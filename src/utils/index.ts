@@ -1,3 +1,4 @@
+export * from './fsUtils';
 export * from './mimeTypeUtils';
 export * from './stringUtils';
 export * from './requestUtils';

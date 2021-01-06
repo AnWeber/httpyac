@@ -34,13 +34,12 @@ export class HttpFileStore{
     return this.storeCache.map(obj => obj.httpFile);
   }
   @trace()
-  async getOrCreate(fileName: string, text: string, version: number = 0): Promise<HttpFile> {
+  async getOrCreate(fileName: string, getText: () => Promise<string>, version: number): Promise<HttpFile> {
     try {
       const httpFileStoreEntry: HttpFileStoreEntry = this.getFromStore(fileName, version);
       if (version !== httpFileStoreEntry.version || !httpFileStoreEntry.httpFile) {
-        const httpFile = await parseHttpFile(text, fileName);
+        const httpFile = (await parseHttpFile(await getText(), fileName));
         httpFile.fileName = fileName;
-
         if (httpFileStoreEntry.httpFile) {
           for (const httpRegion of httpFile.httpRegions) {
             const cachedHttpRegion = httpFileStoreEntry.httpFile.httpRegions.find(obj => obj.source === httpRegion.source);
@@ -53,7 +52,7 @@ export class HttpFileStore{
       }
       return httpFileStoreEntry.httpFile;
     } catch (err) {
-      log.error(fileName, text, err);
+      log.error(fileName, err);
       throw err;
     }
   }

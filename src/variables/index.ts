@@ -1,3 +1,3 @@
 export * from './variableProvider';
-export * from './httpFileVariablesProvider';
-export * from './httpResponseVariableProvider';
+export * from './httpFileVariableProvider';
+export * from './httpFileImportsVariableProvider';

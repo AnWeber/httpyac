@@ -1,5 +1,5 @@
 import { HttpFile } from '../httpRegion';
 
-export function httpFileVariablesProvider(httpFile: HttpFile) {
+export function httpFileVariableProvider(httpFile: HttpFile) {
   return Promise.resolve(httpFile.variables);
 }

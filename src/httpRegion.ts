@@ -4,10 +4,10 @@ export interface HttpFile{
   httpRegions: Array<HttpRegion>;
   variables: Record<string, any>;
   env: string | undefined;
+  imports?: Array<HttpFile>;
 }
 
 export interface HttpRegion<TOptions = any>{
-  name?: string;
   disabled: boolean;
   actions: Array<HttpRegionAction>;
   request?: HttpRequest<TOptions>;
@@ -18,6 +18,7 @@ export interface HttpRegion<TOptions = any>{
     end: number;
   };
   source?: string;
+  metaParams?: Record<string, any>;
 }
 
 export interface HttpRequest<TOptions = any>{

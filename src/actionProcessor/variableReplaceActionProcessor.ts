@@ -41,12 +41,12 @@ async function replaceVariablesInRequest(httpRegion: HttpRegion, httpFile: HttpF
 }
 
 async function replaceVariables(text: string, httpFile: HttpFile, httpRegion: HttpRegion, variables: Record<string,any>) {
-  const variableRegex = /\{{2}(.+?)\}{2}/g;
+  const variableRegex = /\{{2}(?<variable>.+?)\}{2}/g;
   let match: RegExpExecArray | null;
   let result = text;
   while ((match = variableRegex.exec(text)) !== null) {
     const searchValue = match[0];
-    const script = `exports.$result = (${match[1]});`;
+    const script = `exports.$result = (${match.groups?.variable});`;
 
     let lineOffset = httpRegion.position.requestLine || httpRegion.position.start;
     if (httpRegion.source) {

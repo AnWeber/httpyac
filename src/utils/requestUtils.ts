@@ -2,8 +2,11 @@ import { HttpMethod, HttpRequest, HttpResponse, HttpTimings } from '../httpRegio
 import { isString } from './stringUtils';
 import { EOL } from 'os';
 
-export function isRequestMethod(method: string): method is HttpMethod {
-  return ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS', 'CONNECT', 'TRACE'].includes(method.toUpperCase());
+export function isRequestMethod(method: string | undefined): method is HttpMethod {
+  if (method) {
+    return ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS', 'CONNECT', 'TRACE'].includes(method.toUpperCase());
+  }
+  return false;
 }
 
 export function getHeader(headers: Record<string, string | string[] | undefined | null>, headerName: string) {

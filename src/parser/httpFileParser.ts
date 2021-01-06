@@ -17,7 +17,7 @@ export async function parseHttpFile(text: string, fileName: string): Promise<Htt
     let httpRegion: HttpRegion = initHttpRegion(0);
     for (let line = 0; line < lines.length; line++) {
       for (const httpRegionParser of httpYacApi.httpRegionParsers) {
-        const httpRegionParserResult = await httpRegionParser.parse(createReader(line, lines), httpRegion, fileName);
+        const httpRegionParserResult = await httpRegionParser.parse(createReader(line, lines), httpRegion, httpFile);
         if (httpRegionParserResult) {
           if (httpRegionParserResult.newRegion) {
 

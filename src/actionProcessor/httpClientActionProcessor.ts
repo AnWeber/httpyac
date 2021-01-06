@@ -1,5 +1,5 @@
 import { HttpRegion, HttpFile } from '../httpRegion';
-import { isString, isMimeTypeFormUrlEncoded } from '../utils';
+import { isString, isMimeTypeFormUrlEncoded , isMimeTypeJSON} from '../utils';
 import { httpYacApi } from '../httpYacApi';
 import { HttpClientOptions } from '../httpClient';
 import { log } from '../logger';
@@ -19,7 +19,23 @@ export async function httpClientActionProcessor(data: unknown, httpRegion: HttpR
     httpRegion.request.url = encodeUrl(httpRegion.request.url);
     try {
       log.debug('request', httpRegion.request.url, options);
-      httpRegion.response = await httpYacApi.httpClient(httpRegion.request.url, options);
+      const response = await httpYacApi.httpClient(httpRegion.request.url, options);
+
+      httpRegion.response = response;
+      if (httpRegion.metaParams?.name) {
+
+        let body = httpRegion.response.body;
+        if (isMimeTypeJSON(httpRegion.response.contentType) && isString(httpRegion.response.body)) {
+          try {
+            body = JSON.parse(httpRegion.response.body);
+          } catch (err) {
+            log.debug('json parse error', body, err);
+          }
+        }
+        variables[httpRegion.metaParams.name] = body;
+        httpFile.variables[httpRegion.metaParams.name] = body;
+
+      }
       log.trace('response', httpRegion.response);
     } catch (err) {
       log.error(httpRegion.request.url, options, err);

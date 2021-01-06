@@ -1,25 +1,22 @@
 
-import { HttpRegion, HttpRequest } from '../httpRegion';
+import { HttpRegion, HttpRequest, HttpFile } from '../httpRegion';
 import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult } from './httpRegionParser';
 
-import { isString, isEmptyString, parseMimeType, isRequestMethod, getHeader } from '../utils';
+import { isString, isStringEmpty, parseMimeType, isRequestMethod, getHeader } from '../utils';
 import {httpClientActionProcessor  } from '../actionProcessor/httpClientActionProcessor';
 import {variableReplaceActionProcessor  } from '../actionProcessor/variableReplaceActionProcessor';
 
-const REGEX_REQUESTLINE = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE)\s*(.+?)(?:\s+(HTTP\/\S+))?$/;
+const REGEX_REQUESTLINE = /^(?<method>GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE)?\s*(?<url>.+?)(?:\s+(HTTP\/\S+))?$/;
 
 export class RequestHttpRegionParser implements HttpRegionParser{
 
-
-
-
   private getRequestLine(textLine: string): HttpRequest{
-    const matches = REGEX_REQUESTLINE.exec(textLine);
-    if (matches && matches.length >= 3) {
+    const urlMatch = REGEX_REQUESTLINE.exec(textLine);
+    if (urlMatch && urlMatch.length > 1 && urlMatch.groups) {
       return {
-        url: matches[2],
-        method: isRequestMethod(matches[1]) ? matches[1] : 'GET' ,
-        headers: {},
+        url: urlMatch.groups.url,
+        method: isRequestMethod(urlMatch.groups.method) ? urlMatch.groups.method : 'GET',
+        headers: {}
       };
     }
     return {
@@ -35,19 +32,18 @@ export class RequestHttpRegionParser implements HttpRegionParser{
   }
 
   private getRequestHeader(textLine: string) {
-    const matches = /^\s*([\w\-]+)\s*\:\s*(.*?)\s*$/.exec(textLine);
-
-    if (matches) {
+    const headerMatch = /^\s*(?<key>[\w\-]+)\s*\:\s*(?<value>.*?)\s*$/.exec(textLine);
+    if (headerMatch && headerMatch.length > 1 && headerMatch.groups) {
       return {
-        [matches[1]]: matches.length > 2 ? matches[2] : null,
+        [headerMatch.groups.key]: headerMatch.groups.value
       };
     }
     return null;
   }
 
-  parse(lineReader: HttpRegionParserGenerator, httpRegion: HttpRegion): Promise<HttpRegionParserResult> {
+  parse(lineReader: HttpRegionParserGenerator, httpRegion: HttpRegion, httpFile: HttpFile): Promise<HttpRegionParserResult> {
     let next = lineReader.next();
-    if (!next.done && !isEmptyString(next.value.textLine) && !httpRegion.position.requestLine) {
+    if (!next.done && !isStringEmpty(next.value.textLine) && !httpRegion.position.requestLine) {
       httpRegion.request = this.getRequestLine(next.value.textLine);
       httpRegion.position.requestLine = next.value.line;
 
@@ -57,7 +53,7 @@ export class RequestHttpRegionParser implements HttpRegionParser{
       next = lineReader.next();
       while (!next.done) {
         result.endLine = next.value.line;
-        if (isEmptyString(next.value.textLine)) {
+        if (isStringEmpty(next.value.textLine)) {
           break;
         } else if (this.isRequestQueryLine(next.value.textLine)) {
           httpRegion.request.url += next.value.textLine;

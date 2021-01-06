@@ -1,10 +1,9 @@
 
-import { HttpRegion } from '../httpRegion';
+import { HttpRegion, HttpFile} from '../httpRegion';
 import { EOL } from 'os';
 import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult } from './httpRegionParser';
-import { isString, isMimeTypeMultiPartFormData, isEmptyString, isMimeTypeNewlineDelimitedJSON, isMimeTypeFormUrlEncoded } from '../utils';
+import { normalizeFileName, isString, isMimeTypeMultiPartFormData, isStringEmpty, isMimeTypeNewlineDelimitedJSON, isMimeTypeFormUrlEncoded } from '../utils';
 import { createReadStream, promises as fs } from 'fs';
-import { isAbsolute, join, dirname } from 'path';
 import { log } from '../logger';
 
 const REGEX_IMPORTFILE = /^<(?:(?<injectVariables>@)(?<encoding>\w+)?)?\s+(?<fileName>.+?)\s*$/;
@@ -15,12 +14,12 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
 
   private bodyLines: Array<RequestBodyLineType> = [];
 
-  async parse(lineReader: HttpRegionParserGenerator, httpRegion: HttpRegion, fileName: string): Promise<HttpRegionParserResult> {
+  async parse(lineReader: HttpRegionParserGenerator, httpRegion: HttpRegion, httpFile: HttpFile): Promise<HttpRegionParserResult> {
     if (httpRegion.position.requestLine) {
       let next = lineReader.next();
       if (!next.done) {
-        if (this.bodyLines.length > 0 || !isEmptyString(next.value.textLine)) {
-          this.bodyLines.push(await this.parseLine(next.value.textLine, fileName));
+        if (this.bodyLines.length > 0 || !isStringEmpty(next.value.textLine)) {
+          this.bodyLines.push(await this.parseLine(next.value.textLine, httpFile.fileName));
           return {
             endLine: next.value.line
           };
@@ -34,7 +33,7 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
     const fileImport = REGEX_IMPORTFILE.exec(textLine);
     if (fileImport && fileImport.length === 4 && fileImport.groups) {
       try {
-        const normalizedPath = await this.normalizeFileName(fileImport.groups.fileName, httpFileName);
+        const normalizedPath = await normalizeFileName(fileImport.groups.fileName, httpFileName);
         if (normalizedPath) {
           if (fileImport.groups.injectVariables) {
             return await fs.readFile(normalizedPath, { encoding: this.getBufferEncoding(fileImport.groups.encoding) });
@@ -80,16 +79,6 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
     });
 }
 
-  private async normalizeFileName(fileName: string, httpFileName: string) {
-    if (isAbsolute(fileName) && await fs.stat(fileName)) {
-      return fileName;
-    }
-    const absolute = join(dirname(httpFileName), fileName);
-    if (fs.stat(fileName)) {
-      return absolute;
-    }
-    return undefined;
-  }
 
   close(httpRegion: HttpRegion): void {
     if (httpRegion.request) {
@@ -128,7 +117,7 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
   }
 
   removeTrailingEmptyLines(obj: Array<any>) {
-    while (obj.length > 0 && isEmptyString(obj[obj.length - 1])) {
+    while (obj.length > 0 && isStringEmpty(obj[obj.length - 1])) {
       obj.pop();
     }
   }

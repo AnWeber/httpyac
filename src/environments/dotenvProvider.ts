@@ -35,7 +35,7 @@ export function dotenvVariableProviderFactory(defaultFiles: Array<string> = ['.e
     if (httpFile.fileName) {
       return await parseDotenv(dirname(httpFile.fileName), getFiles(defaultFiles, httpFile.env));
     }
-    return undefined;
+    return {};
   };
 }
 

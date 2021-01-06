@@ -1,31 +1,33 @@
 
-import { HttpRegion } from '../httpRegion';
+import { HttpRegion, HttpFile } from '../httpRegion';
 import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult } from './httpRegionParser';
 import { toMultiLineString } from '../utils';
 import { jsActionProcessor, ScriptData, executeScript } from '../actionProcessor/jsActionProcessor';
 
 
 export class JsHttpRegionParser implements HttpRegionParser{
-  async parse(lineReader: HttpRegionParserGenerator, httpRegion: HttpRegion, fileName: string): Promise<HttpRegionParserResult> {
+  async parse(lineReader: HttpRegionParserGenerator, httpRegion: HttpRegion, httpFile: HttpFile): Promise<HttpRegionParserResult> {
     let next = lineReader.next();
 
-    if (!next.done && this.isScriptStartTag(next.value.textLine)) {
+    if (!next.done) {
+      const matches = /^\s*{{(?<processOnlyOnce>1)?(?<immediately>#)?\s*$/.exec(next.value.textLine);
+      if (!matches) {
+        return false;
+      }
       const lineOffset = next.value.line;
-      let processOnlyOnce = this.isScriptStartTagOnlyOnce(next.value.textLine);
-      const immediately = this.isScriptStartTagImmediately(next.value.textLine);
       next = lineReader.next();
       const script: Array<string> = [];
       while (!next.done) {
 
-        if (this.isScriptEndTag(next.value.textLine)) {
-          if (immediately) {
-            await executeScript(toMultiLineString(script),fileName, {}, lineOffset);
+        if (/^\s*}}\s*$/.test(next.value.textLine)) {
+          if (!!matches.groups?.immediately) {
+            await executeScript(toMultiLineString(script),httpFile.fileName, {}, lineOffset);
           }else{
             const data: ScriptData = {
               script: toMultiLineString(script),
               count: 0,
               lineOffset,
-              processOnlyOnce
+              processOnlyOnce: !!matches.groups?.processOnlyOnce
             };
             httpRegion.actions.push(
               {
@@ -44,19 +46,5 @@ export class JsHttpRegionParser implements HttpRegionParser{
       }
     }
     return false;
-  }
-
-  private isScriptStartTag(textLine: string) {
-    return /^\s*{{(=)?\s*$/.test(textLine);
-  }
-  private isScriptStartTagOnlyOnce(textLine: string) {
-    return /^\s*{{=\s*$/.test(textLine);
-  }
-
-  private isScriptStartTagImmediately(textLine: string) {
-    return /^\s*{{!\s*$/.test(textLine);
-  }
-  private isScriptEndTag(textLine: string) {
-    return /^\s*}}\s*$/.test(textLine);
   }
 }

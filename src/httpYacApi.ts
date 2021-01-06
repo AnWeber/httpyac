@@ -1,7 +1,7 @@
 import { HttpRegion, HttpFile } from './httpRegion';
 import * as parser from './parser';
 import { HttpOutputProcessor } from './output/httpOutputProcessor';
-import { VariableProvider, httpFileVariablesProvider, httpResponseVariableProvider } from './variables';
+import { VariableProvider, httpFileVariableProvider, httpFileImportsVariableProvider } from './variables';
 import { dotenvVariableProviderFactory } from './environments';
 import { HttpClient, gotHttpClientFactory } from './httpClient';
 import { environmentStore } from './environments/environmentStore';
@@ -26,8 +26,8 @@ class HttpYacApi {
     this.httpOutputProcessors = [];
     this.variableProviders = [
       dotenvVariableProviderFactory(),
-      httpFileVariablesProvider,
-      httpResponseVariableProvider,
+      httpFileImportsVariableProvider,
+      httpFileVariableProvider,
     ];
   }
 
