@@ -5,7 +5,7 @@ import { VariableProvider, httpFileVariableProvider, httpFileImportsVariableProv
 import { dotenvVariableProviderFactory } from './environments';
 import { HttpClient, gotHttpClientFactory } from './httpClient';
 import { environmentStore } from './environments/environmentStore';
-import { trace } from './utils';
+import { trace, sendHttpFile, sendHttpRegion } from './utils';
 import { log } from './logger';
 import { httpFileStore } from './httpFileStore';
 
@@ -38,18 +38,8 @@ class HttpYacApi {
    */
   @trace()
   async send(httpRegion: HttpRegion, httpFile: HttpFile) {
-    if (!httpRegion.disabled) {
-      const variables = await this.getVariables(httpFile);
-      for (const prevHttpRegion of httpFile.httpRegions) {
-        if (prevHttpRegion === httpRegion) {
-          break;
-        }
-        if (!prevHttpRegion.request && !prevHttpRegion.disabled) {
-          await this.processHttpRegionActions(prevHttpRegion, httpFile, variables);
-        }
-      }
-      await this.processHttpRegionActions(httpRegion, httpFile, variables);
-    }
+    const variables = await this.getVariables(httpFile);
+    await sendHttpRegion(httpRegion, httpFile, variables);
   }
   /**
    * process all httpRegion of HttpFile
@@ -58,11 +48,7 @@ class HttpYacApi {
   @trace()
   async sendAll(httpFile: HttpFile) {
     const variables = await this.getVariables(httpFile);
-    for (const httpRegion of httpFile.httpRegions) {
-      if (!httpRegion.disabled) {
-        await this.processHttpRegionActions(httpRegion, httpFile, variables);
-      }
-    }
+    await sendHttpFile(httpFile, variables);
   }
   @trace()
   private async getVariables(httpFile: HttpFile): Promise<Record<string, any>> {
@@ -93,14 +79,6 @@ class HttpYacApi {
   @trace()
   public async show(httpRegion: HttpRegion<unknown>, httpFile: HttpFile) {
     await Promise.all(this.httpOutputProcessors.map(outputProcessor => outputProcessor(httpRegion, httpFile)));
-  }
-
-  private async processHttpRegionActions(httpRegion: HttpRegion<unknown>, httpFile: HttpFile, variables: Record<string, any>) {
-    for (const action of httpRegion.actions) {
-      if (!httpRegion.disabled) {
-        await action.processor(action.data, httpRegion, httpFile, variables);
-      }
-    }
   }
 
   toString() {

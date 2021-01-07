@@ -5,6 +5,7 @@ import { httpFileStore } from '../httpFileStore';
 import { log } from '../logger';
 import { promises as fs } from 'fs';
 import { normalizeFileName } from '../utils';
+import { sendHttpRegionActionProcessor } from '../actionProcessor';
 export class MetaHttpRegionParser implements HttpRegionParser{
   static isMetaTag(textLine: string) {
     return /^\s*\#{1,}/.test(textLine);
@@ -33,6 +34,12 @@ export class MetaHttpRegionParser implements HttpRegionParser{
               case 'import':
                 await importHttpFile(httpFile, match.groups.value);
                 break;
+              case 'send':
+                sendHttpRegion(httpRegion, match.groups.value, false);
+                break;
+              case 'sendAlways':
+                sendHttpRegion(httpRegion, match.groups.value, true);
+                break;
               default:
                 httpRegion.metaParams = Object.assign(httpRegion.metaParams || {}, {
                   [match.groups.key]: match.groups.value,
@@ -54,11 +61,22 @@ async function importHttpFile(httpFile: HttpFile, fileName: string) {
       if (!httpFile.imports) {
         httpFile.imports = [];
       }
-      httpFile.imports.push(await httpFileStore.getOrCreate(absoluteFileName, () => fs.readFile(absoluteFileName, 'utf-8'), 0));
+      httpFile.imports.push(() => httpFileStore.getOrCreate(absoluteFileName, () => fs.readFile(absoluteFileName, 'utf-8'), 0));
     }
   } catch (err) {
     log.debug('import error', fileName, err);
   }
+}
+
+function sendHttpRegion(httpRegion: HttpRegion, name: string, alwaysSend: boolean) {
+  httpRegion.actions.push({
+    type: 'send',
+    processor: sendHttpRegionActionProcessor,
+    data: {
+      name,
+      alwaysSend
+    }
+  });
 }
 
 

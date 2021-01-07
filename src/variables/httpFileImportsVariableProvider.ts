@@ -1,8 +1,13 @@
 import { HttpFile } from '../httpRegion';
 
-export function httpFileImportsVariableProvider(httpFile: HttpFile) {
+export async function httpFileImportsVariableProvider(httpFile: HttpFile) {
   if (httpFile.imports) {
-    return Object.assign({},...httpFile.imports.map(obj => obj.variables));
+    const variables: Array<Record<string,any>> = [];
+    for (const httpFileLoader of httpFile.imports) {
+      const refHttpFile = await httpFileLoader();
+      variables.push(refHttpFile.variables);
+    }
+    return Object.assign({},...variables);
   }
   return {};
 }

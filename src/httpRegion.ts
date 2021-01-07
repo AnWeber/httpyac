@@ -4,7 +4,7 @@ export interface HttpFile{
   httpRegions: Array<HttpRegion>;
   variables: Record<string, any>;
   env: string | undefined;
-  imports?: Array<HttpFile>;
+  imports?: Array<() => Promise<HttpFile>>;
 }
 
 export interface HttpRegion<TOptions = any>{
