@@ -3,7 +3,7 @@ import { ContentType } from '../httpRegion';
 export function parseMimeType(contentType: string): ContentType {
   const [mimeType, ...parameters] = contentType.split(';').map(v => v.trim());
   const charset = parameters.find(p => p.startsWith('charset='))?.split('=')[1];
-  return { mimeType, charset };
+  return { mimeType, contentType, charset };
 }
 
 export function isMimeTypeJSON(contentType: ContentType | undefined) {
@@ -30,6 +30,10 @@ export function isMimeTypeCSS(contentType: ContentType | undefined) {
   return contentType?.mimeType === 'text/css';
 }
 
+export function isMimeTypeMarkdown(contentType: ContentType | undefined) {
+  return contentType?.mimeType === 'text/markdown';
+}
+
 export function isMimeTypeMultiPartFormData(contentType: ContentType | undefined): boolean {
   return contentType?.mimeType === 'multipart/form-data';
 }
@@ -40,4 +44,19 @@ export function isMimeTypeNewlineDelimitedJSON(contentType: ContentType | undefi
 
 export function isMimeTypeFormUrlEncoded(contentType: ContentType | undefined): boolean {
   return contentType?.mimeType === 'application/x-www-form-urlencoded';
+}
+
+export function isMimeTypePdf(contentType: ContentType | undefined): boolean {
+  return contentType?.mimeType === 'application/pdf';
+}
+
+export function isMimeTypeImage(contentType: ContentType | undefined): boolean{
+  if (contentType) {
+    return ['image/jpeg',
+      'image/gif',
+      'image/webp',
+      'image/png',
+      'image/bmp'].indexOf(contentType.mimeType) >= 0;
+  }
+  return false;
 }

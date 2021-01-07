@@ -27,22 +27,27 @@ export class MetaHttpRegionParser implements HttpRegionParser{
           httpRegion.position.end = next.value.line;
           result.newRegion = true;
         } else {
-          const match = /^\s*\#{1,}\s+\@(?<key>.*)\s+(?<value>[^\s]+)$/.exec(textLine);
-          if (match && match.groups && match.groups.value && match.groups.key) {
-
+          const match = /^\s*\#{1,}\s+\@(?<key>[^\s]*)(\s+)?(?<value>[^\s]+)?$/.exec(textLine);
+          if (match && match.groups && match.groups.key) {
             switch (match.groups.key) {
               case 'import':
-                await importHttpFile(httpFile, match.groups.value);
+                if (match.groups.value) {
+                  await importHttpFile(httpFile, match.groups.value);
+                }
                 break;
               case 'send':
-                sendHttpRegion(httpRegion, match.groups.value, false);
+                if (match.groups.value) {
+                  sendHttpRegion(httpRegion, match.groups.value, false);
+                }
                 break;
               case 'sendAlways':
-                sendHttpRegion(httpRegion, match.groups.value, true);
+                if (match.groups.value) {
+                  sendHttpRegion(httpRegion, match.groups.value, true);
+                }
                 break;
               default:
                 httpRegion.metaParams = Object.assign(httpRegion.metaParams || {}, {
-                  [match.groups.key]: match.groups.value,
+                  [match.groups.key]: match.groups.value || 'true',
                 });
                 break;
             }

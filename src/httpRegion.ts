@@ -18,7 +18,7 @@ export interface HttpRegion<TOptions = any>{
     end: number;
   };
   source?: string;
-  metaParams?: Record<string, any>;
+  metaParams?: Record<string, string | undefined>;
 }
 
 export interface HttpRequest<TOptions = any>{
@@ -37,7 +37,7 @@ export interface HttpResponse<T = unknown>{
   headers: Record<string, string | string[] | undefined | null>;
   contentType?: ContentType;
   body: T;
-  rawBody?: Buffer;
+  rawBody: Buffer;
 }
 
 export interface HttpTimings{
@@ -55,6 +55,7 @@ export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'HEAD' | 'DELETE' | 
 
 export interface ContentType{
   mimeType: string;
+  contentType: string;
   charset?: string | undefined;
 }
 export interface HttpRegionAction<T = any> {
