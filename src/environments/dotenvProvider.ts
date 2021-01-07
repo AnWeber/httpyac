@@ -10,12 +10,18 @@ export class DotenvProvider implements EnvironmentProvider{
   constructor(private readonly basepath: string, private readonly defaultFiles: Array<string> = ['.env']) { }
 
   async getEnvironments(): Promise<string[]> {
-    const files = await fs.readdir(this.basepath);
+    try {
+      const files = await fs.readdir(this.basepath);
 
-    return files
-      .filter(file => file.indexOf('.env') >= 0)
-      .filter(fileName => this.defaultFiles.indexOf(fileName) < 0)
-      .map(fileName => fileName.replace('.env', ''));
+      return files
+        .filter(file => file.indexOf('.env') >= 0)
+        .filter(fileName => this.defaultFiles.indexOf(fileName) < 0)
+        .map(fileName => fileName.replace('.env', ''));
+
+      } catch (err) {
+        log.trace(err);
+    }
+    return [];
   }
   async getVariables(env: string): Promise<Record<string, any>> {
     return await parseDotenv(this.basepath, getFiles(this.defaultFiles, env) );
