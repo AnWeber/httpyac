@@ -41,6 +41,8 @@ export class HttpFileStore{
         const httpFile = (await parseHttpFile(await getText(), fileName));
         httpFile.fileName = fileName;
         if (httpFileStoreEntry.httpFile) {
+          httpFile.variables = httpFileStoreEntry.httpFile.variables;
+          httpFile.env = httpFileStoreEntry.httpFile.env;
           for (const httpRegion of httpFile.httpRegions) {
             const cachedHttpRegion = httpFileStoreEntry.httpFile.httpRegions.find(obj => obj.source === httpRegion.source);
             if (cachedHttpRegion) {
