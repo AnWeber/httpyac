@@ -10,7 +10,7 @@ export class JsHttpRegionParser implements HttpRegionParser{
     let next = lineReader.next();
 
     if (!next.done) {
-      const matches = /^\s*{{(?<processOnlyOnce>1)?(?<immediately>#)?\s*$/.exec(next.value.textLine);
+      const matches = /^\s*{{(?<immediately>#)?\s*$/.exec(next.value.textLine);
       if (!matches) {
         return false;
       }
@@ -25,9 +25,7 @@ export class JsHttpRegionParser implements HttpRegionParser{
           }else{
             const data: ScriptData = {
               script: toMultiLineString(script),
-              count: 0,
               lineOffset,
-              processOnlyOnce: !!matches.groups?.processOnlyOnce
             };
             httpRegion.actions.push(
               {

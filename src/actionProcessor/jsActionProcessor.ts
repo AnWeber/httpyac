@@ -4,23 +4,23 @@ import * as vm from 'vm';
 import { dirname } from 'path';
 import { log } from '../logger';
 import { isPromise } from '../utils';
+import * as got from 'got';
+import { httpYacApi } from '../httpYacApi';
+import { httpFileStore } from '../httpFileStore';
+import { environmentStore } from '../environments';
 
 export interface ScriptData{
   script: string;
-  count: number;
   lineOffset: number;
-  processOnlyOnce: boolean;
 }
 
 
 export async function jsActionProcessor(scriptData: ScriptData, httpRegion: HttpRegion, httpFile: HttpFile, variables: Record<string, any>) {
-  if (scriptData.processOnlyOnce && scriptData.count++ === 0 || !scriptData.processOnlyOnce) {
-    variables.httpRegion = httpRegion;
-    let value = await executeScript(scriptData.script, httpFile.fileName, variables, scriptData.lineOffset + 1);
-    if (value) {
-      Object.assign(variables, value);
-      Object.assign(httpFile.variables, value);
-    }
+  variables.httpRegion = httpRegion;
+  let value = await executeScript(scriptData.script, httpFile.fileName, variables, scriptData.lineOffset + 1);
+  if (value) {
+    Object.assign(variables, value);
+    Object.assign(httpFile.variables, value);
   }
 }
 
@@ -33,7 +33,7 @@ export async function executeScript(script: string, fileName: string | undefined
 
     const argsName = ['exports', 'require', 'module', '__filename', '__dirname'];
     if (variables) {
-      argsName.push(...Object.entries(variables).map(obj => obj[0]));
+      argsName.push(...Object.entries(variables).map(([key]) => key));
     }
 
     const wrappedFunction = `(function userJS(${argsName.join(',')}){${script}})`;
@@ -46,13 +46,28 @@ export async function executeScript(script: string, fileName: string | undefined
     scriptModule.paths = (Module as any)._nodeModulePaths(dir);
 
 
-    const scriptRequire: any = (id: any) => scriptModule.require(id);
+    const scriptRequire: any = (id: any) => {
+      if (id === 'got') {
+        return got;
+      }
+      if (id === 'httpYac') {
+        return {
+          httpYacApi,
+          environmentStore,
+          httpFileStore,
+        };
+      }
+      if (httpYacApi.additionalRequire[id]) {
+        return httpYacApi.additionalRequire[id];
+      }
+      return scriptModule.require(id);
+    };
     // see https://github.com/nodejs/node/blob/master/lib/internal/modules/cjs/loader.js#L823-L911
     scriptRequire.resolve = (req: any) => (Module as any)._resolveFilename(req, scriptModule);
 
     const scriptArgs = [scriptModule.exports, scriptRequire, scriptModule, fileName, dir];
     if (variables) {
-      scriptArgs.push(...Object.entries(variables).map(obj => obj[1]));
+      scriptArgs.push(...Object.entries(variables).map(([key,value]) => value));
     }
     const compiledWrapper = vm.runInThisContext(wrappedFunction, {
       filename: fileName,

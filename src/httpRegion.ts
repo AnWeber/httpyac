@@ -3,12 +3,11 @@ export interface HttpFile{
   fileName: string;
   httpRegions: Array<HttpRegion>;
   variables: Record<string, any>;
-  env: string | undefined;
+  env: string[] | undefined;
   imports?: Array<() => Promise<HttpFile>>;
 }
 
 export interface HttpRegion<TOptions = any>{
-  disabled: boolean;
   actions: Array<HttpRegionAction>;
   request?: HttpRequest<TOptions>;
   response?: HttpResponse;
@@ -18,7 +17,7 @@ export interface HttpRegion<TOptions = any>{
     end: number;
   };
   source?: string;
-  metaParams?: Record<string, string | undefined>;
+  metaParams: Record<string, string>;
 }
 
 export interface HttpRequest<TOptions = any>{
@@ -38,6 +37,7 @@ export interface HttpResponse<T = unknown>{
   contentType?: ContentType;
   body: T;
   rawBody: Buffer;
+  request?: HttpRequest;
 }
 
 export interface HttpTimings{

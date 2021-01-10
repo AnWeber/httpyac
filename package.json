@@ -31,6 +31,7 @@
 	},
 	"devDependencies": {
 		"@types/got": "^9.6.11",
+		"@types/lodash": "^4.14.167",
 		"@types/node": "^14.14.20",
 		"@typescript-eslint/eslint-plugin": "^4.12.0",
 		"@typescript-eslint/parser": "^4.12.0",
@@ -40,9 +41,10 @@
 		"webpack": "^5.11.1",
 		"webpack-cli": "^4.3.1"
 	},
-	"dependencies": {
+	"peerDependencies": {
 		"dotenv": "^8.2.0",
 		"encodeurl": "^1.0.2",
-		"got": "^11.8.1"
+		"got": "^11.8.1",
+		"lodash": "^4.17.20"
 	}
 }

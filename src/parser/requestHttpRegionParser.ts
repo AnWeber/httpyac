@@ -3,8 +3,7 @@ import { HttpRegion, HttpRequest, HttpFile } from '../httpRegion';
 import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult } from './httpRegionParser';
 
 import { isString, isStringEmpty, parseMimeType, isRequestMethod, getHeader } from '../utils';
-import {httpClientActionProcessor  } from '../actionProcessor/httpClientActionProcessor';
-import {variableReplaceActionProcessor  } from '../actionProcessor/variableReplaceActionProcessor';
+import {httpClientActionProcessor  } from '../actionProcessor';
 
 const REGEX_REQUESTLINE = /^(?<method>GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE)?\s*(?<url>.+?)(?:\s+(HTTP\/\S+))?$/;
 
@@ -66,9 +65,6 @@ export class RequestHttpRegionParser implements HttpRegionParser{
         next = lineReader.next();
       }
       httpRegion.actions.push({
-        type: 'variableReplacer',
-        processor: variableReplaceActionProcessor
-      }, {
         type: 'request',
         processor: httpClientActionProcessor
       });

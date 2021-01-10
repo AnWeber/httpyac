@@ -3,12 +3,12 @@ import { HttpRegion, HttpFile } from '../httpRegion';
 import {responseToString, requestToString, timingsToString } from './requestUtils';
 
 export async function sendHttpRegion(httpRegion: HttpRegion, httpFile: HttpFile, variables: Record<string, any>) {
-  if (!httpRegion.disabled) {
+  if (!httpRegion.metaParams.disabled) {
     for (const prevHttpRegion of httpFile.httpRegions) {
       if (prevHttpRegion === httpRegion) {
         break;
       }
-      if (!prevHttpRegion.request && !prevHttpRegion.disabled) {
+      if (!prevHttpRegion.request && !prevHttpRegion.metaParams.disabled) {
         await processHttpRegionActions(prevHttpRegion, httpFile, variables);
       }
     }
@@ -18,15 +18,15 @@ export async function sendHttpRegion(httpRegion: HttpRegion, httpFile: HttpFile,
 
 export async function sendHttpFile(httpFile: HttpFile, variables: Record<string,any>) {
   for (const httpRegion of httpFile.httpRegions) {
-    if (!httpRegion.disabled) {
+    if (!httpRegion.metaParams.disabled) {
       await processHttpRegionActions(httpRegion, httpFile, variables);
     }
   }
 }
 
-async function processHttpRegionActions(httpRegion: HttpRegion<unknown>, httpFile: HttpFile, variables: Record<string, any>) {
+export async function processHttpRegionActions(httpRegion: HttpRegion<unknown>, httpFile: HttpFile, variables: Record<string, any>) {
   for (const action of httpRegion.actions) {
-    if (!httpRegion.disabled) {
+    if (!httpRegion.metaParams.disabled) {
       await action.processor(action.data, httpRegion, httpFile, variables);
     }
   }
@@ -47,13 +47,14 @@ export function toMarkdown(httpRegion: HttpRegion) {
 ### timings
 ${timingsToString(httpRegion.response.timings)}
 `);
-  }
-  if (httpRegion.request) {
-    result.push(`)
+
+    if (httpRegion.response.request) {
+      result.push(`)
 ---
 ### request
-${requestToString(httpRegion.request)}
+${requestToString(httpRegion.response.request)}
         `);
+    }
   }
   return result.join(EOL).split(EOL).join(`  ${EOL}`);
 }

@@ -11,7 +11,7 @@ export async function parseHttpFile(text: string, fileName: string): Promise<Htt
       httpRegions: [],
       fileName,
       variables: {},
-      env: environmentStore.activeEnv,
+      env: environmentStore.activeEnvironments,
     };
     const lines = toMultiLineArray(text);
     let httpRegion: HttpRegion = initHttpRegion(0);
@@ -56,10 +56,10 @@ function setSource(httpRegions: Array<HttpRegion>, lines: Array<string>) {
   }
 }
 
-function initHttpRegion(start: number, end?: number) {
+function initHttpRegion(start: number, end?: number): HttpRegion {
   return {
-    disabled: false,
     actions: [],
+    metaParams: {},
     position: {
       start,
       end: end || start,

@@ -3,7 +3,7 @@ import { trace } from '../utils';
 
 const ENVIRONMENT_NONE = '__NONE__';
 class EnvironmentStore{
-  activeEnv: string| undefined;
+  activeEnvironments: Array<string>| undefined;
   readonly environmentProviders: Array<EnvironmentProvider> = [];
 
   private variables: Record<string, Array<Record<string, any>>> = {};
@@ -13,13 +13,11 @@ class EnvironmentStore{
     this.variables = {};
   }
 
-
-
   @trace()
-  async getVariables(env: string | undefined) {
+  async getVariables(env: string | undefined) : Promise<Record<string, any>> {
     let result = this.variables[env || ENVIRONMENT_NONE];
     if (!result) {
-      result = await Promise.all(this.environmentProviders.map(obj => obj.getVariables(env)));
+      result = Object.assign({}, ...(await Promise.all(this.environmentProviders.map(obj => obj.getVariables(env || ENVIRONMENT_NONE)))));
       this.variables[env || ENVIRONMENT_NONE] = result;
     }
     return result;

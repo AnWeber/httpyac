@@ -1,6 +1,7 @@
 import { HttpMethod, HttpResponse } from './httpRegion';
 import { getHeader, isString, parseMimeType } from './utils';
 import { default as got, OptionsOfUnknownResponseBody } from 'got';
+import merge from 'lodash/merge';
 
 
 export interface HttpClientOptions{
@@ -22,8 +23,7 @@ export function gotHttpClientFactory(defaultsOverride: OptionsOfUnknownResponseB
       defaultsOverride,
       clientOptions,
     ];
-    const options: OptionsOfUnknownResponseBody = Object.assign({}, ...optionList);
-    options.headers = Object.assign({}, ...optionList.filter(obj => obj.headers).map(obj => obj.headers));
+    const options: OptionsOfUnknownResponseBody = merge({}, ...optionList);
 
     const response = await got(url, options);
 

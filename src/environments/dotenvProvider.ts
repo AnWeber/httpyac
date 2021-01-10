@@ -38,8 +38,17 @@ function getFiles(defaultFiles: Array<string>, env: string | undefined) {
 
 export function dotenvVariableProviderFactory(defaultFiles: Array<string> = ['.env']) {
   return async function (httpFile: HttpFile) {
-    if (httpFile.fileName) {
-      return await parseDotenv(dirname(httpFile.fileName), getFiles(defaultFiles, httpFile.env));
+    if (httpFile.fileName && httpFile.env) {
+      const files = httpFile.env.map(env => getFiles(defaultFiles, env))
+        .reduce((prev, current) => {
+          for (const item of current) {
+            if (prev.indexOf(item) < 0) {
+              prev.push(item);
+            }
+          }
+          return prev;
+        }, []);
+      return  await parseDotenv(dirname(httpFile.fileName), files);
     }
     return {};
   };

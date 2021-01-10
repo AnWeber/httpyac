@@ -14,6 +14,8 @@ class HttpYacApi {
   readonly httpOutputProcessors: Array<HttpOutputProcessor>;
   readonly variableProviders: Array<VariableProvider>;
 
+  readonly additionalRequire: Record<string, any> = {};
+
   httpClient: HttpClient = gotHttpClientFactory();
   constructor() {
     this.httpRegionParsers = [
@@ -52,23 +54,25 @@ class HttpYacApi {
   }
   @trace()
   private async getVariables(httpFile: HttpFile): Promise<Record<string, any>> {
-    const environement = await environmentStore.getVariables(httpFile.env);
-    return Object.assign({},
-      {
-        httpYacApi,
-        httpFile,
-        environmentStore,
-        httpFileStore,
-        log,
-        environement,
-      },
-      ...environement,
+    let environment: Record<string, Record<string, any>> = {};
+    if (httpFile.env) {
+      for (const env of httpFile.env) {
+        environment[env] = await environmentStore.getVariables(env);
+      }
+    }
+    const variables = Object.assign({
+      log,
+      environment,
+    },
+      ...Object.entries(environment).map(([key, value]) => value),
       ...(await Promise.all(
           httpYacApi.variableProviders
             .map(variableProvider => variableProvider(httpFile)
             )
       ))
     );
+    log.trace(variables);
+    return variables;
   }
 
   /**

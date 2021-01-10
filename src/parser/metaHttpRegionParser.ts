@@ -5,7 +5,7 @@ import { httpFileStore } from '../httpFileStore';
 import { log } from '../logger';
 import { promises as fs } from 'fs';
 import { normalizeFileName } from '../utils';
-import { sendHttpRegionActionProcessor } from '../actionProcessor';
+import { refMetaHttpRegionActionProcessor } from '../actionProcessor';
 export class MetaHttpRegionParser implements HttpRegionParser{
   static isMetaTag(textLine: string) {
     return /^\s*\#{1,}/.test(textLine);
@@ -35,19 +35,19 @@ export class MetaHttpRegionParser implements HttpRegionParser{
                   await importHttpFile(httpFile, match.groups.value);
                 }
                 break;
-              case 'send':
+              case 'ref':
                 if (match.groups.value) {
-                  sendHttpRegion(httpRegion, match.groups.value, false);
+                  addRefHttpRegion(httpRegion, match.groups.value, false);
                 }
                 break;
-              case 'sendAlways':
+              case 'forceRef':
                 if (match.groups.value) {
-                  sendHttpRegion(httpRegion, match.groups.value, true);
+                  addRefHttpRegion(httpRegion, match.groups.value, true);
                 }
                 break;
               default:
                 httpRegion.metaParams = Object.assign(httpRegion.metaParams || {}, {
-                  [match.groups.key]: match.groups.value || 'true',
+                  [match.groups.key]: match.groups.value || true,
                 });
                 break;
             }
@@ -73,13 +73,13 @@ async function importHttpFile(httpFile: HttpFile, fileName: string) {
   }
 }
 
-function sendHttpRegion(httpRegion: HttpRegion, name: string, alwaysSend: boolean) {
+function addRefHttpRegion(httpRegion: HttpRegion, name: string, force: boolean) {
   httpRegion.actions.push({
-    type: 'send',
-    processor: sendHttpRegionActionProcessor,
+    type: 'ref',
+    processor: refMetaHttpRegionActionProcessor,
     data: {
       name,
-      alwaysSend
+      force
     }
   });
 }
