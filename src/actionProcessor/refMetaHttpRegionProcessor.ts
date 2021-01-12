@@ -12,7 +12,7 @@ interface InternalRefData{
 
 export async function refMetaHttpRegionActionProcessor(data: RefMetaHttpRegionData & InternalRefData, httpRegion: HttpRegion, httpFile: HttpFile, variables: Record<string, any>): Promise<void> {
 
-  const refHttpRegion = httpFile.httpRegions.find(obj => obj.metaParams.name === data.name);
+  const refHttpRegion = httpFile.httpRegions.find(obj => !obj.metaParams.disabled && obj.metaParams.name === data.name);
   if (refHttpRegion && refHttpRegion !== httpRegion) {
     if (data.force || !refHttpRegion.response) {
       if (data.sendNeeded) {
