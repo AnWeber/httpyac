@@ -14,6 +14,7 @@ export interface ScriptData{
   lineOffset: number;
 }
 
+export const JAVASCRIPT_KEYWORDS = ['await', 'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'else', 'enum', 'export', 'extends', 'false', 'finally', 'for', 'function', 'if', 'implements', 'import', 'in', 'instanceof', 'interface', 'let', 'new', 'null', 'package', 'private', 'protected', 'public', 'return', 'super', 'switch', 'static', 'this', 'throw', 'try', 'true', 'typeof', 'var', 'void', 'while', 'with', 'yield'];
 
 export async function jsActionProcessor(scriptData: ScriptData, httpRegion: HttpRegion, httpFile: HttpFile, variables: Record<string, any>) {
   variables.httpRegion = httpRegion;
@@ -33,7 +34,7 @@ export async function executeScript(script: string, fileName: string | undefined
 
     const argsName = ['exports', 'require', 'module', '__filename', '__dirname'];
     if (variables) {
-      argsName.push(...Object.entries(variables).map(([key]) => key));
+      argsName.push(...Object.entries(variables).filter(([key]) => JAVASCRIPT_KEYWORDS.indexOf(key) < 0).map(([key]) => key));
     }
 
     const wrappedFunction = `(function userJS(${argsName.join(',')}){${script}})`;
@@ -67,7 +68,7 @@ export async function executeScript(script: string, fileName: string | undefined
 
     const scriptArgs = [scriptModule.exports, scriptRequire, scriptModule, fileName, dir];
     if (variables) {
-      scriptArgs.push(...Object.entries(variables).map(([key,value]) => value));
+      scriptArgs.push(...Object.entries(variables).filter(([key]) => JAVASCRIPT_KEYWORDS.indexOf(key) < 0).map(([key,value]) => value));
     }
     const compiledWrapper = vm.runInThisContext(wrappedFunction, {
       filename: fileName,

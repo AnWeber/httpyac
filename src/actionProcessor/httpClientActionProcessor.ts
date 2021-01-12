@@ -3,7 +3,7 @@ import { isString, isMimeTypeFormUrlEncoded , isMimeTypeJSON} from '../utils';
 import { httpYacApi } from '../httpYacApi';
 import { HttpClientOptions } from '../httpClient';
 import { log } from '../logger';
-import { executeScript } from './jsActionProcessor';
+import { executeScript, JAVASCRIPT_KEYWORDS } from './jsActionProcessor';
 import { EOL } from 'os';
 import cloneDeep = require('lodash/cloneDeep');
 const encodeUrl = require('encodeurl');
@@ -29,17 +29,21 @@ export async function httpClientActionProcessor(data: unknown, httpRegion: HttpR
       httpRegion.response = response;
       if (httpRegion.metaParams.name) {
 
-        let body = httpRegion.response.body;
-        if (isMimeTypeJSON(httpRegion.response.contentType) && isString(httpRegion.response.body)) {
-          try {
-            body = JSON.parse(httpRegion.response.body);
-          } catch (err) {
-            log.debug('json parse error', body, err);
+        if (JAVASCRIPT_KEYWORDS.indexOf(httpRegion.metaParams.name) >= 0) {
+          throw new Error(`Javascript Keyword ${httpRegion.metaParams.name} not allowed as name`);
+        }else{
+          let body = httpRegion.response.body;
+          if (isMimeTypeJSON(httpRegion.response.contentType) && isString(httpRegion.response.body)) {
+            try {
+              body = JSON.parse(httpRegion.response.body);
+            } catch (err) {
+              log.debug('json parse error', body, err);
+            }
           }
-        }
-        variables[httpRegion.metaParams.name] = body;
-        httpFile.variables[httpRegion.metaParams.name] = body;
 
+          variables[httpRegion.metaParams.name] = body;
+          httpFile.variables[httpRegion.metaParams.name] = body;
+        }
       }
       log.trace('response', httpRegion.response);
     } catch (err) {
