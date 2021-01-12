@@ -90,13 +90,32 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
       if (this.bodyLines.length > 0) {
         if (isMimeTypeFormUrlEncoded(contentType)) {
           httpRegion.request.body = this.formUrlEncodedJoin(this.bodyLines);
-        } else if(this.bodyLines.every(obj => isString(obj))) {
-          if (isMimeTypeNewlineDelimitedJSON(contentType)) {
+        } else {
+          if (this.bodyLines.every(obj => isString(obj)) && isMimeTypeNewlineDelimitedJSON(contentType)) {
             this.bodyLines.push('');
           }
-          httpRegion.request.body = this.bodyLines.join(isMimeTypeMultiPartFormData(contentType) ? '\r\n' : EOL);
-        } else {
-          httpRegion.request.body = this.bodyLines;
+
+          const body: Array<string | (() => Promise<Buffer>)> = [];
+          const strings: Array<string> = [];
+          const lineEnding = isMimeTypeMultiPartFormData(contentType) ?  '\r\n' : EOL;
+
+          for (const line of this.bodyLines) {
+            if (isString(line)) {
+              strings.push(line);
+            } else {
+              if (strings.length > 0) {
+                strings.push(lineEnding);
+                body.push(strings.join(lineEnding));
+                strings.length = 0;
+              }
+              body.push(line);
+            }
+          }
+          if (strings.length > 0) {
+            body.push(strings.join(lineEnding));
+          }
+
+          httpRegion.request.body = body;
         }
       }
       this.reset();
