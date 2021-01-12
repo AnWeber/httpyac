@@ -1,11 +1,14 @@
 import { HttpFile } from '../httpRegion';
 import { EnvironmentProvider } from './environmentProvider';
 import { dirname,join } from 'path';
-import {promises as fs } from 'fs';
+import {promises as fs, watchFile } from 'fs';
 import { parse } from 'dotenv';
 import { log } from '../logger';
+import {environmentStore} from './environmentStore';
 
 export class DotenvProvider implements EnvironmentProvider{
+
+  private watchFiles: Array<string> = [];
 
   constructor(private readonly basepath: string, private readonly defaultFiles: Array<string> = ['.env']) { }
 
@@ -23,8 +26,20 @@ export class DotenvProvider implements EnvironmentProvider{
     }
     return [];
   }
+
+
+
   async getVariables(env: string): Promise<Record<string, any>> {
-    return await parseDotenv(this.basepath, getFiles(this.defaultFiles, env) );
+    const { variables, validFilesNames } = await parseDotenv(this.basepath, getFiles(this.defaultFiles, env));
+    if (validFilesNames.length > 0) {
+      for (const file of validFilesNames) {
+        if (this.watchFiles.indexOf(file) < 0) {
+          this.watchFiles.push(file);
+          watchFile(file, environmentStore.refresh.bind(environmentStore));
+        }
+      }
+    }
+    return variables;
   }
 }
 
@@ -37,7 +52,7 @@ function getFiles(defaultFiles: Array<string>, env: string | undefined) {
 }
 
 export function dotenvVariableProviderFactory(defaultFiles: Array<string> = ['.env']) {
-  return async function (httpFile: HttpFile) {
+  return async function (httpFile: HttpFile): Promise<Record<string, any>> {
     if (httpFile.fileName && httpFile.env) {
       const files = httpFile.env.map(env => getFiles(defaultFiles, env))
         .reduce((prev, current) => {
@@ -48,14 +63,16 @@ export function dotenvVariableProviderFactory(defaultFiles: Array<string> = ['.e
           }
           return prev;
         }, []);
-      return  await parseDotenv(dirname(httpFile.fileName), files);
+      const { variables } = await parseDotenv(dirname(httpFile.fileName), files);
+      return variables;
     }
     return {};
   };
 }
 
-async function parseDotenv(dirname: string, fileNames: Array<string>): Promise<Record<string, any>> {
-  const vars = [];
+async function parseDotenv(dirname: string, fileNames: Array<string>): Promise<{ variables: Record<string, any>; validFilesNames: Array<string>; }> {
+  const vars: Array<Record<string, any>> = [];
+  const validFilesNames: Array<string> = [];
   for (const fileName of fileNames) {
     const envFileName = join(dirname, fileName);
     try {
@@ -63,10 +80,12 @@ async function parseDotenv(dirname: string, fileNames: Array<string>): Promise<R
         const content = await fs.readFile(envFileName);
         const variables = parse(content);
         vars.push(variables);
+        validFilesNames.push(envFileName);
       }
     } catch (err) {
       log.trace(err);
     }
   }
-  return Object.assign({}, ...vars);
+  const variables = Object.assign({}, ...vars);
+  return { variables, validFilesNames };
 }
