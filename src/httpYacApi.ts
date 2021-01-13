@@ -1,18 +1,18 @@
 import { HttpRegion, HttpFile } from './httpRegion';
 import * as parser from './parser';
 import { HttpOutputProcessor } from './output/httpOutputProcessor';
-import { VariableProvider, httpFileVariableProvider, httpFileImportsVariableProvider } from './variables';
+import { provider, replacer } from './variables';
 import { dotenvVariableProviderFactory } from './environments';
 import { HttpClient, gotHttpClientFactory } from './httpClient';
 import { environmentStore } from './environments/environmentStore';
 import { trace, sendHttpFile, sendHttpRegion } from './utils';
 import { log } from './logger';
-import { httpFileStore } from './httpFileStore';
 
 class HttpYacApi {
   readonly httpRegionParsers: Array<parser.HttpRegionParser>;
   readonly httpOutputProcessors: Array<HttpOutputProcessor>;
-  readonly variableProviders: Array<VariableProvider>;
+  readonly variableProviders: Array<provider.VariableProvider>;
+  readonly variableReplacers: Array<replacer.VariableReplacer>;
 
   readonly additionalRequire: Record<string, any> = {};
 
@@ -21,6 +21,7 @@ class HttpYacApi {
     this.httpRegionParsers = [
       new parser.MetaHttpRegionParser(),
       new parser.JsHttpRegionParser(),
+      new parser.IntellijHttpRegionParser(),
       new parser.RequestHttpRegionParser(),
       new parser.RequestBodyHttpRegionParser(),
     ];
@@ -28,8 +29,13 @@ class HttpYacApi {
     this.httpOutputProcessors = [];
     this.variableProviders = [
       dotenvVariableProviderFactory(),
-      httpFileImportsVariableProvider,
-      httpFileVariableProvider,
+      provider.httpFileImportsVariableProvider,
+      provider.httpFileVariableProvider,
+    ];
+
+    this.variableReplacers = [
+      replacer.intellijVariableReplacer,
+      replacer.jsVariableReplacer,
     ];
   }
 

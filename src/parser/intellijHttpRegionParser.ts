@@ -2,15 +2,15 @@
 import { HttpRegion, HttpFile } from '../httpRegion';
 import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult } from './httpRegionParser';
 import { toMultiLineString } from '../utils';
-import { jsActionProcessor, ScriptData, executeScript } from '../actionProcessor';
+import { ScriptData, intellijActionProcessor } from '../actionProcessor';
 
 
-export class JsHttpRegionParser implements HttpRegionParser{
+export class IntellijHttpRegionParser implements HttpRegionParser{
   async parse(lineReader: HttpRegionParserGenerator, httpRegion: HttpRegion, httpFile: HttpFile): Promise<HttpRegionParserResult> {
     let next = lineReader.next();
 
     if (!next.done) {
-      const matches = /^\s*{{(?<immediately>#)?\s*$/.exec(next.value.textLine);
+      const matches = /^\s*>\s{1}{%?\s*$/.exec(next.value.textLine);
       if (!matches) {
         return false;
       }
@@ -19,22 +19,18 @@ export class JsHttpRegionParser implements HttpRegionParser{
       const script: Array<string> = [];
       while (!next.done) {
 
-        if (/^\s*}}\s*$/.test(next.value.textLine)) {
-          if (!!matches.groups?.immediately) {
-            await executeScript(toMultiLineString(script),httpFile.fileName, {}, lineOffset);
-          }else{
-            const data: ScriptData = {
-              script: toMultiLineString(script),
-              lineOffset,
-            };
-            httpRegion.actions.push(
-              {
-                data,
-                type:'js',
-                processor: jsActionProcessor,
-              }
-            );
-          }
+        if (/^\s*%}\s*$/.test(next.value.textLine)) {
+          const data: ScriptData = {
+            script: toMultiLineString(script),
+            lineOffset,
+          };
+          httpRegion.actions.push(
+            {
+              data,
+              type: 'intellij',
+              processor: intellijActionProcessor,
+            }
+          );
           return {
             endLine: next.value.line,
           };

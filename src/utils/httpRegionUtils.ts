@@ -49,7 +49,7 @@ ${timingsToString(httpRegion.response.timings)}
 `);
 
     if (httpRegion.response.request) {
-      result.push(`)
+      result.push(`
 ---
 ### request
 ${requestToString(httpRegion.response.request)}

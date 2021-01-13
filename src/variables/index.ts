@@ -1,3 +1,2 @@
-export * from './variableProvider';
-export * from './httpFileVariableProvider';
-export * from './httpFileImportsVariableProvider';
+export * as provider from './provider';
+export * as replacer from './replacer';

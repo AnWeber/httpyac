@@ -75,7 +75,7 @@ async function normalizeBody(body: string | Array<string | (() => Promise<Buffer
 async function replaceVariablesInRequest(request: HttpRequest, httpRegion: HttpRegion, httpFile: HttpFile, variables: Record<string, any>) {
 
   const replacedReqeust = cloneDeep(request);
-  const replacer = (value: string) => replaceVariables(value, httpFile, httpRegion, variables);
+  const replacer = (value: string) => replaceVariables(value, httpRegion, httpFile, variables);
 
   replacedReqeust.url = await replacer(replacedReqeust.url);
 
@@ -103,25 +103,10 @@ async function replaceVariablesInRequest(request: HttpRequest, httpRegion: HttpR
   return replacedReqeust;
 }
 
-async function replaceVariables(text: string, httpFile: HttpFile, httpRegion: HttpRegion, variables: Record<string,any>) {
-  const variableRegex = /\{{2}(.+?)\}{2}/g;
-  let match: RegExpExecArray | null;
+async function replaceVariables(text: string, httpRegion: HttpRegion, httpFile: HttpFile, variables: Record<string, any>): Promise<any> {
   let result = text;
-  while ((match = variableRegex.exec(text)) !== null) {
-    const [searchValue, jsVariable] = match;
-    const script = `exports.$result = (${jsVariable});`;
-
-    let lineOffset = httpRegion.position.requestLine || httpRegion.position.start;
-    if (httpRegion.source) {
-      const index = httpRegion.source.split(EOL).findIndex(line => line.indexOf(searchValue) >= 0);
-      if (index >= 0) {
-        lineOffset = httpRegion.position.start + index;
-      }
-    }
-    const value = await executeScript(script, httpFile.fileName, variables, lineOffset);
-    if (value.$result) {
-      result = result.replace(match[0], `${value.$result}`);
-    }
+  for (var replacer of httpYacApi.variableReplacers) {
+    result = await replacer(result, httpRegion, httpFile, variables);
   }
   return result;
 }

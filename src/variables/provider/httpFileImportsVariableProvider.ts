@@ -1,4 +1,4 @@
-import { HttpFile } from '../httpRegion';
+import { HttpFile } from '../../httpRegion';
 
 export async function httpFileImportsVariableProvider(httpFile: HttpFile) {
   if (httpFile.imports) {
