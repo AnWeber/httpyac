@@ -40,9 +40,28 @@ export class RequestHttpRegionParser implements HttpRegionParser{
     return null;
   }
 
-  parse(lineReader: HttpRegionParserGenerator, httpRegion: HttpRegion, httpFile: HttpFile): Promise<HttpRegionParserResult> {
+  private isValidRequestLine(textLine: string, httpRegion: HttpRegion) {
+    if (isStringEmpty(textLine)) {
+      return false;
+    }
+    if (!!httpRegion.request) {
+      if (!!REGEX_REQUESTLINE.exec(textLine)?.groups?.method) {
+        return true;
+      }
+      return false;
+    }
+    return true;
+  }
+
+  async parse(lineReader: HttpRegionParserGenerator, httpRegion: HttpRegion, httpFile: HttpFile): Promise<HttpRegionParserResult> {
     let next = lineReader.next();
-    if (!next.done && !isStringEmpty(next.value.textLine) && !httpRegion.position.requestLine) {
+    if (!next.done && this.isValidRequestLine(next.value.textLine, httpRegion)) {
+      if (!!httpRegion.request){
+        return {
+          newRegion: true,
+          endLine: next.value.line - 1,
+        };
+      }
       httpRegion.request = this.getRequestLine(next.value.textLine);
       httpRegion.position.requestLine = next.value.line;
 
@@ -64,6 +83,7 @@ export class RequestHttpRegionParser implements HttpRegionParser{
         }
         next = lineReader.next();
       }
+
       httpRegion.actions.push({
         type: 'request',
         processor: httpClientActionProcessor
@@ -72,9 +92,9 @@ export class RequestHttpRegionParser implements HttpRegionParser{
       if (isString(contentType)) {
         httpRegion.request.contentType = parseMimeType(contentType);
       }
-      return Promise.resolve(result);
+      return result;
     }
-    return Promise.resolve(false);
+    return false;
   }
 
 }

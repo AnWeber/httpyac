@@ -27,6 +27,7 @@ export async function parseHttpFile(text: string, fileName: string): Promise<Htt
               }
             };
             httpFile.httpRegions.push(httpRegion);
+            httpRegion.position.end = httpRegionParserResult.endLine;
             httpRegion = initHttpRegion(httpRegionParserResult.endLine + 1);
           }
           line = httpRegionParserResult.endLine;

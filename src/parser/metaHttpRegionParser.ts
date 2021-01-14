@@ -24,7 +24,6 @@ export class MetaHttpRegionParser implements HttpRegionParser{
           endLine: next.value.line,
         };
         if (this.isDelimiter(textLine)) {
-          httpRegion.position.end = next.value.line;
           result.newRegion = true;
         } else {
           const match = /^\s*\#{1,}\s+\@(?<key>[^\s]*)(\s+)?(?<value>[^\s]+)?$/.exec(textLine);
