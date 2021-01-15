@@ -1,5 +1,5 @@
 
-import { HttpRegion, HttpFile } from '../httpRegion';
+import { HttpRegion, HttpFile, HttpSymbolKind } from '../httpRegion';
 import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult } from './httpRegionParser';
 import { toMultiLineString } from '../utils';
 import { ScriptData, intellijActionProcessor } from '../actionProcessor';
@@ -33,6 +33,15 @@ export class IntellijHttpRegionParser implements HttpRegionParser{
           );
           return {
             endLine: next.value.line,
+            symbols: [{
+              name: 'Intellij Script',
+              description: 'Intellij Script',
+              kind: HttpSymbolKind.script,
+              startLine: lineOffset,
+              startOffset: 0,
+              endLine: next.value.line,
+              endOffset: 0,
+            }],
           };
         }
         script.push(next.value.textLine);

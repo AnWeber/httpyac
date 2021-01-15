@@ -13,6 +13,6 @@ export function isString(text: any): text is string{
 }
 
 
-export function isStringEmpty(text: any): text is string {
+export function isStringEmpty(text: any) {
   return typeof text === 'string' && /^(\s*)?$/.test(text);
 }

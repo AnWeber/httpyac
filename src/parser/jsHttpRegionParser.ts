@@ -1,5 +1,5 @@
 
-import { HttpRegion, HttpFile } from '../httpRegion';
+import { HttpRegion, HttpFile, HttpSymbolKind } from '../httpRegion';
 import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult } from './httpRegionParser';
 import { toMultiLineString } from '../utils';
 import { jsActionProcessor, ScriptData, executeScript } from '../actionProcessor';
@@ -37,6 +37,15 @@ export class JsHttpRegionParser implements HttpRegionParser{
           }
           return {
             endLine: next.value.line,
+            symbols: [{
+              name: "script",
+              description: "nodejs script",
+              kind: HttpSymbolKind.script,
+              startLine: lineOffset,
+              startOffset: 0,
+              endLine: next.value.line,
+              endOffset: 0,
+            }]
           };
         }
         script.push(next.value.textLine);

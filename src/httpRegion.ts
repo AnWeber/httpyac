@@ -11,13 +11,10 @@ export interface HttpRegion<TOptions = any>{
   actions: Array<HttpRegionAction>;
   request?: HttpRequest<TOptions>;
   response?: HttpResponse;
-  position: {
-    start: number;
-    requestLine?: number;
-    end: number;
-  };
+  requestLine?: number;
   source?: string;
   metaParams: Record<string, string>;
+  symbol: HttpSymbol;
 }
 
 export interface HttpRequest<TOptions = any>{
@@ -57,6 +54,32 @@ export interface ContentType{
   mimeType: string;
   contentType: string;
   charset?: string | undefined;
+}
+
+
+export interface HttpSymbol{
+  name: string;
+  description: string;
+  kind: HttpSymbolKind,
+  startLine: number;
+  startOffset: number;
+  endLine: number;
+  endOffset: number;
+  children?: Array<HttpSymbol>
+}
+
+export enum HttpSymbolKind{
+  request,
+  requestLine,
+  requestMethod,
+  requestUrl,
+  requestHeader,
+  requestHeaderKey,
+  requestHeaderValue,
+  script,
+  metaParam,
+  metaParamKey,
+  metaParamValue
 }
 export interface HttpRegionAction<T = any> {
   data?: T;

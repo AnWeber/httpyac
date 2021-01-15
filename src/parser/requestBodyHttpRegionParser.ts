@@ -15,13 +15,14 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
   private bodyLines: Array<RequestBodyLineType> = [];
 
   async parse(lineReader: HttpRegionParserGenerator, httpRegion: HttpRegion, httpFile: HttpFile): Promise<HttpRegionParserResult> {
-    if (httpRegion.position.requestLine) {
+    if (httpRegion.request) {
       let next = lineReader.next();
       if (!next.done) {
         if (this.bodyLines.length > 0 || !isStringEmpty(next.value.textLine)) {
           this.bodyLines.push(await this.parseLine(next.value.textLine, httpFile.fileName));
           return {
-            endLine: next.value.line
+            endLine: next.value.line,
+            symbols: [],
           };
         }
       }

@@ -10,11 +10,11 @@ export async function jsVariableReplacer(text: string, httpRegion: HttpRegion, h
     const [searchValue, jsVariable] = match;
     const script = `exports.$result = (${jsVariable});`;
 
-    let lineOffset = httpRegion.position.requestLine || httpRegion.position.start;
+    let lineOffset = httpRegion.symbol.startLine;
     if (httpRegion.source) {
       const index = httpRegion.source.split(EOL).findIndex(line => line.indexOf(searchValue) >= 0);
       if (index >= 0) {
-        lineOffset = httpRegion.position.start + index;
+        lineOffset = httpRegion.symbol.startLine + index;
       }
     }
     const value = await executeScript(script, httpFile.fileName, variables, lineOffset);

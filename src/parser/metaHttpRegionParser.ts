@@ -1,5 +1,5 @@
 
-import { HttpRegion, HttpFile} from '../httpRegion';
+import { HttpRegion, HttpFile, HttpSymbol, HttpSymbolKind} from '../httpRegion';
 import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult } from './httpRegionParser';
 import { httpFileStore } from '../httpFileStore';
 import { log } from '../logger';
@@ -20,14 +20,46 @@ export class MetaHttpRegionParser implements HttpRegionParser{
     if (!next.done) {
       const textLine = next.value.textLine;
       if (MetaHttpRegionParser.isMetaTag(textLine)) {
+
         const result: HttpRegionParserResult =  {
-          endLine: next.value.line,
+          endLine: next.value.line
         };
         if (this.isDelimiter(textLine)) {
           result.newRegion = true;
         } else {
           const match = /^\s*\#{1,}\s+\@(?<key>[^\s]*)(\s+)?(?<value>[^\s]+)?$/.exec(textLine);
+
           if (match && match.groups && match.groups.key) {
+            const symbol: HttpSymbol = {
+              name: match.groups.key,
+              description: match.groups.value || '-',
+              kind: HttpSymbolKind.metaParam,
+              startLine: next.value.line,
+              startOffset: 0,
+              endLine: next.value.line,
+              endOffset: next.value.textLine.length,
+              children: [{
+                name: match.groups.key,
+                description: 'key of meta data',
+                kind: HttpSymbolKind.metaParamKey,
+                startLine: next.value.line,
+                startOffset: next.value.textLine.indexOf(match.groups.key),
+                endLine: next.value.line,
+                endOffset: next.value.textLine.indexOf(match.groups.key) + match.groups.key.length,
+              }]
+            };
+            if (match.groups.value && symbol.children) {
+              symbol.children.push({
+                name: match.groups.value,
+                description: 'value of meta data',
+                kind: HttpSymbolKind.metaParamValue,
+                startLine: next.value.line,
+                startOffset: next.value.textLine.indexOf(match.groups.value),
+                endLine: next.value.line,
+                endOffset: next.value.textLine.indexOf(match.groups.value) + match.groups.value.length,
+              });
+            }
+            result.symbols = [symbol];
             switch (match.groups.key) {
               case 'import':
                 if (match.groups.value) {
