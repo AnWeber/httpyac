@@ -5,7 +5,7 @@ import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult } f
 import { isString, isStringEmpty, parseMimeType, isRequestMethod, getHeader } from '../utils';
 import {httpClientActionProcessor  } from '../actionProcessor';
 
-const REGEX_REQUESTLINE = /^(?<method>GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE)?\s*(?<url>.+?)(?:\s+(HTTP\/\S+))?$/;
+const REGEX_REQUESTLINE = /^\s*(?<method>GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE)?\s*(?<url>.+?)(?:\s+(HTTP\/\S+))?$/;
 
 export class RequestHttpRegionParser implements HttpRegionParser{
 
