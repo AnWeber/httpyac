@@ -8,6 +8,7 @@ import { EOL } from 'os';
 import cloneDeep = require('lodash/cloneDeep');
 const encodeUrl = require('encodeurl');
 import merge from 'lodash/merge';
+import { ReplacerType } from '../variables/replacer';
 
 
 export async function httpClientActionProcessor(data: unknown, httpRegion: HttpRegion, httpFile: HttpFile, variables: Record<string, any>): Promise<void> {
@@ -75,24 +76,24 @@ async function normalizeBody(body: string | Array<string | (() => Promise<Buffer
 async function replaceVariablesInRequest(request: HttpRequest, httpRegion: HttpRegion, httpFile: HttpFile, variables: Record<string, any>) {
 
   const replacedReqeust = cloneDeep(request);
-  const replacer = (value: string) => replaceVariables(value, httpRegion, httpFile, variables);
+  const replacer = (value: string, type: ReplacerType | string) => replaceVariables(value, type, httpRegion, httpFile, variables);
 
-  replacedReqeust.url = await replacer(replacedReqeust.url);
+  replacedReqeust.url = await replacer(replacedReqeust.url, ReplacerType.url);
 
   for (const [headerName, headerValue] of Object.entries(replacedReqeust.headers)) {
     if (isString(headerValue)) {
-      replacedReqeust.headers[headerName] = await replacer(headerValue);
+      replacedReqeust.headers[headerName] = await replacer(headerValue, headerName);
     }
   }
 
   if (replacedReqeust.body) {
     if (isString(replacedReqeust.body)) {
-      replacedReqeust.body = await replacer(replacedReqeust.body);
+      replacedReqeust.body = await replacer(replacedReqeust.body, ReplacerType.body);
     } else if (Array.isArray(replacedReqeust.body)) {
       const replacedBody: Array<string | (() => Promise<Buffer>)> = [];
       for (const obj of replacedReqeust.body) {
         if (isString(obj)) {
-          replacedBody.push(await replacer(obj));
+          replacedBody.push(await replacer(obj, ReplacerType.body));
         } else {
           replacedBody.push(obj);
         }
@@ -103,10 +104,11 @@ async function replaceVariablesInRequest(request: HttpRequest, httpRegion: HttpR
   return replacedReqeust;
 }
 
-async function replaceVariables(text: string, httpRegion: HttpRegion, httpFile: HttpFile, variables: Record<string, any>): Promise<any> {
+
+export async function replaceVariables(text: string, type: ReplacerType | string, httpRegion: HttpRegion, httpFile: HttpFile, variables: Record<string, any>): Promise<any> {
   let result = text;
   for (var replacer of httpYacApi.variableReplacers) {
-    result = await replacer(result, httpRegion, httpFile, variables);
+    result = await replacer(result,type, httpRegion, httpFile, variables);
   }
   return result;
 }

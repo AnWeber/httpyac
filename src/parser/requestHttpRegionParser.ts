@@ -157,7 +157,7 @@ export class RequestHttpRegionParser implements HttpRegionParser {
                 }
               ]
             });
-            Object.assign(httpRegion.request.headers, requestHeader);
+            httpRegion.request.headers[requestHeader.key] = requestHeader.value;
           }
         }
         next = lineReader.next();

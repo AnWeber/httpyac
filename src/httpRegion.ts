@@ -79,7 +79,10 @@ export enum HttpSymbolKind{
   script,
   metaParam,
   metaParamKey,
-  metaParamValue
+  metaParamValue,
+  variable,
+  variableName,
+  varialbeValue,
 }
 export interface HttpRegionAction<T = any> {
   data?: T;

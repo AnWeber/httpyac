@@ -20,6 +20,7 @@ class HttpYacApi {
   constructor() {
     this.httpRegionParsers = [
       new parser.MetaHttpRegionParser(),
+      new parser.VariableHttpRegionParser(),
       new parser.JsHttpRegionParser(),
       new parser.IntellijHttpRegionParser(),
       new parser.RequestHttpRegionParser(),
@@ -36,6 +37,7 @@ class HttpYacApi {
     this.variableReplacers = [
       replacer.intellijVariableReplacer,
       replacer.jsVariableReplacer,
+      replacer.hostVariableReplacer,
     ];
   }
 

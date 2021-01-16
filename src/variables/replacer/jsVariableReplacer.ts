@@ -2,7 +2,7 @@ import { EOL } from 'os';
 import { executeScript } from '../../actionProcessor';
 import { HttpRegion, HttpFile } from '../../httpRegion';
 
-export async function jsVariableReplacer(text: string, httpRegion: HttpRegion, httpFile: HttpFile, variables: Record<string,any>) {
+export async function jsVariableReplacer(text: string, type: string, httpRegion: HttpRegion, httpFile: HttpFile, variables: Record<string,any>) {
   const variableRegex = /\{{2}(.+?)\}{2}/g;
   let match: RegExpExecArray | null;
   let result = text;

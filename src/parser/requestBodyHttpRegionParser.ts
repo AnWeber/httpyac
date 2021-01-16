@@ -2,7 +2,7 @@
 import { HttpRegion, HttpFile} from '../httpRegion';
 import { EOL } from 'os';
 import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult } from './httpRegionParser';
-import { normalizeFileName, isString, isMimeTypeMultiPartFormData, isStringEmpty, isMimeTypeNewlineDelimitedJSON, isMimeTypeFormUrlEncoded } from '../utils';
+import { toAbsoluteFilename, isString, isMimeTypeMultiPartFormData, isStringEmpty, isMimeTypeNewlineDelimitedJSON, isMimeTypeFormUrlEncoded } from '../utils';
 import { createReadStream, promises as fs } from 'fs';
 import { log } from '../logger';
 
@@ -34,7 +34,7 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
     const fileImport = REGEX_IMPORTFILE.exec(textLine);
     if (fileImport && fileImport.length === 4 && fileImport.groups) {
       try {
-        const normalizedPath = await normalizeFileName(fileImport.groups.fileName, httpFileName);
+        const normalizedPath = await toAbsoluteFilename(fileImport.groups.fileName, httpFileName);
         if (normalizedPath) {
           if (fileImport.groups.injectVariables) {
             return await fs.readFile(normalizedPath, { encoding: this.getBufferEncoding(fileImport.groups.encoding) });

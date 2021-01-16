@@ -4,7 +4,7 @@ import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult } f
 import { httpFileStore } from '../httpFileStore';
 import { log } from '../logger';
 import { promises as fs } from 'fs';
-import { normalizeFileName } from '../utils';
+import { toAbsoluteFilename } from '../utils';
 import { refMetaHttpRegionActionProcessor } from '../actionProcessor';
 export class MetaHttpRegionParser implements HttpRegionParser{
   static isMetaTag(textLine: string) {
@@ -92,7 +92,7 @@ export class MetaHttpRegionParser implements HttpRegionParser{
 }
 async function importHttpFile(httpFile: HttpFile, fileName: string) {
   try {
-    const absoluteFileName = await normalizeFileName(fileName, httpFile.fileName);
+    const absoluteFileName = await toAbsoluteFilename(fileName, httpFile.fileName);
     if (absoluteFileName) {
       if (!httpFile.imports) {
         httpFile.imports = [];
