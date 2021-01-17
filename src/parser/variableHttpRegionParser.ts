@@ -1,8 +1,7 @@
 ;
 
 
-import { HttpRegion, HttpFile, HttpSymbolKind} from '../httpRegion';
-import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult } from './httpRegionParser';
+import { HttpRegion, HttpFile, HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult } from '../models';
 import { variableHttpRegionProcessor } from '../actionProcessor';
 
 export class VariableHttpRegionParser implements HttpRegionParser{

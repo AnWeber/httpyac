@@ -1,6 +1,5 @@
 
-import { HttpRegion, HttpRequest, HttpFile, HttpSymbol, HttpSymbolKind } from '../httpRegion';
-import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult } from './httpRegionParser';
+import { HttpRegion, HttpRequest, HttpFile, HttpSymbol, HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult  } from '../models';
 
 import { isString, isStringEmpty, parseMimeType, isRequestMethod, getHeader } from '../utils';
 import {httpClientActionProcessor  } from '../actionProcessor';

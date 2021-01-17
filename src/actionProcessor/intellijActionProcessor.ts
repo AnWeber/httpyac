@@ -1,10 +1,10 @@
-import { HttpRegion, HttpFile } from '../httpRegion';
+import { Variables, ProcessorContext } from '../models';
 import { ScriptData, executeScript } from './jsActionProcessor';
 import { ok } from 'assert';
 import { log } from '../logger';
 
 
-export async function intellijActionProcessor(scriptData: ScriptData, httpRegion: HttpRegion, httpFile: HttpFile, variables: Record<string, any>) {
+export async function intellijActionProcessor(scriptData: ScriptData, {httpRegion, httpFile, variables}: ProcessorContext) {
   variables.httpRegion = httpRegion;
 
 
@@ -33,12 +33,13 @@ export async function intellijActionProcessor(scriptData: ScriptData, httpRegion
     response,
   };
   await executeScript(scriptData.script, httpFile.fileName, intellijVars, scriptData.lineOffset + 1);
+  return true;
 }
 
 export class HttpClient{
   global: HttpClientVariables;
 
-  constructor(variables: Record<string, any>) {
+  constructor(variables: Variables) {
     this.global = new HttpClientVariables(variables);
   }
 
@@ -61,7 +62,7 @@ export class HttpClient{
 }
 
 class HttpClientVariables{
-  constructor(private readonly variables: Record<string, any>) { }
+  constructor(private readonly variables: Variables) { }
   set(varName: string, varValue: string): void{
     this.variables[varName] = varValue;
   }

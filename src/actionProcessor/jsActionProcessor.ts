@@ -1,9 +1,9 @@
-import { HttpRegion, HttpFile } from '../httpRegion';
+import { Variables, ProcessorContext } from '../models';
 import { Module } from 'module';
 import * as vm from 'vm';
 import { dirname } from 'path';
 import { log } from '../logger';
-import { isPromise } from '../utils';
+import { isPromise , toEnvironmentKey} from '../utils';
 import * as got from 'got';
 import { httpYacApi } from '../httpYacApi';
 import { httpFileStore } from '../httpFileStore';
@@ -16,17 +16,18 @@ export interface ScriptData{
 
 export const JAVASCRIPT_KEYWORDS = ['await', 'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'else', 'enum', 'export', 'extends', 'false', 'finally', 'for', 'function', 'if', 'implements', 'import', 'in', 'instanceof', 'interface', 'let', 'new', 'null', 'package', 'private', 'protected', 'public', 'return', 'super', 'switch', 'static', 'this', 'throw', 'try', 'true', 'typeof', 'var', 'void', 'while', 'with', 'yield'];
 
-export async function jsActionProcessor(scriptData: ScriptData, httpRegion: HttpRegion, httpFile: HttpFile, variables: Record<string, any>) {
+export async function jsActionProcessor(scriptData: ScriptData, {httpRegion, httpFile, variables}: ProcessorContext) {
   variables.httpRegion = httpRegion;
-  let value = await executeScript(scriptData.script, httpFile.fileName, variables, scriptData.lineOffset + 1);
-  if (value) {
-    Object.assign(variables, value);
-    Object.assign(httpFile.variables, value);
+  let result = await executeScript(scriptData.script, httpFile.fileName, variables, scriptData.lineOffset + 1);
+  if (result) {
+    Object.assign(variables, result);
+    Object.assign(httpFile.environments[toEnvironmentKey(httpFile.activeEnvironment)], result);
   }
+  return !result.$cancel;
 }
 
 
-export async function executeScript(script: string, fileName: string | undefined, variables: Record<string, any>, lineOffset:number) {
+export async function executeScript(script: string, fileName: string | undefined, variables: Variables, lineOffset:number) {
   try {
     fileName = fileName || __filename;
     const dir = dirname(fileName);

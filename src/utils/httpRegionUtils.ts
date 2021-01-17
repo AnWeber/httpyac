@@ -1,41 +1,46 @@
 import { EOL } from 'os';
-import { HttpRegion, HttpFile } from '../httpRegion';
+import { HttpRegion, HttpFile, Variables, ProcessorContext } from '../models';
 import {responseToString, requestToString, timingsToString } from './requestUtils';
 
-export async function sendHttpRegion(httpRegion: HttpRegion, httpFile: HttpFile, variables: Record<string, any>) {
-  if (!httpRegion.metaParams.disabled) {
-    for (const prevHttpRegion of httpFile.httpRegions) {
-      if (prevHttpRegion === httpRegion) {
-        break;
-      }
-      if (!prevHttpRegion.request && !prevHttpRegion.metaParams.disabled) {
-        await processHttpRegionActions(prevHttpRegion, httpFile, variables);
-      }
+export async function sendHttpRegion(httpRegion: HttpRegion, httpFile: HttpFile, variables: Variables) {
+  if (!httpRegion.metaData.disabled) {
+    if (await executeGlobalScripts(httpFile, variables)) {
+      return await processHttpRegionActions({ httpRegion, httpFile, variables });
     }
-    await processHttpRegionActions(httpRegion, httpFile, variables);
   }
+  return false;
 }
 
-export async function sendHttpFile(httpFile: HttpFile, variables: Record<string,any>) {
+export async function sendHttpFile(httpFile: HttpFile, variables: Variables) {
   for (const httpRegion of httpFile.httpRegions) {
-    if (!httpRegion.metaParams.disabled) {
-      await processHttpRegionActions(httpRegion, httpFile, variables);
+    if (!httpRegion.metaData.disabled) {
+      await processHttpRegionActions({ httpRegion, httpFile, variables });
     }
   }
 }
 
-export async function processHttpRegionActions(httpRegion: HttpRegion<unknown>, httpFile: HttpFile, variables: Record<string, any>) {
-  for (const action of httpRegion.actions) {
-    if (!httpRegion.metaParams.disabled) {
-      await action.processor(action.data, httpRegion, httpFile, variables);
+export async function executeGlobalScripts(httpFile: HttpFile, variables: Variables) {
+  for (const httpRegion of httpFile.httpRegions) {
+    if (!httpRegion.request && !httpRegion.metaData.disabled) {
+      if (!await processHttpRegionActions({ httpRegion, httpFile, variables })) {
+        return false;
+      }
     }
   }
+  return true;
 }
 
-
-export function isHttpRegion(obj: any): obj is HttpRegion{
-  return obj.actions && obj.position;
+export async function processHttpRegionActions(context: ProcessorContext) {
+  for (const action of context.httpRegion.actions) {
+    if (!context.httpRegion.metaData.disabled) {
+      if (!await action.processor(action.data, context)) {
+        return false;
+      }
+    }
+  }
+  return true;
 }
+
 
 export function toMarkdown(httpRegion: HttpRegion) {
 

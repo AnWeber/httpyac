@@ -1,11 +1,12 @@
-import { HttpRegion , HttpFile} from '../httpRegion';
-import { ReplacerType } from '../variables/replacer';
-import { replaceVariables } from './httpClientActionProcessor';
+import { ProcessorContext, VariableReplacerType} from '../models';
+import { httpYacApi } from '../httpYacApi';
 
-export async function variableHttpRegionProcessor(data: Record<string, string>, httpRegion: HttpRegion, httpFile: HttpFile, variables: Record<string, any>) {
+
+export async function variableHttpRegionProcessor(data: Record<string, string>, context: ProcessorContext) {
   if (data) {
     for (const [key, value] of Object.entries(data)) {
-      variables[key] = await replaceVariables(value, ReplacerType.variable, httpRegion, httpFile, variables);
+      context.variables[key] = await httpYacApi.replaceVariables(value, VariableReplacerType.variable, context);
     }
   }
+  return true;
 }

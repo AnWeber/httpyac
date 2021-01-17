@@ -1,5 +1,5 @@
 export * from './httpYacApi';
-export * from './httpRegion';
+export * from './models';
 export * from './httpFileStore';
 export * from './environments/environmentStore';
 export * from './httpClient';

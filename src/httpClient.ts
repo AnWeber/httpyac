@@ -1,4 +1,4 @@
-import { HttpMethod, HttpResponse } from './httpRegion';
+import { HttpMethod, HttpResponse } from './models';
 import { getHeader, isString, parseMimeType } from './utils';
 import { default as got, OptionsOfUnknownResponseBody } from 'got';
 import merge from 'lodash/merge';

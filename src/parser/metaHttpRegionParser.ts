@@ -1,6 +1,5 @@
 
-import { HttpRegion, HttpFile, HttpSymbol, HttpSymbolKind} from '../httpRegion';
-import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult } from './httpRegionParser';
+import { HttpRegion, HttpFile, HttpSymbol, HttpSymbolKind,  HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult } from '../models';
 import { httpFileStore } from '../httpFileStore';
 import { log } from '../logger';
 import { promises as fs } from 'fs';
@@ -77,7 +76,7 @@ export class MetaHttpRegionParser implements HttpRegionParser{
                 }
                 break;
               default:
-                httpRegion.metaParams = Object.assign(httpRegion.metaParams || {}, {
+                httpRegion.metaData = Object.assign(httpRegion.metaData || {}, {
                   [match.groups.key]: match.groups.value || true,
                 });
                 break;

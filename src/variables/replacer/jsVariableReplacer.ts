@@ -1,8 +1,8 @@
 import { EOL } from 'os';
+import { ProcessorContext } from '../../models';
 import { executeScript } from '../../actionProcessor';
-import { HttpRegion, HttpFile } from '../../httpRegion';
 
-export async function jsVariableReplacer(text: string, type: string, httpRegion: HttpRegion, httpFile: HttpFile, variables: Record<string,any>) {
+export async function jsVariableReplacer(text: string, type: string, {httpRegion, httpFile, variables}: ProcessorContext) {
   const variableRegex = /\{{2}(.+?)\}{2}/g;
   let match: RegExpExecArray | null;
   let result = text;

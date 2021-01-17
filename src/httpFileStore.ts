@@ -1,4 +1,4 @@
-import { HttpFile } from './httpRegion';
+import { HttpFile } from './models';
 import { trace } from './utils';
 import { parseHttpFile } from './parser';
 import { log } from './logger';
@@ -41,8 +41,8 @@ export class HttpFileStore{
         const httpFile = (await parseHttpFile(await getText(), fileName));
         httpFile.fileName = fileName;
         if (httpFileStoreEntry.httpFile) {
-          httpFile.variables = httpFileStoreEntry.httpFile.variables;
-          httpFile.env = httpFileStoreEntry.httpFile.env;
+          httpFile.environments = httpFileStoreEntry.httpFile.environments;
+          httpFile.activeEnvironment = httpFileStoreEntry.httpFile.activeEnvironment;
           for (const httpRegion of httpFile.httpRegions) {
             const cachedHttpRegion = httpFileStoreEntry.httpFile.httpRegions.find(obj => obj.source === httpRegion.source);
             if (cachedHttpRegion) {

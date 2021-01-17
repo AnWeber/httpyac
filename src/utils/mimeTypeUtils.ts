@@ -1,4 +1,4 @@
-import { ContentType } from '../httpRegion';
+import { ContentType } from '../models';
 
 export function parseMimeType(contentType: string): ContentType {
   const [mimeType, ...parameters] = contentType.split(';').map(v => v.trim());

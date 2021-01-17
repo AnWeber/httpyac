@@ -1,4 +1,4 @@
-import { EnvironmentProvider } from './environmentProvider';
+import { EnvironmentProvider } from '../models';
 
 const DEFAULT_ENV = "$shared";
 export class JsonEnvProvider implements EnvironmentProvider{

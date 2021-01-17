@@ -1,4 +1,4 @@
-import { HttpRegion, HttpFile } from './httpRegion';
+import { HttpRegion, HttpFile , VariableReplacerType, ProcessorContext, HttpRegionParser} from './models';
 import * as parser from './parser';
 import { HttpOutputProcessor } from './output/httpOutputProcessor';
 import { provider, replacer } from './variables';
@@ -9,7 +9,7 @@ import { trace, sendHttpFile, sendHttpRegion } from './utils';
 import { log } from './logger';
 
 class HttpYacApi {
-  readonly httpRegionParsers: Array<parser.HttpRegionParser>;
+  readonly httpRegionParsers: Array<HttpRegionParser>;
   readonly httpOutputProcessors: Array<HttpOutputProcessor>;
   readonly variableProviders: Array<provider.VariableProvider>;
   readonly variableReplacers: Array<replacer.VariableReplacer>;
@@ -62,25 +62,26 @@ class HttpYacApi {
   }
   @trace()
   private async getVariables(httpFile: HttpFile): Promise<Record<string, any>> {
-    let environment: Record<string, Record<string, any>> = {};
-    if (httpFile.env) {
-      for (const env of httpFile.env) {
-        environment[env] = await environmentStore.getVariables(env);
-      }
-    }
     const variables = Object.assign({
       log,
-      environment,
     },
-      ...Object.entries(environment).map(([key, value]) => value),
+      (await environmentStore.getVariables(httpFile.activeEnvironment)),
       ...(await Promise.all(
           httpYacApi.variableProviders
-            .map(variableProvider => variableProvider(httpFile)
+            .map(variableProvider => variableProvider(httpFile.activeEnvironment, httpFile)
             )
       ))
     );
     log.trace(variables);
     return variables;
+  }
+
+  async replaceVariables(text: string, type: VariableReplacerType | string, context: ProcessorContext): Promise<any> {
+    let result = text;
+    for (var replacer of this.variableReplacers) {
+      result = await replacer(result,type, context);
+    }
+    return result;
   }
 
   /**

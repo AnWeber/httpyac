@@ -1,7 +1,6 @@
 
-import { HttpRegion, HttpFile, HttpSymbolKind } from '../httpRegion';
-import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult } from './httpRegionParser';
-import { toMultiLineString, toAbsoluteFilename } from '../utils';
+import { HttpRegion, HttpFile, HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult } from '../models';
+import { toMultiLineString } from '../utils';
 import { ScriptData, intellijActionProcessor } from '../actionProcessor';
 
 

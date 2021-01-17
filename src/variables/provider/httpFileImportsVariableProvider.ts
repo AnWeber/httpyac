@@ -1,11 +1,18 @@
-import { HttpFile } from '../../httpRegion';
+import { HttpFile, Variables } from '../../models';
+import {toEnvironmentKey } from '../../utils';
 
-export async function httpFileImportsVariableProvider(httpFile: HttpFile) {
+export async function httpFileImportsVariableProvider(env: string[] | undefined,httpFile: HttpFile) {
+
+  const envkey = toEnvironmentKey(env);
+
   if (httpFile.imports) {
-    const variables: Array<Record<string,any>> = [];
+    const variables: Array<Variables> = [];
     for (const httpFileLoader of httpFile.imports) {
       const refHttpFile = await httpFileLoader();
-      variables.push(refHttpFile.variables);
+      if (!refHttpFile.environments[envkey]) {
+        refHttpFile.environments[envkey] = {};
+      }
+      variables.push(refHttpFile.environments[envkey]);
     }
     return Object.assign({},...variables);
   }

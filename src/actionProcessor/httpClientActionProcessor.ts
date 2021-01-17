@@ -1,19 +1,17 @@
-import { HttpRegion, HttpFile, HttpRequest } from '../httpRegion';
-import { isString, isMimeTypeFormUrlEncoded , isMimeTypeJSON} from '../utils';
+import {ProcessorContext, HttpRequest, VariableReplacerType } from '../models';
+import { isString, isMimeTypeFormUrlEncoded , isMimeTypeJSON, toEnvironmentKey} from '../utils';
 import { httpYacApi } from '../httpYacApi';
 import { HttpClientOptions } from '../httpClient';
 import { log } from '../logger';
-import { executeScript, JAVASCRIPT_KEYWORDS } from './jsActionProcessor';
-import { EOL } from 'os';
+import { JAVASCRIPT_KEYWORDS } from './jsActionProcessor';
 import cloneDeep = require('lodash/cloneDeep');
-const encodeUrl = require('encodeurl');
 import merge from 'lodash/merge';
-import { ReplacerType } from '../variables/replacer';
+const encodeUrl = require('encodeurl');
 
 
-export async function httpClientActionProcessor(data: unknown, httpRegion: HttpRegion, httpFile: HttpFile, variables: Record<string, any>): Promise<void> {
+export async function httpClientActionProcessor(data: unknown, {httpRegion, httpFile, variables}: ProcessorContext): Promise<boolean> {
   if (httpRegion.request) {
-    const request = await replaceVariablesInRequest(httpRegion.request, httpRegion, httpFile,variables);
+    const request = await replaceVariablesInRequest(httpRegion.request, {httpRegion, httpFile, variables});
     const options: HttpClientOptions = merge({
       headers: request.headers,
       method: request.method,
@@ -28,10 +26,10 @@ export async function httpClientActionProcessor(data: unknown, httpRegion: HttpR
       const response = await httpYacApi.httpClient(request.url, options);
       response.request = request;
       httpRegion.response = response;
-      if (httpRegion.metaParams.name) {
+      if (httpRegion.metaData.name) {
 
-        if (JAVASCRIPT_KEYWORDS.indexOf(httpRegion.metaParams.name) >= 0) {
-          throw new Error(`Javascript Keyword ${httpRegion.metaParams.name} not allowed as name`);
+        if (JAVASCRIPT_KEYWORDS.indexOf(httpRegion.metaData.name) >= 0) {
+          throw new Error(`Javascript Keyword ${httpRegion.metaData.name} not allowed as name`);
         }else{
           let body = httpRegion.response.body;
           if (isMimeTypeJSON(httpRegion.response.contentType) && isString(httpRegion.response.body)) {
@@ -42,8 +40,8 @@ export async function httpClientActionProcessor(data: unknown, httpRegion: HttpR
             }
           }
 
-          variables[httpRegion.metaParams.name] = body;
-          httpFile.variables[httpRegion.metaParams.name] = body;
+          variables[httpRegion.metaData.name] = body;
+          httpFile.environments[toEnvironmentKey(httpFile.activeEnvironment)][httpRegion.metaData.name] = body;
         }
       }
       log.trace('response', httpRegion.response);
@@ -52,6 +50,7 @@ export async function httpClientActionProcessor(data: unknown, httpRegion: HttpR
       throw err;
     }
   }
+  return true;
 };
 
 async function normalizeBody(body: string | Array<string | (() => Promise<Buffer>)> | undefined) {
@@ -73,12 +72,12 @@ async function normalizeBody(body: string | Array<string | (() => Promise<Buffer
 
 
 
-async function replaceVariablesInRequest(request: HttpRequest, httpRegion: HttpRegion, httpFile: HttpFile, variables: Record<string, any>) {
+async function replaceVariablesInRequest(request: HttpRequest, context: ProcessorContext) {
 
   const replacedReqeust = cloneDeep(request);
-  const replacer = (value: string, type: ReplacerType | string) => replaceVariables(value, type, httpRegion, httpFile, variables);
+  const replacer = (value: string, type: VariableReplacerType | string) => httpYacApi.replaceVariables(value, type, context);
 
-  replacedReqeust.url = await replacer(replacedReqeust.url, ReplacerType.url);
+  replacedReqeust.url = await replacer(replacedReqeust.url, VariableReplacerType.url);
 
   for (const [headerName, headerValue] of Object.entries(replacedReqeust.headers)) {
     if (isString(headerValue)) {
@@ -88,12 +87,12 @@ async function replaceVariablesInRequest(request: HttpRequest, httpRegion: HttpR
 
   if (replacedReqeust.body) {
     if (isString(replacedReqeust.body)) {
-      replacedReqeust.body = await replacer(replacedReqeust.body, ReplacerType.body);
+      replacedReqeust.body = await replacer(replacedReqeust.body, VariableReplacerType.body);
     } else if (Array.isArray(replacedReqeust.body)) {
       const replacedBody: Array<string | (() => Promise<Buffer>)> = [];
       for (const obj of replacedReqeust.body) {
         if (isString(obj)) {
-          replacedBody.push(await replacer(obj, ReplacerType.body));
+          replacedBody.push(await replacer(obj, VariableReplacerType.body));
         } else {
           replacedBody.push(obj);
         }
@@ -105,10 +104,3 @@ async function replaceVariablesInRequest(request: HttpRequest, httpRegion: HttpR
 }
 
 
-export async function replaceVariables(text: string, type: ReplacerType | string, httpRegion: HttpRegion, httpFile: HttpFile, variables: Record<string, any>): Promise<any> {
-  let result = text;
-  for (var replacer of httpYacApi.variableReplacers) {
-    result = await replacer(result,type, httpRegion, httpFile, variables);
-  }
-  return result;
-}

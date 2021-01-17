@@ -1,6 +1,5 @@
 
-import { HttpRegion, HttpFile, HttpSymbolKind } from '../httpRegion';
-import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult } from './httpRegionParser';
+import { HttpRegion, HttpFile, HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult } from '../models';
 import { toMultiLineString } from '../utils';
 import { jsActionProcessor, ScriptData, executeScript } from '../actionProcessor';
 

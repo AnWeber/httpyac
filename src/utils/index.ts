@@ -1,3 +1,4 @@
+export * from './environmentUtils';
 export * from './fsUtils';
 export * from './httpRegionUtils';
 export * from './mimeTypeUtils';

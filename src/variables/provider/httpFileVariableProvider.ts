@@ -1,5 +1,10 @@
-import { HttpFile } from '../../httpRegion';
+import { HttpFile } from '../../models';
+import {toEnvironmentKey } from '../../utils';
 
-export function httpFileVariableProvider(httpFile: HttpFile) {
-  return Promise.resolve(httpFile.variables);
+export async function httpFileVariableProvider(env: string[] | undefined, httpFile: HttpFile) {
+  const envkey = toEnvironmentKey(env);
+  if (!httpFile.environments[envkey]) {
+    httpFile.environments[envkey] = {};
+  }
+  return httpFile.environments[envkey];
 }

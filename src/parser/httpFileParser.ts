@@ -1,4 +1,4 @@
-import { HttpFile, HttpRegion, HttpSymbolKind, HttpSymbol } from '../httpRegion';
+import { HttpFile, HttpRegion, HttpSymbolKind, HttpSymbol } from '../models';
 import { toMultiLineString, toMultiLineArray} from '../utils';
 import { environmentStore } from '../environments/environmentStore';
 import { httpYacApi } from '../httpYacApi';
@@ -10,8 +10,8 @@ export async function parseHttpFile(text: string, fileName: string): Promise<Htt
     const httpFile: HttpFile = {
       httpRegions: [],
       fileName,
-      variables: {},
-      env: environmentStore.activeEnvironments,
+      environments: {},
+      activeEnvironment: environmentStore.activeEnvironments,
     };
     const lines = toMultiLineArray(text);
     let httpRegion: HttpRegion = initHttpRegion(0);
@@ -63,7 +63,7 @@ function closeHttpRegion(httpRegion: HttpRegion, httpFile: HttpFile) {
     }
   };
   const requestName = httpRegion.symbol.children?.find(obj => obj.kind === HttpSymbolKind.requestLine)?.name || 'global';
-  httpRegion.symbol.name = httpRegion.metaParams.name || requestName;
+  httpRegion.symbol.name = httpRegion.metaData.name || requestName;
   httpRegion.symbol.description = requestName;
   httpFile.httpRegions.push(httpRegion);
 }
@@ -77,7 +77,7 @@ function setSource(httpRegions: Array<HttpRegion>, lines: Array<string>) {
 function initHttpRegion(start: number): HttpRegion {
   return {
     actions: [],
-    metaParams: {},
+    metaData: {},
     symbol: {
       name: '-',
       description: '-',

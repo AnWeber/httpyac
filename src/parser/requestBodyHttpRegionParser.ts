@@ -1,7 +1,6 @@
 
-import { HttpRegion, HttpFile} from '../httpRegion';
+import { HttpRegion, HttpFile, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult } from '../models';
 import { EOL } from 'os';
-import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult } from './httpRegionParser';
 import { toAbsoluteFilename, isString, isMimeTypeMultiPartFormData, isStringEmpty, isMimeTypeNewlineDelimitedJSON, isMimeTypeFormUrlEncoded } from '../utils';
 import { createReadStream, promises as fs } from 'fs';
 import { log } from '../logger';

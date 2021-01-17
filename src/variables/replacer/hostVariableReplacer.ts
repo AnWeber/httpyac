@@ -1,8 +1,7 @@
-import { HttpRegion, HttpFile } from '../../httpRegion';
-import { ReplacerType } from './variableReplacer';
+import { ProcessorContext, VariableReplacerType } from '../../models';
 
-export async function hostVariableReplacer(text: string, type: ReplacerType | string, httpRegion: HttpRegion, httpFile: HttpFile, variables: Record<string, any>) {
-  if (ReplacerType.url === type && !!variables.host) {
+export async function hostVariableReplacer(text: string, type: VariableReplacerType | string, { variables}: ProcessorContext) {
+  if (VariableReplacerType.url === type && !!variables.host) {
     if (text.startsWith("/")) {
       return `${variables.host}${text}`;
     }

@@ -1,4 +1,4 @@
-import { HttpMethod, HttpRequest, HttpResponse, HttpTimings } from '../httpRegion';
+import { HttpMethod, HttpRequest, HttpResponse, HttpTimings } from '../models';
 import { isString } from './stringUtils';
 import { EOL } from 'os';
 

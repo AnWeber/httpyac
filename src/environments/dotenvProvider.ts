@@ -1,5 +1,4 @@
-import { HttpFile } from '../httpRegion';
-import { EnvironmentProvider } from './environmentProvider';
+import { HttpFile, Variables, EnvironmentProvider } from '../models';
 import { dirname,join } from 'path';
 import {promises as fs, watchFile } from 'fs';
 import { parse } from 'dotenv';
@@ -52,17 +51,23 @@ function getFiles(defaultFiles: Array<string>, env: string | undefined) {
 }
 
 export function dotenvVariableProviderFactory(defaultFiles: Array<string> = ['.env']) {
-  return async function (httpFile: HttpFile): Promise<Record<string, any>> {
-    if (httpFile.fileName && httpFile.env) {
-      const files = httpFile.env.map(env => getFiles(defaultFiles, env))
-        .reduce((prev, current) => {
-          for (const item of current) {
-            if (prev.indexOf(item) < 0) {
-              prev.push(item);
+  return async function (env: string[] | undefined, httpFile: HttpFile): Promise<Record<string, any>> {
+
+    if (httpFile.fileName) {
+      const files: Array<string> = [];
+      if (env) {
+        files.push(...env.map(env => getFiles(defaultFiles, env))
+          .reduce((prev, current) => {
+            for (const item of current) {
+              if (prev.indexOf(item) < 0) {
+                prev.push(item);
+              }
             }
-          }
-          return prev;
-        }, []);
+            return prev;
+          }, []));
+      } else {
+        files.push(...getFiles(defaultFiles, env));
+      }
       const { variables } = await parseDotenv(dirname(httpFile.fileName), files);
       return variables;
     }
@@ -70,7 +75,7 @@ export function dotenvVariableProviderFactory(defaultFiles: Array<string> = ['.e
   };
 }
 
-async function parseDotenv(dirname: string, fileNames: Array<string>): Promise<{ variables: Record<string, any>; validFilesNames: Array<string>; }> {
+async function parseDotenv(dirname: string, fileNames: Array<string>): Promise<{ variables: Variables; validFilesNames: Array<string>; }> {
   const vars: Array<Record<string, any>> = [];
   const validFilesNames: Array<string> = [];
   for (const fileName of fileNames) {
