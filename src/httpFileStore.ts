@@ -50,6 +50,7 @@ export class HttpFileStore{
             }
           }
         }
+        httpFileStoreEntry.version = version;
         httpFileStoreEntry.httpFile = httpFile;
       }
       return httpFileStoreEntry.httpFile;

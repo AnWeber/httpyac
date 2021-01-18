@@ -26,13 +26,13 @@ export class MetaHttpRegionParser implements HttpRegionParser{
         if (this.isDelimiter(textLine)) {
           result.newRegion = true;
         } else {
-          const match = /^\s*\#{1,}\s+\@(?<key>[^\s]*)(\s+)?(?<value>[^\s]+)?$/.exec(textLine);
+          const match = /^\s*\#{1,}\s+\@(?<key>[^\s]*)(\s+)?"?(?<value>[^\s]+)?"?$/.exec(textLine);
 
           if (match && match.groups && match.groups.key) {
             const symbol: HttpSymbol = {
               name: match.groups.key,
               description: match.groups.value || '-',
-              kind: HttpSymbolKind.metaParam,
+              kind: HttpSymbolKind.metaData,
               startLine: next.value.line,
               startOffset: 0,
               endLine: next.value.line,
@@ -40,7 +40,7 @@ export class MetaHttpRegionParser implements HttpRegionParser{
               children: [{
                 name: match.groups.key,
                 description: 'key of meta data',
-                kind: HttpSymbolKind.metaParamKey,
+                kind: HttpSymbolKind.metaDataKey,
                 startLine: next.value.line,
                 startOffset: next.value.textLine.indexOf(match.groups.key),
                 endLine: next.value.line,
@@ -51,7 +51,7 @@ export class MetaHttpRegionParser implements HttpRegionParser{
               symbol.children.push({
                 name: match.groups.value,
                 description: 'value of meta data',
-                kind: HttpSymbolKind.metaParamValue,
+                kind: HttpSymbolKind.metaDataValue,
                 startLine: next.value.line,
                 startOffset: next.value.textLine.indexOf(match.groups.value),
                 endLine: next.value.line,

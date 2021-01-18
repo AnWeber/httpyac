@@ -49,7 +49,7 @@ class HttpYacApi {
   @trace()
   async send(httpRegion: HttpRegion, httpFile: HttpFile) {
     const variables = await this.getVariables(httpFile);
-    await sendHttpRegion(httpRegion, httpFile, variables);
+    return await sendHttpRegion(httpRegion, httpFile, variables);
   }
   /**
    * process all httpRegion of HttpFile

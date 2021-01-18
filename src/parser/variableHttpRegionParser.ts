@@ -11,7 +11,7 @@ export class VariableHttpRegionParser implements HttpRegionParser{
     if (!next.done) {
       const textLine = next.value.textLine;
 
-      const match = /^\s*\@(?<key>[^\s]*)\s*(=\s*)?(?<value>.*)\s*$/.exec(textLine);
+      const match = /^\s*\@(?<key>[^\s]*)\s*(=\s*)?"?(?<value>.*)"?\s*$/.exec(textLine);
 
       if (match && match.groups && match.groups.key && match.groups.value) {
         httpRegion.actions.push({
