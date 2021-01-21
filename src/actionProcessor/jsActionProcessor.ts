@@ -33,15 +33,6 @@ export async function executeScript(script: string, fileName: string | undefined
     const dir = dirname(fileName);
     const scriptModule = new Module(fileName, require.main);
 
-    const argsName = ['exports', 'require', 'module', '__filename', '__dirname'];
-    if (variables) {
-      argsName.push(...Object.entries(variables).filter(([key]) => JAVASCRIPT_KEYWORDS.indexOf(key) < 0).map(([key]) => key));
-    }
-
-    const wrappedFunction = `(function userJS(${argsName.join(',')}){${script}})`;
-
-    log.trace(wrappedFunction);
-
     scriptModule.filename = fileName;
     scriptModule.exports = {};
     // see https://github.com/nodejs/node/blob/master/lib/internal/modules/cjs/loader.js#L565-L640
@@ -67,16 +58,13 @@ export async function executeScript(script: string, fileName: string | undefined
     // see https://github.com/nodejs/node/blob/master/lib/internal/modules/cjs/loader.js#L823-L911
     scriptRequire.resolve = (req: any) => (Module as any)._resolveFilename(req, scriptModule);
 
-    const scriptArgs = [scriptModule.exports, scriptRequire, scriptModule, fileName, dir];
-    if (variables) {
-      scriptArgs.push(...Object.entries(variables).filter(([key]) => JAVASCRIPT_KEYWORDS.indexOf(key) < 0).map(([key,value]) => value));
-    }
-    const compiledWrapper = vm.runInThisContext(wrappedFunction, {
+    const wrappedFunction = `(function userJS(exports, require, module, __filename, __dirname){${script}})`;
+    const compiledWrapper = vm.runInNewContext(wrappedFunction, variables, {
       filename: fileName,
       lineOffset,
       displayErrors: true
     });
-    compiledWrapper.apply(variables, scriptArgs);
+    compiledWrapper.apply(variables, [scriptModule.exports, scriptRequire, scriptModule, fileName, dir]);
 
 
     let result = scriptModule.exports;

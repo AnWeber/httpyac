@@ -1,15 +1,10 @@
-import { HttpMethod, HttpResponse } from './models';
+import { HttpClientOptions, HttpResponse } from './models';
 import { getHeader, isString, parseMimeType } from './utils';
 import { default as got, OptionsOfUnknownResponseBody } from 'got';
 import merge from 'lodash/merge';
+import { HttpProxyAgent } from 'http-proxy-agent';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 
-
-export interface HttpClientOptions{
-  method: HttpMethod;
-  headers: Record<string, string | string[] | undefined | null>;
-  body?: string | Buffer;
-}
-export type HttpClient = (url: string, options: HttpClientOptions) => Promise<HttpResponse>;
 
 export function gotHttpClientFactory(defaultsOverride: OptionsOfUnknownResponseBody = {}) {
   return async function gotHttpClient(url: string, clientOptions: HttpClientOptions) {
@@ -18,10 +13,12 @@ export function gotHttpClientFactory(defaultsOverride: OptionsOfUnknownResponseB
       retry: 0,
       throwHttpErrors: false,
     };
+
     const optionList = [
       defaults,
       defaultsOverride,
       clientOptions,
+      initProxy(clientOptions),
     ];
     const options: OptionsOfUnknownResponseBody = merge({}, ...optionList);
 
@@ -44,4 +41,16 @@ export function gotHttpClientFactory(defaultsOverride: OptionsOfUnknownResponseB
     return result;
 
   };
+}
+
+function initProxy(clientOptions: HttpClientOptions): OptionsOfUnknownResponseBody {
+  const options: OptionsOfUnknownResponseBody = {};
+  if (clientOptions.proxy) {
+    options.agent = {
+      http: new HttpProxyAgent(clientOptions.proxy),
+      https: new HttpsProxyAgent(clientOptions.proxy)
+    };
+    delete clientOptions.proxy;
+  }
+  return options;
 }

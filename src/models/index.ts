@@ -1,5 +1,7 @@
 export * from './contentType';
 export * from './environmentProvider';
+export * from './httpClient';
+export * from './httpClientOptions';
 export * from './httpFile';
 export * from './httpMethod';
 export * from './httpRegion';

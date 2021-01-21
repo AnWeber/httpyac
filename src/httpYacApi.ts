@@ -1,9 +1,9 @@
-import { HttpRegion, HttpFile , VariableReplacerType, ProcessorContext, HttpRegionParser} from './models';
+import { HttpRegion, HttpFile , VariableReplacerType, ProcessorContext, HttpRegionParser, HttpClient, VariableReplacer} from './models';
 import * as parser from './parser';
 import { HttpOutputProcessor } from './output/httpOutputProcessor';
 import { provider, replacer } from './variables';
 import { dotenvVariableProviderFactory } from './environments';
-import { HttpClient, gotHttpClientFactory } from './httpClient';
+import { gotHttpClientFactory } from './gotHttpClientFactory';
 import { environmentStore } from './environments/environmentStore';
 import { trace, sendHttpFile, sendHttpRegion } from './utils';
 import { log } from './logger';
@@ -12,7 +12,7 @@ class HttpYacApi {
   readonly httpRegionParsers: Array<HttpRegionParser>;
   readonly httpOutputProcessors: Array<HttpOutputProcessor>;
   readonly variableProviders: Array<provider.VariableProvider>;
-  readonly variableReplacers: Array<replacer.VariableReplacer>;
+  readonly variableReplacers: Array<VariableReplacer>;
 
   readonly additionalRequire: Record<string, any> = {};
 
@@ -37,6 +37,8 @@ class HttpYacApi {
     this.variableReplacers = [
       replacer.intellijVariableReplacer,
       replacer.jsVariableReplacer,
+      replacer.basicAuthVariableReplacer,
+      replacer.digestAuthVariableReplacer,
       replacer.hostVariableReplacer,
     ];
   }
@@ -76,10 +78,12 @@ class HttpYacApi {
     return variables;
   }
 
-  async replaceVariables(text: string, type: VariableReplacerType | string, context: ProcessorContext): Promise<any> {
-    let result = text;
+  async replaceVariables(text: string, type: VariableReplacerType | string, context: ProcessorContext): Promise<string | undefined> {
+    let result: string | undefined = text;
     for (var replacer of this.variableReplacers) {
-      result = await replacer(result,type, context);
+      if (result) {
+        result = await replacer(result, type, context);
+      }
     }
     return result;
   }
