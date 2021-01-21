@@ -10,7 +10,7 @@ interface InternalRefData{
   globalScriptExecution?: boolean;
 }
 
-export async function refMetaHttpRegionActionProcessor(data: RefMetaHttpRegionData & InternalRefData, {httpRegion, httpFile, variables}: ProcessorContext): Promise<boolean> {
+export async function refMetaActionProcessor(data: RefMetaHttpRegionData & InternalRefData, {httpRegion, httpFile, variables}: ProcessorContext): Promise<boolean> {
   for (const refHttpRegion of httpFile.httpRegions) {
     if (refHttpRegion.metaData.name === data.name
       && !refHttpRegion.metaData.disabled
@@ -29,7 +29,7 @@ export async function refMetaHttpRegionActionProcessor(data: RefMetaHttpRegionDa
     for (const httpFileLoader of httpFile.imports) {
       const refHttpFile = await httpFileLoader();
       data.globalScriptExecution = true;
-      await refMetaHttpRegionActionProcessor(data, { httpRegion, httpFile: refHttpFile, variables });
+      await refMetaActionProcessor(data, { httpRegion, httpFile: refHttpFile, variables });
     }
   }
   return true;

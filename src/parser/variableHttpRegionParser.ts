@@ -2,7 +2,7 @@
 
 
 import { HttpRegion, HttpFile, HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult } from '../models';
-import { variableHttpRegionProcessor } from '../actionProcessor';
+import { variableActionProcessor } from '../actionProcessor';
 
 export class VariableHttpRegionParser implements HttpRegionParser{
 
@@ -19,7 +19,7 @@ export class VariableHttpRegionParser implements HttpRegionParser{
             [match.groups.key]: match.groups.value.trim(),
           },
           type: 'variable',
-          processor: variableHttpRegionProcessor
+          processor: variableActionProcessor
         });
         return {
           endLine:next.value.line,

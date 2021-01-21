@@ -4,7 +4,7 @@ import { httpFileStore } from '../httpFileStore';
 import { log } from '../logger';
 import { promises as fs } from 'fs';
 import { toAbsoluteFilename } from '../utils';
-import { refMetaHttpRegionActionProcessor } from '../actionProcessor';
+import { refMetaActionProcessor, jwtActionProcessor } from '../actionProcessor';
 export class MetaHttpRegionParser implements HttpRegionParser{
   static isMetaTag(textLine: string) {
     return /^\s*\#{1,}/.test(textLine);
@@ -88,6 +88,16 @@ export class MetaHttpRegionParser implements HttpRegionParser{
     }
     return false;
   }
+
+  close(httpRegion: HttpRegion): void {
+    if (httpRegion.metaData.jwt) {
+      httpRegion.actions.push({
+        data: httpRegion.metaData.jwt.split(','),
+        type: 'jwt',
+        processor: jwtActionProcessor
+      });
+    }
+  }
 }
 async function importHttpFile(httpFile: HttpFile, fileName: string) {
   try {
@@ -106,7 +116,7 @@ async function importHttpFile(httpFile: HttpFile, fileName: string) {
 function addRefHttpRegion(httpRegion: HttpRegion, name: string, force: boolean) {
   httpRegion.actions.push({
     type: 'ref',
-    processor: refMetaHttpRegionActionProcessor,
+    processor: refMetaActionProcessor,
     data: {
       name,
       force
