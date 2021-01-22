@@ -1,6 +1,6 @@
 import { Variables, ProcessorContext } from '../models';
 import { Module } from 'module';
-import * as vm from 'vm';
+import { runInThisContext} from 'vm';
 import { dirname } from 'path';
 import { log } from '../logger';
 import { isPromise , toEnvironmentKey} from '../utils';
@@ -58,13 +58,15 @@ export async function executeScript(script: string, fileName: string | undefined
     // see https://github.com/nodejs/node/blob/master/lib/internal/modules/cjs/loader.js#L823-L911
     scriptRequire.resolve = (req: any) => (Module as any)._resolveFilename(req, scriptModule);
 
-    const wrappedFunction = `(function userJS(exports, require, module, __filename, __dirname){${script}})`;
-    const compiledWrapper = vm.runInNewContext(wrappedFunction, variables, {
+    const vars = Object.entries(variables).map(([key]) => key).join(', ').trim();
+    const wrappedFunction = `(function userJS(exports, require, module, __filename, __dirname${vars.length > 0 ? `, ${vars}` : ''}){${script}})`;
+
+    const compiledWrapper = runInThisContext(wrappedFunction, {
       filename: fileName,
       lineOffset,
-      displayErrors: true
+      displayErrors: true,
     });
-    compiledWrapper.apply(variables, [scriptModule.exports, scriptRequire, scriptModule, fileName, dir]);
+    compiledWrapper.apply(variables, [scriptModule.exports, scriptRequire, scriptModule, fileName, dir, ...Object.entries(variables).map(([,value]) => value)]);
 
 
     let result = scriptModule.exports;
