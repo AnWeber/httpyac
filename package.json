@@ -4,7 +4,7 @@
 	"license": "MIT",
 	"publisher": "weber.andreas",
 	"description": "HTTP/REST Client for *.http files",
-	"version": "1.2.2",
+	"version": "1.3.0",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/AnWeber/httpyac"
@@ -26,6 +26,7 @@
 	"types": "./dist/index.d.ts",
 	"scripts": {
 		"compile": "webpack --config ./webpack.config.js",
+		"prepare": "npm run compile",
 		"watch": "webpack --watch --config ./webpack.config.js",
 		"lint": "eslint src --ext ts"
 	},

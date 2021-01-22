@@ -1,6 +1,6 @@
 import { Variables, ProcessorContext } from '../models';
 import { Module } from 'module';
-import { runInThisContext} from 'vm';
+import { runInThisContext, runInNewContext} from 'vm';
 import { dirname } from 'path';
 import { log } from '../logger';
 import { isPromise , toEnvironmentKey} from '../utils';
