@@ -1,6 +1,6 @@
 import { EOL } from 'os';
+import { isString } from './stringUtils';
 import { HttpRegion, HttpFile, Variables, ProcessorContext } from '../models';
-import {responseToString, requestToString, timingsToString } from './requestUtils';
 
 export async function sendHttpRegion(httpRegion: HttpRegion, httpFile: HttpFile, variables: Variables) {
   if (!httpRegion.metaData.disabled) {
@@ -41,25 +41,3 @@ export async function processHttpRegionActions(context: ProcessorContext) {
   return true;
 }
 
-
-export function toMarkdown(httpRegion: HttpRegion) {
-
-  const result: Array<string> = [];
-  if (httpRegion.response) {
-    result.push(`${responseToString(httpRegion.response)}
-
----
-### timings
-${timingsToString(httpRegion.response.timings)}
-`);
-
-    if (httpRegion.response.request) {
-      result.push(`
----
-### request
-${requestToString(httpRegion.response.request)}
-        `);
-    }
-  }
-  return result.join(EOL).split(EOL).join(`  ${EOL}`);
-}

@@ -20,30 +20,29 @@ export function getHeader(headers: Record<string, string | string[] | undefined 
   return undefined;
 }
 
-export function headersToArray(headers: Record<string, string | string[] | undefined | null>) {
-  return Object.entries(headers)
-    .map(header => `${header[0]}: ${header.length > 1 ? header[1] : ''}`)
-    .sort();
-}
 
-export function responseToString(response: HttpResponse) {
-  const contents = [`HTTP${response.httpVersion || ''} ${response.statusCode} - ${response.statusMessage}`];
-  contents.push(...headersToArray(response.headers));
-  return contents.join(EOL);
-}
-
-export function timingsToString(timings: HttpTimings) {
-  return Object.entries(timings)
-    .map(timings => `${timings[0].toUpperCase()}: ${timings.length > 1 ? timings[1] : '-'} ms`)
-    .sort().join(EOL);
-}
-export function requestToString(request: HttpRequest) {
-  const contents = [`${request.method} ${request.url}`];
-  contents.push(...headersToArray(request.headers));
-  if (isString(request.body)) {
-    contents.push('');
-    contents.push(request.body);
+export function decodeJWT(str: string) {
+  let jwtComponents = str.split('.');
+  if (jwtComponents.length !== 3) {
+    return;
   }
-  return contents.join(EOL);
-}
+  let payload = jwtComponents[1];
+  payload = payload.replace(/-/g, '+');
+  payload = payload.replace(/_/g, '/');
+  switch (payload.length % 4) {
+    case 0:
+      break;
+    case 2:
+      payload += '==';
+      break;
+    case 3:
+      payload += '=';
+      break;
+    default:
+      return null;
+  }
 
+  const result = decodeURIComponent(escape(Buffer.from(payload, 'base64').toString()));
+
+  return JSON.parse(result);
+}

@@ -92,7 +92,7 @@ export class MetaHttpRegionParser implements HttpRegionParser{
   close(httpRegion: HttpRegion): void {
     if (httpRegion.metaData.jwt) {
       httpRegion.actions.push({
-        data: httpRegion.metaData.jwt.split(','),
+        data: httpRegion.metaData.jwt,
         type: 'jwt',
         processor: jwtActionProcessor
       });
