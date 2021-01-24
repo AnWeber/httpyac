@@ -1,5 +1,5 @@
 
-import { HttpRegion, HttpRequest, HttpFile, HttpSymbol, HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult  } from '../models';
+import { HttpRegion, HttpRequest, HttpSymbol, HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext  } from '../models';
 
 import { isString, isStringEmpty, parseMimeType, isRequestMethod, getHeader } from '../utils';
 import {httpClientActionProcessor  } from '../actionProcessor';
@@ -87,7 +87,7 @@ export class RequestHttpRegionParser implements HttpRegionParser {
     return true;
   }
 
-  async parse(lineReader: HttpRegionParserGenerator, httpRegion: HttpRegion, httpFile: HttpFile): Promise<HttpRegionParserResult> {
+  async parse(lineReader: HttpRegionParserGenerator, { httpRegion }: ParserContext): Promise<HttpRegionParserResult> {
     let next = lineReader.next();
     if (!next.done && this.isValidRequestLine(next.value.textLine, httpRegion)) {
       if (!!httpRegion.request){

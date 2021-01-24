@@ -1,11 +1,10 @@
-import { HttpRegion, HttpFile, HttpRegionParserResult} from '../models';
+import { HttpRegionParserResult} from '../models';
+import { ParserContext } from './parserContext';
 
 export type HttpRegionParserGenerator = Generator<{ textLine: string; line: number; }, void, unknown>;
 
 export interface HttpRegionParser{
-  parse(lineReader: HttpRegionParserGenerator, httpRegion: HttpRegion, httpFile: HttpFile): Promise<HttpRegionParserResult>;
+  parse(lineReader: HttpRegionParserGenerator, context: ParserContext): Promise<HttpRegionParserResult>;
 
-
-  close?(httpRegion: HttpRegion): void;
-  reset?(): void;
+  close?(context: ParserContext): void;
 }

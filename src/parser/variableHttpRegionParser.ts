@@ -1,12 +1,12 @@
 ;
 
 
-import { HttpRegion, HttpFile, HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult } from '../models';
+import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext } from '../models';
 import { variableActionProcessor } from '../actionProcessor';
 
 export class VariableHttpRegionParser implements HttpRegionParser{
 
-  async parse(lineReader: HttpRegionParserGenerator, httpRegion: HttpRegion, httpFile: HttpFile): Promise<HttpRegionParserResult>{
+  async parse(lineReader: HttpRegionParserGenerator, { httpRegion }: ParserContext): Promise<HttpRegionParserResult>{
     const next = lineReader.next();
     if (!next.done) {
       const textLine = next.value.textLine;

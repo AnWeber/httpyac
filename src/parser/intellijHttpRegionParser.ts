@@ -1,11 +1,11 @@
 
-import { HttpRegion, HttpFile, HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult } from '../models';
+import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext } from '../models';
 import { toMultiLineString } from '../utils';
 import { ScriptData, intellijActionProcessor } from '../actionProcessor';
 
 
 export class IntellijHttpRegionParser implements HttpRegionParser{
-  async parse(lineReader: HttpRegionParserGenerator, httpRegion: HttpRegion, httpFile: HttpFile): Promise<HttpRegionParserResult> {
+  async parse(lineReader: HttpRegionParserGenerator, { httpRegion }: ParserContext): Promise<HttpRegionParserResult> {
     if (httpRegion.request) {
       let next = lineReader.next();
 

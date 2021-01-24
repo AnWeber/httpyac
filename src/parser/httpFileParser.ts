@@ -1,4 +1,4 @@
-import { HttpFile, HttpRegion, HttpSymbolKind, HttpSymbol } from '../models';
+import { HttpFile, HttpRegion, HttpSymbolKind, ParserContext } from '../models';
 import { toMultiLineString, toMultiLineArray} from '../utils';
 import { environmentStore } from '../environments/environmentStore';
 import { httpYacApi } from '../httpYacApi';
@@ -6,66 +6,61 @@ import { httpYacApi } from '../httpYacApi';
 
 export async function parseHttpFile(text: string, fileName: string): Promise<HttpFile> {
 
-  try {
-    const httpFile: HttpFile = {
-      httpRegions: [],
-      fileName,
-      environments: {},
-      activeEnvironment: environmentStore.activeEnvironments,
-    };
-    const lines = toMultiLineArray(text);
-    let httpRegion: HttpRegion = initHttpRegion(0);
-    for (let line = 0; line < lines.length; line++) {
-      for (const httpRegionParser of httpYacApi.httpRegionParsers) {
-        const httpRegionParserResult = await httpRegionParser.parse(createReader(line, lines), httpRegion, httpFile);
+  const httpFile: HttpFile = {
+    httpRegions: [],
+    fileName,
+    environments: {},
+    activeEnvironment: environmentStore.activeEnvironments,
+  };
+  const lines = toMultiLineArray(text);
+
+  const parserContext: ParserContext = {
+    httpFile,
+    httpRegion: initHttpRegion(0),
+    data: {}
+  };
+  for (let line = 0; line < lines.length; line++) {
+
+    for (const httpRegionParser of httpYacApi.httpRegionParsers) {
+      const httpRegionParserResult = await httpRegionParser.parse(createReader(line, lines), parserContext);
 
 
-        if (httpRegionParserResult) {
-          if (httpRegionParserResult.newRegion) {
+      if (httpRegionParserResult) {
+        if (httpRegionParserResult.newRegion) {
 
-            httpRegion.symbol.endLine = httpRegionParserResult.endLine;
-            closeHttpRegion(httpRegion, httpFile);
+          parserContext.httpRegion.symbol.endLine = httpRegionParserResult.endLine;
+          closeHttpRegion(parserContext);
 
-            httpRegion = initHttpRegion(httpRegionParserResult.endLine + 1);
-          }
-          if (httpRegionParserResult.symbols) {
-            if (httpRegion.symbol.children) {
-              httpRegion.symbol.children.push(...httpRegionParserResult.symbols);
-            } else {
-              httpRegion.symbol.children = httpRegionParserResult.symbols;
-            }
-          }
-          line = httpRegionParserResult.endLine;
-          break;
+          parserContext.httpRegion = initHttpRegion(httpRegionParserResult.endLine + 1);
         }
-      }
-    }
-    closeHttpRegion(httpRegion, httpFile);
-    httpRegion.symbol.endLine = lines.length - 1;
-
-
-    setSource(httpFile.httpRegions, lines);
-
-    return httpFile;
-  } finally {
-    for (const obj of httpYacApi.httpRegionParsers) {
-      if (obj.reset) {
-        obj.reset();
+        if (httpRegionParserResult.symbols) {
+          if (parserContext.httpRegion.symbol.children) {
+            parserContext.httpRegion.symbol.children.push(...httpRegionParserResult.symbols);
+          } else {
+            parserContext.httpRegion.symbol.children = httpRegionParserResult.symbols;
+          }
+        }
+        line = httpRegionParserResult.endLine;
+        break;
       }
     }
   }
+  closeHttpRegion(parserContext);
+  parserContext.httpRegion.symbol.endLine = lines.length - 1;
+  setSource(httpFile.httpRegions, lines);
+  return httpFile;
 }
 
-function closeHttpRegion(httpRegion: HttpRegion, httpFile: HttpFile) {
+function closeHttpRegion(parserContext: ParserContext) {
   for (const obj of httpYacApi.httpRegionParsers) {
     if (obj.close) {
-      obj.close(httpRegion);
+      obj.close(parserContext);
     }
   };
-  const requestName = httpRegion.symbol.children?.find(obj => obj.kind === HttpSymbolKind.requestLine)?.name || 'global';
-  httpRegion.symbol.name = httpRegion.metaData.name || requestName;
-  httpRegion.symbol.description = requestName;
-  httpFile.httpRegions.push(httpRegion);
+  const requestName = parserContext.httpRegion.symbol.children?.find(obj => obj.kind === HttpSymbolKind.requestLine)?.name || 'global';
+  parserContext.httpRegion.symbol.name = parserContext.httpRegion.metaData.name || requestName;
+  parserContext.httpRegion.symbol.description = requestName;
+  parserContext.httpFile.httpRegions.push(parserContext.httpRegion);
 }
 
 function setSource(httpRegions: Array<HttpRegion>, lines: Array<string>) {

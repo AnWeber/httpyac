@@ -1,5 +1,5 @@
 
-import { HttpRegion, HttpFile, HttpSymbol, HttpSymbolKind,  HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult } from '../models';
+import { HttpRegion, HttpFile, HttpSymbol, HttpSymbolKind,  HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext } from '../models';
 import { httpFileStore } from '../httpFileStore';
 import { log } from '../logger';
 import { promises as fs } from 'fs';
@@ -14,7 +14,7 @@ export class MetaHttpRegionParser implements HttpRegionParser{
     return /^\#{3,}\s*$/.test(textLine);
   }
 
-  async parse(lineReader: HttpRegionParserGenerator, httpRegion: HttpRegion, httpFile: HttpFile): Promise<HttpRegionParserResult>{
+  async parse(lineReader: HttpRegionParserGenerator, { httpRegion, httpFile }: ParserContext): Promise<HttpRegionParserResult>{
     const next = lineReader.next();
     if (!next.done) {
       const textLine = next.value.textLine;
@@ -89,7 +89,7 @@ export class MetaHttpRegionParser implements HttpRegionParser{
     return false;
   }
 
-  close(httpRegion: HttpRegion): void {
+  close({ httpRegion }: ParserContext): void {
     if (httpRegion.metaData.jwt) {
       httpRegion.actions.push({
         data: httpRegion.metaData.jwt,
