@@ -32,7 +32,7 @@ export async function intellijActionProcessor(scriptData: ScriptData, {httpRegio
     client,
     response,
   };
-  await executeScript(scriptData.script, httpFile.fileName, intellijVars, scriptData.lineOffset + 1);
+  await executeScript({ script: scriptData.script, fileName: httpFile.fileName, variables: intellijVars, lineOffset: scriptData.lineOffset + 1 });
   return true;
 }
 

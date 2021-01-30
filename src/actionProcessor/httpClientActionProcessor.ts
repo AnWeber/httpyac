@@ -8,18 +8,23 @@ import merge from 'lodash/merge';
 const encodeUrl = require('encodeurl');
 
 
-export async function httpClientActionProcessor(data: unknown, {httpRegion, httpFile, variables}: ProcessorContext): Promise<boolean> {
+export async function httpClientActionProcessor(data: unknown, {httpRegion, httpFile, variables, progress}: ProcessorContext): Promise<boolean> {
   if (httpRegion.request) {
     const request = await replaceVariablesInRequest(httpRegion.request, {httpRegion, httpFile, variables});
     const options: HttpClientOptions = await initOptions(request, httpRegion.metaData.proxy);
-    request.url = encodeUrl(request.url);
+
     try {
-      log.debug('request', request.url, options);
-      const response = await httpYacApi.httpClient(request.url, options);
-      response.request = request;
-      httpRegion.response = response;
-      setResponseAsVariable(httpRegion, variables, httpFile);
-      log.trace('response', httpRegion.response);
+      log.debug('request', options);
+
+      const response = await httpYacApi.httpClient(options, progress);
+      if (response) {
+        response.request = request;
+        httpRegion.response = response;
+        setResponseAsVariable(httpRegion, variables, httpFile);
+        log.trace('response', httpRegion.response);
+      } else {
+        return false;
+      }
     } catch (err) {
       log.error(httpRegion.request.url, options, err);
       throw err;
@@ -50,6 +55,7 @@ function setResponseAsVariable(httpRegion: HttpRegion<any>, variables: Record<st
 
 async function initOptions(request: HttpRequest<any>, proxy: string | undefined) {
   const options: HttpClientOptions = merge({
+    url: encodeUrl(request.url),
     headers: request.headers,
     method: request.method,
     body: await normalizeBody(request.body),

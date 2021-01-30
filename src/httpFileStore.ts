@@ -1,5 +1,4 @@
 import { HttpFile } from './models';
-import { trace } from './utils';
 import { parseHttpFile } from './parser';
 import { log } from './logger';
 
@@ -33,7 +32,6 @@ export class HttpFileStore{
   getAll() {
     return this.storeCache.map(obj => obj.httpFile);
   }
-  @trace()
   async getOrCreate(fileName: string, getText: () => Promise<string>, version: number): Promise<HttpFile> {
     try {
       const httpFileStoreEntry: HttpFileStoreEntry = this.getFromStore(fileName, version);

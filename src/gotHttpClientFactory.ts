@@ -1,45 +1,80 @@
-import { HttpClientOptions, HttpResponse } from './models';
+import { HttpClientOptions, HttpResponse, Progress } from './models';
 import { getHeader, isString, parseMimeType } from './utils';
-import { default as got, OptionsOfUnknownResponseBody } from 'got';
+import { default as got, OptionsOfUnknownResponseBody, CancelError } from 'got';
 import merge from 'lodash/merge';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 
 
 export function gotHttpClientFactory(defaultsOverride: OptionsOfUnknownResponseBody = {}) {
-  return async function gotHttpClient(url: string, clientOptions: HttpClientOptions) {
-    const defaults: OptionsOfUnknownResponseBody = {
-      decompress: true,
-      retry: 0,
-      throwHttpErrors: false,
-    };
+  return async function gotHttpClient(clientOptions: HttpClientOptions, progress: Progress |undefined) {
+    try {
+      const defaults: OptionsOfUnknownResponseBody = {
+        decompress: true,
+        retry: 0,
+        throwHttpErrors: false,
+        http2: true,
+      };
 
-    const optionList = [
-      defaults,
-      defaultsOverride,
-      clientOptions,
-      initProxy(clientOptions),
-    ];
-    const options: OptionsOfUnknownResponseBody = merge({}, ...optionList);
+      const url = clientOptions.url;
+      const optionList = [
+        defaults,
+        defaultsOverride,
+        clientOptions,
+        initProxy(clientOptions),
+      ];
+      const options: OptionsOfUnknownResponseBody = merge({}, ...optionList);
 
-    const response = await got(url, options);
+      delete options.url;
 
-    const result: HttpResponse = {
-      statusCode: response.statusCode,
-      statusMessage: response.statusMessage,
-      body: response.body,
-      rawBody: response.rawBody,
-      headers: response.headers,
-      timings: response.timings.phases,
-      httpVersion: response.httpVersion,
-    };
+      const responsePromise = got(url, options);
 
-    const contentType = getHeader(response.headers, 'content-type');
-    if (isString(contentType)) {
-      result.contentType = parseMimeType(contentType);
+      let dispose: (() => void) | undefined;
+      let prevPercent = 0;
+      if (progress) {
+        if (progress.showProgressBar) {
+          responsePromise.on("downloadProgress", data => {
+            const newData = data.percent - prevPercent;
+            prevPercent = data.percent;
+            progress.report({
+              message: url,
+              increment: newData * 100,
+            });
+          });
+        }
+        dispose = progress.register(() => {
+          responsePromise.cancel();
+        });
+      }
+      const response = await responsePromise;
+
+      if (dispose) {
+        dispose();
+      }
+      const result: HttpResponse = {
+        statusCode: response.statusCode,
+        statusMessage: response.statusMessage,
+        body: response.body,
+        rawBody: response.rawBody,
+        headers: response.headers,
+        timings: response.timings.phases,
+        httpVersion: response.httpVersion,
+        ip: response.ip,
+        redirectUrls: response.redirectUrls
+      };
+
+      const contentType = getHeader(response.headers, 'content-type');
+      if (isString(contentType)) {
+        result.contentType = parseMimeType(contentType);
+      }
+      return result;
+
+    } catch (err) {
+      if (err instanceof CancelError) {
+        return false;
+      }
+      throw err;
     }
-    return result;
-
   };
 }
 

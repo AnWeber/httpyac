@@ -1,12 +1,10 @@
-import { HttpRegion, HttpFile , VariableReplacerType, ProcessorContext, HttpRegionParser, HttpClient, VariableReplacer} from './models';
+import { VariableReplacerType, HttpFileSendContext, HttpRegionSendContext, HttpRegionParser, HttpClient, VariableReplacer, HttpFile, HttpRegion, ProcessorContext} from './models';
 import * as parser from './parser';
 import { HttpOutputProcessor } from './output/httpOutputProcessor';
 import { provider, replacer } from './variables';
 import { dotenvVariableProviderFactory } from './environments';
 import { gotHttpClientFactory } from './gotHttpClientFactory';
-import { environmentStore } from './environments/environmentStore';
-import { trace, sendHttpFile, sendHttpRegion } from './utils';
-import { log } from './logger';
+import { sendHttpFile, sendHttpRegion, isHttpRegionSendContext } from './utils';
 
 class HttpYacApi {
   readonly httpRegionParsers: Array<HttpRegionParser>;
@@ -44,39 +42,19 @@ class HttpYacApi {
   }
 
 
+
   /**
    * process one httpRegion of HttpFile
    * @param httpFile httpFile
    */
-  @trace()
-  async send(httpRegion: HttpRegion, httpFile: HttpFile) {
-    const variables = await this.getVariables(httpFile);
-    return await sendHttpRegion(httpRegion, httpFile, variables);
+  async send(context: HttpFileSendContext | HttpRegionSendContext) {
+    if (isHttpRegionSendContext(context)) {
+      return await sendHttpRegion(context);
+    } else {
+      return await sendHttpFile(context);
+    }
   }
-  /**
-   * process all httpRegion of HttpFile
-   * @param httpFile httpFile
-   */
-  @trace()
-  async sendAll(httpFile: HttpFile) {
-    const variables = await this.getVariables(httpFile);
-    await sendHttpFile(httpFile, variables);
-  }
-  @trace()
-  private async getVariables(httpFile: HttpFile): Promise<Record<string, any>> {
-    const variables = Object.assign({
-      log,
-    },
-      (await environmentStore.getVariables(httpFile.activeEnvironment)),
-      ...(await Promise.all(
-          httpYacApi.variableProviders
-            .map(variableProvider => variableProvider(httpFile.activeEnvironment, httpFile)
-            )
-      ))
-    );
-    log.trace(variables);
-    return variables;
-  }
+
 
   async replaceVariables(text: string, type: VariableReplacerType | string, context: ProcessorContext): Promise<string | undefined> {
     let result: string | undefined = text;
@@ -93,7 +71,6 @@ class HttpYacApi {
    * @param httpRegion httpRegion
    * @param httpFile httpFile
    */
-  @trace()
   public async show(httpRegion: HttpRegion<unknown>, httpFile: HttpFile) {
     await Promise.all(this.httpOutputProcessors.map(outputProcessor => outputProcessor(httpRegion, httpFile)));
   }

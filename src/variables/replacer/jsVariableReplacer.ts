@@ -2,7 +2,7 @@ import { EOL } from 'os';
 import { ProcessorContext } from '../../models';
 import { executeScript } from '../../actionProcessor';
 
-export async function jsVariableReplacer(text: string, type: string, {httpRegion, httpFile, variables}: ProcessorContext) {
+export async function jsVariableReplacer(text: string, type: string, {httpRegion, httpFile, variables, progress}: ProcessorContext) {
   const variableRegex = /\{{2}(.+?)\}{2}/g;
   let match: RegExpExecArray | null;
   let result = text;
@@ -17,7 +17,15 @@ export async function jsVariableReplacer(text: string, type: string, {httpRegion
         lineOffset = httpRegion.symbol.startLine + index;
       }
     }
-    const value = await executeScript(script, httpFile.fileName, variables, lineOffset);
+    const value = await executeScript({
+      script,
+      fileName: httpFile.fileName,
+      variables,
+      lineOffset,
+      require: {
+        progress
+      }
+    });
     if (value.$result) {
       result = result.replace(match[0], `${value.$result}`);
     }

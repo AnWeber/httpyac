@@ -12,4 +12,6 @@ export interface HttpResponse<T = unknown>{
   body: T;
   rawBody: Buffer;
   request?: HttpRequest;
+  ip?: string;
+  redirectUrls?: Array<string>
 }

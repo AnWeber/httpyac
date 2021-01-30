@@ -10,26 +10,29 @@ interface InternalRefData{
   globalScriptExecution?: boolean;
 }
 
-export async function refMetaActionProcessor(data: RefMetaHttpRegionData & InternalRefData, {httpRegion, httpFile, variables}: ProcessorContext): Promise<boolean> {
-  for (const refHttpRegion of httpFile.httpRegions) {
+export async function refMetaActionProcessor(data: RefMetaHttpRegionData & InternalRefData, context: ProcessorContext): Promise<boolean> {
+  for (const refHttpRegion of context.httpFile.httpRegions) {
     if (refHttpRegion.metaData.name === data.name
       && !refHttpRegion.metaData.disabled
-      && refHttpRegion !== httpRegion) {
+      && refHttpRegion !== context.httpRegion) {
       if (data.force || !refHttpRegion.response) {
-        if (!data.globalScriptExecution || await executeGlobalScripts(httpFile, variables)) {
+        if (!data.globalScriptExecution || await executeGlobalScripts(context.httpFile, context.variables)) {
           delete data.globalScriptExecution;
-          if (await processHttpRegionActions({ httpRegion: refHttpRegion, httpFile, variables })) {
+
+          const refContext = { ...context, httpRegion: refHttpRegion };
+          if (await processHttpRegionActions(refContext)) {
             return true;
           }
         }
       }
     }
   }
-  if (httpFile.imports) {
-    for (const httpFileLoader of httpFile.imports) {
+  if (context.httpFile.imports) {
+    for (const httpFileLoader of context.httpFile.imports) {
       const refHttpFile = await httpFileLoader();
       data.globalScriptExecution = true;
-      await refMetaActionProcessor(data, { httpRegion, httpFile: refHttpFile, variables });
+      const fileContext = { ...context, httpFile: refHttpFile };
+      await refMetaActionProcessor(data, fileContext);
     }
   }
   return true;

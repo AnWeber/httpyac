@@ -1,4 +1,4 @@
-import { trace, ENVIRONMENT_NONE } from '../utils';
+import { ENVIRONMENT_NONE } from '../utils';
 import { Variables, EnvironmentProvider } from '../models';
 
 class EnvironmentStore{
@@ -12,7 +12,6 @@ class EnvironmentStore{
     this.environments = {};
   }
 
-  @trace()
   async getVariables(environments: string[] | undefined): Promise<Record<string, any>> {
     const result: Array<Variables> = [];
 
@@ -38,7 +37,6 @@ class EnvironmentStore{
     return Object.assign({}, ...result);
   }
 
-  @trace()
   async getEnviroments(): Promise<Array<string> | null> {
     const result = await Promise.all(this.environmentProviders.map(obj => obj.getEnvironments()));
     if (result && result.length > 0) {

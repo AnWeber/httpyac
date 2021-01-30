@@ -16,9 +16,22 @@ export interface ScriptData{
 
 export const JAVASCRIPT_KEYWORDS = ['await', 'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'else', 'enum', 'export', 'extends', 'false', 'finally', 'for', 'function', 'if', 'implements', 'import', 'in', 'instanceof', 'interface', 'let', 'new', 'null', 'package', 'private', 'protected', 'public', 'return', 'super', 'switch', 'static', 'this', 'throw', 'try', 'true', 'typeof', 'var', 'void', 'while', 'with', 'yield'];
 
-export async function jsActionProcessor(scriptData: ScriptData, {httpRegion, httpFile, variables}: ProcessorContext) {
+export async function jsActionProcessor(scriptData: ScriptData, { httpRegion, httpFile, variables, progress }: ProcessorContext) {
   variables.httpRegion = httpRegion;
-  let result = await executeScript(scriptData.script, httpFile.fileName, variables, scriptData.lineOffset + 1);
+  variables.httpFile = httpFile;
+
+  let result = await executeScript({
+    script: scriptData.script,
+    fileName: httpFile.fileName,
+    variables,
+    lineOffset: scriptData.lineOffset + 1,
+    require: {
+      progress,
+    }
+  });
+  delete variables.httpRegion;
+  delete variables.httpFile;
+
   if (result) {
     Object.assign(variables, result);
     Object.assign(httpFile.environments[toEnvironmentKey(httpFile.activeEnvironment)], result);
@@ -27,13 +40,13 @@ export async function jsActionProcessor(scriptData: ScriptData, {httpRegion, htt
 }
 
 
-export async function executeScript(script: string, fileName: string | undefined, variables: Variables, lineOffset:number) {
+export async function executeScript(context: { script: string, fileName: string | undefined, variables: Variables, lineOffset: number, require?: Record<string, any>}) {
   try {
-    fileName = fileName || __filename;
-    const dir = dirname(fileName);
-    const scriptModule = new Module(fileName, require.main);
+    const filename = context.fileName || __filename;
+    const dir = dirname(filename);
+    const scriptModule = new Module(filename, require.main);
 
-    scriptModule.filename = fileName;
+    scriptModule.filename = filename;
     scriptModule.exports = {};
     // see https://github.com/nodejs/node/blob/master/lib/internal/modules/cjs/loader.js#L565-L640
     scriptModule.paths = (Module as any)._nodeModulePaths(dir);
@@ -48,6 +61,7 @@ export async function executeScript(script: string, fileName: string | undefined
           httpYacApi,
           environmentStore,
           httpFileStore,
+          ...context.require || {},
         };
       }
       if (httpYacApi.additionalRequire[id]) {
@@ -58,15 +72,15 @@ export async function executeScript(script: string, fileName: string | undefined
     // see https://github.com/nodejs/node/blob/master/lib/internal/modules/cjs/loader.js#L823-L911
     scriptRequire.resolve = (req: any) => (Module as any)._resolveFilename(req, scriptModule);
 
-    const vars = Object.entries(variables).map(([key]) => key).join(', ').trim();
-    const wrappedFunction = `(function userJS(exports, require, module, __filename, __dirname${vars.length > 0 ? `, ${vars}` : ''}){${script}})`;
+    const vars = Object.entries(context.variables).map(([key]) => key).join(', ').trim();
+    const wrappedFunction = `(function userJS(exports, require, module, __filename, __dirname${vars.length > 0 ? `, ${vars}` : ''}){${context.script}})`;
 
     const compiledWrapper = runInThisContext(wrappedFunction, {
-      filename: fileName,
-      lineOffset,
+      filename,
+      lineOffset: context.lineOffset,
       displayErrors: true,
     });
-    compiledWrapper.apply(variables, [scriptModule.exports, scriptRequire, scriptModule, fileName, dir, ...Object.entries(variables).map(([,value]) => value)]);
+    compiledWrapper.apply(context.variables, [scriptModule.exports, scriptRequire, scriptModule, filename, dir, ...Object.entries(context.variables).map(([,value]) => value)]);
 
 
     let result = scriptModule.exports;
@@ -81,7 +95,7 @@ export async function executeScript(script: string, fileName: string | undefined
     }
     return result;
   } catch (err) {
-    log.error(script, err);
+    log.error(context.script, err);
     throw err;
   }
 }
