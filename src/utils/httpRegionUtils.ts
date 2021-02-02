@@ -41,8 +41,7 @@ async function getVariables(httpFile: HttpFile): Promise<Record<string, any>> {
     (await environmentStore.getVariables(httpFile.activeEnvironment)),
     ...(await Promise.all(
         httpYacApi.variableProviders
-          .map(variableProvider => variableProvider(httpFile.activeEnvironment, httpFile)
-          )
+          .map(variableProvider => variableProvider.getVariables(httpFile.activeEnvironment, httpFile))
     ))
   );
   log.trace(variables);

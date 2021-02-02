@@ -1,20 +1,23 @@
-import { HttpFile, Variables } from '../../models';
+import { HttpFile, VariableProvider, Variables } from '../../models';
 import {toEnvironmentKey } from '../../utils';
 
-export async function httpFileImportsVariableProvider(env: string[] | undefined,httpFile: HttpFile) {
+export class HttpFileImportsVariableProvider implements VariableProvider {
 
-  const envkey = toEnvironmentKey(env);
+  async getVariables(env: string[] | undefined, httpFile: HttpFile) {
 
-  if (httpFile.imports) {
-    const variables: Array<Variables> = [];
-    for (const httpFileLoader of httpFile.imports) {
-      const refHttpFile = await httpFileLoader();
-      if (!refHttpFile.environments[envkey]) {
-        refHttpFile.environments[envkey] = {};
+    const envkey = toEnvironmentKey(env);
+
+    if (httpFile.imports) {
+      const variables: Array<Variables> = [];
+      for (const httpFileLoader of httpFile.imports) {
+        const refHttpFile = await httpFileLoader();
+        if (!refHttpFile.environments[envkey]) {
+          refHttpFile.environments[envkey] = {};
+        }
+        variables.push(refHttpFile.environments[envkey]);
       }
-      variables.push(refHttpFile.environments[envkey]);
+      return Object.assign({}, ...variables);
     }
-    return Object.assign({},...variables);
+    return {};
   }
-  return {};
 }

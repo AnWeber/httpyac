@@ -1,3 +1,3 @@
-export * from '../../models/variableProvider';
+export * from './envVariableProvider';
 export * from './httpFileVariableProvider';
 export * from './httpFileImportsVariableProvider';

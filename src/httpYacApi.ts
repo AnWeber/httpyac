@@ -1,15 +1,14 @@
-import { VariableReplacerType, HttpFileSendContext, HttpRegionSendContext, HttpRegionParser, HttpClient, VariableReplacer, HttpFile, HttpRegion, ProcessorContext} from './models';
+import { VariableReplacerType, HttpFileSendContext, HttpRegionSendContext, HttpRegionParser, HttpClient, VariableReplacer, HttpFile, HttpRegion, ProcessorContext, VariableProvider} from './models';
 import * as parser from './parser';
 import { HttpOutputProcessor } from './output/httpOutputProcessor';
 import { provider, replacer } from './variables';
-import { dotenvVariableProviderFactory } from './environments';
 import { gotHttpClientFactory } from './gotHttpClientFactory';
 import { sendHttpFile, sendHttpRegion, isHttpRegionSendContext } from './utils';
 
 class HttpYacApi {
   readonly httpRegionParsers: Array<HttpRegionParser>;
   readonly httpOutputProcessors: Array<HttpOutputProcessor>;
-  readonly variableProviders: Array<provider.VariableProvider>;
+  readonly variableProviders: Array<VariableProvider>;
   readonly variableReplacers: Array<VariableReplacer>;
 
   readonly additionalRequire: Record<string, any> = {};
@@ -27,9 +26,8 @@ class HttpYacApi {
 
     this.httpOutputProcessors = [];
     this.variableProviders = [
-      dotenvVariableProviderFactory(),
-      provider.httpFileImportsVariableProvider,
-      provider.httpFileVariableProvider,
+      new provider.HttpFileImportsVariableProvider(),
+      new provider.HttpFileVariableProvider(),
     ];
 
     this.variableReplacers = [

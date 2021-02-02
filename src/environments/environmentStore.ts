@@ -1,5 +1,6 @@
 import { ENVIRONMENT_NONE } from '../utils';
-import { Variables, EnvironmentProvider } from '../models';
+import { Variables, EnvironmentProvider, HttpFile } from '../models';
+import {httpYacApi} from '../httpYacApi';
 
 class EnvironmentStore{
   activeEnvironments: Array<string>| undefined;
@@ -8,8 +9,18 @@ class EnvironmentStore{
   private environments: Record<string, Variables> = {};
 
 
-  async refresh() {
+  async reset() {
     this.environments = {};
+    for (const variableProvider of httpYacApi.variableProviders) {
+      if (variableProvider.reset) {
+        variableProvider.reset();
+      }
+    }
+    for (const envProvider of this.environmentProviders) {
+      if (envProvider.reset) {
+        envProvider.reset();
+      }
+    }
   }
 
   async getVariables(environments: string[] | undefined): Promise<Record<string, any>> {
@@ -37,8 +48,17 @@ class EnvironmentStore{
     return Object.assign({}, ...result);
   }
 
-  async getEnviroments(): Promise<Array<string> | null> {
+  async getEnviroments(httpFile: HttpFile | undefined): Promise<Array<string> | null> {
     const result = await Promise.all(this.environmentProviders.map(obj => obj.getEnvironments()));
+
+    if (httpFile) {
+      for (const variableProvider of httpYacApi.variableProviders) {
+        if (variableProvider.getEnvironments) {
+          result.push(await variableProvider.getEnvironments(httpFile));
+        }
+      }
+    }
+
     if (result && result.length > 0) {
       return result.reduce((prev, current) => {
         for (const env of current) {
