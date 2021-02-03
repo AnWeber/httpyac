@@ -1,6 +1,6 @@
-import { EOL } from 'os';
 import { ProcessorContext } from '../../models';
 import { executeScript } from '../../actionProcessor';
+import { toMultiLineArray } from '../../utils';
 
 export async function jsVariableReplacer(text: string, type: string, {httpRegion, httpFile, variables, progress}: ProcessorContext) {
   const variableRegex = /\{{2}(.+?)\}{2}/g;
@@ -12,7 +12,7 @@ export async function jsVariableReplacer(text: string, type: string, {httpRegion
 
     let lineOffset = httpRegion.symbol.startLine;
     if (httpRegion.source) {
-      const index = httpRegion.source.split(EOL).findIndex(line => line.indexOf(searchValue) >= 0);
+      const index = toMultiLineArray(httpRegion.source).findIndex(line => line.indexOf(searchValue) >= 0);
       if (index >= 0) {
         lineOffset = httpRegion.symbol.startLine + index;
       }

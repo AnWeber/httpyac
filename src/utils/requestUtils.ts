@@ -1,6 +1,5 @@
-import { HttpMethod, HttpRequest, HttpResponse, HttpTimings } from '../models';
-import { isString } from './stringUtils';
-import { EOL } from 'os';
+import { HttpMethod } from '../models';
+
 
 export function isRequestMethod(method: string | undefined): method is HttpMethod {
   if (method) {

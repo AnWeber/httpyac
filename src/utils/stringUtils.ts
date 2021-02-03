@@ -5,7 +5,7 @@ export function toMultiLineString(lines: Array<string>) {
 }
 
 export function toMultiLineArray(text: string) {
-  return text.split(EOL);
+  return text.split(/\r?\n/g);
 }
 
 export function isString(text: any): text is string{
