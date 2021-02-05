@@ -1,5 +1,5 @@
 import {ProcessorContext, HttpRequest, VariableReplacerType , HttpClientOptions, HttpFile, HttpRegion} from '../models';
-import { isString, isMimeTypeFormUrlEncoded , isMimeTypeJSON, toEnvironmentKey} from '../utils';
+import { isString, isMimeTypeFormUrlEncoded , isMimeTypeJSON, toEnvironmentKey , toConsoleOutput} from '../utils';
 import { httpYacApi } from '../httpYacApi';
 import { log } from '../logger';
 import { JAVASCRIPT_KEYWORDS } from './jsActionProcessor';
@@ -21,7 +21,7 @@ export async function httpClientActionProcessor(data: unknown, {httpRegion, http
         response.request = request;
         httpRegion.response = response;
         setResponseAsVariable(httpRegion, variables, httpFile);
-        log.trace('response', httpRegion.response);
+        log.info(toConsoleOutput(httpRegion.response));
       } else {
         return false;
       }
@@ -43,7 +43,7 @@ function setResponseAsVariable(httpRegion: HttpRegion<any>, variables: Record<st
         try {
           body = JSON.parse(httpRegion.response.body);
         } catch (err) {
-          log.debug('json parse error', body, err);
+          log.warn('json parse error', body, err);
         }
       }
 

@@ -4,6 +4,7 @@ import { default as got, OptionsOfUnknownResponseBody, CancelError } from 'got';
 import merge from 'lodash/merge';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
+import { default as filesize } from 'filesize';
 
 
 export function gotHttpClientFactory(defaultsOverride: OptionsOfUnknownResponseBody = {}) {
@@ -59,8 +60,11 @@ export function gotHttpClientFactory(defaultsOverride: OptionsOfUnknownResponseB
         headers: response.headers,
         timings: response.timings.phases,
         httpVersion: response.httpVersion,
-        ip: response.ip,
-        redirectUrls: response.redirectUrls
+        meta: {
+          ip: response.ip,
+          redirectUrls: response.redirectUrls,
+          size: filesize(response.rawHeaders.map(obj => obj.length).reduce((size, current) => size + current, 0) + response.rawBody.length),
+        }
       };
 
       const contentType = getHeader(response.headers, 'content-type');

@@ -17,7 +17,7 @@ export async function toAbsoluteFilename(fileName: string, baseName: string, isF
       return absolute;
     }
   } catch (err) {
-    log.debug(fileName, err);
+    log.trace(fileName, err);
   }
   return undefined;
 }

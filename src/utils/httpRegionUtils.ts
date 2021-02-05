@@ -2,7 +2,8 @@
 import { environmentStore } from '../environments';
 import { httpYacApi } from '../httpYacApi';
 import { log } from '../logger';
-import { HttpFileSendContext, HttpRegionSendContext, ProcessorContext, HttpFile, Variables } from '../models';
+import { HttpFileSendContext, HttpRegionSendContext, ProcessorContext, HttpFile, Variables, HttpResponse } from '../models';
+import {toMultiLineString } from './stringUtils';
 
 export async function sendHttpRegion(context: HttpRegionSendContext) {
   const variables = await getVariables(context.httpFile);
@@ -44,7 +45,7 @@ async function getVariables(httpFile: HttpFile): Promise<Record<string, any>> {
           .map(variableProvider => variableProvider.getVariables(httpFile.activeEnvironment, httpFile))
     ))
   );
-  log.trace(variables);
+  log.debug(variables);
   return variables;
 }
 
@@ -69,4 +70,39 @@ export async function processHttpRegionActions(context: ProcessorContext, showPr
 
 export function isHttpRegionSendContext(context: any): context is HttpRegionSendContext{
   return !!context.httpRegion;
+}
+
+
+export function toConsoleOutput(response: HttpResponse) {
+
+  const result: Array<string> = [];
+  result.push(`HTTP${response.httpVersion || ''} ${response.statusCode} - ${response.statusMessage}`);
+
+  result.push('');
+  result.push(...Object.entries(response.headers)
+    .filter(([key]) => !key.startsWith(':'))
+    .map(([key, value]) => `${key}: ${value}`)
+    .sort()
+  );
+
+  if (response.request) {
+
+    if (!!response.meta) {
+      result.push('');
+      result.push('------');
+      result.push('');
+
+      for (const [key, value] of Object.entries(response.meta)) {
+        if (Array.isArray(value)) {
+          if (value.length > 0) {
+            result.push(`${key}: ${value.join(',')}`);
+          }
+        } else {
+          result.push(`${key}: ${value}`);
+        }
+
+      }
+    }
+  }
+  return toMultiLineString(result);
 }
