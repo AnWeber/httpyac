@@ -22,7 +22,7 @@ export async function parseHttpFile(text: string, fileName: string): Promise<Htt
   for (let line = 0; line < lines.length; line++) {
 
     for (const httpRegionParser of httpYacApi.httpRegionParsers) {
-      const httpRegionParserResult = await httpRegionParser.parse(createReader(line, lines), parserContext);
+      const httpRegionParserResult = await httpRegionParser.parse(createReader(line, lines, !!httpRegionParser.noStopOnMetaTag), parserContext);
 
 
       if (httpRegionParserResult) {
@@ -85,16 +85,18 @@ function initHttpRegion(start: number): HttpRegion {
   };
 }
 
-function* createReader(startLine: number, lines: Array<string>) {
+function* createReader(startLine: number, lines: Array<string>, noStopOnMetaTag: boolean) {
   for (let line = startLine; line < lines.length; line++) {
     const textLine = lines[line];
     yield {
       textLine,
       line
     };
-    // if parser region is not closed stop at delimiter
-    if ( /^\s*\#{3,}/.test(textLine)) {
-      break;
+    if (!noStopOnMetaTag) {
+      // if parser region is not closed stop at delimiter
+      if (/^\s*\#{3,}/.test(textLine)) {
+        break;
+      }
     }
   }
 }

@@ -1,3 +1,4 @@
+export * from './commentHttpRegionParser';
 export * from './httpFileParser';
 export * from './intellijHttpRegionParser';
 export * from './intellijFileHttpRegionParser';

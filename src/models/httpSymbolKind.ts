@@ -13,4 +13,5 @@ export enum HttpSymbolKind{
   variable = "variable",
   variableName = "variableName",
   varialbeValue = "varialbeValue",
+  commnet = "commnet",
 }
