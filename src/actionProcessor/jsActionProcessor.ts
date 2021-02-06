@@ -16,6 +16,19 @@ export interface ScriptData{
 
 export const JAVASCRIPT_KEYWORDS = ['await', 'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'else', 'enum', 'export', 'extends', 'false', 'finally', 'for', 'function', 'if', 'implements', 'import', 'in', 'instanceof', 'interface', 'let', 'new', 'null', 'package', 'private', 'protected', 'public', 'return', 'super', 'switch', 'static', 'this', 'throw', 'try', 'true', 'typeof', 'var', 'void', 'while', 'with', 'yield'];
 
+
+export function isValidVariableName(name: string) {
+  if (JAVASCRIPT_KEYWORDS.indexOf(name) <= 0) {
+    try {
+      Function(`var ${name}`);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  return false;
+}
+
 export async function jsActionProcessor(scriptData: ScriptData, { httpRegion, httpFile, variables, progress }: ProcessorContext) {
   variables.httpRegion = httpRegion;
   variables.httpFile = httpFile;

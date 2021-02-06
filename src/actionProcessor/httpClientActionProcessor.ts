@@ -2,7 +2,7 @@ import {ProcessorContext, HttpRequest, VariableReplacerType , HttpClientOptions,
 import { isString, isMimeTypeFormUrlEncoded , isMimeTypeJSON, toEnvironmentKey , toConsoleOutput} from '../utils';
 import { httpYacApi } from '../httpYacApi';
 import { log } from '../logger';
-import { JAVASCRIPT_KEYWORDS } from './jsActionProcessor';
+import { isValidVariableName } from './jsActionProcessor';
 import cloneDeep = require('lodash/cloneDeep');
 import merge from 'lodash/merge';
 const encodeUrl = require('encodeurl');
@@ -35,9 +35,7 @@ export async function httpClientActionProcessor(data: unknown, {httpRegion, http
 
 function setResponseAsVariable(httpRegion: HttpRegion<any>, variables: Record<string, any>, httpFile: HttpFile) {
   if (httpRegion.metaData.name && httpRegion.response) {
-    if (JAVASCRIPT_KEYWORDS.indexOf(httpRegion.metaData.name) >= 0) {
-      throw new Error(`Javascript Keyword ${httpRegion.metaData.name} not allowed as name`);
-    } else {
+    if (isValidVariableName(httpRegion.metaData.name)) {
       let body = httpRegion.response.body;
       if (isMimeTypeJSON(httpRegion.response.contentType) && isString(httpRegion.response.body)) {
         try {
@@ -49,6 +47,8 @@ function setResponseAsVariable(httpRegion: HttpRegion<any>, variables: Record<st
 
       variables[httpRegion.metaData.name] = body;
       httpFile.environments[toEnvironmentKey(httpFile.activeEnvironment)][httpRegion.metaData.name] = body;
+    } else {
+      log.warn(`Javascript Keyword ${httpRegion.metaData.name} not allowed as name`);
     }
   }
 }
