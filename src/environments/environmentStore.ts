@@ -1,4 +1,4 @@
-import { ENVIRONMENT_NONE } from '../utils';
+import { ENVIRONMENT_NONE, isString } from '../utils';
 import { Variables, EnvironmentProvider, HttpFile } from '../models';
 import {httpYacApi} from '../httpYacApi';
 
@@ -7,6 +7,8 @@ class EnvironmentStore{
   readonly environmentProviders: Array<EnvironmentProvider> = [];
 
   private environments: Record<string, Variables> = {};
+
+  public additionalResets: Array<() => void> = [];
 
 
   async reset() {
@@ -20,6 +22,10 @@ class EnvironmentStore{
       if (envProvider.reset) {
         envProvider.reset();
       }
+    }
+
+    for (const reset of this.additionalResets) {
+      reset();
     }
   }
 
@@ -45,7 +51,30 @@ class EnvironmentStore{
         result.push(this.environments[ENVIRONMENT_NONE]);
       }
     }
-    return Object.assign({}, ...result);
+    const variables: Variables = Object.assign({}, ...result);
+
+    this.expandVariables(variables);
+    return variables;
+  }
+
+  private expandVariables(variables: Variables) {
+    for (const [key, value] of Object.entries(variables)) {
+      this.expandVar(key, value, variables);
+    }
+  }
+
+  private expandVar(key: string, value: any, variables: Record<string, any>) {
+    if (value && isString(value)) {
+      let match: RegExpExecArray | null;
+      const variableRegex = /\{{2}([a-zA-Z0-9_]+)\}{2}/g;
+      while ((match = variableRegex.exec(value)) !== null) {
+        const [searchValue, variableName] = match;
+        const val = this.expandVar(variableName, variables[variableName], variables);
+        value = value.replace(searchValue, val);
+      }
+    }
+    variables[key] = value;
+    return value;
   }
 
   async getEnviroments(httpFile: HttpFile | undefined): Promise<Array<string> | null> {

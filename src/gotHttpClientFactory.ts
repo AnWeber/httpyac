@@ -8,7 +8,7 @@ import { default as filesize } from 'filesize';
 
 
 export function gotHttpClientFactory(defaultsOverride: OptionsOfUnknownResponseBody = {}) {
-  return async function gotHttpClient(clientOptions: HttpClientOptions, progress: Progress |undefined) {
+  return async function gotHttpClient(clientOptions: HttpClientOptions, progress: Progress | undefined, showProgressBar: boolean) {
     try {
       const defaults: OptionsOfUnknownResponseBody = {
         decompress: true,
@@ -30,25 +30,21 @@ export function gotHttpClientFactory(defaultsOverride: OptionsOfUnknownResponseB
 
       const responsePromise = got(url, options);
 
-      let dispose: (() => void) | undefined;
       let prevPercent = 0;
-      if (progress) {
-        if (progress.showProgressBar) {
-          responsePromise.on("downloadProgress", data => {
-            const newData = data.percent - prevPercent;
-            prevPercent = data.percent;
-            progress.report({
-              message: url,
-              increment: newData * 100,
-            });
+      if (showProgressBar) {
+        responsePromise.on("downloadProgress", data => {
+          const newData = data.percent - prevPercent;
+          prevPercent = data.percent;
+          progress && progress.report({
+            message: url,
+            increment: newData * 100,
           });
-        }
-        dispose = progress.register(() => {
-          responsePromise.cancel();
         });
       }
+      const dispose = progress && progress.register(() => {
+        responsePromise.cancel();
+      });
       const response = await responsePromise;
-
       if (dispose) {
         dispose();
       }

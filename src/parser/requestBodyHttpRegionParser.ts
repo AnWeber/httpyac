@@ -90,8 +90,6 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
       delete context.data[BODY_IDENTIFIER];
 
       this.removeTrailingEmptyLines(bodyLines);
-
-      this.removeTrailingEmptyLines(bodyLines);
       if (bodyLines.length > 0) {
         if (isMimeTypeFormUrlEncoded(contentType)) {
           context.httpRegion.request.body = this.formUrlEncodedJoin(bodyLines);
@@ -116,11 +114,15 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
               body.push(line);
             }
           }
-          if (strings.length > 0) {
-            body.push(strings.join(lineEnding));
-          }
 
-          context.httpRegion.request.body = body;
+          if (strings.length > 0 && body.length === 0) {
+            context.httpRegion.request.body = strings.join(lineEnding);
+          } else {
+            if (strings.length > 0) {
+              body.push(strings.join(lineEnding));
+            }
+            context.httpRegion.request.body = body;
+          }
         }
       }
     }

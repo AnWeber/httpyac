@@ -35,6 +35,7 @@ class HttpYacApi {
     this.variableReplacers = [
       replacer.intellijVariableReplacer,
       replacer.jsVariableReplacer,
+      replacer.openIdVariableReplacer,
       replacer.basicAuthVariableReplacer,
       replacer.digestAuthVariableReplacer,
       replacer.hostVariableReplacer,

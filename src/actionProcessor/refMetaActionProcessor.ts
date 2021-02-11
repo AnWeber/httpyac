@@ -16,7 +16,7 @@ export async function refMetaActionProcessor(data: RefMetaHttpRegionData & Inter
       && !refHttpRegion.metaData.disabled
       && refHttpRegion !== context.httpRegion) {
       if (data.force || !refHttpRegion.response) {
-        if (!data.globalScriptExecution || await executeGlobalScripts(context.httpFile, context.variables)) {
+        if (!data.globalScriptExecution || await executeGlobalScripts(context.httpFile, context.variables, context.httpClient)) {
           delete data.globalScriptExecution;
 
           const refContext = { ...context, httpRegion: refHttpRegion };

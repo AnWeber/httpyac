@@ -2,13 +2,13 @@
 import { environmentStore } from '../environments';
 import { httpYacApi } from '../httpYacApi';
 import { log } from '../logger';
-import { HttpFileSendContext, HttpRegionSendContext, ProcessorContext, HttpFile, Variables, HttpResponse } from '../models';
-import {toMultiLineString } from './stringUtils';
+import { HttpFileSendContext, HttpRegionSendContext, ProcessorContext, HttpFile, Variables, HttpResponse, HttpClient } from '../models';
+import {isString, toMultiLineString } from './stringUtils';
 
 export async function sendHttpRegion(context: HttpRegionSendContext) {
   const variables = await getVariables(context.httpFile);
   if (!context.httpRegion.metaData.disabled) {
-    if (await executeGlobalScripts(context.httpFile, variables)) {
+    if (await executeGlobalScripts(context.httpFile, variables, context.httpClient)) {
       return await processHttpRegionActions({variables, ...context}, true);
     }
   }
@@ -24,10 +24,10 @@ export async function sendHttpFile(context: HttpFileSendContext) {
   }
 }
 
-export async function executeGlobalScripts(httpFile: HttpFile, variables: Variables) {
+export async function executeGlobalScripts(httpFile: HttpFile, variables: Variables, httpClient: HttpClient) {
   for (const httpRegion of httpFile.httpRegions) {
     if (!httpRegion.request && !httpRegion.metaData.disabled) {
-      if (!await processHttpRegionActions({ httpRegion, httpFile, variables })) {
+      if (!await processHttpRegionActions({ httpRegion, httpFile, variables, httpClient })) {
         return false;
       }
     }
@@ -53,7 +53,7 @@ export async function processHttpRegionActions(context: ProcessorContext, showPr
 
   for (const action of context.httpRegion.actions) {
     if (context.progress) {
-      context.progress.showProgressBar = showProgressBar;
+      context.showProgressBar = showProgressBar;
     }
     context.progress?.report({ message: `${context.httpRegion.metaData.name || context.httpRegion.request?.url || 'global' }` });
     if (!context.httpRegion.metaData.disabled) {
@@ -73,11 +73,25 @@ export function isHttpRegionSendContext(context: any): context is HttpRegionSend
 }
 
 
-export function toConsoleOutput(response: HttpResponse) {
+export function toConsoleOutput(response: HttpResponse, logTotalBody = false) {
 
   const result: Array<string> = [];
-  result.push(`HTTP${response.httpVersion || ''} ${response.statusCode} - ${response.statusMessage}`);
+  if (response.request) {
+    result.push(`${response.request.method} ${response.request.url}`);
+    result.push('');
+    result.push(...Object.entries(response.request.headers)
+      .map(([key, value]) => `${key}: ${value}`)
+      .sort()
+    );
+    if (isString(response.request.body)) {
+      result.push('');
+      result.push(response.request.body);
+    }
+  }
 
+  result.push('');
+  result.push('------ response --------------------------------------------');
+  result.push(`HTTP${response.httpVersion || ''} ${response.statusCode} - ${response.statusMessage}`);
   result.push('');
   result.push(...Object.entries(response.headers)
     .filter(([key]) => !key.startsWith(':'))
@@ -85,24 +99,19 @@ export function toConsoleOutput(response: HttpResponse) {
     .sort()
   );
 
-  if (response.request) {
-
-    if (!!response.meta) {
-      result.push('');
-      result.push('------');
-      result.push('');
-
-      for (const [key, value] of Object.entries(response.meta)) {
-        if (Array.isArray(value)) {
-          if (value.length > 0) {
-            result.push(`${key}: ${value.join(',')}`);
-          }
-        } else {
-          result.push(`${key}: ${value}`);
-        }
-
+  if (isString(response.body)) {
+    result.push('');
+    let body = response.body;
+    if (!logTotalBody) {
+      const logLength = 100;
+      body = body.substr(0, Math.min(body.length, logLength));
+      if (response.body.length >= logLength) {
+        body += `... (${response.body.length - logLength} characters  more)`;
       }
     }
+    result.push(body);
   }
+  result.push('');
+  result.push('------------------------------------------------------------');
   return toMultiLineString(result);
 }

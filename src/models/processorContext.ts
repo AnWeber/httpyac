@@ -1,3 +1,4 @@
+import { HttpClient } from './httpClient';
 import { HttpFile } from './httpFile';
 import { HttpRegion } from './httpRegion';
 import { HttpRequest } from './httpRequest';
@@ -7,7 +8,6 @@ import { Variables } from './variables';
 export type Dispose = () => void;
 
 export interface Progress{
-  showProgressBar?: boolean;
   isCanceled: () => boolean;
   register: (event: (() => void)) => Dispose;
   report: (value: { message?: string, increment?: number }) => void;
@@ -16,6 +16,7 @@ export interface Progress{
 export interface HttpFileSendContext{
   httpFile: HttpFile;
   progress?: Progress;
+  httpClient: HttpClient;
 }
 
 export interface HttpRegionSendContext extends HttpFileSendContext{
@@ -24,4 +25,5 @@ export interface HttpRegionSendContext extends HttpFileSendContext{
 export interface ProcessorContext extends HttpRegionSendContext{
   variables: Variables;
   request?: HttpRequest;
+  showProgressBar?: boolean;
 }

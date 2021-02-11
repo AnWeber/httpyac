@@ -8,17 +8,17 @@ import merge from 'lodash/merge';
 const encodeUrl = require('encodeurl');
 
 
-export async function httpClientActionProcessor(data: unknown, {httpRegion, httpFile, variables, progress}: ProcessorContext): Promise<boolean> {
+export async function httpClientActionProcessor(data: unknown, {httpRegion, httpFile, variables, progress, httpClient, showProgressBar}: ProcessorContext): Promise<boolean> {
   if (httpRegion.request) {
-    const request = await replaceVariablesInRequest(httpRegion.request, {httpRegion, httpFile, variables});
+    const request = await replaceVariablesInRequest(httpRegion.request, {httpRegion, httpFile, variables, httpClient});
     const options: HttpClientOptions = await initOptions(request, httpRegion.metaData.proxy);
 
     try {
       log.debug('request', options);
 
-      const response = await httpYacApi.httpClient(options, progress);
+      const response = await httpClient(options, progress, !!showProgressBar);
       if (response) {
-        response.request = request;
+        response.request = options;
         httpRegion.response = response;
         setResponseAsVariable(httpRegion, variables, httpFile);
         log.info(toConsoleOutput(httpRegion.response));
