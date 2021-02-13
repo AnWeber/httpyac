@@ -4,6 +4,7 @@ import { ParserContext } from './parserContext';
 export type HttpRegionParserGenerator = Generator<{ textLine: string; line: number; }, void, unknown>;
 
 export interface HttpRegionParser{
+  supportsEmptyLine?: boolean;
   noStopOnMetaTag?: boolean;
   parse(lineReader: HttpRegionParserGenerator, context: ParserContext): Promise<HttpRegionParserResult>;
 

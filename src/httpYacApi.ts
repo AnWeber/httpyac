@@ -22,8 +22,10 @@ class HttpYacApi {
       new parser.JsHttpRegionParser(),
       new parser.IntellijHttpRegionParser(),
       new parser.IntellijFileHttpRegionParser(),
+      new parser.GqlHttpRegionParser(),
       new parser.RequestHttpRegionParser(),
       new parser.RequestBodyHttpRegionParser(),
+      new parser.GqlBodyModifierHttpRegionParser(),
     ];
 
     this.httpOutputProcessors = [];

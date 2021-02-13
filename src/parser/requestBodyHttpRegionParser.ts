@@ -12,6 +12,7 @@ type RequestBodyLineType = string | (() => Promise<Buffer>);
 
 const BODY_IDENTIFIER = 'body';
 export class RequestBodyHttpRegionParser implements HttpRegionParser {
+  supportsEmptyLine = true;
 
   async parse(lineReader: HttpRegionParserGenerator, context: ParserContext): Promise<HttpRegionParserResult> {
     if (context.httpRegion.request) {

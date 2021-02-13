@@ -1,4 +1,6 @@
 export * from './commentHttpRegionParser';
+export * from './gqlHttpRegionParser';
+export * from './gqlBodyModifierHttpRegionParser';
 export * from './httpFileParser';
 export * from './intellijHttpRegionParser';
 export * from './intellijFileHttpRegionParser';

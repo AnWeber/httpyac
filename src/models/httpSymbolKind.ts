@@ -6,6 +6,7 @@ export enum HttpSymbolKind{
   requestHeader ="requestHeader",
   requestHeaderKey = "requestHeaderKey",
   requestHeaderValue = "requestHeaderValue",
+  gql ="gql",
   script = "script",
   metaData = "metaData",
   metaDataKey = "metaDataKey",

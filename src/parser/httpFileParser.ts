@@ -21,27 +21,26 @@ export async function parseHttpFile(text: string, fileName: string): Promise<Htt
   };
   for (let line = 0; line < lines.length; line++) {
 
+    const isLineEmpty = /^\s*$/.test(lines[line]);
     for (const httpRegionParser of httpYacApi.httpRegionParsers) {
-      const httpRegionParserResult = await httpRegionParser.parse(createReader(line, lines, !!httpRegionParser.noStopOnMetaTag), parserContext);
-
-
-      if (httpRegionParserResult) {
-        if (httpRegionParserResult.newRegion) {
-
-          parserContext.httpRegion.symbol.endLine = httpRegionParserResult.endLine;
-          closeHttpRegion(parserContext);
-
-          parserContext.httpRegion = initHttpRegion(httpRegionParserResult.endLine + 1);
-        }
-        if (httpRegionParserResult.symbols) {
-          if (parserContext.httpRegion.symbol.children) {
-            parserContext.httpRegion.symbol.children.push(...httpRegionParserResult.symbols);
-          } else {
-            parserContext.httpRegion.symbol.children = httpRegionParserResult.symbols;
+      if (!isLineEmpty || httpRegionParser.supportsEmptyLine && isLineEmpty) {
+        const httpRegionParserResult = await httpRegionParser.parse(createReader(line, lines, !!httpRegionParser.noStopOnMetaTag), parserContext);
+        if (httpRegionParserResult) {
+          if (httpRegionParserResult.newRegion) {
+            parserContext.httpRegion.symbol.endLine = httpRegionParserResult.endLine;
+            closeHttpRegion(parserContext);
+            parserContext.httpRegion = initHttpRegion(httpRegionParserResult.endLine + 1);
           }
+          if (httpRegionParserResult.symbols) {
+            if (parserContext.httpRegion.symbol.children) {
+              parserContext.httpRegion.symbol.children.push(...httpRegionParserResult.symbols);
+            } else {
+              parserContext.httpRegion.symbol.children = httpRegionParserResult.symbols;
+            }
+          }
+          line = httpRegionParserResult.endLine;
+          break;
         }
-        line = httpRegionParserResult.endLine;
-        break;
       }
     }
   }
