@@ -3,7 +3,10 @@ import { HttpMethod } from '../models';
 
 export function isRequestMethod(method: string | undefined): method is HttpMethod {
   if (method) {
-    return ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS', 'CONNECT', 'TRACE'].includes(method.toUpperCase());
+    return ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS', 'CONNECT', 'TRACE',
+      'PROPFIND', 'PROPPATCH', 'MKCOL', 'COPY', 'MOVE', 'LOCK', 'UNLOCK', 'CHECKOUT', 'CHECKIN', 'REPORT', 'MERGE', 'MKACTIVITY', 'MKWORKSPACE', 'VERSION-CONTROL', 'BASELINE-CONTROL' //cal-dav
+    ]
+      .includes(method.toUpperCase());
   }
   return false;
 }
