@@ -110,7 +110,7 @@ function toOpenIdInformation(url: string, time: number, response: false | HttpRe
     log.info(toConsoleOutput(response, true));
     if (response.statusCode === 200 && isString(response.body)) {
       const jwtToken = JSON.parse(response.body);
-      console.info(JSON.stringify(jwtToken, null, 2));
+      log.info(JSON.stringify(jwtToken, null, 2));
       return {
         url,
         time,
