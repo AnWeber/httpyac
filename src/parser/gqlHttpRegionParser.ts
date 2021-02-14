@@ -1,6 +1,6 @@
 
 import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext } from '../models';
-import { toMultiLineString, toAbsoluteFilename, isMimeTypeJSON } from '../utils';
+import { toMultiLineString, toAbsoluteFilename } from '../utils';
 import { promises as fs } from 'fs';
 import { log } from '../logger';
 import { GQL_IDENTIFIER, GqlData } from './gqlBodyModifierHttpRegionParser';
@@ -12,10 +12,6 @@ export class GqlHttpRegionParser implements HttpRegionParser{
   async parse(lineReader: HttpRegionParserGenerator, context: ParserContext): Promise<HttpRegionParserResult> {
 
     if (!!context.httpRegion.metaData.noGqlParsing) {
-      return false;
-    }
-
-    if (context.httpRegion.request && !isMimeTypeJSON(context.httpRegion.request.contentType)) {
       return false;
     }
 

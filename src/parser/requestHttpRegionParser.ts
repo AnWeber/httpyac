@@ -2,7 +2,7 @@
 import { HttpRegion, HttpRequest, HttpSymbol, HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext  } from '../models';
 
 import { isString, isStringEmpty, parseMimeType, isRequestMethod, getHeader } from '../utils';
-import {httpClientActionProcessor  } from '../actionProcessor';
+import {httpClientActionProcessor, defaultHeadersActionProcessor } from '../actionProcessor';
 
 const REGEX_REQUESTLINE = /^\s*(?<method>GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE|PROPFIND|PROPPATCH|MKCOL|COPY|MOVE|LOCK|UNLOCK|CHECKOUT|CHECKIN|REPORT|MERGE|MKACTIVITY|MKWORKSPACE|VERSION-CONTROL|BASELINE-CONTROL)\s*(?<url>.+?)(?:\s+(HTTP\/\S+))?$/;
 export class RequestHttpRegionParser implements HttpRegionParser {
@@ -62,16 +62,6 @@ export class RequestHttpRegionParser implements HttpRegionParser {
     return /^\s*(\?|&)([^=\s]+)=(.*)$/.test(textLine);
   }
 
-  private getRequestHeader(textLine: string) {
-    const headerMatch = /^\s*(?<key>[\w\-]+)\s*\:\s*(?<value>.*?)\s*$/.exec(textLine);
-    if (headerMatch && headerMatch.length > 1 && headerMatch.groups) {
-      return {
-        key: headerMatch.groups.key,
-        value: headerMatch.groups.value
-      };
-    }
-    return null;
-  }
 
   private isValidRequestLine(textLine: string, httpRegion: HttpRegion) {
     if (isStringEmpty(textLine)) {
@@ -126,36 +116,15 @@ export class RequestHttpRegionParser implements HttpRegionParser {
           requestSymbol.endOffset = next.value.textLine.length;
           httpRegion.request.url += next.value.textLine.trim();
         } else {
-          const requestHeader = this.getRequestHeader(next.value.textLine);
-          if (requestHeader) {
-            symbols.push({
-              name: requestHeader.key,
-              description:  requestHeader.value,
-              kind: HttpSymbolKind.requestHeader,
-              startLine: next.value.line,
-              startOffset: next.value.textLine.indexOf(requestHeader.key),
-              endLine: next.value.line,
-              endOffset: next.value.textLine.length,
-              children: [{
-                name: requestHeader.key,
-                description: 'request header key',
-                kind: HttpSymbolKind.requestHeaderValue,
-                startLine: next.value.line,
-                startOffset: next.value.textLine.indexOf(requestHeader.key),
-                endLine: next.value.line,
-                endOffset: next.value.textLine.indexOf(requestHeader.key) + requestHeader.key.length,
-              }, {
-                  name: requestHeader.value,
-                  description: 'request header value',
-                  kind: HttpSymbolKind.requestHeaderValue,
-                  startLine: next.value.line,
-                  startOffset: next.value.textLine.indexOf(requestHeader.value),
-                  endLine: next.value.line,
-                  endOffset: next.value.textLine.indexOf(requestHeader.value) + requestHeader.value.length,
-                }
-              ]
+          const fileHeaders = /^\s*...(?<variableName>[^\s]+)\s*$/.exec(next.value.textLine);
+          if (fileHeaders && fileHeaders.groups?.variableName) {
+            httpRegion.actions.push({
+              type: "defaultHeaders",
+              data: fileHeaders.groups.variableName,
+              processor: defaultHeadersActionProcessor,
             });
-            httpRegion.request.headers[requestHeader.key] = requestHeader.value;
+          } else {
+            symbols.push(...this.parseRequestHeader(next, httpRegion.request));
           }
         }
         next = lineReader.next();
@@ -174,6 +143,42 @@ export class RequestHttpRegionParser implements HttpRegionParser {
     return false;
   }
 
+
+  private parseRequestHeader(next: IteratorYieldResult<{ textLine: string; line: number; }>, httpRequest: HttpRequest) {
+    const symbols: Array<HttpSymbol> = [];
+    const headerMatch = /^\s*(?<key>[\w\-]+)\s*\:\s*(?<value>.*?)\s*$/.exec(next.value.textLine);
+    if (headerMatch?.groups?.key && headerMatch?.groups?.value) {
+      symbols.push({
+        name: headerMatch.groups.key,
+        description: headerMatch.groups.value,
+        kind: HttpSymbolKind.requestHeader,
+        startLine: next.value.line,
+        startOffset: next.value.textLine.indexOf(headerMatch.groups.key),
+        endLine: next.value.line,
+        endOffset: next.value.textLine.length,
+        children: [{
+          name: headerMatch.groups.key,
+          description: 'request header key',
+          kind: HttpSymbolKind.requestHeaderValue,
+          startLine: next.value.line,
+          startOffset: next.value.textLine.indexOf(headerMatch.groups.key),
+          endLine: next.value.line,
+          endOffset: next.value.textLine.indexOf(headerMatch.groups.key) + headerMatch.groups.key.length,
+        }, {
+          name: headerMatch.groups.value,
+          description: 'request header value',
+          kind: HttpSymbolKind.requestHeaderValue,
+          startLine: next.value.line,
+          startOffset: next.value.textLine.indexOf(headerMatch.groups.value),
+          endLine: next.value.line,
+          endOffset: next.value.textLine.indexOf(headerMatch.groups.value) + headerMatch.groups.value.length,
+        }
+        ]
+      });
+      httpRequest.headers[headerMatch.groups.key] = headerMatch.groups.value;
+    }
+    return symbols;
+  }
 }
 
 

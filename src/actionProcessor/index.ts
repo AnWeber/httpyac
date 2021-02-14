@@ -1,3 +1,4 @@
+export * from './defaultHeadersActionProcessor';
 export * from './httpClientActionProcessor';
 export * from './intellijActionProcessor';
 export * from './jsActionProcessor';

@@ -1,6 +1,6 @@
 
 import { HttpRegionParser, HttpRegionParserResult, ParserContext } from '../models';
-import { isString, isMimeTypeJSON } from '../utils';
+import { isString } from '../utils';
 
 export const GQL_IDENTIFIER = 'gql';
 
@@ -34,7 +34,7 @@ export class GqlBodyModifierHttpRegionParser implements HttpRegionParser{
       }
       delete gqlData.operationName;
       delete gqlData.body;
-      if (context.httpRegion.request && isMimeTypeJSON(context.httpRegion.request.contentType)) {
+      if (context.httpRegion.request) {
         if (isString(context.httpRegion.request.body)) {
           gqlRequestBody.variables = JSON.parse(context.httpRegion.request.body);
         }
