@@ -25,8 +25,6 @@ export class GqlHttpRegionParser implements HttpRegionParser{
         fragments: {}
       };
       context.data[GQL_IDENTIFIER] = gqlData;
-
-
       for (const [key, value] of Object.entries(gqlData.fragments)) {
         const gql = gqlContent.gql;
         if (gql.indexOf(`...${key}`) >= 0) {
@@ -36,8 +34,11 @@ export class GqlHttpRegionParser implements HttpRegionParser{
 
       if (context.httpRegion.request) {
         gqlData.body = gqlContent.gql;
-        if (gqlContent.name && !context.httpRegion.metaData.name) {
-          context.httpRegion.metaData.name = gqlContent.name;
+        if (gqlContent.name) {
+          gqlData.operationName = gqlContent.name;
+          if (!context.httpRegion.metaData.name) {
+            context.httpRegion.metaData.name = gqlContent.name;
+          }
         }
       } else if(gqlContent.name) {
         gqlData.fragments[gqlContent.name] = gqlContent.gql;
@@ -66,7 +67,7 @@ async function getGQLContent(lineReader: HttpRegionParserGenerator, httpFileName
 
     const startLine = next.value.line;
 
-    const fileMatches = /^\s*gql\s+<\s+(?<fileName>.+)\s*$/.exec(next.value.textLine);
+    const fileMatches = /^\s*gql(\s+(?<name>[^\s\(]+))?\s+<\s+(?<fileName>.+)\s*$/.exec(next.value.textLine);
     if (fileMatches && fileMatches.groups?.fileName) {
       try {
         const normalizedPath = await toAbsoluteFilename(fileMatches.groups.fileName, httpFileName);
@@ -74,7 +75,7 @@ async function getGQLContent(lineReader: HttpRegionParserGenerator, httpFileName
           return {
             startLine,
             endLine: startLine,
-            name: fileMatches.groups.fileName,
+            name: fileMatches.groups.name || fileMatches.groups.fileName,
             gql: await fs.readFile(normalizedPath, 'utf-8')
           };
         }

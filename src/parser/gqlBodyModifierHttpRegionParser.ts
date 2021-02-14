@@ -7,6 +7,7 @@ export const GQL_IDENTIFIER = 'gql';
 
 
 export interface GqlData{
+  operationName?: string;
   body?: string;
   fragments: Record<string, string>
 }
@@ -28,6 +29,10 @@ export class GqlBodyModifierHttpRegionParser implements HttpRegionParser{
       const gqlRequestBody: GqlPostRequest = {
         query: gqlData.body
       };
+      if (gqlData.operationName) {
+        gqlRequestBody.operationName = gqlData.operationName;
+      }
+      delete gqlData.operationName;
       delete gqlData.body;
       if (context.httpRegion.request && isMimeTypeJSON(context.httpRegion.request.contentType)) {
         if (isString(context.httpRegion.request.body)) {
