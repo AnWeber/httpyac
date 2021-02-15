@@ -3,7 +3,7 @@ import { executeScript } from '../../actionProcessor';
 import { toMultiLineArray } from '../../utils';
 
 export async function jsVariableReplacer(text: string, type: string, {httpRegion, httpFile, variables, progress}: ProcessorContext) {
-  const variableRegex = /\{{2}([\s\S]+)\}{2}/g;
+  const variableRegex = /\{{2}([^}{2}]+)\}{2}/g;
   let match: RegExpExecArray | null;
   let result = text;
   while ((match = variableRegex.exec(text)) !== null) {
