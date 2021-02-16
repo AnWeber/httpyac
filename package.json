@@ -22,8 +22,7 @@
 		"Soap",
 		"Client"
 	],
-	"main": "./dist/index.js",
-	"types": "./dist/index.d.ts",
+	"main": "./src/index.ts",
 	"scripts": {
 		"compile": "webpack --config ./webpack.config.js",
 		"prepare": "npm run compile",
