@@ -1,6 +1,10 @@
 import { ENVIRONMENT_NONE, isString } from '../utils';
-import { Variables, EnvironmentProvider, HttpFile } from '../models';
+import { Variables, EnvironmentProvider, HttpFile, EnvironmentConfig } from '../models';
 import {httpYacApi} from '../httpYacApi';
+import { JsonEnvProvider } from './jsonEnvProvider';
+import { EnvVariableProvider } from '../variables/provider/envVariableProvider';
+import { IntellijProvider } from './intellijEnvProvider';
+import { DotenvProvider } from './dotenvProvider';
 
 class EnvironmentStore{
   activeEnvironments: Array<string>| undefined;
@@ -104,6 +108,47 @@ class EnvironmentStore{
   toString() {
     return 'environmentStore';
   }
+
+  async configure(config: EnvironmentConfig): Promise<Dispose> {
+
+    const environmentProviders: Array<EnvironmentProvider> = [];
+
+    if (config.environments) {
+      environmentProviders.push(new JsonEnvProvider(config.environments));
+    }
+
+    if (config.intellijDirs) {
+      const factory = (path: string) => new IntellijProvider(path);
+      for (const dir of config.intellijDirs) {
+        environmentProviders.push(factory(dir));
+      }
+      if (config.intellijVariableProviderEnabled) {
+        httpYacApi.variableProviders.splice(0, 0, new EnvVariableProvider(factory, config.intellijDirs));
+      }
+    }
+    if (config.dotenvDirs) {
+      const factory = (path: string) => new DotenvProvider(path, config.dotenvDefaultFiles || ['.env']);
+      for (const dir of config.dotenvDirs) {
+        environmentProviders.push(factory(dir));
+      }
+      if (config.dotenvVariableProviderEnabled) {
+        httpYacApi.variableProviders.splice(0, 0, new EnvVariableProvider(factory, config.dotenvDirs));
+      }
+    }
+
+    await this.reset();
+    this.environmentProviders.push(...environmentProviders);
+    return () => {
+      for (const envProvider of environmentProviders) {
+        if (envProvider.reset) {
+          envProvider.reset();
+        }
+        this.environmentProviders.splice(this.environmentProviders.indexOf(envProvider), 1);
+      }
+    };
+  }
 }
+
+type Dispose = () => void;
 
 export const environmentStore = new EnvironmentStore();

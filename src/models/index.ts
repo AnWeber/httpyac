@@ -1,5 +1,6 @@
 export * from './actionProcessorType';
 export * from './contentType';
+export * from './environmentConfig';
 export * from './environmentProvider';
 export * from './httpClient';
 export * from './httpClientOptions';
