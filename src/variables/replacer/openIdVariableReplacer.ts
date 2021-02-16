@@ -85,7 +85,7 @@ export async function openIdVariableReplacer(text: string, type: string, context
 
 function keepAlive(cacheKey: string, httpClient: HttpClient) {
   const openIdInformation = oauthStore[cacheKey];
-  if (openIdInformation) {
+  if (openIdInformation && openIdInformation.refreshToken) {
     const timeoutId = setTimeout(async () => {
       const result = await refreshToken(openIdInformation, httpClient, undefined);
       if (result) {
