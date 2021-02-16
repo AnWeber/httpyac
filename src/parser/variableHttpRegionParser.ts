@@ -1,7 +1,7 @@
 ;
 
 
-import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext } from '../models';
+import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, ActionProcessorType } from '../models';
 import { variableActionProcessor } from '../actionProcessor';
 
 export class VariableHttpRegionParser implements HttpRegionParser{
@@ -18,7 +18,7 @@ export class VariableHttpRegionParser implements HttpRegionParser{
           data: {
             [match.groups.key]: match.groups.value.trim(),
           },
-          type: 'variable',
+          type: ActionProcessorType.variable,
           processor: variableActionProcessor
         });
         return {

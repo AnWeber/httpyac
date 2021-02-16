@@ -1,13 +1,12 @@
 import { Variables, ProcessorContext } from '../models';
 import { Module } from 'module';
-import { runInThisContext, runInNewContext} from 'vm';
+import { runInThisContext} from 'vm';
 import { dirname } from 'path';
 import { log } from '../logger';
 import { isPromise , toEnvironmentKey} from '../utils';
 import * as got from 'got';
 import { httpYacApi } from '../httpYacApi';
-import { httpFileStore } from '../httpFileStore';
-import { environmentStore } from '../environments';
+import * as httpYac from '..';
 
 export interface ScriptData{
   script: string;
@@ -71,9 +70,7 @@ export async function executeScript(context: { script: string, fileName: string 
       }
       if (id === 'httpYac') {
         return {
-          httpYacApi,
-          environmentStore,
-          httpFileStore,
+          ...httpYac,
           ...context.require || {},
         };
       }

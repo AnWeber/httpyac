@@ -1,5 +1,5 @@
 
-import { HttpRegion, HttpFile, HttpSymbol, HttpSymbolKind,  HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext } from '../models';
+import { HttpRegion, HttpFile, HttpSymbol, HttpSymbolKind,  HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, ActionProcessorType } from '../models';
 import { httpFileStore } from '../httpFileStore';
 import { log } from '../logger';
 import { promises as fs } from 'fs';
@@ -91,11 +91,15 @@ export class MetaHttpRegionParser implements HttpRegionParser{
 
   close({ httpRegion }: ParserContext): void {
     if (httpRegion.metaData.jwt) {
-      httpRegion.actions.push({
-        data: httpRegion.metaData.jwt,
-        type: 'jwt',
-        processor: jwtActionProcessor
-      });
+      const index = httpRegion.actions.findIndex(obj => obj.type === ActionProcessorType.request);
+
+      if (index >= 0) {
+        httpRegion.actions.splice(index + 1, 0, {
+          data: httpRegion.metaData.jwt,
+          type: ActionProcessorType.jwt,
+          processor: jwtActionProcessor
+        });
+      }
     }
   }
 }
@@ -115,7 +119,7 @@ async function importHttpFile(httpFile: HttpFile, fileName: string) {
 
 function addRefHttpRegion(httpRegion: HttpRegion, name: string, force: boolean) {
   httpRegion.actions.push({
-    type: 'ref',
+    type: ActionProcessorType.ref,
     processor: refMetaActionProcessor,
     data: {
       name,

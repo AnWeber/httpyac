@@ -1,3 +1,4 @@
+export * from './actionProcessorType';
 export * from './contentType';
 export * from './environmentProvider';
 export * from './httpClient';

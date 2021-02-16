@@ -1,5 +1,5 @@
 
-import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext } from '../models';
+import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, ActionProcessorType } from '../models';
 import { toMultiLineString } from '../utils';
 import { ScriptData, intellijActionProcessor } from '../actionProcessor';
 
@@ -27,7 +27,7 @@ export class IntellijHttpRegionParser implements HttpRegionParser{
             httpRegion.actions.push(
               {
                 data,
-                type: 'intellij',
+                type: ActionProcessorType.intellij,
                 processor: intellijActionProcessor,
               }
             );

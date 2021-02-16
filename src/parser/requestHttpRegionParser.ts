@@ -1,5 +1,5 @@
 
-import { HttpRegion, HttpRequest, HttpSymbol, HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext  } from '../models';
+import { HttpRegion, HttpRequest, HttpSymbol, HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, ActionProcessorType  } from '../models';
 
 import { isString, isStringEmpty, parseMimeType, isRequestMethod, getHeader } from '../utils';
 import {httpClientActionProcessor, defaultHeadersActionProcessor } from '../actionProcessor';
@@ -119,7 +119,7 @@ export class RequestHttpRegionParser implements HttpRegionParser {
           const fileHeaders = /^\s*...(?<variableName>[^\s]+)\s*$/.exec(next.value.textLine);
           if (fileHeaders && fileHeaders.groups?.variableName) {
             httpRegion.actions.push({
-              type: "defaultHeaders",
+              type: ActionProcessorType.defaultHeaders,
               data: fileHeaders.groups.variableName,
               processor: defaultHeadersActionProcessor,
             });
@@ -131,7 +131,7 @@ export class RequestHttpRegionParser implements HttpRegionParser {
       }
 
       httpRegion.actions.push({
-        type: 'request',
+        type: ActionProcessorType.request,
         processor: httpClientActionProcessor
       });
       const contentType = getHeader(httpRegion.request.headers, 'content-type');

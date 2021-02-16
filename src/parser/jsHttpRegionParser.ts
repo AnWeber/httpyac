@@ -1,5 +1,5 @@
 
-import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext } from '../models';
+import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, ActionProcessorType } from '../models';
 import { toMultiLineString } from '../utils';
 import { jsActionProcessor, ScriptData } from '../actionProcessor';
 
@@ -26,7 +26,7 @@ export class JsHttpRegionParser implements HttpRegionParser{
           httpRegion.actions.push(
             {
               data,
-              type: 'js',
+              type: ActionProcessorType.js,
               processor: jsActionProcessor,
             }
           );
