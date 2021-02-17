@@ -4,8 +4,8 @@ import { httpFileStore } from '../httpFileStore';
 import { log } from '../logger';
 import { promises as fs } from 'fs';
 import { toAbsoluteFilename } from '../utils';
-import { refMetaActionProcessor, jwtActionProcessor } from '../actionProcessor';
-export class MetaHttpRegionParser implements HttpRegionParser{
+import { refMetaActionProcessor } from '../actionProcessor';
+export class MetaHttpRegionParser implements HttpRegionParser {
   static isMetaTag(textLine: string) {
     return /^\s*\#{1,}/.test(textLine);
   }
@@ -14,13 +14,13 @@ export class MetaHttpRegionParser implements HttpRegionParser{
     return /^\#{3,}\s*$/.test(textLine);
   }
 
-  async parse(lineReader: HttpRegionParserGenerator, { httpRegion, httpFile }: ParserContext): Promise<HttpRegionParserResult>{
+  async parse(lineReader: HttpRegionParserGenerator, { httpRegion, httpFile }: ParserContext): Promise<HttpRegionParserResult> {
     const next = lineReader.next();
     if (!next.done) {
       const textLine = next.value.textLine;
       if (MetaHttpRegionParser.isMetaTag(textLine)) {
 
-        const result: HttpRegionParserResult =  {
+        const result: HttpRegionParserResult = {
           endLine: next.value.line
         };
         if (this.isDelimiter(textLine)) {
@@ -62,17 +62,17 @@ export class MetaHttpRegionParser implements HttpRegionParser{
             switch (match.groups.key) {
               case 'import':
                 if (match.groups.value) {
-                  await importHttpFile(httpFile, match.groups.value);
+                  await this.importHttpFile(httpFile, match.groups.value);
                 }
                 break;
               case 'ref':
                 if (match.groups.value) {
-                  addRefHttpRegion(httpRegion, match.groups.value, false);
+                  this.addRefHttpRegion(httpRegion, match.groups.value, false);
                 }
                 break;
               case 'forceRef':
                 if (match.groups.value) {
-                  addRefHttpRegion(httpRegion, match.groups.value, true);
+                  this.addRefHttpRegion(httpRegion, match.groups.value, true);
                 }
                 break;
               default:
@@ -89,43 +89,29 @@ export class MetaHttpRegionParser implements HttpRegionParser{
     return false;
   }
 
-  close({ httpRegion }: ParserContext): void {
-    if (httpRegion.metaData.jwt) {
-      const index = httpRegion.actions.findIndex(obj => obj.type === ActionProcessorType.request);
-
-      if (index >= 0) {
-        httpRegion.actions.splice(index + 1, 0, {
-          data: httpRegion.metaData.jwt,
-          type: ActionProcessorType.jwt,
-          processor: jwtActionProcessor
-        });
+  async importHttpFile(httpFile: HttpFile, fileName: string) {
+    try {
+      const absoluteFileName = await toAbsoluteFilename(fileName, httpFile.fileName);
+      if (absoluteFileName) {
+        if (!httpFile.imports) {
+          httpFile.imports = [];
+        }
+        httpFile.imports.push(() => httpFileStore.getOrCreate(absoluteFileName, () => fs.readFile(absoluteFileName, 'utf-8'), 0));
       }
+    } catch (err) {
+      log.error('import error', fileName, err);
     }
   }
-}
-async function importHttpFile(httpFile: HttpFile, fileName: string) {
-  try {
-    const absoluteFileName = await toAbsoluteFilename(fileName, httpFile.fileName);
-    if (absoluteFileName) {
-      if (!httpFile.imports) {
-        httpFile.imports = [];
+
+  addRefHttpRegion(httpRegion: HttpRegion, name: string, force: boolean) {
+    httpRegion.actions.push({
+      type: ActionProcessorType.ref,
+      processor: refMetaActionProcessor,
+      data: {
+        name,
+        force
       }
-      httpFile.imports.push(() => httpFileStore.getOrCreate(absoluteFileName, () => fs.readFile(absoluteFileName, 'utf-8'), 0));
-    }
-  } catch (err) {
-    log.error('import error', fileName, err);
+    });
   }
 }
-
-function addRefHttpRegion(httpRegion: HttpRegion, name: string, force: boolean) {
-  httpRegion.actions.push({
-    type: ActionProcessorType.ref,
-    processor: refMetaActionProcessor,
-    data: {
-      name,
-      force
-    }
-  });
-}
-
 

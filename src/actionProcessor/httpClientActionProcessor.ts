@@ -1,10 +1,11 @@
 import {ProcessorContext, HttpRequest, VariableReplacerType , HttpClientOptions, HttpFile, HttpRegion} from '../models';
-import { isString, isMimeTypeFormUrlEncoded , isMimeTypeJSON, toEnvironmentKey , toConsoleOutput} from '../utils';
+import { isString, isMimeTypeFormUrlEncoded , isMimeTypeJSON, toEnvironmentKey , toConsoleOutput, decodeJWT} from '../utils';
 import { httpYacApi } from '../httpYacApi';
 import { log } from '../logger';
 import { isValidVariableName } from './jsActionProcessor';
 import cloneDeep = require('lodash/cloneDeep');
 import merge from 'lodash/merge';
+import get from 'lodash/get';
 const encodeUrl = require('encodeurl');
 
 
@@ -34,24 +35,22 @@ export async function httpClientActionProcessor(data: unknown, {httpRegion, http
 };
 
 function setResponseAsVariable(httpRegion: HttpRegion<any>, variables: Record<string, any>, httpFile: HttpFile) {
-  if (httpRegion.metaData.name && httpRegion.response) {
-    if (isValidVariableName(httpRegion.metaData.name)) {
-      let body = httpRegion.response.body;
-      if (isMimeTypeJSON(httpRegion.response.contentType) && isString(httpRegion.response.body)) {
-        try {
-          body = JSON.parse(httpRegion.response.body);
-        } catch (err) {
-          log.warn('json parse error', body, err);
-        }
-      }
 
-      variables[httpRegion.metaData.name] = body;
-      httpFile.environments[toEnvironmentKey(httpFile.activeEnvironment)][httpRegion.metaData.name] = body;
-    } else {
-      log.warn(`Javascript Keyword ${httpRegion.metaData.name} not allowed as name`);
+  if (httpRegion.response && isMimeTypeJSON(httpRegion.response.contentType) && isString(httpRegion.response.body)) {
+    let body = httpRegion.response.body;
+    try {
+      if (httpRegion.metaData.name || httpRegion.metaData.jwt) {
+        body = JSON.parse(httpRegion.response.body);
+
+        handleJWTMetaData(body, httpRegion);
+        handleNameMetaData(body, httpRegion, variables, httpFile);
+      }
+    } catch (err) {
+      log.warn('json parse error', body, err);
     }
   }
 }
+
 
 async function initOptions(request: HttpRequest<any>, proxy: string | undefined) {
   const options: HttpClientOptions = merge({
@@ -124,3 +123,41 @@ async function replaceVariablesInRequest(request: HttpRequest, context: Processo
 }
 
 
+function handleNameMetaData(body: unknown,httpRegion: HttpRegion<any>, variables: Record<string, any>, httpFile: HttpFile) {
+  if (httpRegion.metaData.name && isValidVariableName(httpRegion.metaData.name)) {
+    variables[httpRegion.metaData.name] = body;
+    httpFile.environments[toEnvironmentKey(httpFile.activeEnvironment)][httpRegion.metaData.name] = body;
+  } else if (httpRegion.metaData.name) {
+    log.warn(`Javascript Keyword ${httpRegion.metaData.name} not allowed as name`);
+  }
+}
+
+function handleJWTMetaData(body: unknown, httpRegion: HttpRegion ) {
+  if (httpRegion.metaData.jwt && body && httpRegion.response) {
+    if (isString(httpRegion.metaData.jwt)) {
+      for (const key of httpRegion.metaData.jwt.split(',')) {
+        const value = get(body, key);
+        parseJwtToken(body, key, value);
+      }
+    } else if (body && typeof body === 'object') {
+      for (const [key, value] of Object.entries(body)) {
+        parseJwtToken(body, key, value);
+      }
+    }
+    httpRegion.response.body = JSON.stringify(body, null, 2);
+  }
+}
+
+
+function parseJwtToken(response: any, key: string, value: any) {
+  if (isString(value)) {
+    try {
+      const jwt = decodeJWT(value);
+      if (jwt) {
+        response[`${key}_parsed`] = jwt;
+      }
+    } catch (err) {
+      log.error(err);
+    }
+  }
+}
