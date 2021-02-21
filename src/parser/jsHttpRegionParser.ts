@@ -10,7 +10,7 @@ export class JsHttpRegionParser implements HttpRegionParser{
     let next = lineReader.next();
 
     if (!next.done) {
-      const matches = /^\s*{{(?<executeOnEveryRequest>+)?\s*$/.exec(next.value.textLine);
+      const matches = /^\s*{{(?<executeOnEveryRequest>\+)?\s*$/.exec(next.value.textLine);
       if (!matches) {
         return false;
       }
