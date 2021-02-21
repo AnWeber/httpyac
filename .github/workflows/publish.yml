@@ -1,8 +1,8 @@
-name: lint
+name: publish
 on:
   push:
     branches:
-      - master
+      - 'release/**'
 jobs:
   build:
     strategy:
@@ -18,3 +18,7 @@ jobs:
         node-version: 14.x
     - run: npm install
     - run: npm run lint
+    - run: npm publish --access public
+      if: success() && matrix.os == 'ubuntu-latest'
+      env:
+        NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
