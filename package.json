@@ -25,8 +25,7 @@
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"scripts": {
-		"compile": "webpack --config ./webpack.config.js",
-		"prepare": "npm run compile",
+		"prepare": "webpack --config ./webpack.config.js",
 		"watch": "webpack --watch --config ./webpack.config.js",
 		"lint": "eslint src --ext ts"
 	},
