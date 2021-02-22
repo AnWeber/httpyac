@@ -13,21 +13,22 @@ interface OpenIdConfig{
   tokenEndpoint: string;
   clientId: string;
   clientSecret: string;
+  scope: string;
+  keepAlive: boolean;
+  time: number;
   username?: string;
   password?: string;
   port?: string;
+  subjectIssuer?: string;
 }
 
 interface OpenIdInformation{
-  clientId: string;
-  clientSecret: string;
-  url: string;
+  config: OpenIdConfig;
   accessToken: string;
   expiresIn: number;
-  time: number;
+  timeSkew: number;
   refreshToken?: string;
   refreshExpiresIn?: number;
-  timeSkew: number;
   dispose?: () => void;
 }
 
@@ -63,7 +64,7 @@ export async function openIdVariableReplacer(text: string, type: string, context
               openIdInformation = await requestOpenIdInformation(match.groups.tokenExchangePrefix, config => tokenExchangeFlow(config, openIdInformation), context);
             }
             if (!openIdInformation) {
-              throw new Error(`Anmeldung gescheitert`);
+              throw new Error(`authorization failed`);
             }
           }
         }
@@ -73,6 +74,7 @@ export async function openIdVariableReplacer(text: string, type: string, context
         removeOpenIdInformation(cacheKey);
         oauthStore[cacheKey] = openIdInformation;
         keepAlive(cacheKey, context.httpClient);
+
         return `Bearer ${openIdInformation.accessToken}`;
       }
     } catch (err) {
@@ -85,7 +87,7 @@ export async function openIdVariableReplacer(text: string, type: string, context
 
 function keepAlive(cacheKey: string, httpClient: HttpClient) {
   const openIdInformation = oauthStore[cacheKey];
-  if (openIdInformation && openIdInformation.refreshToken) {
+  if (openIdInformation && openIdInformation.refreshToken && openIdInformation.config.keepAlive) {
     const timeoutId = setTimeout(async () => {
       const result = await refreshToken(openIdInformation, httpClient, undefined);
       if (result) {
@@ -105,14 +107,11 @@ function removeOpenIdInformation(cacheKey: string) {
     }
     delete oauthStore[cacheKey];
   }
-
-
 }
-
 
 async function refreshTokenOrReuse(cachedOpenIdInformation: OpenIdInformation, httpClient: HttpClient, progress: Progress | undefined) {
   if (cachedOpenIdInformation) {
-    if (!isTokenExpired(cachedOpenIdInformation.time, cachedOpenIdInformation.expiresIn, cachedOpenIdInformation.timeSkew)) {
+    if (!isTokenExpired(cachedOpenIdInformation.config.time, cachedOpenIdInformation.expiresIn, cachedOpenIdInformation.timeSkew)) {
       return cachedOpenIdInformation;
     }
 
@@ -125,28 +124,34 @@ async function refreshTokenOrReuse(cachedOpenIdInformation: OpenIdInformation, h
 async function refreshToken(cachedOpenIdInformation: OpenIdInformation, httpClient: HttpClient, progress: Progress | undefined) {
   if (cachedOpenIdInformation.refreshToken
     && cachedOpenIdInformation.refreshExpiresIn
-    && !isTokenExpired(cachedOpenIdInformation.time, cachedOpenIdInformation.refreshExpiresIn, cachedOpenIdInformation.timeSkew)) {
+    && !isTokenExpired(cachedOpenIdInformation.config.time, cachedOpenIdInformation.refreshExpiresIn, cachedOpenIdInformation.timeSkew)) {
 
-    const time = new Date().getTime();
+    const config = {
+      ...cachedOpenIdInformation.config,
+      time: new Date().getTime()
+    };
     const options: HttpClientOptions = {
-      url: cachedOpenIdInformation.url,
+      url: config.tokenEndpoint,
       method: 'POST',
       headers: {
-        'authorization': `Basic ${Buffer.from(`${cachedOpenIdInformation.clientId}:${cachedOpenIdInformation.clientSecret}`).toString('base64')}`,
+        'authorization': `Basic ${Buffer.from(`${config.clientId}:${config.clientSecret}`).toString('base64')}`,
         'content-type': 'application/x-www-form-urlencoded',
       },
-      body: `grant_type=refresh_token&refresh_token=${cachedOpenIdInformation.refreshToken}`
+      body: toQueryParams({
+        grant_type: 'refresh_token',
+        refresh_token: cachedOpenIdInformation.refreshToken
+      })
     };
     const response = await httpClient(options, progress, false);
     if (response) {
       response.request = options;
     }
-    return toOpenIdInformation(cachedOpenIdInformation.url, cachedOpenIdInformation.clientId, cachedOpenIdInformation.clientSecret, time, response);
+    return toOpenIdInformation(response, config);
   }
   return false;
 }
 
-function toOpenIdInformation(url: string, clientId: string, clientSecret: string, time: number, response: false | HttpResponse): OpenIdInformation | false {
+function toOpenIdInformation(response: false | HttpResponse, config: OpenIdConfig): OpenIdInformation | false {
   if (response) {
     log.info(toConsoleOutput(response, true));
     if (response.statusCode === 200 && isString(response.body)) {
@@ -154,15 +159,12 @@ function toOpenIdInformation(url: string, clientId: string, clientSecret: string
       const parsedToken = decodeJWT(jwtToken.access_token);
       log.info(JSON.stringify(parsedToken, null, 2));
       return {
-        url,
-        clientId,
-        clientSecret,
-        time,
+        config,
         accessToken: jwtToken.access_token,
         expiresIn: jwtToken.expires_in,
         refreshToken: jwtToken.refresh_token,
         refreshExpiresIn: jwtToken.refresh_expires_in,
-        timeSkew: Math.floor(time / 1000) - parsedToken.iat,
+        timeSkew: parsedToken?.iat ? Math.floor(config.time / 1000) - parsedToken.iat : 0,
       };
     }
   }
@@ -174,8 +176,6 @@ function isTokenExpired(time: number, expiresIn: number, timeSkew: number) {
 }
 
 async function requestOpenIdInformation(variablePrefix: string, getOptions: (config: OpenIdConfig) => Promise<HttpClientOptions | false>, { httpClient, progress, variables }: ProcessorContext) : Promise<OpenIdInformation | false>{
-  const time = new Date().getTime();
-
   const getVariable = (name: string) => variables[`${variablePrefix}_${name}`] || get(variables, `${variablePrefix}.${name}`);
 
   const config: OpenIdConfig = {
@@ -183,9 +183,13 @@ async function requestOpenIdInformation(variablePrefix: string, getOptions: (con
     tokenEndpoint: getVariable('tokenEndpoint'),
     clientId: getVariable('clientId'),
     clientSecret: getVariable('clientSecret'),
+    scope: getVariable('scope'),
     username: getVariable('username'),
     password: getVariable('password'),
+    subjectIssuer: getVariable('subjectIssuer'),
     port: getVariable('port') || 3000,
+    keepAlive: ['false', '0', false].indexOf(getVariable('keepAlive')) < 0,
+    time: new Date().getTime()
   };
 
   const options = await getOptions(config);
@@ -194,7 +198,7 @@ async function requestOpenIdInformation(variablePrefix: string, getOptions: (con
     if (response) {
       response.request = options;
     }
-    return toOpenIdInformation(config.tokenEndpoint, config.clientId, config.clientSecret, time, response);
+    return toOpenIdInformation(response, config);
   }
   return false;
 }
@@ -207,7 +211,10 @@ async function clientCredentialsFlow(config: OpenIdConfig) : Promise<HttpClientO
       'authorization': `Basic ${Buffer.from(`${config.clientId}:${config.clientSecret}`).toString('base64')}`,
       'content-type': 'application/x-www-form-urlencoded',
     },
-    body: 'grant_type=client_credentials'
+    body: toQueryParams({
+      grant_type: 'client_credentials',
+      scope: config.scope
+    })
   };
 }
 
@@ -221,7 +228,12 @@ async function passwordFlow(config: OpenIdConfig) : Promise<HttpClientOptions | 
         'authorization': `Basic ${Buffer.from(`${config.clientId}:${config.clientSecret}`).toString('base64')}`,
         'content-type': 'application/x-www-form-urlencoded',
       },
-      body: `grant_type=password&username=${encodeURIComponent(config.username)}&password=${encodeURIComponent(config.password)}`
+      body:  toQueryParams({
+        grant_type: 'password',
+        scope: config.scope,
+        username: config.username,
+        password: config.password
+      })
     };
   }
   return false;
@@ -231,24 +243,25 @@ async function tokenExchangeFlow(config: OpenIdConfig, openIdInformation: OpenId
   if (openIdInformation) {
     const jwtToken = decodeJWT(openIdInformation.accessToken);
 
-
-    const bodyLines = [
-      "grant_type=urn:ietf:params:oauth:grant-type:token-exchange",
-      "requested_token_type=urn:ietf:params:oauth:token-type:access_token",
-      "subject_token_type=urn:ietf:params:oauth:token-type:access_token",
-      "scope=openid",
-      `subject_issuer=${jwtToken.iss}`,
-      `subject_token=${encodeUrl(openIdInformation.accessToken)}`
-    ];
-    return {
-      url: config.tokenEndpoint,
-      method: 'POST',
-      headers: {
-        'authorization': `Basic ${Buffer.from(`${config.clientId}:${config.clientSecret}`).toString('base64')}`,
-        'content-type': 'application/x-www-form-urlencoded',
-      },
-      body: bodyLines.join('&')
-    };
+    if (config.subjectIssuer || jwtToken?.iss) {
+      const issuer = config.subjectIssuer || jwtToken?.iss;
+      return {
+        url: config.tokenEndpoint,
+        method: 'POST',
+        headers: {
+          'authorization': `Basic ${Buffer.from(`${config.clientId}:${config.clientSecret}`).toString('base64')}`,
+          'content-type': 'application/x-www-form-urlencoded',
+        },
+        body: toQueryParams({
+          grant_type: 'urn:ietf:params:oauth:grant-type:token-exchange',
+          requested_token_type: 'urn:ietf:params:oauth:token-type:access_token',
+          subject_token_type: 'urn:ietf:params:oauth:token-type:access_token',
+          scope: config.scope || 'openid',
+          subject_issuer: issuer,
+          subject_token: encodeUrl(openIdInformation.accessToken)
+        })
+      };
+    }
   }
   return false;
 }
@@ -256,14 +269,19 @@ async function tokenExchangeFlow(config: OpenIdConfig, openIdInformation: OpenId
 
 function authorizationCodeFlow(config: OpenIdConfig, filename: string) : Promise<HttpClientOptions | false> {
   return new Promise<HttpClientOptions | false>(async (resolve, reject) => {
-
     try {
-
-
       const redirectUri = `http://localhost:${config.port}/callback`;
       const state = stateGenerator();
 
-      const authUrl = `${config.authorizationEndpoint}?client_id=${encodeURIComponent(config.clientId)}&response_type=code&state=${encodeURIComponent(state)}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+      const queryString = toQueryParams({
+        client_id: config.clientId,
+        scope: config.scope || 'openid',
+        response_type: 'code',
+        state: state,
+        redirect_uri: redirectUri
+      });
+
+      const authUrl = `${config.authorizationEndpoint}${config.authorizationEndpoint.indexOf('?') > 0 ? '&' : '?'}${queryString}`;
 
       let close: false | (() => void) = false;
       const server = createServer((req, res) => {
@@ -281,10 +299,13 @@ function authorizationCodeFlow(config: OpenIdConfig, filename: string) : Promise
                   'authorization': `Basic ${Buffer.from(`${config.clientId}:${config.clientSecret}`).toString('base64')}`,
                   'content-type': 'application/x-www-form-urlencoded',
                 },
-                body: `grant_type=authorization_code&code=${encodeURIComponent(queryParams.code)}&redirect_uri=${encodeURIComponent(redirectUri)}`
+                body: toQueryParams({
+                  grant_type: 'authorization_code',
+                  scope: config.scope,
+                  code: queryParams.code,
+                  redirect_uri: redirectUri
+                })
               });
-
-
 
               res.setHeader("Location", `vscode://${filename}`);
               statusCode = 302;
@@ -336,6 +357,14 @@ function parseQueryParams(url: string) {
     prev[key] = value;
     return prev;
   }, {} as Record<string,string>);
+}
+
+
+function toQueryParams(params: Record<string, any>) {
+  return Object.entries(params)
+    .filter(([, value]) => !!value)
+    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+    .join('&');
 }
 
 function getHtml(message: string) {

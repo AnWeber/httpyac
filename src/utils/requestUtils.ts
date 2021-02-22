@@ -1,4 +1,5 @@
 import { HttpMethod } from '../models';
+import { log } from '../logger';
 
 
 export function isRequestMethod(method: string | undefined): method is HttpMethod {
@@ -23,28 +24,45 @@ export function getHeader(headers: Record<string, string | string[] | undefined 
 }
 
 
-export function decodeJWT(str: string) {
-  let jwtComponents = str.split('.');
-  if (jwtComponents.length !== 3) {
-    return;
-  }
-  let payload = jwtComponents[1];
-  payload = payload.replace(/-/g, '+');
-  payload = payload.replace(/_/g, '/');
-  switch (payload.length % 4) {
-    case 0:
-      break;
-    case 2:
-      payload += '==';
-      break;
-    case 3:
-      payload += '=';
-      break;
-    default:
+export interface JWTToken {
+  iss?: string;
+  sub?: string;
+  aud?: string[];
+  exp?: number;
+  iat?: number;
+  jti?: string;
+  scope?: string;
+  name?: string;
+}
+
+
+export function decodeJWT(str: string) : JWTToken | null{
+  try {
+    let jwtComponents = str.split('.');
+    if (jwtComponents.length !== 3) {
       return null;
+    }
+    let payload = jwtComponents[1];
+    payload = payload.replace(/-/g, '+');
+    payload = payload.replace(/_/g, '/');
+    switch (payload.length % 4) {
+      case 0:
+        break;
+      case 2:
+        payload += '==';
+        break;
+      case 3:
+        payload += '=';
+        break;
+      default:
+        return null;
+    }
+
+    const result = decodeURIComponent(escape(Buffer.from(payload, 'base64').toString()));
+
+    return JSON.parse(result);
+  } catch (err) {
+    log.warn(err);
+    return null;
   }
-
-  const result = decodeURIComponent(escape(Buffer.from(payload, 'base64').toString()));
-
-  return JSON.parse(result);
 }
