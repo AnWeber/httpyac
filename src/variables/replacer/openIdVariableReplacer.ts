@@ -1,14 +1,14 @@
 import { ProcessorContext, HttpResponse, HttpClientOptions, HttpClient, Progress } from '../../models';
 import { isString, toConsoleOutput, decodeJWT } from '../../utils';
 import { environmentStore } from '../../environments';
-import { log } from '../../logger';
+import { log, popupService } from '../../logger';
 import get from 'lodash/get';
 const encodeUrl = require('encodeurl');
-import { createServer } from 'http';
-import { default as open} from 'open';
-
+import { default as open } from 'open';
+import {registerListener, unregisterListener } from './openIdHttpserver';
 
 interface OpenIdConfig{
+  variablePrefix: string;
   authorizationEndpoint: string;
   tokenEndpoint: string;
   clientId: string;
@@ -47,8 +47,8 @@ export async function openIdVariableReplacer(text: string, type: string, context
       const flows: Record<string, ((config: OpenIdConfig) => Promise<HttpClientOptions | false>) | undefined> = {
         'client_credentials': clientCredentialsFlow,
         'password': passwordFlow,
-        'authorization_code': (config) => authorizationCodeFlow(config, context.httpFile.fileName),
-        'code': (config) => authorizationCodeFlow(config, context.httpFile.fileName),
+        'authorization_code': (config) => authorizationCodeFlow(config, context),
+        'code': (config) => authorizationCodeFlow(config, context),
       };
 
       let openIdInformation: OpenIdInformation | false = await refreshTokenOrReuse(oauthStore[cacheKey], context.httpClient, context.progress);
@@ -62,19 +62,18 @@ export async function openIdVariableReplacer(text: string, type: string, context
 
             if (openIdInformation && match.groups.tokenExchangePrefix) {
               openIdInformation = await requestOpenIdInformation(match.groups.tokenExchangePrefix, config => tokenExchangeFlow(config, openIdInformation), context);
-            }
-            if (!openIdInformation) {
-              throw new Error(`authorization failed`);
+            } else if(context.cancelVariableReplacer) {
+              // flow found but no authorization, stop processing
+              context.cancelVariableReplacer();
             }
           }
         }
       }
 
+      removeOpenIdInformation(cacheKey);
       if (openIdInformation) {
-        removeOpenIdInformation(cacheKey);
         oauthStore[cacheKey] = openIdInformation;
         keepAlive(cacheKey, context.httpClient);
-
         return `Bearer ${openIdInformation.accessToken}`;
       }
     } catch (err) {
@@ -179,6 +178,7 @@ async function requestOpenIdInformation(variablePrefix: string, getOptions: (con
   const getVariable = (name: string) => variables[`${variablePrefix}_${name}`] || get(variables, `${variablePrefix}.${name}`);
 
   const config: OpenIdConfig = {
+    variablePrefix,
     authorizationEndpoint: getVariable('authorizationEndpoint'),
     tokenEndpoint: getVariable('tokenEndpoint'),
     clientId: getVariable('clientId'),
@@ -204,6 +204,9 @@ async function requestOpenIdInformation(variablePrefix: string, getOptions: (con
 }
 
 async function clientCredentialsFlow(config: OpenIdConfig) : Promise<HttpClientOptions | false>{
+  if (!assertConfig(config, ['tokenEndpoint', 'clientId', 'clientSecret'])) {
+    return false;
+  }
   return {
     url: config.tokenEndpoint,
     method: 'POST',
@@ -218,9 +221,36 @@ async function clientCredentialsFlow(config: OpenIdConfig) : Promise<HttpClientO
   };
 }
 
-async function passwordFlow(config: OpenIdConfig) : Promise<HttpClientOptions | false> {
-  if (config.username
-    && config.password) {
+async function passwordFlow(config: OpenIdConfig): Promise<HttpClientOptions | false> {
+
+  if (!assertConfig(config, ['tokenEndpoint', 'clientId', 'clientSecret', 'username', 'password'])) {
+    return false;
+  }
+  return {
+    url: config.tokenEndpoint,
+    method: 'POST',
+    headers: {
+      'authorization': `Basic ${Buffer.from(`${config.clientId}:${config.clientSecret}`).toString('base64')}`,
+      'content-type': 'application/x-www-form-urlencoded',
+    },
+    body: toQueryParams({
+      grant_type: 'password',
+      scope: config.scope,
+      username: config.username,
+      password: config.password
+    })
+  };
+}
+
+async function tokenExchangeFlow(config: OpenIdConfig, openIdInformation: OpenIdInformation | false): Promise<HttpClientOptions | false> {
+  if (openIdInformation) {
+    const jwtToken = decodeJWT(openIdInformation.accessToken);
+
+    const issuer = config.subjectIssuer || jwtToken?.iss;
+
+    if(!assertConfig(config, ['tokenEndpoint', 'clientId', 'clientSecret']) || !issuer) {
+      return false;
+    }
     return {
       url: config.tokenEndpoint,
       method: 'POST',
@@ -228,115 +258,88 @@ async function passwordFlow(config: OpenIdConfig) : Promise<HttpClientOptions | 
         'authorization': `Basic ${Buffer.from(`${config.clientId}:${config.clientSecret}`).toString('base64')}`,
         'content-type': 'application/x-www-form-urlencoded',
       },
-      body:  toQueryParams({
-        grant_type: 'password',
-        scope: config.scope,
-        username: config.username,
-        password: config.password
+      body: toQueryParams({
+        grant_type: 'urn:ietf:params:oauth:grant-type:token-exchange',
+        requested_token_type: 'urn:ietf:params:oauth:token-type:access_token',
+        subject_token_type: 'urn:ietf:params:oauth:token-type:access_token',
+        scope: config.scope || 'openid',
+        subject_issuer: issuer,
+        subject_token: encodeUrl(openIdInformation.accessToken)
       })
     };
-  }
-  return false;
-}
 
-async function tokenExchangeFlow(config: OpenIdConfig, openIdInformation: OpenIdInformation | false): Promise<HttpClientOptions | false> {
-  if (openIdInformation) {
-    const jwtToken = decodeJWT(openIdInformation.accessToken);
-
-    if (config.subjectIssuer || jwtToken?.iss) {
-      const issuer = config.subjectIssuer || jwtToken?.iss;
-      return {
-        url: config.tokenEndpoint,
-        method: 'POST',
-        headers: {
-          'authorization': `Basic ${Buffer.from(`${config.clientId}:${config.clientSecret}`).toString('base64')}`,
-          'content-type': 'application/x-www-form-urlencoded',
-        },
-        body: toQueryParams({
-          grant_type: 'urn:ietf:params:oauth:grant-type:token-exchange',
-          requested_token_type: 'urn:ietf:params:oauth:token-type:access_token',
-          subject_token_type: 'urn:ietf:params:oauth:token-type:access_token',
-          scope: config.scope || 'openid',
-          subject_issuer: issuer,
-          subject_token: encodeUrl(openIdInformation.accessToken)
-        })
-      };
-    }
   }
   return false;
 }
 
 
-function authorizationCodeFlow(config: OpenIdConfig, filename: string) : Promise<HttpClientOptions | false> {
+function authorizationCodeFlow(config: OpenIdConfig, context: ProcessorContext) : Promise<HttpClientOptions | false> {
   return new Promise<HttpClientOptions | false>(async (resolve, reject) => {
+    const state = stateGenerator();
     try {
-      const redirectUri = `http://localhost:${config.port}/callback`;
-      const state = stateGenerator();
 
-      const queryString = toQueryParams({
+      if(!assertConfig(config, ['tokenEndpoint', 'authorizationEndpoint', 'clientId', 'clientSecret'])) {
+        return resolve(false);
+      }
+
+      const redirectUri = `http://localhost:${config.port}/callback`;
+
+      const authUrl = `${config.authorizationEndpoint}${config.authorizationEndpoint.indexOf('?') > 0 ? '&' : '?'}${toQueryParams({
         client_id: config.clientId,
         scope: config.scope || 'openid',
         response_type: 'code',
-        state: state,
+        state,
         redirect_uri: redirectUri
-      });
+      })}`;
 
-      const authUrl = `${config.authorizationEndpoint}${config.authorizationEndpoint.indexOf('?') > 0 ? '&' : '?'}${queryString}`;
+      let unregisterProgress: (() => void) | undefined;
+      if (context.progress) {
+        unregisterProgress = context.progress.register(() => {
+          unregisterListener(state);
+          reject();
+        });
+      }
 
-      let close: false | (() => void) = false;
-      const server = createServer((req, res) => {
-        try {
-          let message = 'invalid uri';
-          let statusCode = 500;
-          if (req.url && req.url.startsWith('/callback')) {
-            const queryParams = parseQueryParams(req.url);
-
-            if (queryParams.code && queryParams.state === state) {
-              resolve({
-                url: config.tokenEndpoint,
-                method: 'POST',
-                headers: {
-                  'authorization': `Basic ${Buffer.from(`${config.clientId}:${config.clientSecret}`).toString('base64')}`,
-                  'content-type': 'application/x-www-form-urlencoded',
-                },
-                body: toQueryParams({
-                  grant_type: 'authorization_code',
-                  scope: config.scope,
-                  code: queryParams.code,
-                  redirect_uri: redirectUri
-                })
-              });
-
-              res.setHeader("Location", `vscode://${filename}`);
-              statusCode = 302;
-              message = 'code and valid state received. switch back to vscode';
-
-              if (close) {
-                close();
-              }
-            } else {
-              if (!queryParams.code) {
-                message = 'missing code';
-              } else {
-                message = 'state is not valid';
-              }
-              resolve(false);
+      registerListener({
+        id: state,
+        name: `authorization for ${config.clientId}: ${config.authorizationEndpoint}`,
+        resolve: (params) => {
+          if (params.code && params.state === state) {
+            if (unregisterProgress) {
+              unregisterProgress();
             }
+            resolve({
+              url: config.tokenEndpoint,
+              method: 'POST',
+              headers: {
+                'authorization': `Basic ${Buffer.from(`${config.clientId}:${config.clientSecret}`).toString('base64')}`,
+                'content-type': 'application/x-www-form-urlencoded',
+              },
+              body: toQueryParams({
+                grant_type: 'authorization_code',
+                scope: config.scope,
+                code: params.code,
+                redirect_uri: redirectUri
+              })
+            });
+            return {
+              valid: true,
+              message: 'code received.',
+              statusMessage: 'code and state valid. starting code exchange'
+            };
           }
-          res.setHeader("Content-Type", "text/html");
-          res.writeHead(statusCode, message);
-          res.end(getHtml(message));
-        } catch (err) {
-          log.error(err);
-          res.end(getHtml(err));
-        }
+
+          return {
+            valid: false,
+            message: 'no code received',
+            statusMessage: 'no code received'
+          };
+        },
+        reject,
       });
-      server.listen(config.port);
-      close = () => server.close();
-
       await open(authUrl);
-
     } catch (err) {
+      unregisterListener(state);
       reject(err);
     }
   });
@@ -350,14 +353,20 @@ function stateGenerator(length: number = 30) {
   return result.join('');
 }
 
-
-function parseQueryParams(url: string) {
-  return url.substring(url.indexOf('?') + 1).split('&').reduce((prev, current) => {
-    const [key, value] = current.split('=');
-    prev[key] = value;
-    return prev;
-  }, {} as Record<string,string>);
+function assertConfig(config: OpenIdConfig, keys: string[]) {
+  const missingKeys = [];
+  for (const key of keys) {
+    if (!Object.entries(config).some(([obj, value]) => obj === key && !!value)) {
+      missingKeys.push(key);
+    }
+  }
+  if (missingKeys.length > 0) {
+    popupService.warn(`missing configuration: ${missingKeys.map(obj => `${config.variablePrefix}_${obj}`).join(', ')}`);
+    return false;
+  }
+  return true;
 }
+
 
 
 function toQueryParams(params: Record<string, any>) {
@@ -365,17 +374,4 @@ function toQueryParams(params: Record<string, any>) {
     .filter(([, value]) => !!value)
     .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
     .join('&');
-}
-
-function getHtml(message: string) {
-
-  return `
-<html>
-<body>
-  <p align="center">
-    <img src="https://raw.githubusercontent.com/AnWeber/vscode-httpyac/master/icon.png" alt="HttpYac Logo" />
-  </p>
-  <div>${message}</message>
-</body>
-</html>`;
 }

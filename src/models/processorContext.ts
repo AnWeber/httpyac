@@ -25,5 +25,6 @@ export interface HttpRegionSendContext extends HttpFileSendContext{
 export interface ProcessorContext extends HttpRegionSendContext{
   variables: Variables;
   request?: HttpRequest;
+  cancelVariableReplacer?: () => void;
   showProgressBar?: boolean;
 }

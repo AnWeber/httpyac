@@ -1,7 +1,7 @@
 import { Variables, ProcessorContext, HttpRegion, HttpFile } from '../models';
 import { ScriptData, executeScript } from './jsActionProcessor';
 import { ok } from 'assert';
-import { log } from '../logger';
+import { log, popupService } from '../logger';
 import { toAbsoluteFilename } from '../utils';
 import { promises as fs } from 'fs';
 
@@ -38,6 +38,7 @@ async function loadScript(file: string, httpFile: HttpFile) {
     }
     return script;
   } catch (err) {
+    popupService.error(`error loading script ${file}`);
     log.warn(file, err);
     return false;
   }

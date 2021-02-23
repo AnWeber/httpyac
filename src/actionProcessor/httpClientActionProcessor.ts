@@ -1,7 +1,7 @@
 import {ProcessorContext, HttpRequest, VariableReplacerType , HttpClientOptions, HttpFile, HttpRegion} from '../models';
 import { isString, isMimeTypeFormUrlEncoded , isMimeTypeJSON, toEnvironmentKey , toConsoleOutput, decodeJWT} from '../utils';
 import { httpYacApi } from '../httpYacApi';
-import { log } from '../logger';
+import { log, popupService } from '../logger';
 import { isValidVariableName } from './jsActionProcessor';
 import cloneDeep = require('lodash/cloneDeep');
 import merge from 'lodash/merge';
@@ -11,27 +11,28 @@ const encodeUrl = require('encodeurl');
 
 export async function httpClientActionProcessor(data: unknown, {httpRegion, httpFile, variables, progress, httpClient, showProgressBar}: ProcessorContext): Promise<boolean> {
   if (httpRegion.request) {
-    const request = await replaceVariablesInRequest(httpRegion.request, {httpRegion, httpFile, variables, httpClient});
-    const options: HttpClientOptions = await initOptions(request, httpRegion.metaData.proxy);
+    const request = await replaceVariablesInRequest(httpRegion.request, { httpRegion, httpFile, variables, httpClient });
+    if (!!request) {
+      const options: HttpClientOptions = await initOptions(request, httpRegion.metaData.proxy);
 
-    try {
-      log.debug('request', options);
+      try {
+        log.debug('request', options);
 
-      const response = await httpClient(options, progress, !!showProgressBar);
-      if (response) {
-        response.request = options;
-        httpRegion.response = response;
-        setResponseAsVariable(httpRegion, variables, httpFile);
-        log.info(toConsoleOutput(httpRegion.response));
-      } else {
-        return false;
+        const response = await httpClient(options, progress, !!showProgressBar);
+        if (response) {
+          response.request = options;
+          httpRegion.response = response;
+          setResponseAsVariable(httpRegion, variables, httpFile);
+          log.info(toConsoleOutput(httpRegion.response));
+          return true;
+        }
+      } catch (err) {
+        log.error(httpRegion.request.url, options, err);
+        throw err;
       }
-    } catch (err) {
-      log.error(httpRegion.request.url, options, err);
-      throw err;
     }
   }
-  return true;
+  return false;
 };
 
 function setResponseAsVariable(httpRegion: HttpRegion<any>, variables: Record<string, any>, httpFile: HttpFile) {
@@ -46,6 +47,7 @@ function setResponseAsVariable(httpRegion: HttpRegion<any>, variables: Record<st
         handleNameMetaData(body, httpRegion, variables, httpFile);
       }
     } catch (err) {
+      popupService.warn('json parse error', body);
       log.warn('json parse error', body, err);
     }
   }
@@ -88,18 +90,29 @@ async function normalizeBody(body: string | Array<string | (() => Promise<Buffer
 async function replaceVariablesInRequest(request: HttpRequest, context: ProcessorContext) {
   const replacedReqeust = cloneDeep(request);
   context.request = replacedReqeust;
-  const replacer = (value: string, type: VariableReplacerType | string) => httpYacApi.replaceVariables(value, type, context);
-  replacedReqeust.url = await replacer(replacedReqeust.url, VariableReplacerType.url) || replacedReqeust.url;
-  for (const [headerName, headerValue] of Object.entries(replacedReqeust.headers)) {
-    if (isString(headerValue)) {
-      const value = await replacer(headerValue, headerName);
-      if (value === undefined) {
-        delete replacedReqeust.headers[headerName];
-      }else{
-        replacedReqeust.headers[headerName] = value;
-      }
+
+  let cancel = false;
+  context.cancelVariableReplacer = () => cancel = true;
+
+  const replacer = async (value: string, type: VariableReplacerType | string) => {
+    if (!cancel) {
+      return await httpYacApi.replaceVariables(value, type, context);
     }
+    return value;
+  };
+
+  replacedReqeust.url = await replacer(replacedReqeust.url, VariableReplacerType.url) || replacedReqeust.url;
+  await replaceVariablesInHeader(replacedReqeust, replacer);
+  await replaceVariablesInBody(replacedReqeust, replacer);
+  delete context.request;
+  if (!cancel){
+    return replacedReqeust;
   }
+  return false;
+}
+
+
+async function replaceVariablesInBody(replacedReqeust: HttpRequest<any>, replacer: (value: string, type: VariableReplacerType | string) => Promise<string | undefined>) {
   if (replacedReqeust.body) {
     if (isString(replacedReqeust.body)) {
       replacedReqeust.body = await replacer(replacedReqeust.body, VariableReplacerType.body);
@@ -118,16 +131,27 @@ async function replaceVariablesInRequest(request: HttpRequest, context: Processo
       replacedReqeust.body = replacedBody;
     }
   }
-  delete context.request;
-  return replacedReqeust;
 }
 
+async function replaceVariablesInHeader(replacedReqeust: HttpRequest<any>, replacer: (value: string, type: VariableReplacerType | string) => Promise<string | undefined>) {
+  for (const [headerName, headerValue] of Object.entries(replacedReqeust.headers)) {
+    if (isString(headerValue)) {
+      const value = await replacer(headerValue, headerName);
+      if (value === undefined) {
+        delete replacedReqeust.headers[headerName];
+      } else {
+        replacedReqeust.headers[headerName] = value;
+      }
+    }
+  }
+}
 
 function handleNameMetaData(body: unknown,httpRegion: HttpRegion<any>, variables: Record<string, any>, httpFile: HttpFile) {
   if (httpRegion.metaData.name && isValidVariableName(httpRegion.metaData.name)) {
     variables[httpRegion.metaData.name] = body;
     httpFile.environments[toEnvironmentKey(httpFile.activeEnvironment)][httpRegion.metaData.name] = body;
   } else if (httpRegion.metaData.name) {
+    popupService.warn(`Javascript Keyword ${httpRegion.metaData.name} not allowed as name`);
     log.warn(`Javascript Keyword ${httpRegion.metaData.name} not allowed as name`);
   }
 }
