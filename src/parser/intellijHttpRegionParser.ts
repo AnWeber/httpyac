@@ -1,54 +1,100 @@
 
 import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, ActionProcessorType } from '../models';
 import { toMultiLineString } from '../utils';
-import { ScriptData, intellijActionProcessor } from '../actionProcessor';
+import { ScriptData, IntellijScriptData, intellijActionProcessor } from '../actionProcessor';
+
+
+export interface IntelliJParserResult{
+  name?: string,
+  startLine: number,
+  endLine: number,
+  data: ScriptData | IntellijScriptData;
+}
 
 
 export class IntellijHttpRegionParser implements HttpRegionParser{
   async parse(lineReader: HttpRegionParserGenerator, { httpRegion }: ParserContext): Promise<HttpRegionParserResult> {
     if (httpRegion.request) {
-      let next = lineReader.next();
 
-      if (!next.done) {
-        const matches = /^\s*>\s+{%?\s*$/.exec(next.value.textLine);
-        if (!matches) {
-          return false;
-        }
-        const lineOffset = next.value.line;
-        next = lineReader.next();
-        const script: Array<string> = [];
-        while (!next.done) {
+      const intellijContent = getIntellijContent(lineReader);
 
-          if (/^\s*%}\s*$/.test(next.value.textLine)) {
-            const data: ScriptData = {
-              script: toMultiLineString(script),
-              lineOffset,
-            };
-            httpRegion.actions.push(
-              {
-                data,
-                type: ActionProcessorType.intellij,
-                processor: intellijActionProcessor,
-              }
-            );
-            return {
-              endLine: next.value.line,
-              symbols: [{
-                name: 'Intellij Script',
-                description: 'Intellij Script',
-                kind: HttpSymbolKind.script,
-                startLine: lineOffset,
-                startOffset: 0,
-                endLine: next.value.line,
-                endOffset: 0,
-              }],
-            };
+      if (intellijContent) {
+        httpRegion.actions.push(
+          {
+            data: intellijContent.data,
+            type: ActionProcessorType.intellij,
+            processor: intellijActionProcessor,
           }
-          script.push(next.value.textLine);
-          next = lineReader.next();
-        }
+        );
+        return {
+          endLine: intellijContent.endLine,
+          symbols: [{
+            name: 'Intellij Script',
+            description: 'Intellij Script',
+            kind: HttpSymbolKind.script,
+            startLine: intellijContent.startLine,
+            startOffset: 0,
+            endLine: intellijContent.endLine,
+            endOffset: 0,
+          }],
+        };
       }
     }
     return false;
   }
+}
+
+
+
+function getIntellijContent(lineReader: HttpRegionParserGenerator): IntelliJParserResult | false {
+  let next = lineReader.next();
+  if (!next.done) {
+
+    const startLine = next.value.line;
+
+    const fileMatches = /^\s*>\s+(?<fileName>[^\s{%}]+\s*)$/.exec(next.value.textLine);
+    if (fileMatches?.groups?.fileName) {
+      return {
+        startLine,
+        endLine: startLine,
+        data: {
+          fileName: fileMatches.groups.fileName
+        }
+      };
+    }
+
+    const singleLineMatch = /^\s*>\s+{%\s*(?<script>.*)\s*%}\s*$/.exec(next.value.textLine);
+    if (singleLineMatch?.groups?.script) {
+      return {
+        startLine,
+        endLine: startLine,
+        data: {
+          script: singleLineMatch.groups.script,
+          lineOffset: startLine,
+        }
+      };
+    }
+
+    const multiLineMatch = /^\s*>\s+{%\s*$/.exec(next.value.textLine);
+    if (multiLineMatch) {
+      let next = lineReader.next();
+      const scriptLines: Array<string> = [];
+      while (!next.done) {
+        if (/^\s*%}\s*$/.test(next.value.textLine)) {
+          return {
+            startLine,
+            endLine: next.value.line,
+            data: {
+              script: toMultiLineString(scriptLines),
+              lineOffset: startLine
+            }
+          };
+        }
+        scriptLines.push(next.value.textLine);
+        next = lineReader.next();
+      }
+
+    }
+  }
+  return false;
 }
