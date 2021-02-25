@@ -38,6 +38,7 @@ export async function executeGlobalScripts(httpFile: HttpFile, variables: Variab
 async function getVariables(httpFile: HttpFile): Promise<Record<string, any>> {
   const variables = Object.assign({
     log,
+    console: log,
   },
     (await environmentStore.getVariables(httpFile.activeEnvironment)),
     ...(await Promise.all(

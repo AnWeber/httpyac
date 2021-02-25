@@ -18,6 +18,7 @@ export interface PopupService{
 
 export interface Logger {
   level: LogLevel,
+  readonly log: (...data: Array<any>) => void;
   readonly info: (...data: Array<any>) => void;
   readonly trace: (...data:Array<any>) => void;
   readonly debug: (...data:Array<any>) => void;
@@ -64,6 +65,7 @@ export const outputProvider: OutputProvider = {
 
 export const log: Logger = {
   level: LogLevel.warn,
+  log: (...params) => logToOutputChannel(LogLevel.info, outputProvider.log, ...params),
   info: (...params) => logToOutputChannel(LogLevel.info, outputProvider.log, ...params),
   trace: (...params) => logToOutputChannel(LogLevel.trace, outputProvider.log, ...params),
   debug: (...params) => logToOutputChannel(LogLevel.debug, outputProvider.log, ...params),
