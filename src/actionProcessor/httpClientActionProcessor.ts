@@ -9,21 +9,27 @@ import get from 'lodash/get';
 const encodeUrl = require('encodeurl');
 
 
-export async function httpClientActionProcessor(data: unknown, {httpRegion, httpFile, variables, progress, httpClient, showProgressBar}: ProcessorContext): Promise<boolean> {
+export async function httpClientActionProcessor(data: unknown, context: ProcessorContext): Promise<boolean> {
+  const { httpRegion, httpFile, httpClient, variables } = context;
   if (httpRegion.request) {
     const request = await replaceVariablesInRequest(httpRegion.request, { httpRegion, httpFile, variables, httpClient });
     if (!!request) {
       const options: HttpClientOptions = await initOptions(request, httpRegion.metaData.proxy);
+      options.followRedirect = !httpRegion.metaData.noRedirect;
 
       try {
-        log.debug('request', options);
+        if (!httpRegion.metaData.noLog) {
+          log.debug('request', options);
+        }
 
-        const response = await httpClient(options, progress, !!showProgressBar);
+        const response = await httpClient(options, context);
         if (response) {
           response.request = options;
           httpRegion.response = response;
           setResponseAsVariable(httpRegion, variables, httpFile);
-          log.info(toConsoleOutput(httpRegion.response));
+          if(!httpRegion.metaData.noLog){
+            log.info(toConsoleOutput(httpRegion.response));
+          }
           return true;
         }
       } catch (err) {

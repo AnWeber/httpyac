@@ -1,5 +1,6 @@
 import { HttpClientOptions } from './httpClientOptions';
 import { HttpResponse } from './httpResponse';
-import { Progress } from './processorContext';
+import { HttpClientContext } from './httpClientContext';
 
-export type HttpClient = (options: HttpClientOptions, progress: Progress | undefined, showProgressBar: boolean) => Promise<HttpResponse | false>;
+
+export type HttpClient = (options: HttpClientOptions, context: HttpClientContext) => Promise<HttpResponse | false>;

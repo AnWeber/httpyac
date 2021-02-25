@@ -5,7 +5,6 @@ import { ScriptData, IntellijScriptData, intellijActionProcessor } from '../acti
 
 
 export interface IntelliJParserResult{
-  name?: string,
   startLine: number,
   endLine: number,
   data: ScriptData | IntellijScriptData;

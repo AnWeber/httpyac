@@ -59,7 +59,10 @@ export class MetaHttpRegionParser implements HttpRegionParser {
               });
             }
             result.symbols = [symbol];
-            switch (match.groups.key) {
+
+            const key = match.groups.key.replace(/-./, (value) => value[1].toUpperCase());
+
+            switch (key) {
               case 'import':
                 if (match.groups.value) {
                   await this.importHttpFile(httpFile, match.groups.value);
@@ -77,7 +80,7 @@ export class MetaHttpRegionParser implements HttpRegionParser {
                 break;
               default:
                 httpRegion.metaData = Object.assign(httpRegion.metaData || {}, {
-                  [match.groups.key]: match.groups.value || true,
+                  [key]: match.groups.value || true,
                 });
                 break;
             }

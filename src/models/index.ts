@@ -3,6 +3,7 @@ export * from './contentType';
 export * from './environmentConfig';
 export * from './environmentProvider';
 export * from './httpClient';
+export * from './httpClientContext';
 export * from './httpClientOptions';
 export * from './httpFile';
 export * from './httpMethod';

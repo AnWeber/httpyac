@@ -20,6 +20,7 @@ interface OpenIdConfig{
   password?: string;
   port?: string;
   subjectIssuer?: string;
+  noLog?: boolean;
 }
 
 interface OpenIdInformation{
@@ -141,7 +142,7 @@ async function refreshToken(cachedOpenIdInformation: OpenIdInformation, httpClie
         refresh_token: cachedOpenIdInformation.refreshToken
       })
     };
-    const response = await httpClient(options, progress, false);
+    const response = await httpClient(options, { progress, showProgressBar: false});
     if (response) {
       response.request = options;
     }
@@ -152,11 +153,15 @@ async function refreshToken(cachedOpenIdInformation: OpenIdInformation, httpClie
 
 function toOpenIdInformation(response: false | HttpResponse, config: OpenIdConfig): OpenIdInformation | false {
   if (response) {
-    log.info(toConsoleOutput(response, true));
+    if (!config.noLog) {
+      log.info(toConsoleOutput(response, true));
+    }
     if (response.statusCode === 200 && isString(response.body)) {
       const jwtToken = JSON.parse(response.body);
       const parsedToken = decodeJWT(jwtToken.access_token);
-      log.info(JSON.stringify(parsedToken, null, 2));
+      if (!config.noLog) {
+        log.info(JSON.stringify(parsedToken, null, 2));
+      }
       return {
         config,
         accessToken: jwtToken.access_token,
@@ -187,6 +192,7 @@ async function requestOpenIdInformation(variablePrefix: string, getOptions: (con
     username: getVariable('username'),
     password: getVariable('password'),
     subjectIssuer: getVariable('subjectIssuer'),
+    noLog: getVariable('noLog'),
     port: getVariable('port') || 3000,
     keepAlive: ['false', '0', false].indexOf(getVariable('keepAlive')) < 0,
     time: new Date().getTime()
@@ -194,7 +200,7 @@ async function requestOpenIdInformation(variablePrefix: string, getOptions: (con
 
   const options = await getOptions(config);
   if (options) {
-    const response = await httpClient(options, progress, false);
+    const response = await httpClient(options, { progress, showProgressBar: false });
     if (response) {
       response.request = options;
     }

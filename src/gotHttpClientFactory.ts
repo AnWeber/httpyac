@@ -1,4 +1,4 @@
-import { HttpClientOptions, HttpResponse, Progress } from './models';
+import { HttpClientContext, HttpClientOptions, HttpResponse, Progress } from './models';
 import { getHeader, isString, parseMimeType } from './utils';
 import { default as got, OptionsOfUnknownResponseBody, CancelError } from 'got';
 import merge from 'lodash/merge';
@@ -8,7 +8,7 @@ import { default as filesize } from 'filesize';
 
 
 export function gotHttpClientFactory(defaultsOverride: OptionsOfUnknownResponseBody = {}) {
-  return async function gotHttpClient(clientOptions: HttpClientOptions, progress: Progress | undefined, showProgressBar: boolean) {
+  return async function gotHttpClient(clientOptions: HttpClientOptions, context: HttpClientContext) {
     try {
       const defaults: OptionsOfUnknownResponseBody = {
         decompress: true,
@@ -31,17 +31,17 @@ export function gotHttpClientFactory(defaultsOverride: OptionsOfUnknownResponseB
       const responsePromise = got(url, options);
 
       let prevPercent = 0;
-      if (showProgressBar) {
+      if (context.showProgressBar) {
         responsePromise.on("downloadProgress", data => {
           const newData = data.percent - prevPercent;
           prevPercent = data.percent;
-          progress && progress.report({
+          context.progress && context.progress.report({
             message: url,
             increment: newData * 100,
           });
         });
       }
-      const dispose = progress && progress.register(() => {
+      const dispose = context.progress && context.progress.register(() => {
         responsePromise.cancel();
       });
       const response = await responsePromise;
