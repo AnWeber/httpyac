@@ -56,8 +56,11 @@ function closeHttpRegion(parserContext: ParserContext) {
       obj.close(parserContext);
     }
   };
-  const requestName = parserContext.httpRegion.symbol.children?.find(obj => obj.kind === HttpSymbolKind.requestLine)?.name || 'global';
-  parserContext.httpRegion.symbol.name = parserContext.httpRegion.metaData.name || requestName;
+  const requestName = parserContext.httpRegion.request?.url
+    || parserContext.httpRegion.symbol.children?.find(obj => obj.kind === HttpSymbolKind.requestLine)?.name
+    || 'global';
+  parserContext.httpRegion.symbol.name = parserContext.httpRegion.metaData.name
+    || requestName;
   parserContext.httpRegion.symbol.description = requestName;
   parserContext.httpFile.httpRegions.push(parserContext.httpRegion);
 }
