@@ -111,7 +111,7 @@ async function replaceVariablesInRequest(request: HttpRequest, context: Processo
   await replaceVariablesInHeader(replacedReqeust, replacer);
   await replaceVariablesInBody(replacedReqeust, replacer);
   delete context.request;
-  if (!cancel){
+  if (!cancel) {
     return replacedReqeust;
   }
   return false;

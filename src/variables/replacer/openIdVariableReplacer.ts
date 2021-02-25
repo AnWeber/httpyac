@@ -63,7 +63,9 @@ export async function openIdVariableReplacer(text: string, type: string, context
 
             if (openIdInformation && match.groups.tokenExchangePrefix) {
               openIdInformation = await requestOpenIdInformation(match.groups.tokenExchangePrefix, config => tokenExchangeFlow(config, openIdInformation), context);
-            } else if(context.cancelVariableReplacer) {
+            }
+
+            if(!openIdInformation && context.cancelVariableReplacer) {
               // flow found but no authorization, stop processing
               context.cancelVariableReplacer();
             }
