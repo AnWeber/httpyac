@@ -9,13 +9,13 @@ import {registerListener, unregisterListener } from './openIdHttpserver';
 
 interface OpenIdConfig{
   variablePrefix: string;
+  flow: string;
   authorizationEndpoint: string;
   tokenEndpoint: string;
   clientId: string;
   clientSecret: string;
   scope: string;
   keepAlive: boolean;
-  time: number;
   username?: string;
   password?: string;
   port?: string;
@@ -24,6 +24,7 @@ interface OpenIdConfig{
 }
 
 interface OpenIdInformation{
+  time: number;
   config: OpenIdConfig;
   accessToken: string;
   expiresIn: number;
@@ -40,51 +41,58 @@ environmentStore.additionalResets.push(() => {
   }
 });
 
+type OpenIdFlow = ((config: OpenIdConfig) => Promise<HttpClientOptions | false>);
 
 export async function openIdVariableReplacer(text: string, type: string, context: ProcessorContext) {
   if (type.toLowerCase() === "authorization" && text) {
-    const cacheKey = `${context.httpFile.activeEnvironment?.join('_')}|${text}`;
-    try {
-      const flows: Record<string, ((config: OpenIdConfig) => Promise<HttpClientOptions | false>) | undefined> = {
-        'client_credentials': clientCredentialsFlow,
-        'password': passwordFlow,
-        'authorization_code': (config) => authorizationCodeFlow(config, context),
-        'code': (config) => authorizationCodeFlow(config, context),
-      };
 
-      let openIdInformation: OpenIdInformation | false = await refreshTokenOrReuse(oauthStore[cacheKey], context.httpClient, context.progress);
-      if (!openIdInformation) {
-        const match = /^\s*(openid)\s+(?<flow>[^\s]*)\s+(?<variablePrefix>[^\s]*)\s*((token_exchange)\s+(?<tokenExchangePrefix>[^\s]*))?\s*$/i.exec(text);
-        if (match && match.groups && match.groups.flow && match.groups.variablePrefix) {
+    const flows: Record<string, OpenIdFlow | undefined> = {
+      'client_credentials': clientCredentialsFlow,
+      'password': passwordFlow,
+      'authorization_code': (config) => authorizationCodeFlow(config, context),
+      'code': (config) => authorizationCodeFlow(config, context),
+    };
 
-          const flow = flows[match.groups.flow];
-          if (flow) {
-            openIdInformation = await requestOpenIdInformation(match.groups.variablePrefix, flow, context);
+    const match = /^\s*(openid)\s+(?<flow>[^\s]*)\s+(?<variablePrefix>[^\s]*)\s*((token_exchange)\s+(?<tokenExchangePrefix>[^\s]*))?\s*$/i.exec(text);
+    if (match && match.groups && match.groups.flow && match.groups.variablePrefix) {
 
-            if (openIdInformation && match.groups.tokenExchangePrefix) {
-              openIdInformation = await requestOpenIdInformation(match.groups.tokenExchangePrefix, config => tokenExchangeFlow(config, openIdInformation), context);
-            }
+      const variablePrefix = match.groups.variablePrefix;
+      const tokenExchangePrefix = match.groups.tokenExchangePrefix;
 
-            if(!openIdInformation && context.cancelVariableReplacer) {
-              // flow found but no authorization, stop processing
-              context.cancelVariableReplacer();
-            }
-          }
-        }
+      const flow = flows[match.groups.flow];
+      if (flow && variablePrefix) {
+        return requestFlow(variablePrefix, match.groups.flow, flow, tokenExchangePrefix, context);
       }
-
-      removeOpenIdInformation(cacheKey);
-      if (openIdInformation) {
-        oauthStore[cacheKey] = openIdInformation;
-        keepAlive(cacheKey, context.httpClient);
-        return `Bearer ${openIdInformation.accessToken}`;
-      }
-    } catch (err) {
-      removeOpenIdInformation(cacheKey);
-      throw err;
     }
   }
   return text;
+}
+
+async function requestFlow(variablePrefix: string, flowType: string, flow: OpenIdFlow, tokenExchangePrefix: string, context: ProcessorContext) : Promise<string | undefined> {
+  const config: OpenIdConfig = getOpenIdConfig(variablePrefix, flowType, context.variables);
+  const cacheKey = JSON.stringify(config);
+  try {
+    let openIdInformation: OpenIdInformation | false = await refreshTokenOrReuse(oauthStore[cacheKey], context.httpClient, context.progress);
+    if (!openIdInformation) {
+      openIdInformation = await requestOpenIdInformation(config, flow, context);
+      if (openIdInformation && tokenExchangePrefix) {
+        openIdInformation = await requestOpenIdInformation(getOpenIdConfig(tokenExchangePrefix, flowType, context.variables), config => tokenExchangeFlow(config, openIdInformation), context);
+      }
+    }
+    removeOpenIdInformation(cacheKey);
+    if (openIdInformation) {
+      oauthStore[cacheKey] = openIdInformation;
+      keepAlive(cacheKey, context.httpClient);
+      return `Bearer ${openIdInformation.accessToken}`;
+    } else if(context.cancelVariableReplacer) {
+        // flow found but no authorization, stop processing
+        context.cancelVariableReplacer();
+    }
+  } catch (err) {
+    removeOpenIdInformation(cacheKey);
+    throw err;
+  }
+  return undefined;
 }
 
 function keepAlive(cacheKey: string, httpClient: HttpClient) {
@@ -113,7 +121,7 @@ function removeOpenIdInformation(cacheKey: string) {
 
 async function refreshTokenOrReuse(cachedOpenIdInformation: OpenIdInformation, httpClient: HttpClient, progress: Progress | undefined) {
   if (cachedOpenIdInformation) {
-    if (!isTokenExpired(cachedOpenIdInformation.config.time, cachedOpenIdInformation.expiresIn, cachedOpenIdInformation.timeSkew)) {
+    if (!isTokenExpired(cachedOpenIdInformation.time, cachedOpenIdInformation.expiresIn, cachedOpenIdInformation.timeSkew)) {
       return cachedOpenIdInformation;
     }
 
@@ -126,17 +134,14 @@ async function refreshTokenOrReuse(cachedOpenIdInformation: OpenIdInformation, h
 async function refreshToken(cachedOpenIdInformation: OpenIdInformation, httpClient: HttpClient, progress: Progress | undefined) {
   if (cachedOpenIdInformation.refreshToken
     && cachedOpenIdInformation.refreshExpiresIn
-    && !isTokenExpired(cachedOpenIdInformation.config.time, cachedOpenIdInformation.refreshExpiresIn, cachedOpenIdInformation.timeSkew)) {
+    && !isTokenExpired(cachedOpenIdInformation.time, cachedOpenIdInformation.refreshExpiresIn, cachedOpenIdInformation.timeSkew)) {
 
-    const config = {
-      ...cachedOpenIdInformation.config,
-      time: new Date().getTime()
-    };
+
     const options: HttpClientOptions = {
-      url: config.tokenEndpoint,
+      url: cachedOpenIdInformation.config.tokenEndpoint,
       method: 'POST',
       headers: {
-        'authorization': `Basic ${Buffer.from(`${config.clientId}:${config.clientSecret}`).toString('base64')}`,
+        'authorization': `Basic ${Buffer.from(`${cachedOpenIdInformation.config.clientId}:${cachedOpenIdInformation.config.clientSecret}`).toString('base64')}`,
         'content-type': 'application/x-www-form-urlencoded',
       },
       body: toQueryParams({
@@ -144,16 +149,17 @@ async function refreshToken(cachedOpenIdInformation: OpenIdInformation, httpClie
         refresh_token: cachedOpenIdInformation.refreshToken
       })
     };
+    const time = new Date().getTime();
     const response = await httpClient(options, { progress, showProgressBar: false});
     if (response) {
       response.request = options;
     }
-    return toOpenIdInformation(response, config);
+    return toOpenIdInformation(response, time, cachedOpenIdInformation.config);
   }
   return false;
 }
 
-function toOpenIdInformation(response: false | HttpResponse, config: OpenIdConfig): OpenIdInformation | false {
+function toOpenIdInformation(response: false | HttpResponse, time: number, config: OpenIdConfig): OpenIdInformation | false {
   if (response) {
     if (!config.noLog) {
       logRequest.info(toConsoleOutput(response, true));
@@ -165,12 +171,13 @@ function toOpenIdInformation(response: false | HttpResponse, config: OpenIdConfi
         log.info(JSON.stringify(parsedToken, null, 2));
       }
       return {
+        time,
         config,
         accessToken: jwtToken.access_token,
         expiresIn: jwtToken.expires_in,
         refreshToken: jwtToken.refresh_token,
         refreshExpiresIn: jwtToken.refresh_expires_in,
-        timeSkew: parsedToken?.iat ? Math.floor(config.time / 1000) - parsedToken.iat : 0,
+        timeSkew: parsedToken?.iat ? Math.floor(time / 1000) - parsedToken.iat : 0,
       };
     }
   }
@@ -181,11 +188,25 @@ function isTokenExpired(time: number, expiresIn: number, timeSkew: number) {
   return time + 1000 * (expiresIn - timeSkew) < (new Date()).getTime();
 }
 
-async function requestOpenIdInformation(variablePrefix: string, getOptions: (config: OpenIdConfig) => Promise<HttpClientOptions | false>, { httpClient, progress, variables }: ProcessorContext) : Promise<OpenIdInformation | false>{
+async function requestOpenIdInformation(config: OpenIdConfig, getOptions: OpenIdFlow, { httpClient, progress }: ProcessorContext) : Promise<OpenIdInformation | false>{
+  const options = await getOptions(config);
+  if (options) {
+    const time = new Date().getTime();
+    const response = await httpClient(options, { progress, showProgressBar: false });
+    if (response) {
+      response.request = options;
+    }
+    return toOpenIdInformation(response, time, config);
+  }
+  return false;
+}
+
+function getOpenIdConfig(variablePrefix: string, flow: string, variables: Record<string, any>) {
   const getVariable = (name: string) => variables[`${variablePrefix}_${name}`] || get(variables, `${variablePrefix}.${name}`);
 
   const config: OpenIdConfig = {
     variablePrefix,
+    flow,
     authorizationEndpoint: getVariable('authorizationEndpoint'),
     tokenEndpoint: getVariable('tokenEndpoint'),
     clientId: getVariable('clientId'),
@@ -197,18 +218,8 @@ async function requestOpenIdInformation(variablePrefix: string, getOptions: (con
     noLog: getVariable('noLog'),
     port: getVariable('port') || 3000,
     keepAlive: ['false', '0', false].indexOf(getVariable('keepAlive')) < 0,
-    time: new Date().getTime()
   };
-
-  const options = await getOptions(config);
-  if (options) {
-    const response = await httpClient(options, { progress, showProgressBar: false });
-    if (response) {
-      response.request = options;
-    }
-    return toOpenIdInformation(response, config);
-  }
-  return false;
+  return config;
 }
 
 async function clientCredentialsFlow(config: OpenIdConfig) : Promise<HttpClientOptions | false>{
@@ -369,7 +380,7 @@ function assertConfig(config: OpenIdConfig, keys: string[]) {
     }
   }
   if (missingKeys.length > 0) {
-    popupService.warn(`missing configuration: ${missingKeys.map(obj => `${config.variablePrefix}_${obj}`).join(', ')}`);
+    popupService.error(`missing configuration: ${missingKeys.map(obj => `${config.variablePrefix}_${obj}`).join(', ')}`);
     return false;
   }
   return true;
