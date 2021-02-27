@@ -105,7 +105,7 @@ export async function executeScript(context: { script: string, fileName: string 
     }
     return result;
   } catch (err) {
-    log.error(context.script, err);
+    log.error(`js: ${context.script}`);
     throw err;
   }
 }

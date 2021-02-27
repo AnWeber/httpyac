@@ -1,7 +1,7 @@
 import { ProcessorContext, HttpResponse, HttpClientOptions, HttpClient, Progress } from '../../models';
 import { isString, toConsoleOutput, decodeJWT } from '../../utils';
 import { environmentStore } from '../../environments';
-import { log, popupService } from '../../logger';
+import { log, popupService, logRequest } from '../../logger';
 import get from 'lodash/get';
 const encodeUrl = require('encodeurl');
 import { default as open } from 'open';
@@ -156,7 +156,7 @@ async function refreshToken(cachedOpenIdInformation: OpenIdInformation, httpClie
 function toOpenIdInformation(response: false | HttpResponse, config: OpenIdConfig): OpenIdInformation | false {
   if (response) {
     if (!config.noLog) {
-      log.info(toConsoleOutput(response, true));
+      logRequest.info(toConsoleOutput(response, true));
     }
     if (response.statusCode === 200 && isString(response.body)) {
       const jwtToken = JSON.parse(response.body);

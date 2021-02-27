@@ -62,7 +62,7 @@ export class HttpClient{
       func();
       log.info(testName);
     } catch (err) {
-      log.error(testName, err);
+      log.error(testName);
       throw err;
     }
   }

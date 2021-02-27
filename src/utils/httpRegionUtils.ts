@@ -1,7 +1,7 @@
 
 import { environmentStore } from '../environments';
 import { httpYacApi } from '../httpYacApi';
-import { log } from '../logger';
+import { log, console } from '../logger';
 import { HttpFileSendContext, HttpRegionSendContext, ProcessorContext, HttpFile, Variables, HttpResponse, HttpClient } from '../models';
 import {isString, toMultiLineString } from './stringUtils';
 
@@ -38,7 +38,7 @@ export async function executeGlobalScripts(httpFile: HttpFile, variables: Variab
 async function getVariables(httpFile: HttpFile): Promise<Record<string, any>> {
   const variables = Object.assign({
     log,
-    console: log,
+    console,
   },
     (await environmentStore.getVariables(httpFile.activeEnvironment)),
     ...(await Promise.all(

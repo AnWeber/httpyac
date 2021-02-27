@@ -53,7 +53,7 @@ export class HttpFileStore{
       }
       return httpFileStoreEntry.httpFile;
     } catch (err) {
-      log.error(fileName, err);
+      log.error(fileName);
       throw err;
     }
   }

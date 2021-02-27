@@ -1,7 +1,7 @@
 import {ProcessorContext, HttpRequest, VariableReplacerType , HttpClientOptions, HttpFile, HttpRegion} from '../models';
 import { isString, isMimeTypeFormUrlEncoded , isMimeTypeJSON, toEnvironmentKey , toConsoleOutput, decodeJWT} from '../utils';
 import { httpYacApi } from '../httpYacApi';
-import { log, popupService } from '../logger';
+import { log, popupService, logRequest } from '../logger';
 import { isValidVariableName } from './jsActionProcessor';
 import cloneDeep = require('lodash/cloneDeep');
 import merge from 'lodash/merge';
@@ -18,22 +18,18 @@ export async function httpClientActionProcessor(data: unknown, context: Processo
       options.followRedirect = !httpRegion.metaData.noRedirect;
 
       try {
-        if (!httpRegion.metaData.noLog) {
-          log.debug('request', options);
-        }
-
         const response = await httpClient(options, context);
         if (response) {
           response.request = options;
           httpRegion.response = response;
           setResponseAsVariable(httpRegion, variables, httpFile);
           if(!httpRegion.metaData.noLog){
-            log.info(toConsoleOutput(httpRegion.response));
+            logRequest.info(toConsoleOutput(httpRegion.response));
           }
           return true;
         }
       } catch (err) {
-        log.error(httpRegion.request.url, options, err);
+        log.error(httpRegion.request.url, options);
         throw err;
       }
     }

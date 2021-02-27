@@ -9,72 +9,78 @@ export enum LogLevel{
 }
 
 
-export interface PopupService{
-  readonly info: (...data: Array<any>) => void;
-  readonly error: (...data:Array<any>) => void;
-  readonly warn: (...data:Array<any>) => void;
-
-}
-
-export interface Logger {
-  level: LogLevel,
-  readonly log: (...data: Array<any>) => void;
-  readonly info: (...data: Array<any>) => void;
-  readonly trace: (...data:Array<any>) => void;
-  readonly debug: (...data:Array<any>) => void;
-  readonly error: (...data:Array<any>) => void;
-  readonly warn: (...data:Array<any>) => void;
-}
-
-
-export type LogMethod = (level: LogLevel, ...params: any[]) => void;
-
-
-function logToOutputChannel(level: LogLevel, logger: LogMethod, ...params: any[]) {
-  if (level >= log.level) {
-    logger(level, ...params);
-  }
-}
-
+export type ChannelLogMethod = (channel: string, level: LogLevel, ...params: any[]) => void;
 export interface OutputProvider{
-  log: LogMethod,
-  showMessage?: LogMethod;
+  log: ChannelLogMethod,
 }
 
 export const outputProvider: OutputProvider = {
-  log: (level, ...params) => {
-    switch (level) {
-      case LogLevel.trace:
-        console.trace(...params);
-        break;
-      case LogLevel.debug:
-        console.debug(...params);
-        break;
-      case LogLevel.error:
-        console.error(...params);
-        break;
-      case LogLevel.warn:
-        console.warn(...params);
-        break;
-      default:
-        console.info(...params);
-        break;
+  log: (channel, level, ...params) => consoleOutputProvider(level, ...params),
+};
+
+
+function consoleOutputProvider(level: LogLevel, ...params: any[]) {
+  switch (level) {
+    case LogLevel.trace:
+      console.trace(...params);
+      break;
+    case LogLevel.debug:
+      console.debug(...params);
+      break;
+    case LogLevel.error:
+      console.error(...params);
+      break;
+    case LogLevel.warn:
+      console.warn(...params);
+      break;
+    default:
+      console.info(...params);
+      break;
+  }
+}
+
+class Logger {
+  public level: LogLevel;
+  constructor(private readonly channel: string) {
+    this.level = LogLevel.trace;
+   }
+  info(...params: any[]) {
+    if (LogLevel.info >= this.level) {
+      outputProvider.log(this.channel, LogLevel.info, ...params);
     }
-  },
-};
+  }
+  log(...params: any[]) {
+    if (LogLevel.info >= this.level) {
+      outputProvider.log(this.channel, LogLevel.info, ...params);
+    }
+  }
+  trace(...params: any[]) {
+    if (LogLevel.trace >= this.level) {
+      outputProvider.log(this.channel, LogLevel.trace, ...params);
+    }
+  }
+  debug(...params: any[]) {
+    if (LogLevel.debug >= this.level) {
+      outputProvider.log(this.channel, LogLevel.debug, ...params);
+    }
+  }
+  error(...params: any[]) {
+    if (LogLevel.error >= this.level) {
+      outputProvider.log(this.channel, LogLevel.error, ...params);
+    }
+  }
+  warn(...params: any[]) {
+    if (LogLevel.warn >= this.level) {
+      outputProvider.log(this.channel, LogLevel.warn, ...params);
+    }
+  }
+}
 
-export const log: Logger = {
-  level: LogLevel.warn,
-  log: (...params) => logToOutputChannel(LogLevel.info, outputProvider.log, ...params),
-  info: (...params) => logToOutputChannel(LogLevel.info, outputProvider.log, ...params),
-  trace: (...params) => logToOutputChannel(LogLevel.trace, outputProvider.log, ...params),
-  debug: (...params) => logToOutputChannel(LogLevel.debug, outputProvider.log, ...params),
-  error: (...params) => logToOutputChannel(LogLevel.error, outputProvider.log, ...params),
-  warn: (...params) => logToOutputChannel(LogLevel.warn, outputProvider.log, ...params),
-};
+export const PopupChannel = 'PopupChannel';
+export const RequestChannel = 'Requests';
 
-export const popupService: PopupService = {
-  info: (...params) => logToOutputChannel(LogLevel.info, outputProvider.showMessage || outputProvider.log, ...params),
-  error: (...params) => logToOutputChannel(LogLevel.error, outputProvider.showMessage || outputProvider.log, ...params),
-  warn: (...params) => logToOutputChannel(LogLevel.warn, outputProvider.showMessage || outputProvider.log, ...params),
-};
+export const log = new Logger('Log');
+export const console = new Logger('Script Console');
+export const logRequest = new Logger('Requests');
+export const popupService = new Logger(PopupChannel);
+

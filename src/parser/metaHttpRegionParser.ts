@@ -102,7 +102,7 @@ export class MetaHttpRegionParser implements HttpRegionParser {
         httpFile.imports.push(() => httpFileStore.getOrCreate(absoluteFileName, () => fs.readFile(absoluteFileName, 'utf-8'), 0));
       }
     } catch (err) {
-      log.error('import error', fileName, err);
+      log.error('import error', fileName);
     }
   }
 
