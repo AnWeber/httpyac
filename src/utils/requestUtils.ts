@@ -66,3 +66,11 @@ export function decodeJWT(str: string) : JWTToken | null{
     return null;
   }
 }
+
+
+export function toQueryParams(params: Record<string, any>) {
+  return Object.entries(params)
+    .filter(([, value]) => !!value)
+    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+    .join('&');
+}
