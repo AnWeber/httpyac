@@ -79,7 +79,6 @@ export function toConsoleOutput(response: HttpResponse, logTotalBody = false) {
   const result: Array<string> = [];
   if (response.request) {
     result.push(`${response.request.method} ${response.request.url}`);
-    result.push('');
     result.push(...Object.entries(response.request.headers)
       .map(([key, value]) => `${key}: ${value}`)
       .sort()
@@ -93,7 +92,6 @@ export function toConsoleOutput(response: HttpResponse, logTotalBody = false) {
   result.push('');
   result.push('------ response --------------------------------------------');
   result.push(`HTTP${response.httpVersion || ''} ${response.statusCode} - ${response.statusMessage}`);
-  result.push('');
   result.push(...Object.entries(response.headers)
     .filter(([key]) => !key.startsWith(':'))
     .map(([key, value]) => `${key}: ${value}`)
