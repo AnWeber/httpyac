@@ -36,11 +36,12 @@ async function loadScript(file: string, httpFile: HttpFile) {
       script = await fs.readFile(filename, 'utf-8');
     } else {
       popupService.error(`File not found: ${file}`);
+      log.error(`File not found: ${file}`);
     }
     return script;
   } catch (err) {
     popupService.error(`error loading script ${file}`);
-    log.warn(file, err);
+    log.error(file, err);
     return false;
   }
 }

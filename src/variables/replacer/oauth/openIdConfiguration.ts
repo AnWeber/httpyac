@@ -57,6 +57,7 @@ export function assertConfiguration(config: OpenIdConfiguration, keys: string[])
     const message = `missing configuration: ${missingKeys.map(obj => `${config.variablePrefix}_${obj}`).join(', ')}`;
     log.error(message);
     popupService.error(message);
+    log.error(message);
     return false;
   }
   return true;
