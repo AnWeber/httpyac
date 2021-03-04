@@ -66,6 +66,7 @@ function getOpenIdFlow(flowType: string) {
     oauth.authorizationCodeFlow,
     oauth.clientCredentialsFlow,
     oauth.passwordFlow,
+    oauth.implicitFlow,
   ];
   return openIdFlows.find(flow => flow.supportsFlow(flowType));
 }

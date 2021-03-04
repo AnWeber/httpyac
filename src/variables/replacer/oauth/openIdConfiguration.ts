@@ -7,6 +7,9 @@ export interface OpenIdConfiguration{
   tokenEndpoint: string;
   clientId: string;
   clientSecret: string;
+  responseType: string;
+  responseMode?: string;
+  audience?: string;
   scope: string;
   keepAlive: boolean;
   username?: string;
@@ -26,6 +29,9 @@ export function getOpenIdConfiguration(variablePrefix: string, variables: Record
       tokenEndpoint: getVariable('tokenEndpoint'),
       clientId: getVariable('clientId'),
       clientSecret: getVariable('clientSecret'),
+      responseType: getVariable('responseType'),
+      responseMode: getVariable('responseMode'),
+      audience: getVariable('audience'),
       scope: getVariable('scope'),
       username: getVariable('username'),
       password: getVariable('password'),

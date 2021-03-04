@@ -26,41 +26,39 @@ export async function requestOpenIdInformation(options: HttpClientOptions | fals
     const response = await context.httpClient(options, { showProgressBar: false });
     if (response) {
       response.request = options;
+
+      if (!context.config.noLog) {
+        logRequest.info(toConsoleOutput(response, true));
+      }
+      if (response.statusCode === 200 && isString(response.body)) {
+        const jwtToken = JSON.parse(response.body);
+        return toOpenIdInformation(jwtToken, time, context);
+      }
     }
-    return toOpenIdInformation(response, time, context);
   }
   return false;
 }
 
-export function toOpenIdInformation(response: false | HttpResponse, time: number, context: {
+export function toOpenIdInformation(jwtToken: Record<string, any>, time: number, context: {
   config: OpenIdConfiguration,
   id: string,
   title: string,
   description: string,
 }): OpenIdInformation | false {
-  if (response) {
-    if (!context.config.noLog) {
-      logRequest.info(toConsoleOutput(response, true));
-    }
-    if (response.statusCode === 200 && isString(response.body)) {
-      const jwtToken = JSON.parse(response.body);
-      const parsedToken = decodeJWT(jwtToken.access_token);
-      if (!context.config.noLog) {
-        log.info(JSON.stringify(parsedToken, null, 2));
-      }
-      return {
-        id: context.id,
-        title: context.title,
-        description: context.description,
-        time,
-        config: context.config,
-        accessToken: jwtToken.access_token,
-        expiresIn: jwtToken.expires_in,
-        refreshToken: jwtToken.refresh_token,
-        refreshExpiresIn: jwtToken.refresh_expires_in,
-        timeSkew: parsedToken?.iat ? Math.floor(time / 1000) - parsedToken.iat : 0,
-      };
-    }
+  const parsedToken = decodeJWT(jwtToken.access_token);
+  if (!context.config.noLog) {
+    log.info(JSON.stringify(parsedToken, null, 2));
   }
-  return false;
+  return {
+    id: context.id,
+    title: context.title,
+    description: context.description,
+    time,
+    config: context.config,
+    accessToken: jwtToken.access_token,
+    expiresIn: jwtToken.expires_in,
+    refreshToken: jwtToken.refresh_token,
+    refreshExpiresIn: jwtToken.refresh_expires_in,
+    timeSkew: parsedToken?.iat ? Math.floor(time / 1000) - parsedToken.iat : 0,
+  };
 }

@@ -1,7 +1,7 @@
 import { OpenIdConfiguration, assertConfiguration } from './openIdConfiguration';
 import { OpenIdInformation, requestOpenIdInformation } from './openIdInformation';
 import { OpenIdFlow } from './openIdFlow';
-import { toQueryParams } from '../../../utils';
+import { toQueryParams, stateGenerator } from '../../../utils';
 import { HttpClient, Progress } from '../../../models';
 import open from 'open';
 import { registerListener, unregisterListener } from './openIdHttpserver';
@@ -20,7 +20,7 @@ class AuthorizationCodeFlow implements OpenIdFlow {
 
   async perform(config: OpenIdConfiguration, context: {httpClient: HttpClient, progress: Progress | undefined, cacheKey: string}): Promise<OpenIdInformation | false> {
     return new Promise<OpenIdInformation | false>(async (resolve, reject) => {
-      const state = this.stateGenerator();
+      const state = stateGenerator();
       try {
         const redirectUri = `http://localhost:${config.port}/callback`;
         const authUrl = `${config.authorizationEndpoint}${config.authorizationEndpoint.indexOf('?') > 0 ? '&' : '?'}${toQueryParams({
@@ -28,6 +28,7 @@ class AuthorizationCodeFlow implements OpenIdFlow {
           scope: config.scope || 'openid',
           response_type: 'code',
           state,
+          audience: config.audience,
           redirect_uri: redirectUri
         })}`;
 
@@ -75,6 +76,13 @@ class AuthorizationCodeFlow implements OpenIdFlow {
               };
             }
 
+            if (params.error_description) {
+              return {
+                valid: false,
+                message: decodeURIComponent(params.error_description),
+                statusMessage: 'no access_token received'
+              };
+            }
             return {
               valid: false,
               message: 'no code received',
@@ -89,15 +97,6 @@ class AuthorizationCodeFlow implements OpenIdFlow {
         reject(err);
       }
     });
-  }
-
-  private stateGenerator(length: number = 30) {
-    const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const result = [];
-    for (var i = length; i > 0; --i){
-      result.push(chars[Math.floor(Math.random() * chars.length)]);
-    }
-    return result.join('');
   }
 }
 

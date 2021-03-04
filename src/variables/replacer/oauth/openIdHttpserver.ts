@@ -89,7 +89,19 @@ function initServer() {
               statusMessage = result.statusMessage;
             } else {
               responseContent.push(getMessageHtml('invalid state received', false));
+              responseContent.push(`
+                <script>
+                  if(window.location.hash){
+                    window.document.querySelector('.js-message').remove();
+                    window.location.replace(\`\${window.location.href.substring(0,window.location.href.indexOf('#'))}?\${window.location.hash.substring(1)}\`);
+                  }
+                </script>
+                <noscript>
+                  ${getMessageHtml('Please enable javascript for redirect or replace fragment (#) with query (?)', false)}
+                </noscript>
+              `);
               statusMessage = 'invalid state received';
+
             }
           } else if (req.url.startsWith('/reject')) {
             const listener = listeners.find(obj => obj.id === queryParams.id);
@@ -104,7 +116,7 @@ function initServer() {
             }
           } else if (req.url.startsWith('/shutdown')) {
             closeServer();
-            responseContent.push(getMessageHtml('server was shut down', true));
+            responseContent.push(getMessageHtml('server closed', true));
             statusCode = 200;
             statusMessage ="server was shut down";
           }
@@ -135,13 +147,9 @@ function parseQueryParams(url: string) {
 
 function getMessageHtml(message: string, valid: boolean) {
   return `
-<div class="box">
-  <span class="message">${message}</span>
-  ${valid ? `<svg class="icon" viewBox="0 0 24 24">
-  <path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
-</svg>` : `<svg class="icon" viewBox="0 0 24 24">
-<path fill="currentColor" d="M11,15H13V17H11V15M11,7H13V13H11V7M12,2C6.47,2 2,6.5 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20Z" />
-</svg>`}
+<div class="card js-message ${valid ? 'card--success' : 'card--error'}">
+  <h3 class="card__title">${valid ? 'success' : 'error'}</h3>
+  <div class="card__message">${message}</div>
 </div>`;
 
 }
@@ -149,27 +157,23 @@ function getMessageHtml(message: string, valid: boolean) {
 function getServerStatus() {
   const lines = [];
   if (listeners.length > 0) {
-    lines.push('<h3>open requests</h3>');
     lines.push(...listeners.map(obj => `
-      <div class="box">
-        <span class="message">${obj.name}</span>
-        <a href="/reject?id=${obj.id}">
-          <svg class="iconlink" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
-          </svg>
-        </a>
+      <div class="card">
+        <h3 class="card__title">open requests</h3>
+        <div class="card__message">${obj.name}</div>
+        <div class="card__actions">
+          <a href="/reject?id=${obj.id}">remove</a>
+        </div>
       </div>`));
   }
   if (serverTimeoutTime > 0) {
-    lines.push('<h3>server management</h3>');
     lines.push(`
-    <div class="box">
-      <span class="message">shutdown server (automatic shutdown in ${toTimeString(Math.floor((serverTimeoutTime - (new Date()).getTime()) / 1000))})</span>
-      <a href="/shutdown">
-        <svg class="iconlink" viewBox="0 0 24 24">
-          <path fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
-        </svg>
-      </a>
+    <div class="card">
+      <h3 class="card__title">Server Status</h3>
+      <div class="card__message">automatic shutdown in ${toTimeString(Math.floor((serverTimeoutTime - (new Date()).getTime()) / 1000))}</div>
+      <div class="card__actions">
+        <a href="/shutdown">shutdown</a>
+      </div>
     </div>`);
   }
 
@@ -202,55 +206,74 @@ function getHtml(message: string) {
     <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <style>
     :root{
-      --grey: #9A9390;
-      --brown: #BAA99D;
-      --light: #F6EEE9;
+      --light: #FAFAFA;
+      --success: #4CAF50;
+      --success-dark: #43A047;
+      --error: #D32F2F;
+      --error-dark: #C62828;
+      --link-light: #E1F5FE;
+      --link: #00B0FF;
+      --link-dark: #0091EA;
     }
       body{
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-        text-align:center;
         background-color: var(--light);
+        display:flex;
+        align-items: center;
+        flex-direction: column;
       }
 
-      .box{
-        background-color: var(--brown);
-        width: 30rem;
-        padding: 2rem;
+      .card{
+        border-radius: 4px;
+        background-color: #FFF;
+        box-shadow: 0px 2px 1px -1px rgb(0 0 0 / 20%), 0px 1px 1px 0px rgb(0 0 0 / 14%), 0px 1px 3px 0px rgb(0 0 0 / 12%);
+        width: 22rem;
+        padding: .5rem;
         margin: auto;
         display: flex;
-        flex-direction: row;
-        align-items: center;
+        flex-direction: column;
         justify-content: center;
-      }
-      .message{
-        flex-grow: 1;
-      }
-      .icon{
-        color: var(--brown);
-        background-color: var(--grey);
-        border-radius:5px;
-        width: 2.5em;
-        height: 2.5em;
+        margin: 2rem;
       }
 
-      .iconlink{
-        width: 2.5em;
-        height: 2.5em;
+      .card--success{
+        border-bottom: 1rem solid var(--success);
+      }
+      .card--success:hover{
+        border-bottom: 1rem solid var(--success-dark);
+      }
+
+      .card--error{
+        border-bottom: 1rem solid var(--error);
+      }
+      .card--error:hover{
+        border-bottom: 1rem solid var(--error-dark);
+      }
+      .card__title{
+        margin: 0 .5rem;
+      }
+      .card__message{
+        padding: 0 .5rem;
+        word-break: break-word;
+      }
+      .card__actions{
+        padding: 1rem 0;
       }
       a {
-          color: var(--brown);
-          background-color: var(--grey);
+          color: var(--link);
           text-decoration:none;
-          border-radius:5px;
+          border-radius:3px;
           cursor:pointer;
+          text-transform: uppercase;
+          padding: .5rem;
       }
       a:focus {
-        outline-color: var(--light);
-        color: var(--light);
+        outline-color: var(--link);
+        color: var(--link);
       }
       a:hover, a:active {
-          color: var(--light);
-          background-color: var(--grey);
+          color: var(--link-dark);
+          background-color: var(--link-light);
       }
     </style>
   </head>
