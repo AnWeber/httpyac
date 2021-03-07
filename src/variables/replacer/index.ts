@@ -1,3 +1,4 @@
+export * from './awsAuthVariableReplacer';
 export * from './basicAuthVariableReplacer';
 export * from './digestAuthVariableReplacer';
 export * from './hostVariableReplacer';

@@ -75,6 +75,7 @@ async function load(url: string, options: OptionsOfUnknownResponseBody, context:
 
   let prevPercent = 0;
   if (context.showProgressBar) {
+
     responsePromise.on("downloadProgress", data => {
       const newData = data.percent - prevPercent;
       prevPercent = data.percent;
@@ -108,7 +109,7 @@ function initProxy(clientOptions: HttpClientOptions): OptionsOfUnknownResponseBo
 }
 
 
-function toHttpResponse(response: Response<unknown>): HttpResponse {
+function toHttpResponse(response: Response<any>): HttpResponse {
   return {
     statusCode: response.statusCode,
     statusMessage: response.statusMessage,
