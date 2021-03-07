@@ -17,10 +17,10 @@
 			"presentation": {
 				"reveal": "never"
 			},
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			}
+			"group": "build",
+			"problemMatcher": [],
+			"label": "npm: watch",
+			"detail": "webpack --watch --config ./webpack.config.js"
 		}
 	]
 }
