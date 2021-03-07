@@ -1,5 +1,5 @@
 
-import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext } from '../models';
+import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, HttpSymbol, HttpSymbolKind, ParserContext } from '../models';
 import { EOL } from 'os';
 import { toAbsoluteFilename, isString, isMimeTypeMultiPartFormData, isStringEmpty, isMimeTypeNewlineDelimitedJSON, isMimeTypeFormUrlEncoded } from '../utils';
 import { createReadStream, promises as fs } from 'fs';
@@ -7,29 +7,71 @@ import { log } from '../logger';
 
 const REGEX_IMPORTFILE = /^<(?:(?<injectVariables>@)(?<encoding>\w+)?)?\s+(?<fileName>.+?)\s*$/;
 
-type RequestBodyLineType = string | (() => Promise<Buffer>);
+
+type RequestBodyTextLine = string | (() => Promise<Buffer>);
+interface ParserRequestBody{
+  textLines: Array<RequestBodyTextLine>;
+  symbol?: HttpSymbol;
+}
 
 
-const BODY_IDENTIFIER = 'body';
+const BODY_IDENTIFIER = 'request_body';
 export class RequestBodyHttpRegionParser implements HttpRegionParser {
   supportsEmptyLine = true;
 
   async parse(lineReader: HttpRegionParserGenerator, context: ParserContext): Promise<HttpRegionParserResult> {
     if (context.httpRegion.request) {
-      const bodyLines: Array<RequestBodyLineType> = context.data[BODY_IDENTIFIER] || [];
+      const requestBody = this.getRequestBody(context);
       let next = lineReader.next();
       if (!next.done) {
-        if (bodyLines.length > 0 || !isStringEmpty(next.value.textLine)) {
-          bodyLines.push(await this.parseLine(next.value.textLine, context.httpFile.fileName));
-          context.data[BODY_IDENTIFIER] = bodyLines;
+        if (requestBody.textLines.length > 0 || !isStringEmpty(next.value.textLine)) {
+          requestBody.textLines.push(await this.parseLine(next.value.textLine, context.httpFile.fileName));
+
+          const symbols: Array<HttpSymbol> = [];
+
+
+          if (!requestBody.symbol || requestBody.symbol.endLine !== next.value.line - 1) {
+            requestBody.symbol = {
+              name: 'request body',
+              description: 'request body',
+              kind: HttpSymbolKind.requestBody,
+              startLine: next.value.line,
+              startOffset: 0,
+              endLine: next.value.line,
+              endOffset: next.value.textLine.length,
+            };
+            symbols.push(requestBody.symbol);
+          } else {
+            requestBody.symbol.endLine = next.value.line;
+            requestBody.symbol.endOffset = next.value.textLine.length;
+          }
+
           return {
             endLine: next.value.line,
-            symbols: [],
+            symbols: symbols,
           };
         }
       }
     }
     return false;
+  }
+
+  private getRequestBody(context: ParserContext) {
+    let result: ParserRequestBody = context.data[BODY_IDENTIFIER];
+    if (!result) {
+      result = {
+        textLines: [],
+      };
+      context.data[BODY_IDENTIFIER] = result;
+    }
+    return result;
+  }
+  private getAndRemoveRequestBody(context: ParserContext) {
+    let result: ParserRequestBody = context.data[BODY_IDENTIFIER];
+    if (result) {
+      delete context.data[BODY_IDENTIFIER];
+    }
+    return result;
   }
 
   private async parseLine(textLine: string, httpFileName: string) {
@@ -84,26 +126,24 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
 
 
   close(context: ParserContext): void {
-    if (context.httpRegion.request && context.data[BODY_IDENTIFIER]) {
+    const requestBody = this.getAndRemoveRequestBody(context);
+    if (context.httpRegion.request && !!requestBody) {
       const contentType = context.httpRegion.request.contentType;
 
-      const bodyLines: Array<RequestBodyLineType> = context.data[BODY_IDENTIFIER];
-      delete context.data[BODY_IDENTIFIER];
-
-      this.removeTrailingEmptyLines(bodyLines);
-      if (bodyLines.length > 0) {
+      this.removeTrailingEmptyLines(requestBody.textLines);
+      if (requestBody.textLines.length > 0) {
         if (isMimeTypeFormUrlEncoded(contentType)) {
-          context.httpRegion.request.body = this.formUrlEncodedJoin(bodyLines);
+          context.httpRegion.request.body = this.formUrlEncodedJoin(requestBody.textLines);
         } else {
-          if (bodyLines.every(obj => isString(obj)) && isMimeTypeNewlineDelimitedJSON(contentType)) {
-            bodyLines.push('');
+          if (requestBody.textLines.every(obj => isString(obj)) && isMimeTypeNewlineDelimitedJSON(contentType)) {
+            requestBody.textLines.push('');
           }
 
           const body: Array<string | (() => Promise<Buffer>)> = [];
           const strings: Array<string> = [];
           const lineEnding = isMimeTypeMultiPartFormData(contentType) ?  '\r\n' : EOL;
 
-          for (const line of bodyLines) {
+          for (const line of requestBody.textLines) {
             if (isString(line)) {
               strings.push(line);
             } else {
@@ -129,7 +169,7 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
     }
   }
 
-  private formUrlEncodedJoin(body: Array<RequestBodyLineType>): string  {
+  private formUrlEncodedJoin(body: Array<RequestBodyTextLine>): string  {
     const result = body.reduce((previousValue, currentValue, currentIndex) => {
       if (isString(currentValue)) {
         previousValue += `${(currentIndex === 0 || currentValue.startsWith('&') ? '' : EOL)}${currentValue}`;
@@ -145,6 +185,14 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
   removeTrailingEmptyLines(obj: Array<any>) {
     while (obj.length > 0 && isStringEmpty(obj[obj.length - 1])) {
       obj.pop();
+    }
+    if (obj.length > 0) {
+      const lastLine = obj[obj.length - 1];
+      if (isString(lastLine)) {
+        if (/\s*<--->\s*/.test(lastLine)) {
+          obj.pop();
+        }
+      }
     }
   }
 }
