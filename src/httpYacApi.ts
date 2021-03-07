@@ -24,7 +24,6 @@ class HttpYacApi {
       new parser.GqlHttpRegionParser(),
       new parser.RequestHttpRegionParser(),
       new parser.RequestBodyHttpRegionParser(),
-      new parser.GqlBodyModifierHttpRegionParser(),
     ];
 
     this.httpOutputProcessors = [];

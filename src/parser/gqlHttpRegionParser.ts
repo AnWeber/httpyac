@@ -1,9 +1,12 @@
 
-import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext } from '../models';
+import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, ActionProcessorType } from '../models';
 import { toMultiLineString, toAbsoluteFilename } from '../utils';
 import { promises as fs } from 'fs';
 import { log } from '../logger';
-import { GQL_IDENTIFIER, GqlData } from './gqlBodyModifierHttpRegionParser';
+import { gqlActionProcessor, GqlData } from '../actionProcessor';
+
+export const GQL_FRAGMENTS_IDENTIFIER = 'gql';
+
 
 
 
@@ -17,10 +20,9 @@ export class GqlHttpRegionParser implements HttpRegionParser{
 
     const gqlContent = await getGQLContent(lineReader, context.httpFile.fileName);
     if (gqlContent) {
-      const gqlData: GqlData = context.data[GQL_IDENTIFIER] || {
-        fragments: {}
+      const gqlData: GqlData = {
+        fragments: this.getGqlFragments(context),
       };
-      context.data[GQL_IDENTIFIER] = gqlData;
       for (const [key, value] of Object.entries(gqlData.fragments)) {
         const gql = gqlContent.gql;
         if (gql.indexOf(`...${key}`) >= 0) {
@@ -29,7 +31,7 @@ export class GqlHttpRegionParser implements HttpRegionParser{
       }
 
       if (context.httpRegion.request) {
-        gqlData.body = gqlContent.gql;
+        gqlData.query = gqlContent.gql;
         if (gqlContent.name) {
           gqlData.operationName = gqlContent.name;
           if (!context.httpRegion.metaData.name) {
@@ -39,6 +41,11 @@ export class GqlHttpRegionParser implements HttpRegionParser{
       } else if(gqlContent.name) {
         gqlData.fragments[gqlContent.name] = gqlContent.gql;
       }
+      context.httpRegion.actions.push({
+        data: gqlData,
+        type: ActionProcessorType.gql,
+        processor: gqlActionProcessor,
+      });
       return {
         endLine: gqlContent.endLine,
         symbols: [{
@@ -53,6 +60,15 @@ export class GqlHttpRegionParser implements HttpRegionParser{
       };
     }
     return false;
+  }
+
+  private getGqlFragments(context: ParserContext) {
+    let result = context.data[GQL_FRAGMENTS_IDENTIFIER];
+    if (!result) {
+      result = {};
+      context.data[GQL_FRAGMENTS_IDENTIFIER] = result;
+    }
+    return result;
   }
 }
 

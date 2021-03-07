@@ -2,7 +2,7 @@
 import { HttpRegion, HttpRequest, HttpSymbol, HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, ActionProcessorType, HttpRegionAction  } from '../models';
 
 import { isString, isStringEmpty, parseMimeType, isRequestMethod, getHeader } from '../utils';
-import {httpClientActionProcessor, defaultHeadersActionProcessor } from '../actionProcessor';
+import {httpClientActionProcessor, createRequestActionProcessor, defaultHeadersActionProcessor, variableReplacerActionProcessor, responseAsVariableActionProcessor } from '../actionProcessor';
 
 const REGEX_REQUESTLINE = /^\s*(?<method>GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE|PROPFIND|PROPPATCH|MKCOL|COPY|MOVE|LOCK|UNLOCK|CHECKOUT|CHECKIN|REPORT|MERGE|MKACTIVITY|MKWORKSPACE|VERSION-CONTROL|BASELINE-CONTROL)\s*(?<url>.+?)(?:\s+(HTTP\/\S+))?$/;
 export class RequestHttpRegionParser implements HttpRegionParser {
@@ -127,9 +127,19 @@ export class RequestHttpRegionParser implements HttpRegionParser {
         next = lineReader.next();
       }
 
-      httpRegion.actions.push({
+      httpRegion.actions.splice(0, 0, {
         type: ActionProcessorType.request,
+        processor: createRequestActionProcessor,
+      });
+      httpRegion.actions.push({
+        type: ActionProcessorType.variableReplacer,
+        processor: variableReplacerActionProcessor
+      }, {
+        type: ActionProcessorType.httpClient,
         processor: httpClientActionProcessor
+      },{
+        type: ActionProcessorType.response,
+        processor: responseAsVariableActionProcessor
       });
       const contentType = getHeader(httpRegion.request.headers, 'content-type');
       if (isString(contentType)) {

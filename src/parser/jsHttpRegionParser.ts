@@ -1,6 +1,6 @@
 
 import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, ActionProcessorType } from '../models';
-import { toMultiLineString } from '../utils';
+import { toMultiLineString , actionProcessorIndexAfterRequest} from '../utils';
 import { jsActionProcessor, ScriptData } from '../actionProcessor';
 
 
@@ -66,7 +66,7 @@ export class JsHttpRegionParser implements HttpRegionParser{
   close({data, httpRegion}: ParserContext): void {
     let onEveryRequestArray: ScriptData[] = data[JS_ON_EVERY_REQUEST_IDENTIFIER];
     if (onEveryRequestArray && httpRegion.request) {
-      httpRegion.actions.splice(0, 0, ...onEveryRequestArray.map(scriptData => {
+      httpRegion.actions.splice(actionProcessorIndexAfterRequest(httpRegion), 0, ...onEveryRequestArray.map(scriptData => {
         return {
           data: scriptData,
           type: ActionProcessorType.js,

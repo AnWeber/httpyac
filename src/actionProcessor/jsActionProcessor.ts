@@ -28,11 +28,12 @@ export function isValidVariableName(name: string) {
   return false;
 }
 
-export async function jsActionProcessor(scriptData: ScriptData, { httpRegion, httpFile, variables, progress }: ProcessorContext) {
+export async function jsActionProcessor(scriptData: ScriptData, { httpRegion, httpFile,request, variables, progress }: ProcessorContext) {
+  variables.request = request;
   variables.httpRegion = httpRegion;
   variables.httpFile = httpFile;
 
-  let result = await executeScript({
+  const result = await executeScript({
     script: scriptData.script,
     fileName: httpFile.fileName,
     variables,
@@ -41,6 +42,7 @@ export async function jsActionProcessor(scriptData: ScriptData, { httpRegion, ht
       progress,
     }
   });
+  delete variables.request;
   delete variables.httpRegion;
   delete variables.httpFile;
 
