@@ -34,7 +34,7 @@ class ClientCredentialsFlow implements OpenIdFlow {
       config: config,
       id: context.cacheKey,
       title: `clientCredentials: ${config.clientId}`,
-      description: config.tokenEndpoint
+      description: `${config.variablePrefix} - ${config.tokenEndpoint}`
     });
   }
 }

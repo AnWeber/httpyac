@@ -35,7 +35,7 @@ class PasswordFlow implements OpenIdFlow {
       config: config,
       id: context.cacheKey,
       title: `PasswordFlow: ${config.username} (${config.clientId})`,
-      description: config.tokenEndpoint
+      description: `${config.variablePrefix} - ${config.tokenEndpoint}`
     });
   }
 }

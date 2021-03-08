@@ -66,7 +66,7 @@ class AuthorizationCodeFlow implements OpenIdFlow {
                 config: config,
                 id: context.cacheKey,
                 title: `authorization_code: ${config.clientId}`,
-                description: config.tokenEndpoint
+                description: `${config.variablePrefix} - ${config.tokenEndpoint}`
               });
               resolve(openIdInformation);
               return {
