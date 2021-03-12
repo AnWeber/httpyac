@@ -2,8 +2,27 @@
 import { environmentStore } from '../environments';
 import { httpYacApi } from '../httpYacApi';
 import { log, console } from '../logger';
-import { HttpFileSendContext, HttpRegionSendContext, ProcessorContext, HttpFile, Variables, HttpResponse, HttpClient } from '../models';
+import { HttpFileSendContext, HttpRegionSendContext, ProcessorContext, HttpFile, Variables, HttpResponse, HttpClient, HttpRegion } from '../models';
 import {isString, toMultiLineString } from './stringUtils';
+
+
+export function getName(httpRegion: HttpRegion, defaultName: string = 'global') {
+  if (httpRegion.metaData.name) {
+    return httpRegion.metaData.name;
+  }
+  if (httpRegion.request) {
+
+    const index = httpRegion.request.url.indexOf('/');
+    if (index >= 0) {
+      let indexQuery = httpRegion.request.url.indexOf('?');
+      if (indexQuery < 0) {
+        indexQuery = httpRegion.request.url.length;
+      }
+      return httpRegion.request.url.substring(index, indexQuery);
+    }
+  }
+  return defaultName;
+}
 
 export async function sendHttpRegion(context: HttpRegionSendContext) {
   const variables = await getVariables(context.httpFile);
@@ -56,7 +75,7 @@ export async function processHttpRegionActions(context: ProcessorContext, showPr
     if (context.progress) {
       context.showProgressBar = showProgressBar;
     }
-    context.progress?.report({ message: `${context.httpRegion.metaData.name || context.httpRegion.request?.url || 'global' }` });
+    context.progress?.report({ message: `${getName(context.httpRegion)}` });
     if (!context.httpRegion.metaData.disabled) {
       if (!await action.processor(action.data, context)) {
         return false;

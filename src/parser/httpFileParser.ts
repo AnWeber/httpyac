@@ -1,5 +1,5 @@
 import { HttpFile, HttpRegion, HttpSymbolKind, ParserContext } from '../models';
-import { toMultiLineString, toMultiLineArray} from '../utils';
+import { toMultiLineString, toMultiLineArray, getName} from '../utils';
 import { environmentStore } from '../environments/environmentStore';
 import { httpYacApi } from '../httpYacApi';
 
@@ -56,12 +56,12 @@ function closeHttpRegion(parserContext: ParserContext) {
       obj.close(parserContext);
     }
   };
-  const requestName = parserContext.httpRegion.request?.url
-    || parserContext.httpRegion.symbol.children?.find(obj => obj.kind === HttpSymbolKind.requestLine)?.name
-    || 'global';
-  parserContext.httpRegion.symbol.name = parserContext.httpRegion.metaData.name
-    || requestName;
-  parserContext.httpRegion.symbol.description = requestName;
+  parserContext.httpRegion.symbol.name = getName(parserContext.httpRegion);
+  if (parserContext.httpRegion.request) {
+    parserContext.httpRegion.symbol.description = `${parserContext.httpRegion.request.method} ${parserContext.httpRegion.request.url}`;
+  } else {
+    parserContext.httpRegion.symbol.description = '-';
+  }
   parserContext.httpFile.httpRegions.push(parserContext.httpRegion);
 }
 
