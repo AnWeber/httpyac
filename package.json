@@ -4,7 +4,7 @@
 	"license": "MIT",
 	"publisher": "weber.andreas",
 	"description": "HTTP/REST Client for *.http files",
-	"version": "1.19.0",
+	"version": "1.19.1",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/AnWeber/httpyac"
