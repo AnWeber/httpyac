@@ -14,7 +14,9 @@ const config = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'index.js',
-    libraryTarget: 'commonjs2'
+    library: {
+      type: 'umd',
+    },
   },
   devtool: 'nosources-source-map',
   resolve: {

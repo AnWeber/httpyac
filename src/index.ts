@@ -1,3 +1,4 @@
+export * from './cli';
 export * from './httpYacApi';
 export * from './models';
 export * from './httpFileStore';

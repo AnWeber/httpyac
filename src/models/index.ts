@@ -18,6 +18,7 @@ export * from './httpSymbol';
 export * from './httpSymbolKind';
 export * from './httpTimings';
 export * from './index';
+export * from './repeatOptions';
 export * from './parserContext';
 export * from './processorContext';
 export * from './variableReplacer';

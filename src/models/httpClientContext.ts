@@ -1,10 +1,8 @@
-import { Progress, RepeatOrder } from './processorContext';
+import { Progress } from './processorContext';
+import { RepeatOptions } from './repeatOptions';
 
 export interface HttpClientContext{
   progress?: Progress | undefined,
   showProgressBar?: boolean;
-  repeat?: {
-    type: RepeatOrder;
-    count: number;
-  }
+  repeat?: RepeatOptions
 }

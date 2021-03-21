@@ -2,6 +2,7 @@ import { HttpClient } from './httpClient';
 import { HttpFile } from './httpFile';
 import { HttpRegion } from './httpRegion';
 import { HttpRequest } from './httpRequest';
+import { RepeatOptions } from './repeatOptions';
 import { Variables } from './variables';
 
 
@@ -19,17 +20,10 @@ export interface HttpFileSendContext{
   httpClient: HttpClient;
 }
 
-export enum RepeatOrder{
-  sequential,
-  parallel,
-}
 
 export interface HttpRegionSendContext extends HttpFileSendContext{
   httpRegion: HttpRegion;
-  repeat?: {
-    type: RepeatOrder;
-    count: number;
-  }
+  repeat?: RepeatOptions
 }
 export interface ProcessorContext extends HttpRegionSendContext{
   variables: Variables;
