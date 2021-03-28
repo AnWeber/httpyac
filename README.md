@@ -1,12 +1,12 @@
 <p align="center">
-<img src="https://raw.githubusercontent.com/AnWeber/httpyac/master/icon.png" alt="HttpYac Logo" />
+<img src="https://raw.githubusercontent.com/AnWeber/httpyac/main/icon.png" alt="HttpYac Logo" />
 </p>
 
 # Http Yac - Yet another Rest Client
 
 Command Line Interface for *.http and *.rest files
 
-![example](https://raw.githubusercontent.com/AnWeber/httpyac/master/assets/cli.gif)
+![example](https://raw.githubusercontent.com/AnWeber/httpyac/main/assets/cli.gif)
 
 > This program is used to execute *.http files on the command line. These can be created most easily with [vscode-httpyac](https://marketplace.visualstudio.com/items?itemName=anweber.vscode-httpyac).
 
