@@ -1,0 +1,29 @@
+@host = {{oauthHost}}
+
+###
+# @name client_credentials
+GET /actuator/info
+Authorization: openid client_credentials local
+
+
+
+###
+# @name authorization_code
+GET /actuator/info
+Authorization: openid authorization_code local
+
+
+###
+# @name implicit
+GET /actuator/info
+Authorization: openid implicit local
+
+
+###
+# @name password
+GET /actuator/info
+Authorization: openid password local
+
+
+
+

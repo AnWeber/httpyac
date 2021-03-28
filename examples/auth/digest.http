@@ -1,0 +1,13 @@
+
+@host = https://httpbin.org
+@user = doe
+@password = 12345678
+
+
+GET /digest-auth/auth/{{user}}/{{password}}
+Authorization: Digest {{user}} {{password}}
+
+{{
+  const assert = require('assert');
+  assert.equal(response.authenticated, true, "Digest Auth works");
+}}

@@ -1,0 +1,11 @@
+
+
+GET /xml
+
+
+GET /xml
+
+
+// url withouth method does not work in kibana style
+/xml
+

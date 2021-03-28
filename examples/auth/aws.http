@@ -1,0 +1,12 @@
+@accessId = doe
+@accessKey = 12345678
+@token = token
+@region = region
+@service = service
+
+GET https://httpbin.org/aws-auth
+Authorization: AWS {{accessId}} {{accessKey}} token:{{token}} region:{{region}} service:{{service}}
+
+
+
+

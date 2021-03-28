@@ -1,0 +1,17 @@
+{{
+  const CryptoJS = require('crypto-js');
+  const request = httpRegion.request;
+  const authDate = new Date();
+  let requestUri = request.url.substring(request.url.indexOf('/v1'), request.url.indexOf('?') > 0 ? request.url.indexOf('?') : request.url.length);
+  let timeInMillis = authDate.getTime() - authDate.getMilliseconds();
+
+  let signature = request.method + "|" + requestUri + "|" + timeInMillis;
+
+  let signatureHmac = CryptoJS.HmacSHA256(signature, accessSecret);
+  let signatureBase64 = CryptoJS.enc.Base64.stringify(signatureHmac);
+  exports.authentcation = serviceToken + " " + accessKey + ":" + signatureBase64;
+}}
+
+
+GET {{host}}/admin
+Authentication: {{authentcation}}
