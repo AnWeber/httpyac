@@ -1,7 +1,7 @@
 import { Variables, ProcessorContext, HttpRegion, HttpFile } from '../models';
 import { ScriptData, executeScript } from './jsActionProcessor';
 import { ok } from 'assert';
-import { log, console, popupService } from '../logger';
+import { log, scriptConsole, popupService } from '../logger';
 import { toAbsoluteFilename, isMimeTypeJSON, isString } from '../utils';
 import { promises as fs } from 'fs';
 
@@ -61,9 +61,9 @@ export class HttpClient{
   test(testName: string, func: Function): void{
     try {
       func();
-      console.info(testName);
+      scriptConsole.info(testName);
     } catch (err) {
-      console.error(testName);
+      scriptConsole.error(testName);
       throw err;
     }
   }
@@ -71,12 +71,12 @@ export class HttpClient{
     try {
       ok(condition, message);
     } catch (err) {
-      console.error(err);
+      scriptConsole.error(err);
       throw err;
     }
   }
   log(text: string): void{
-    console.info(text);
+    scriptConsole.info(text);
   }
 }
 

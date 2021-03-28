@@ -5,3 +5,5 @@ export * from './hostVariableReplacer';
 export * from './intellijVariableReplacer';
 export * from './openIdVariableReplacer';
 export * from './jsVariableReplacer';
+export * from './showInputBoxVariableReplacer';
+export * from './showQuickpickVariableReplacer';

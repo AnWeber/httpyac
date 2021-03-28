@@ -26,7 +26,7 @@ export class MetaHttpRegionParser implements HttpRegionParser {
         if (this.isDelimiter(textLine)) {
           result.newRegion = true;
         } else {
-          const match = /^\s*\#{1,}\s+\@(?<key>[^\s]*)(\s+)?"?(?<value>[^\s]+)?"?$/.exec(textLine);
+          const match = /^\s*\#{1,}\s+\@(?<key>[^\s]*)(\s+)?"?(?<value>.*)?"?$/.exec(textLine);
 
           if (match && match.groups && match.groups.key) {
             const symbol: HttpSymbol = {

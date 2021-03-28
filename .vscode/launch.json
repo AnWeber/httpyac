@@ -11,9 +11,9 @@
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "cwd": "C:\\Users\\weber\\Desktop\\httpyac\\postman\\src",
-      "program": "${workspaceFolder}\\cli\\httpyac.js",
-      "args": ["./elastic.http", "-e", "999", "-l", "3"],
+      "cwd": "C:\\Users\\weber\\Desktop\\httpyac\\httpyac\\examples\\auth",
+      "program": "${workspaceFolder}\\bin\\httpyac.js",
+      "args": ["./auth.http"],
       "outFiles": [
         "${workspaceFolder}/dist/**/*.js"
       ]

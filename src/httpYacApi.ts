@@ -2,7 +2,6 @@ import { VariableReplacerType, HttpFileSendContext, HttpRegionSendContext, HttpR
 import * as parser from './parser';
 import { HttpOutputProcessor } from './output/httpOutputProcessor';
 import { provider, replacer } from './variables';
-import { gotHttpClientFactory } from './gotHttpClientFactory';
 import { sendHttpFile, sendHttpRegion, isHttpRegionSendContext } from './utils';
 
 class HttpYacApi {
@@ -13,7 +12,6 @@ class HttpYacApi {
 
   readonly additionalRequire: Record<string, any> = {};
 
-  httpClient: HttpClient = gotHttpClientFactory();
   constructor() {
     this.httpRegionParsers = [
       new parser.CommentHttpRegionParser(),

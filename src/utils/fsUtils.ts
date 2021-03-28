@@ -13,7 +13,7 @@ export async function toAbsoluteFilename(fileName: string, baseName: string, isF
       dirName = dirname(baseName);
     }
     const absolute = join(dirName, fileName);
-    if (fs.stat(fileName)) {
+    if (await fs.stat(absolute)) {
       return absolute;
     }
   } catch (err) {
@@ -43,4 +43,33 @@ export function shortenFileName(fileName: string, maxChars = 50) {
   }
   const joinedString = result.reverse().join('_');
   return joinedString.substring(Math.max(joinedString.length - maxChars, 0));
+}
+
+
+
+export async function findPackageJson(currentDir: string, files: Array<string> = ['package.json', '.httpyac.json','env']): Promise<string | undefined> {
+  for (const file of files) {
+    try {
+      const dir = join(currentDir, file);
+      if (await fs.stat(dir)) {
+        return dirname(dir);
+      }
+    } catch (err) {
+      log.trace(err);
+    }
+  }
+  if (dirname(currentDir) !== currentDir) {
+    return findPackageJson(dirname(currentDir), files);
+  }
+  return undefined;
+}
+
+export async function parseJson(fileName: string) {
+  try {
+    const text = await fs.readFile(fileName, 'utf8');
+    return JSON.parse(text);
+  } catch (err) {
+    log.trace(err);
+  }
+  return undefined;
 }

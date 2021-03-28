@@ -4,7 +4,7 @@
 @region = region
 @service = service
 
-GET https://httpbin.org/aws-auth
+GET https://httpbin.org/anything
 Authorization: AWS {{accessId}} {{accessKey}} token:{{token}} region:{{region}} service:{{service}}
 
 

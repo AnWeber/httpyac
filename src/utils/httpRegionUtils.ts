@@ -1,12 +1,11 @@
 
 import { environmentStore } from '../environments';
 import { httpYacApi } from '../httpYacApi';
-import { log, console } from '../logger';
+import { log, scriptConsole } from '../logger';
 import { HttpFileSendContext, HttpRegionSendContext, ProcessorContext, HttpFile, Variables, HttpResponse, HttpClient, HttpRegion } from '../models';
-import {isString, toMultiLineString } from './stringUtils';
 
 
-export function getName(httpRegion: HttpRegion, defaultName: string = 'global') {
+export function getRegionName(httpRegion: HttpRegion, defaultName: string = 'global') {
   if (httpRegion.metaData.name) {
     return httpRegion.metaData.name;
   }
@@ -57,7 +56,7 @@ export async function executeGlobalScripts(httpFile: HttpFile, variables: Variab
 async function getVariables(httpFile: HttpFile): Promise<Record<string, any>> {
   const variables = Object.assign({
     log,
-    console,
+    console:scriptConsole,
   },
     (await environmentStore.getVariables(httpFile.activeEnvironment)),
     ...(await Promise.all(
@@ -75,7 +74,7 @@ export async function processHttpRegionActions(context: ProcessorContext, showPr
     if (context.progress) {
       context.showProgressBar = showProgressBar;
     }
-    context.progress?.report({ message: `${getName(context.httpRegion)}` });
+    context.progress?.report({ message: `${getRegionName(context.httpRegion)}` });
     if (!context.httpRegion.metaData.disabled) {
       if (!await action.processor(action.data, context)) {
         return false;
@@ -93,43 +92,3 @@ export function isHttpRegionSendContext(context: any): context is HttpRegionSend
 }
 
 
-export function toConsoleOutput(response: HttpResponse, logTotalBody = false) {
-
-  const result: Array<string> = [];
-  if (response.request) {
-    result.push(`${response.request.method} ${response.request.url}`);
-    result.push(...Object.entries(response.request.headers)
-      .map(([key, value]) => `${key}: ${value}`)
-      .sort()
-    );
-    if (isString(response.request.body)) {
-      result.push('');
-      result.push(response.request.body);
-    }
-  }
-
-  result.push('');
-  result.push('------ response --------------------------------------------');
-  result.push(`HTTP${response.httpVersion || ''} ${response.statusCode} - ${response.statusMessage}`);
-  result.push(...Object.entries(response.headers)
-    .filter(([key]) => !key.startsWith(':'))
-    .map(([key, value]) => `${key}: ${value}`)
-    .sort()
-  );
-
-  if (isString(response.body)) {
-    result.push('');
-    let body = response.body;
-    if (!logTotalBody) {
-      const logLength = 100;
-      body = body.substr(0, Math.min(body.length, logLength));
-      if (response.body.length >= logLength) {
-        body += `... (${response.body.length - logLength} characters  more)`;
-      }
-    }
-    result.push(body);
-  }
-  result.push('');
-  result.push('------------------------------------------------------------');
-  return toMultiLineString(result);
-}

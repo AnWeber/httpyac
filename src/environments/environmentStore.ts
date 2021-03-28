@@ -1,10 +1,11 @@
 import { ENVIRONMENT_NONE, isString } from '../utils';
-import { Variables, EnvironmentProvider, HttpFile, EnvironmentConfig, UserSession } from '../models';
+import { Variables, EnvironmentProvider, HttpFile, EnvironmentConfig, UserSession, HttpClient } from '../models';
 import {httpYacApi} from '../httpYacApi';
 import { JsonEnvProvider } from './jsonEnvProvider';
 import { EnvVariableProvider } from '../variables/provider/envVariableProvider';
 import { IntellijProvider } from './intellijEnvProvider';
 import { DotenvProvider } from './dotenvProvider';
+import { log, logRequest } from '../logger';
 
 class EnvironmentStore{
   activeEnvironments: Array<string>| undefined;
@@ -126,36 +127,23 @@ class EnvironmentStore{
     return null;
   }
 
-  toString() {
-    return 'environmentStore';
-  }
-
   async configure(config: EnvironmentConfig): Promise<Dispose> {
+    if (config.log) {
+      if (config.log.level) {
+        log.level = config.log.level;
+      }
+      logRequest.supportAnsiColors = !!config.log.supportAnsiColors;
+      logRequest.logResponseBodyLength = config.log.responseBodyLength || 0;
+      logRequest.isRequestLogEnabled = !!config.log.isRequestLogEnabled;
+      logRequest.prettyPrint = !!config.log.prettyPrint;
+    }
 
     const environmentProviders: Array<EnvironmentProvider> = [];
-
     if (config.environments) {
       environmentProviders.push(new JsonEnvProvider(config.environments));
     }
-
-    if (config.intellijDirs) {
-      const factory = (path: string) => new IntellijProvider(path);
-      for (const dir of config.intellijDirs) {
-        environmentProviders.push(factory(dir));
-      }
-      if (config.intellijVariableProviderEnabled) {
-        httpYacApi.variableProviders.splice(0, 0, new EnvVariableProvider(factory, config.intellijDirs));
-      }
-    }
-    if (config.dotenvDirs) {
-      const factory = (path: string) => new DotenvProvider(path, config.dotenvDefaultFiles || ['.env']);
-      for (const dir of config.dotenvDirs) {
-        environmentProviders.push(factory(dir));
-      }
-      if (config.dotenvVariableProviderEnabled) {
-        httpYacApi.variableProviders.splice(0, 0, new EnvVariableProvider(factory, config.dotenvDirs));
-      }
-    }
+    environmentProviders.push(...this.initIntellijProviders(config));
+    environmentProviders.push(...this.initDotenvProviders(config));
 
     await this.reset();
     this.environmentProviders.push(...environmentProviders);
@@ -168,6 +156,37 @@ class EnvironmentStore{
       }
     };
   }
+
+  private initIntellijProviders(config: EnvironmentConfig) {
+    const result = [];
+    if (config.intellij) {
+      const factory = (path: string) => new IntellijProvider(path);
+      for (const dir of config.intellij.dirs) {
+        result.push(factory(dir));
+      }
+      if (config.intellij.variableProviderEnabled) {
+        httpYacApi.variableProviders.splice(0, 0, new EnvVariableProvider(factory, config.intellij.dirs));
+      }
+    }
+    return result;
+  }
+
+
+  private initDotenvProviders(config: EnvironmentConfig) {
+    const result = [];
+    if (config.dotenv) {
+      const factory = (path: string) => new DotenvProvider(path, config.dotenv?.defaultFiles || ['.env']);
+      for (const dir of config.dotenv.dirs) {
+        result.push(factory(dir));
+      }
+      if (config.dotenv.variableProviderEnabled) {
+        httpYacApi.variableProviders.splice(0, 0, new EnvVariableProvider(factory, config.dotenv.dirs));
+      }
+    }
+    return result;
+  }
+
+
 }
 
 type Dispose = () => void;

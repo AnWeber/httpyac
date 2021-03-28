@@ -3,14 +3,15 @@ import inquirer from 'inquirer';
 import { promises as fs } from 'fs';
 import { join, isAbsolute, dirname } from 'path';
 import { EnvironmentConfig, HttpFile, HttpFileSendContext, HttpRegionSendContext, HttpSymbolKind, RepeatOptions, RepeatOrder, SettingsConfig } from './models';
-import { initHttpClient } from './gotHttpClientFactory';
+import { gotHttpClientFactory } from './gotHttpClientFactory';
 import { httpFileStore } from './httpFileStore';
 import { httpYacApi } from './httpYacApi';
-import { log, logRequest } from './logger';
+import { log, LogLevel, logRequest } from './logger';
 import { findPackageJson, parseJson } from './utils';
 import { environmentStore } from './environments';
 import { DefaultHeadersHttpRegionParser, NoteMetaHttpRegionParser, SettingsScriptHttpRegionParser } from './parser';
 import { showInputBoxVariableReplacerFactory, showQuickpickVariableReplacerFactory } from './variables/replacer';
+import merge from 'lodash/merge';
 
 // TODO progress ?,
 // TODO log umbiegen auf inquirer bar
@@ -23,10 +24,12 @@ interface HttpCliOptions{
   httpRegionName?: string,
   activeEnvironments?: Array<string>,
   repeat?: RepeatOptions,
+  rootDir?: string;
   help?: boolean,
   verbose?: boolean
   requestTimeout?: number;
-  disableSslCertficateValidation?: boolean;
+  rejectUnauthorized?: boolean;
+  editor?: boolean;
 }
 
 const httpyacJsonFileName = '.httpac.json';
@@ -36,17 +39,33 @@ export async function send(rawArgs: string[]) {
   if (!cliOptions) {
     return;
   }
-  if (cliOptions.help || !cliOptions.fileName) {
+  if (cliOptions.help) {
     return renderHelp();
   }
+
+
+  const environmentConfig = await initEnviroment(cliOptions);
   try {
-    const fileName = isAbsolute(cliOptions.fileName) ? cliOptions.fileName : join(process.cwd(), cliOptions.fileName);
-    const environmentConfig = await initEnviroment(cliOptions);
-    const httpFile = await httpFileStore.getOrCreate(cliOptions.fileName, async () => await fs.readFile(fileName, 'utf8'), 0);
+    let httpFile: HttpFile | undefined;
 
-    const sendContext = await getSendContext(httpFile, cliOptions, environmentConfig);
+    if (cliOptions.editor) {
+      const answer = await inquirer.prompt([{
+        type: 'editor',
+        message: 'input http request',
+        name: 'httpFile'
+      }]);
+      httpFile = await httpFileStore.getOrCreate(process.cwd(), async () => answer.httpFile, 0);
+    } else if (cliOptions.fileName) {
+      const fileName = isAbsolute(cliOptions.fileName) ? cliOptions.fileName : join(process.cwd(), cliOptions.fileName);
+      httpFile = await httpFileStore.getOrCreate(cliOptions.fileName, async () => await fs.readFile(fileName, 'utf8'), 0);
+    }
 
-    await httpYacApi.send(sendContext);
+    if (httpFile) {
+      const sendContext = await getSendContext(httpFile, cliOptions, environmentConfig);
+      await httpYacApi.send(sendContext);
+    } else {
+      return renderHelp();
+    }
   } catch (err) {
     log.error(err);
   }
@@ -59,6 +78,7 @@ function parseCliOptions(rawArgs: string[]): HttpCliOptions | undefined {
     const args = arg(
       {
         '--all': Boolean,
+        '--editor': Boolean,
         '--env': [String],
         '--name': String,
         '--help': Boolean,
@@ -66,6 +86,7 @@ function parseCliOptions(rawArgs: string[]): HttpCliOptions | undefined {
         '--line': Number,
         '--repeat': Number,
         '--repeat-mode': String,
+        '--root': String,
         '--timeout': Number,
         '--verbose': Boolean,
 
@@ -90,10 +111,12 @@ function parseCliOptions(rawArgs: string[]): HttpCliOptions | undefined {
         count: args['--repeat'],
         type: args['--repeat-mode'] === 'sequential' ? RepeatOrder.sequential : RepeatOrder.parallel,
       } : undefined,
+      rootDir: args['--root'],
       help: args['--help'],
       verbose: args['--verbose'],
       requestTimeout: args['--timeout'],
-      disableSslCertficateValidation: args['--insecure']
+      rejectUnauthorized: args['--insecure'] !== undefined ? args['--insecure'] : undefined,
+      editor: args['--editor']
     };
   } catch (error) {
     if (error instanceof arg.ArgError) {
@@ -108,30 +131,30 @@ function parseCliOptions(rawArgs: string[]): HttpCliOptions | undefined {
 function renderHelp() {
 
 
-  const helpMessages = [
-    `send http requests of .http or .rest`,
-    '',
-    `usage: httpyac [options...] <file>`,
-    '       --all          execute all regions in a http file',
-    '       --timeout      maximum time allowed for connections',
-    '  -e   --env          list of environemnts',
-    '  -h   --help         help',
-    '       --insecure     allow insecure server connections when using ssl',
-    '  -l   --line         line of the region',
-    '  -n   --name         name of the region',
-    '  -r   --repeat       repeat count for requests',
-    '       --repeat-mode  repeat mode: sequential, parallel (default)',
-    '  -v   --verbose      make the operation more talkative'
-  ];
+  const helpMessage = `send http requests of .http or .rest
 
-  helpMessages.forEach(obj => console.info(obj));
+usage: httpyac [options...] <file>
+       --all          execute all http requests in a http file
+       --editor       enter a new request and execute it
+  -e   --env          list of environemnts
+  -h   --help         help
+       --insecure     allow insecure server connections when using ssl
+  -l   --line         line of the http requests
+  -n   --name         name of the http requests
+  -r   --repeat       repeat count for requests
+       --repeat-mode  repeat mode: sequential, parallel (default)
+       --root         absolute path to root dir of project
+       --timeout      maximum time allowed for connections
+  -v   --verbose      make the operation more talkative`;
+
+  console.info(helpMessage);
 }
 
 
 async function getSendContext(httpFile: HttpFile, cliOptions: HttpCliOptions, environmentConfig: SettingsConfig): Promise<HttpFileSendContext | HttpRegionSendContext> {
   const sendContext: any = {
     httpFile,
-    httpClient: initHttpClient(environmentConfig),
+    httpClient: gotHttpClientFactory(environmentConfig.request, process.env.http_proxy),
     repeat: cliOptions.repeat,
   };
 
@@ -166,39 +189,40 @@ async function getSendContext(httpFile: HttpFile, cliOptions: HttpCliOptions, en
 }
 
 async function initEnviroment(cliOptions: HttpCliOptions) {
-  if (cliOptions.verbose) {
-    log.level = 0;
-  }
-  logRequest.prettyPrint = true;
-  const rootDir = await findPackageJson(process.cwd());
-  let config: EnvironmentConfig & SettingsConfig = {};
-  if (rootDir) {
-    config = await parseJson(join(rootDir, httpyacJsonFileName));
-    if (!config) {
-      const packageJson = await parseJson(join(rootDir, 'package.json'));
-      if (packageJson) {
-        config = packageJson['httpyac'];
+
+
+  const environmentConfig: EnvironmentConfig & SettingsConfig = {
+    log: {
+      level: cliOptions.verbose ? LogLevel.trace : LogLevel.info,
+      isRequestLogEnabled: true,
+      supportAnsiColors: true,
+      prettyPrint: true,
+    },
+    request: {
+      timeout: cliOptions.requestTimeout,
+      followRedirect: true,
+      https: {
+        rejectUnauthorized: !cliOptions.rejectUnauthorized
       }
     }
-    if (!config) {
-      config = {
-        dotenvDefaultFiles: ['.env'],
-        dotenvDirs: [rootDir, join(rootDir, 'env')],
-      };
-    }
+  };
 
-    if (cliOptions.requestTimeout) {
-      config.requestTimeout = cliOptions.requestTimeout;
-    }
-    if (cliOptions.disableSslCertficateValidation) {
-      config.requestSslCertficateValidation = false;
-    }
+
+  const rootDir = cliOptions.rootDir || await findPackageJson(process.cwd());
+  if (rootDir) {
+    merge(environmentConfig, {
+        dotenv: {
+          defaultFiles: ['.env'],
+          dirs: [rootDir, join(rootDir, 'env')],
+        },
+        intellij: {
+          dirs: [rootDir],
+        }
+      },
+      (await parseJson(join(rootDir, 'package.json')))?.httpyac,
+      await parseJson(join(rootDir, httpyacJsonFileName))
+    );
   }
-
-  const environmentConfig: EnvironmentConfig & SettingsConfig = Object.assign({
-    requestFollowRedirect: true,
-    requestSslCertficateValidation: true
-  }, config);
 
   await environmentStore.configure(environmentConfig);
   initHttpYacApiExtensions(environmentConfig, rootDir);
@@ -208,7 +232,9 @@ async function initEnviroment(cliOptions: HttpCliOptions) {
 }
 
 function initHttpYacApiExtensions(config: EnvironmentConfig & SettingsConfig, rootDir: string | undefined) {
-  httpYacApi.httpRegionParsers.push(new DefaultHeadersHttpRegionParser(() => config.requestDefaultHeaders));
+  if (config.defaultHeaders) {
+    httpYacApi.httpRegionParsers.push(new DefaultHeadersHttpRegionParser(() => config.defaultHeaders));
+  }
   httpYacApi.httpRegionParsers.push(new NoteMetaHttpRegionParser(async (note: string) => {
     const answer = await inquirer.prompt([{
       type: 'confirm',

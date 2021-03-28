@@ -1,28 +1,34 @@
 import { HttpRegion, ProcessorContext} from '../models';
 import get from 'lodash/get';
 import { log, popupService, logRequest } from '../logger';
-import { decodeJWT, isMimeTypeJSON, isString, toConsoleOutput, toEnvironmentKey } from '../utils';
+import { decodeJWT, isMimeTypeJSON, isString, toEnvironmentKey } from '../utils';
 import { isValidVariableName } from './jsActionProcessor';
 
 export async function responseAsVariableActionProcessor(data: string, context: ProcessorContext) {
   if (context.httpRegion.response) {
+
+    let body = context.httpRegion.response.body;
+
     if (context.httpRegion.response
       && isMimeTypeJSON(context.httpRegion.response.contentType)
-      && isString(context.httpRegion.response.body)) {
-      let body = context.httpRegion.response.body;
+      && isString(body)) {
       try {
-        if (context.httpRegion.metaData.name || context.httpRegion.metaData.jwt) {
-          body = JSON.parse(context.httpRegion.response.body);
-          handleJWTMetaData(body, context.httpRegion);
-          handleNameMetaData(body, context);
-        }
+        body = JSON.parse(body);
       } catch (err) {
         popupService.warn('json parse error', body);
         log.warn('json parse error', body, err);
       }
     }
+    context.variables['response'] = body;
+
+    if (context.httpRegion.metaData.name || context.httpRegion.metaData.jwt) {
+      handleJWTMetaData(body, context.httpRegion);
+      handleNameMetaData(body, context);
+    }
+
+
     if (!context.httpRegion.metaData.noLog) {
-      logRequest.info(toConsoleOutput(context.httpRegion.response));
+      logRequest.info(context.httpRegion.response);
     }
   }
   return true;

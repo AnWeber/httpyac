@@ -1,6 +1,6 @@
 //@ts-check
-
 'use strict';
+const fs = require('fs');
 
 const path = require('path');
 const webpack = require('webpack');
@@ -15,7 +15,7 @@ const config = {
     path: path.resolve(__dirname, 'dist'),
     filename: 'index.js',
     library: {
-      type: 'umd',
+      type: 'commonjs2',
     },
   },
   devtool: 'nosources-source-map',
@@ -35,8 +35,9 @@ const config = {
       }
     ]
   },
-  plugins: [
-    new webpack.ContextReplacementPlugin(/keyv/)
-  ]
+  externals: fs.readdirSync("node_modules"),
+  optimization: {
+    minimize: false,
+  }
 };
 module.exports = config;

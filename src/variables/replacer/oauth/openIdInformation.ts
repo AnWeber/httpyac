@@ -1,7 +1,7 @@
 import { OpenIdConfiguration } from './openIdConfiguration';
 import { log, logRequest } from '../../../logger';
 import { HttpClient, HttpClientOptions, HttpResponse, UserSession } from '../../../models';
-import { decodeJWT, isString, toConsoleOutput } from '../../../utils';
+import { decodeJWT, isString } from '../../../utils';
 
 export interface OpenIdInformation extends UserSession{
   time: number;
@@ -28,7 +28,7 @@ export async function requestOpenIdInformation(options: HttpClientOptions | fals
       response.request = options;
 
       if (!context.config.noLog) {
-        logRequest.info(toConsoleOutput(response, true));
+        logRequest.info(response);
       }
       if (response.statusCode === 200 && isString(response.body)) {
         const jwtToken = JSON.parse(response.body);

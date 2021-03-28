@@ -6,8 +6,12 @@ import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { default as filesize } from 'filesize';
 
+export interface HttpDefaultOptions extends OptionsOfUnknownResponseBody{
 
-export function gotHttpClientFactory(defaultsOverride: OptionsOfUnknownResponseBody = {}) {
+}
+
+
+export function gotHttpClientFactory(defaultsOverride: HttpDefaultOptions | undefined, proxy: string | undefined) {
   return async function gotHttpClient(clientOptions: HttpClientOptions, context: HttpClientContext) {
     try {
       const defaults: OptionsOfUnknownResponseBody = {
@@ -22,7 +26,7 @@ export function gotHttpClientFactory(defaultsOverride: OptionsOfUnknownResponseB
         defaults,
         defaultsOverride,
         clientOptions,
-        initProxy(clientOptions),
+        initProxy(clientOptions, proxy),
       ];
       const options: OptionsOfUnknownResponseBody = merge({}, ...optionList);
       delete options.url;
@@ -35,7 +39,6 @@ export function gotHttpClientFactory(defaultsOverride: OptionsOfUnknownResponseB
       }
 
       if (response) {
-
         const contentType = getHeader(response.headers, 'content-type');
         if (isString(contentType)) {
           response.contentType = parseMimeType(contentType);
@@ -96,12 +99,13 @@ async function load(url: string, options: OptionsOfUnknownResponseBody, context:
   return toHttpResponse(response);
 }
 
-function initProxy(clientOptions: HttpClientOptions): OptionsOfUnknownResponseBody {
+function initProxy(clientOptions: HttpClientOptions, proxy: string | undefined): OptionsOfUnknownResponseBody {
   const options: OptionsOfUnknownResponseBody = {};
-  if (clientOptions.proxy) {
+  const obj = clientOptions.proxy || proxy;
+  if (obj) {
     options.agent = {
-      http: new HttpProxyAgent(clientOptions.proxy),
-      https: new HttpsProxyAgent(clientOptions.proxy)
+      http: new HttpProxyAgent(obj),
+      https: new HttpsProxyAgent(obj)
     };
     delete clientOptions.proxy;
   }
