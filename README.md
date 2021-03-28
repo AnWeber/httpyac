@@ -70,7 +70,7 @@ A complete specification / documentation can be found [here](https://github.com/
 > httpyac --help
 
        --all          execute all regions in a http file
-       --timeout      maximum time allowed for connections
+       --editor       enter a new request and execute it
   -e   --env          list of environemnts
   -h   --help         help
        --insecure     allow insecure server connections when using ssl
@@ -79,10 +79,12 @@ A complete specification / documentation can be found [here](https://github.com/
   -r   --repeat       repeat count for requests
        --repeat-mode  repeat mode: sequential, parallel (default)
        --root         absolute path to root dir of project
+       --timeout      maximum time allowed for connections
   -v   --verbose      make the operation more talkative
 
 ```
 
+> --editor option only works on linux and mac ([see](https://github.com/nodejs/node/issues/21771))
 
 ## Settings
 
