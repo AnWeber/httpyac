@@ -37,7 +37,7 @@ const config = {
   },
   externals: fs.readdirSync("node_modules"),
   optimization: {
-    minimize: false,
+    minimize: true,
   }
 };
 module.exports = config;
