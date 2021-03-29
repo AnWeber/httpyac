@@ -7,7 +7,7 @@ import { gotHttpClientFactory } from './gotHttpClientFactory';
 import { httpFileStore } from './httpFileStore';
 import { httpYacApi } from './httpYacApi';
 import { log, LogLevel, logRequest } from './logger';
-import { findPackageJson, parseJson } from './utils';
+import { findPackageJson, getHttpacJsonConfig } from './utils';
 import { environmentStore } from './environments';
 import { DefaultHeadersHttpRegionParser, NoteMetaHttpRegionParser, SettingsScriptHttpRegionParser } from './parser';
 import { showInputBoxVariableReplacerFactory, showQuickpickVariableReplacerFactory } from './variables/replacer';
@@ -32,7 +32,6 @@ interface HttpCliOptions{
   editor?: boolean;
 }
 
-const httpyacJsonFileName = '.httpac.json';
 
 export async function send(rawArgs: string[]) {
   const cliOptions = parseCliOptions(rawArgs);
@@ -219,8 +218,7 @@ async function initEnviroment(cliOptions: HttpCliOptions) {
           dirs: [rootDir],
         }
       },
-      (await parseJson(join(rootDir, 'package.json')))?.httpyac,
-      await parseJson(join(rootDir, httpyacJsonFileName))
+      await getHttpacJsonConfig(rootDir),
     );
   }
 

@@ -1,6 +1,8 @@
 import { isAbsolute, join, dirname } from 'path';
 import { promises as fs } from 'fs';
 import { log } from '../logger';
+import { EnvironmentConfig } from '../models';
+
 
 
 export async function toAbsoluteFilename(fileName: string, baseName: string, isFolder: boolean = false) {
@@ -72,4 +74,13 @@ export async function parseJson(fileName: string) {
     log.trace(err);
   }
   return undefined;
+}
+
+
+export async function getHttpacJsonConfig(rootDir: string) : Promise<EnvironmentConfig | undefined>{
+  let result = await parseJson(join(rootDir, '.httpyac.json'));
+  if (!result) {
+    result = (await parseJson(join(rootDir, 'package.json')))?.httpyac;
+  }
+  return result;
 }
