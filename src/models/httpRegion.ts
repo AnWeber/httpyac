@@ -4,9 +4,9 @@ import { HttpResponse } from './httpResponse';
 import { HttpSymbol } from './httpSymbol';
 
 
-export interface HttpRegion<TOptions = any>{
+export interface HttpRegion{
   actions: Array<HttpRegionAction>;
-  request?: HttpRequest<TOptions>;
+  request?: HttpRequest;
   response?: HttpResponse;
   requestLine?: number;
   source?: string;

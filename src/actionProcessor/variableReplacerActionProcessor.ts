@@ -16,15 +16,15 @@ export async function variableReplacerActionProcessor(data: unknown, context: Pr
     };
 
     context.request.url = await replacer(context.request.url, VariableReplacerType.url) || context.request.url;
-    await replaceVariablesInHeader(context.request, replacer);
     await replaceVariablesInBody(context.request, replacer);
+    await replaceVariablesInHeader(context.request, replacer);
     return !cancel;
   }
   return true;
 }
 
 
-async function replaceVariablesInBody(replacedReqeust: HttpRequest<any>, replacer: (value: string, type: VariableReplacerType | string) => Promise<string | undefined>) {
+async function replaceVariablesInBody(replacedReqeust: HttpRequest, replacer: (value: string, type: VariableReplacerType | string) => Promise<string | undefined>) {
   if (replacedReqeust.body) {
     if (isString(replacedReqeust.body)) {
       replacedReqeust.body = await replacer(replacedReqeust.body, VariableReplacerType.body);
@@ -45,7 +45,7 @@ async function replaceVariablesInBody(replacedReqeust: HttpRequest<any>, replace
   }
 }
 
-async function replaceVariablesInHeader(replacedReqeust: HttpRequest<any>, replacer: (value: string, type: VariableReplacerType | string) => Promise<string | undefined>) {
+async function replaceVariablesInHeader(replacedReqeust: HttpRequest, replacer: (value: string, type: VariableReplacerType | string) => Promise<string | undefined>) {
   for (const [headerName, headerValue] of Object.entries(replacedReqeust.headers)) {
     if (isString(headerValue)) {
       const value = await replacer(headerValue, headerName);

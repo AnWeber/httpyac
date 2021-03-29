@@ -26,7 +26,7 @@ export async function httpClientActionProcessor(data: unknown, context: Processo
   return false;
 }
 
-async function initOptions(request: HttpRequest<any>, proxy: string | undefined) {
+async function initOptions(request: HttpRequest, proxy: string | undefined) {
   const options: HttpClientOptions = merge({
     url: encodeUrl(request.url),
     headers: request.headers,

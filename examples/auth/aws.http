@@ -1,12 +1,22 @@
 @accessId = doe
 @accessKey = 12345678
 @token = token
-@region = region
-@service = service
+@region = eu-central-1
 
-GET https://httpbin.org/anything
+@service = cognito-idp
+
+###
+
+GET https://cognito-idp.eu-central-1.amazonaws.com
 Authorization: AWS {{accessId}} {{accessKey}} token:{{token}} region:{{region}} service:{{service}}
 
+
+GET https://cognito-idp.eu-central-1.amazonaws.com
+Authorization: AWS {{accessId}} {{accessKey}} token:{{token}}
+
+
+GET https://cognito-idp.eu-central-1.amazonaws.com
+Authorization: AWS {{accessId}} {{accessKey}}
 
 
 

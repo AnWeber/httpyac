@@ -71,7 +71,7 @@ class HttpYacApi {
    * @param httpRegion httpRegion
    * @param httpFile httpFile
    */
-  public async show(httpRegion: HttpRegion<unknown>, httpFile: HttpFile) {
+  public async show(httpRegion: HttpRegion, httpFile: HttpFile) {
     await Promise.all(this.httpOutputProcessors.map(outputProcessor => outputProcessor(httpRegion, httpFile)));
   }
 

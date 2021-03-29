@@ -1,7 +1,7 @@
 import { ProcessorContext } from '../../models';
-import { OptionsOfUnknownResponseBody } from 'got';
-import merge from 'lodash/merge';
+import { URL } from 'url';
 import aws4 = require('aws4');
+import { getHeader } from '../../utils';
 
 export async function awsAuthVariableReplacer(text: string, type: string, { request }: ProcessorContext) {
   if (type.toLowerCase() === "authorization" && text && request) {
@@ -13,24 +13,22 @@ export async function awsAuthVariableReplacer(text: string, type: string, { requ
         secretAccessKey: match.groups.secretAccessKey,
         sessionToken: match.groups.token
       };
-      const awsScope = {
+      const url = new URL(request.url);
+      const requestOptions = {
+        ...request,
+        host: url.host,
+        path: url.pathname,
         region: match.groups.region,
         service: match.groups.service,
       };
-      const options: OptionsOfUnknownResponseBody = {
-        http2: false,
-        hooks: {
-          beforeRequest: [async options => {
-            await aws4.sign({ ...options, ...awsScope }, credentials);
-          }]
-        }
-      };
-      if (request.options) {
-        merge(request.options, options);
-      } else {
-        request.options = options;
+      const result = await aws4.sign(requestOptions, credentials);
+
+      if (!request.options) {
+        request.options = {};
       }
-      return undefined;
+
+      request.options = Object.assign(request.options, { http2: false });
+      return result.headers.Authorization;
     }
   }
   return text;

@@ -101,7 +101,7 @@ class HttpClientVariables{
   }
 }
 
-function initIntellijVariables(httpRegion: HttpRegion<any>, variables: Record<string, any>) {
+function initIntellijVariables(httpRegion: HttpRegion, variables: Record<string, any>) {
   let response: any = undefined;
   if (httpRegion.response) {
     response = {
