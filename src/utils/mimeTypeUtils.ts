@@ -10,6 +10,7 @@ export function isMimeTypeJSON(contentType: ContentType | undefined) {
   return contentType && (
     contentType.mimeType === 'application/json'
     || contentType.mimeType.indexOf('+json') >= 0
+    || contentType.mimeType.indexOf('x-amz-json') >= 0
   );
 }
 export function isMimeTypeJavascript(contentType: ContentType | undefined) {
