@@ -5,3 +5,4 @@ webpack.config.js
 dev.env
 assets
 examples
+icon.png
