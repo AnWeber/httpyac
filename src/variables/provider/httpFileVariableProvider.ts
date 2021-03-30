@@ -5,9 +5,9 @@ export class HttpFileVariableProvider implements VariableProvider {
 
   async getVariables(env: string[] | undefined, httpFile: HttpFile) {
     const envkey = toEnvironmentKey(env);
-    if (!httpFile.environments[envkey]) {
-      httpFile.environments[envkey] = {};
+    if (!httpFile.variablesPerEnv[envkey]) {
+      httpFile.variablesPerEnv[envkey] = {};
     }
-    return httpFile.environments[envkey];
+    return httpFile.variablesPerEnv[envkey];
   }
 }

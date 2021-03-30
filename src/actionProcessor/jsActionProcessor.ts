@@ -48,7 +48,7 @@ export async function jsActionProcessor(scriptData: ScriptData, { httpRegion, ht
 
   if (result) {
     Object.assign(variables, result);
-    Object.assign(httpFile.environments[toEnvironmentKey(httpFile.activeEnvironment)], result);
+    Object.assign(httpFile.variablesPerEnv[toEnvironmentKey(httpFile.activeEnvironment)], result);
   }
   return !result.$cancel;
 }

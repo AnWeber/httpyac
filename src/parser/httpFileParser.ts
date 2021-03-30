@@ -9,7 +9,7 @@ export async function parseHttpFile(text: string, fileName: string): Promise<Htt
   const httpFile: HttpFile = {
     httpRegions: [],
     fileName,
-    environments: {},
+    variablesPerEnv: {},
     activeEnvironment: environmentStore.activeEnvironments,
   };
   const lines = toMultiLineArray(text);

@@ -39,7 +39,7 @@ function handleNameMetaData(body: unknown, context: ProcessorContext) {
   const { httpRegion, httpFile, variables } = context;
   if (httpRegion.metaData.name && isValidVariableName(httpRegion.metaData.name)) {
     variables[httpRegion.metaData.name] = body;
-    httpFile.environments[toEnvironmentKey(httpFile.activeEnvironment)][httpRegion.metaData.name] = body;
+    httpFile.variablesPerEnv[toEnvironmentKey(httpFile.activeEnvironment)][httpRegion.metaData.name] = body;
   } else if (httpRegion.metaData.name) {
     popupService.warn(`Javascript Keyword ${httpRegion.metaData.name} not allowed as name`);
     log.warn(`Javascript Keyword ${httpRegion.metaData.name} not allowed as name`);

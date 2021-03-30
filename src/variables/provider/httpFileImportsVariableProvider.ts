@@ -11,10 +11,10 @@ export class HttpFileImportsVariableProvider implements VariableProvider {
       const variables: Array<Variables> = [];
       for (const httpFileLoader of httpFile.imports) {
         const refHttpFile = await httpFileLoader();
-        if (!refHttpFile.environments[envkey]) {
-          refHttpFile.environments[envkey] = {};
+        if (!refHttpFile.variablesPerEnv[envkey]) {
+          refHttpFile.variablesPerEnv[envkey] = {};
         }
-        variables.push(refHttpFile.environments[envkey]);
+        variables.push(refHttpFile.variablesPerEnv[envkey]);
       }
       return Object.assign({}, ...variables);
     }
