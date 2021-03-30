@@ -13,10 +13,6 @@ import { DefaultHeadersHttpRegionParser, NoteMetaHttpRegionParser, SettingsScrip
 import { showInputBoxVariableReplacerFactory, showQuickpickVariableReplacerFactory } from './variables/replacer';
 import merge from 'lodash/merge';
 
-// TODO progress ?,
-// TODO log umbiegen auf inquirer bar
-
-
 interface HttpCliOptions{
   activeEnvironments?: Array<string>,
   allRegions?: boolean,
@@ -47,9 +43,8 @@ export async function send(rawArgs: string[]) {
   if (cliOptions.help) {
     return renderHelp();
   }
-
-
   const environmentConfig = await initEnviroment(cliOptions);
+
   try {
     let httpFile: HttpFile | undefined;
 
@@ -71,10 +66,12 @@ export async function send(rawArgs: string[]) {
     } else {
       return renderHelp();
     }
+
   } catch (err) {
     log.error(err);
+  } finally {
+    process.exit();
   }
-  process.exit();
 }
 
 
@@ -136,8 +133,6 @@ function parseCliOptions(rawArgs: string[]): HttpCliOptions | undefined {
 }
 
 function renderHelp() {
-
-
   const helpMessage = `send http requests of .http or .rest
 
 usage: httpyac [options...] <file>
