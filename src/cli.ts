@@ -1,13 +1,13 @@
 import arg from 'arg';
 import inquirer from 'inquirer';
 import { promises as fs } from 'fs';
-import { join, isAbsolute, dirname } from 'path';
+import { join, isAbsolute } from 'path';
 import { EnvironmentConfig, HttpFile, HttpFileSendContext, HttpRegionSendContext, HttpSymbolKind, RepeatOptions, RepeatOrder, SettingsConfig } from './models';
 import { gotHttpClientFactory } from './gotHttpClientFactory';
 import { httpFileStore } from './httpFileStore';
 import { httpYacApi } from './httpYacApi';
-import { log, LogLevel, logRequest } from './logger';
-import { findPackageJson, getHttpacJsonConfig } from './utils';
+import { log, LogLevel } from './logger';
+import { findPackageJson, getHttpacJsonConfig, parseJson } from './utils';
 import { environmentStore } from './environments';
 import { DefaultHeadersHttpRegionParser, NoteMetaHttpRegionParser, SettingsScriptHttpRegionParser } from './parser';
 import { showInputBoxVariableReplacerFactory, showQuickpickVariableReplacerFactory } from './variables/replacer';
@@ -18,24 +18,30 @@ import merge from 'lodash/merge';
 
 
 interface HttpCliOptions{
-  fileName?: string,
+  activeEnvironments?: Array<string>,
   allRegions?: boolean,
+  editor?: boolean;
+  fileName?: string,
+  help?: boolean,
   httpRegionLine?: number,
   httpRegionName?: string,
-  activeEnvironments?: Array<string>,
-  repeat?: RepeatOptions,
-  rootDir?: string;
-  help?: boolean,
-  verbose?: boolean
-  requestTimeout?: number;
   rejectUnauthorized?: boolean;
-  editor?: boolean;
+  repeat?: RepeatOptions,
+  requestTimeout?: number;
+  rootDir?: string;
+  verbose?: boolean
+  version?: boolean;
 }
 
 
 export async function send(rawArgs: string[]) {
   const cliOptions = parseCliOptions(rawArgs);
   if (!cliOptions) {
+    return;
+  }
+  if (cliOptions.version) {
+    const packageJson = await parseJson(join(__dirname, '../package.json'));
+    console.info(`httpyac v${packageJson.version}`);
     return;
   }
   if (cliOptions.help) {
@@ -79,20 +85,21 @@ function parseCliOptions(rawArgs: string[]): HttpCliOptions | undefined {
         '--all': Boolean,
         '--editor': Boolean,
         '--env': [String],
-        '--name': String,
         '--help': Boolean,
         '--insecure': Boolean,
         '--line': Number,
+        '--name': String,
         '--repeat': Number,
         '--repeat-mode': String,
         '--root': String,
         '--timeout': Number,
         '--verbose': Boolean,
+        '--version': Boolean,
 
         '-e': '--env',
-        '-n': '--name',
-        '-l': '--line',
         '-h': '--help',
+        '-l': '--line',
+        '-n': '--name',
         '-v': '--verbose'
       },
       {
@@ -101,21 +108,22 @@ function parseCliOptions(rawArgs: string[]): HttpCliOptions | undefined {
     );
 
     return {
-      fileName: args._.length > 0 ?  args._[args._.length - 1] : undefined,
+      activeEnvironments: args['--env'],
       allRegions: args['--all'],
+      editor: args['--editor'],
+      fileName: args._.length > 0 ?  args._[args._.length - 1] : undefined,
+      help: args['--help'],
       httpRegionLine: args['--line'],
       httpRegionName: args['--name'],
-      activeEnvironments: args['--env'],
+      rejectUnauthorized: args['--insecure'] !== undefined ? args['--insecure'] : undefined,
       repeat: args['--repeat'] ? {
         count: args['--repeat'],
         type: args['--repeat-mode'] === 'sequential' ? RepeatOrder.sequential : RepeatOrder.parallel,
       } : undefined,
-      rootDir: args['--root'],
-      help: args['--help'],
-      verbose: args['--verbose'],
       requestTimeout: args['--timeout'],
-      rejectUnauthorized: args['--insecure'] !== undefined ? args['--insecure'] : undefined,
-      editor: args['--editor']
+      rootDir: args['--root'],
+      verbose: args['--verbose'],
+      version: args['--version'],
     };
   } catch (error) {
     if (error instanceof arg.ArgError) {
@@ -144,7 +152,8 @@ usage: httpyac [options...] <file>
        --repeat-mode  repeat mode: sequential, parallel (default)
        --root         absolute path to root dir of project
        --timeout      maximum time allowed for connections
-  -v   --verbose      make the operation more talkative`;
+  -v   --verbose      make the operation more talkative
+       --version      version of httpyac`;
 
   console.info(helpMessage);
 }
