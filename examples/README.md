@@ -268,6 +268,18 @@ Authentication: {{authentcation}}
 
 > Variables already defined can be accessed via the global scope.
 
+> Since all variables are placed on the global scope of the script, they may overwrite other variables. Please use unique variable names
+
+
+In addition to the variables, the following values are also set
+
+| name | description |
+| - | - |
+| request | request of the next [http request](https://github.com/AnWeber/httpyac/blob/main/src/models/httpRequest.ts) |
+| response | response body of the last request (if statuscode/ headers are required use httpRegion.response) |
+| httpRegion | current [httpRegion](https://github.com/AnWeber/httpyac/blob/main/src/models/httpRegion.ts) |
+| httpFile | current [httpFile](https://github.com/AnWeber/httpyac/blob/main/src/models/httpFile.ts) |
+
 ```html
 @foo = https://httpbin.org
 
@@ -277,9 +289,6 @@ Authentication: {{authentcation}}
 ```
 
 
-> Since all variables are placed on the global scope of the script, they may overwrite other variables. Please use unique variable names
-
-> you can also require your own scripts and reuse code
 
 Scripts with no request in the same region are always executed (Global Scripts). Global Scripts initialized with `{{+` are executed for every region.
 
@@ -296,6 +305,8 @@ Scripts with no request in the same region are always executed (Global Scripts).
 
 
 > External dependencies must be installed independently, exceptions are [vscode](https://www.npmjs.com/package/@types/vscode), [got](https://www.npmjs.com/package/got) and [httpYac](https://www.npmjs.com/package/httpyac) Dependency, which are provided from the extension.
+
+> you can also require your own scripts/ *.js files and reuse code
 
 ### Variable Substitution in Request
 
@@ -446,7 +457,7 @@ Authorization: Digest {{user}} {{password}}
 
 #### Intellij Script
 
-Intellij Scripts are supported. An Http client and response object corresponding to the interface is created and are available in the script. Possibly the behavior (order of test execution, not described internal Api, ...) is not completely identical, to Intellij Execution. If needed, please let us know.
+Intellij Scripts are supported. An [Http client]((https://www.jetbrains.com/help/idea/http-client-reference.html)) and [response](https://www.jetbrains.com/help/idea/http-response-reference.html) object corresponding to the interface is created and are available in the script. Possibly the behavior (order of test execution, not described internal Api, ...) is not completely identical, to Intellij Execution. If needed, please let me know.
 
 ```
 GET https://www.google.de?q={{$uuid}}
@@ -468,7 +479,6 @@ Accept: text/html
 ```
 
 > Intellij scripts are always executed after request. Scripts before Request Line are ignored
-
 
 
 ## Meta Data
@@ -551,8 +561,9 @@ extension of file for save or openWith.
 
 ## Environment Variables Support
 
-The extension supports switching to different environments. Several environments can be active at the same time. A different environment can be selected per file. Newly opened files are opened with the last active environment.
+Simultaneous use of multiple environments is supported.
 All environment variables are expanded automatically.
+
 
 ```
 # .env
@@ -565,6 +576,8 @@ authHost=https://my.openid.de
 authHost=https://my.openid.de
 auth_tokenEndpoint=https://my.openid.de/auth/realms/test/protocol/openid-connect/token
 ```
+
+The VS Code extension supports switching to different environments. A different environment can be selected per file. Newly opened files are opened with the last active environment.
 
 ##### JSON Setting Support
 Environments can be provided with setting `environmentVariables`. All settings with key `$shared` are shared between all environments
