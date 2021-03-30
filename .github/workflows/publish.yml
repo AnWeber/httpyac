@@ -1,8 +1,7 @@
 name: publish
 on:
-  push:
-    branches:
-      - 'release/**'
+  release:
+    types: [created]
 jobs:
   build:
     runs-on: ubuntu-latest
