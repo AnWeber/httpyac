@@ -8,7 +8,7 @@ Command Line Interface for *.http and *.rest files
 
 ![example](https://raw.githubusercontent.com/AnWeber/httpyac/main/assets/cli.gif)
 
-> This program is used to execute *.http files on the command line. These can be created most easily with [vscode-httpyac](https://marketplace.visualstudio.com/items?itemName=anweber.vscode-httpyac).
+> This program is used to execute *.http files on the command line. These can be created most easily in [VSCode](https://marketplace.visualstudio.com/items?itemName=anweber.vscode-httpyac), [VSCodium](https://open-vsx.org/extension/anweber/vscode-httpyac) or [Theia](https://open-vsx.org/extension/anweber/vscode-httpyac).
 
 
 ## Examples
@@ -136,9 +136,9 @@ enrich requests with custom scripts
 *.http files of [Intellij HTTP Client](https://www.jetbrains.com/help/idea/http-client-in-product-code-editor.html) can be parsed and executed
 
 
-### VSCode support
+### VSCode, VSCodium and Theia support
 
-develop *.http Files in VSCode with [vscode-httpyac](https://marketplace.visualstudio.com/items?itemName=anweber.vscode-httpyac) extension
+develop *.http Files in VSCode with [vscode-httpyac](https://marketplace.visualstudio.com/items?itemName=anweber.vscode-httpyac) extension or use [VSCodium](https://open-vsx.org/extension/anweber/vscode-httpyac)
 
 
 ## License
