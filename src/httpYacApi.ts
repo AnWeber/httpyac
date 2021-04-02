@@ -1,12 +1,10 @@
 import { VariableReplacerType, HttpFileSendContext, HttpRegionSendContext, HttpRegionParser, HttpClient, VariableReplacer, HttpFile, HttpRegion, ProcessorContext, VariableProvider} from './models';
 import * as parser from './parser';
-import { HttpOutputProcessor } from './output/httpOutputProcessor';
 import { provider, replacer } from './variables';
 import { sendHttpFile, sendHttpRegion, isHttpRegionSendContext } from './utils';
 
 class HttpYacApi {
   readonly httpRegionParsers: Array<HttpRegionParser>;
-  readonly httpOutputProcessors: Array<HttpOutputProcessor>;
   readonly variableProviders: Array<VariableProvider>;
   readonly variableReplacers: Array<VariableReplacer>;
 
@@ -24,7 +22,6 @@ class HttpYacApi {
       new parser.RequestBodyHttpRegionParser(),
     ];
 
-    this.httpOutputProcessors = [];
     this.variableProviders = [
       new provider.HttpFileImportsVariableProvider(),
       new provider.HttpFileVariableProvider(),
@@ -64,19 +61,6 @@ class HttpYacApi {
       }
     }
     return result;
-  }
-
-  /**
-   * ececute httpOutputProcessor
-   * @param httpRegion httpRegion
-   * @param httpFile httpFile
-   */
-  public async show(httpRegion: HttpRegion, httpFile: HttpFile) {
-    await Promise.all(this.httpOutputProcessors.map(outputProcessor => outputProcessor(httpRegion, httpFile)));
-  }
-
-  toString() {
-    return 'httpYacApi';
   }
 }
 
