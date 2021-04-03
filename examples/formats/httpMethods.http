@@ -1,0 +1,47 @@
+GET /get
+
+POST /post
+
+PUT /post
+
+DELETE /delete
+
+PATCH /patch
+
+HEAD /get
+
+OPTIONS /get
+
+CONNECT /connect
+
+TRACE /trace
+
+PROPFIND /get
+
+PROPPATCH /get
+
+MKCOL /get
+
+COPY /get
+
+MOVE /get
+
+LOCK /get
+
+UNLOCK /get
+
+CHECKOUT /get
+
+CHECKIN /get
+
+REPORT /get
+
+MERGE /get
+
+MKACTIVITY /get
+
+MKWORKSPACE /get
+
+VERSION-CONTROL /get
+
+BASELINE-CONTROL /get

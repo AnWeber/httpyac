@@ -11,7 +11,8 @@ export async function responseAsVariableActionProcessor(data: string, context: P
 
     if (context.httpRegion.response
       && isMimeTypeJSON(context.httpRegion.response.contentType)
-      && isString(body)) {
+      && isString(body)
+      && body.length > 0) {
       try {
         body = JSON.parse(body);
       } catch (err) {
