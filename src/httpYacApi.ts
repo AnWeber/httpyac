@@ -52,17 +52,6 @@ class HttpYacApi {
       return await sendHttpFile(context);
     }
   }
-
-
-  async replaceVariables(text: string, type: VariableReplacerType | string, context: ProcessorContext): Promise<string | undefined> {
-    let result: string | undefined = text;
-    for (var replacer of this.variableReplacers) {
-      if (result) {
-        result = await replacer(result, type, context);
-      }
-    }
-    return result;
-  }
 }
 
 export const httpYacApi = new HttpYacApi();

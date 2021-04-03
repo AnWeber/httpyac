@@ -1,5 +1,5 @@
 import { HttpRequest, ProcessorContext, VariableReplacerType} from '../models';
-import { httpYacApi } from '../httpYacApi';
+import { replaceVariables } from './variableActionProcessor';
 import { isString } from '../utils';
 
 
@@ -10,7 +10,7 @@ export async function variableReplacerActionProcessor(data: unknown, context: Pr
 
     const replacer = async (value: string, type: VariableReplacerType | string) => {
       if (!cancel) {
-        return await httpYacApi.replaceVariables(value, type, context);
+        return await replaceVariables(value, type, context);
       }
       return value;
     };
@@ -42,7 +42,7 @@ async function replaceVariablesInBody(replacedReqeust: HttpRequest, replacer: (v
           replacedBody.push(obj);
         }
       }
-      replacedReqeust.parserBody = replacedBody;
+      replacedReqeust.body = replacedBody;
     }
   }
 }

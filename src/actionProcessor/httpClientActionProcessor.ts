@@ -26,9 +26,11 @@ export async function httpClientActionProcessor(data: unknown, context: Processo
 }
 
 async function initBody(request: HttpRequest) {
-  request.body = await normalizeBody(request.parserBody);
-  if (request.body && isString(request.body) && isMimeTypeFormUrlEncoded(request.contentType)) {
-    request.body = encodeUrl(request.body);
+  if (isString(request.body) || Array.isArray(request.body)) {
+    request.body = await normalizeBody(request.body);
+    if (request.body && isString(request.body) && isMimeTypeFormUrlEncoded(request.contentType)) {
+      request.body = encodeUrl(request.body);
+    }
   }
 }
 
