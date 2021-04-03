@@ -1,4 +1,4 @@
-import { ENVIRONMENT_NONE, isString } from '../utils';
+import { ENVIRONMENT_NONE, getHttpacJsonConfig, isString, toAbsoluteFilename } from '../utils';
 import { Variables, EnvironmentProvider, HttpFile, EnvironmentConfig, UserSession, HttpClient, ClientCertificateOptions } from '../models';
 import {httpYacApi} from '../httpYacApi';
 import { JsonEnvProvider } from './jsonEnvProvider';
@@ -6,14 +6,16 @@ import { EnvVariableProvider } from '../variables/provider/envVariableProvider';
 import { IntellijProvider } from './intellijEnvProvider';
 import { DotenvProvider } from './dotenvProvider';
 import { log, logRequest } from '../logger';
+import { isAbsolute, join } from 'path';
+import merge from 'lodash/merge';
 
 class EnvironmentStore{
   activeEnvironments: Array<string>| undefined;
-  readonly clientCertificates?: Record<string, ClientCertificateOptions> = {};
   readonly environmentProviders: Array<EnvironmentProvider> = [];
 
   private environments: Record<string, Variables> = {};
 
+  environmentConfig?: EnvironmentConfig;
 
   async reset() {
     this.environments = {};
@@ -101,7 +103,58 @@ class EnvironmentStore{
     return null;
   }
 
-  async configure(config: EnvironmentConfig): Promise<Dispose> {
+
+  async configure(config: EnvironmentConfig, rootDirs: string[]) {
+    const environmentConfig: EnvironmentConfig = merge({}, ...(await this.loadFileEnvironemntConfigs(rootDirs)), config);
+
+    this.initLogConfiguration(environmentConfig);
+    await this.searchClientCertficates(environmentConfig, rootDirs);
+
+    this.environmentConfig = environmentConfig;
+    return this.initEnvProviders(environmentConfig, rootDirs);
+  }
+
+
+  private async searchClientCertficates(environmentConfig: EnvironmentConfig, rootDirs: string[]) {
+    if (environmentConfig.clientCertificates) {
+      for (const [, value] of Object.entries(environmentConfig.clientCertificates)) {
+        value.cert = await this.findFileName(value.cert, rootDirs);
+        value.key = await this.findFileName(value.key, rootDirs);
+        value.pfx = await this.findFileName(value.pfx, rootDirs);
+      }
+    }
+  }
+
+  private async loadFileEnvironemntConfigs(rootDirs: string[]): Promise<Array<EnvironmentConfig>> {
+    const environmentConfigs: Array<EnvironmentConfig> = [];
+    for (const rootDir of rootDirs) {
+      const environmentConfig = await getHttpacJsonConfig(rootDir);
+      if (environmentConfig) {
+        environmentConfigs.push(environmentConfig);
+      }
+    }
+
+    return environmentConfigs;
+  }
+
+
+  private async findFileName(fileName: string | undefined, rootDirs: string[]): Promise<string | undefined> {
+    if (fileName) {
+      if (isAbsolute(fileName)) {
+        return fileName;
+      }
+      for (const rootDir of rootDirs) {
+        const absolute = await toAbsoluteFilename(fileName, rootDir, true);
+        if (absolute) {
+          return absolute;
+        }
+      }
+    }
+    return fileName;
+  }
+
+
+  private initLogConfiguration(config: EnvironmentConfig) {
     if (config.log) {
       if (config.log.level) {
         log.level = config.log.level;
@@ -111,14 +164,16 @@ class EnvironmentStore{
       logRequest.isRequestLogEnabled = !!config.log.isRequestLogEnabled;
       logRequest.prettyPrint = !!config.log.prettyPrint;
     }
-    Object.assign(this.clientCertificates, config.clientCertificates);
+  }
+
+  private async initEnvProviders(config: EnvironmentConfig, rootDirs: string[]): Promise<Dispose> {
 
     const environmentProviders: Array<EnvironmentProvider> = [];
     if (config.environments) {
       environmentProviders.push(new JsonEnvProvider(config.environments));
     }
-    environmentProviders.push(...this.initIntellijProviders(config));
-    environmentProviders.push(...this.initDotenvProviders(config));
+    environmentProviders.push(...this.initEnvProvider((path: string) => new IntellijProvider(path),config.intellij, rootDirs));
+    environmentProviders.push(...this.initEnvProvider((path: string) => new DotenvProvider(path, config.dotenv?.defaultFiles), config.dotenv, rootDirs));
 
     await this.reset();
     this.environmentProviders.push(...environmentProviders);
@@ -132,36 +187,27 @@ class EnvironmentStore{
     };
   }
 
-  private initIntellijProviders(config: EnvironmentConfig) {
+  private initEnvProvider(factory: (path: string) => EnvironmentProvider, config: {
+    dirname?: string;
+    variableProviderEnabled?: boolean;
+  } | undefined, rootDirs: string[]) {
     const result = [];
-    if (config.intellij) {
-      const factory = (path: string) => new IntellijProvider(path);
-      for (const dir of config.intellij.dirs) {
-        result.push(factory(dir));
+    if (config) {
+      for (const rootDir of rootDirs) {
+        result.push(factory(rootDir));
+        if (config.dirname && !isAbsolute(config.dirname)) {
+          result.push(factory(join(rootDir, config.dirname)));
+        }
       }
-      if (config.intellij.variableProviderEnabled) {
-        httpYacApi.variableProviders.splice(0, 0, new EnvVariableProvider(factory, config.intellij.dirs));
+      if (config.dirname && isAbsolute(config.dirname)) {
+        result.push(factory(config.dirname));
+      }
+      if (config.variableProviderEnabled) {
+        httpYacApi.variableProviders.splice(0, 0, new EnvVariableProvider(factory, rootDirs));
       }
     }
     return result;
   }
-
-
-  private initDotenvProviders(config: EnvironmentConfig) {
-    const result = [];
-    if (config.dotenv) {
-      const factory = (path: string) => new DotenvProvider(path, config.dotenv?.defaultFiles || ['.env']);
-      for (const dir of config.dotenv.dirs) {
-        result.push(factory(dir));
-      }
-      if (config.dotenv.variableProviderEnabled) {
-        httpYacApi.variableProviders.splice(0, 0, new EnvVariableProvider(factory, config.dotenv.dirs));
-      }
-    }
-    return result;
-  }
-
-
 }
 
 type Dispose = () => void;

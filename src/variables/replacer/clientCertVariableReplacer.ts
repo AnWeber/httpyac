@@ -7,9 +7,9 @@ import { environmentStore } from '../../environments';
 
 
 export async function clientCertVariableReplacer(text: string, type: string, { request, httpFile }: ProcessorContext) {
-  if (type.toLowerCase().endsWith("url") && environmentStore.clientCertificates && request?.url) {
-    const url = new URL(request.url);
-    const clientCertifcateOptions = environmentStore.clientCertificates[url.host];
+  if (type.toLowerCase().endsWith("url") && environmentStore.environmentConfig?.clientCertificates && request) {
+    const url = new URL(text);
+    const clientCertifcateOptions = environmentStore.environmentConfig?.clientCertificates[url.host];
     if (clientCertifcateOptions) {
       request.https = Object.assign({}, request.https, {
         certificate: await resolveFile(clientCertifcateOptions.cert, httpFile.fileName),

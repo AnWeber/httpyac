@@ -21,7 +21,7 @@ export interface EnvironmentConfig{
     /** default dotenv files which is active in all profiles */
     defaultFiles?: string[];
     /** relative or absolute path to folder with dotenv files */
-    dirs: string[];
+    dirname?: string;
     /** search for .env file next to *.http files */
     variableProviderEnabled?: boolean;
     /** prettyPrint response */
@@ -29,7 +29,7 @@ export interface EnvironmentConfig{
   },
   intellij?: {
     /** relative or absolute path to folder with intellij variables files */
-    dirs: string[];
+    dirname?: string;
     /** search for http-client.env.json file next to *.http files */
     variableProviderEnabled?: boolean;
   }
