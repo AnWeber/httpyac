@@ -33,7 +33,6 @@ export class RequestHttpRegionParser implements HttpRegionParser {
         request: {
           url: urlMatch.groups.url,
           method: isRequestMethod(urlMatch.groups.method) ? urlMatch.groups.method : 'GET',
-          headers: {}
         },
         requestSymbols
       };
@@ -141,9 +140,11 @@ export class RequestHttpRegionParser implements HttpRegionParser {
         type: ActionProcessorType.response,
         processor: responseAsVariableActionProcessor
       });
-      const contentType = getHeader(httpRegion.request.headers, 'content-type');
-      if (isString(contentType)) {
-        httpRegion.request.contentType = parseMimeType(contentType);
+      if (httpRegion.request.headers) {
+        const contentType = getHeader(httpRegion.request.headers, 'content-type');
+        if (isString(contentType)) {
+          httpRegion.request.contentType = parseMimeType(contentType);
+        }
       }
       return result;
     }
@@ -220,6 +221,9 @@ export class RequestHttpRegionParser implements HttpRegionParser {
 
 
   private parseRequestHeader(textLine: string, line: number, httpRequest: HttpRequest) {
+    if (!httpRequest.headers) {
+      httpRequest.headers = {};
+    }
     const headerMatch = /^\s*(?<key>[\w\-]+)\s*\:\s*(?<value>.*?)\s*$/.exec(textLine);
     if (headerMatch?.groups?.key && headerMatch?.groups?.value) {
       httpRequest.headers[headerMatch.groups.key] = headerMatch.groups.value;

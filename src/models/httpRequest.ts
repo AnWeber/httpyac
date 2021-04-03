@@ -1,12 +1,13 @@
-import { HttpDefaultOptions } from '../gotHttpClientFactory';
+
 import { ContentType } from './contentType';
 import { HttpMethod } from './httpMethod';
+import { OptionsOfUnknownResponseBody } from 'got';
 
-export interface HttpRequest{
-  url: string;
-  method: HttpMethod;
-  headers: Record<string, string | string[] | undefined | null>;
+export interface HttpRequest extends OptionsOfUnknownResponseBody{
+  url?: string;
+  method?: HttpMethod;
+  headers?: Record<string, string | string[] | undefined>;
   contentType?: ContentType;
-  body?: string | Array<string | (() => Promise<Buffer>)>;
-  options?: HttpDefaultOptions;
+  parserBody?: string | Array<string | (() => Promise<Buffer>)>;
+  proxy?: string;
 }

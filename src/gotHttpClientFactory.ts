@@ -1,4 +1,4 @@
-import { HttpClientContext, HttpClientOptions, HttpResponse, RepeatOrder } from './models';
+import { HttpClientContext, HttpRequest, HttpResponse, RepeatOrder } from './models';
 import { getHeader, isString, parseMimeType, isMimeTypeJSON } from './utils';
 import { default as got, OptionsOfUnknownResponseBody, CancelError, Response } from 'got';
 import merge from 'lodash/merge';
@@ -6,13 +6,11 @@ import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { default as filesize } from 'filesize';
 
-export interface HttpDefaultOptions extends OptionsOfUnknownResponseBody{
-
-}
 
 
-export function gotHttpClientFactory(defaultsOverride: HttpDefaultOptions | undefined, proxy: string | undefined) {
-  return async function gotHttpClient(clientOptions: HttpClientOptions, context: HttpClientContext) {
+
+export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined) {
+  return async function gotHttpClient(request: HttpRequest, context: HttpClientContext) {
     try {
       const defaults: OptionsOfUnknownResponseBody = {
         decompress: true,
@@ -21,15 +19,21 @@ export function gotHttpClientFactory(defaultsOverride: HttpDefaultOptions | unde
         http2: true,
       };
 
-      const url = clientOptions.url;
+      const url = request.url;
+
+      if (!url) {
+        throw new Error('empty url');
+      }
+
       const optionList = [
         defaults,
         defaultsOverride,
-        clientOptions,
-        initProxy(clientOptions, proxy),
+        request,
+        initProxy(request),
       ];
       const options: OptionsOfUnknownResponseBody = merge({}, ...optionList);
       delete options.url;
+
 
       let response: HttpResponse | false;
       if (context.repeat && context.repeat.count > 0) {
@@ -99,15 +103,14 @@ async function load(url: string, options: OptionsOfUnknownResponseBody, context:
   return toHttpResponse(response);
 }
 
-function initProxy(clientOptions: HttpClientOptions, proxy: string | undefined): OptionsOfUnknownResponseBody {
+function initProxy(request: HttpRequest): OptionsOfUnknownResponseBody {
   const options: OptionsOfUnknownResponseBody = {};
-  const obj = clientOptions.proxy || proxy;
-  if (obj) {
+  if (request.proxy) {
     options.agent = {
-      http: new HttpProxyAgent(obj),
-      https: new HttpsProxyAgent(obj)
+      http: new HttpProxyAgent(request.proxy),
+      https: new HttpsProxyAgent(request.proxy)
     };
-    delete clientOptions.proxy;
+    delete request.proxy;
   }
   return options;
 }

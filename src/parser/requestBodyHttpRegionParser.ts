@@ -162,7 +162,7 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
             if (strings.length > 0) {
               body.push(strings.join(lineEnding));
             }
-            context.httpRegion.request.body = body;
+            context.httpRegion.request.parserBody = body;
           }
         }
       }

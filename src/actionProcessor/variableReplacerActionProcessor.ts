@@ -15,7 +15,9 @@ export async function variableReplacerActionProcessor(data: unknown, context: Pr
       return value;
     };
 
-    context.request.url = await replacer(context.request.url, VariableReplacerType.url) || context.request.url;
+    if (context.request.url) {
+      context.request.url = await replacer(context.request.url, VariableReplacerType.url) || context.request.url;
+    }
     await replaceVariablesInBody(context.request, replacer);
     await replaceVariablesInHeader(context.request, replacer);
     return !cancel;
@@ -40,19 +42,21 @@ async function replaceVariablesInBody(replacedReqeust: HttpRequest, replacer: (v
           replacedBody.push(obj);
         }
       }
-      replacedReqeust.body = replacedBody;
+      replacedReqeust.parserBody = replacedBody;
     }
   }
 }
 
 async function replaceVariablesInHeader(replacedReqeust: HttpRequest, replacer: (value: string, type: VariableReplacerType | string) => Promise<string | undefined>) {
-  for (const [headerName, headerValue] of Object.entries(replacedReqeust.headers)) {
-    if (isString(headerValue)) {
-      const value = await replacer(headerValue, headerName);
-      if (value === undefined) {
-        delete replacedReqeust.headers[headerName];
-      } else {
-        replacedReqeust.headers[headerName] = value;
+  if (replacedReqeust.headers) {
+    for (const [headerName, headerValue] of Object.entries(replacedReqeust.headers)) {
+      if (isString(headerValue)) {
+        const value = await replacer(headerValue, headerName);
+        if (value === undefined) {
+          delete replacedReqeust.headers[headerName];
+        } else {
+          replacedReqeust.headers[headerName] = value;
+        }
       }
     }
   }

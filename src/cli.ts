@@ -7,7 +7,7 @@ import { gotHttpClientFactory } from './gotHttpClientFactory';
 import { httpFileStore } from './httpFileStore';
 import { httpYacApi } from './httpYacApi';
 import { log, LogLevel } from './logger';
-import { findPackageJson, getHttpacJsonConfig, parseJson } from './utils';
+import { findPackageJson, getHttpacJsonConfig, parseJson, toAbsoluteFilename } from './utils';
 import { environmentStore } from './environments';
 import { DefaultHeadersHttpRegionParser, NoteMetaHttpRegionParser, SettingsScriptHttpRegionParser } from './parser';
 import { showInputBoxVariableReplacerFactory, showQuickpickVariableReplacerFactory } from './variables/replacer';
@@ -155,9 +155,13 @@ usage: httpyac [options...] <file>
 
 
 async function getSendContext(httpFile: HttpFile, cliOptions: HttpCliOptions, environmentConfig: SettingsConfig): Promise<HttpFileSendContext | HttpRegionSendContext> {
+  const request = {
+    ...environmentConfig.request,
+    proxy: process.env.http_proxy
+  };
   const sendContext: any = {
     httpFile,
-    httpClient: gotHttpClientFactory(environmentConfig.request, process.env.http_proxy),
+    httpClient: gotHttpClientFactory(request),
     repeat: cliOptions.repeat,
   };
 
@@ -225,6 +229,13 @@ async function initEnviroment(cliOptions: HttpCliOptions) {
       await getHttpacJsonConfig(rootDir),
     );
   }
+  if (environmentConfig.clientCertificates) {
+    for (const [, value] of Object.entries(environmentConfig.clientCertificates)) {
+      value.cert = await findFileName(value.cert, rootDir);
+      value.key = await findFileName(value.key, rootDir);
+      value.pfx = await findFileName(value.pfx, rootDir);
+    }
+  }
 
   await environmentStore.configure(environmentConfig);
   initHttpYacApiExtensions(environmentConfig, rootDir);
@@ -232,6 +243,19 @@ async function initEnviroment(cliOptions: HttpCliOptions) {
 
   return environmentConfig;
 }
+
+ async function findFileName(fileName: string | undefined, rootDir:string | undefined): Promise<string | undefined> {
+    if (fileName && rootDir) {
+      if (isAbsolute(fileName)) {
+        return fileName;
+      }
+      const absolute = await toAbsoluteFilename(fileName, rootDir, true);
+      if (absolute) {
+        return absolute;
+      }
+    }
+    return fileName;
+  }
 
 function initHttpYacApiExtensions(config: EnvironmentConfig & SettingsConfig, rootDir: string | undefined) {
   if (config.defaultHeaders) {

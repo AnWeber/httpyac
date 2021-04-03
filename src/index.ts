@@ -2,7 +2,6 @@
 export * from './httpYacApi';
 export * from './models';
 export * from './httpFileStore';
-export * from './environments/environmentStore';
 export * from './gotHttpClientFactory';
 export * from './logger';
 

@@ -1,5 +1,6 @@
 export * from './awsAuthVariableReplacer';
 export * from './basicAuthVariableReplacer';
+export * from './clientCertVariableReplacer';
 export * from './digestAuthVariableReplacer';
 export * from './hostVariableReplacer';
 export * from './intellijVariableReplacer';

@@ -1,6 +1,6 @@
 import { OpenIdConfiguration } from './openIdConfiguration';
 import { log, logRequest } from '../../../logger';
-import { HttpClient, HttpClientOptions, HttpResponse, UserSession } from '../../../models';
+import { HttpClient, HttpRequest, UserSession } from '../../../models';
 import { decodeJWT, isString } from '../../../utils';
 
 export interface OpenIdInformation extends UserSession{
@@ -14,18 +14,18 @@ export interface OpenIdInformation extends UserSession{
 }
 
 
-export async function requestOpenIdInformation(options: HttpClientOptions | false,context: {
+export async function requestOpenIdInformation(request: HttpRequest | false,context: {
   config: OpenIdConfiguration,
   httpClient: HttpClient,
   id: string,
   title: string,
   description: string,
 }): Promise<OpenIdInformation | false>{
-  if (options) {
+  if (request) {
     const time = new Date().getTime();
-    const response = await context.httpClient(options, { showProgressBar: false });
+    const response = await context.httpClient(request, { showProgressBar: false });
     if (response) {
-      response.request = options;
+      response.request = request;
 
       if (!context.config.noLog) {
         logRequest.info(response);

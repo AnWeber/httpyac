@@ -1,0 +1,6 @@
+
+
+GET https://client.badssl.com/
+
+
+GET https://client-cert-missing.badssl.com/

@@ -1,5 +1,5 @@
 import { ENVIRONMENT_NONE, isString } from '../utils';
-import { Variables, EnvironmentProvider, HttpFile, EnvironmentConfig, UserSession, HttpClient } from '../models';
+import { Variables, EnvironmentProvider, HttpFile, EnvironmentConfig, UserSession, HttpClient, ClientCertificateOptions } from '../models';
 import {httpYacApi} from '../httpYacApi';
 import { JsonEnvProvider } from './jsonEnvProvider';
 import { EnvVariableProvider } from '../variables/provider/envVariableProvider';
@@ -9,10 +9,10 @@ import { log, logRequest } from '../logger';
 
 class EnvironmentStore{
   activeEnvironments: Array<string>| undefined;
+  readonly clientCertificates?: Record<string, ClientCertificateOptions> = {};
   readonly environmentProviders: Array<EnvironmentProvider> = [];
 
   private environments: Record<string, Variables> = {};
-  readonly userSessions: Array<UserSession> = [];
 
 
   async reset() {
@@ -26,32 +26,6 @@ class EnvironmentStore{
       if (envProvider.reset) {
         envProvider.reset();
       }
-    }
-
-    for (const userSession of this.userSessions) {
-      if (userSession.logout) {
-        userSession.logout();
-      }
-    }
-    this.userSessions.length = 0;
-  }
-
-  getUserSession(id: string) {
-    return this.userSessions.find(obj => obj.id === id);
-  }
-
-  setUserSession(userSession: UserSession) {
-    this.removeUserSession(userSession.id);
-    this.userSessions.push(userSession);
-  }
-
-  removeUserSession(id: string) {
-    const userSession = this.userSessions.find(obj => obj.id === id);
-    if (userSession) {
-      if (userSession.logout) {
-        userSession.logout();
-      }
-      this.userSessions.splice(this.userSessions.indexOf(userSession), 1);
     }
   }
 
@@ -85,17 +59,17 @@ class EnvironmentStore{
 
   private expandVariables(variables: Variables) {
     for (const [key, value] of Object.entries(variables)) {
-      this.expandVar(key, value, variables);
+      this.expandVariable(key, value, variables);
     }
   }
 
-  private expandVar(key: string, value: any, variables: Record<string, any>) {
+  private expandVariable(key: string, value: any, variables: Record<string, any>) {
     if (value && isString(value)) {
       let match: RegExpExecArray | null;
       const variableRegex = /\{{2}([a-zA-Z0-9_]+)\}{2}/g;
       while ((match = variableRegex.exec(value)) !== null) {
         const [searchValue, variableName] = match;
-        const val = this.expandVar(variableName, variables[variableName], variables);
+        const val = this.expandVariable(variableName, variables[variableName], variables);
         value = value.replace(searchValue, val);
       }
     }
@@ -137,6 +111,7 @@ class EnvironmentStore{
       logRequest.isRequestLogEnabled = !!config.log.isRequestLogEnabled;
       logRequest.prettyPrint = !!config.log.prettyPrint;
     }
+    Object.assign(this.clientCertificates, config.clientCertificates);
 
     const environmentProviders: Array<EnvironmentProvider> = [];
     if (config.environments) {

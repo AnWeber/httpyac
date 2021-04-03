@@ -1,5 +1,5 @@
 import { ProcessorContext, HttpClient } from '../../models';
-import { environmentStore } from '../../environments';
+import { userSessionStore } from '../../environments';
 import * as oauth from './oauth';
 import { log } from '../../logger';
 
@@ -18,7 +18,7 @@ export async function openIdVariableReplacer(text: string, type: string, context
         const cacheKey = openIdFlow.getCacheKey(config);
         if (cacheKey) {
           let openIdInformation = getOpenIdConfiguration(cacheKey, tokenExchangeConfig || config);
-          environmentStore.removeUserSession(cacheKey);
+          userSessionStore.removeUserSession(cacheKey);
           if (openIdInformation) {
             openIdInformation = await oauth.refreshTokenFlow.perform(openIdInformation, context);
           }
@@ -33,7 +33,7 @@ export async function openIdVariableReplacer(text: string, type: string, context
             }
           }
           if (openIdInformation) {
-            environmentStore.setUserSession(openIdInformation);
+            userSessionStore.setUserSession(openIdInformation);
             keepAlive(cacheKey, context.httpClient);
             return `Bearer ${openIdInformation.accessToken}`;
           }
@@ -50,7 +50,7 @@ export async function openIdVariableReplacer(text: string, type: string, context
 }
 
 function getOpenIdConfiguration(cacheKey: string, config: oauth.OpenIdConfiguration): oauth.OpenIdInformation | false {
-  const openIdInformation = environmentStore.userSessions.find(obj => obj.id === cacheKey);
+  const openIdInformation = userSessionStore.userSessions.find(obj => obj.id === cacheKey);
   if (isOpenIdInformation(openIdInformation) && JSON.stringify(openIdInformation.config) === JSON.stringify(config)) {
     return openIdInformation;
   }
@@ -72,13 +72,13 @@ function getOpenIdFlow(flowType: string) {
 }
 
 function keepAlive(cacheKey: string, httpClient: HttpClient) {
-  const openIdInformation = environmentStore.userSessions.find(obj => obj.id === cacheKey);
+  const openIdInformation = userSessionStore.userSessions.find(obj => obj.id === cacheKey);
   if (isOpenIdInformation(openIdInformation) && openIdInformation.refreshToken && openIdInformation.config.keepAlive) {
     const timeoutId = setTimeout(async () => {
       const result = await oauth.refreshTokenFlow.perform(openIdInformation, {httpClient});
       if (result) {
         log.info(`token ${result.title} refreshed`);
-        environmentStore.setUserSession(result);
+        userSessionStore.setUserSession(result);
         keepAlive(cacheKey, httpClient);
       }
     }, (openIdInformation.expiresIn - openIdInformation.timeSkew) * 1000);

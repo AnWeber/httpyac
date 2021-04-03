@@ -428,6 +428,33 @@ AWS Signature v4 authenticates requests to AWS services.
 GET https://httpbin.org/aws
 Authorization: AWS {{accessKeyId}} {{secretAccessKey}} token:{{token}} region:{{region}} service:{{serviceName}}
 ```
+
+#### SSL Client Certificate Replacment
+
+To use SSL Client Certifcates, the `clientCertificates` setting must be set. This contains the certificate to be used for each host. For each host either the certifcate/ key or pfx/ passphrase must be maintained.
+
+* cert: Path of public x509 certificate
+* key: Path of private key
+* pfx: Path of PKCS #12 or PFX certificate
+* passphrase: Optional passphrase for the certificate if required
+
+```json
+{
+  "clientCertificates": {
+    "example.com": {
+      "cert": "./assets/client.crt",
+      "key": "./assets/client.key"
+    },
+    "client.badssl.com": {
+      "pfx": "./assets/badssl.com-client.p12",
+      "passphrase": "badssl.com"
+    }
+  }
+}
+```
+
+> path should be absolute or relative to workspace root
+
 #### BasicAuth Replacment
 A support method is provided for using Basic Authentication. Just specify the username and password separated by spaces and the base64 encoding will be applied automatically
 

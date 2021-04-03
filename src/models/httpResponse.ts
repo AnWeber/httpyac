@@ -1,5 +1,5 @@
 import { ContentType } from './contentType';
-import { HttpClientOptions } from './httpClientOptions';
+import { HttpRequest } from './httpRequest';
 import { HttpTimings } from './httpTimings';
 
 export interface HttpResponse{
@@ -11,6 +11,6 @@ export interface HttpResponse{
   contentType?: ContentType;
   body: unknown;
   rawBody?: Buffer;
-  request?: HttpClientOptions;
+  request?: HttpRequest;
   meta?: Record<string, any>
 }

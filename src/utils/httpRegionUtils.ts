@@ -9,8 +9,7 @@ export function getRegionName(httpRegion: HttpRegion, defaultName: string = 'glo
   if (httpRegion.metaData.name) {
     return httpRegion.metaData.name;
   }
-  if (httpRegion.request) {
-
+  if (httpRegion.request?.url) {
     const index = httpRegion.request.url.indexOf('/');
     if (index >= 0) {
       let indexQuery = httpRegion.request.url.indexOf('?');

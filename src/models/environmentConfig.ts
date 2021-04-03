@@ -1,5 +1,6 @@
 import { LogLevel } from '../logger';
-import { OptionsOfUnknownResponseBody } from 'got';
+import { ClientCertificateOptions } from './clientCertifcateOptions';
+import { HttpRequest } from './httpRequest';
 
 export interface EnvironmentConfig{
 
@@ -15,7 +16,7 @@ export interface EnvironmentConfig{
 
   /** environment variables  */
   environments?: Record<string, Record<string, any>>;
-
+  clientCertificates?: Record<string, ClientCertificateOptions>,
   dotenv?: {
     /** default dotenv files which is active in all profiles */
     defaultFiles?: string[];
@@ -35,7 +36,7 @@ export interface EnvironmentConfig{
 }
 
 export interface SettingsConfig {
-  request?: OptionsOfUnknownResponseBody;
+  request?: HttpRequest;
 
   /** default request headers if not overwritten */
   defaultHeaders?: Record<string, string>,

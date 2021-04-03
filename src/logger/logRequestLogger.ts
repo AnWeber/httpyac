@@ -1,4 +1,4 @@
-import { HttpClientOptions, HttpResponse } from '../models';
+import { HttpRequest, HttpResponse } from '../models';
 import { isMimeTypeJSON, isString, toMultiLineString } from '../utils';
 import { AnsiColors } from './ansiColors';
 import { LogChannels } from './logChannels';
@@ -65,13 +65,18 @@ class LogRequestsLogger {
     logOutputProvider.log(LogChannels.Request, LogLevel.info, toMultiLineString(result));
   }
 
-  private logRequest(request: HttpClientOptions) {
+  private logRequest(request: HttpRequest) {
     const result: Array<string> = [];
     result.push(`${this.getAnsiColor(AnsiColors.Cyan)}${request.method} ${request.url}${this.getAnsiColor(AnsiColors.Reset)}`);
-    result.push(...Object.entries(request.headers)
-      .map(([key, value]) => `${this.getAnsiColor(AnsiColors.Yellow)}${key}${this.getAnsiColor(AnsiColors.Reset)}: ${value}`)
-      .sort()
-    );
+    if (request.headers) {
+      result.push(...Object.entries(request.headers)
+        .map(([key, value]) => `${this.getAnsiColor(AnsiColors.Yellow)}${key}${this.getAnsiColor(AnsiColors.Reset)}: ${value}`)
+        .sort()
+      );
+    }
+    if (request.https?.certificate || request.https?.pfx) {
+      result.push(`Client-Cert: true`);
+    }
     if (isString(request.body)) {
       result.push('');
       result.push(request.body);

@@ -1,43 +1,35 @@
-import {ProcessorContext, HttpRequest, HttpClientOptions} from '../models';
+import {ProcessorContext, HttpRequest} from '../models';
 import { isString, isMimeTypeFormUrlEncoded} from '../utils';
 import { log } from '../logger';
-import merge from 'lodash/merge';
 const encodeUrl = require('encodeurl');
 
 
 export async function httpClientActionProcessor(data: unknown, context: ProcessorContext): Promise<boolean> {
   const { httpRegion, httpClient, request } = context;
   if (request) {
-
-    const options: HttpClientOptions = await initOptions(request, httpRegion.metaData.proxy);
-    options.followRedirect = !httpRegion.metaData.noRedirect;
+    await initBody(request);
+    request.proxy = httpRegion.metaData.proxy;
+    request.followRedirect = !httpRegion.metaData.noRedirect;
     try {
-      const response = await httpClient(options, context);
+      const response = await httpClient(request, context);
       if (response) {
-        response.request = options;
+        response.request = request;
         httpRegion.response = response;
         return true;
       }
     } catch (err) {
-      log.error(request.url, options);
+      log.error(request.url, request);
       throw err;
     }
   }
   return false;
 }
 
-async function initOptions(request: HttpRequest, proxy: string | undefined) {
-  const options: HttpClientOptions = merge({
-    url: encodeUrl(request.url),
-    headers: request.headers,
-    method: request.method,
-    body: await normalizeBody(request.body),
-    proxy
-  }, request.options);
-  if (options.body && isString(options.body) && isMimeTypeFormUrlEncoded(request.contentType)) {
-    options.body = encodeUrl(options.body);
+async function initBody(request: HttpRequest) {
+  request.body = await normalizeBody(request.parserBody);
+  if (request.body && isString(request.body) && isMimeTypeFormUrlEncoded(request.contentType)) {
+    request.body = encodeUrl(request.body);
   }
-  return options;
 }
 
 async function normalizeBody(body: string | Array<string | (() => Promise<Buffer>)> | undefined) {
