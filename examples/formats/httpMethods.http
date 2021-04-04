@@ -2,11 +2,23 @@ GET /get
 
 POST /post
 
-PUT /post
+{
+  "name": "john smith"
+}
+
+PUT /put
+
+{
+  "name": "john smith"
+}
 
 DELETE /delete
 
 PATCH /patch
+
+{
+  "name": "john smith"
+}
 
 HEAD /get
 

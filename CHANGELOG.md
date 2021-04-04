@@ -3,6 +3,7 @@
 #### Feature
 
 * support for ssl client certficates
+* note http version (version 1.1 disables http2 support)
 
 
 ## 2.1.0 (2021-03-30)

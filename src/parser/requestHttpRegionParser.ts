@@ -4,7 +4,7 @@ import { HttpRegion, HttpRequest, HttpSymbol, HttpSymbolKind, HttpRegionParser, 
 import { isString, isStringEmpty, parseMimeType, isRequestMethod, getHeader } from '../utils';
 import {httpClientActionProcessor, createRequestActionProcessor, defaultHeadersActionProcessor, variableReplacerActionProcessor, responseAsVariableActionProcessor } from '../actionProcessor';
 
-const REGEX_REQUESTLINE = /^\s*(?<method>GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE|PROPFIND|PROPPATCH|MKCOL|COPY|MOVE|LOCK|UNLOCK|CHECKOUT|CHECKIN|REPORT|MERGE|MKACTIVITY|MKWORKSPACE|VERSION-CONTROL|BASELINE-CONTROL)\s*(?<url>.+?)(?:\s+(HTTP\/\S+))?$/;
+const REGEX_REQUESTLINE = /^\s*(?<method>GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE|PROPFIND|PROPPATCH|MKCOL|COPY|MOVE|LOCK|UNLOCK|CHECKOUT|CHECKIN|REPORT|MERGE|MKACTIVITY|MKWORKSPACE|VERSION-CONTROL|BASELINE-CONTROL)\s*(?<url>.+?)(\s+HTTP\/(?<version>(\S+)))?$/;
 export class RequestHttpRegionParser implements HttpRegionParser {
 
   private getRequestLine(textLine: string, line: number): { request: HttpRequest, requestSymbols: Array<HttpSymbol> } {
@@ -33,6 +33,7 @@ export class RequestHttpRegionParser implements HttpRegionParser {
         request: {
           url: urlMatch.groups.url,
           method: isRequestMethod(urlMatch.groups.method) ? urlMatch.groups.method : 'GET',
+          http2: urlMatch.groups.version !== '1.1'
         },
         requestSymbols
       };
