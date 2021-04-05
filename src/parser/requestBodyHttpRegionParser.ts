@@ -3,9 +3,8 @@ import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, Ht
 import { EOL } from 'os';
 import { toAbsoluteFilename, isString, isMimeTypeMultiPartFormData, isStringEmpty, isMimeTypeNewlineDelimitedJSON, isMimeTypeFormUrlEncoded } from '../utils';
 import { createReadStream, promises as fs } from 'fs';
-import { log } from '../logger';
+import { log, popupService } from '../logger';
 
-const REGEX_IMPORTFILE = /^<(?:(?<injectVariables>@)(?<encoding>\w+)?)?\s+(?<fileName>.+?)\s*$/;
 
 
 type RequestBodyTextLine = string | (() => Promise<Buffer>);
@@ -75,7 +74,7 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
   }
 
   private async parseLine(textLine: string, httpFileName: string) {
-    const fileImport = REGEX_IMPORTFILE.exec(textLine);
+    const fileImport = /^<(?:(?<injectVariables>@)(?<encoding>\w+)?)?\s+(?<fileName>.+?)\s*$/.exec(textLine);
     if (fileImport && fileImport.length === 4 && fileImport.groups) {
       try {
         const normalizedPath = await toAbsoluteFilename(fileImport.groups.fileName, httpFileName);
@@ -86,6 +85,9 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
             const stream = createReadStream(normalizedPath);
             return async () => await this.toBuffer(stream);
           }
+        } else {
+          popupService.warn(`request body file ${fileImport.groups.filename} not found`);
+          log.warn(`request body file ${fileImport.groups.filename} not found`);
         }
       } catch (err) {
         log.trace(err);

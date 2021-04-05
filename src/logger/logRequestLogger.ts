@@ -1,10 +1,12 @@
-import { HttpRequest, HttpResponse } from '../models';
+import { HttpResponse } from '../models';
 import { isMimeTypeJSON, isString, toMultiLineString } from '../utils';
 import { AnsiColors } from './ansiColors';
 import { LogChannels } from './logChannels';
 import { log } from './logger';
 import { LogLevel } from './logLevel';
 import { logOutputProvider } from './logOutputProvider';
+
+import { NormalizedOptions } from 'got';
 
 class LogRequestsLogger {
   private isFirstRequest:boolean = true;
@@ -65,7 +67,7 @@ class LogRequestsLogger {
     logOutputProvider.log(LogChannels.Request, LogLevel.info, toMultiLineString(result));
   }
 
-  private logRequest(request: HttpRequest) {
+  private logRequest(request: NormalizedOptions) {
     const result: Array<string> = [];
     result.push(`${this.getAnsiColor(AnsiColors.Cyan)}${request.method} ${request.url}${this.getAnsiColor(AnsiColors.Reset)}`);
     if (request.headers) {
@@ -77,9 +79,13 @@ class LogRequestsLogger {
     if (request.https?.certificate || request.https?.pfx) {
       result.push(`Client-Cert: true`);
     }
-    if (isString(request.body)) {
+    if (request.body) {
       result.push('');
-      result.push(request.body);
+      if (isString(request.body)) {
+        result.push(request.body);
+      } else if (Buffer.isBuffer(request.body)) {
+        result.push(`buffer<${request.body.byteLength}>`);
+      }
     }
     return result;
   }

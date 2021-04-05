@@ -13,7 +13,6 @@ export async function httpClientActionProcessor(data: unknown, context: Processo
     try {
       const response = await httpClient(request, context);
       if (response) {
-        response.request = request;
         httpRegion.response = response;
         return true;
       }

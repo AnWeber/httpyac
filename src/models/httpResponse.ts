@@ -1,5 +1,5 @@
+import { NormalizedOptions } from 'got';
 import { ContentType } from './contentType';
-import { HttpRequest } from './httpRequest';
 import { HttpTimings } from './httpTimings';
 
 export interface HttpResponse{
@@ -11,6 +11,6 @@ export interface HttpResponse{
   contentType?: ContentType;
   body: unknown;
   rawBody?: Buffer;
-  request?: HttpRequest;
+  request?: NormalizedOptions;
   meta?: Record<string, any>
 }

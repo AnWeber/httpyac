@@ -24,17 +24,13 @@ export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined) 
       if (!url) {
         throw new Error('empty url');
       }
-
-      const optionList = [
-        defaults,
+      const mergedRequest: HttpRequest = merge({}, defaults,
         defaultsOverride,
-        request,
-        initProxy(request),
-      ];
-      const options: OptionsOfUnknownResponseBody = merge({}, ...optionList);
-      delete options.url;
+        request);
+      delete mergedRequest.url;
+      initProxy(mergedRequest);
 
-
+      const options: OptionsOfUnknownResponseBody = toGotOptions(mergedRequest);
       let response: HttpResponse | false;
       if (context.repeat && context.repeat.count > 0) {
         response = await loadRepeat(url, options, context.repeat.type, context.repeat.count);
@@ -50,6 +46,7 @@ export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined) 
         return response;
       }
       throw new Error('no response');
+
     } catch (err) {
       if (err instanceof CancelError) {
         return false;
@@ -57,6 +54,12 @@ export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined) 
       throw err;
     }
   };
+
+  function toGotOptions(mergedRequest: HttpRequest): OptionsOfUnknownResponseBody {
+    let options: OptionsOfUnknownResponseBody = {};
+    Object.assign(options, mergedRequest); // HACK ignore type of body
+    return options;
+  }
 }
 
 
@@ -103,16 +106,14 @@ async function load(url: string, options: OptionsOfUnknownResponseBody, context:
   return toHttpResponse(response);
 }
 
-function initProxy(request: HttpRequest): OptionsOfUnknownResponseBody {
-  const options: OptionsOfUnknownResponseBody = {};
+function initProxy(request: HttpRequest) {
   if (request.proxy) {
-    options.agent = {
+    request.agent = {
       http: new HttpProxyAgent(request.proxy),
       https: new HttpsProxyAgent(request.proxy)
     };
     delete request.proxy;
   }
-  return options;
 }
 
 
@@ -125,6 +126,7 @@ function toHttpResponse(response: Response<any>): HttpResponse {
     headers: response.headers,
     timings: response.timings.phases,
     httpVersion: response.httpVersion,
+    request: response.request.options,
     meta: {
       ip: response.ip,
       redirectUrls: response.redirectUrls,
@@ -134,7 +136,8 @@ function toHttpResponse(response: Response<any>): HttpResponse {
 }
 
 function mergeHttpResponse(responses: Array<HttpResponse>): HttpResponse | false {
-  const statusCode = responses.map(obj => obj.statusCode).reduce((prev, curr) => Math.max(prev, curr), 0);
+  const statusCode = responses.map(obj => obj.statusCode)
+    .reduce((prev, curr) => Math.max(prev, curr), 0);
   const response = responses.find(obj => obj.statusCode === statusCode);
   if (response) {
 

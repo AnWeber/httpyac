@@ -2,7 +2,7 @@
 import { HttpRegion, HttpRequest, HttpSymbol, HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, ActionProcessorType, HttpRegionAction  } from '../models';
 
 import { isString, isStringEmpty, parseMimeType, isRequestMethod, getHeader } from '../utils';
-import {httpClientActionProcessor, createRequestActionProcessor, defaultHeadersActionProcessor, variableReplacerActionProcessor, responseAsVariableActionProcessor } from '../actionProcessor';
+import * as actionProcessor  from '../actionProcessor';
 
 const REGEX_REQUESTLINE = /^\s*(?<method>GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE|PROPFIND|PROPPATCH|MKCOL|COPY|MOVE|LOCK|UNLOCK|CHECKOUT|CHECKIN|REPORT|MERGE|MKACTIVITY|MKWORKSPACE|VERSION-CONTROL|BASELINE-CONTROL)\s*(?<url>.+?)(\s+HTTP\/(?<version>(\S+)))?$/;
 export class RequestHttpRegionParser implements HttpRegionParser {
@@ -129,17 +129,20 @@ export class RequestHttpRegionParser implements HttpRegionParser {
 
       httpRegion.actions.splice(0, 0, {
         type: ActionProcessorType.request,
-        processor: createRequestActionProcessor,
+        processor: actionProcessor.createRequestActionProcessor,
       });
       httpRegion.actions.push({
         type: ActionProcessorType.variableReplacer,
-        processor: variableReplacerActionProcessor
+        processor: actionProcessor.variableReplacerActionProcessor
       }, {
+        type: ActionProcessorType.cookieJar,
+        processor: actionProcessor.cookieJarActionProcessor
+      },{
         type: ActionProcessorType.httpClient,
-        processor: httpClientActionProcessor
+        processor: actionProcessor.httpClientActionProcessor
       },{
         type: ActionProcessorType.response,
-        processor: responseAsVariableActionProcessor
+        processor: actionProcessor.responseAsVariableActionProcessor
       });
       if (httpRegion.request.headers) {
         const contentType = getHeader(httpRegion.request.headers, 'content-type');
@@ -172,7 +175,7 @@ export class RequestHttpRegionParser implements HttpRegionParser {
           {
             type: ActionProcessorType.defaultHeaders,
             data: fileHeaders.groups.variableName,
-            processor: defaultHeadersActionProcessor,
+            processor: actionProcessor.defaultHeadersActionProcessor,
           }
         ]
       };

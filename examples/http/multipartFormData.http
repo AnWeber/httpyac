@@ -1,0 +1,19 @@
+
+POST /post
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="text"
+
+invoice_text
+------WebKitFormBoundary
+Content-Disposition: form-data; name="title"
+
+invoice_title
+------WebKitFormBoundary
+Content-Disposition: form-data; name="invoice"; filename="invoice.pdf"
+Content-Type: application/pdf
+
+< ../assets/sample.pdf
+------WebKitFormBoundary--
+

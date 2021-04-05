@@ -111,6 +111,17 @@ GET https://www.google.de HTTP/1.1
 ...defaultHeaders
 ```
 
+### Cookie
+
+CookieJar support is enabled by default. All received Cookies, previously sent by the server with the Set-Cookie header are automatically sent back. It is possible to send own cookies to the server using cookie header.
+
+```html
+GET https://httpbin.org/cookies
+Cookie: bar=foo
+```
+
+> Cookies are only stored In-Memory
+
 ### Request Body
 The request body can be represented as a simple message or a mixed type message (multipart-form-data). A request message can be inserted in-place or from a file. Request Body is separated with a blank line from the request-line.
 
@@ -146,7 +157,9 @@ Authorization: Basic {{authorization}}
 ```
 > If the request body is configured in-place, whitespaces around it will be trimmed. To send leading or trailing whitespaces as part of the request body, send it from a separate file.
 
-#### mixed request body
+#### multipart/form-data
+
+It is possible to mix inline text with file imports
 
 ```html
 POST {{host}}/auth
@@ -196,7 +209,7 @@ query repositoryQuery($name: String!, $owner: String!) {
 }
 ```
 
-To import GraphQL File you need to use special GraphQL Import Directive. Operationname foo is optional
+To import GraphQL File you need to use special GraphQL Import Directive. Operationname `foo` is optional
 
 ```html
 POST https://api.github.com/graphql
@@ -255,13 +268,12 @@ It is possible to create NodeJS scripts. All scripts before the request line are
   exports.authentcation = serviceToken + " " + accessKey + ":" + signatureBase64;
 }}
 @host = https://www.mydomain.de
-# @name admin
 GET {{host}}/admin
 Authentication: {{authentcation}}
 
 {{
   const assert = require('assert');
-  assert.equal(admin.name, "Mario", "name is valid");
+  assert.equal(response.name, "Mario", "name is valid");
 }}
 ```
 
@@ -451,6 +463,10 @@ To use SSL Client Certifcates, the `clientCertificates` setting must be set. Thi
     }
   }
 }
+```
+
+```html
+GET https://client.badssl.com
 ```
 
 > path should be absolute or relative to workspace root

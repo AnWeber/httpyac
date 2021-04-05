@@ -25,7 +25,6 @@ export async function requestOpenIdInformation(request: HttpRequest | false,cont
     const time = new Date().getTime();
     const response = await context.httpClient(request, { showProgressBar: false });
     if (response) {
-      response.request = request;
 
       if (!context.config.noLog) {
         logRequest.info(response);

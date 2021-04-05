@@ -211,6 +211,7 @@ async function initEnviroment(cliOptions: HttpCliOptions) {
         rejectUnauthorized: !cliOptions.rejectUnauthorized
       }
     },
+    cookieJarEnabled: true,
     dotenv: {
       defaultFiles: ['.env'],
       dirname: 'env',

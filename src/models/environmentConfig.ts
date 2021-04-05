@@ -3,7 +3,7 @@ import { ClientCertificateOptions } from './clientCertifcateOptions';
 import { HttpRequest } from './httpRequest';
 
 export interface EnvironmentConfig{
-
+  cookieJarEnabled?: boolean;
   log?: {
     /** log level of outputs */
     level?: LogLevel,

@@ -1,0 +1,11 @@
+
+GET /cookies/set?foo=bar
+
+GET /cookies
+
+GET /cookies
+Cookie: bar=foo
+
+GET /cookies/delete?foo=bar
+
+
