@@ -1,9 +1,10 @@
-## 2.2.0 (2021-04-xx)
+## 2.2.0 (2021-04-05)
 
 #### Feature
 
 * support for ssl client certficates
 * note http version (version 1.1 disables http2 support)
+* cookiejar support
 
 
 ## 2.1.0 (2021-03-30)
