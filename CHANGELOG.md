@@ -1,3 +1,9 @@
+## 2.2.1 (2021-04-05)
+
+#### Fix
+
+* minimize size of webpack build
+
 ## 2.2.0 (2021-04-05)
 
 #### Feature

@@ -18,7 +18,7 @@ const config = {
       type: 'commonjs2',
     },
   },
-  devtool: process.env.NODE_ENV !== 'production' ? 'eval-source-map' : 'source-map',
+  devtool: 'nosources-source-map',
   resolve: {
     extensions: ['.ts', '.js']
   },
