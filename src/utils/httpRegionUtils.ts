@@ -35,9 +35,15 @@ export async function sendHttpRegion(context: HttpRegionSendContext) {
 export async function sendHttpFile(context: HttpFileSendContext) {
   const variables = await getVariables(context.httpFile);
   for (const httpRegion of context.httpFile.httpRegions) {
-    if (!httpRegion.metaData.disabled) {
-      await processHttpRegionActions({ httpRegion, variables , ...context });
+    if (httpRegion.metaData.disabled) {
+      log.debug(`${getRegionName(httpRegion)} is disabled`);
+      return;
     }
+    if (httpRegion.request && context.httpRegionPredicate && !context.httpRegionPredicate(httpRegion)) {
+      log.debug(`${getRegionName(httpRegion)} disabled by predicate`);
+      return;
+    }
+    await processHttpRegionActions({ httpRegion, variables, ...context });
   }
 }
 
