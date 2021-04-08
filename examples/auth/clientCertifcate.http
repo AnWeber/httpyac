@@ -3,4 +3,30 @@
 GET https://client.badssl.com/
 
 
+GET https://client.badssl.com/
+ClientCert: pfx: ../assets/badssl.com-client.p12 passphrase: badssl.com
+
+
+
+GET https://client.badssl.com/
+X-ClientCert: pfx: ../assets/badssl.com-client.p12 passphrase: badssl.com
+
+
+###
+# @no-client-cert
+
+GET https://client.badssl.com/
+
+
+
+###
+// @no-client-cert
+
+GET https://client.badssl.com/
+
+
+
+###
+// error response
 GET https://client-cert-missing.badssl.com/
+

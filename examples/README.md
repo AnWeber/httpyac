@@ -471,6 +471,20 @@ GET https://client.badssl.com
 
 > path should be absolute or relative to workspace root
 
+It is also possible to attach the certificate using (X-)ClientCert header. The header will be removed.
+
+```html
+// Client-Cert: cert: <cert> key: <key> pfx: <pfx> passphrase: <passphrase>
+
+GET https://client.badssl.com/
+ClientCert: pfx: ../assets/badssl.com-client.p12 passphrase: badssl.com
+
+// or
+
+GET https://client.badssl.com/
+X-ClientCert: pfx: ../assets/badssl.com-client.p12 passphrase: badssl.com
+```
+
 #### BasicAuth Replacment
 A support method is provided for using Basic Authentication. Just specify the username and password separated by spaces and the base64 encoding will be applied automatically
 
@@ -601,6 +615,23 @@ https://raw.githubusercontent.com/AnWeber/vscode-httpyac/master/icon.png
 ### extension
 
 extension of file for save or openWith.
+### no-log
+
+prevent logging of request data in output console
+### no-cookie-jar
+
+cookieJar support is disabled for this request
+
+### no-client-cert
+
+SSL client certificate is not send for this request
+
+```html
+# @no-client-cert
+
+GET https://client.badssl.com/
+X-ClientCert: pfx: ../assets/badssl.com-client.p12 passphrase: badssl.com
+```
 
 ## Environment Variables Support
 

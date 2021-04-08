@@ -4,7 +4,7 @@ import { getHeader, isString } from '../utils';
 
 export async function cookieJarActionProcessor(data: unknown, { request, httpRegion }: ProcessorContext) {
   if (request
-    && !httpRegion.metaData["no-cookie-jar"]
+    && !httpRegion.metaData.noCookieJar
     && environmentStore.environmentConfig?.cookieJarEnabled) {
     const jar = cookieStore.jar;
     if (request.headers && request.url) {

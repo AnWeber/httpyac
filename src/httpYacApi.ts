@@ -12,8 +12,8 @@ class HttpYacApi {
 
   constructor() {
     this.httpRegionParsers = [
-      new parser.CommentHttpRegionParser(),
       new parser.MetaHttpRegionParser(),
+      new parser.CommentHttpRegionParser(),
       new parser.VariableHttpRegionParser(),
       new parser.JsHttpRegionParser(),
       new parser.IntellijHttpRegionParser(),

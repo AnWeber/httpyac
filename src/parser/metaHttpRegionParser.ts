@@ -6,8 +6,8 @@ import { promises as fs } from 'fs';
 import { toAbsoluteFilename } from '../utils';
 import { refMetaActionProcessor } from '../actionProcessor';
 export class MetaHttpRegionParser implements HttpRegionParser {
-  static isMetaTag(textLine: string) {
-    return /^\s*\#{1,}/.test(textLine);
+  private static isMetaTag(textLine: string) {
+    return /^\s*(\#{1,}|\/{2})/.test(textLine);
   }
 
   private isDelimiter(textLine: string) {
@@ -26,7 +26,7 @@ export class MetaHttpRegionParser implements HttpRegionParser {
         if (this.isDelimiter(textLine)) {
           result.newRegion = true;
         } else {
-          const match = /^\s*\#{1,}\s+\@(?<key>[^\s]*)(\s+)?"?(?<value>.*)?"?$/.exec(textLine);
+          const match = /^\s*(\#{1,}|\/{2,})\s+\@(?<key>[^\s]*)(\s+)?"?(?<value>.*)?"?$/.exec(textLine);
 
           if (match && match.groups && match.groups.key) {
             const symbol: HttpSymbol = {
@@ -60,7 +60,7 @@ export class MetaHttpRegionParser implements HttpRegionParser {
             }
             result.symbols = [symbol];
 
-            const key = match.groups.key.replace(/-./, (value) => value[1].toUpperCase());
+            const key = match.groups.key.replace(/-./g, (value) => value[1].toUpperCase());
 
             switch (key) {
               case 'import':
