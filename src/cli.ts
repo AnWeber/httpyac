@@ -111,7 +111,7 @@ function parseCliOptions(rawArgs: string[]): HttpCliOptions | undefined {
       help: args['--help'],
       httpRegionLine: args['--line'],
       httpRegionName: args['--name'],
-      rejectUnauthorized: args['--insecure'] !== undefined ? args['--insecure'] : undefined,
+      rejectUnauthorized: args['--insecure'] !== undefined ? !args['--insecure'] : undefined,
       repeat: args['--repeat'] ? {
         count: args['--repeat'],
         type: args['--repeat-mode'] === 'sequential' ? RepeatOrder.sequential : RepeatOrder.parallel,
@@ -199,23 +199,14 @@ async function initEnviroment(cliOptions: HttpCliOptions) {
 
   const environmentConfig: EnvironmentConfig & SettingsConfig = {
     log: {
-      level: cliOptions.verbose ? LogLevel.trace : LogLevel.info,
-      isRequestLogEnabled: true,
-      supportAnsiColors: true,
-      prettyPrint: true,
+      level: cliOptions.verbose ? LogLevel.trace : undefined,
     },
     request: {
       timeout: cliOptions.requestTimeout,
-      followRedirect: true,
       https: {
-        rejectUnauthorized: !cliOptions.rejectUnauthorized
+        rejectUnauthorized: cliOptions.rejectUnauthorized
       }
-    },
-    cookieJarEnabled: true,
-    dotenv: {
-      defaultFiles: ['.env'],
-      dirname: 'env',
-    },
+    }
   };
 
   const rootDir = cliOptions.rootDir || await findPackageJson(process.cwd()) || process.cwd();

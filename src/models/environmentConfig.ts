@@ -18,16 +18,16 @@ export interface EnvironmentConfig{
   environments?: Record<string, Record<string, any>>;
   clientCertificates?: Record<string, ClientCertificateOptions>,
   dotenv?: {
+    enabled?: boolean;
     /** default dotenv files which is active in all profiles */
     defaultFiles?: string[];
     /** relative or absolute path to folder with dotenv files */
     dirname?: string;
     /** search for .env file next to *.http files */
     variableProviderEnabled?: boolean;
-    /** prettyPrint response */
-    prettyPrint?: boolean;
   },
   intellij?: {
+    enabled?: boolean;
     /** relative or absolute path to folder with intellij variables files */
     dirname?: string;
     /** search for http-client.env.json file next to *.http files */

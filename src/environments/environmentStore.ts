@@ -105,7 +105,21 @@ class EnvironmentStore{
 
 
   async configure(config: EnvironmentConfig, rootDirs: string[]) {
-    const environmentConfig: EnvironmentConfig = merge({}, ...(await this.loadFileEnvironemntConfigs(rootDirs)), config);
+    const environmentConfig: EnvironmentConfig = merge({
+      log: {
+        isRequestLogEnabled: true,
+        supportAnsiColors: true,
+        prettyPrint: true,
+      },
+      request: {
+        followRedirect: true,
+      },
+      cookieJarEnabled: true,
+      dotenv: {
+        defaultFiles: ['.env'],
+        dirname: 'env',
+      },
+    }, ...(await this.loadFileEnvironemntConfigs(rootDirs)), config);
 
     this.initLogConfiguration(environmentConfig);
     await this.searchClientCertficates(environmentConfig, rootDirs);
@@ -188,11 +202,12 @@ class EnvironmentStore{
   }
 
   private initEnvProvider(factory: (path: string) => EnvironmentProvider, config: {
+    enabled?: boolean;
     dirname?: string;
     variableProviderEnabled?: boolean;
   } | undefined, rootDirs: string[]) {
     const result = [];
-    if (config) {
+    if (config?.enabled) {
       for (const rootDir of rootDirs) {
         result.push(factory(rootDir));
         if (config.dirname && !isAbsolute(config.dirname)) {
