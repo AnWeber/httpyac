@@ -1,8 +1,11 @@
-## 2.3.0 (2021-04-05)
+## 2.3.0 (2021-04-09)
 
 #### Features
 
 * define global script executed after every request
+* set ssl client certifcates per request
+* intellij syntax support for metadata (`// @no-cookie-jar`)
+* markdown utils in httpyac
 
 #### Fix
 
