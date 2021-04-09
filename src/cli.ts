@@ -210,7 +210,7 @@ async function initEnviroment(cliOptions: HttpCliOptions) {
   };
 
   const rootDir = cliOptions.rootDir || await findPackageJson(process.cwd()) || process.cwd();
-  await environmentStore.configure(environmentConfig, [rootDir]);
+  await environmentStore.configure([rootDir], environmentConfig,);
   initHttpYacApiExtensions(environmentConfig, rootDir);
   environmentStore.activeEnvironments = cliOptions.activeEnvironments;
 

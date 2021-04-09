@@ -104,7 +104,7 @@ class EnvironmentStore{
   }
 
 
-  async configure(config: EnvironmentConfig, rootDirs: string[]) {
+  async configure(rootDirs: string[], config: EnvironmentConfig, defaults: EnvironmentConfig = {}) {
     const environmentConfig: EnvironmentConfig = merge({
       log: {
         isRequestLogEnabled: true,
@@ -119,7 +119,10 @@ class EnvironmentStore{
         defaultFiles: ['.env'],
         dirname: 'env',
       },
-    }, ...(await this.loadFileEnvironemntConfigs(rootDirs)), config);
+    },
+      defaults,
+      ...(await this.loadFileEnvironemntConfigs(rootDirs)),
+      config);
 
     this.initLogConfiguration(environmentConfig);
     await this.searchClientCertficates(environmentConfig, rootDirs);
