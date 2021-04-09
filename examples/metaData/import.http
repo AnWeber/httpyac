@@ -6,3 +6,11 @@ POST /anything
 
 {{JSON.stringify(one)}}
 
+###
+
+// @import ./ref.http
+// @ref one
+POST /anything
+
+{{JSON.stringify(one)}}
+

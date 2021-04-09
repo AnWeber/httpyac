@@ -1,3 +1,10 @@
 
 # @extension html
 GET /xml
+
+###
+// @extension html
+GET /xml
+
+
+GET /xml

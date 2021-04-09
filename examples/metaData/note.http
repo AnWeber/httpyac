@@ -2,5 +2,8 @@
 # @note Are you sure?
 GET /anything
 
+###
+// @note Are you sure?
+GET /anything
 
 

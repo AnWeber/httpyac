@@ -18,3 +18,20 @@ POST /anything
 POST /anything
 
 {{JSON.stringify(one)}}
+
+
+###
+
+// @ref one
+POST /anything
+
+{{JSON.stringify(one)}}
+
+
+
+###
+
+// @forceRef one
+POST /anything
+
+{{JSON.stringify(one)}}

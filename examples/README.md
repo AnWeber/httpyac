@@ -544,7 +544,7 @@ Accept: text/html
 
 ## Meta Data
 
-All lines starting with `#` are interpreted as comment lines. Lines in Format `# @foo bar` are interpreted as meta data. It is possible to attach meta data that influences the processing of the request
+All lines starting with `#` are interpreted as meta data lines. Lines in Format `# @foo bar` are interpreted as meta data (or alternatively `// @foo` because of [Intellij](https://www.jetbrains.com/help/idea/exploring-http-syntax.html#enable-disable-redirects)). It is possible to attach meta data that influences the processing of the request
 
 ### name
 responses of a requests with a name are automatically added as variables and can be reused by other requests
