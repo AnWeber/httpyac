@@ -66,20 +66,23 @@ export async function executeScript(context: { script: string, fileName: string 
     scriptModule.paths = (Module as any)._nodeModulePaths(dir);
 
 
-    const scriptRequire: any = (id: any) => {
-      if (id === 'got') {
-        return got;
+    const scriptRequire: any = (id: string | undefined) => {
+      if (id) {
+        if (id === 'got') {
+          return got;
+        }
+        if (id === 'httpyac') {
+          return {
+            ...httpYac,
+            ...context.require || {},
+          };
+        }
+        if (httpYacApi.additionalRequire[id]) {
+          return httpYacApi.additionalRequire[id];
+        }
+        return scriptModule.require(id);
       }
-      if (id === 'httpYac') {
-        return {
-          ...httpYac,
-          ...context.require || {},
-        };
-      }
-      if (httpYacApi.additionalRequire[id]) {
-        return httpYacApi.additionalRequire[id];
-      }
-      return scriptModule.require(id);
+      return null;
     };
     // see https://github.com/nodejs/node/blob/master/lib/internal/modules/cjs/loader.js#L823-L911
     scriptRequire.resolve = (req: any) => (Module as any)._resolveFilename(req, scriptModule);

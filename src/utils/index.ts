@@ -2,6 +2,7 @@ export * from './actionProcessorUtils';
 export * from './environmentUtils';
 export * from './fsUtils';
 export * from './httpRegionUtils';
+export * from './markdownUtils';
 export * from './mimeTypeUtils';
 export * from './stringUtils';
 export * from './requestUtils';
