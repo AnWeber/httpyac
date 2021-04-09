@@ -1,3 +1,13 @@
+## 2.3.0 (2021-04-05)
+
+#### Features
+
+* define global script executed after every request
+
+#### Fix
+
+* priority of config initialization adjusted ([#3](https://github.com/AnWeber/httpyac/issues/3))
+
 ## 2.2.1 (2021-04-05)
 
 #### Fix

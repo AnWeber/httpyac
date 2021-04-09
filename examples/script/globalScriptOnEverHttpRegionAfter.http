@@ -1,0 +1,11 @@
+{{+after
+  console.info('post request script', response);
+}}
+
+
+###
+GET /anything
+
+
+GET /anything
+

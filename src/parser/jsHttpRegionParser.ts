@@ -1,20 +1,21 @@
 
 import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, ActionProcessorType } from '../models';
-import { toMultiLineString , actionProcessorIndexAfterRequest} from '../utils';
+import { toMultiLineString, actionProcessorIndexAfterRequest } from '../utils';
 import { jsActionProcessor, ScriptData } from '../actionProcessor';
 
 
+interface EveryRequestScript { scriptData: ScriptData, postScript: boolean }
+
 const JS_ON_EVERY_REQUEST_IDENTIFIER = 'jsOnEveryRequest';
-export class JsHttpRegionParser implements HttpRegionParser{
+export class JsHttpRegionParser implements HttpRegionParser {
   async parse(lineReader: HttpRegionParserGenerator, { httpRegion, data }: ParserContext): Promise<HttpRegionParserResult> {
     let next = lineReader.next();
 
     if (!next.done) {
-      const matches = /^\s*{{(?<executeOnEveryRequest>\+)?\s*$/.exec(next.value.textLine);
-      if (!matches) {
+      const match = /^\s*{{(?<executeOnEveryRequest>\+(pre|post|after)?)?\s*$/.exec(next.value.textLine);
+      if (!match) {
         return false;
       }
-      const executeOnEveryRequest = !!matches.groups?.executeOnEveryRequest;
       const lineOffset = next.value.line;
       next = lineReader.next();
       const script: Array<string> = [];
@@ -26,7 +27,7 @@ export class JsHttpRegionParser implements HttpRegionParser{
             lineOffset,
           };
 
-          if (!executeOnEveryRequest) {
+          if (!match.groups?.executeOnEveryRequest) {
             httpRegion.actions.push(
               {
                 data: scriptData,
@@ -36,11 +37,14 @@ export class JsHttpRegionParser implements HttpRegionParser{
             );
           } else {
 
-            let onEveryRequestArray: ScriptData[] = data[JS_ON_EVERY_REQUEST_IDENTIFIER];
+            let onEveryRequestArray: EveryRequestScript[] = data[JS_ON_EVERY_REQUEST_IDENTIFIER];
             if (!onEveryRequestArray) {
               data[JS_ON_EVERY_REQUEST_IDENTIFIER] = onEveryRequestArray = [];
             }
-            onEveryRequestArray.push(scriptData);
+            onEveryRequestArray.push({
+              scriptData,
+              postScript: ['+after', '+post'].indexOf(match.groups?.executeOnEveryRequest) >=0,
+            });
           }
 
           return {
@@ -63,16 +67,26 @@ export class JsHttpRegionParser implements HttpRegionParser{
     return false;
   }
 
-  close({data, httpRegion}: ParserContext): void {
-    let onEveryRequestArray: ScriptData[] = data[JS_ON_EVERY_REQUEST_IDENTIFIER];
+  close({ data, httpRegion }: ParserContext): void {
+    let onEveryRequestArray: EveryRequestScript[] = data[JS_ON_EVERY_REQUEST_IDENTIFIER];
     if (onEveryRequestArray && httpRegion.request) {
-      httpRegion.actions.splice(actionProcessorIndexAfterRequest(httpRegion), 0, ...onEveryRequestArray.map(scriptData => {
-        return {
-          data: scriptData,
-          type: ActionProcessorType.js,
-          processor: jsActionProcessor,
-        };
-      }));
+      for (const everyRequestScript of onEveryRequestArray) {
+        if (everyRequestScript.postScript) {
+          httpRegion.actions.push({
+            data: everyRequestScript.scriptData,
+            type: ActionProcessorType.js,
+            processor: jsActionProcessor,
+          });
+        } else {
+          httpRegion.actions.splice(actionProcessorIndexAfterRequest(httpRegion), 0, {
+            data: everyRequestScript.scriptData,
+            type: ActionProcessorType.js,
+            processor: jsActionProcessor,
+          });
+        }
+
+      }
+
 
     }
   }

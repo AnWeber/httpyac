@@ -302,7 +302,7 @@ In addition to the variables, the following values are also set
 
 
 
-Scripts with no request in the same region are always executed (Global Scripts). Global Scripts initialized with `{{+` are executed for every region.
+Scripts with no request in the same region are always executed (Global Scripts). Global Scripts initialized with `{{+` are executed before every region. Global Scripts initialized with `{{+after` are executed after every region.
 
 ```
 
@@ -310,8 +310,12 @@ Scripts with no request in the same region are always executed (Global Scripts).
   // executed once per http file
 }}
 {{+
-  // executed on every requests in http file
+  // executed before every requests in http file
   log.info(httpRegion.request.url)
+}}
+{{+after
+  // executed after every requests in http file
+  log.info(response)
 }}
 ```
 
