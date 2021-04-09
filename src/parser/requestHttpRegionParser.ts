@@ -132,6 +132,9 @@ export class RequestHttpRegionParser implements HttpRegionParser {
         processor: actionProcessor.createRequestActionProcessor,
       });
       httpRegion.actions.push({
+        type: ActionProcessorType.envDefaultHeaders,
+        processor: actionProcessor.envDefaultHeadersActionProcessor
+      }, {
         type: ActionProcessorType.variableReplacer,
         processor: actionProcessor.variableReplacerActionProcessor
       }, {

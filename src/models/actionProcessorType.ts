@@ -1,6 +1,7 @@
 
 export enum ActionProcessorType{
   cookieJar = 'cookieJar',
+  envDefaultHeaders = 'envDefaultHeaders',
   defaultHeaders = 'defaultHeaders',
   intellij = 'intellij',
   gql = 'gql',

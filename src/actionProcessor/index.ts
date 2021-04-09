@@ -2,6 +2,7 @@
 export * from './cookieJarActionProcessor';
 export * from './createRequestActionProcessor';
 export * from './defaultHeadersActionProcessor';
+export * from './envDefaultsHeaderActionProcessor';
 export * from './gqlActionProcessor';
 export * from './httpClientActionProcessor';
 export * from './intellijActionProcessor';

@@ -13,6 +13,8 @@ export interface EnvironmentConfig{
     responseBodyLength?: number,
     prettyPrint?: boolean,
   }
+  /** default request headers if not overwritten */
+  defaultHeaders?: Record<string, string>,
 
   /** environment variables  */
   environments?: Record<string, Record<string, any>>;
@@ -38,8 +40,6 @@ export interface EnvironmentConfig{
 export interface SettingsConfig {
   request?: HttpRequest;
 
-  /** default request headers if not overwritten */
-  defaultHeaders?: Record<string, string>,
 
   proxy?: string;
   /** absolute or relative path to a script which gets executed for every http request in a file */

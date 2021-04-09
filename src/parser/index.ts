@@ -1,5 +1,4 @@
 export * from './commentHttpRegionParser';
-export * from './defaultHeadersHttpRegionParser';
 export * from './gqlHttpRegionParser';
 export * from './httpFileParser';
 export * from './intellijHttpRegionParser';

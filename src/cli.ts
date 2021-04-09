@@ -9,7 +9,7 @@ import { httpYacApi } from './httpYacApi';
 import { log, LogLevel } from './logger';
 import { findPackageJson, getHttpacJsonConfig, parseJson, toAbsoluteFilename } from './utils';
 import { environmentStore } from './environments';
-import { DefaultHeadersHttpRegionParser, NoteMetaHttpRegionParser, SettingsScriptHttpRegionParser } from './parser';
+import { NoteMetaHttpRegionParser, SettingsScriptHttpRegionParser } from './parser';
 import { showInputBoxVariableReplacerFactory, showQuickpickVariableReplacerFactory } from './variables/replacer';
 
 interface HttpCliOptions{
@@ -195,8 +195,6 @@ async function getSendContext(httpFile: HttpFile, cliOptions: HttpCliOptions, en
 }
 
 async function initEnviroment(cliOptions: HttpCliOptions) {
-
-
   const environmentConfig: EnvironmentConfig & SettingsConfig = {
     log: {
       level: cliOptions.verbose ? LogLevel.trace : undefined,
@@ -218,9 +216,6 @@ async function initEnviroment(cliOptions: HttpCliOptions) {
 }
 
 function initHttpYacApiExtensions(config: EnvironmentConfig & SettingsConfig, rootDir: string | undefined) {
-  if (config.defaultHeaders) {
-    httpYacApi.httpRegionParsers.push(new DefaultHeadersHttpRegionParser(() => config.defaultHeaders));
-  }
   httpYacApi.httpRegionParsers.push(new NoteMetaHttpRegionParser(async (note: string) => {
     const answer = await inquirer.prompt([{
       type: 'confirm',
