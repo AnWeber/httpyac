@@ -17,6 +17,9 @@ export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined) 
         retry: 0,
         throwHttpErrors: false,
         http2: true,
+        headers: {
+          'user-agent': 'httpyac',
+        }
       };
 
       const url = request.url;

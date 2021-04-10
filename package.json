@@ -59,6 +59,7 @@
 	"dependencies": {
 		"arg": "^5.0.0",
 		"aws4": "^1.11.0",
+		"chalk": "^4.1.0",
 		"dotenv": "^8.2.0",
 		"encodeurl": "^1.0.2",
 		"filesize": "^6.1.0",

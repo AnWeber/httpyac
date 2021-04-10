@@ -7,7 +7,7 @@ import { gotHttpClientFactory } from './gotHttpClientFactory';
 import { httpFileStore } from './httpFileStore';
 import { httpYacApi } from './httpYacApi';
 import { log, LogLevel } from './logger';
-import { findPackageJson, getHttpacJsonConfig, parseJson, toAbsoluteFilename } from './utils';
+import { findPackageJson, parseJson } from './utils';
 import { environmentStore } from './environments';
 import { NoteMetaHttpRegionParser, SettingsScriptHttpRegionParser } from './parser';
 import { showInputBoxVariableReplacerFactory, showQuickpickVariableReplacerFactory } from './variables/replacer';

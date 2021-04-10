@@ -1,6 +1,6 @@
 import { HttpResponse } from '../models';
 import { isMimeTypeJSON, isString, toMultiLineString } from '../utils';
-import { AnsiColors } from './ansiColors';
+import { Chalk, Instance} from 'chalk';
 import { LogChannels } from './logChannels';
 import { log } from './logger';
 import { LogLevel } from './logLevel';
@@ -16,30 +16,26 @@ class LogRequestsLogger {
   public isResponseHeaderLogEnabled: boolean = true;
   public logResponseBodyLength: number = 0;
 
-  private getAnsiColor(color: AnsiColors) {
-    if (this.supportAnsiColors) {
-      return color;
-    }
-    return '';
-  }
 
   info(response: HttpResponse) {
+
+    const chalk = new Instance(this.supportAnsiColors ? undefined : {level: 0});
     const result: Array<string> = [];
     if (this.isFirstRequest) {
       this.isFirstRequest = false;
     } else {
-      result.push('--------------------------------------------------');
+      result.push(chalk`{gray --------------------------------------------------}`);
     }
 
     if (response.request && this.isRequestLogEnabled) {
-      result.push(...this.logRequest(response.request));
+      result.push(...this.logRequest(response.request, chalk));
     }
 
     if (this.isResponseHeaderLogEnabled) {
       if (result.length > 0) {
         result.push('');
       }
-      result.push(...this.logResponseHeader(response));
+      result.push(...this.logResponseHeader(response, chalk));
     }
 
     if (isString(response.body)) {
@@ -67,22 +63,22 @@ class LogRequestsLogger {
     logOutputProvider.log(LogChannels.Request, LogLevel.info, toMultiLineString(result));
   }
 
-  private logRequest(request: NormalizedOptions) {
+  private logRequest(request: NormalizedOptions, chalk: Chalk) {
     const result: Array<string> = [];
-    result.push(`${this.getAnsiColor(AnsiColors.Cyan)}${request.method} ${request.url}${this.getAnsiColor(AnsiColors.Reset)}`);
+    result.push(chalk`{bold ${request.method} ${request.url}}`);
     if (request.headers) {
       result.push(...Object.entries(request.headers)
-        .map(([key, value]) => `${this.getAnsiColor(AnsiColors.Yellow)}${key}${this.getAnsiColor(AnsiColors.Reset)}: ${value}`)
+        .map(([key, value]) => chalk`{yellow ${key}}: ${value}`)
         .sort()
       );
     }
     if (request.https?.certificate || request.https?.pfx) {
-      result.push(`Client-Cert: true`);
+      result.push( chalk`{yellow client-cert}: true`);
     }
     if (request.body) {
       result.push('');
       if (isString(request.body)) {
-        result.push(request.body);
+        result.push(chalk`{gray ${request.body}}`);
       } else if (Buffer.isBuffer(request.body)) {
         result.push(`buffer<${request.body.byteLength}>`);
       }
@@ -90,16 +86,16 @@ class LogRequestsLogger {
     return result;
   }
 
-  private logResponseHeader(response: HttpResponse) {
+  private logResponseHeader(response: HttpResponse, chalk: Chalk) {
     const result: Array<string> = [];
-    let responseColor = AnsiColors.Green;
     if (response.statusCode >= 400) {
-      responseColor = AnsiColors.Red;
+      result.push(chalk`{red.bold HTTP${response.httpVersion || ''}} {red.bold ${response.statusCode}} {red - ${response.statusMessage}}`);
+    } else {
+      result.push(chalk`{green.bold HTTP${response.httpVersion || ''}} {green.bold ${response.statusCode}} {black - ${response.statusMessage}}`);
     }
-    result.push(`${this.getAnsiColor(responseColor)}HTTP${response.httpVersion || ''} ${response.statusCode} - ${response.statusMessage}${this.getAnsiColor(AnsiColors.Reset)}`);
     result.push(...Object.entries(response.headers)
       .filter(([key]) => !key.startsWith(':'))
-      .map(([key, value]) => `${this.getAnsiColor(AnsiColors.Yellow)}${key}${this.getAnsiColor(AnsiColors.Reset)}: ${value}`)
+      .map(([key, value]) => chalk`{yellow ${key}}: ${value}`)
       .sort()
     );
     return result;
