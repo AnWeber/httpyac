@@ -39,8 +39,6 @@ export interface EnvironmentConfig{
 
 export interface SettingsConfig {
   request?: HttpRequest;
-
-
   proxy?: string;
   /** absolute or relative path to a script which gets executed for every http request in a file */
   httpRegionScript?: string;

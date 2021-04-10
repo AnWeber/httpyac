@@ -104,23 +104,23 @@ class EnvironmentStore{
   }
 
 
-  async configure(rootDirs: string[], config: EnvironmentConfig, defaults: EnvironmentConfig = {}) {
-    const environmentConfig: EnvironmentConfig = merge({
+  async configure(rootDirs: string[], config: EnvironmentConfig, defaultOverride: EnvironmentConfig = {}) {
+    const defaultConfig: EnvironmentConfig = {
       log: {
         isRequestLogEnabled: true,
         supportAnsiColors: true,
         prettyPrint: true,
       },
-      request: {
-        followRedirect: true,
-      },
       cookieJarEnabled: true,
       dotenv: {
+        enabled: true,
         defaultFiles: ['.env'],
         dirname: 'env',
       },
-    },
-      defaults,
+    };
+    const environmentConfig: EnvironmentConfig = merge(
+      defaultConfig,
+      defaultOverride,
       ...(await this.loadFileEnvironemntConfigs(rootDirs)),
       config);
 
