@@ -14,11 +14,6 @@
 		"url": "https://github.com/AnWeber/httpyac/issues"
 	},
 	"icon": "icon.png",
-	"categories": [
-		"Other",
-		"Snippets",
-		"Programming Languages"
-	],
 	"keywords": [
 		"HTTP",
 		"REST",

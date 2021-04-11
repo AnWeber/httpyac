@@ -5,10 +5,14 @@ import { LogLevel } from './logLevel';
 export type ChannelLogMethod = (channel: LogChannels, level: LogLevel, ...params: any[]) => void;
 export interface LogOutputProvider{
   log: ChannelLogMethod,
+  clear: (channel: LogChannels) => void;
 }
 
 export const logOutputProvider: LogOutputProvider = {
   log: (channel, level, ...params) => consoleLogOutputProvider(level, ...params),
+  clear: (channel) => {
+    // console should not be cleared
+  },
 };
 
 

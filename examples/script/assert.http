@@ -1,0 +1,33 @@
+
+
+GET /json
+
+{{
+  const { equal } = require('assert');
+  test('status code 200', () => {
+    equal(response.statusCode, 200);
+  });
+}}
+
+
+GET https://cat-fact.herokuapp.com/facts/random HTTP/1.1
+
+
+{{
+  const { equal, ok } = require('assert');
+    test('status code is 200', () => {
+        equal(response.statusCode, 200);
+    });
+
+    test('content is not null', () => {
+        ok(response.body);
+    });
+
+    var body = JSON.parse(response.body);
+
+    test('type is cat', () => {
+        equal(body.type, 'cat');
+    });
+}}
+
+###

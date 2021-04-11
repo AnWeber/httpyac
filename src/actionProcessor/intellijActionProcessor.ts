@@ -2,7 +2,7 @@ import { Variables, ProcessorContext, HttpRegion, HttpFile } from '../models';
 import { ScriptData, executeScript } from './jsActionProcessor';
 import { ok } from 'assert';
 import { log, scriptConsole, popupService } from '../logger';
-import { toAbsoluteFilename, isMimeTypeJSON, isString } from '../utils';
+import { toAbsoluteFilename } from '../utils';
 import { promises as fs } from 'fs';
 
 export interface IntellijScriptData{
@@ -105,7 +105,7 @@ function initIntellijVariables(httpRegion: HttpRegion, variables: Record<string,
   let response: any = undefined;
   if (httpRegion.response) {
     response = {
-      body: isMimeTypeJSON(httpRegion.response.contentType) && isString(httpRegion.response.body) ? JSON.parse(httpRegion.response.body) : httpRegion.response.body,
+      body: httpRegion.response.parsedBody || httpRegion.response.body,
       headers: {
         valueOf: (headerName: string) => {
           if (httpRegion.response) {

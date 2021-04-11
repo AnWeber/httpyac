@@ -1,0 +1,78 @@
+
+GET /json
+
+{{
+  const { expect } = require('chai');
+  test('status code 200', () => {
+    expect(response.statusCode).to.equal(200)
+  });
+}}
+
+GET https://cat-fact.herokuapp.com/facts/random HTTP/1.1
+
+
+{{
+    const { expect } = require('chai');
+    test('status code is 200', () => {
+        expect(response.statusCode).to.equal(200);
+    });
+
+    test('content is not null', () => {
+        expect(response.body).to.not.be.null;
+    });
+
+    var body = JSON.parse(response.body);
+
+    test('type is cat', () => {
+        expect(body.type).to.equal('cat');
+    });
+}}
+
+###
+
+GET https://cat-fact.herokuapp.com/facts/random HTTP/1.1
+
+
+{{
+  const { expect } = require('chai');
+    test('status code is 200', () => {
+        expect(response.statusCode).to.equal(200);
+    });
+
+    test('content is not null', () => {
+        expect(response.body).to.not.be.null;
+    });
+
+    var body = JSON.parse(response.body);
+
+    test('text equals hello world', () => {
+        expect(body.text).to.equal('hello world');
+    });
+
+    test('type is cat', () => {
+        expect(body.type).to.equal('cat');
+    });
+}}
+
+###
+
+GET https://cat-fact.herokuapp.com/facts/random HTTP/1.1
+
+
+{{
+  const { expect } = require('chai');
+  test('status code is 400', () => {
+      expect(response.statusCode).to.equal(400);
+  });
+
+  var body = JSON.parse(response.body);
+
+  test('text equals hello world', () => {
+      expect(body.text).to.equal('hello world');
+  });
+}}
+
+
+###
+
+GET https://cat-fact.herokuapp.com/facts/random HTTP/1.1

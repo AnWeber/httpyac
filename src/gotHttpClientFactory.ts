@@ -1,4 +1,4 @@
-import { HttpClientContext, HttpRequest, HttpResponse, RepeatOrder } from './models';
+import { HttpClient, HttpClientContext, HttpRequest, HttpResponse, RepeatOrder } from './models';
 import { getHeader, isString, parseMimeType, isMimeTypeJSON } from './utils';
 import { default as got, OptionsOfUnknownResponseBody, CancelError, Response } from 'got';
 import merge from 'lodash/merge';
@@ -9,8 +9,8 @@ import { default as filesize } from 'filesize';
 
 
 
-export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined) {
-  return async function gotHttpClient(request: HttpRequest, context: HttpClientContext) {
+export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined) : HttpClient {
+  return async function gotHttpClient(request: HttpRequest, context: HttpClientContext) : Promise<HttpResponse | false>{
     try {
       const defaults: OptionsOfUnknownResponseBody = {
         decompress: true,
@@ -42,10 +42,7 @@ export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined) 
       }
 
       if (response) {
-        const contentType = getHeader(response.headers, 'content-type');
-        if (isString(contentType)) {
-          response.contentType = parseMimeType(contentType);
-        }
+        parseContentType(response);
         return response;
       }
       throw new Error('no response');
@@ -65,6 +62,13 @@ export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined) 
   }
 }
 
+
+function parseContentType(response: HttpResponse) {
+  const contentType = getHeader(response.headers, 'content-type');
+  if (isString(contentType)) {
+    response.contentType = parseMimeType(contentType);
+  }
+}
 
 async function loadRepeat(url: string, options: OptionsOfUnknownResponseBody, repeatOrder: RepeatOrder, count: number) {
 

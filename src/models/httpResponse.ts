@@ -10,6 +10,7 @@ export interface HttpResponse{
   headers: Record<string, string | string[] | undefined | null>;
   contentType?: ContentType;
   body: unknown;
+  parsedBody?: any;
   rawBody?: Buffer;
   request?: NormalizedOptions;
   meta?: Record<string, any>

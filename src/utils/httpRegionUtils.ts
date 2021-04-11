@@ -1,7 +1,7 @@
 
 import { environmentStore } from '../environments';
 import { httpYacApi } from '../httpYacApi';
-import { log, scriptConsole } from '../logger';
+import { log } from '../logger';
 import { HttpFileSendContext, HttpRegionSendContext, ProcessorContext, HttpFile, Variables, HttpResponse, HttpClient, HttpRegion } from '../models';
 
 
@@ -60,8 +60,6 @@ export async function executeGlobalScripts(httpFile: HttpFile, variables: Variab
 
 async function getVariables(httpFile: HttpFile): Promise<Record<string, any>> {
   const variables = Object.assign({
-    log,
-    console:scriptConsole,
   },
     (await environmentStore.getVariables(httpFile.activeEnvironment)),
     ...(await Promise.all(

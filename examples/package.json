@@ -1,0 +1,25 @@
+{
+  "name": "httpyac-examples",
+  "version": "1.0.0",
+  "description": "examples how to use httpyac",
+  "homepage": "https://github.com/AnWeber/httpyac",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AnWeber/httpyac"
+  },
+  "bugs": {
+    "url": "https://github.com/AnWeber/httpyac/issues"
+  },
+  "icon": "icon.png",
+  "keywords": [
+    "httpyac",
+    "examples",
+    "docs"
+  ],
+  "author": "anweber",
+  "license": "ISC",
+  "dependencies": {
+    "chai": "^4.3.4",
+    "faker": "^5.5.3"
+  }
+}

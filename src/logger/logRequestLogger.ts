@@ -1,8 +1,7 @@
 import { HttpResponse } from '../models';
-import { isMimeTypeJSON, isString, toMultiLineString } from '../utils';
+import { isString, toMultiLineString } from '../utils';
 import { Chalk, Instance} from 'chalk';
 import { LogChannels } from './logChannels';
-import { log } from './logger';
 import { LogLevel } from './logLevel';
 import { logOutputProvider } from './logOutputProvider';
 
@@ -44,20 +43,15 @@ class LogRequestsLogger {
       }
       let body = response.body;
 
-      if (isMimeTypeJSON(response.contentType) && this.prettyPrint) {
-        try {
-          body = JSON.stringify(JSON.parse(body), null, 2);
-        } catch (err) {
-          log.trace(err);
-        }
+      if (response.parsedBody) {
+        body = JSON.stringify(response.parsedBody, null, 2);
       }
-
-      {if (this.logResponseBodyLength > 0) {
+      if (this.logResponseBodyLength > 0) {
         body = body.substr(0, Math.min(body.length, this.logResponseBodyLength));
         if (response.body.length >= this.logResponseBodyLength) {
           body += `... (${response.body.length - this.logResponseBodyLength} characters  more)`;
         }
-      }}
+      }
       result.push(body);
     }
     logOutputProvider.log(LogChannels.Request, LogLevel.info, toMultiLineString(result));

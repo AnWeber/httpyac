@@ -4,12 +4,12 @@ GET /json
 {{
   const assert = require('assert');
 
-  assert.equal(response.slideshow.title, 'Sample Slide Show', "Post Request Scripts Works");
+  assert.equal(response.parsedBody.slideshow.title, 'Sample Slide Show', "Post Request Scripts Works");
 }}
 
 GET /json
 
 {{
   const assert = require('assert');
-  assert.equal(response.slideshow.title, 'fail', "Post Request Scripts does not Works");
+  assert.equal(response.parsedBody.slideshow.title, 'fail', "Post Request Scripts does not Works");
 }}

@@ -29,9 +29,8 @@ export async function requestOpenIdInformation(request: HttpRequest | false,cont
       if (!context.config.noLog) {
         logRequest.info(response);
       }
-      if (response.statusCode === 200 && isString(response.body)) {
-        const jwtToken = JSON.parse(response.body);
-        return toOpenIdInformation(jwtToken, time, context);
+      if (response.statusCode === 200 && response.parsedBody) {
+        return toOpenIdInformation(response.parsedBody, time, context);
       }
     }
   }

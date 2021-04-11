@@ -2,11 +2,13 @@ import { Variables, ProcessorContext } from '../models';
 import { Module } from 'module';
 import { runInThisContext} from 'vm';
 import { dirname } from 'path';
-import { log } from '../logger';
-import { isPromise , toEnvironmentKey} from '../utils';
+import { log, scriptConsole, testLogger} from '../logger';
+import { isPromise , toEnvironmentKey, getRegionName} from '../utils';
 import * as got from 'got';
 import { httpYacApi } from '../httpYacApi';
 import * as httpYac from '..';
+import { Instance } from 'chalk';
+import { environmentStore } from '../environments';
 
 export interface ScriptData{
   script: string;
@@ -28,10 +30,24 @@ export function isValidVariableName(name: string) {
   return false;
 }
 
-export async function jsActionProcessor(scriptData: ScriptData, { httpRegion, httpFile,request, variables, progress }: ProcessorContext) {
-  variables.request = request;
-  variables.httpRegion = httpRegion;
-  variables.httpFile = httpFile;
+export async function jsActionProcessor(scriptData: ScriptData, { httpRegion, httpFile, request, variables, progress }: ProcessorContext) {
+
+  let isFirstTestCall = true;
+  const defaultVariables = {
+    request,
+    httpRegion,
+    httpFile,
+    log,
+    console: scriptConsole,
+    test: (message: string, testMethod: boolean | (() => void)) => {
+      if (isFirstTestCall) {
+        testLogger.clear();
+        testLogger.info(`Tests (${getRegionName(httpRegion)})`);
+      }
+      test(testMethod, message);
+    }
+  };
+  Object.assign(variables, defaultVariables);
 
   const result = await executeScript({
     script: scriptData.script,
@@ -42,10 +58,9 @@ export async function jsActionProcessor(scriptData: ScriptData, { httpRegion, ht
       progress,
     }
   });
-  delete variables.request;
-  delete variables.httpRegion;
-  delete variables.httpFile;
-
+  for (const [key] of Object.entries(defaultVariables)) {
+    delete variables[key];
+  }
   if (result) {
     Object.assign(variables, result);
     Object.assign(httpFile.variablesPerEnv[toEnvironmentKey(httpFile.activeEnvironment)], result);
@@ -53,6 +68,26 @@ export async function jsActionProcessor(scriptData: ScriptData, { httpRegion, ht
   return !result.$cancel;
 }
 
+
+function test(testMethod: boolean | (() => void), message: string) {
+  const chalk = new Instance(environmentStore.environmentConfig?.log?.supportAnsiColors ? undefined : { level: 0 });
+  let result = testMethod;
+  let description: string = '';
+  if (typeof testMethod === 'function') {
+    try {
+      testMethod();
+      result = true;
+    } catch (err) {
+      result = false;
+      description = ` (${err.message || err})`;
+    }
+  }
+  if (result) {
+    testLogger.info(chalk`{green ✓ - ${message || 'Test passed'}}`);
+  } else {
+    testLogger.error(chalk`{red ⚠ - ${message || 'Test failed'}${description || ''}}`);
+  }
+}
 
 export async function executeScript(context: { script: string, fileName: string | undefined, variables: Variables, lineOffset: number, require?: Record<string, any>}) {
   try {
