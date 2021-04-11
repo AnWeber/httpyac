@@ -89,9 +89,9 @@ class LogRequestsLogger {
   private logResponseHeader(response: HttpResponse, chalk: Chalk) {
     const result: Array<string> = [];
     if (response.statusCode >= 400) {
-      result.push(chalk`{red.bold HTTP${response.httpVersion || ''}} {red.bold ${response.statusCode}} {red - ${response.statusMessage}}`);
+      result.push(chalk`{red.bold HTTP/${response.httpVersion || ''}} {red.bold ${response.statusCode}} {red ${response.statusMessage}}`);
     } else {
-      result.push(chalk`{green.bold HTTP${response.httpVersion || ''}} {green.bold ${response.statusCode}} {black - ${response.statusMessage}}`);
+      result.push(chalk`{green.bold HTTP/${response.httpVersion || ''}} {green.bold ${response.statusCode}} {black ${response.statusMessage}}`);
     }
     result.push(...Object.entries(response.headers)
       .filter(([key]) => !key.startsWith(':'))
