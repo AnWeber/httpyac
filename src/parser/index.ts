@@ -7,5 +7,6 @@ export * from './metaHttpRegionParser';
 export * from './noteMetaHttpRegionParser';
 export * from './requestBodyHttpRegionParser';
 export * from './requestHttpRegionParser';
+export * from './responseHttpRegionParser';
 export * from './settingsScriptHttpRegionParser';
 export * from './variableHttpRegionParser';

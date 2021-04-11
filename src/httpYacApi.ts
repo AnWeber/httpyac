@@ -19,6 +19,7 @@ class HttpYacApi {
       new parser.IntellijHttpRegionParser(),
       new parser.GqlHttpRegionParser(),
       new parser.RequestHttpRegionParser(),
+      new parser.ResponseHttpRegionParser(),
       new parser.RequestBodyHttpRegionParser(),
     ];
 

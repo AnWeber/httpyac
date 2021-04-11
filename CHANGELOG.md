@@ -1,3 +1,14 @@
+## 2.4.0 (2021-04-xx)
+
+#### Features
+
+* define response example in http file (ignored in parsing file)
+* using chalk for ansi support
+
+#### Fix
+
+* dotenv support accidentally disabled
+
 ## 2.3.0 (2021-04-09)
 
 #### Features

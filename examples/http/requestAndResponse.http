@@ -1,0 +1,37 @@
+
+GET /json
+
+
+//response example
+HTTP/2.0 200 OK
+access-control-allow-credentials: true
+access-control-allow-origin: *
+content-length: 429
+content-type: application/json
+date: Sun, 11 Apr 2021 12:27:26 GMT
+server: gunicorn/19.9.0
+
+{
+  "slideshow": {
+    "author": "Yours Truly",
+    "date": "date of publication",
+    "slides": [
+      {
+        "title": "Wake up to WonderWidgets!",
+        "type": "all"
+      },
+      {
+        "items": [
+          "Why <em>WonderWidgets</em> are great",
+          "Who <em>buys</em> WonderWidgets"
+        ],
+        "title": "Overview",
+        "type": "all"
+      }
+    ],
+    "title": "Sample Slide Show"
+  }
+}
+
+
+GET /json
