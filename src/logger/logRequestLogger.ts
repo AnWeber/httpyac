@@ -1,16 +1,15 @@
 import { HttpResponse } from '../models';
 import { isString, toMultiLineString } from '../utils';
-import { Chalk, Instance} from 'chalk';
 import { LogChannels } from './logChannels';
 import { LogLevel } from './logLevel';
 import { logOutputProvider } from './logOutputProvider';
 
 import { NormalizedOptions } from 'got';
+import { chalkInstance } from './chalk';
 
 class LogRequestsLogger {
   private isFirstRequest:boolean = true;
   public prettyPrint: boolean = false;
-  public supportAnsiColors: boolean = true;
   public isRequestLogEnabled: boolean = true;
   public isResponseHeaderLogEnabled: boolean = true;
   public logResponseBodyLength: number = 0;
@@ -18,7 +17,7 @@ class LogRequestsLogger {
 
   info(response: HttpResponse) {
 
-    const chalk = new Instance(this.supportAnsiColors ? undefined : {level: 0});
+    const chalk = chalkInstance();
     const result: Array<string> = [];
     if (this.isFirstRequest) {
       this.isFirstRequest = false;
@@ -27,14 +26,14 @@ class LogRequestsLogger {
     }
 
     if (response.request && this.isRequestLogEnabled) {
-      result.push(...this.logRequest(response.request, chalk));
+      result.push(...this.logRequest(response.request));
     }
 
     if (this.isResponseHeaderLogEnabled) {
       if (result.length > 0) {
         result.push('');
       }
-      result.push(...this.logResponseHeader(response, chalk));
+      result.push(...this.logResponseHeader(response));
     }
 
     if (isString(response.body)) {
@@ -57,7 +56,8 @@ class LogRequestsLogger {
     logOutputProvider.log(LogChannels.Request, LogLevel.info, toMultiLineString(result));
   }
 
-  private logRequest(request: NormalizedOptions, chalk: Chalk) {
+  private logRequest(request: NormalizedOptions) {
+    const chalk = chalkInstance();
     const result: Array<string> = [];
     result.push(chalk`{bold ${request.method} ${request.url}}`);
     if (request.headers) {
@@ -74,13 +74,14 @@ class LogRequestsLogger {
       if (isString(request.body)) {
         result.push(chalk`{gray ${request.body}}`);
       } else if (Buffer.isBuffer(request.body)) {
-        result.push(`buffer<${request.body.byteLength}>`);
+        result.push(chalk`{gray buffer<${request.body.byteLength}>}`);
       }
     }
     return result;
   }
 
-  private logResponseHeader(response: HttpResponse, chalk: Chalk) {
+  private logResponseHeader(response: HttpResponse) {
+    const chalk = chalkInstance();
     const result: Array<string> = [];
     if (response.statusCode >= 400) {
       result.push(chalk`{red.bold HTTP/${response.httpVersion || ''}} {red.bold ${response.statusCode}} {red ${response.statusMessage}}`);

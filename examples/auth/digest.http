@@ -9,5 +9,7 @@ Authorization: Digest {{user}} {{password}}
 
 {{
   const assert = require('assert');
-  assert.equal(response.parsedBody.authenticated, true, "Digest Auth works");
+  test("Digest Auth works", () => {
+    assert.equal(response.parsedBody.authenticated, true, );
+  });
 }}

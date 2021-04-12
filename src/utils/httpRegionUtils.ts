@@ -74,15 +74,18 @@ async function getVariables(httpFile: HttpFile): Promise<Record<string, any>> {
 export async function processHttpRegionActions(context: ProcessorContext, showProgressBar?: boolean) {
 
   for (const action of context.httpRegion.actions) {
+    log.trace(`action ${action.type} executing`);
     if (context.progress) {
       context.showProgressBar = showProgressBar;
     }
     context.progress?.report({ message: `${getRegionName(context.httpRegion)}` });
     if (!context.httpRegion.metaData.disabled) {
       if (!await action.processor(action.data, context)) {
+        log.trace(`processs canceled by action ${action.type}`);
         return false;
       }
       if (context.progress?.isCanceled()) {
+        log.trace(`processs canceled by progress after ${action.type}`);
         return false;
       }
     }

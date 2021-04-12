@@ -9,7 +9,9 @@ Authorization: Basic {{user}} {{password}}
 
 {{
   const assert = require('assert');
-  assert.equal(response.parsedBody.authenticated, true, "Basic Auth works");
+  test("Basic Auth works", () => {
+    assert.equal(response.parsedBody.authenticated, true, );
+  });
 }}
 
 
@@ -18,5 +20,7 @@ Authorization: Basic {{Buffer.from( user + ":" + password).toString('base64')}}
 
 {{
   const assert = require('assert');
-  assert.equal(response.parsedBody.authenticated, true, "Basic Auth works");
+  test("Basic Auth works", () => {
+    assert.equal(response.parsedBody.authenticated, true, );
+  });
 }}

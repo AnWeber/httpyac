@@ -4,6 +4,7 @@ import { ok } from 'assert';
 import { log, scriptConsole, popupService } from '../logger';
 import { toAbsoluteFilename } from '../utils';
 import { promises as fs } from 'fs';
+import { test } from './testMethod';
 
 export interface IntellijScriptData{
   fileName: string;
@@ -58,22 +59,11 @@ export class HttpClient{
   }
 
 
-  test(testName: string, func: Function): void{
-    try {
-      func();
-      scriptConsole.info(testName);
-    } catch (err) {
-      scriptConsole.error(testName);
-      throw err;
-    }
+  test(testName: string, func: () => void): void{
+    test(testName, func);
   }
   assert(condition: boolean, message?: string) {
-    try {
-      ok(condition, message);
-    } catch (err) {
-      scriptConsole.error(err);
-      throw err;
-    }
+    ok(condition, message);
   }
   log(text: string): void{
     scriptConsole.info(text);

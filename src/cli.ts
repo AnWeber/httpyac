@@ -11,6 +11,7 @@ import { findPackageJson, parseJson } from './utils';
 import { environmentStore } from './environments';
 import { NoteMetaHttpRegionParser, SettingsScriptHttpRegionParser } from './parser';
 import { showInputBoxVariableReplacerFactory, showQuickpickVariableReplacerFactory } from './variables/replacer';
+import { testSymbols } from './actionProcessor';
 
 interface HttpCliOptions{
   activeEnvironments?: Array<string>,
@@ -65,9 +66,9 @@ export async function send(rawArgs: string[]) {
     } else {
       return renderHelp();
     }
-
   } catch (err) {
     log.error(err);
+    throw err;
   } finally {
     process.exit();
   }
@@ -162,6 +163,7 @@ async function getSendContext(httpFile: HttpFile, cliOptions: HttpCliOptions, en
     httpFile,
     httpClient: gotHttpClientFactory(request),
     repeat: cliOptions.repeat,
+    sendResult: {},
   };
 
   if (cliOptions.httpRegionName) {
@@ -211,6 +213,13 @@ async function initEnviroment(cliOptions: HttpCliOptions) {
   await environmentStore.configure([rootDir], environmentConfig,);
   initHttpYacApiExtensions(environmentConfig, rootDir);
   environmentStore.activeEnvironments = cliOptions.activeEnvironments;
+
+
+  if ('win32' === process.platform) {
+    // https://github.com/nodejs/node-v0.x-archive/issues/7940
+    testSymbols.ok = '[x]';
+    testSymbols.error = '[ ]';
+  }
 
   return environmentConfig;
 }

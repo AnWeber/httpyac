@@ -43,7 +43,6 @@ class Logger {
 }
 
 export const log = new Logger(LogChannels.Log);
-export const testLogger = new Logger(LogChannels.Test);
 export const scriptConsole = new Logger(LogChannels.ScriptConsole);
 
 export const popupService = new Logger(LogChannels.PopupChannel);

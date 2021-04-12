@@ -176,7 +176,6 @@ class EnvironmentStore{
       if (config.log.level) {
         log.level = config.log.level;
       }
-      logRequest.supportAnsiColors = !!config.log.supportAnsiColors;
       logRequest.logResponseBodyLength = config.log.responseBodyLength || 0;
       logRequest.isRequestLogEnabled = !!config.log.isRequestLogEnabled;
       logRequest.prettyPrint = !!config.log.prettyPrint;

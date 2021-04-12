@@ -8,7 +8,6 @@ POST https://api.github.com/graphql
 Content-Type: application/json
 Authorization: Bearer {{git_api_key}}
 
-
 query test($name: String!, $owner: String!) {
   repository(name: $name, owner: $owner) {
     name
