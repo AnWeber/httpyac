@@ -39,7 +39,7 @@ export async function openIdVariableReplacer(text: string, type: string, context
           }
         }
         if (context.cancelVariableReplacer) {
-          // flow found but no authorization, stop processing
+          log.debug('flow found but no authorization, stop processing');
           context.cancelVariableReplacer();
         }
         return undefined;

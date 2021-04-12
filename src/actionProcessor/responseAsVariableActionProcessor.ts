@@ -7,20 +7,7 @@ import { isValidVariableName } from './jsActionProcessor';
 export async function responseAsVariableActionProcessor(data: string, context: ProcessorContext) {
   if (context.httpRegion.response) {
     const response = context.httpRegion.response;
-
-    let body = response.body;
-
-    if (isMimeTypeJSON(response.contentType)
-      && isString(body)
-      && body.length > 0) {
-      try {
-        body = JSON.parse(body);
-        response.parsedBody = body;
-      } catch (err) {
-        popupService.warn('json parse error', body);
-        log.warn('json parse error', body, err);
-      }
-    }
+    const body = response.parsedBody || response.body;
     context.variables['response'] = response;
     if (context.httpRegion.metaData.name || context.httpRegion.metaData.jwt) {
       handleJWTMetaData(body, context.httpRegion);

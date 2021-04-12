@@ -5,6 +5,7 @@ import merge from 'lodash/merge';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { default as filesize } from 'filesize';
+import { log, popupService } from './logger';
 
 
 
@@ -42,7 +43,6 @@ export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined) 
       }
 
       if (response) {
-        parseContentType(response);
         return response;
       }
       throw new Error('no response');
@@ -63,12 +63,6 @@ export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined) 
 }
 
 
-function parseContentType(response: HttpResponse) {
-  const contentType = getHeader(response.headers, 'content-type');
-  if (isString(contentType)) {
-    response.contentType = parseMimeType(contentType);
-  }
-}
 
 async function loadRepeat(url: string, options: OptionsOfUnknownResponseBody, repeatOrder: RepeatOrder, count: number) {
 
@@ -124,8 +118,16 @@ function initProxy(request: HttpRequest) {
 }
 
 
+function parseContentType(headers: Record<string, string | string[] | undefined>) {
+  const contentType = getHeader(headers, 'content-type');
+  if (isString(contentType)) {
+    return parseMimeType(contentType);
+  }
+  return undefined;
+}
+
 function toHttpResponse(response: Response<any>): HttpResponse {
-  return {
+  const httpResponse: HttpResponse = {
     statusCode: response.statusCode,
     statusMessage: response.statusMessage,
     body: response.body,
@@ -134,12 +136,25 @@ function toHttpResponse(response: Response<any>): HttpResponse {
     timings: response.timings.phases,
     httpVersion: response.httpVersion,
     request: response.request.options,
+    contentType: parseContentType(response.headers),
     meta: {
       ip: response.ip,
       redirectUrls: response.redirectUrls,
       size: filesize(response.rawHeaders.map(obj => obj.length).reduce((size, current) => size + current, 0) + response.rawBody.length),
     }
   };
+
+  if (isMimeTypeJSON(httpResponse.contentType)
+      && isString(httpResponse.body)
+      && httpResponse.body.length > 0) {
+      try {
+        httpResponse.parsedBody = JSON.parse(httpResponse.body);
+      } catch (err) {
+        popupService.warn('json parse error', httpResponse.body);
+        log.warn('json parse error', httpResponse.body, err);
+      }
+    }
+  return httpResponse;
 }
 
 function mergeHttpResponse(responses: Array<HttpResponse>): HttpResponse | false {
@@ -148,13 +163,14 @@ function mergeHttpResponse(responses: Array<HttpResponse>): HttpResponse | false
   const response = responses.find(obj => obj.statusCode === statusCode);
   if (response) {
 
-    response.body = JSON.stringify(responses.map(obj => {
+    response.parsedBody = responses.map(obj => {
       if (isString(obj.body) && isMimeTypeJSON(obj.contentType)) {
         obj.body = JSON.parse(obj.body);
       }
       delete obj.rawBody;
       return obj;
-    }));
+    });
+    response.body = JSON.stringify(response.parsedBody);
 
     return {
       statusCode: response.statusCode,
