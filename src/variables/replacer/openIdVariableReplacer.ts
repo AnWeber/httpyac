@@ -17,12 +17,15 @@ export async function openIdVariableReplacer(text: string, type: string, context
       if (openIdFlow && config) {
         const cacheKey = openIdFlow.getCacheKey(config);
         if (cacheKey) {
+
           let openIdInformation = getOpenIdConfiguration(cacheKey, tokenExchangeConfig || config);
           userSessionStore.removeUserSession(cacheKey);
           if (openIdInformation) {
+            log.trace(`openid refresh token flow used: ${cacheKey}`);
             openIdInformation = await oauth.refreshTokenFlow.perform(openIdInformation, context);
           }
           if (!openIdInformation) {
+            log.trace(`openid flow ${match.groups.flow} used: ${cacheKey}`);
             openIdInformation = await openIdFlow.perform(config, {
               httpClient: context.httpClient,
               cacheKey,
@@ -33,6 +36,7 @@ export async function openIdVariableReplacer(text: string, type: string, context
             }
           }
           if (openIdInformation) {
+            log.trace(`openid flow ${match.groups.flow} finished`);
             userSessionStore.setUserSession(openIdInformation);
             keepAlive(cacheKey, context.httpClient);
             return `Bearer ${openIdInformation.accessToken}`;

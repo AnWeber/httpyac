@@ -14,7 +14,6 @@ export interface OpenIdConfiguration{
   keepAlive: boolean;
   username?: string;
   password?: string;
-  port?: string;
   subjectIssuer?: string;
   noLog?: boolean;
 }

@@ -65,9 +65,10 @@ function closeServer() {
   }
 }
 
-function initServer() {
+function initServer(port: number = 3000) {
   resetServer(600);
   if (!server) {
+    log.trace(`open http server on port ${port}`);
     server = createServer((req, res) => {
       try {
         let statusMessage = 'invalid';
@@ -130,7 +131,7 @@ function initServer() {
         res.end(getHtml(err));
       }
     });
-    server.listen(3000);
+    server.listen(port);
   }
 }
 

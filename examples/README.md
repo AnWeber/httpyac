@@ -438,7 +438,6 @@ To configure the flow, the following variables must be specified
 | {{prefix}}_scope | authorization_code, implicit, password, client_credentials | Scope |
 | {{prefix}}_responseType | authorization_code, implicit | response type of auth server |
 | {{prefix}}_audience | authorization_code, implicit | audience |
-| {{prefix}}_port | authorization_code, implicit | http server port used for Authorization Flow |
 | {{prefix}}_username | password | username for password flow |
 | {{prefix}}_password | password | password for password flow |
 | {{prefix}}_keepAlive | authorization_code, password, client_credentials | AccessToken is automatically renewed in the background before expiration with RequestToken |
