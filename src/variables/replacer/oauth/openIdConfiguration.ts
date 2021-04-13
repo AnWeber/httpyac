@@ -36,7 +36,6 @@ export function getOpenIdConfiguration(variablePrefix: string, variables: Record
       password: getVariable('password'),
       subjectIssuer: getVariable('subjectIssuer'),
       noLog: getVariable('noLog'),
-      port: getVariable('port') || 3000,
       keepAlive: ['false', '0', false].indexOf(getVariable('keepAlive')) < 0,
     };
     return config;

@@ -23,7 +23,7 @@ class AuthorizationCodeFlow implements OpenIdFlow {
     return new Promise<OpenIdInformation | false>(async (resolve, reject) => {
       const state = stateGenerator();
       try {
-        const redirectUri = `http://localhost:${config.port}/callback`;
+        const redirectUri = `http://localhost:3000/callback`;
         const authUrl = `${config.authorizationEndpoint}${config.authorizationEndpoint.indexOf('?') > 0 ? '&' : '?'}${toQueryParams({
           client_id: config.clientId,
           scope: config.scope || 'openid',
