@@ -173,7 +173,7 @@ class EnvironmentStore{
 
   private initLogConfiguration(config: EnvironmentConfig) {
     if (config.log) {
-      if (config.log.level) {
+      if (config.log.level !== undefined) {
         log.level = config.log.level;
       }
       logRequest.logResponseBodyLength = config.log.responseBodyLength || 0;
