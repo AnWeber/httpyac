@@ -2,8 +2,13 @@
 
 #### Features
 
-* better test method support
+* better [test](https://github.com/AnWeber/httpyac/blob/main/examples/README.md#node-js-scripts) method support
 * refactored response in script to [http response](https://github.com/AnWeber/httpyac/blob/main/src/models/httpResponse.ts) instead of body
+
+#### Fix
+
+* intellij env support enabled
+* unnecessary file parse when using ref in vscode
 
 ## 2.3.1 (2021-04-11)
 

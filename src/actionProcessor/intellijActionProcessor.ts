@@ -4,7 +4,7 @@ import { ok } from 'assert';
 import { log, scriptConsole, popupService } from '../logger';
 import { toAbsoluteFilename } from '../utils';
 import { promises as fs } from 'fs';
-import { test } from './testMethod';
+import { testFactory } from './testMethod';
 
 export interface IntellijScriptData{
   fileName: string;
@@ -53,14 +53,11 @@ function isIntellijScriptData(scriptData: any) : scriptData is IntellijScriptDat
 
 export class HttpClient{
   global: HttpClientVariables;
-
-  constructor(variables: Variables) {
+  constructor(private readonly httpRegion: HttpRegion, variables: Variables) {
     this.global = new HttpClientVariables(variables);
   }
-
-
   test(testName: string, func: () => void): void{
-    test(testName, func);
+    testFactory(this.httpRegion)(testName, func);
   }
   assert(condition: boolean, message?: string) {
     ok(condition, message);
@@ -114,7 +111,7 @@ function initIntellijVariables(httpRegion: HttpRegion, variables: Record<string,
       contentType: httpRegion.response.contentType,
     };
   }
-  const client = new HttpClient(variables);
+  const client = new HttpClient(httpRegion, variables);
   const intellijVars = {
     client,
     response,

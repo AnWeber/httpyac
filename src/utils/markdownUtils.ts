@@ -1,7 +1,8 @@
 import { EOL } from 'os';
-import {  HttpResponse } from '../models';
+import {  HttpResponse, TestResult } from '../models';
 import { isString, toMultiLineArray } from './stringUtils';
 import { NormalizedOptions} from 'got';
+import { testSymbols } from '../actionProcessor';
 
 export enum MarkdownParts{
   response,
@@ -28,7 +29,7 @@ export function toMarkdown(response: HttpResponse) {
   return joinMarkdown(result);
 }
 
-export function toMarkdownPreview(response: HttpResponse) {
+export function toMarkdownPreview(response: HttpResponse, testResults?: Array<TestResult>) {
   const result: Array<string> = [];
 
   result.push(...toMarkdownResponse(response, false));
@@ -38,6 +39,14 @@ export function toMarkdownPreview(response: HttpResponse) {
     result.push('');
     result.push('');
     result.push(...toMarkdownRequest(response.request, true));
+  }
+
+  if (testResults) {
+    result.push('');
+    result.push('---');
+    result.push('');
+    result.push('');
+    result.push(...toMarkdownTestResults(testResults));
   }
 
   if (response.timings) {
@@ -84,6 +93,16 @@ function toMarkdownRequest(request: NormalizedOptions, outputBody: boolean) {
     result.push('```json');
     result.push(joinMarkdown(toMultiLineArray(request.body)));
     result.push('```');
+  }
+  return result;
+}
+
+function toMarkdownTestResults(testResults: Array<TestResult>) {
+  const result: Array<string> = [];
+  result.push(`| TestResults |  |  |`);
+  result.push(`| --- | --- | --- |`);
+  for (const testResult of testResults) {
+    result.push(`| ${testResult.result ? testSymbols.ok : testSymbols.error} | ${testResult.message} | ${testResult.error?.displayMessage || ''} |`);
   }
   return result;
 }

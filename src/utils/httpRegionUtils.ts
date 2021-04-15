@@ -72,6 +72,8 @@ async function getVariables(httpFile: HttpFile): Promise<Record<string, any>> {
 }
 
 export async function processHttpRegionActions(context: ProcessorContext, showProgressBar?: boolean) {
+  delete context.httpRegion.response;
+  delete context.httpRegion.testResults;
 
   for (const action of context.httpRegion.actions) {
     log.trace(`action ${action.type} executing`);

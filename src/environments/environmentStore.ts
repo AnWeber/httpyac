@@ -5,7 +5,7 @@ import { JsonEnvProvider } from './jsonEnvProvider';
 import { EnvVariableProvider } from '../variables/provider/envVariableProvider';
 import { IntellijProvider } from './intellijEnvProvider';
 import { DotenvProvider } from './dotenvProvider';
-import { log, logRequest } from '../logger';
+import { log, logRequest, LogLevel } from '../logger';
 import { isAbsolute, join } from 'path';
 import merge from 'lodash/merge';
 
@@ -107,6 +107,8 @@ class EnvironmentStore{
   async configure(rootDirs: string[], config: EnvironmentConfig, defaultOverride: EnvironmentConfig = {}) {
     const defaultConfig: EnvironmentConfig = {
       log: {
+        level: LogLevel.warn,
+        responseBodyLength: 0,
         isRequestLogEnabled: true,
         supportAnsiColors: true,
         prettyPrint: true,

@@ -7,7 +7,7 @@ import { isPromise , toEnvironmentKey} from '../utils';
 import * as got from 'got';
 import { httpYacApi } from '../httpYacApi';
 import * as httpYac from '..';
-import { test } from './testMethod';
+import { testFactory } from './testMethod';
 
 export interface ScriptData{
   script: string;
@@ -37,7 +37,7 @@ export async function jsActionProcessor(scriptData: ScriptData, { httpRegion, ht
     httpFile,
     log,
     console: scriptConsole,
-    test,
+    test: testFactory(httpRegion),
   };
   Object.assign(variables, defaultVariables);
 
