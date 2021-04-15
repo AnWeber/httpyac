@@ -35,7 +35,7 @@ export class HttpFileStore{
   async getOrCreate(fileName: string, getText: () => Promise<string>, version: number): Promise<HttpFile> {
     try {
       const httpFileStoreEntry: HttpFileStoreEntry = this.getFromStore(fileName, version);
-      if (version !== httpFileStoreEntry.version || !httpFileStoreEntry.httpFile) {
+      if (version > httpFileStoreEntry.version || !httpFileStoreEntry.httpFile) {
         const httpFile = (await parseHttpFile(await getText(), fileName));
         httpFile.fileName = fileName;
         if (httpFileStoreEntry.httpFile) {
