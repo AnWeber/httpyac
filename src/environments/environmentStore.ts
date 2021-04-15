@@ -117,6 +117,9 @@ class EnvironmentStore{
         defaultFiles: ['.env'],
         dirname: 'env',
       },
+      intellij: {
+        enabled: true,
+      },
     };
     const environmentConfig: EnvironmentConfig = merge(
       defaultConfig,
