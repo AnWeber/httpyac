@@ -1,10 +1,10 @@
 import { HttpRegion, ProcessorContext} from '../models';
 import get from 'lodash/get';
 import { log, popupService, logRequest } from '../logger';
-import { decodeJWT, isMimeTypeJSON, isString, toEnvironmentKey } from '../utils';
+import { decodeJWT, isString, toEnvironmentKey } from '../utils';
 import { isValidVariableName } from './jsActionProcessor';
 
-export async function responseAsVariableActionProcessor(data: string, context: ProcessorContext) {
+export async function responseAsVariableActionProcessor(_data: unknown, context: ProcessorContext) {
   if (context.httpRegion.response) {
     const response = context.httpRegion.response;
     const body = response.parsedBody || response.body;
@@ -33,8 +33,8 @@ function handleNameMetaData(body: unknown, context: ProcessorContext) {
 }
 
 function handleJWTMetaData(body: unknown, httpRegion: HttpRegion ) {
-  if (httpRegion.metaData.jwt && body && httpRegion.response) {
-    if (isString(httpRegion.metaData.jwt)) {
+  if (httpRegion.metaData.jwt && httpRegion.response) {
+    if (body && isString(httpRegion.metaData.jwt)) {
       for (const key of httpRegion.metaData.jwt.split(',')) {
         const value = get(body, key);
         parseJwtToken(body, key, value);

@@ -2,7 +2,7 @@
 import { environmentStore } from '../environments';
 import { httpYacApi } from '../httpYacApi';
 import { log } from '../logger';
-import { HttpFileSendContext, HttpRegionSendContext, ProcessorContext, HttpFile, Variables, HttpResponse, HttpClient, HttpRegion } from '../models';
+import { HttpFileSendContext, HttpRegionSendContext, ProcessorContext, HttpFile, Variables, HttpClient, HttpRegion } from '../models';
 
 
 export function getRegionName(httpRegion: HttpRegion, defaultName: string = 'global') {

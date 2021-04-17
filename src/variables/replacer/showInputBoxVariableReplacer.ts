@@ -1,10 +1,9 @@
 import { ProcessorContext } from '../../models';
-import inquirer from 'inquirer';
 
 const lastValue: Record<string, string> = {};
 
 export function showInputBoxVariableReplacerFactory(showInputPrompt: (message: string, defaultValue: string) => Promise<string | undefined>) {
-  return async function showInputBoxVariableReplacer(text: string, type: string, context: ProcessorContext) {
+  return async function showInputBoxVariableReplacer(text: string, _type: string, context: ProcessorContext) {
 
     const variableRegex = /\{{2}(.+?)\}{2}/g;
     let match: RegExpExecArray | null;

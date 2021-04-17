@@ -4,7 +4,7 @@ import { log } from '../logger';
 const encodeUrl = require('encodeurl');
 
 
-export async function httpClientActionProcessor(data: unknown, context: ProcessorContext): Promise<boolean> {
+export async function httpClientActionProcessor(_data: unknown, context: ProcessorContext): Promise<boolean> {
   const { httpRegion, httpClient, request } = context;
   if (request) {
     await initBody(request);

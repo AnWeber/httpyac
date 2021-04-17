@@ -92,9 +92,9 @@ function md5(value: string | Buffer) {
 }
 
 function ha1Compute(algorithm: string | undefined, username: string, password: string, realm: string, nonce: string, cnonce: string | false) {
-  const ha1 = md5(username + ':' + realm + ':' + password);
+  const ha1 = md5(`${username}:${realm}:${password}`);
   if (cnonce && algorithm?.toLowerCase() === 'md5-sess') {
-    return md5(ha1 + ':' + nonce + ':' + cnonce);
+    return md5(`${ha1}:${nonce}:${cnonce}`);
   }
   return ha1;
 }

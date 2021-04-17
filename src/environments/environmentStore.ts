@@ -1,5 +1,5 @@
 import { ENVIRONMENT_NONE, getHttpacJsonConfig, isString, toAbsoluteFilename } from '../utils';
-import { Variables, EnvironmentProvider, HttpFile, EnvironmentConfig, UserSession, HttpClient, ClientCertificateOptions } from '../models';
+import { Variables, EnvironmentProvider, HttpFile, EnvironmentConfig } from '../models';
 import {httpYacApi} from '../httpYacApi';
 import { JsonEnvProvider } from './jsonEnvProvider';
 import { EnvVariableProvider } from '../variables/provider/envVariableProvider';

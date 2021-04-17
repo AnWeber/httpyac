@@ -11,6 +11,10 @@
 		"strict": true,
 	  "noImplicitReturns": true,
 		"noFallthroughCasesInSwitch": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noImplicitAny": true,
+		"noImplicitThis": true,
 		"experimentalDecorators": true,
 		"declaration": true,
 		"esModuleInterop": true

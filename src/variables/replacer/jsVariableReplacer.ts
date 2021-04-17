@@ -2,7 +2,7 @@ import { ProcessorContext } from '../../models';
 import { executeScript } from '../../actionProcessor';
 import { isString, toMultiLineArray } from '../../utils';
 
-export async function jsVariableReplacer(text: string, type: string, {httpRegion, httpFile, variables, progress}: ProcessorContext) {
+export async function jsVariableReplacer(text: string, _type: string, {httpRegion, httpFile, variables, progress}: ProcessorContext) {
   const variableRegex = /\{{2}([^}{2}]+)\}{2}/g;
   let match: RegExpExecArray | null;
   let result = text;

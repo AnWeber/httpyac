@@ -1,7 +1,7 @@
 import { ProcessorContext, VariableReplacer } from '../../models';
 
 export function showQuickpickVariableReplacerFactory(showListPrompt: (message: string, values: string[]) => Promise<string | undefined>): VariableReplacer {
-  return async function showQuickpickVariableReplacer(text: string, type: string, context: ProcessorContext) {
+  return async function showQuickpickVariableReplacer(text: string, _type: string, context: ProcessorContext) {
 
     const variableRegex = /\{{2}(.+?)\}{2}/g;
     let match: RegExpExecArray | null;

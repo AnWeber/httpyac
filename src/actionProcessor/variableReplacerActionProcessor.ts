@@ -4,7 +4,7 @@ import { isString } from '../utils';
 import { log } from '../logger';
 
 
-export async function variableReplacerActionProcessor(data: unknown, context: ProcessorContext) {
+export async function variableReplacerActionProcessor(_data: unknown, context: ProcessorContext) {
   if (context.request) {
     let cancel = false;
     context.cancelVariableReplacer = () => cancel = true;

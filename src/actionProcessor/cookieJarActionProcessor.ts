@@ -2,7 +2,7 @@ import { ProcessorContext} from '../models';
 import { cookieStore, environmentStore } from '../environments';
 import { getHeader, isString } from '../utils';
 
-export async function cookieJarActionProcessor(data: unknown, { request, httpRegion }: ProcessorContext) {
+export async function cookieJarActionProcessor(_data: unknown, { request, httpRegion }: ProcessorContext) {
   if (request
     && !httpRegion.metaData.noCookieJar
     && environmentStore.environmentConfig?.cookieJarEnabled) {

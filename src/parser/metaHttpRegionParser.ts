@@ -1,5 +1,5 @@
 
-import { HttpRegion, HttpFile, HttpSymbol, HttpSymbolKind,  HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, ActionProcessorType } from '../models';
+import { HttpFile, HttpSymbol, HttpSymbolKind,  HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext } from '../models';
 import { httpFileStore } from '../httpFileStore';
 import { log } from '../logger';
 import { promises as fs } from 'fs';

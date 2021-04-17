@@ -160,7 +160,7 @@ export class RequestHttpRegionParser implements HttpRegionParser {
 
 
 
-  private parseDefaultHeaders(textLine: string, line: number, httpRequest: HttpRequest) {
+  private parseDefaultHeaders(textLine: string, line: number, _httpRequest: HttpRequest) {
     const fileHeaders = /^\s*\.{3}(?<variableName>[^\s]+)\s*$/.exec(textLine);
     if (fileHeaders?.groups?.variableName) {
       const val = textLine.trim();

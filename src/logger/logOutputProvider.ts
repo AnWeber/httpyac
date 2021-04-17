@@ -9,9 +9,9 @@ export interface LogOutputProvider{
 }
 
 export const logOutputProvider: LogOutputProvider = {
-  log: (channel, level, ...params) => consoleLogOutputProvider(level, ...params),
-  clear: (channel) => {
-    // console should not be cleared
+  log: (_channel, level, ...params) => consoleLogOutputProvider(level, ...params),
+  clear: (_channel) => {
+    console.clear();
   },
 };
 
