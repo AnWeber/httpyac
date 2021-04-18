@@ -1,6 +1,3 @@
-/* eslint-disable no-undef */
-/* eslint-disable @typescript-eslint/no-var-requires */
-//@ts-check
 'use strict';
 const fs = require('fs');
 const path = require('path');

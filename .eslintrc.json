@@ -19,5 +19,6 @@
         "eqeqeq": "warn",
         "no-throw-literal": "warn",
         "semi": "off"
-    }
+    },
+    "ignorePatterns": "webpack.config.js"
 }
