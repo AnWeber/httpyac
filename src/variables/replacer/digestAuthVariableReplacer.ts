@@ -88,6 +88,7 @@ function createDigestHeader(authValues: Record<string, string | boolean>) {
 }
 
 function md5(value: string | Buffer) {
+  // lgtm [js/weak-cryptographic-algorithm, js/insufficient-password-hash]
   return createHash('md5').update(value).digest('hex');
 }
 
