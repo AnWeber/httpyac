@@ -36,7 +36,11 @@
 		"watch": "webpack --watch --config ./webpack.config.js",
 		"lockfile-lint": "lockfile-lint --path package-lock.json --validate-https --allowed-hosts npm --validate-checksum --validate-integrity",
 		"eslint": "eslint src --ext ts",
-		"lint": "npm run eslint && npm run lockfile-lint"
+		"lint": "npm run eslint && npm run lockfile-lint",
+		"prepare": "husky install"
+	},
+	"lint-staged": {
+		"*.ts": "eslint --cache --fix"
 	},
 	"devDependencies": {
 		"@types/aws4": "^1.5.1",
@@ -49,6 +53,8 @@
 		"@typescript-eslint/parser": "^4.21.0",
 		"eslint": "^7.23.0",
 		"eslint-webpack-plugin": "^2.5.3",
+		"husky": "^6.0.0",
+		"lint-staged": "^10.5.4",
 		"lockfile-lint": "^4.6.2",
 		"ts-loader": "^8.1.0",
 		"typescript": "^4.2.4",
