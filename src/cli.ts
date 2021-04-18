@@ -2,7 +2,7 @@ import arg from 'arg';
 import inquirer from 'inquirer';
 import { promises as fs } from 'fs';
 import { join, isAbsolute } from 'path';
-import { EnvironmentConfig, HttpFile, HttpFileSendContext, HttpRegionSendContext, HttpSymbolKind, RepeatOptions, RepeatOrder, SettingsConfig } from './models';
+import { EnvironmentConfig, HttpFile, HttpFileSendContext, HttpRegion, HttpRegionSendContext, HttpSymbolKind, RepeatOptions, RepeatOrder, SettingsConfig } from './models';
 import { gotHttpClientFactory } from './gotHttpClientFactory';
 import { httpFileStore } from './httpFileStore';
 import { httpYacApi } from './httpYacApi';
@@ -30,14 +30,14 @@ interface HttpCliOptions{
 }
 
 
-export async function send(rawArgs: string[]) {
+export async function send(rawArgs: string[]) : Promise<void> {
   const cliOptions = parseCliOptions(rawArgs);
   if (!cliOptions) {
     return;
   }
   if (cliOptions.version) {
     const packageJson = await parseJson(join(__dirname, '../package.json'));
-    console.info(`httpyac v${packageJson.version}`);
+    console.info(`httpyac v${packageJson?.version}`);
     return;
   }
   if (cliOptions.help) {
@@ -159,11 +159,11 @@ async function getSendContext(httpFile: HttpFile, cliOptions: HttpCliOptions, en
     ...environmentConfig.request,
     proxy: process.env.http_proxy
   };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sendContext: any = {
     httpFile,
     httpClient: gotHttpClientFactory(request),
     repeat: cliOptions.repeat,
-    sendResult: {},
   };
 
   if (cliOptions.httpRegionName) {
@@ -172,7 +172,7 @@ async function getSendContext(httpFile: HttpFile, cliOptions: HttpCliOptions, en
     sendContext.httpRegion = httpFile.httpRegions.find(obj => cliOptions.httpRegionLine && obj.symbol.startLine <= cliOptions.httpRegionLine && obj.symbol.endLine >= cliOptions.httpRegionLine);
   } else if (!cliOptions.allRegions && httpFile.httpRegions.length > 1) {
 
-    const httpRegionMap = httpFile.httpRegions.reduce((prev: Record<string, any>, current) => {
+    const httpRegionMap = httpFile.httpRegions.reduce((prev: Record<string, HttpRegion| false>, current) => {
       if (current.request) {
         const line = current.symbol.children?.find(obj => obj.kind === HttpSymbolKind.requestLine)?.startLine || current.symbol.startLine;
         const name = current.metaData.name || `${current.request.method} ${current.request.url} (line ${line + 1})`;

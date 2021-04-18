@@ -1,6 +1,6 @@
 import { environmentStore } from '../environments';
-import { Instance } from 'chalk';
+import { Chalk, Instance } from 'chalk';
 
-export function chalkInstance() {
+export function chalkInstance() : Chalk {
   return new Instance(environmentStore.environmentConfig?.log?.supportAnsiColors === false ? { level: 0 } : undefined);
 }

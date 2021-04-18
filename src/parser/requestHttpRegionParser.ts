@@ -62,8 +62,8 @@ export class RequestHttpRegionParser implements HttpRegionParser {
     if (isStringEmpty(textLine)) {
       return false;
     }
-    if (!!httpRegion.request) {
-      if (!!REGEX_REQUESTLINE.exec(textLine)?.groups?.method) {
+    if (httpRegion.request) {
+      if (REGEX_REQUESTLINE.exec(textLine)?.groups?.method) {
         return true;
       }
       return false;
@@ -74,7 +74,7 @@ export class RequestHttpRegionParser implements HttpRegionParser {
   async parse(lineReader: HttpRegionParserGenerator, { httpRegion }: ParserContext): Promise<HttpRegionParserResult> {
     let next = lineReader.next();
     if (!next.done && this.isValidRequestLine(next.value.textLine, httpRegion)) {
-      if (!!httpRegion.request){
+      if (httpRegion.request){
         return {
           newRegion: true,
           endLine: next.value.line - 1,
@@ -160,7 +160,7 @@ export class RequestHttpRegionParser implements HttpRegionParser {
 
 
 
-  private parseDefaultHeaders(textLine: string, line: number, _httpRequest: HttpRequest) {
+  private parseDefaultHeaders(textLine: string, line: number) {
     const fileHeaders = /^\s*\.{3}(?<variableName>[^\s]+)\s*$/.exec(textLine);
     if (fileHeaders?.groups?.variableName) {
       const val = textLine.trim();
@@ -231,7 +231,7 @@ export class RequestHttpRegionParser implements HttpRegionParser {
     if (!httpRequest.headers) {
       httpRequest.headers = {};
     }
-    const headerMatch = /^\s*(?<key>[\w\-]+)\s*\:\s*(?<value>.*?)\s*$/.exec(textLine);
+    const headerMatch = /^\s*(?<key>[\w-]+)\s*:\s*(?<value>.*?)\s*$/.exec(textLine);
     if (headerMatch?.groups?.key && headerMatch?.groups?.value) {
       httpRequest.headers[headerMatch.groups.key] = headerMatch.groups.value;
 

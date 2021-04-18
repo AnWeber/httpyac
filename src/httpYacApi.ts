@@ -8,7 +8,7 @@ class HttpYacApi {
   readonly variableProviders: Array<VariableProvider>;
   readonly variableReplacers: Array<VariableReplacer>;
 
-  readonly additionalRequire: Record<string, any> = {};
+  readonly additionalRequire: Record<string, unknown> = {};
 
   constructor() {
     this.httpRegionParsers = [

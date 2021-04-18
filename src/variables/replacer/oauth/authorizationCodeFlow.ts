@@ -20,6 +20,7 @@ class AuthorizationCodeFlow implements OpenIdFlow {
   }
 
   async perform(config: OpenIdConfiguration, context: {httpClient: HttpClient, progress: Progress | undefined, cacheKey: string}): Promise<OpenIdInformation | false> {
+    // eslint-disable-next-line no-async-promise-executor
     return new Promise<OpenIdInformation | false>(async (resolve, reject) => {
       const state = stateGenerator();
       try {

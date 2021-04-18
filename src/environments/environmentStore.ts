@@ -31,7 +31,7 @@ class EnvironmentStore{
     }
   }
 
-  async getVariables(environments: string[] | undefined): Promise<Record<string, any>> {
+  async getVariables(environments: string[] | undefined): Promise<Variables> {
     const result: Array<Variables> = [];
 
     if (environments) {
@@ -65,17 +65,20 @@ class EnvironmentStore{
     }
   }
 
-  private expandVariable(key: string, value: any, variables: Record<string, any>) {
+  private expandVariable(key: string, value: unknown, variables: Variables) {
     if (value && isString(value)) {
+      let result = value;
       let match: RegExpExecArray | null;
       const variableRegex = /\{{2}([a-zA-Z0-9_]+)\}{2}/g;
-      while ((match = variableRegex.exec(value)) !== null) {
+      while ((match = variableRegex.exec(result)) !== null) {
         const [searchValue, variableName] = match;
         const val = this.expandVariable(variableName, variables[variableName], variables);
-        value = value.replace(searchValue, val);
+        result = result.replace(searchValue, `${val}`);
       }
+      variables[key] = result;
+    } else {
+      variables[key] = value;
     }
-    variables[key] = value;
     return value;
   }
 

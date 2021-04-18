@@ -1,6 +1,7 @@
 import { LogLevel } from '../logger';
 import { ClientCertificateOptions } from './clientCertifcateOptions';
 import { HttpRequest } from './httpRequest';
+import { Variables } from './variables';
 
 export interface EnvironmentConfig{
   cookieJarEnabled?: boolean;
@@ -17,7 +18,7 @@ export interface EnvironmentConfig{
   defaultHeaders?: Record<string, string>,
 
   /** environment variables  */
-  environments?: Record<string, Record<string, any>>;
+  environments?: Record<string, Variables>;
   clientCertificates?: Record<string, ClientCertificateOptions>,
   dotenv?: {
     enabled?: boolean;

@@ -1,4 +1,4 @@
-;
+
 
 
 import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, ActionProcessorType } from '../models';
@@ -11,7 +11,7 @@ export class VariableHttpRegionParser implements HttpRegionParser{
     if (!next.done) {
       const textLine = next.value.textLine;
 
-      const match = /^\s*\@(?<key>[^\s=]*)\s*(?<operator>=\s*)"?(?<value>.*)"?\s*$/.exec(textLine);
+      const match = /^\s*@(?<key>[^\s=]*)\s*(?<operator>=\s*)"?(?<value>.*)"?\s*$/.exec(textLine);
 
       if (match && match.groups && match.groups.key && match.groups.value) {
         httpRegion.actions.push({

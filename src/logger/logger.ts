@@ -7,32 +7,32 @@ class Logger {
   constructor(private readonly channel: LogChannels) {
     this.level = LogLevel.warn;
    }
-  info(...params: any[]) {
+  info(...params: unknown[]) {
     if (LogLevel.info >= this.level) {
       logOutputProvider.log(this.channel, LogLevel.info, ...params);
     }
   }
-  log(...params: any[]) {
+  log(...params: unknown[]) {
     if (LogLevel.info >= this.level) {
       logOutputProvider.log(this.channel, LogLevel.info, ...params);
     }
   }
-  trace(...params: any[]) {
+  trace(...params: unknown[]) {
     if (LogLevel.trace >= this.level) {
       logOutputProvider.log(this.channel, LogLevel.trace, ...params);
     }
   }
-  debug(...params: any[]) {
+  debug(...params: unknown[]) {
     if (LogLevel.debug >= this.level) {
       logOutputProvider.log(this.channel, LogLevel.debug, ...params);
     }
   }
-  error(...params: any[]) {
+  error(...params: unknown[]) {
     if (LogLevel.error >= this.level) {
       logOutputProvider.log(this.channel, LogLevel.error, ...params);
     }
   }
-  warn(...params: any[]) {
+  warn(...params: unknown[]) {
     if (LogLevel.warn >= this.level) {
       logOutputProvider.log(this.channel, LogLevel.warn, ...params);
     }

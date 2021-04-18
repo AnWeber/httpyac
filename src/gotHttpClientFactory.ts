@@ -56,7 +56,7 @@ export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined) 
   };
 
   function toGotOptions(mergedRequest: HttpRequest): OptionsOfUnknownResponseBody {
-    let options: OptionsOfUnknownResponseBody = {};
+    const options: OptionsOfUnknownResponseBody = {};
     Object.assign(options, mergedRequest); // HACK ignore type of body
     return options;
   }
@@ -126,7 +126,7 @@ function parseContentType(headers: Record<string, string | string[] | undefined>
   return undefined;
 }
 
-function toHttpResponse(response: Response<any>): HttpResponse {
+function toHttpResponse(response: Response<unknown>): HttpResponse {
   const httpResponse: HttpResponse = {
     statusCode: response.statusCode,
     statusMessage: response.statusMessage,

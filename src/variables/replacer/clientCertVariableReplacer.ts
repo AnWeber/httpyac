@@ -6,7 +6,7 @@ import { environmentStore } from '../../environments';
 
 
 
-export async function clientCertVariableReplacer(text: string, type: VariableReplacerType | string, { request, httpRegion, httpFile }: ProcessorContext) {
+export async function clientCertVariableReplacer(text: string, type: VariableReplacerType | string, { request, httpRegion, httpFile }: ProcessorContext) : Promise<string | undefined> {
   if (request && !httpRegion.metaData.noClientCert) {
     if (type === VariableReplacerType.url && environmentStore.environmentConfig?.clientCertificates) {
       const url = new URL(text);
@@ -40,7 +40,7 @@ async function setClientCertificateOptions(request: HttpRequest, clientCertifcat
 }
 
 
-async function resolveFile(fileName: string | undefined, currentFilename: string): Promise<any | undefined> {
+async function resolveFile(fileName: string | undefined, currentFilename: string): Promise<unknown | undefined> {
   if (fileName) {
     const file = await toAbsoluteFilename(fileName, currentFilename);
     if (file) {

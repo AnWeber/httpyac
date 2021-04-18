@@ -1,10 +1,10 @@
 import { ProcessorContext } from '../../models';
-import { OptionsOfUnknownResponseBody, Response } from 'got';
+import { CancelableRequest, OptionsOfUnknownResponseBody, Response } from 'got';
 import { createHash } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { URL } from 'url';
 
-export async function digestAuthVariableReplacer(text: string, type: string, { request}: ProcessorContext) {
+export async function digestAuthVariableReplacer(text: string, type: string, { request}: ProcessorContext) : Promise<string | undefined> {
   if (type.toLowerCase() === "authorization" && text && request) {
     const match = /^\s*(d|D)(i|I)(g|G)(e|E)(s|S)(t|T)\s+(?<user>[^\s]*)\s+(?<password>([^\s]+.*))$/i.exec(text);
 
@@ -24,7 +24,7 @@ export async function digestAuthVariableReplacer(text: string, type: string, { r
 
 
 function digestFactory(username: string, password: string) {
-  return function digestAfterResponse(response: Response, retryWithMergedOptions: (options: OptionsOfUnknownResponseBody) => any) {
+  return function digestAfterResponse(response: Response, retryWithMergedOptions: (options: OptionsOfUnknownResponseBody) => CancelableRequest<Response>) {
     const wwwAuthenticate = response.headers['www-authenticate'];
     if (response.statusCode === 401
       && wwwAuthenticate
@@ -100,7 +100,7 @@ function ha1Compute(algorithm: string | undefined, username: string, password: s
 }
 
 
-function updateChallenge(challenge: any, wwwAuthenticate: string) {
+function updateChallenge(challenge: Record<string, string>, wwwAuthenticate: string) {
 
   for (const item of wwwAuthenticate.split(',')) {
     const match = /([a-z0-9_-]+)=(?:"([^"]+)"|([a-z0-9_-]+))/gi.exec(item);

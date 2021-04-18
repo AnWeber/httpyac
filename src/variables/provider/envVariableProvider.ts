@@ -1,5 +1,5 @@
 import { dirname } from 'path';
-import { EnvironmentProvider, HttpFile, VariableProvider } from '../../models';
+import { EnvironmentProvider, HttpFile, VariableProvider, Variables } from '../../models';
 
 export class EnvVariableProvider<T extends EnvironmentProvider> implements VariableProvider {
 
@@ -7,7 +7,7 @@ export class EnvVariableProvider<T extends EnvironmentProvider> implements Varia
   constructor(private readonly factory: (path: string) => T,
     private readonly ignorePaths: Array<string>) { }
 
-  reset() {
+  reset(): void {
     for (const [, envProvider] of Object.entries(this.paths)) {
       if (envProvider.reset) {
         envProvider.reset();
@@ -26,7 +26,7 @@ export class EnvVariableProvider<T extends EnvironmentProvider> implements Varia
     return await envProvider.getEnvironments();
   }
 
-  async getVariables(env: string[] | undefined, httpFile: HttpFile): Promise<Record<string, any>> {
+  async getVariables(env: string[] | undefined, httpFile: HttpFile): Promise<Variables> {
     const basePath = dirname(httpFile.fileName);
     if (this.ignorePaths.indexOf(basePath) >= 0) {
       return {};

@@ -2,7 +2,7 @@ import { LogChannels } from './logChannels';
 import { LogLevel } from './logLevel';
 
 
-export type ChannelLogMethod = (channel: LogChannels, level: LogLevel, ...params: any[]) => void;
+export type ChannelLogMethod = (channel: LogChannels, level: LogLevel, ...params: unknown[]) => void;
 export interface LogOutputProvider{
   log: ChannelLogMethod,
   clear: (channel: LogChannels) => void;
@@ -10,13 +10,13 @@ export interface LogOutputProvider{
 
 export const logOutputProvider: LogOutputProvider = {
   log: (_channel, level, ...params) => consoleLogOutputProvider(level, ...params),
-  clear: (_channel) => {
+  clear: () => {
     console.clear();
   },
 };
 
 
-export function consoleLogOutputProvider(level: LogLevel, ...params: any[]) {
+export function consoleLogOutputProvider(level: LogLevel, ...params: unknown[]) : void {
   switch (level) {
     case LogLevel.trace:
       console.trace(...params);

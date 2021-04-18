@@ -9,8 +9,10 @@ export class ResponseHttpRegionParser implements HttpRegionParser {
 
   async parse(lineReader: HttpRegionParserGenerator, context: ParserContext): Promise<HttpRegionParserResult> {
 
-    let next = lineReader.next();
+    const next = lineReader.next();
     if (!next.done) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       const responseSymbol: HttpSymbol = context.data[BODY_IDENTIFIER];
       if (responseSymbol) {
         responseSymbol.endLine = next.value.line;

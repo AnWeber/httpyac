@@ -1,7 +1,7 @@
 import { ProcessorContext} from '../models';
 import { environmentStore } from '../environments';
 
-export async function envDefaultHeadersActionProcessor(_data: unknown, {request}: ProcessorContext) {
+export async function envDefaultHeadersActionProcessor(_data: unknown, {request}: ProcessorContext) : Promise<boolean> {
   if (request && environmentStore?.environmentConfig?.defaultHeaders) {
     const defaultHeaders = environmentStore.environmentConfig.defaultHeaders;
     if (!request.headers) {

@@ -1,5 +1,6 @@
 import get from 'lodash/get';
 import { popupService, log } from '../../../logger';
+import { Variables } from '../../../models';
 
 export interface OpenIdConfiguration{
   variablePrefix: string;
@@ -18,9 +19,10 @@ export interface OpenIdConfiguration{
   noLog?: boolean;
 }
 
-export function getOpenIdConfiguration(variablePrefix: string, variables: Record<string, any>) {
+export function getOpenIdConfiguration(variablePrefix: string, variables: Variables) : OpenIdConfiguration | false {
   if (variablePrefix) {
-    const getVariable = (name: string) => variables[`${variablePrefix}_${name}`] || get(variables, `${variablePrefix}.${name}`);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const getVariable: (name: string) => any = (name: string) => variables[`${variablePrefix}_${name}`] || get(variables, `${variablePrefix}.${name}`);
 
     const config: OpenIdConfiguration = {
       variablePrefix,
@@ -44,7 +46,7 @@ export function getOpenIdConfiguration(variablePrefix: string, variables: Record
 }
 
 
-export function assertConfiguration(config: OpenIdConfiguration, keys: string[]) {
+export function assertConfiguration(config: OpenIdConfiguration, keys: string[]) : boolean {
   const missingKeys = [];
   for (const key of keys) {
     if (!Object.entries(config).some(([obj, value]) => obj === key && !!value)) {

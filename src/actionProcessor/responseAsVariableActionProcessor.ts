@@ -4,7 +4,7 @@ import { log, popupService, logRequest } from '../logger';
 import { decodeJWT, isString, toEnvironmentKey } from '../utils';
 import { isValidVariableName } from './jsActionProcessor';
 
-export async function responseAsVariableActionProcessor(_data: unknown, context: ProcessorContext) {
+export async function responseAsVariableActionProcessor(_data: unknown, context: ProcessorContext) : Promise<boolean> {
   if (context.httpRegion.response) {
     const response = context.httpRegion.response;
     const body = response.parsedBody || response.body;
@@ -49,7 +49,8 @@ function handleJWTMetaData(body: unknown, httpRegion: HttpRegion ) {
 }
 
 
-function parseJwtToken(response: any, key: string, value: any) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function parseJwtToken(response: any, key: string, value: unknown) {
   if (isString(value)) {
     try {
       const jwt = decodeJWT(value);

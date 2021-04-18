@@ -8,7 +8,7 @@ export enum LogLevel{
   error = 100,
 }
 
-export function toLogLevel(level: string | undefined) {
+export function toLogLevel(level: string | undefined) : LogLevel {
   switch (level) {
     case 'trace':
       return LogLevel.trace;

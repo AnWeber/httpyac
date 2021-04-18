@@ -68,7 +68,7 @@ export class JsHttpRegionParser implements HttpRegionParser {
   }
 
   close({ data, httpRegion }: ParserContext): void {
-    let onEveryRequestArray: EveryRequestScript[] = data[JS_ON_EVERY_REQUEST_IDENTIFIER];
+    const onEveryRequestArray: EveryRequestScript[] = data[JS_ON_EVERY_REQUEST_IDENTIFIER];
     if (onEveryRequestArray && httpRegion.request) {
       for (const everyRequestScript of onEveryRequestArray) {
         if (everyRequestScript.postScript) {

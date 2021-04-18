@@ -1,22 +1,23 @@
 
 import {actionProcessorIndexAfterRequest } from '../utils';
-import { HttpRegionParser, HttpRegionParserResult, ParserContext, ProcessorContext } from '../models';
+import { HttpRegionAction, HttpRegionParser, HttpRegionParserResult, ParserContext, ProcessorContext } from '../models';
 import { jsActionProcessor, ScriptData } from '../actionProcessor';
 
 
 export class SettingsScriptHttpRegionParser implements HttpRegionParser{
   constructor(private readonly getScriptData: () => Promise<ScriptData | undefined>){}
-  async parse(_lineReader: unknown, _context: ParserContext): Promise<HttpRegionParserResult>{
+  async parse(): Promise<HttpRegionParserResult>{
     return false;
   }
 
   close({ httpRegion }: ParserContext): void {
     if (httpRegion.request) {
-      httpRegion.actions.splice(actionProcessorIndexAfterRequest(httpRegion), 0, {
+      const action: HttpRegionAction<() => Promise<ScriptData | undefined>> = {
         data: this.getScriptData,
         type: 'settings_js',
         processor: this.executeSettingsScript,
-      });
+      };
+      httpRegion.actions.splice(actionProcessorIndexAfterRequest(httpRegion), 0, action);
     }
   }
 

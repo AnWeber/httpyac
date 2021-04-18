@@ -12,7 +12,7 @@ export function isRequestMethod(method: string | undefined): method is HttpMetho
   return false;
 }
 
-export function getHeader(headers: Record<string, string | string[] | undefined | null>, headerName: string) {
+export function getHeader(headers: Record<string, string | string[] | undefined | null>, headerName: string) : string | string[] | undefined | null{
   if (headers) {
     const value = Object.entries(headers)
       .find(obj => obj[0].toLowerCase() === headerName.toLowerCase());
@@ -38,7 +38,7 @@ export interface JWTToken {
 
 export function decodeJWT(str: string) : JWTToken | null{
   try {
-    let jwtComponents = str.split('.');
+    const jwtComponents = str.split('.');
     if (jwtComponents.length !== 3) {
       return null;
     }
@@ -68,9 +68,9 @@ export function decodeJWT(str: string) : JWTToken | null{
 }
 
 
-export function toQueryParams(params: Record<string, any>) {
+export function toQueryParams(params: Record<string, undefined | string | number | boolean>): string{
   return Object.entries(params)
     .filter(([, value]) => !!value)
-    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+    .map(([key, value]) => `${key}=${encodeURIComponent(value || '')}`)
     .join('&');
 }

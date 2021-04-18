@@ -1,7 +1,11 @@
+/* eslint-disable no-undef */
+/* eslint-disable @typescript-eslint/no-var-requires */
 //@ts-check
 'use strict';
 const fs = require('fs');
 const path = require('path');
+const ESLintPlugin = require('eslint-webpack-plugin');
+
 
 /**@type {import('webpack').Configuration}*/
 const config = {
@@ -33,6 +37,7 @@ const config = {
       }
     ]
   },
+  plugins: [new ESLintPlugin({extensions: ['js', 'ts']})],
   externals: fs.readdirSync("node_modules"),
   optimization: {
     minimize: true,

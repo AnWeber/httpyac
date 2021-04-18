@@ -1,7 +1,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
-export function intellijVariableReplacer(text: string) {
+export function intellijVariableReplacer(text: string) : Promise<string | undefined> {
 
   const variableRegex = /\{{2}(.+?)\}{2}/g;
   let match: RegExpExecArray | null;

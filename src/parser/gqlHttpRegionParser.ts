@@ -14,7 +14,7 @@ export const GQL_FRAGMENTS_IDENTIFIER = 'gql';
 export class GqlHttpRegionParser implements HttpRegionParser{
   async parse(lineReader: HttpRegionParserGenerator, context: ParserContext): Promise<HttpRegionParserResult> {
 
-    if (!!context.httpRegion.metaData.noGqlParsing) {
+    if (context.httpRegion.metaData.noGqlParsing) {
       return false;
     }
 
@@ -74,12 +74,12 @@ export class GqlHttpRegionParser implements HttpRegionParser{
 
 
 async function getGQLContent(lineReader: HttpRegionParserGenerator, httpFileName: string): Promise<GqlParserResult | false> {
-  let next = lineReader.next();
+  const next = lineReader.next();
   if (!next.done) {
 
     const startLine = next.value.line;
 
-    const fileMatches = /^\s*gql(\s+(?<name>[^\s\(]+))?\s+<\s+(?<fileName>.+)\s*$/.exec(next.value.textLine);
+    const fileMatches = /^\s*gql(\s+(?<name>[^\s(]+))?\s+<\s+(?<fileName>.+)\s*$/.exec(next.value.textLine);
     if (fileMatches && fileMatches.groups?.fileName) {
       try {
         const normalizedPath = await toAbsoluteFilename(fileMatches.groups.fileName, httpFileName);
@@ -95,11 +95,11 @@ async function getGQLContent(lineReader: HttpRegionParserGenerator, httpFileName
         log.trace(err);
       }
     } else {
-      const queryMatch = /^\s*(query|mutation)(\s+(?<name>[^\s\(]+))?/.exec(next.value.textLine);
+      const queryMatch = /^\s*(query|mutation)(\s+(?<name>[^\s(]+))?/.exec(next.value.textLine);
       if (queryMatch) {
         return matchGqlContent(next.value, lineReader, queryMatch.groups?.name);
       }
-      const fragmentMatch = /^\s*(fragment)\s+(?<name>[^\s\(]+)\s+on\s+/.exec(next.value.textLine);
+      const fragmentMatch = /^\s*(fragment)\s+(?<name>[^\s(]+)\s+on\s+/.exec(next.value.textLine);
       if (fragmentMatch) {
         return matchGqlContent(next.value, lineReader, fragmentMatch.groups?.name);
       }

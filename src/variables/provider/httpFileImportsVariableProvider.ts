@@ -3,7 +3,7 @@ import {toEnvironmentKey } from '../../utils';
 
 export class HttpFileImportsVariableProvider implements VariableProvider {
 
-  async getVariables(env: string[] | undefined, httpFile: HttpFile) {
+  async getVariables(env: string[] | undefined, httpFile: HttpFile): Promise<Variables> {
 
     const envkey = toEnvironmentKey(env);
 

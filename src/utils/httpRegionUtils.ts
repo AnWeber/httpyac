@@ -5,7 +5,7 @@ import { log } from '../logger';
 import { HttpFileSendContext, HttpRegionSendContext, ProcessorContext, HttpFile, Variables, HttpClient, HttpRegion } from '../models';
 
 
-export function getRegionName(httpRegion: HttpRegion, defaultName: string = 'global') {
+export function getRegionName(httpRegion: HttpRegion, defaultName = 'global'): string {
   if (httpRegion.metaData.name) {
     return httpRegion.metaData.name;
   }
@@ -22,7 +22,7 @@ export function getRegionName(httpRegion: HttpRegion, defaultName: string = 'glo
   return defaultName;
 }
 
-export async function sendHttpRegion(context: HttpRegionSendContext) {
+export async function sendHttpRegion(context: HttpRegionSendContext): Promise<boolean> {
   const variables = await getVariables(context.httpFile);
   if (!context.httpRegion.metaData.disabled) {
     if (await executeGlobalScripts(context.httpFile, variables, context.httpClient)) {
@@ -32,22 +32,23 @@ export async function sendHttpRegion(context: HttpRegionSendContext) {
   return false;
 }
 
-export async function sendHttpFile(context: HttpFileSendContext) {
+export async function sendHttpFile(context: HttpFileSendContext): Promise<boolean> {
   const variables = await getVariables(context.httpFile);
   for (const httpRegion of context.httpFile.httpRegions) {
     if (httpRegion.metaData.disabled) {
       log.debug(`${getRegionName(httpRegion)} is disabled`);
-      return;
+      continue;
     }
     if (httpRegion.request && context.httpRegionPredicate && !context.httpRegionPredicate(httpRegion)) {
       log.debug(`${getRegionName(httpRegion)} disabled by predicate`);
-      return;
+      continue;
     }
     await processHttpRegionActions({ httpRegion, variables, ...context });
   }
+  return true;
 }
 
-export async function executeGlobalScripts(httpFile: HttpFile, variables: Variables, httpClient: HttpClient) {
+export async function executeGlobalScripts(httpFile: HttpFile, variables: Variables, httpClient: HttpClient): Promise<boolean> {
   for (const httpRegion of httpFile.httpRegions) {
     if (!httpRegion.request && !httpRegion.metaData.disabled) {
       if (!await processHttpRegionActions({ httpRegion, httpFile, variables, httpClient })) {
@@ -58,7 +59,7 @@ export async function executeGlobalScripts(httpFile: HttpFile, variables: Variab
   return true;
 }
 
-async function getVariables(httpFile: HttpFile): Promise<Record<string, any>> {
+async function getVariables(httpFile: HttpFile): Promise<Record<string, unknown>> {
   const variables = Object.assign({
   },
     (await environmentStore.getVariables(httpFile.activeEnvironment)),
@@ -71,7 +72,7 @@ async function getVariables(httpFile: HttpFile): Promise<Record<string, any>> {
   return variables;
 }
 
-export async function processHttpRegionActions(context: ProcessorContext, showProgressBar?: boolean) {
+export async function processHttpRegionActions(context: ProcessorContext, showProgressBar?: boolean): Promise<boolean> {
   delete context.httpRegion.response;
   delete context.httpRegion.testResults;
 
@@ -95,8 +96,9 @@ export async function processHttpRegionActions(context: ProcessorContext, showPr
   return true;
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any
 export function isHttpRegionSendContext(context: any): context is HttpRegionSendContext{
-  return !!context.httpRegion;
+  return !!context?.httpRegion;
 }
 
 

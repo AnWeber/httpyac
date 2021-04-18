@@ -55,7 +55,7 @@ function closeHttpRegion(parserContext: ParserContext) {
     if (obj.close) {
       obj.close(parserContext);
     }
-  };
+  }
   parserContext.httpRegion.symbol.name = getRegionName(parserContext.httpRegion);
   if (parserContext.httpRegion.request) {
     parserContext.httpRegion.symbol.description = `${parserContext.httpRegion.request.method} ${parserContext.httpRegion.request.url}`;
@@ -96,7 +96,7 @@ function* createReader(startLine: number, lines: Array<string>, noStopOnMetaTag:
     };
     if (!noStopOnMetaTag) {
       // if parser region is not closed stop at delimiter
-      if (/^\s*\#{3,}/.test(textLine)) {
+      if (/^\s*#{3,}/.test(textLine)) {
         break;
       }
     }

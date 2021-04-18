@@ -5,7 +5,7 @@ import { toMultiLineString } from '../utils';
 
 export class CommentHttpRegionParser implements HttpRegionParser{
 
-  noStopOnMetaTag: boolean = true;
+  noStopOnMetaTag = true;
   async parse(lineReader: HttpRegionParserGenerator): Promise<HttpRegionParserResult> {
     const comment = getCommentContent(lineReader);
     if (comment) {
@@ -21,7 +21,7 @@ export class CommentHttpRegionParser implements HttpRegionParser{
           endOffset: 0,
         }],
       };
-    };
+    }
     return false;
   }
 }
@@ -52,7 +52,7 @@ function getCommentContent(lineReader: HttpRegionParserGenerator): CommentParser
 
     const multiLineMatch = /^\s*\/\*$/.exec(next.value.textLine);
     if (multiLineMatch) {
-      let next = lineReader.next();
+      next = lineReader.next();
       const lines: Array<string> = [];
       while (!next.done) {
         if (/^\s*\*\/\s*$/.test(next.value.textLine)) {

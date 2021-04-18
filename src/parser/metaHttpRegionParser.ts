@@ -6,11 +6,11 @@ import { promises as fs } from 'fs';
 import { toAbsoluteFilename } from '../utils';
 export class MetaHttpRegionParser implements HttpRegionParser {
   private static isMetaTag(textLine: string) {
-    return /^\s*(\#{1,}|\/{2})/.test(textLine);
+    return /^\s*(#{1,}|\/{2})/.test(textLine);
   }
 
   private isDelimiter(textLine: string) {
-    return /^\#{3,}\s*$/.test(textLine);
+    return /^#{3,}\s*$/.test(textLine);
   }
 
   async parse(lineReader: HttpRegionParserGenerator, { httpRegion, httpFile }: ParserContext): Promise<HttpRegionParserResult> {
@@ -25,7 +25,7 @@ export class MetaHttpRegionParser implements HttpRegionParser {
         if (this.isDelimiter(textLine)) {
           result.newRegion = true;
         } else {
-          const match = /^\s*(\#{1,}|\/{2,})\s+\@(?<key>[^\s]*)(\s+)?"?(?<value>.*)?"?$/.exec(textLine);
+          const match = /^\s*(#{1,}|\/{2,})\s+@(?<key>[^\s]*)(\s+)?"?(?<value>.*)?"?$/.exec(textLine);
 
           if (match && match.groups && match.groups.key) {
             const symbol: HttpSymbol = {
@@ -81,7 +81,7 @@ export class MetaHttpRegionParser implements HttpRegionParser {
     return false;
   }
 
-  async importHttpFile(httpFile: HttpFile, fileName: string) {
+  async importHttpFile(httpFile: HttpFile, fileName: string) : Promise<void> {
     try {
       const absoluteFileName = await toAbsoluteFilename(fileName, httpFile.fileName);
       if (absoluteFileName) {

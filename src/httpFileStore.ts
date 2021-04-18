@@ -25,11 +25,11 @@ export class HttpFileStore{
     return httpFileStoreEntry;
   }
 
-  get(fileName: string) {
+  get(fileName: string): HttpFile | undefined {
     return this.storeCache.find(obj => obj.fileName === fileName)?.httpFile;
   }
 
-  getAll() {
+  getAll() : Array<HttpFile | undefined> {
     return this.storeCache.map(obj => obj.httpFile);
   }
   async getOrCreate(fileName: string, getText: () => Promise<string>, version: number): Promise<HttpFile> {
@@ -58,26 +58,22 @@ export class HttpFileStore{
     }
   }
 
-  remove(fileName: string) {
+  remove(fileName: string) : void {
     const index = this.storeCache.findIndex(obj => obj.fileName === fileName);
     if (index >= 0) {
       this.storeCache.splice(index, 1);
     }
   }
 
-  rename(oldFileName: string, newFileName: string) {
+  rename(oldFileName: string, newFileName: string) : void {
     const httpFile = this.storeCache.find(obj => obj.fileName === oldFileName);
     if (httpFile) {
       httpFile.fileName = newFileName;
     }
   }
 
-  clear() {
+  clear() : void {
     this.storeCache.length = 0;
-  }
-
-  toString() {
-    return 'httpFileStore';
   }
 }
 

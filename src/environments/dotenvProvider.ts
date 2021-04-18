@@ -15,7 +15,7 @@ export class DotenvProvider implements EnvironmentProvider {
 
   constructor(private readonly basepath: string, private readonly defaultFiles: Array<string> = ['.env']) { }
 
-  reset() {
+  reset() : void{
     for (const watchFile of this.watchFiles) {
       unwatchFile(watchFile, storeReset);
     }
@@ -37,7 +37,7 @@ export class DotenvProvider implements EnvironmentProvider {
     return [];
   }
 
-  async getVariables(env: string): Promise<Record<string, any>> {
+  async getVariables(env: string): Promise<Variables> {
     const { variables, validFilesNames } = await this.parseDotenv(this.basepath, this.getDotenvFiles(this.defaultFiles, env));
     if (validFilesNames.length > 0) {
       for (const file of validFilesNames) {
@@ -62,7 +62,7 @@ export class DotenvProvider implements EnvironmentProvider {
 
 
   private async parseDotenv(dirname: string, fileNames: Array<string>): Promise<{ variables: Variables; validFilesNames: Array<string>; }> {
-    const vars: Array<Record<string, any>> = [];
+    const vars: Array<Variables> = [];
     const validFilesNames: Array<string> = [];
     for (const fileName of fileNames) {
       const envFileName = join(dirname, fileName);

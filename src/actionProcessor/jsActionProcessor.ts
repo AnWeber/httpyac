@@ -17,7 +17,7 @@ export interface ScriptData{
 export const JAVASCRIPT_KEYWORDS = ['await', 'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'else', 'enum', 'export', 'extends', 'false', 'finally', 'for', 'function', 'if', 'implements', 'import', 'in', 'instanceof', 'interface', 'let', 'new', 'null', 'package', 'private', 'protected', 'public', 'return', 'super', 'switch', 'static', 'this', 'throw', 'try', 'true', 'typeof', 'var', 'void', 'while', 'with', 'yield'];
 
 
-export function isValidVariableName(name: string) {
+export function isValidVariableName(name: string) : boolean {
   if (JAVASCRIPT_KEYWORDS.indexOf(name) <= 0) {
     try {
       Function(`var ${name}`);
@@ -29,7 +29,7 @@ export function isValidVariableName(name: string) {
   return false;
 }
 
-export async function jsActionProcessor(scriptData: ScriptData, { httpRegion, httpFile, request, variables, progress }: ProcessorContext) {
+export async function jsActionProcessor(scriptData: ScriptData, { httpRegion, httpFile, request, variables, progress }: ProcessorContext) : Promise<boolean> {
 
   const defaultVariables = {
     request,
@@ -62,7 +62,7 @@ export async function jsActionProcessor(scriptData: ScriptData, { httpRegion, ht
 
 
 
-export async function executeScript(context: { script: string, fileName: string | undefined, variables: Variables, lineOffset: number, require?: Record<string, any>}) {
+export async function executeScript(context: { script: string, fileName: string | undefined, variables: Variables, lineOffset: number, require?: Record<string, unknown>}) : Promise<Variables> {
   try {
     const filename = context.fileName || __filename;
     const dir = dirname(filename);
@@ -71,10 +71,11 @@ export async function executeScript(context: { script: string, fileName: string 
     scriptModule.filename = filename;
     scriptModule.exports = {};
     // see https://github.com/nodejs/node/blob/master/lib/internal/modules/cjs/loader.js#L565-L640
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     scriptModule.paths = (Module as any)._nodeModulePaths(dir);
 
 
-    const scriptRequire: any = (id: string | undefined) => {
+    const scriptRequire = (id: string | undefined) => {
       if (id) {
         if (id === 'got') {
           return got;
@@ -93,7 +94,8 @@ export async function executeScript(context: { script: string, fileName: string 
       return null;
     };
     // see https://github.com/nodejs/node/blob/master/lib/internal/modules/cjs/loader.js#L823-L911
-    scriptRequire.resolve = (req: any) => (Module as any)._resolveFilename(req, scriptModule);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    scriptRequire.resolve = (req: unknown) => (Module as any)._resolveFilename(req, scriptModule);
 
     const vars = Object.entries(context.variables).map(([key]) => key).join(', ').trim();
     const wrappedFunction = `(function userJS(exports, require, module, __filename, __dirname${vars.length > 0 ? `, ${vars}` : ''}){${context.script}})`;

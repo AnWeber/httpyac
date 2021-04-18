@@ -5,7 +5,7 @@ import { log } from '../../logger';
 
 
 
-export async function openIdVariableReplacer(text: string, type: string, context: ProcessorContext) {
+export async function openIdVariableReplacer(text: string, type: string, context: ProcessorContext) : Promise<string | undefined> {
   if (type.toLowerCase() === "authorization" && text) {
     const match = /^\s*(openid|oauth2)\s+(?<flow>[^\s]*)\s+(?<variablePrefix>[^\s]*)\s*((token_exchange)\s+(?<tokenExchangePrefix>[^\s]*))?\s*$/i.exec(text);
     if (match && match.groups && match.groups.flow && match.groups.variablePrefix) {
@@ -61,6 +61,7 @@ function getOpenIdConfiguration(cacheKey: string, config: oauth.OpenIdConfigurat
   return false;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isOpenIdInformation(userSession: any): userSession is oauth.OpenIdInformation{
   return !!userSession?.accessToken;
 }

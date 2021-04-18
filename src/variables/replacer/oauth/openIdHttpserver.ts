@@ -14,14 +14,14 @@ const listeners: Array<RequestListener> = [];
 
 let server: Server | undefined;
 let serverTimeout: NodeJS.Timeout | undefined;
-let serverTimeoutTime: number = 0;
+let serverTimeoutTime = 0;
 
-export function registerListener(listener: RequestListener){
+export function registerListener(listener: RequestListener) : void{
   listeners.push(listener);
   initServer();
 }
 
-export function unregisterListener(id: string) {
+export function unregisterListener(id: string) : void {
   const listenerIndex = listeners.findIndex(obj => obj.id === id);
   if (listenerIndex >= 0) {
     listeners.splice(listenerIndex, 1);
@@ -65,7 +65,7 @@ function closeServer() {
   }
 }
 
-function initServer(port: number = 3000) {
+function initServer(port = 3000) {
   resetServer(600);
   if (!server) {
     log.trace(`open http server on port ${port}`);

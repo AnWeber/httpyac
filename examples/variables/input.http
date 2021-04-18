@@ -1,0 +1,4 @@
+
+@query = {{$input input app? $value: foo}}
+
+GET /json?q={{query}}

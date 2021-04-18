@@ -76,7 +76,7 @@ function getIntellijContent(lineReader: HttpRegionParserGenerator): IntelliJPars
 
     const multiLineMatch = /^\s*>\s+{%\s*$/.exec(next.value.textLine);
     if (multiLineMatch) {
-      let next = lineReader.next();
+      next = lineReader.next();
       const scriptLines: Array<string> = [];
       while (!next.done) {
         if (/^\s*%}\s*$/.test(next.value.textLine)) {

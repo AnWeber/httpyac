@@ -21,7 +21,7 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
   async parse(lineReader: HttpRegionParserGenerator, context: ParserContext): Promise<HttpRegionParserResult> {
     if (context.httpRegion.request) {
       const requestBody = this.getRequestBody(context);
-      let next = lineReader.next();
+      const next = lineReader.next();
       if (!next.done) {
         if (requestBody.textLines.length > 0 || !isStringEmpty(next.value.textLine)) {
           requestBody.textLines.push(await this.parseLine(next.value.textLine, context.httpFile.fileName));
@@ -66,7 +66,7 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
     return result;
   }
   private getAndRemoveRequestBody(context: ParserContext) {
-    let result: ParserRequestBody = context.data[BODY_IDENTIFIER];
+    const result: ParserRequestBody = context.data[BODY_IDENTIFIER];
     if (result) {
       delete context.data[BODY_IDENTIFIER];
     }
@@ -184,7 +184,7 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
     return '';
   }
 
-  removeTrailingEmptyLines(obj: Array<any>) {
+  removeTrailingEmptyLines(obj: Array<unknown>) : void {
     while (obj.length > 0 && isStringEmpty(obj[obj.length - 1])) {
       obj.pop();
     }

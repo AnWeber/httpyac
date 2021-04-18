@@ -5,4 +5,4 @@ export interface ClientCertificateOptions{
   key?: string;
   pfx?: string;
   passphrase?: string;
-};
+}

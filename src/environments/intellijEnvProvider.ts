@@ -17,7 +17,7 @@ export class IntellijProvider implements EnvironmentProvider {
 
   constructor(public readonly basepath: string) { }
 
-  reset() {
+  reset(): void {
     delete this.env;
     for (const watchFile of this.watchFiles) {
       unwatchFile(watchFile, storeReset);
@@ -43,7 +43,7 @@ export class IntellijProvider implements EnvironmentProvider {
     return result;
   }
 
-  async getVariables(env: string): Promise<Record<string, any>> {
+  async getVariables(env: string): Promise<Variables> {
     const environments = await this.parseIntellijVariables(this.basepath);
     return Object.assign({}, ...environments.map(obj => obj[env] || {}));
   }

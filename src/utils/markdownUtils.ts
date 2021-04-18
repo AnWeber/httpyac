@@ -1,5 +1,5 @@
 import { EOL } from 'os';
-import {  HttpResponse, TestResult } from '../models';
+import {  HttpResponse, HttpTimings, TestResult } from '../models';
 import { isString, toMultiLineArray } from './stringUtils';
 import { NormalizedOptions} from 'got';
 import { testSymbols } from '../actionProcessor';
@@ -19,7 +19,7 @@ export interface MarkDownOptions{
 }
 
 
-export function toMarkdown(response: HttpResponse) {
+export function toMarkdown(response: HttpResponse) : string {
   const result: Array<string> = [];
   if (response.request) {
     result.push(...toMarkdownRequest(response.request, true));
@@ -29,7 +29,7 @@ export function toMarkdown(response: HttpResponse) {
   return joinMarkdown(result);
 }
 
-export function toMarkdownPreview(response: HttpResponse, testResults?: Array<TestResult>) {
+export function toMarkdownPreview(response: HttpResponse, testResults?: Array<TestResult>) : string {
   const result: Array<string> = [];
 
   result.push(...toMarkdownResponse(response, false));
@@ -57,7 +57,7 @@ export function toMarkdownPreview(response: HttpResponse, testResults?: Array<Te
     result.push(...toMarkdownTimings(response.timings));
   }
 
-  if (!!response.meta) {
+  if (response.meta) {
     result.push('');
     result.push('---');
     result.push('');
@@ -69,7 +69,7 @@ export function toMarkdownPreview(response: HttpResponse, testResults?: Array<Te
   return joinMarkdown(result);
 }
 
-export function toMarkdownResponse(response: HttpResponse, outputBody: boolean) {
+export function toMarkdownResponse(response: HttpResponse, outputBody: boolean) : Array<string>{
   const result: Array<string> = [];
   result.push(`### HTTP${response.httpVersion || ''} **${response.statusCode}** - ${response.statusMessage}`);
   result.push(...toMarkdownHeader(response.headers));
@@ -82,7 +82,7 @@ export function toMarkdownResponse(response: HttpResponse, outputBody: boolean) 
   return result;
 }
 
-function toMarkdownRequest(request: NormalizedOptions, outputBody: boolean) {
+function toMarkdownRequest(request: NormalizedOptions, outputBody: boolean)  : Array<string>{
   const result: Array<string> = [];
   result.push(`### ${request.method} ${request.url}`);
   if (request.headers) {
@@ -97,7 +97,7 @@ function toMarkdownRequest(request: NormalizedOptions, outputBody: boolean) {
   return result;
 }
 
-function toMarkdownTestResults(testResults: Array<TestResult>) {
+function toMarkdownTestResults(testResults: Array<TestResult>) : Array<string>{
   const result: Array<string> = [];
   result.push(`| TestResults |  |  |`);
   result.push(`| --- | --- | --- |`);
@@ -107,7 +107,7 @@ function toMarkdownTestResults(testResults: Array<TestResult>) {
   return result;
 }
 
-export function toMarkdownHeader(headers: Record<string, string | string[] | undefined | null>) {
+export function toMarkdownHeader(headers: Record<string, string | string[] | undefined | null>) : Array<string> {
   return Object.entries(headers)
     .map(([key, value]) => {
       let val = value || '';
@@ -121,7 +121,7 @@ export function toMarkdownHeader(headers: Record<string, string | string[] | und
     .sort();
 }
 
-export function toMarkdownMeta(meta: Record<string, string | string[]>) {
+export function toMarkdownMeta(meta: Record<string, unknown>) : Array<string> {
   const result: Array<string> = [];
   result.push(`| Meta |  |`);
   result.push(`| --- | --- |`);
@@ -137,7 +137,7 @@ export function toMarkdownMeta(meta: Record<string, string | string[]>) {
   return result;
 }
 
-export function toMarkdownTimings(timings: Record<string, any>) {
+export function toMarkdownTimings(timings: HttpTimings) : Array<string> {
   const result: Array<string> = [];
   result.push(`| Timings |  |`);
     result.push(`| --- | --- |`);
@@ -149,6 +149,6 @@ export function toMarkdownTimings(timings: Record<string, any>) {
 }
 
 
-export function joinMarkdown(lines: string[]) {
+export function joinMarkdown(lines: string[]) : string {
   return lines.join(`  ${EOL}`);
 }

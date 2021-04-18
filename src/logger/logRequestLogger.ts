@@ -8,11 +8,11 @@ import { NormalizedOptions } from 'got';
 import { chalkInstance } from './chalk';
 
 class LogRequestsLogger {
-  private isFirstRequest:boolean = true;
-  public prettyPrint: boolean = false;
-  public isRequestLogEnabled: boolean = true;
-  public isResponseHeaderLogEnabled: boolean = true;
-  public logResponseBodyLength: number = 0;
+  private isFirstRequest = true;
+  public prettyPrint = false;
+  public isRequestLogEnabled = true;
+  public isResponseHeaderLogEnabled = true;
+  public logResponseBodyLength = 0;
 
 
   info(response: HttpResponse) {

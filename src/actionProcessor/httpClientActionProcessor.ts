@@ -1,6 +1,7 @@
 import {ProcessorContext, HttpRequest} from '../models';
 import { isString, isMimeTypeFormUrlEncoded} from '../utils';
 import { log } from '../logger';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const encodeUrl = require('encodeurl');
 
 

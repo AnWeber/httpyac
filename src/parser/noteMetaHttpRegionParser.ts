@@ -6,7 +6,7 @@ export class NoteMetaHttpRegionParser implements HttpRegionParser{
 
   constructor(private readonly showNote: (note: string) => Promise<boolean>){}
 
-  async parse(_lineReader: unknown, _context: ParserContext): Promise<HttpRegionParserResult>{
+  async parse(): Promise<HttpRegionParserResult>{
     return false;
   }
 

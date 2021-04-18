@@ -37,6 +37,7 @@ export async function requestOpenIdInformation(request: HttpRequest | false,cont
   return false;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function toOpenIdInformation(jwtToken: Record<string, any>, time: number, context: {
   config: OpenIdConfiguration,
   id: string,

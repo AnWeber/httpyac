@@ -5,7 +5,7 @@ import { EnvironmentConfig } from '../models';
 
 
 
-export async function toAbsoluteFilename(fileName: string, baseName: string, isFolder: boolean = false) {
+export async function toAbsoluteFilename(fileName: string, baseName: string, isFolder = false) : Promise<string | undefined> {
   try {
     if (isAbsolute(fileName) && await fs.stat(fileName)) {
       return fileName;
@@ -24,17 +24,17 @@ export async function toAbsoluteFilename(fileName: string, baseName: string, isF
   return undefined;
 }
 
-export function replaceInvalidChars(fileName: string) {
+export function replaceInvalidChars(fileName: string) : string {
   fileName = fileName.replace(/[/\\?%*:|"<>]/g, '_');
 
   return fileName.split('_').filter(obj => obj.length > 0).join('_');
 }
 
 
-export function shortenFileName(fileName: string, maxChars = 50) {
+export function shortenFileName(fileName: string, maxChars = 50): string {
   const result: Array<string> = [];
 
-  let charLength: number = 0;
+  let charLength = 0;
   for (const item of fileName.split('_').reverse()) {
     if (item.length + charLength < maxChars) {
       result.push(item);
@@ -66,7 +66,8 @@ export async function findPackageJson(currentDir: string, files: Array<string> =
   return undefined;
 }
 
-export async function parseJson(fileName: string) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function parseJson(fileName: string) : Promise<Record<string, any> | undefined> {
   try {
     const text = await fs.readFile(fileName, 'utf8');
     return JSON.parse(text);

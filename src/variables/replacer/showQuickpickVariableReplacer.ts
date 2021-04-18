@@ -9,13 +9,13 @@ export function showQuickpickVariableReplacerFactory(showListPrompt: (message: s
     while ((match = variableRegex.exec(text)) !== null) {
       const [searchValue, variable] = match;
 
-      const matchInput = /^\$pick\s*(?<placeholder>[^\$]*)(\$value:\s*(?<value>.*))\s*$/.exec(variable);
+      const matchInput = /^\$pick\s*(?<placeholder>[^$]*)(\$value:\s*(?<value>.*))\s*$/.exec(variable);
       if (matchInput?.groups?.placeholder && matchInput?.groups?.value) {
 
         const placeholder = matchInput.groups.placeholder;
         const value = matchInput.groups.value;
 
-        const answer = showListPrompt(placeholder, value.split(','));
+        const answer = await showListPrompt(placeholder, value.split(','));
 
 
         if (answer && result) {

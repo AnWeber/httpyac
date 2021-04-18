@@ -11,10 +11,10 @@ export interface GqlData{
 export interface GqlPostRequest{
   query: string;
   operationName?: string;
-  variables?: Record<string, any>
+  variables?: Record<string, unknown>
 }
 
-export async function gqlActionProcessor(gqlData: GqlData, context: ProcessorContext) {
+export async function gqlActionProcessor(gqlData: GqlData, context: ProcessorContext) : Promise<boolean> {
   if (context.request?.body && gqlData?.query) {
     const gqlRequestBody: GqlPostRequest = {
       query: gqlData.query

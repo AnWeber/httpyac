@@ -10,7 +10,7 @@ export interface IntellijScriptData{
   fileName: string;
 }
 
-export async function intellijActionProcessor(scriptData: ScriptData | IntellijScriptData, {httpRegion, httpFile, variables}: ProcessorContext) {
+export async function intellijActionProcessor(scriptData: ScriptData | IntellijScriptData, {httpRegion, httpFile, variables}: ProcessorContext) : Promise<boolean> {
   const intellijVars = initIntellijVariables(httpRegion, variables);
 
   let data: ScriptData;
@@ -26,7 +26,8 @@ export async function intellijActionProcessor(scriptData: ScriptData | IntellijS
   } else {
     data = scriptData;
   }
-  return await executeScript({ script: data.script, fileName: httpFile.fileName, variables: intellijVars, lineOffset: data.lineOffset + 1 });
+  await executeScript({ script: data.script, fileName: httpFile.fileName, variables: intellijVars, lineOffset: data.lineOffset + 1 });
+  return true;
 }
 
 async function loadScript(file: string, httpFile: HttpFile) {
@@ -47,6 +48,7 @@ async function loadScript(file: string, httpFile: HttpFile) {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isIntellijScriptData(scriptData: any) : scriptData is IntellijScriptData{
   return !!scriptData.fileName;
 }
@@ -59,7 +61,7 @@ export class HttpClient{
   test(testName: string, func: () => void): void{
     testFactory(this.httpRegion)(testName, func);
   }
-  assert(condition: boolean, message?: string) {
+  assert(condition: boolean, message?: string) : void {
     ok(condition, message);
   }
   log(text: string): void{
@@ -72,7 +74,7 @@ class HttpClientVariables{
   set(varName: string, varValue: string): void{
     this.variables[varName] = varValue;
   }
-  get(varName: string): string{
+  get(varName: string): unknown{
     return this.variables[varName];
   }
   isEmpty(): boolean{
@@ -88,8 +90,8 @@ class HttpClientVariables{
   }
 }
 
-function initIntellijVariables(httpRegion: HttpRegion, variables: Record<string, any>) {
-  let response: any = undefined;
+function initIntellijVariables(httpRegion: HttpRegion, variables: Variables) {
+  let response: unknown = undefined;
   if (httpRegion.response) {
     response = {
       body: httpRegion.response.parsedBody || httpRegion.response.body,

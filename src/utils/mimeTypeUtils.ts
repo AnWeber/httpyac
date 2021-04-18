@@ -6,32 +6,32 @@ export function parseMimeType(contentType: string): ContentType {
   return { mimeType, contentType, charset };
 }
 
-export function isMimeTypeJSON(contentType: ContentType | undefined) {
-  return contentType && (
+export function isMimeTypeJSON(contentType: ContentType | undefined) : boolean {
+  return !!contentType && (
     contentType.mimeType === 'application/json'
     || contentType.mimeType.indexOf('+json') >= 0
     || contentType.mimeType.indexOf('x-amz-json') >= 0
   );
 }
-export function isMimeTypeJavascript(contentType: ContentType | undefined) {
+export function isMimeTypeJavascript(contentType: ContentType | undefined) : boolean {
   return contentType?.mimeType === 'application/javascript';
 }
-export function isMimeTypeXml(contentType: ContentType | undefined) {
-  return contentType && (
+export function isMimeTypeXml(contentType: ContentType | undefined) : boolean {
+  return !!contentType && (
     contentType.mimeType === 'application/xml'
     || contentType.mimeType === 'text/xml'
     || contentType.mimeType.indexOf('+xml') >= 0
   );
 }
-export function isMimeTypeHtml(contentType: ContentType | undefined) {
+export function isMimeTypeHtml(contentType: ContentType | undefined) : boolean {
   return contentType?.mimeType === 'text/html';
 
 }
-export function isMimeTypeCSS(contentType: ContentType | undefined) {
+export function isMimeTypeCSS(contentType: ContentType | undefined) : boolean {
   return contentType?.mimeType === 'text/css';
 }
 
-export function isMimeTypeMarkdown(contentType: ContentType | undefined) {
+export function isMimeTypeMarkdown(contentType: ContentType | undefined) : boolean {
   return contentType?.mimeType === 'text/markdown';
 }
 
