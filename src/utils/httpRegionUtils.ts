@@ -96,9 +96,9 @@ export async function processHttpRegionActions(context: ProcessorContext, showPr
   return true;
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any
-export function isHttpRegionSendContext(context: any): context is HttpRegionSendContext{
-  return !!context?.httpRegion;
+export function isHttpRegionSendContext(context: HttpRegionSendContext | HttpFileSendContext): context is HttpRegionSendContext{
+  const guard = context as HttpRegionSendContext;
+  return !!guard?.httpRegion;
 }
 
 

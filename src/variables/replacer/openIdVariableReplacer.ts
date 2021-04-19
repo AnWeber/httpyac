@@ -1,4 +1,4 @@
-import { ProcessorContext, HttpClient } from '../../models';
+import { ProcessorContext, HttpClient, UserSession } from '../../models';
 import { userSessionStore } from '../../environments';
 import * as oauth from './oauth';
 import { log } from '../../logger';
@@ -61,9 +61,9 @@ function getOpenIdConfiguration(cacheKey: string, config: oauth.OpenIdConfigurat
   return false;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function isOpenIdInformation(userSession: any): userSession is oauth.OpenIdInformation{
-  return !!userSession?.accessToken;
+function isOpenIdInformation(userSession: UserSession | undefined): userSession is oauth.OpenIdInformation{
+  const guard = userSession as oauth.OpenIdInformation;
+  return !!guard?.accessToken;
 }
 
 function getOpenIdFlow(flowType: string) {

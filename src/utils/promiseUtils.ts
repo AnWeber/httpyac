@@ -1,4 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
-export function isPromise(obj: any): obj is Promise<unknown> {
-  return obj && obj.then;
+export function isPromise(obj: unknown): obj is Promise<unknown> {
+  const guard = obj as Promise<unknown>;
+  return guard && !!guard.then;
 }

@@ -48,9 +48,9 @@ async function loadScript(file: string, httpFile: HttpFile) {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function isIntellijScriptData(scriptData: any) : scriptData is IntellijScriptData{
-  return !!scriptData.fileName;
+function isIntellijScriptData(scriptData: IntellijScriptData | ScriptData): scriptData is IntellijScriptData{
+  const guard = scriptData as IntellijScriptData;
+  return !!guard.fileName;
 }
 
 export class HttpClient{
