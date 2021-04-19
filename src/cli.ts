@@ -159,17 +159,20 @@ async function getSendContext(httpFile: HttpFile, cliOptions: HttpCliOptions, en
     ...environmentConfig.request,
     proxy: process.env.http_proxy
   };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const sendContext: any = {
+  const sendContext: HttpFileSendContext | HttpRegionSendContext = {
     httpFile,
     httpClient: gotHttpClientFactory(request),
     repeat: cliOptions.repeat,
   };
 
   if (cliOptions.httpRegionName) {
-    sendContext.httpRegion = httpFile.httpRegions.find(obj => obj.metaData.name === cliOptions.httpRegionName);
-  }else if (cliOptions.httpRegionLine) {
-    sendContext.httpRegion = httpFile.httpRegions.find(obj => cliOptions.httpRegionLine && obj.symbol.startLine <= cliOptions.httpRegionLine && obj.symbol.endLine >= cliOptions.httpRegionLine);
+    Object.assign(sendContext, {
+      httpRegion: httpFile.httpRegions.find(obj => obj.metaData.name === cliOptions.httpRegionName)
+    });
+  } else if (cliOptions.httpRegionLine) {
+    Object.assign(sendContext, {
+      httpRegion: httpFile.httpRegions.find(obj => cliOptions.httpRegionLine && obj.symbol.startLine <= cliOptions.httpRegionLine && obj.symbol.endLine >= cliOptions.httpRegionLine)
+    });
   } else if (!cliOptions.allRegions && httpFile.httpRegions.length > 1) {
 
     const httpRegionMap = httpFile.httpRegions.reduce((prev: Record<string, HttpRegion| false>, current) => {
@@ -190,7 +193,9 @@ async function getSendContext(httpFile: HttpFile, cliOptions: HttpCliOptions, en
       choices: Object.entries(httpRegionMap).map(([key]) => key),
     }]);
     if (answer.region && httpRegionMap[answer.region]) {
-      sendContext.httpRegion = httpRegionMap[answer.region];
+      Object.assign(sendContext, {
+        httpRegion: httpRegionMap[answer.region]
+      });
     }
   }
   return sendContext;
