@@ -36,7 +36,7 @@ export async function send(rawArgs: string[]) : Promise<void> {
     return;
   }
   if (cliOptions.version) {
-    const packageJson = await parseJson(join(__dirname, '../package.json'));
+    const packageJson = await parseJson<Record<string, string>>(join(__dirname, '../package.json'));
     console.info(`httpyac v${packageJson?.version}`);
     return;
   }

@@ -66,8 +66,7 @@ export async function findPackageJson(currentDir: string, files: Array<string> =
   return undefined;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function parseJson(fileName: string) : Promise<Record<string, any> | undefined> {
+export async function parseJson<T>(fileName: string) : Promise<T | undefined> {
   try {
     const text = await fs.readFile(fileName, 'utf8');
     return JSON.parse(text);
@@ -79,9 +78,9 @@ export async function parseJson(fileName: string) : Promise<Record<string, any> 
 
 
 export async function getHttpacJsonConfig(rootDir: string) : Promise<EnvironmentConfig | undefined>{
-  let result = await parseJson(join(rootDir, '.httpyac.json'));
+  let result = await parseJson<EnvironmentConfig>(join(rootDir, '.httpyac.json'));
   if (!result) {
-    result = (await parseJson(join(rootDir, 'package.json')))?.httpyac;
+    result = (await parseJson<Record<string, EnvironmentConfig>>(join(rootDir, 'package.json')))?.httpyac;
   }
   return result;
 }
