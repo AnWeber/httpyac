@@ -2,8 +2,7 @@ import { OpenIdConfiguration, assertConfiguration } from './openIdConfiguration'
 import { OpenIdInformation, requestOpenIdInformation } from './openIdInformation';
 import { toQueryParams, decodeJWT } from '../../../utils';
 import { HttpClient } from '../../../models';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const encodeUrl = require('encodeurl');
+import encodeUrl from 'encodeurl';
 
 class TokenExchangeFlow {
   getCacheKey(config: OpenIdConfiguration) {

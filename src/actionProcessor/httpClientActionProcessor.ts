@@ -1,8 +1,7 @@
 import {ProcessorContext, HttpRequest} from '../models';
 import { isString, isMimeTypeFormUrlEncoded} from '../utils';
 import { log } from '../logger';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const encodeUrl = require('encodeurl');
+import encodeUrl from 'encodeurl';
 
 
 export async function httpClientActionProcessor(_data: unknown, context: ProcessorContext): Promise<boolean> {
@@ -28,6 +27,7 @@ export async function httpClientActionProcessor(_data: unknown, context: Process
 async function initBody(request: HttpRequest) {
   if (isString(request.body) || Array.isArray(request.body)) {
     request.body = await normalizeBody(request.body);
+
     if (request.body && isString(request.body) && isMimeTypeFormUrlEncoded(request.contentType)) {
       request.body = encodeUrl(request.body);
     }
