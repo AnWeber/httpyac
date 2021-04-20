@@ -33,7 +33,8 @@ export class RequestHttpRegionParser implements HttpRegionParser {
         request: {
           url: urlMatch.groups.url,
           method: isRequestMethod(urlMatch.groups.method) ? urlMatch.groups.method : 'GET',
-          http2: urlMatch.groups.version !== '1.1'
+          http2: urlMatch.groups.version !== '1.1',
+          headers: {},
         },
         requestSymbols
       };
