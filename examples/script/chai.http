@@ -21,10 +21,8 @@ GET https://cat-fact.herokuapp.com/facts/random HTTP/1.1
       expect(response.body).to.not.be.null;
   });
 
-  var body = JSON.parse(response.body);
-
   test('type is cat', () => {
-      expect(body.type).to.equal('cat');
+      expect(response.parsedBody.type).to.equal('cat');
   });
 }}
 
@@ -43,14 +41,13 @@ GET https://cat-fact.herokuapp.com/facts/random HTTP/1.1
       expect(response.body).to.not.be.null;
   });
 
-  var body = JSON.parse(response.body);
 
   test('text equals hello world', () => {
-      expect(body.text).to.equal('hello world');
+      expect(response.parsedBody.text).to.equal('hello world');
   });
 
   test('type is cat', () => {
-      expect(body.type).to.equal('cat');
+      expect(response.parsedBody.type).to.equal('cat');
   });
 }}
 
@@ -65,10 +62,8 @@ GET https://cat-fact.herokuapp.com/facts/random HTTP/1.1
       expect(response.statusCode).to.equal(400);
   });
 
-  var body = JSON.parse(response.body);
-
   test('text equals hello world', () => {
-      expect(body.text).to.equal('hello world');
+      expect(response.parsedBody.text).to.equal('hello world');
   });
 }}
 
