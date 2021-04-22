@@ -31,7 +31,7 @@ export async function jsVariableReplacer(text: string, _type: string, {httpRegio
     }else if (value.$result instanceof Date) {
       result = result.replace(searchValue, `${value.$result.toISOString()}`);
     }else if (value.$result) {
-      result = result.replace(searchValue, value.$result);
+      result = result.replace(searchValue, `${value.$result}`);
     }
   }
   return result;

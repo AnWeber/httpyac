@@ -1,7 +1,6 @@
 import { ActionType, HttpRegion, HttpRegionAction, ProcessorContext } from '../models';
-import get from 'lodash/get';
 import { log, popupService, logRequest } from '../logger';
-import { decodeJWT, isString, toEnvironmentKey } from '../utils';
+import { decodeJWT, isString, JWTToken, toEnvironmentKey } from '../utils';
 import { isValidVariableName } from './javascriptAction';
 
 export class ResponseAsVariableAction implements HttpRegionAction {
@@ -37,33 +36,35 @@ export class ResponseAsVariableAction implements HttpRegionAction {
 
   private handleJWTMetaData(body: unknown, httpRegion: HttpRegion) {
     if (httpRegion.metaData.jwt && httpRegion.response) {
-      if (body && isString(httpRegion.metaData.jwt)) {
-        for (const key of httpRegion.metaData.jwt.split(',')) {
-          const value = get(body, key);
-          this.parseJwtToken(body, key, value);
+      if (body && typeof body === 'object') {
+        const entries = Object.entries(body);
+
+        let checkEntries = entries;
+        if (isString(httpRegion.metaData.jwt)) {
+          checkEntries = entries.filter(([key]) => httpRegion.metaData.jwt.indexOf(key) >= 0);
         }
-      } else if (body && typeof body === 'object') {
-        for (const [key, value] of Object.entries(body)) {
-          this.parseJwtToken(body, key, value);
+        for (const [key, value] of checkEntries) {
+          const val = this.parseJwtToken(value);
+          if (val) {
+            entries.push([`${key}_parsed`, val]);
+          }
         }
+        body = Object.entries(entries);
+        httpRegion.response.body = JSON.stringify(body, null, 2);
       }
-      httpRegion.response.body = JSON.stringify(body, null, 2);
     }
   }
 
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private parseJwtToken(response: any, key: string, value: unknown) {
+  private parseJwtToken(value: unknown) : JWTToken | null{
     if (isString(value)) {
       try {
-        const jwt = decodeJWT(value);
-        if (jwt) {
-          response[`${key}_parsed`] = jwt;
-        }
+        return decodeJWT(value);
       } catch (err) {
         log.error(err);
       }
     }
+    return null;
   }
 
 }

@@ -37,27 +37,42 @@ export async function requestOpenIdInformation(request: HttpRequest | false,cont
   return false;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function toOpenIdInformation(jwtToken: Record<string, any>, time: number, context: {
+export function toOpenIdInformation(jwtToken: unknown, time: number, context: {
   config: OpenIdConfiguration,
   id: string,
   title: string,
   description: string,
 }): OpenIdInformation | false {
-  const parsedToken = decodeJWT(jwtToken.access_token);
-  if (!context.config.noLog) {
-    log.info(JSON.stringify(parsedToken, null, 2));
+  if (isAuthToken(jwtToken)) {
+    const parsedToken = decodeJWT(jwtToken.access_token);
+    if (!context.config.noLog) {
+      log.info(JSON.stringify(parsedToken, null, 2));
+    }
+    return {
+      id: context.id,
+      title: context.title,
+      description: context.description,
+      time,
+      config: context.config,
+      accessToken: jwtToken.access_token,
+      expiresIn: jwtToken.expires_in,
+      refreshToken: jwtToken.refresh_token,
+      refreshExpiresIn: jwtToken.refresh_expires_in,
+      timeSkew: parsedToken?.iat ? Math.floor(time / 1000) - parsedToken.iat : 0,
+    };
   }
-  return {
-    id: context.id,
-    title: context.title,
-    description: context.description,
-    time,
-    config: context.config,
-    accessToken: jwtToken.access_token,
-    expiresIn: jwtToken.expires_in,
-    refreshToken: jwtToken.refresh_token,
-    refreshExpiresIn: jwtToken.refresh_expires_in,
-    timeSkew: parsedToken?.iat ? Math.floor(time / 1000) - parsedToken.iat : 0,
-  };
+  return false;
+}
+
+
+export function isAuthToken(obj: unknown): obj is AuthToken {
+  const guard = obj as AuthToken;
+  return guard && !!guard.access_token && !!guard.expires_in;
+}
+
+interface AuthToken {
+  access_token: string;
+  expires_in: number;
+  refresh_token?: string;
+  refresh_expires_in?: number;
 }

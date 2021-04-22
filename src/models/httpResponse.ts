@@ -10,8 +10,7 @@ export interface HttpResponse{
   headers: Record<string, string | string[] | undefined | null>;
   contentType?: ContentType;
   body: unknown;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  parsedBody?: any;
+  parsedBody?: unknown;
   rawBody?: Buffer;
   request?: NormalizedOptions;
   meta?: Record<string, unknown>
