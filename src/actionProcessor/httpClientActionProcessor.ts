@@ -1,4 +1,4 @@
-import {ProcessorContext, HttpRequest} from '../models';
+import {ProcessorContext, HttpRequest, HttpRequestBodyLine} from '../models';
 import { isString, isMimeTypeFormUrlEncoded} from '../utils';
 import { log } from '../logger';
 import encodeUrl from 'encodeurl';
@@ -34,7 +34,7 @@ async function initBody(request: HttpRequest) {
   }
 }
 
-async function normalizeBody(body: string | Array<string | (() => Promise<Buffer>)> | undefined) {
+async function normalizeBody(body: string | Array<HttpRequestBodyLine> | undefined) {
   if (isString(body)) {
     return body;
   }else if (Array.isArray(body)) {

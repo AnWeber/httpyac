@@ -1,4 +1,4 @@
-import { HttpRequest, ProcessorContext, VariableReplacerType} from '../models';
+import { HttpRequest, HttpRequestBodyLine, ProcessorContext, VariableReplacerType} from '../models';
 import { replaceVariables } from './variableActionProcessor';
 import { isString } from '../utils';
 import { log } from '../logger';
@@ -35,7 +35,7 @@ async function replaceVariablesInBody(replacedReqeust: HttpRequest, replacer: (v
     if (isString(replacedReqeust.body)) {
       replacedReqeust.body = await replacer(replacedReqeust.body, VariableReplacerType.body);
     } else if (Array.isArray(replacedReqeust.body)) {
-      const replacedBody: Array<string | (() => Promise<Buffer>)> = [];
+      const replacedBody: Array<HttpRequestBodyLine> = [];
       for (const obj of replacedReqeust.body) {
         if (isString(obj)) {
           const value = await replacer(obj, VariableReplacerType.body);

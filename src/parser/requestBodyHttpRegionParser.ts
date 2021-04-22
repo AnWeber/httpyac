@@ -1,5 +1,5 @@
 
-import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, HttpSymbol, HttpSymbolKind, ParserContext } from '../models';
+import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, HttpRequestBodyLine, HttpSymbol, HttpSymbolKind, ParserContext } from '../models';
 import { EOL } from 'os';
 import { toAbsoluteFilename, isString, isMimeTypeMultiPartFormData, isStringEmpty, isMimeTypeNewlineDelimitedJSON, isMimeTypeFormUrlEncoded } from '../utils';
 import { createReadStream, promises as fs } from 'fs';
@@ -7,14 +7,8 @@ import { log, popupService } from '../logger';
 
 
 
-type RequestBodyTextLine = string | (() => Promise<Buffer>);
-interface ParserRequestBody{
-  textLines: Array<RequestBodyTextLine>;
-  symbol?: HttpSymbol;
-}
 
 
-const BODY_IDENTIFIER = 'request_body';
 export class RequestBodyHttpRegionParser implements HttpRegionParser {
   supportsEmptyLine = true;
 
@@ -56,19 +50,19 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
   }
 
   private getRequestBody(context: ParserContext) {
-    let result: ParserRequestBody = context.data[BODY_IDENTIFIER];
+    let result = context.data.request_body;
     if (!result) {
       result = {
         textLines: [],
       };
-      context.data[BODY_IDENTIFIER] = result;
+      context.data.request_body = result;
     }
     return result;
   }
   private getAndRemoveRequestBody(context: ParserContext) {
-    const result: ParserRequestBody = context.data[BODY_IDENTIFIER];
+    const result = context.data.request_body;
     if (result) {
-      delete context.data[BODY_IDENTIFIER];
+      delete context.data.request_body;
     }
     return result;
   }
@@ -141,7 +135,7 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
             requestBody.textLines.push('');
           }
 
-          const body: Array<string | (() => Promise<Buffer>)> = [];
+          const body: Array<HttpRequestBodyLine> = [];
           const strings: Array<string> = [];
           const lineEnding = isMimeTypeMultiPartFormData(contentType) ?  '\r\n' : EOL;
 
@@ -171,7 +165,7 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
     }
   }
 
-  private formUrlEncodedJoin(body: Array<RequestBodyTextLine>): string  {
+  private formUrlEncodedJoin(body: Array<HttpRequestBodyLine>): string  {
     const result = body.reduce((previousValue, currentValue, currentIndex) => {
       if (isString(currentValue)) {
         previousValue += `${(currentIndex === 0 || currentValue.startsWith('&') ? '' : EOL)}${currentValue}`;

@@ -8,6 +8,9 @@ export interface HttpRequest extends Omit<OptionsOfUnknownResponseBody, 'body'>{
   method?: HttpMethod;
   headers?: Record<string, string | string[] | undefined>;
   contentType?: ContentType;
-  body?: string | Array<string | (() => Promise<Buffer>)> | Buffer;
+  body?: string | Array<HttpRequestBodyLine> | Buffer;
   proxy?: string;
 }
+
+
+export type HttpRequestBodyLine = string | (() => Promise<Buffer>);

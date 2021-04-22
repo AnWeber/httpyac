@@ -20,6 +20,7 @@ export * from './httpTimings';
 export * from './index';
 export * from './repeatOptions';
 export * from './parserContext';
+export * from './parserContextData';
 export * from './processorContext';
 export * from './variableReplacer';
 export * from './variableProvider';

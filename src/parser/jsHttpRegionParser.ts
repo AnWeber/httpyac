@@ -3,10 +3,6 @@ import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegion
 import { toMultiLineString, actionProcessorIndexAfterRequest } from '../utils';
 import { jsActionProcessor, ScriptData } from '../actionProcessor';
 
-
-interface EveryRequestScript { scriptData: ScriptData, postScript: boolean }
-
-const JS_ON_EVERY_REQUEST_IDENTIFIER = 'jsOnEveryRequest';
 export class JsHttpRegionParser implements HttpRegionParser {
   async parse(lineReader: HttpRegionParserGenerator, { httpRegion, data }: ParserContext): Promise<HttpRegionParserResult> {
     let next = lineReader.next();
@@ -37,9 +33,9 @@ export class JsHttpRegionParser implements HttpRegionParser {
             );
           } else {
 
-            let onEveryRequestArray: EveryRequestScript[] = data[JS_ON_EVERY_REQUEST_IDENTIFIER];
+            let onEveryRequestArray = data.jsOnEveryRequest;
             if (!onEveryRequestArray) {
-              data[JS_ON_EVERY_REQUEST_IDENTIFIER] = onEveryRequestArray = [];
+              data.jsOnEveryRequest = onEveryRequestArray = [];
             }
             onEveryRequestArray.push({
               scriptData,
@@ -68,7 +64,7 @@ export class JsHttpRegionParser implements HttpRegionParser {
   }
 
   close({ data, httpRegion }: ParserContext): void {
-    const onEveryRequestArray: EveryRequestScript[] = data[JS_ON_EVERY_REQUEST_IDENTIFIER];
+    const onEveryRequestArray = data.jsOnEveryRequest;
     if (onEveryRequestArray && httpRegion.request) {
       for (const everyRequestScript of onEveryRequestArray) {
         if (everyRequestScript.postScript) {
@@ -86,8 +82,6 @@ export class JsHttpRegionParser implements HttpRegionParser {
         }
 
       }
-
-
     }
   }
 }

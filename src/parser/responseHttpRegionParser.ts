@@ -1,8 +1,7 @@
 
-import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, HttpSymbol, HttpSymbolKind, ParserContext } from '../models';
+import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, HttpSymbolKind, ParserContext } from '../models';
 
 
-const BODY_IDENTIFIER = 'response_body';
 
 export class ResponseHttpRegionParser implements HttpRegionParser {
   supportsEmptyLine = true;
@@ -11,9 +10,7 @@ export class ResponseHttpRegionParser implements HttpRegionParser {
 
     const next = lineReader.next();
     if (!next.done) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      const responseSymbol: HttpSymbol = context.data[BODY_IDENTIFIER];
+      const responseSymbol = context.data.httpResponseSymbol;
       if (responseSymbol) {
         responseSymbol.endLine = next.value.line;
         responseSymbol.endOffset = next.value.textLine.length;
@@ -24,7 +21,7 @@ export class ResponseHttpRegionParser implements HttpRegionParser {
       const match = /^\s*(HTTP\/\S+)\s*([1-5][0-9][0-9])\s*(.*)$/.exec(next.value.textLine);
       if (match) {
 
-        context.data[BODY_IDENTIFIER] = {
+        context.data.httpResponseSymbol = {
           name: 'response',
           description: 'response',
           kind: HttpSymbolKind.response,
@@ -35,7 +32,7 @@ export class ResponseHttpRegionParser implements HttpRegionParser {
         };
         return {
           endLine: next.value.line,
-          symbols: [context.data[BODY_IDENTIFIER]],
+          symbols: [context.data.httpResponseSymbol],
         };
       }
     }
@@ -43,7 +40,7 @@ export class ResponseHttpRegionParser implements HttpRegionParser {
   }
 
   close(context: ParserContext): void {
-    delete context.data[BODY_IDENTIFIER];
+    delete context.data.httpResponseSymbol;
   }
 }
 

@@ -5,12 +5,6 @@ import { promises as fs } from 'fs';
 import { log } from '../logger';
 import { gqlActionProcessor, GqlData } from '../actionProcessor';
 
-export const GQL_FRAGMENTS_IDENTIFIER = 'gql';
-
-
-
-
-
 export class GqlHttpRegionParser implements HttpRegionParser{
   async parse(lineReader: HttpRegionParserGenerator, context: ParserContext): Promise<HttpRegionParserResult> {
 
@@ -63,10 +57,10 @@ export class GqlHttpRegionParser implements HttpRegionParser{
   }
 
   private getGqlFragments(context: ParserContext) {
-    let result = context.data[GQL_FRAGMENTS_IDENTIFIER];
+    let result = context.data.gql;
     if (!result) {
       result = {};
-      context.data[GQL_FRAGMENTS_IDENTIFIER] = result;
+      context.data.gql = result;
     }
     return result;
   }
