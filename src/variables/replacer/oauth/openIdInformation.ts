@@ -2,6 +2,7 @@ import { OpenIdConfiguration } from './openIdConfiguration';
 import { log, logRequest } from '../../../logger';
 import { HttpClient, HttpRequest, UserSession } from '../../../models';
 import { decodeJWT } from '../../../utils';
+import { environmentStore} from '../../../environments';
 
 export interface OpenIdInformation extends UserSession{
   time: number;
@@ -26,7 +27,7 @@ export async function requestOpenIdInformation(request: HttpRequest | false,cont
     const response = await context.httpClient(request, { showProgressBar: false });
     if (response) {
 
-      if (!context.config.noLog) {
+      if (environmentStore.environmentConfig?.log?.isRequestLogEnabled) {
         logRequest.info(response);
       }
       if (response.statusCode === 200 && response.parsedBody) {
@@ -45,7 +46,7 @@ export function toOpenIdInformation(jwtToken: unknown, time: number, context: {
 }): OpenIdInformation | false {
   if (isAuthToken(jwtToken)) {
     const parsedToken = decodeJWT(jwtToken.access_token);
-    if (!context.config.noLog) {
+    if (environmentStore.environmentConfig?.log?.isRequestLogEnabled) {
       log.info(JSON.stringify(parsedToken, null, 2));
     }
     return {

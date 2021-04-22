@@ -16,13 +16,11 @@ export interface OpenIdConfiguration{
   username?: string;
   password?: string;
   subjectIssuer?: string;
-  noLog?: boolean;
 }
 
 export function getOpenIdConfiguration(variablePrefix: string, variables: Variables) : OpenIdConfiguration | false {
   if (variablePrefix) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const getVariable: (name: string) => any = (name: string) => variables[`${variablePrefix}_${name}`] || get(variables, `${variablePrefix}.${name}`);
+    const getVariable: (name: string) => string = (name: string) => `${variables[`${variablePrefix}_${name}`] || get(variables, `${variablePrefix}.${name}`)}`;
 
     const config: OpenIdConfiguration = {
       variablePrefix,
@@ -37,7 +35,6 @@ export function getOpenIdConfiguration(variablePrefix: string, variables: Variab
       username: getVariable('username'),
       password: getVariable('password'),
       subjectIssuer: getVariable('subjectIssuer'),
-      noLog: getVariable('noLog'),
       keepAlive: ['false', '0', false].indexOf(getVariable('keepAlive')) < 0,
     };
     return config;

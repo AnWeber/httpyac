@@ -441,7 +441,6 @@ To configure the flow, the following variables must be specified
 | {{prefix}}_username | password | username for password flow |
 | {{prefix}}_password | password | password for password flow |
 | {{prefix}}_keepAlive | authorization_code, password, client_credentials | AccessToken is automatically renewed in the background before expiration with RequestToken |
-| {{prefix}}_noLog | authorization_code, implicit, password, client_credentials | do not log http requests and responses |
 
 ##### example
 ```html
