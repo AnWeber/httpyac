@@ -23,10 +23,8 @@ GET https://cat-fact.herokuapp.com/facts/random HTTP/1.1
         ok(response.body);
     });
 
-    var body = JSON.parse(response.body);
-
     test('type is cat', () => {
-        equal(body.type, 'cat');
+        equal(response.parsedBody.type, 'cat');
     });
 }}
 
