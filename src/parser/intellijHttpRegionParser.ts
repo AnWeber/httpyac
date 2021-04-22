@@ -1,7 +1,7 @@
 
-import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, ActionProcessorType } from '../models';
+import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext } from '../models';
 import { toMultiLineString } from '../utils';
-import { ScriptData, IntellijScriptData, intellijActionProcessor } from '../actionProcessor';
+import { ScriptData, IntellijScriptData, IntellijAction } from '../actions';
 
 
 export interface IntelliJParserResult{
@@ -18,13 +18,7 @@ export class IntellijHttpRegionParser implements HttpRegionParser{
       const intellijContent = getIntellijContent(lineReader);
 
       if (intellijContent) {
-        httpRegion.actions.push(
-          {
-            data: intellijContent.data,
-            type: ActionProcessorType.intellij,
-            processor: intellijActionProcessor,
-          }
-        );
+        httpRegion.actions.push(new IntellijAction(intellijContent.data));
         return {
           endLine: intellijContent.endLine,
           symbols: [{

@@ -1,8 +1,8 @@
 
-import { HttpRegion, HttpRequest, HttpSymbol, HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, ActionProcessorType, HttpRegionAction  } from '../models';
+import { HttpRegion, HttpRequest, HttpSymbol, HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, HttpRegionAction  } from '../models';
 
 import { isString, isStringEmpty, parseMimeType, isRequestMethod, getHeader } from '../utils';
-import * as actionProcessor  from '../actionProcessor';
+import * as actions  from '../actions';
 
 const REGEX_REQUESTLINE = /^\s*(?<method>GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE|PROPFIND|PROPPATCH|MKCOL|COPY|MOVE|LOCK|UNLOCK|CHECKOUT|CHECKIN|REPORT|MERGE|MKACTIVITY|MKWORKSPACE|VERSION-CONTROL|BASELINE-CONTROL)\s*(?<url>.+?)(\s+HTTP\/(?<version>(\S+)))?$/;
 export class RequestHttpRegionParser implements HttpRegionParser {
@@ -128,26 +128,13 @@ export class RequestHttpRegionParser implements HttpRegionParser {
         next = lineReader.next();
       }
 
-      httpRegion.actions.splice(0, 0, {
-        type: ActionProcessorType.request,
-        processor: actionProcessor.createRequestActionProcessor,
-      });
-      httpRegion.actions.push({
-        type: ActionProcessorType.envDefaultHeaders,
-        processor: actionProcessor.envDefaultHeadersActionProcessor
-      }, {
-        type: ActionProcessorType.variableReplacer,
-        processor: actionProcessor.variableReplacerActionProcessor
-      }, {
-        type: ActionProcessorType.cookieJar,
-        processor: actionProcessor.cookieJarActionProcessor
-      },{
-        type: ActionProcessorType.httpClient,
-        processor: actionProcessor.httpClientActionProcessor
-      },{
-        type: ActionProcessorType.response,
-        processor: actionProcessor.responseAsVariableActionProcessor
-      });
+      httpRegion.actions.splice(0, 0, new actions.CreateRequestAction());
+      httpRegion.actions.push(
+        new actions.EnvDefaultHeadersAction(),
+        new actions.VariableReplacerAction(),
+        new actions.CookieJarAction(),
+        new actions.HttpClientAction(),
+        new actions.ResponseAsVariableAction());
       if (httpRegion.request.headers) {
         const contentType = getHeader(httpRegion.request.headers, 'content-type');
         if (isString(contentType)) {
@@ -175,13 +162,7 @@ export class RequestHttpRegionParser implements HttpRegionParser {
           endOffset: textLine.length,
           endLine: line,
         }],
-        actions: [
-          {
-            type: ActionProcessorType.defaultHeaders,
-            data: fileHeaders.groups.variableName,
-            processor: actionProcessor.defaultHeadersActionProcessor,
-          }
-        ]
+        actions: [new actions.DefaultHeadersAction(fileHeaders.groups.variableName)]
       };
     }
     return false;

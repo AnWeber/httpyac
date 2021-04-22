@@ -1,7 +1,7 @@
 
-import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, ActionProcessorType } from '../models';
-import { toMultiLineString, actionProcessorIndexAfterRequest } from '../utils';
-import { jsActionProcessor, ScriptData } from '../actionProcessor';
+import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, ActionType } from '../models';
+import { toMultiLineString, pushAfter } from '../utils';
+import { JavascriptAction, ScriptData } from '../actions';
 
 export class JsHttpRegionParser implements HttpRegionParser {
   async parse(lineReader: HttpRegionParserGenerator, { httpRegion, data }: ParserContext): Promise<HttpRegionParserResult> {
@@ -24,13 +24,7 @@ export class JsHttpRegionParser implements HttpRegionParser {
           };
 
           if (!match.groups?.executeOnEveryRequest) {
-            httpRegion.actions.push(
-              {
-                data: scriptData,
-                type: ActionProcessorType.js,
-                processor: jsActionProcessor,
-              }
-            );
+            httpRegion.actions.push(new JavascriptAction(scriptData));
           } else {
 
             let onEveryRequestArray = data.jsOnEveryRequest;
@@ -68,19 +62,10 @@ export class JsHttpRegionParser implements HttpRegionParser {
     if (onEveryRequestArray && httpRegion.request) {
       for (const everyRequestScript of onEveryRequestArray) {
         if (everyRequestScript.postScript) {
-          httpRegion.actions.push({
-            data: everyRequestScript.scriptData,
-            type: ActionProcessorType.js,
-            processor: jsActionProcessor,
-          });
+          httpRegion.actions.push(new JavascriptAction(everyRequestScript.scriptData));
         } else {
-          httpRegion.actions.splice(actionProcessorIndexAfterRequest(httpRegion), 0, {
-            data: everyRequestScript.scriptData,
-            type: ActionProcessorType.js,
-            processor: jsActionProcessor,
-          });
+          pushAfter(httpRegion.actions, obj => obj.type === ActionType.request, new JavascriptAction(everyRequestScript.scriptData));
         }
-
       }
     }
   }

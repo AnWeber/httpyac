@@ -1,8 +1,8 @@
 
 
 
-import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, ActionProcessorType } from '../models';
-import { variableActionProcessor } from '../actionProcessor';
+import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext } from '../models';
+import { VariableAction } from '../actions';
 
 export class VariableHttpRegionParser implements HttpRegionParser{
 
@@ -14,13 +14,9 @@ export class VariableHttpRegionParser implements HttpRegionParser{
       const match = /^\s*@(?<key>[^\s=]*)\s*(?<operator>=\s*)"?(?<value>.*)"?\s*$/.exec(textLine);
 
       if (match && match.groups && match.groups.key && match.groups.value) {
-        httpRegion.actions.push({
-          data: {
-            [match.groups.key]: match.groups.value.trim(),
-          },
-          type: ActionProcessorType.variable,
-          processor: variableActionProcessor
-        });
+        httpRegion.actions.push(new VariableAction({
+          [match.groups.key]: match.groups.value.trim(),
+        }));
         return {
           endLine:next.value.line,
           symbols: [{

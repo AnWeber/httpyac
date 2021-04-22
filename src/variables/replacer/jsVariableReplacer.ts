@@ -1,5 +1,5 @@
 import { ProcessorContext } from '../../models';
-import { executeScript } from '../../actionProcessor';
+import { executeScript } from '../../actions';
 import { isString, toMultiLineArray } from '../../utils';
 
 export async function jsVariableReplacer(text: string, _type: string, {httpRegion, httpFile, variables, progress}: ProcessorContext) : Promise<string | undefined> {

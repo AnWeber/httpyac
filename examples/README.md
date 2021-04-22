@@ -293,7 +293,7 @@ In addition to the variables, the following values are also set
 | response | [http response](https://github.com/AnWeber/httpyac/blob/main/src/models/httpResponse.ts) of the last request |
 | httpRegion | current [httpRegion](https://github.com/AnWeber/httpyac/blob/main/src/models/httpRegion.ts) |
 | httpFile | current [httpFile](https://github.com/AnWeber/httpyac/blob/main/src/models/httpFile.ts) |
-| test | method to simplify [tests](https://github.com/AnWeber/httpyac/blob/main/src/actionProcessor/jsActionProcessor.ts#L40) ([assert](https://github.com/AnWeber/httpyac/blob/main/examples/script/assert.http) or [chai](https://github.com/AnWeber/httpyac/blob/main/examples/script/chai.http)) |
+| test | method to simplify [tests](https://github.com/AnWeber/httpyac/blob/main/src/actions/jsAction.ts#L40) ([assert](https://github.com/AnWeber/httpyac/blob/main/examples/script/assert.http) or [chai](https://github.com/AnWeber/httpyac/blob/main/examples/script/chai.http)) |
 
 ```html
 @foo = https://httpbin.org

@@ -1,9 +1,9 @@
 
-import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, ActionProcessorType } from '../models';
-import { toMultiLineString, toAbsoluteFilename, actionProcessorIndexAfterRequest } from '../utils';
+import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, ActionType } from '../models';
+import { toMultiLineString, toAbsoluteFilename, pushAfter } from '../utils';
 import { promises as fs } from 'fs';
 import { log } from '../logger';
-import { gqlActionProcessor, GqlData } from '../actionProcessor';
+import { GqlAction, GqlData } from '../actions';
 
 export class GqlHttpRegionParser implements HttpRegionParser{
   async parse(lineReader: HttpRegionParserGenerator, context: ParserContext): Promise<HttpRegionParserResult> {
@@ -32,11 +32,7 @@ export class GqlHttpRegionParser implements HttpRegionParser{
             context.httpRegion.metaData.name = gqlContent.name;
           }
         }
-        context.httpRegion.actions.splice(actionProcessorIndexAfterRequest(context.httpRegion),0, {
-          data: gqlData,
-          type: ActionProcessorType.gql,
-          processor: gqlActionProcessor,
-        });
+        pushAfter(context.httpRegion.actions, obj => obj.type === ActionType.request, new GqlAction (gqlData));
       } else if(gqlContent.name) {
         gqlData.fragments[gqlContent.name] = gqlContent.gql;
       }

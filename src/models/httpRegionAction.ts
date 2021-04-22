@@ -1,10 +1,25 @@
-import { HttpRegionActionProcessor } from './httpRegionActionProcessor';
+import { ProcessorContext } from './processorContext';
 
 
+/**
+ * @returns false if processing cancelled
+ */
+ export interface HttpRegionAction {
+  type: ActionType | string;
+  process(context: ProcessorContext): Promise<boolean>;
+}
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface HttpRegionAction<T = any> {
-  data?: T;
-  type: string;
-  processor: HttpRegionActionProcessor<T>;
+export enum ActionType{
+  cookieJar = 'cookieJar',
+  envDefaultHeaders = 'envDefaultHeaders',
+  defaultHeaders = 'defaultHeaders',
+  intellij = 'intellij',
+  gql = 'gql',
+  js = 'js',
+  request = 'request',
+  httpClient = 'httpClient',
+  ref = 'ref',
+  response = 'response',
+  variable = 'variable',
+  variableReplacer = 'variableReplacer',
 }

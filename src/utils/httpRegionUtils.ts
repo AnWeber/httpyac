@@ -83,7 +83,7 @@ export async function processHttpRegionActions(context: ProcessorContext, showPr
     }
     context.progress?.report({ message: `${getRegionName(context.httpRegion)}` });
     if (!context.httpRegion.metaData.disabled) {
-      if (!await action.processor(action.data, context)) {
+      if (!await action.process(context)) {
         log.trace(`processs canceled by action ${action.type}`);
         return false;
       }

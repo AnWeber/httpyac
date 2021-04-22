@@ -1,4 +1,3 @@
-export * from './actionProcessorType';
 export * from './clientCertifcateOptions';
 export * from './contentType';
 export * from './environmentConfig';
@@ -9,7 +8,6 @@ export * from './httpFile';
 export * from './httpMethod';
 export * from './httpRegion';
 export * from './httpRegionAction';
-export * from './httpRegionActionProcessor';
 export * from './httpRegionParser';
 export * from './httpRegionParserResult';
 export * from './httpRequest';

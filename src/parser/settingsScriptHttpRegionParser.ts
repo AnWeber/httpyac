@@ -1,7 +1,7 @@
 
-import {actionProcessorIndexAfterRequest } from '../utils';
-import { HttpRegionAction, HttpRegionParser, HttpRegionParserResult, ParserContext, ProcessorContext } from '../models';
-import { jsActionProcessor, ScriptData } from '../actionProcessor';
+import {pushAfter } from '../utils';
+import { ActionType, HttpRegionParser, HttpRegionParserResult, ParserContext } from '../models';
+import { GenericAction, JavascriptAction, ScriptData } from '../actions';
 
 
 export class SettingsScriptHttpRegionParser implements HttpRegionParser{
@@ -12,20 +12,14 @@ export class SettingsScriptHttpRegionParser implements HttpRegionParser{
 
   close({ httpRegion }: ParserContext): void {
     if (httpRegion.request) {
-      const action: HttpRegionAction<() => Promise<ScriptData | undefined>> = {
-        data: this.getScriptData,
-        type: 'settings_js',
-        processor: this.executeSettingsScript,
-      };
-      httpRegion.actions.splice(actionProcessorIndexAfterRequest(httpRegion), 0, action);
+      pushAfter(httpRegion.actions, obj => obj.type === ActionType.request, new GenericAction('settings_js', async (context) => {
+        const scriptData = await this.getScriptData();
+        if (scriptData) {
+          const javascriptAction = new JavascriptAction(scriptData);
+          return await javascriptAction.process(context);
+        }
+        return true;
+      }));
     }
-  }
-
-  async executeSettingsScript(data: () => Promise<ScriptData | undefined>, context: ProcessorContext): Promise<boolean> {
-    const scriptData = await data();
-    if (scriptData) {
-      return await jsActionProcessor(scriptData, context);
-    }
-    return true;
   }
 }

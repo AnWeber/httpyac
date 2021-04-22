@@ -2,7 +2,7 @@ import { EOL } from 'os';
 import {  HttpResponse, HttpTimings, TestResult } from '../models';
 import { isString, toMultiLineArray } from './stringUtils';
 import { NormalizedOptions} from 'got';
-import { testSymbols } from '../actionProcessor';
+import { testSymbols } from '../actions';
 
 export enum MarkdownParts{
   response,

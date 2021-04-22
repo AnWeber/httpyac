@@ -1,4 +1,4 @@
-export * from './actionProcessorUtils';
+export * from './arrayUtils';
 export * from './environmentUtils';
 export * from './errorUtils';
 export * from './fsUtils';

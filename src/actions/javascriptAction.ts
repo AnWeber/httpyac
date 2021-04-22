@@ -1,15 +1,15 @@
-import { Variables, ProcessorContext } from '../models';
+import { Variables, ProcessorContext, HttpRegionAction, ActionType } from '../models';
 import { Module } from 'module';
-import { runInThisContext} from 'vm';
+import { runInThisContext } from 'vm';
 import { dirname } from 'path';
-import { log, scriptConsole} from '../logger';
-import { isPromise , toEnvironmentKey} from '../utils';
+import { log, scriptConsole } from '../logger';
+import { isPromise, toEnvironmentKey } from '../utils';
 import * as got from 'got';
 import { httpYacApi } from '../httpYacApi';
 import * as httpYac from '..';
 import { testFactory } from './testMethod';
 
-export interface ScriptData{
+export interface ScriptData {
   script: string;
   lineOffset: number;
 }
@@ -17,7 +17,7 @@ export interface ScriptData{
 export const JAVASCRIPT_KEYWORDS = ['await', 'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'else', 'enum', 'export', 'extends', 'false', 'finally', 'for', 'function', 'if', 'implements', 'import', 'in', 'instanceof', 'interface', 'let', 'new', 'null', 'package', 'private', 'protected', 'public', 'return', 'super', 'switch', 'static', 'this', 'throw', 'try', 'true', 'typeof', 'var', 'void', 'while', 'with', 'yield'];
 
 
-export function isValidVariableName(name: string) : boolean {
+export function isValidVariableName(name: string): boolean {
   if (JAVASCRIPT_KEYWORDS.indexOf(name) <= 0) {
     try {
       Function(`var ${name}`);
@@ -29,40 +29,50 @@ export function isValidVariableName(name: string) : boolean {
   return false;
 }
 
-export async function jsActionProcessor(scriptData: ScriptData, { httpRegion, httpFile, request, variables, progress }: ProcessorContext) : Promise<boolean> {
 
-  const defaultVariables = {
-    request,
-    httpRegion,
-    httpFile,
-    log,
-    console: scriptConsole,
-    test: testFactory(httpRegion),
-  };
-  Object.assign(variables, defaultVariables);
+export class JavascriptAction implements HttpRegionAction {
+  type = ActionType.js;
 
-  const result = await executeScript({
-    script: scriptData.script,
-    fileName: httpFile.fileName,
-    variables,
-    lineOffset: scriptData.lineOffset + 1,
-    require: {
-      progress,
+  constructor(private readonly scriptData: ScriptData) { }
+
+  async process({ httpRegion, httpFile, request, variables, progress }: ProcessorContext): Promise<boolean> {
+    const defaultVariables = {
+      request,
+      httpRegion,
+      httpFile,
+      log,
+      console: scriptConsole,
+      test: testFactory(httpRegion),
+    };
+    Object.assign(variables, defaultVariables);
+
+    const result = await executeScript({
+      script: this.scriptData.script,
+      fileName: httpFile.fileName,
+      variables,
+      lineOffset: this.scriptData.lineOffset + 1,
+      require: {
+        progress,
+      }
+    });
+    for (const [key] of Object.entries(defaultVariables)) {
+      delete variables[key];
     }
-  });
-  for (const [key] of Object.entries(defaultVariables)) {
-    delete variables[key];
+    if (result) {
+      Object.assign(variables, result);
+      Object.assign(httpFile.variablesPerEnv[toEnvironmentKey(httpFile.activeEnvironment)], result);
+    }
+    return !result.$cancel;
   }
-  if (result) {
-    Object.assign(variables, result);
-    Object.assign(httpFile.variablesPerEnv[toEnvironmentKey(httpFile.activeEnvironment)], result);
-  }
-  return !result.$cancel;
 }
 
 
 
-export async function executeScript(context: { script: string, fileName: string | undefined, variables: Variables, lineOffset: number, require?: Record<string, unknown>}) : Promise<Variables> {
+
+
+
+
+export async function executeScript(context: { script: string, fileName: string | undefined, variables: Variables, lineOffset: number, require?: Record<string, unknown> }): Promise<Variables> {
   try {
     const filename = context.fileName || __filename;
     const dir = dirname(filename);
@@ -105,7 +115,7 @@ export async function executeScript(context: { script: string, fileName: string 
       lineOffset: context.lineOffset,
       displayErrors: true,
     });
-    compiledWrapper.apply(context.variables, [scriptModule.exports, scriptRequire, scriptModule, filename, dir, ...Object.entries(context.variables).map(([,value]) => value)]);
+    compiledWrapper.apply(context.variables, [scriptModule.exports, scriptRequire, scriptModule, filename, dir, ...Object.entries(context.variables).map(([, value]) => value)]);
 
 
     let result = scriptModule.exports;

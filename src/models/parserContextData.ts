@@ -1,4 +1,4 @@
-import { ScriptData } from '../actionProcessor';
+import { ScriptData } from '../actions';
 import { HttpRequestBodyLine } from './httpRequest';
 import { HttpSymbol } from './httpSymbol';
 

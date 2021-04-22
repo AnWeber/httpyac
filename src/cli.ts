@@ -11,7 +11,7 @@ import { findPackageJson, parseJson } from './utils';
 import { environmentStore } from './environments';
 import { NoteMetaHttpRegionParser, SettingsScriptHttpRegionParser } from './parser';
 import { showInputBoxVariableReplacerFactory, showQuickpickVariableReplacerFactory } from './variables/replacer';
-import { testSymbols } from './actionProcessor';
+import { testSymbols } from './actions';
 
 interface HttpCliOptions{
   activeEnvironments?: Array<string>,
