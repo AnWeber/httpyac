@@ -20,5 +20,8 @@
         "no-throw-literal": "warn",
         "semi": "off"
     },
-    "ignorePatterns": "webpack.config.js"
+    "ignorePatterns": [
+        "**/examples/**/*.js",
+        "webpack.config.js"
+    ]
 }

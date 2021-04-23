@@ -1,9 +1,10 @@
 
-import { HttpFile, HttpSymbol, HttpSymbolKind,  HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext } from '../models';
+import { HttpFile, HttpSymbol, HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, HttpRegion } from '../models';
 import { httpFileStore } from '../httpFileStore';
 import { log } from '../logger';
 import { promises as fs } from 'fs';
 import { toAbsoluteFilename } from '../utils';
+import { RefMetaAction } from '../actions';
 export class MetaHttpRegionParser implements HttpRegionParser {
   private static isMetaTag(textLine: string) {
     return /^\s*(#{1,}|\/{2})/.test(textLine);
@@ -67,6 +68,16 @@ export class MetaHttpRegionParser implements HttpRegionParser {
                   await this.importHttpFile(httpFile, match.groups.value);
                 }
                 break;
+              case 'ref':
+                if (match.groups.value) {
+                  this.addRefHttpRegion(httpRegion, match.groups.value, false);
+                }
+                break;
+              case 'forceRef':
+                if (match.groups.value) {
+                  this.addRefHttpRegion(httpRegion, match.groups.value, true);
+                }
+                break;
               default:
                 httpRegion.metaData = Object.assign(httpRegion.metaData || {}, {
                   [key]: match.groups.value || true,
@@ -81,7 +92,7 @@ export class MetaHttpRegionParser implements HttpRegionParser {
     return false;
   }
 
-  async importHttpFile(httpFile: HttpFile, fileName: string) : Promise<void> {
+  async importHttpFile(httpFile: HttpFile, fileName: string): Promise<void> {
     try {
       const absoluteFileName = await toAbsoluteFilename(fileName, httpFile.fileName);
       if (absoluteFileName) {
@@ -93,6 +104,13 @@ export class MetaHttpRegionParser implements HttpRegionParser {
     } catch (err) {
       log.error('import error', fileName);
     }
+  }
+
+  private addRefHttpRegion(httpRegion: HttpRegion, name: string, force: boolean) {
+    httpRegion.actions.push(new RefMetaAction({
+      name,
+      force
+    }));
   }
 }
 

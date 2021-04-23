@@ -1,0 +1,9 @@
+
+@my_base_url=https://httpbin.org/get?
+
+# @import ./login.http
+
+### List companies
+# @forceRef login
+GET {{my_base_url}}/api/companies
+Authorization: Bearer {{user_access_token}}
