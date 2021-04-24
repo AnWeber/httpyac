@@ -1,9 +1,12 @@
-import { ProcessorContext } from '../../models';
+import { ProcessorContext, VariableReplacer } from '../../models';
 
 const lastValue: Record<string, string> = {};
 
-export function showInputBoxVariableReplacerFactory(showInputPrompt: (message: string, defaultValue: string) => Promise<string | undefined>) {
-  return async function showInputBoxVariableReplacer(text: string, _type: string, context: ProcessorContext) : Promise<string | undefined> {
+export class ShowInputBoxVariableReplacer implements VariableReplacer {
+  type = 'showInputBox';
+  constructor(private readonly showInputPrompt: (message: string, defaultValue: string) => Promise<string | undefined>) { }
+
+  async replace(text: string, _type: string, context: ProcessorContext): Promise<string | undefined> {
 
     const variableRegex = /\{{2}(.+?)\}{2}/gu;
     let match: RegExpExecArray | null;
@@ -16,7 +19,7 @@ export function showInputBoxVariableReplacerFactory(showInputPrompt: (message: s
 
         const placeholder = matchInput.groups.placeholder;
 
-        const answer = await showInputPrompt(placeholder, lastValue[placeholder] || matchInput.groups.value);
+        const answer = await this.showInputPrompt(placeholder, lastValue[placeholder] || matchInput.groups.value);
 
         if (answer) {
           lastValue[placeholder] = answer;
@@ -27,5 +30,5 @@ export function showInputBoxVariableReplacerFactory(showInputPrompt: (message: s
       }
     }
     return result;
-  };
+  }
 }

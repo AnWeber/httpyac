@@ -29,14 +29,14 @@ class HttpYacApi {
     ];
 
     this.variableReplacers = [
-      replacer.intellijVariableReplacer,
-      replacer.jsVariableReplacer,
-      replacer.hostVariableReplacer,
-      replacer.openIdVariableReplacer,
-      replacer.awsAuthVariableReplacer,
-      replacer.clientCertVariableReplacer,
-      replacer.basicAuthVariableReplacer,
-      replacer.digestAuthVariableReplacer,
+      new replacer.IntellijVariableReplacer(),
+      new replacer.JavascriptVariableReplacer(),
+      new replacer.HostVariableReplacer(),
+      new replacer.OpenIdVariableReplacer(),
+      new replacer.AwsAuthVariableReplacer(),
+      new replacer.ClientCertVariableReplacer(),
+      new replacer.BasicAuthVariableReplacer(),
+      new replacer.DigestAuthVariableReplacer(),
     ];
   }
 

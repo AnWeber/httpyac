@@ -10,7 +10,7 @@ import { log, LogLevel } from './logger';
 import { findPackageJson, parseJson } from './utils';
 import { environmentStore } from './environments';
 import { NoteMetaHttpRegionParser, SettingsScriptHttpRegionParser } from './parser';
-import { showInputBoxVariableReplacerFactory, showQuickpickVariableReplacerFactory } from './variables/replacer';
+import { ShowInputBoxVariableReplacer, ShowQuickpickVariableReplacer } from './variables/replacer';
 import { testSymbols } from './actions';
 
 interface HttpCliOptions{
@@ -249,7 +249,7 @@ function initHttpYacApiExtensions(config: EnvironmentConfig & SettingsConfig, ro
     }]);
     return answer.note;
   }));
-  httpYacApi.variableReplacers.splice(0, 0, showInputBoxVariableReplacerFactory(async (message: string, defaultValue: string) => {
+  httpYacApi.variableReplacers.splice(0, 0, new ShowInputBoxVariableReplacer(async (message: string, defaultValue: string) => {
     const answer = await inquirer.prompt([{
       type: 'input',
       name: 'placeholder',
@@ -258,7 +258,7 @@ function initHttpYacApiExtensions(config: EnvironmentConfig & SettingsConfig, ro
     }]);
     return answer.placeholder;
   }));
-  httpYacApi.variableReplacers.splice(0, 0, showQuickpickVariableReplacerFactory(async (message: string, values: string[]) => {
+  httpYacApi.variableReplacers.splice(0, 0, new ShowQuickpickVariableReplacer(async (message: string, values: string[]) => {
     const answer = await inquirer.prompt([{
       type: 'list',
       name: 'placeholder',

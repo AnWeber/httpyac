@@ -1,7 +1,11 @@
 import { ProcessorContext, VariableReplacer } from '../../models';
 
-export function showQuickpickVariableReplacerFactory(showListPrompt: (message: string, values: string[]) => Promise<string | undefined>): VariableReplacer {
-  return async function showQuickpickVariableReplacer(text: string, _type: string, context: ProcessorContext) {
+
+export class ShowQuickpickVariableReplacer implements VariableReplacer {
+  type = 'showQuickpick';
+  constructor(private readonly showListPrompt: (message: string, values: string[]) => Promise<string | undefined>) { }
+
+  async replace(text: string, _type: string, context: ProcessorContext): Promise<string | undefined> {
 
     const variableRegex = /\{{2}(.+?)\}{2}/gu;
     let match: RegExpExecArray | null;
@@ -15,7 +19,7 @@ export function showQuickpickVariableReplacerFactory(showListPrompt: (message: s
         const placeholder = matchInput.groups.placeholder;
         const value = matchInput.groups.value;
 
-        const answer = await showListPrompt(placeholder, value.split(','));
+        const answer = await this.showListPrompt(placeholder, value.split(','));
 
 
         if (answer && result) {
@@ -27,5 +31,5 @@ export function showQuickpickVariableReplacerFactory(showListPrompt: (message: s
       }
     }
     return result;
-  };
+  }
 }

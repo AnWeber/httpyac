@@ -2,4 +2,7 @@ import { ProcessorContext } from './processorContext';
 import { VariableReplacerType } from './variableReplacerType';
 
 
-export type VariableReplacer = (text: string, type: VariableReplacerType | string, context: ProcessorContext) => Promise<string | undefined>;
+export interface VariableReplacer {
+  type: string;
+  replace: (text: string, type: VariableReplacerType | string, context: ProcessorContext) => Promise<string | undefined>;
+}
