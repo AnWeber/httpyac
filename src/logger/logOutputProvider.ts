@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { LogChannels } from './logChannels';
 import { LogLevel } from './logLevel';
 

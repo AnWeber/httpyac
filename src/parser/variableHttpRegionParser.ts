@@ -1,24 +1,21 @@
-
-
-
 import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext } from '../models';
 import { VariableAction } from '../actions';
 
-export class VariableHttpRegionParser implements HttpRegionParser{
+export class VariableHttpRegionParser implements HttpRegionParser {
 
-  async parse(lineReader: HttpRegionParserGenerator, { httpRegion }: ParserContext): Promise<HttpRegionParserResult>{
+  async parse(lineReader: HttpRegionParserGenerator, { httpRegion }: ParserContext): Promise<HttpRegionParserResult> {
     const next = lineReader.next();
     if (!next.done) {
       const textLine = next.value.textLine;
 
-      const match = /^\s*@(?<key>[^\s=]*)\s*(?<operator>=\s*)"?(?<value>.*)"?\s*$/.exec(textLine);
+      const match = /^\s*@(?<key>[^\s=]*)\s*(?<operator>=\s*)"?(?<value>.*)"?\s*$/u.exec(textLine);
 
       if (match && match.groups && match.groups.key && match.groups.value) {
         httpRegion.actions.push(new VariableAction({
           [match.groups.key]: match.groups.value.trim(),
         }));
         return {
-          endLine:next.value.line,
+          endLine: next.value.line,
           symbols: [{
             name: match.groups.key,
             description: match.groups.value,
@@ -51,5 +48,3 @@ export class VariableHttpRegionParser implements HttpRegionParser{
     return false;
   }
 }
-
-

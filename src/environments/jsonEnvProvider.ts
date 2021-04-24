@@ -1,7 +1,7 @@
 import { EnvironmentProvider, Variables } from '../models';
 
-const DEFAULT_ENV = "$shared";
-export class JsonEnvProvider implements EnvironmentProvider{
+const DEFAULT_ENV = '$shared';
+export class JsonEnvProvider implements EnvironmentProvider {
 
 
   constructor(private readonly cache: Record<string, Variables>) { }

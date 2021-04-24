@@ -1,13 +1,13 @@
 import { ErrorDescription } from '../models';
 
-export function parseError(err: Error) : ErrorDescription{
+export function parseError(err: Error) : ErrorDescription {
   if (err.stack) {
-    const match = /^(?<error>.*):\s*(?<message>.*)\r?\n\s*at (?<file>.*):(?<line>\d*):(?<offset>\d*)/m.exec(err.stack);
+    const match = /^(?<error>.*):\s*(?<message>.*)\r?\n\s*at (?<file>.*):(?<line>\d*):(?<offset>\d*)/mu.exec(err.stack);
 
     if (match && match.groups?.error) {
       return {
         error: err,
-        errorType:  match.groups.error,
+        errorType: match.groups.error,
         message: match.groups.message,
         file: match.groups.file,
         line: match.groups.line,

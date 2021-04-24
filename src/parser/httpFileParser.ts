@@ -1,5 +1,5 @@
 import { HttpFile, HttpRegion, HttpSymbolKind, ParserContext } from '../models';
-import { toMultiLineString, toMultiLineArray, getRegionName} from '../utils';
+import { toMultiLineString, toMultiLineArray, getRegionName } from '../utils';
 import { environmentStore } from '../environments/environmentStore';
 import { httpYacApi } from '../httpYacApi';
 
@@ -21,7 +21,7 @@ export async function parseHttpFile(text: string, fileName: string): Promise<Htt
   };
   for (let line = 0; line < lines.length; line++) {
 
-    const isLineEmpty = /^\s*$/.test(lines[line]);
+    const isLineEmpty = /^\s*$/u.test(lines[line]);
     for (const httpRegionParser of httpYacApi.httpRegionParsers) {
       if (!isLineEmpty || httpRegionParser.supportsEmptyLine && isLineEmpty) {
         const httpRegionParserResult = await httpRegionParser.parse(createReader(line, lines, !!httpRegionParser.noStopOnMetaTag), parserContext);
@@ -87,7 +87,7 @@ function initHttpRegion(start: number): HttpRegion {
   };
 }
 
-function* createReader(startLine: number, lines: Array<string>, noStopOnMetaTag: boolean) {
+function *createReader(startLine: number, lines: Array<string>, noStopOnMetaTag: boolean) {
   for (let line = startLine; line < lines.length; line++) {
     const textLine = lines[line];
     yield {
@@ -95,12 +95,11 @@ function* createReader(startLine: number, lines: Array<string>, noStopOnMetaTag:
       line
     };
     if (!noStopOnMetaTag) {
+
       // if parser region is not closed stop at delimiter
-      if (/^\s*#{3,}/.test(textLine)) {
+      if (/^\s*#{3,}/u.test(textLine)) {
         break;
       }
     }
   }
 }
-
-

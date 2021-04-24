@@ -1,4 +1,4 @@
-import { HttpFileSendContext, HttpRegionSendContext, HttpRegionParser, VariableReplacer, VariableProvider} from './models';
+import { HttpFileSendContext, HttpRegionSendContext, HttpRegionParser, VariableReplacer, VariableProvider } from './models';
 import * as parser from './parser';
 import { provider, replacer } from './variables';
 import { sendHttpFile, sendHttpRegion, isHttpRegionSendContext } from './utils';
@@ -41,7 +41,6 @@ class HttpYacApi {
   }
 
 
-
   /**
    * process one httpRegion of HttpFile
    * @param httpFile httpFile
@@ -49,9 +48,9 @@ class HttpYacApi {
   async send(context: HttpFileSendContext | HttpRegionSendContext) {
     if (isHttpRegionSendContext(context)) {
       return await sendHttpRegion(context);
-    } else {
-      return await sendHttpFile(context);
     }
+    return await sendHttpFile(context);
+
   }
 }
 

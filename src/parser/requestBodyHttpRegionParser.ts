@@ -1,12 +1,8 @@
-
 import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, HttpRequestBodyLine, HttpSymbol, HttpSymbolKind, ParserContext } from '../models';
 import { EOL } from 'os';
 import { toAbsoluteFilename, isString, isMimeTypeMultiPartFormData, isStringEmpty, isMimeTypeNewlineDelimitedJSON, isMimeTypeFormUrlEncoded } from '../utils';
 import { createReadStream, promises as fs } from 'fs';
 import { log, popupService } from '../logger';
-
-
-
 
 
 export class RequestBodyHttpRegionParser implements HttpRegionParser {
@@ -41,7 +37,7 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
 
           return {
             endLine: next.value.line,
-            symbols: symbols,
+            symbols,
           };
         }
       }
@@ -68,21 +64,21 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
   }
 
   private async parseLine(textLine: string, httpFileName: string) {
-    const fileImport = /^<(?:(?<injectVariables>@)(?<encoding>\w+)?)?\s+(?<fileName>.+?)\s*$/.exec(textLine);
+    const fileImport = /^<(?:(?<injectVariables>@)(?<encoding>\w+)?)?\s+(?<fileName>.+?)\s*$/u.exec(textLine);
     if (fileImport && fileImport.length === 4 && fileImport.groups) {
       try {
         const normalizedPath = await toAbsoluteFilename(fileImport.groups.fileName, httpFileName);
         if (normalizedPath) {
           if (fileImport.groups.injectVariables) {
             return await fs.readFile(normalizedPath, { encoding: this.getBufferEncoding(fileImport.groups.encoding) });
-          } else {
-            const stream = createReadStream(normalizedPath);
-            return async () => await this.toBuffer(stream);
           }
-        } else {
-          popupService.warn(`request body file ${fileImport.groups.filename} not found`);
-          log.warn(`request body file ${fileImport.groups.filename} not found`);
+          const stream = createReadStream(normalizedPath);
+          return async () => await this.toBuffer(stream);
+
         }
+        popupService.warn(`request body file ${fileImport.groups.filename} not found`);
+        log.warn(`request body file ${fileImport.groups.filename} not found`);
+
       } catch (err) {
         log.trace(err);
       }
@@ -91,15 +87,15 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
   }
 
   private isBufferEncoding(encoding: string): encoding is BufferEncoding {
-    return [ "ascii", "utf8", "utf-8",
-      "utf16le", "ucs2", "ucs-2",
-      "base64", "latin1", "binary", "hex"]
+    return ['ascii', 'utf8', 'utf-8',
+      'utf16le', 'ucs2', 'ucs-2',
+      'base64', 'latin1', 'binary', 'hex']
       .indexOf(encoding) >= 0;
   }
 
-  private getBufferEncoding(encoding: string) : BufferEncoding{
+  private getBufferEncoding(encoding: string) : BufferEncoding {
     if (encoding && this.isBufferEncoding(encoding)) {
-       return encoding;
+      return encoding;
     }
     return 'utf8';
   }
@@ -118,7 +114,7 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
       stream.on('error', error => reject(error));
       stream.resume();
     });
-}
+  }
 
 
   close(context: ParserContext): void {
@@ -137,7 +133,7 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
 
           const body: Array<HttpRequestBodyLine> = [];
           const strings: Array<string> = [];
-          const lineEnding = isMimeTypeMultiPartFormData(contentType) ?  '\r\n' : EOL;
+          const lineEnding = isMimeTypeMultiPartFormData(contentType) ? '\r\n' : EOL;
 
           for (const line of requestBody.textLines) {
             if (isString(line)) {
@@ -165,12 +161,13 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
     }
   }
 
-  private formUrlEncodedJoin(body: Array<HttpRequestBodyLine>): string  {
+  private formUrlEncodedJoin(body: Array<HttpRequestBodyLine>): string {
     const result = body.reduce((previousValue, currentValue, currentIndex) => {
+      let prev = previousValue;
       if (isString(currentValue)) {
-        previousValue += `${(currentIndex === 0 || currentValue.startsWith('&') ? '' : EOL)}${currentValue}`;
+        prev += `${(currentIndex === 0 || currentValue.startsWith('&') ? '' : EOL)}${currentValue}`;
       }
-      return previousValue;
+      return prev;
     }, '');
     if (isString(result)) {
       return result;
@@ -185,12 +182,10 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
     if (obj.length > 0) {
       const lastLine = obj[obj.length - 1];
       if (isString(lastLine)) {
-        if (/\s*<--->\s*/.test(lastLine)) {
+        if (/\s*<--->\s*/u.test(lastLine)) {
           obj.pop();
         }
       }
     }
   }
 }
-
-

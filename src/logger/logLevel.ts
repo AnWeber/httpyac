@@ -1,5 +1,3 @@
-
-
 export enum LogLevel{
   trace = 0,
   debug = 2,
@@ -18,6 +16,7 @@ export function toLogLevel(level: string | undefined) : LogLevel {
       return LogLevel.warn;
     case 'error':
       return LogLevel.error;
+    default:
+      return LogLevel.info;
   }
-  return LogLevel.info;
 }

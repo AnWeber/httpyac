@@ -1,4 +1,3 @@
-
 import { ContentType } from './contentType';
 import { HttpMethod } from './httpMethod';
 import { OptionsOfUnknownResponseBody } from 'got';

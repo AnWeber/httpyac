@@ -4,17 +4,20 @@ import { isString } from '../utils';
 import { log } from '../logger';
 
 
+type VarReplacer = (value: string, type: VariableReplacerType | string) => Promise<string | undefined>;
+
 export class VariableReplacerAction implements HttpRegionAction {
   type = ActionType.variableReplacer;
-
 
 
   async process(context: ProcessorContext): Promise<boolean> {
     if (context.request) {
       let cancel = false;
-      context.cancelVariableReplacer = () => cancel = true;
+      context.cancelVariableReplacer = () => {
+        cancel = true;
+      };
 
-      const replacer = async (value: string, type: VariableReplacerType | string) => {
+      const replacer: VarReplacer = async (value: string, type: VariableReplacerType | string) => {
         if (!cancel) {
           return await replaceVariables(value, type, context);
         }
@@ -23,7 +26,7 @@ export class VariableReplacerAction implements HttpRegionAction {
       };
 
       if (context.request.url) {
-        log.trace(`variableReplacer replace url`);
+        log.trace('variableReplacer replace url');
         context.request.url = await replacer(context.request.url, VariableReplacerType.url) || context.request.url;
       }
       await this.replaceVariablesInBody(context.request, replacer);
@@ -33,9 +36,9 @@ export class VariableReplacerAction implements HttpRegionAction {
     return true;
   }
 
-  private async replaceVariablesInBody(replacedReqeust: HttpRequest, replacer: (value: string, type: VariableReplacerType | string) => Promise<string | undefined>) {
+  private async replaceVariablesInBody(replacedReqeust: HttpRequest, replacer: VarReplacer) {
     if (replacedReqeust.body) {
-      log.trace(`variableReplacer replace body`);
+      log.trace('variableReplacer replace body');
       if (isString(replacedReqeust.body)) {
         replacedReqeust.body = await replacer(replacedReqeust.body, VariableReplacerType.body);
       } else if (Array.isArray(replacedReqeust.body)) {
@@ -55,7 +58,7 @@ export class VariableReplacerAction implements HttpRegionAction {
     }
   }
 
-  private async replaceVariablesInHeader(replacedReqeust: HttpRequest, replacer: (value: string, type: VariableReplacerType | string) => Promise<string | undefined>) {
+  private async replaceVariablesInHeader(replacedReqeust: HttpRequest, replacer: VarReplacer) {
     if (replacedReqeust.headers) {
       for (const [headerName, headerValue] of Object.entries(replacedReqeust.headers)) {
         if (isString(headerValue)) {

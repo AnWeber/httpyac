@@ -15,9 +15,3 @@ export interface HttpRegion{
   symbol: HttpSymbol;
   testResults?: Array<TestResult>;
 }
-
-
-
-
-
-

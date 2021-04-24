@@ -1,4 +1,3 @@
-
 import { HttpFile, HttpSymbol, HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, HttpRegion } from '../models';
 import { httpFileStore } from '../httpFileStore';
 import { log } from '../logger';
@@ -7,11 +6,11 @@ import { toAbsoluteFilename } from '../utils';
 import { RefMetaAction } from '../actions';
 export class MetaHttpRegionParser implements HttpRegionParser {
   private static isMetaTag(textLine: string) {
-    return /^\s*(#{1,}|\/{2})/.test(textLine);
+    return /^\s*(#{1,}|\/{2})/u.test(textLine);
   }
 
   private isDelimiter(textLine: string) {
-    return /^#{3,}\s*$/.test(textLine);
+    return /^#{3,}\s*$/u.test(textLine);
   }
 
   async parse(lineReader: HttpRegionParserGenerator, { httpRegion, httpFile }: ParserContext): Promise<HttpRegionParserResult> {
@@ -26,7 +25,7 @@ export class MetaHttpRegionParser implements HttpRegionParser {
         if (this.isDelimiter(textLine)) {
           result.newRegion = true;
         } else {
-          const match = /^\s*(#{1,}|\/{2,})\s+@(?<key>[^\s]*)(\s+)?"?(?<value>.*)?"?$/.exec(textLine);
+          const match = /^\s*(#{1,}|\/{2,})\s+@(?<key>[^\s]*)(\s+)?"?(?<value>.*)?"?$/u.exec(textLine);
 
           if (match && match.groups && match.groups.key) {
             const symbol: HttpSymbol = {
@@ -60,7 +59,7 @@ export class MetaHttpRegionParser implements HttpRegionParser {
             }
             result.symbols = [symbol];
 
-            const key = match.groups.key.replace(/-./g, (value) => value[1].toUpperCase());
+            const key = match.groups.key.replace(/-./gu, value => value[1].toUpperCase());
 
             switch (key) {
               case 'import':
@@ -113,4 +112,3 @@ export class MetaHttpRegionParser implements HttpRegionParser {
     }));
   }
 }
-

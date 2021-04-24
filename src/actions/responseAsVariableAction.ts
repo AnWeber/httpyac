@@ -11,7 +11,7 @@ export class ResponseAsVariableAction implements HttpRegionAction {
     if (context.httpRegion.response) {
       const response = context.httpRegion.response;
       const body = response.parsedBody || response.body;
-      context.variables['response'] = response;
+      context.variables.response = response;
       if (context.httpRegion.metaData.name || context.httpRegion.metaData.jwt) {
         this.handleJWTMetaData(body, context.httpRegion);
         this.handleNameMetaData(body, context);
@@ -49,14 +49,13 @@ export class ResponseAsVariableAction implements HttpRegionAction {
             entries.push([`${key}_parsed`, val]);
           }
         }
-        body = Object.entries(entries);
-        httpRegion.response.body = JSON.stringify(body, null, 2);
+        httpRegion.response.body = JSON.stringify(Object.entries(entries), null, 2);
       }
     }
   }
 
 
-  private parseJwtToken(value: unknown) : JWTToken | null{
+  private parseJwtToken(value: unknown) : JWTToken | null {
     if (isString(value)) {
       try {
         return decodeJWT(value);

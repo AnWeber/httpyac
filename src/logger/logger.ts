@@ -6,7 +6,7 @@ class Logger {
   public level: LogLevel;
   constructor(private readonly channel: LogChannels) {
     this.level = LogLevel.warn;
-   }
+  }
   info(...params: unknown[]) {
     if (LogLevel.info >= this.level) {
       logOutputProvider.log(this.channel, LogLevel.info, ...params);

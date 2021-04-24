@@ -4,7 +4,7 @@ import { ProcessorContext } from './processorContext';
 /**
  * @returns false if processing cancelled
  */
- export interface HttpRegionAction {
+export interface HttpRegionAction {
   type: ActionType | string;
   process(context: ProcessorContext): Promise<boolean>;
 }

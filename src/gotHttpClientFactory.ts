@@ -8,10 +8,8 @@ import { default as filesize } from 'filesize';
 import { log, popupService } from './logger';
 
 
-
-
 export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined) : HttpClient {
-  return async function gotHttpClient(request: HttpRequest, context: HttpClientContext) : Promise<HttpResponse | false>{
+  return async function gotHttpClient(request: HttpRequest, context: HttpClientContext) : Promise<HttpResponse | false> {
     try {
       const defaults: OptionsOfUnknownResponseBody = {
         decompress: true,
@@ -63,12 +61,11 @@ export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined) 
 }
 
 
-
 async function loadRepeat(url: string, options: OptionsOfUnknownResponseBody, repeatOrder: RepeatOrder, count: number) {
 
   const loadFunc = async () => toHttpResponse(await got(url, options));
   const loader: Array<() => Promise<HttpResponse>> = [];
-  for (let index = 0; index < count; index++){
+  for (let index = 0; index < count; index++) {
     loader.push(loadFunc);
   }
   if (repeatOrder === RepeatOrder.parallel) {
@@ -87,13 +84,15 @@ async function load(url: string, options: OptionsOfUnknownResponseBody, context:
   let prevPercent = 0;
   if (context.showProgressBar) {
 
-    responsePromise.on("downloadProgress", data => {
+    responsePromise.on('downloadProgress', data => {
       const newData = data.percent - prevPercent;
       prevPercent = data.percent;
-      context.progress && context.progress.report({
-        message: url,
-        increment: newData * 100,
-      });
+      if (context.progress) {
+        context.progress.report({
+          message: url,
+          increment: newData * 100,
+        });
+      }
     });
   }
   const dispose = context.progress && context.progress.register(() => {
@@ -147,13 +146,13 @@ function toHttpResponse(response: Response<unknown>): HttpResponse {
   if (isMimeTypeJSON(httpResponse.contentType)
       && isString(httpResponse.body)
       && httpResponse.body.length > 0) {
-      try {
-        httpResponse.parsedBody = JSON.parse(httpResponse.body);
-      } catch (err) {
-        popupService.warn('json parse error', httpResponse.body);
-        log.warn('json parse error', httpResponse.body, err);
-      }
+    try {
+      httpResponse.parsedBody = JSON.parse(httpResponse.body);
+    } catch (err) {
+      popupService.warn('json parse error', httpResponse.body);
+      log.warn('json parse error', httpResponse.body, err);
     }
+  }
   return httpResponse;
 }
 

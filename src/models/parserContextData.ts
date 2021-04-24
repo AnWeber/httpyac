@@ -3,8 +3,6 @@ import { HttpRequestBodyLine } from './httpRequest';
 import { HttpSymbol } from './httpSymbol';
 
 
-
-
 export interface ParserEveryRequestScript {
   scriptData: ScriptData,
   postScript: boolean
@@ -16,7 +14,6 @@ export interface ParserRequestBody{
 }
 
 
-
 export interface ParserContextData {
   request_body?: ParserRequestBody,
   httpResponseSymbol?: HttpSymbol,
@@ -24,4 +21,3 @@ export interface ParserContextData {
   jsOnEveryRequest?: ParserEveryRequestScript[],
   readonly [key: string]: unknown;
 }
-

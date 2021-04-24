@@ -18,24 +18,26 @@ export interface OpenIdConfiguration{
   subjectIssuer?: string;
 }
 
+function getVariable(variables: Variables, variablePrefix: string, name: string): string {
+  return `${variables[`${variablePrefix}_${name}`] || get(variables, `${variablePrefix}.${name}`)}`;
+}
+
 export function getOpenIdConfiguration(variablePrefix: string, variables: Variables) : OpenIdConfiguration | false {
   if (variablePrefix) {
-    const getVariable: (name: string) => string = (name: string) => `${variables[`${variablePrefix}_${name}`] || get(variables, `${variablePrefix}.${name}`)}`;
-
     const config: OpenIdConfiguration = {
       variablePrefix,
-      authorizationEndpoint: getVariable('authorizationEndpoint'),
-      tokenEndpoint: getVariable('tokenEndpoint'),
-      clientId: getVariable('clientId'),
-      clientSecret: getVariable('clientSecret'),
-      responseType: getVariable('responseType'),
-      responseMode: getVariable('responseMode'),
-      audience: getVariable('audience'),
-      scope: getVariable('scope'),
-      username: getVariable('username'),
-      password: getVariable('password'),
-      subjectIssuer: getVariable('subjectIssuer'),
-      keepAlive: ['false', '0', false].indexOf(getVariable('keepAlive')) < 0,
+      authorizationEndpoint: getVariable(variables, variablePrefix, 'authorizationEndpoint'),
+      tokenEndpoint: getVariable(variables, variablePrefix, 'tokenEndpoint'),
+      clientId: getVariable(variables, variablePrefix, 'clientId'),
+      clientSecret: getVariable(variables, variablePrefix, 'clientSecret'),
+      responseType: getVariable(variables, variablePrefix, 'responseType'),
+      responseMode: getVariable(variables, variablePrefix, 'responseMode'),
+      audience: getVariable(variables, variablePrefix, 'audience'),
+      scope: getVariable(variables, variablePrefix, 'scope'),
+      username: getVariable(variables, variablePrefix, 'username'),
+      password: getVariable(variables, variablePrefix, 'password'),
+      subjectIssuer: getVariable(variables, variablePrefix, 'subjectIssuer'),
+      keepAlive: ['false', '0', false].indexOf(getVariable(variables, variablePrefix, 'keepAlive')) < 0,
     };
     return config;
   }

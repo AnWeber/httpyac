@@ -1,4 +1,3 @@
-
 import { environmentStore } from '../environments';
 import { httpYacApi } from '../httpYacApi';
 import { log } from '../logger';
@@ -16,7 +15,7 @@ export function getRegionName(httpRegion: HttpRegion, defaultName = 'global'): s
       if (indexQuery < 0) {
         indexQuery = httpRegion.request.url.length;
       }
-      return httpRegion.request.url.substring(index, indexQuery);
+      return httpRegion.request.url.slice(index, indexQuery);
     }
   }
   return defaultName;
@@ -26,7 +25,7 @@ export async function sendHttpRegion(context: HttpRegionSendContext): Promise<bo
   const variables = await getVariables(context.httpFile);
   if (!context.httpRegion.metaData.disabled) {
     if (await executeGlobalScripts(context.httpFile, variables, context.httpClient)) {
-      return await processHttpRegionActions({variables, ...context}, true);
+      return await processHttpRegionActions({ variables, ...context }, true);
     }
   }
   return false;
@@ -62,12 +61,11 @@ export async function executeGlobalScripts(httpFile: HttpFile, variables: Variab
 async function getVariables(httpFile: HttpFile): Promise<Record<string, unknown>> {
   const variables = Object.assign({
   },
-    (await environmentStore.getVariables(httpFile.activeEnvironment)),
-    ...(await Promise.all(
-        httpYacApi.variableProviders
-          .map(variableProvider => variableProvider.getVariables(httpFile.activeEnvironment, httpFile))
-    ))
-  );
+  (await environmentStore.getVariables(httpFile.activeEnvironment)),
+  ...(await Promise.all(
+    httpYacApi.variableProviders
+      .map(variableProvider => variableProvider.getVariables(httpFile.activeEnvironment, httpFile))
+  )));
   log.debug(variables);
   return variables;
 }
@@ -96,9 +94,7 @@ export async function processHttpRegionActions(context: ProcessorContext, showPr
   return true;
 }
 
-export function isHttpRegionSendContext(context: HttpRegionSendContext | HttpFileSendContext): context is HttpRegionSendContext{
+export function isHttpRegionSendContext(context: HttpRegionSendContext | HttpFileSendContext): context is HttpRegionSendContext {
   const guard = context as HttpRegionSendContext;
   return !!guard?.httpRegion;
 }
-
-

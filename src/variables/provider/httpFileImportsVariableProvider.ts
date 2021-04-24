@@ -1,5 +1,5 @@
 import { HttpFile, VariableProvider, Variables } from '../../models';
-import {toEnvironmentKey } from '../../utils';
+import { toEnvironmentKey } from '../../utils';
 
 export class HttpFileImportsVariableProvider implements VariableProvider {
 

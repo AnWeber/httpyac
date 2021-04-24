@@ -1,4 +1,3 @@
-
 import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, ActionType } from '../models';
 import { toMultiLineString, pushAfter } from '../utils';
 import { JavascriptAction, ScriptData } from '../actions';
@@ -8,7 +7,7 @@ export class JsHttpRegionParser implements HttpRegionParser {
     let next = lineReader.next();
 
     if (!next.done) {
-      const match = /^\s*{{(?<executeOnEveryRequest>\+(pre|post|after)?)?\s*$/.exec(next.value.textLine);
+      const match = /^\s*\{\{(?<executeOnEveryRequest>\+(pre|post|after)?)?\s*$/u.exec(next.value.textLine);
       if (!match) {
         return false;
       }
@@ -17,7 +16,7 @@ export class JsHttpRegionParser implements HttpRegionParser {
       const script: Array<string> = [];
       while (!next.done) {
 
-        if (/^\s*}}\s*$/.test(next.value.textLine)) {
+        if (/^\s*\}\}\s*$/u.test(next.value.textLine)) {
           const scriptData: ScriptData = {
             script: toMultiLineString(script),
             lineOffset,
@@ -33,15 +32,15 @@ export class JsHttpRegionParser implements HttpRegionParser {
             }
             onEveryRequestArray.push({
               scriptData,
-              postScript: ['+after', '+post'].indexOf(match.groups?.executeOnEveryRequest) >=0,
+              postScript: ['+after', '+post'].indexOf(match.groups?.executeOnEveryRequest) >= 0,
             });
           }
 
           return {
             endLine: next.value.line,
             symbols: [{
-              name: "script",
-              description: "nodejs script",
+              name: 'script',
+              description: 'nodejs script',
               kind: HttpSymbolKind.script,
               startLine: lineOffset,
               startOffset: 0,

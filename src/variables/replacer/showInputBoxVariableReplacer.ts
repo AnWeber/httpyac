@@ -3,15 +3,15 @@ import { ProcessorContext } from '../../models';
 const lastValue: Record<string, string> = {};
 
 export function showInputBoxVariableReplacerFactory(showInputPrompt: (message: string, defaultValue: string) => Promise<string | undefined>) {
-  return async function showInputBoxVariableReplacer(text: string, _type: string, context: ProcessorContext) : Promise<string | undefined>{
+  return async function showInputBoxVariableReplacer(text: string, _type: string, context: ProcessorContext) : Promise<string | undefined> {
 
-    const variableRegex = /\{{2}(.+?)\}{2}/g;
+    const variableRegex = /\{{2}(.+?)\}{2}/gu;
     let match: RegExpExecArray | null;
     let result = text;
     while ((match = variableRegex.exec(text)) !== null) {
       const [searchValue, variable] = match;
 
-      const matchInput = /^\$input\s*(?<placeholder>[^$]*)(\$value:\s*(?<value>.*))?\s*$/.exec(variable);
+      const matchInput = /^\$input\s*(?<placeholder>[^$]*)(\$value:\s*(?<value>.*))?\s*$/u.exec(variable);
       if (matchInput?.groups?.placeholder) {
 
         const placeholder = matchInput.groups.placeholder;

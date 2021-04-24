@@ -46,7 +46,7 @@ class LogRequestsLogger {
         body = JSON.stringify(response.parsedBody, null, 2);
       }
       if (this.logResponseBodyLength > 0) {
-        body = body.substr(0, Math.min(body.length, this.logResponseBodyLength));
+        body = body.slice(0, Math.min(body.length, this.logResponseBodyLength));
         if (response.body.length >= this.logResponseBodyLength) {
           body += `... (${response.body.length - this.logResponseBodyLength} characters  more)`;
         }
@@ -63,11 +63,10 @@ class LogRequestsLogger {
     if (request.headers) {
       result.push(...Object.entries(request.headers)
         .map(([key, value]) => chalk`{yellow ${key}}: ${value}`)
-        .sort()
-      );
+        .sort());
     }
     if (request.https?.certificate || request.https?.pfx) {
-      result.push( chalk`{yellow client-cert}: true`);
+      result.push(chalk`{yellow client-cert}: true`);
     }
     if (request.body) {
       result.push('');
@@ -91,8 +90,7 @@ class LogRequestsLogger {
     result.push(...Object.entries(response.headers)
       .filter(([key]) => !key.startsWith(':'))
       .map(([key, value]) => chalk`{yellow ${key}}: ${value}`)
-      .sort()
-    );
+      .sort());
     return result;
   }
 }

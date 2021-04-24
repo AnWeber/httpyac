@@ -1,4 +1,4 @@
-import { HttpRegionParserResult} from '../models';
+import { HttpRegionParserResult } from '../models';
 import { ParserContext } from './parserContext';
 
 export type HttpRegionParserGenerator = Generator<{ textLine: string; line: number; }, void, unknown>;

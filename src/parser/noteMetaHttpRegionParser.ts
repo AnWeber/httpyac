@@ -1,13 +1,12 @@
-
 import { HttpRegionParserResult, HttpRegionParser, ParserContext } from '../models';
 import { getRegionName } from '../utils';
 import { GenericAction } from '../actions';
 
-export class NoteMetaHttpRegionParser implements HttpRegionParser{
+export class NoteMetaHttpRegionParser implements HttpRegionParser {
 
-  constructor(private readonly showNote: (note: string) => Promise<boolean>){}
+  constructor(private readonly showNote: (note: string) => Promise<boolean>) {}
 
-  async parse(): Promise<HttpRegionParserResult>{
+  async parse(): Promise<HttpRegionParserResult> {
     return false;
   }
 
@@ -18,6 +17,3 @@ export class NoteMetaHttpRegionParser implements HttpRegionParser{
     }
   }
 }
-
-
-

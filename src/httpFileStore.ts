@@ -8,7 +8,7 @@ interface HttpFileStoreEntry{
   httpFile?: HttpFile;
 }
 
-export class HttpFileStore{
+export class HttpFileStore {
 
 
   private readonly storeCache: Array<HttpFileStoreEntry> = [];

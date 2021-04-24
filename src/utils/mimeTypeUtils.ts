@@ -51,7 +51,7 @@ export function isMimeTypePdf(contentType: ContentType | undefined): boolean {
   return contentType?.mimeType === 'application/pdf';
 }
 
-export function isMimeTypeImage(contentType: ContentType | undefined): boolean{
+export function isMimeTypeImage(contentType: ContentType | undefined): boolean {
   if (contentType) {
     return ['image/jpeg',
       'image/gif',

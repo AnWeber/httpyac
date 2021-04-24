@@ -37,11 +37,12 @@ export async function send(rawArgs: string[]) : Promise<void> {
   }
   if (cliOptions.version) {
     const packageJson = await parseJson<Record<string, string>>(join(__dirname, '../package.json'));
-    console.info(`httpyac v${packageJson?.version}`);
+    log.info(`httpyac v${packageJson?.version}`);
     return;
   }
   if (cliOptions.help) {
-    return renderHelp();
+    renderHelp();
+    return;
   }
   const environmentConfig = await initEnviroment(cliOptions);
 
@@ -64,12 +65,16 @@ export async function send(rawArgs: string[]) : Promise<void> {
       const sendContext = await getSendContext(httpFile, cliOptions, environmentConfig);
       await httpYacApi.send(sendContext);
     } else {
-      return renderHelp();
+      renderHelp();
+      return;
     }
   } catch (err) {
     log.error(err);
     throw err;
   } finally {
+
+    // needed because of async
+    // eslint-disable-next-line node/no-process-exit
     process.exit();
   }
 }
@@ -108,7 +113,7 @@ function parseCliOptions(rawArgs: string[]): HttpCliOptions | undefined {
       activeEnvironments: args['--env'],
       allRegions: args['--all'],
       editor: args['--editor'],
-      fileName: args._.length > 0 ?  args._[args._.length - 1] : undefined,
+      fileName: args._.length > 0 ? args._[args._.length - 1] : undefined,
       help: args['--help'],
       httpRegionLine: args['--line'],
       httpRegionName: args['--name'],
@@ -150,11 +155,13 @@ usage: httpyac [options...] <file>
   -v   --verbose      make the operation more talkative
        --version      version of httpyac`;
 
-  console.info(helpMessage);
+  log.info(helpMessage);
 }
 
 
-async function getSendContext(httpFile: HttpFile, cliOptions: HttpCliOptions, environmentConfig: SettingsConfig): Promise<HttpFileSendContext | HttpRegionSendContext> {
+async function getSendContext(httpFile: HttpFile,
+  cliOptions: HttpCliOptions,
+  environmentConfig: SettingsConfig): Promise<HttpFileSendContext | HttpRegionSendContext> {
   const request = {
     ...environmentConfig.request,
     proxy: process.env.http_proxy
@@ -171,7 +178,10 @@ async function getSendContext(httpFile: HttpFile, cliOptions: HttpCliOptions, en
     });
   } else if (cliOptions.httpRegionLine) {
     Object.assign(sendContext, {
-      httpRegion: httpFile.httpRegions.find(obj => cliOptions.httpRegionLine && obj.symbol.startLine <= cliOptions.httpRegionLine && obj.symbol.endLine >= cliOptions.httpRegionLine)
+      httpRegion: httpFile.httpRegions
+        .find(obj => cliOptions.httpRegionLine
+          && obj.symbol.startLine <= cliOptions.httpRegionLine
+          && obj.symbol.endLine >= cliOptions.httpRegionLine)
     });
   } else if (!cliOptions.allRegions && httpFile.httpRegions.length > 1) {
 
@@ -215,12 +225,13 @@ async function initEnviroment(cliOptions: HttpCliOptions) {
   };
 
   const rootDir = cliOptions.rootDir || await findPackageJson(process.cwd()) || process.cwd();
-  await environmentStore.configure([rootDir], environmentConfig,);
+  await environmentStore.configure([rootDir], environmentConfig);
   initHttpYacApiExtensions(environmentConfig, rootDir);
   environmentStore.activeEnvironments = cliOptions.activeEnvironments;
 
 
-  if ('win32' === process.platform) {
+  if (process.platform === 'win32') {
+
     // https://github.com/nodejs/node-v0.x-archive/issues/7940
     testSymbols.ok = '[x]';
     testSymbols.error = '[ ]';
@@ -251,7 +262,7 @@ function initHttpYacApiExtensions(config: EnvironmentConfig & SettingsConfig, ro
     const answer = await inquirer.prompt([{
       type: 'list',
       name: 'placeholder',
-      message: message,
+      message,
       choices: values
     }]);
     return answer.placeholder;

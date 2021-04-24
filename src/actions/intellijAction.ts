@@ -61,37 +61,37 @@ export class IntellijAction implements HttpRegionAction {
   }
 }
 
-export class HttpClient{
+export class HttpClient {
   global: HttpClientVariables;
   constructor(private readonly httpRegion: HttpRegion, variables: Variables) {
     this.global = new HttpClientVariables(variables);
   }
-  test(testName: string, func: () => void): void{
+  test(testName: string, func: () => void): void {
     testFactory(this.httpRegion)(testName, func);
   }
   assert(condition: boolean, message?: string) : void {
     ok(condition, message);
   }
-  log(text: string): void{
+  log(text: string): void {
     scriptConsole.info(text);
   }
 }
 
-class HttpClientVariables{
+class HttpClientVariables {
   constructor(private readonly variables: Variables) { }
-  set(varName: string, varValue: string): void{
+  set(varName: string, varValue: string): void {
     this.variables[varName] = varValue;
   }
-  get(varName: string): unknown{
+  get(varName: string): unknown {
     return this.variables[varName];
   }
-  isEmpty(): boolean{
+  isEmpty(): boolean {
     return Object.entries(this.variables).length === 0;
   }
-  clear(varName: string): void{
+  clear(varName: string): void {
     delete this.variables[varName];
   }
-  clearAll(): void{
+  clearAll(): void {
     for (const [key] of Object.entries(this.variables)) {
       delete this.variables[key];
     }
@@ -99,7 +99,7 @@ class HttpClientVariables{
 }
 
 function initIntellijVariables(httpRegion: HttpRegion, variables: Variables) {
-  let response: unknown = undefined;
+  let response: unknown;
   if (httpRegion.response) {
     response = {
       body: httpRegion.response.parsedBody || httpRegion.response.body,

@@ -1,5 +1,3 @@
-
-
 export interface ErrorDescription{
   error: Error;
   displayMessage: string;

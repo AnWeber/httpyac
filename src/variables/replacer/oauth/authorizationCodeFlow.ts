@@ -1,14 +1,13 @@
 import { OpenIdConfiguration, assertConfiguration } from './openIdConfiguration';
 import { OpenIdInformation, requestOpenIdInformation } from './openIdInformation';
-import { OpenIdFlow } from './openIdFlow';
+import { OpenIdFlow, OpenIdFlowContext } from './openIdFlow';
 import { toQueryParams, stateGenerator } from '../../../utils';
-import { HttpClient, Progress } from '../../../models';
 import open from 'open';
 import { registerListener, unregisterListener } from './openIdHttpserver';
 import { log } from '../../../logger';
 
 class AuthorizationCodeFlow implements OpenIdFlow {
-  supportsFlow(flow: string): boolean{
+  supportsFlow(flow: string): boolean {
     return ['authorization_code', 'code'].indexOf(flow) >= 0;
   }
 
@@ -19,11 +18,11 @@ class AuthorizationCodeFlow implements OpenIdFlow {
     return false;
   }
 
-  async perform(config: OpenIdConfiguration, context: {httpClient: HttpClient, progress: Progress | undefined, cacheKey: string}): Promise<OpenIdInformation | false> {
+  async perform(config: OpenIdConfiguration, context: OpenIdFlowContext): Promise<OpenIdInformation | false> {
     return new Promise<OpenIdInformation | false>((resolve, reject) => {
       const state = stateGenerator();
       try {
-        const redirectUri = `http://localhost:3000/callback`;
+        const redirectUri = 'http://localhost:3000/callback';
         const authUrl = `${config.authorizationEndpoint}${config.authorizationEndpoint.indexOf('?') > 0 ? '&' : '?'}${toQueryParams({
           client_id: config.clientId,
           scope: config.scope || 'openid',
@@ -37,14 +36,14 @@ class AuthorizationCodeFlow implements OpenIdFlow {
         if (context.progress) {
           unregisterProgress = context.progress.register(() => {
             unregisterListener(state);
-            reject();
+            reject(new Error('process canceled'));
           });
         }
 
         registerListener({
           id: state,
           name: `authorization for ${config.clientId}: ${config.authorizationEndpoint}`,
-          resolve: (params) => {
+          resolve: params => {
             if (params.code && params.state === state) {
               if (unregisterProgress) {
                 unregisterProgress();
@@ -64,7 +63,7 @@ class AuthorizationCodeFlow implements OpenIdFlow {
                 })
               }, {
                 httpClient: context.httpClient,
-                config: config,
+                config,
                 id: context.cacheKey,
                 title: `authorization_code: ${config.clientId}`,
                 description: `${config.variablePrefix} - ${config.tokenEndpoint}`

@@ -4,15 +4,17 @@ import { toQueryParams, decodeJWT } from '../../../utils';
 import { HttpClient } from '../../../models';
 import encodeUrl from 'encodeurl';
 
-class TokenExchangeFlow {
-  getCacheKey(config: OpenIdConfiguration) {
+export class TokenExchangeFlow {
+  static getCacheKey(config: OpenIdConfiguration) : string | false {
     if (assertConfiguration(config, ['tokenEndpoint', 'clientId', 'clientSecret'])) {
       return `${config.tokenEndpoint}_${config.clientId}`;
     }
     return false;
   }
 
-  async perform(config: OpenIdConfiguration, openIdInformation: OpenIdInformation, context: {httpClient: HttpClient}): Promise<OpenIdInformation | false> {
+  static async perform(config: OpenIdConfiguration,
+    openIdInformation: OpenIdInformation,
+    context: { httpClient: HttpClient }): Promise<OpenIdInformation | false> {
     if (openIdInformation) {
       const jwtToken = decodeJWT(openIdInformation.accessToken);
 
@@ -43,5 +45,3 @@ class TokenExchangeFlow {
     return false;
   }
 }
-
-export const tokenExchangeFlow = new TokenExchangeFlow();

@@ -1,7 +1,7 @@
-import { ActionType, HttpRegionAction, ProcessorContext} from '../models';
+import { ActionType, HttpRegionAction, ProcessorContext } from '../models';
 import cloneDeep = require('lodash/cloneDeep');
 
-export class CreateRequestAction implements HttpRegionAction{
+export class CreateRequestAction implements HttpRegionAction {
   type = ActionType.request;
 
   async process(context: ProcessorContext) : Promise<boolean> {

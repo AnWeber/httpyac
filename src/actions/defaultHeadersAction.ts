@@ -1,13 +1,12 @@
-
-import { ActionType, HttpRegionAction, ProcessorContext} from '../models';
+import { ActionType, HttpRegionAction, ProcessorContext } from '../models';
 import get from 'lodash/get';
 
-export class DefaultHeadersAction implements HttpRegionAction{
+export class DefaultHeadersAction implements HttpRegionAction {
   type = ActionType.defaultHeaders;
 
-  constructor(private readonly data: string){}
+  constructor(private readonly data: string) {}
 
-  async process({request, variables}: ProcessorContext) : Promise<boolean> {
+  async process({ request, variables }: ProcessorContext) : Promise<boolean> {
     if (request && this.data && variables) {
       const headers = get(variables, this.data);
       request.headers = Object.assign(headers, request.headers);

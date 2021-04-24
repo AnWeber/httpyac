@@ -1,4 +1,3 @@
-
 import { createServer, Server } from 'http';
 import { log } from '../../../logger';
 
@@ -12,11 +11,11 @@ interface RequestListener{
 
 const listeners: Array<RequestListener> = [];
 
-let server: Server | undefined;
-let serverTimeout: NodeJS.Timeout | undefined;
+let server: Server | false;
+let serverTimeout: NodeJS.Timeout | false;
 let serverTimeoutTime = 0;
 
-export function registerListener(listener: RequestListener) : void{
+export function registerListener(listener: RequestListener) : void {
   listeners.push(listener);
   initServer();
 }
@@ -35,7 +34,7 @@ export function unregisterListener(id: string) : void {
 function clearServerTimeout() {
   if (serverTimeout) {
     clearTimeout(serverTimeout);
-    serverTimeout = undefined;
+    serverTimeout = false;
     serverTimeoutTime = 0;
   }
 }
@@ -54,14 +53,14 @@ function closeServer() {
   listeners.length = 0;
   if (server) {
     clearServerTimeout();
-    server.close((err) => {
+    server.close(err => {
       if (err) {
         log.error(err);
       } else {
-        log.info("http server closed");
+        log.info('http server closed');
       }
     });
-    server = undefined;
+    server = false;
   }
 }
 
@@ -110,7 +109,7 @@ function initServer(port = 3000) {
               listener.reject();
               unregisterListener(queryParams.id);
               statusCode = 200;
-              statusMessage ="listener removed";
+              statusMessage = 'listener removed';
               responseContent.push(getMessageHtml(`${listener.name} removed`, true));
             } else {
               statusMessage = 'listener not found';
@@ -119,11 +118,11 @@ function initServer(port = 3000) {
             closeServer();
             responseContent.push(getMessageHtml('server closed', true));
             statusCode = 200;
-            statusMessage ="server was shut down";
+            statusMessage = 'server was shut down';
           }
         }
         responseContent.push(getServerStatus());
-        res.setHeader("Content-Type", "text/html");
+        res.setHeader('Content-Type', 'text/html');
         res.writeHead(statusCode, statusMessage);
         res.end(getHtml(responseContent.join('')));
       } catch (err) {
@@ -136,13 +135,12 @@ function initServer(port = 3000) {
 }
 
 
-
 function parseQueryParams(url: string) {
-  return url.substring(url.indexOf('?') + 1).split('&').reduce((prev, current) => {
+  return url.slice(url.indexOf('?') + 1).split('&').reduce((prev, current) => {
     const [key, value] = current.split('=');
     prev[key] = value;
     return prev;
-  }, {} as Record<string,string>);
+  }, {} as Record<string, string>);
 }
 
 
@@ -187,9 +185,9 @@ function toTimeString(seconds: number) {
     const sec = seconds % 60;
     if (minutes > 0) {
       if (sec > 0) {
-        return `${minutes}minute${minutes > 1 ? 's': ''} ${sec} seconds`;
+        return `${minutes}minute${minutes > 1 ? 's' : ''} ${sec} seconds`;
       }
-      return `${minutes} minute${minutes > 1 ? 's': ''}`;
+      return `${minutes} minute${minutes > 1 ? 's' : ''}`;
     }
     return `${seconds} seconds`;
   }

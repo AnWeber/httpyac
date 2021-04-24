@@ -1,4 +1,4 @@
-import { Cookie, CookieJar, MemoryCookieStore,  } from 'tough-cookie';
+import { Cookie, CookieJar, MemoryCookieStore } from 'tough-cookie';
 import { log } from '../logger';
 
 
@@ -29,7 +29,7 @@ class CookieStore {
   removeCookies(cookies: Cookie[]) {
     for (const cookie of cookies) {
       if (cookie.domain && cookie.path) {
-        this.memoryCookieStore.removeCookie(cookie.domain, cookie.path, cookie.key, (err) => {
+        this.memoryCookieStore.removeCookie(cookie.domain, cookie.path, cookie.key, err => {
           if (err) {
             log.error(err);
           }

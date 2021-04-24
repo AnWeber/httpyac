@@ -20,6 +20,7 @@ export const JAVASCRIPT_KEYWORDS = ['await', 'break', 'case', 'catch', 'class', 
 export function isValidVariableName(name: string): boolean {
   if (JAVASCRIPT_KEYWORDS.indexOf(name) <= 0) {
     try {
+      // eslint-disable-next-line no-new-func
       Function(`var ${name}`);
       return true;
     } catch (e) {
@@ -66,13 +67,15 @@ export class JavascriptAction implements HttpRegionAction {
   }
 }
 
+export interface ScriptContext {
+  script: string,
+  fileName: string | undefined,
+  variables: Variables,
+  lineOffset: number,
+  require?: Record<string, unknown>
+}
 
-
-
-
-
-
-export async function executeScript(context: { script: string, fileName: string | undefined, variables: Variables, lineOffset: number, require?: Record<string, unknown> }): Promise<Variables> {
+export async function executeScript(context: ScriptContext): Promise<Variables> {
   try {
     const filename = context.fileName || __filename;
     const dir = dirname(filename);
@@ -80,8 +83,9 @@ export async function executeScript(context: { script: string, fileName: string 
 
     scriptModule.filename = filename;
     scriptModule.exports = {};
+
     // see https://github.com/nodejs/node/blob/master/lib/internal/modules/cjs/loader.js#L565-L640
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-underscore-dangle
     scriptModule.paths = (Module as any)._nodeModulePaths(dir);
 
 
@@ -103,8 +107,9 @@ export async function executeScript(context: { script: string, fileName: string 
       }
       return null;
     };
+
     // see https://github.com/nodejs/node/blob/master/lib/internal/modules/cjs/loader.js#L823-L911
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-underscore-dangle
     scriptRequire.resolve = (req: unknown) => (Module as any)._resolveFilename(req, scriptModule);
 
     const vars = Object.entries(context.variables).map(([key]) => key).join(', ').trim();
@@ -115,7 +120,14 @@ export async function executeScript(context: { script: string, fileName: string 
       lineOffset: context.lineOffset,
       displayErrors: true,
     });
-    compiledWrapper.apply(context.variables, [scriptModule.exports, scriptRequire, scriptModule, filename, dir, ...Object.entries(context.variables).map(([, value]) => value)]);
+    compiledWrapper.apply(context.variables, [
+      scriptModule.exports,
+      scriptRequire,
+      scriptModule,
+      filename,
+      dir,
+      ...Object.entries(context.variables).map(([, value]) => value)
+    ]);
 
 
     let result = scriptModule.exports;
@@ -134,4 +146,3 @@ export async function executeScript(context: { script: string, fileName: string 
     throw err;
   }
 }
-

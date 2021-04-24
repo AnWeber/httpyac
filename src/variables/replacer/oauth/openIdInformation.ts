@@ -2,7 +2,7 @@ import { OpenIdConfiguration } from './openIdConfiguration';
 import { log, logRequest } from '../../../logger';
 import { HttpClient, HttpRequest, UserSession } from '../../../models';
 import { decodeJWT } from '../../../utils';
-import { environmentStore} from '../../../environments';
+import { environmentStore } from '../../../environments';
 
 export interface OpenIdInformation extends UserSession{
   time: number;
@@ -15,13 +15,13 @@ export interface OpenIdInformation extends UserSession{
 }
 
 
-export async function requestOpenIdInformation(request: HttpRequest | false,context: {
+export async function requestOpenIdInformation(request: HttpRequest | false, context: {
   config: OpenIdConfiguration,
   httpClient: HttpClient,
   id: string,
   title: string,
   description: string,
-}): Promise<OpenIdInformation | false>{
+}): Promise<OpenIdInformation | false> {
   if (request) {
     const time = new Date().getTime();
     const response = await context.httpClient(request, { showProgressBar: false });

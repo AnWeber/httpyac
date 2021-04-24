@@ -1,7 +1,3 @@
-
-
-
-
 export function pushAfter<T>(array: T[], predicate: (obj: T) => boolean, ...params: T[]) : void {
   const index = array.findIndex(predicate);
   if (index >= 0) {

@@ -1,6 +1,6 @@
 import { ENVIRONMENT_NONE, getHttpacJsonConfig, isString, toAbsoluteFilename } from '../utils';
 import { Variables, EnvironmentProvider, HttpFile, EnvironmentConfig } from '../models';
-import {httpYacApi} from '../httpYacApi';
+import { httpYacApi } from '../httpYacApi';
 import { JsonEnvProvider } from './jsonEnvProvider';
 import { EnvVariableProvider } from '../variables/provider/envVariableProvider';
 import { IntellijProvider } from './intellijEnvProvider';
@@ -9,7 +9,7 @@ import { log, logRequest, LogLevel } from '../logger';
 import { isAbsolute, join } from 'path';
 import merge from 'lodash/merge';
 
-class EnvironmentStore{
+class EnvironmentStore {
   activeEnvironments: Array<string>| undefined;
   readonly environmentProviders: Array<EnvironmentProvider> = [];
 
@@ -69,7 +69,7 @@ class EnvironmentStore{
     if (value && isString(value)) {
       let result = value;
       let match: RegExpExecArray | null;
-      const variableRegex = /\{{2}([a-zA-Z0-9_]+)\}{2}/g;
+      const variableRegex = /\{{2}([a-zA-Z0-9_]+)\}{2}/gu;
       while ((match = variableRegex.exec(result)) !== null) {
         const [searchValue, variableName] = match;
         const val = this.expandVariable(variableName, variables[variableName], variables);
@@ -130,7 +130,8 @@ class EnvironmentStore{
       defaultConfig,
       defaultOverride,
       ...(await this.loadFileEnvironemntConfigs(rootDirs)),
-      config);
+      config
+    );
 
     this.initLogConfiguration(environmentConfig);
     await this.searchClientCertficates(environmentConfig, rootDirs);
@@ -196,7 +197,7 @@ class EnvironmentStore{
     if (config.environments) {
       environmentProviders.push(new JsonEnvProvider(config.environments));
     }
-    environmentProviders.push(...this.initEnvProvider((path: string) => new IntellijProvider(path),config.intellij, rootDirs));
+    environmentProviders.push(...this.initEnvProvider((path: string) => new IntellijProvider(path), config.intellij, rootDirs));
     environmentProviders.push(...this.initEnvProvider((path: string) => new DotenvProvider(path, config.dotenv?.defaultFiles), config.dotenv, rootDirs));
 
     await this.reset();

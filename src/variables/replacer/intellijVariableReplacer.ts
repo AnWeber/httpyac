@@ -1,15 +1,14 @@
-
 import { v4 as uuidv4 } from 'uuid';
 
 export function intellijVariableReplacer(text: string) : Promise<string | undefined> {
 
-  const variableRegex = /\{{2}(.+?)\}{2}/g;
+  const variableRegex = /\{{2}(.+?)\}{2}/gu;
   let match: RegExpExecArray | null;
   let result = text;
   while ((match = variableRegex.exec(text)) !== null) {
     const [searchValue, variable] = match;
 
-    let replacement;
+    let replacement: unknown = null;
     switch (variable.trim()) {
       case '$uuid':
         replacement = uuidv4();
@@ -19,6 +18,9 @@ export function intellijVariableReplacer(text: string) : Promise<string | undefi
         break;
       case '$randomInt':
         replacement = Math.floor(Math.random() * 1000);
+        break;
+      default:
+        replacement = null;
         break;
     }
     if (replacement) {

@@ -1,5 +1,3 @@
-
-
 export interface UserSession{
   id: string;
   title: string;

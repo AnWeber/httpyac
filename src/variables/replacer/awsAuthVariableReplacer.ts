@@ -3,8 +3,8 @@ import { URL } from 'url';
 import aws4 = require('aws4');
 
 export async function awsAuthVariableReplacer(text: string, type: string, { request }: ProcessorContext) : Promise<string | undefined> {
-  if (type.toLowerCase() === "authorization" && text && request?.url) {
-    const match = /^\s*(aws)\s+(?<accessKeyId>[^\s]*)\s+(?<secretAccessKey>[^\s]*)\s*(token:\s*(?<token>[^\s]*))?\s*(region:\s*(?<region>[^\s]*))?\s*(service:\s*(?<service>[^\s]*))?\s*$/i.exec(text);
+  if (type.toLowerCase() === 'authorization' && text && request?.url) {
+    const match = /^\s*(aws)\s+(?<accessKeyId>[^\s]*)\s+(?<secretAccessKey>[^\s]*)\s*(token:\s*(?<token>[^\s]*))?\s*(region:\s*(?<region>[^\s]*))?\s*(service:\s*(?<service>[^\s]*))?\s*$/iu.exec(text);
 
     if (match && match.groups && match.groups.accessKeyId && match.groups.secretAccessKey) {
       const credentials = {

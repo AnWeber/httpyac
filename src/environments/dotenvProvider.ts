@@ -1,8 +1,8 @@
 import { Variables, EnvironmentProvider } from '../models';
-import {promises as fs, watchFile, unwatchFile } from 'fs';
+import { promises as fs, watchFile, unwatchFile } from 'fs';
 import { parse } from 'dotenv';
 import { log } from '../logger';
-import {environmentStore} from './environmentStore';
+import { environmentStore } from './environmentStore';
 import { join } from 'path';
 
 function storeReset() {
@@ -15,7 +15,7 @@ export class DotenvProvider implements EnvironmentProvider {
 
   constructor(private readonly basepath: string, private readonly defaultFiles: Array<string> = ['.env']) { }
 
-  reset() : void{
+  reset() : void {
     for (const watchFile of this.watchFiles) {
       unwatchFile(watchFile, storeReset);
     }
@@ -49,7 +49,6 @@ export class DotenvProvider implements EnvironmentProvider {
     }
     return variables;
   }
-
 
 
   private getDotenvFiles(defaultFiles: Array<string>, env: string | undefined) {

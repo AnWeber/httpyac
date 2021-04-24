@@ -1,4 +1,3 @@
-
 export enum RepeatOrder{
   sequential,
   parallel,

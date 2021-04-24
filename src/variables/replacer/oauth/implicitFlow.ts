@@ -1,14 +1,13 @@
 import { OpenIdConfiguration, assertConfiguration } from './openIdConfiguration';
-import { OpenIdInformation, toOpenIdInformation, requestOpenIdInformation} from './openIdInformation';
-import { OpenIdFlow } from './openIdFlow';
+import { OpenIdInformation, toOpenIdInformation, requestOpenIdInformation } from './openIdInformation';
+import { OpenIdFlow, OpenIdFlowContext } from './openIdFlow';
 import { toQueryParams, stateGenerator } from '../../../utils';
-import { HttpClient, Progress } from '../../../models';
 import open from 'open';
 import { registerListener, unregisterListener } from './openIdHttpserver';
 import { log } from '../../../logger';
 
 class ImplicitFlow implements OpenIdFlow {
-  supportsFlow(flow: string): boolean{
+  supportsFlow(flow: string): boolean {
     return ['implicit', 'hybrid'].indexOf(flow) >= 0;
   }
 
@@ -19,11 +18,11 @@ class ImplicitFlow implements OpenIdFlow {
     return false;
   }
 
-  async perform(config: OpenIdConfiguration, context: {httpClient: HttpClient, progress: Progress | undefined, cacheKey: string}): Promise<OpenIdInformation | false> {
+  async perform(config: OpenIdConfiguration, context: OpenIdFlowContext): Promise<OpenIdInformation | false> {
     return new Promise<OpenIdInformation | false>((resolve, reject) => {
       const state = stateGenerator();
       try {
-        const redirectUri = `http://localhost:3000/callback`;
+        const redirectUri = 'http://localhost:3000/callback';
         const authUrl = `${config.authorizationEndpoint}${config.authorizationEndpoint.indexOf('?') > 0 ? '&' : '?'}${toQueryParams({
           client_id: config.clientId,
           scope: config.scope || 'openid',
@@ -39,14 +38,14 @@ class ImplicitFlow implements OpenIdFlow {
         if (context.progress) {
           unregisterProgress = context.progress.register(() => {
             unregisterListener(state);
-            reject();
+            reject(new Error('progress cancel'));
           });
         }
 
         registerListener({
           id: state,
           name: `authorization for ${config.clientId}: ${config.authorizationEndpoint}`,
-          resolve: (params) => {
+          resolve: params => {
             if (params.state === state) {
 
               if (params.code) {
@@ -65,7 +64,7 @@ class ImplicitFlow implements OpenIdFlow {
                   })
                 }, {
                   httpClient: context.httpClient,
-                  config: config,
+                  config,
                   id: context.cacheKey,
                   title: `implicit: ${config.clientId}`,
                   description: `${config.variablePrefix} - ${config.tokenEndpoint}`
@@ -76,13 +75,13 @@ class ImplicitFlow implements OpenIdFlow {
                   message: 'code received.',
                   statusMessage: 'code valid. starting code exchange'
                 };
-              }else if (params.access_token) {
-
+              }
+              if (params.access_token) {
                 if (unregisterProgress) {
                   unregisterProgress();
                 }
                 const openIdInformation = toOpenIdInformation(params, (new Date()).getTime(), {
-                  config: config,
+                  config,
                   id: context.cacheKey,
                   title: `implicit: ${config.clientId}`,
                   description: config.tokenEndpoint

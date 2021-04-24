@@ -40,7 +40,8 @@ export class HttpClientAction implements HttpRegionAction {
   private async normalizeBody(body: string | Array<HttpRequestBodyLine> | undefined) {
     if (isString(body)) {
       return body;
-    } else if (Array.isArray(body)) {
+    }
+    if (Array.isArray(body)) {
       const buffers: Array<Buffer> = [];
       for (const obj of body) {
         if (isString(obj)) {

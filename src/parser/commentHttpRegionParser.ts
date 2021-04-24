@@ -1,9 +1,8 @@
-
 import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult } from '../models';
 import { toMultiLineString } from '../utils';
 
 
-export class CommentHttpRegionParser implements HttpRegionParser{
+export class CommentHttpRegionParser implements HttpRegionParser {
 
   noStopOnMetaTag = true;
   async parse(lineReader: HttpRegionParserGenerator): Promise<HttpRegionParserResult> {
@@ -41,7 +40,7 @@ function getCommentContent(lineReader: HttpRegionParserGenerator): CommentParser
     const startLine = next.value.line;
 
 
-    const singleLineMatch = /^\s*\/\/\s*(?<comment>.*)\s*$/.exec(next.value.textLine);
+    const singleLineMatch = /^\s*\/\/\s*(?<comment>.*)\s*$/u.exec(next.value.textLine);
     if (singleLineMatch?.groups?.comment) {
       return {
         startLine,
@@ -50,12 +49,12 @@ function getCommentContent(lineReader: HttpRegionParserGenerator): CommentParser
       };
     }
 
-    const multiLineMatch = /^\s*\/\*$/.exec(next.value.textLine);
+    const multiLineMatch = /^\s*\/\*$/u.exec(next.value.textLine);
     if (multiLineMatch) {
       next = lineReader.next();
       const lines: Array<string> = [];
       while (!next.done) {
-        if (/^\s*\*\/\s*$/.test(next.value.textLine)) {
+        if (/^\s*\*\/\s*$/u.test(next.value.textLine)) {
           return {
             startLine,
             endLine: next.value.line,

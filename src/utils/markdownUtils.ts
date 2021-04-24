@@ -1,7 +1,7 @@
 import { EOL } from 'os';
-import {  HttpResponse, HttpTimings, TestResult } from '../models';
+import { HttpResponse, HttpTimings, TestResult } from '../models';
 import { isString, toMultiLineArray } from './stringUtils';
-import { NormalizedOptions} from 'got';
+import { NormalizedOptions } from 'got';
 import { testSymbols } from '../actions';
 
 export enum MarkdownParts{
@@ -69,7 +69,7 @@ export function toMarkdownPreview(response: HttpResponse, testResults?: Array<Te
   return joinMarkdown(result);
 }
 
-export function toMarkdownResponse(response: HttpResponse, outputBody: boolean) : Array<string>{
+export function toMarkdownResponse(response: HttpResponse, outputBody: boolean) : Array<string> {
   const result: Array<string> = [];
   result.push(`### HTTP${response.httpVersion || ''} **${response.statusCode}** - ${response.statusMessage}`);
   result.push(...toMarkdownHeader(response.headers));
@@ -82,7 +82,7 @@ export function toMarkdownResponse(response: HttpResponse, outputBody: boolean) 
   return result;
 }
 
-function toMarkdownRequest(request: NormalizedOptions, outputBody: boolean)  : Array<string>{
+function toMarkdownRequest(request: NormalizedOptions, outputBody: boolean) : Array<string> {
   const result: Array<string> = [];
   result.push(`### ${request.method} ${request.url}`);
   if (request.headers) {
@@ -97,10 +97,10 @@ function toMarkdownRequest(request: NormalizedOptions, outputBody: boolean)  : A
   return result;
 }
 
-function toMarkdownTestResults(testResults: Array<TestResult>) : Array<string>{
+function toMarkdownTestResults(testResults: Array<TestResult>) : Array<string> {
   const result: Array<string> = [];
-  result.push(`| TestResults |  |  |`);
-  result.push(`| --- | --- | --- |`);
+  result.push('| TestResults |  |  |');
+  result.push('| --- | --- | --- |');
   for (const testResult of testResults) {
     result.push(`| ${testResult.result ? testSymbols.ok : testSymbols.error} | ${testResult.message} | ${testResult.error?.displayMessage || ''} |`);
   }
@@ -123,8 +123,8 @@ export function toMarkdownHeader(headers: Record<string, string | string[] | und
 
 export function toMarkdownMeta(meta: Record<string, unknown>) : Array<string> {
   const result: Array<string> = [];
-  result.push(`| Meta |  |`);
-  result.push(`| --- | --- |`);
+  result.push('| Meta |  |');
+  result.push('| --- | --- |');
   for (const [key, value] of Object.entries(meta)) {
     if (Array.isArray(value)) {
       if (value.length > 0) {
@@ -139,12 +139,11 @@ export function toMarkdownMeta(meta: Record<string, unknown>) : Array<string> {
 
 export function toMarkdownTimings(timings: HttpTimings) : Array<string> {
   const result: Array<string> = [];
-  result.push(`| Timings |  |`);
-    result.push(`| --- | --- |`);
-    result.push(...Object.entries(timings)
-      .map(([key, value]) => `| ${key.toUpperCase()} | ${value}ms |`)
-      .sort()
-    );
+  result.push('| Timings |  |');
+  result.push('| --- | --- |');
+  result.push(...Object.entries(timings)
+    .map(([key, value]) => `| ${key.toUpperCase()} | ${value}ms |`)
+    .sort());
   return result;
 }
 

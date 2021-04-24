@@ -1,11 +1,10 @@
-
 import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, ActionType } from '../models';
 import { toMultiLineString, toAbsoluteFilename, pushAfter } from '../utils';
 import { promises as fs } from 'fs';
 import { log } from '../logger';
 import { GqlAction, GqlData } from '../actions';
 
-export class GqlHttpRegionParser implements HttpRegionParser{
+export class GqlHttpRegionParser implements HttpRegionParser {
   async parse(lineReader: HttpRegionParserGenerator, context: ParserContext): Promise<HttpRegionParserResult> {
 
     if (context.httpRegion.metaData.noGqlParsing) {
@@ -32,15 +31,15 @@ export class GqlHttpRegionParser implements HttpRegionParser{
             context.httpRegion.metaData.name = gqlContent.name;
           }
         }
-        pushAfter(context.httpRegion.actions, obj => obj.type === ActionType.request, new GqlAction (gqlData));
-      } else if(gqlContent.name) {
+        pushAfter(context.httpRegion.actions, obj => obj.type === ActionType.request, new GqlAction(gqlData));
+      } else if (gqlContent.name) {
         gqlData.fragments[gqlContent.name] = gqlContent.gql;
       }
       return {
         endLine: gqlContent.endLine,
         symbols: [{
-          name: "gql",
-          description: "gql",
+          name: 'gql',
+          description: 'gql',
           kind: HttpSymbolKind.gql,
           startLine: gqlContent.startLine,
           startOffset: 0,
@@ -69,7 +68,7 @@ async function getGQLContent(lineReader: HttpRegionParserGenerator, httpFileName
 
     const startLine = next.value.line;
 
-    const fileMatches = /^\s*gql(\s+(?<name>[^\s(]+))?\s+<\s+(?<fileName>.+)\s*$/.exec(next.value.textLine);
+    const fileMatches = /^\s*gql(\s+(?<name>[^\s(]+))?\s+<\s+(?<fileName>.+)\s*$/u.exec(next.value.textLine);
     if (fileMatches && fileMatches.groups?.fileName) {
       try {
         const normalizedPath = await toAbsoluteFilename(fileMatches.groups.fileName, httpFileName);
@@ -85,11 +84,11 @@ async function getGQLContent(lineReader: HttpRegionParserGenerator, httpFileName
         log.trace(err);
       }
     } else {
-      const queryMatch = /^\s*(query|mutation)(\s+(?<name>[^\s(]+))?/.exec(next.value.textLine);
+      const queryMatch = /^\s*(query|mutation)(\s+(?<name>[^\s(]+))?/u.exec(next.value.textLine);
       if (queryMatch) {
         return matchGqlContent(next.value, lineReader, queryMatch.groups?.name);
       }
-      const fragmentMatch = /^\s*(fragment)\s+(?<name>[^\s(]+)\s+on\s+/.exec(next.value.textLine);
+      const fragmentMatch = /^\s*(fragment)\s+(?<name>[^\s(]+)\s+on\s+/u.exec(next.value.textLine);
       if (fragmentMatch) {
         return matchGqlContent(next.value, lineReader, fragmentMatch.groups?.name);
       }
@@ -99,13 +98,12 @@ async function getGQLContent(lineReader: HttpRegionParserGenerator, httpFileName
 }
 
 
-
 function matchGqlContent(value: { textLine: string; line: number }, lineReader: HttpRegionParserGenerator, name: string | undefined): GqlParserResult | false {
   const startLine = value.line;
   let next = lineReader.next();
   const gqlLines: Array<string> = [value.textLine];
   while (!next.done) {
-    if (/^\s*$/.test(next.value.textLine)) {
+    if (/^\s*$/u.test(next.value.textLine)) {
       return {
         name,
         startLine,

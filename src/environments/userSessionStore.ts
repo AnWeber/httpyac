@@ -1,4 +1,4 @@
-import {  UserSession } from '../models';
+import { UserSession } from '../models';
 
 
 class UserSessionStore {

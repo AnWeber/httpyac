@@ -1,11 +1,10 @@
-
-import { ActionType, HttpRegionAction, ProcessorContext} from '../models';
+import { ActionType, HttpRegionAction, ProcessorContext } from '../models';
 import { environmentStore } from '../environments';
 
-export class EnvDefaultHeadersAction implements HttpRegionAction{
+export class EnvDefaultHeadersAction implements HttpRegionAction {
   type = ActionType.envDefaultHeaders;
 
-  async process({request}: ProcessorContext) : Promise<boolean> {
+  async process({ request }: ProcessorContext) : Promise<boolean> {
     if (request && environmentStore?.environmentConfig?.defaultHeaders) {
       const defaultHeaders = environmentStore.environmentConfig.defaultHeaders;
       if (!request.headers) {

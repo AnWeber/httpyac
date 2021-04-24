@@ -3,11 +3,9 @@ import { userSessionStore } from '../../environments';
 import * as oauth from './oauth';
 import { log } from '../../logger';
 
-
-
 export async function openIdVariableReplacer(text: string, type: string, context: ProcessorContext) : Promise<string | undefined> {
-  if (type.toLowerCase() === "authorization" && text) {
-    const match = /^\s*(openid|oauth2)\s+(?<flow>[^\s]*)\s+(?<variablePrefix>[^\s]*)\s*((token_exchange)\s+(?<tokenExchangePrefix>[^\s]*))?\s*$/i.exec(text);
+  if (type.toLowerCase() === 'authorization' && text) {
+    const match = /^\s*(openid|oauth2)\s+(?<flow>[^\s]*)\s+(?<variablePrefix>[^\s]*)\s*((token_exchange)\s+(?<tokenExchangePrefix>[^\s]*))?\s*$/iu.exec(text);
     if (match && match.groups && match.groups.flow && match.groups.variablePrefix) {
 
       const config = oauth.getOpenIdConfiguration(match.groups.variablePrefix, context.variables);
@@ -32,7 +30,7 @@ export async function openIdVariableReplacer(text: string, type: string, context
               progress: context.progress
             });
             if (openIdInformation && tokenExchangeConfig) {
-              openIdInformation = await oauth.tokenExchangeFlow.perform(tokenExchangeConfig, openIdInformation, context);
+              openIdInformation = await oauth.TokenExchangeFlow.perform(tokenExchangeConfig, openIdInformation, context);
             }
           }
           if (openIdInformation) {
@@ -61,7 +59,7 @@ function getOpenIdConfiguration(cacheKey: string, config: oauth.OpenIdConfigurat
   return false;
 }
 
-function isOpenIdInformation(userSession: UserSession | undefined): userSession is oauth.OpenIdInformation{
+function isOpenIdInformation(userSession: UserSession | undefined): userSession is oauth.OpenIdInformation {
   const guard = userSession as oauth.OpenIdInformation;
   return !!guard?.accessToken;
 }
@@ -71,7 +69,7 @@ function getOpenIdFlow(flowType: string) {
     oauth.authorizationCodeFlow,
     oauth.clientCredentialsFlow,
     oauth.passwordFlow,
-    oauth.implicitFlow,
+    oauth.implicitFlow
   ];
   return openIdFlows.find(flow => flow.supportsFlow(flowType));
 }
@@ -80,7 +78,7 @@ function keepAlive(cacheKey: string, httpClient: HttpClient) {
   const openIdInformation = userSessionStore.userSessions.find(obj => obj.id === cacheKey);
   if (isOpenIdInformation(openIdInformation) && openIdInformation.refreshToken && openIdInformation.config.keepAlive) {
     const timeoutId = setTimeout(async () => {
-      const result = await oauth.refreshTokenFlow.perform(openIdInformation, {httpClient});
+      const result = await oauth.refreshTokenFlow.perform(openIdInformation, { httpClient });
       if (result) {
         log.info(`token ${result.title} refreshed`);
         userSessionStore.setUserSession(result);
@@ -90,13 +88,3 @@ function keepAlive(cacheKey: string, httpClient: HttpClient) {
     openIdInformation.logout = () => clearTimeout(timeoutId);
   }
 }
-
-
-
-
-
-
-
-
-
-

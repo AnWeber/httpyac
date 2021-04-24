@@ -38,7 +38,7 @@ export class EnvVariableProvider<T extends EnvironmentProvider> implements Varia
     return envProvider.getVariables(env);
   }
 
-  private getEnvProvider(basePath: string) : T{
+  private getEnvProvider(basePath: string) : T {
     let envProvider: T = this.paths[basePath];
     if (!envProvider) {
       envProvider = this.factory(basePath);

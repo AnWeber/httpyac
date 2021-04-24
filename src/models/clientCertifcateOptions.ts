@@ -1,5 +1,3 @@
-
-
 export interface ClientCertificateOptions{
   cert?: string;
   key?: string;

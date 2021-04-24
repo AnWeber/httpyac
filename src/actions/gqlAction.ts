@@ -18,7 +18,7 @@ export interface GqlPostRequest{
 export class GqlAction implements HttpRegionAction {
   type = ActionType.gql;
 
-  constructor(private readonly gqlData: GqlData){}
+  constructor(private readonly gqlData: GqlData) {}
 
   async process(context: ProcessorContext): Promise<boolean> {
     if (context.request?.body && this.gqlData?.query) {

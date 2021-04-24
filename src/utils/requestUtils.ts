@@ -5,14 +5,14 @@ import { log } from '../logger';
 export function isRequestMethod(method: string | undefined): method is HttpMethod {
   if (method) {
     return ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS', 'CONNECT', 'TRACE',
-      'PROPFIND', 'PROPPATCH', 'MKCOL', 'COPY', 'MOVE', 'LOCK', 'UNLOCK', 'CHECKOUT', 'CHECKIN', 'REPORT', 'MERGE', 'MKACTIVITY', 'MKWORKSPACE', 'VERSION-CONTROL', 'BASELINE-CONTROL' //cal-dav
+      'PROPFIND', 'PROPPATCH', 'MKCOL', 'COPY', 'MOVE', 'LOCK', 'UNLOCK', 'CHECKOUT', 'CHECKIN', 'REPORT', 'MERGE', 'MKACTIVITY', 'MKWORKSPACE', 'VERSION-CONTROL', 'BASELINE-CONTROL' // cal-dav
     ]
       .includes(method.toUpperCase());
   }
   return false;
 }
 
-export function getHeader(headers: Record<string, string | string[] | undefined | null>, headerName: string) : string | string[] | undefined | null{
+export function getHeader(headers: Record<string, string | string[] | undefined | null>, headerName: string) : string | string[] | undefined | null {
   if (headers) {
     const value = Object.entries(headers)
       .find(obj => obj[0].toLowerCase() === headerName.toLowerCase());
@@ -20,7 +20,7 @@ export function getHeader(headers: Record<string, string | string[] | undefined 
       return value[1];
     }
   }
-  return undefined;
+  return null;
 }
 
 
@@ -36,15 +36,15 @@ export interface JWTToken {
 }
 
 
-export function decodeJWT(str: string) : JWTToken | null{
+export function decodeJWT(str: string) : JWTToken | null {
   try {
     const jwtComponents = str.split('.');
     if (jwtComponents.length !== 3) {
       return null;
     }
     let payload = jwtComponents[1];
-    payload = payload.replace(/-/g, '+');
-    payload = payload.replace(/_/g, '/');
+    payload = payload.replace(/-/gu, '+');
+    payload = payload.replace(/_/gu, '/');
     switch (payload.length % 4) {
       case 0:
         break;
@@ -68,7 +68,7 @@ export function decodeJWT(str: string) : JWTToken | null{
 }
 
 
-export function toQueryParams(params: Record<string, undefined | string | number | boolean>): string{
+export function toQueryParams(params: Record<string, undefined | string | number | boolean>): string {
   return Object.entries(params)
     .filter(([, value]) => !!value)
     .map(([key, value]) => `${key}=${encodeURIComponent(value || '')}`)

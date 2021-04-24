@@ -2,8 +2,9 @@ import { ProcessorContext } from '../../models';
 import { executeScript } from '../../actions';
 import { isString, toMultiLineArray } from '../../utils';
 
-export async function jsVariableReplacer(text: string, _type: string, {httpRegion, httpFile, variables, progress}: ProcessorContext) : Promise<string | undefined> {
-  const variableRegex = /\{{2}([^}{2}]+)\}{2}/g;
+export async function jsVariableReplacer(text: string, _type: string, context: ProcessorContext): Promise<string | undefined> {
+  const { httpRegion, httpFile, variables, progress } = context;
+  const variableRegex = /\{{2}([^}{2}]+)\}{2}/gu;
   let match: RegExpExecArray | null;
   let result = text;
   while ((match = variableRegex.exec(text)) !== null) {
@@ -28,9 +29,9 @@ export async function jsVariableReplacer(text: string, _type: string, {httpRegio
     });
     if (isString(value.$result) || typeof value.$result === 'number') {
       result = result.replace(searchValue, `${value.$result}`);
-    }else if (value.$result instanceof Date) {
+    } else if (value.$result instanceof Date) {
       result = result.replace(searchValue, `${value.$result.toISOString()}`);
-    }else if (value.$result) {
+    } else if (value.$result) {
       result = result.replace(searchValue, `${value.$result}`);
     }
   }

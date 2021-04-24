@@ -1,4 +1,3 @@
-
 import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext } from '../models';
 import { toMultiLineString } from '../utils';
 import { ScriptData, IntellijScriptData, IntellijAction } from '../actions';
@@ -11,7 +10,7 @@ export interface IntelliJParserResult{
 }
 
 
-export class IntellijHttpRegionParser implements HttpRegionParser{
+export class IntellijHttpRegionParser implements HttpRegionParser {
   async parse(lineReader: HttpRegionParserGenerator, { httpRegion }: ParserContext): Promise<HttpRegionParserResult> {
     if (httpRegion.request) {
 
@@ -38,14 +37,13 @@ export class IntellijHttpRegionParser implements HttpRegionParser{
 }
 
 
-
 function getIntellijContent(lineReader: HttpRegionParserGenerator): IntelliJParserResult | false {
   let next = lineReader.next();
   if (!next.done) {
 
     const startLine = next.value.line;
 
-    const fileMatches = /^\s*>\s+(?<fileName>[^\s{%}]+\s*)$/.exec(next.value.textLine);
+    const fileMatches = /^\s*>\s+(?<fileName>[^\s{%}]+\s*)$/u.exec(next.value.textLine);
     if (fileMatches?.groups?.fileName) {
       return {
         startLine,
@@ -56,7 +54,7 @@ function getIntellijContent(lineReader: HttpRegionParserGenerator): IntelliJPars
       };
     }
 
-    const singleLineMatch = /^\s*>\s+{%\s*(?<script>.*)\s*%}\s*$/.exec(next.value.textLine);
+    const singleLineMatch = /^\s*>\s+\{%\s*(?<script>.*)\s*%\}\s*$/u.exec(next.value.textLine);
     if (singleLineMatch?.groups?.script) {
       return {
         startLine,
@@ -68,12 +66,12 @@ function getIntellijContent(lineReader: HttpRegionParserGenerator): IntelliJPars
       };
     }
 
-    const multiLineMatch = /^\s*>\s+{%\s*$/.exec(next.value.textLine);
+    const multiLineMatch = /^\s*>\s+\{%\s*$/u.exec(next.value.textLine);
     if (multiLineMatch) {
       next = lineReader.next();
       const scriptLines: Array<string> = [];
       while (!next.done) {
-        if (/^\s*%}\s*$/.test(next.value.textLine)) {
+        if (/^\s*%\}\s*$/u.test(next.value.textLine)) {
           return {
             startLine,
             endLine: next.value.line,

@@ -4,9 +4,9 @@ import { createHash } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { URL } from 'url';
 
-export async function digestAuthVariableReplacer(text: string, type: string, { request}: ProcessorContext) : Promise<string | undefined> {
-  if (type.toLowerCase() === "authorization" && text && request) {
-    const match = /^\s*(d|D)(i|I)(g|G)(e|E)(s|S)(t|T)\s+(?<user>[^\s]*)\s+(?<password>([^\s]+.*))$/i.exec(text);
+export async function digestAuthVariableReplacer(text: string, type: string, { request }: ProcessorContext) : Promise<string | undefined> {
+  if (type.toLowerCase() === 'authorization' && text && request) {
+    const match = /^\s*(d|D)(i|I)(g|G)(e|E)(s|S)(t|T)\s+(?<user>[^\s]*)\s+(?<password>([^\s]+.*))$/iu.exec(text);
 
     if (match && match.groups && match.groups.user && match.groups.password) {
       if (!request.hooks) {
@@ -42,14 +42,14 @@ function digestFactory(username: string, password: string) {
       /* see https://github.com/request/request/blob/master/lib/auth.js#L63-L123*/
       updateChallenge(challenge, wwwAuthenticate);
 
-      const qop = /(^|,)\s*auth\s*($|,)/.test(challenge.qop) && 'auth';
+      const qop = /(^|,)\s*auth\s*($|,)/u.test(challenge.qop) && 'auth';
       const nc = qop && '00000001';
-      const cnonce = qop && uuidv4().replace(/-/g, '');
-      const ha1 = ha1Compute(challenge.algorithm, username,password, challenge.realm, challenge.nonce, cnonce);
+      const cnonce = qop && uuidv4().replace(/-/gu, '');
+      const ha1 = ha1Compute(challenge.algorithm, username, password, challenge.realm, challenge.nonce, cnonce);
       const ha2 = md5(`${response.request.options.method}:${url.pathname}`);
       const digestResponse = qop
         ? md5(`${ha1}:${challenge.nonce}:${nc}:${cnonce}:${qop}:${ha2}`)
-        : md5(`${ha1}:${challenge.nonce }:${ha2}`);
+        : md5(`${ha1}:${challenge.nonce}:${ha2}`);
 
       return retryWithMergedOptions({
         headers: {
@@ -58,10 +58,10 @@ function digestFactory(username: string, password: string) {
             realm: challenge.realm,
             nonce: challenge.nonce,
             uri: url.pathname,
-            qop: qop,
+            qop,
             response: digestResponse,
-            nc: nc,
-            cnonce: cnonce,
+            nc,
+            cnonce,
             algorithm: challenge.algorithm,
             opaque: challenge.opaque
           })}`
@@ -88,6 +88,7 @@ function createDigestHeader(authValues: Record<string, string | boolean>) {
 }
 
 function md5(value: string | Buffer) {
+
   // lgtm [js/weak-cryptographic-algorithm, js/insufficient-password-hash]
   return createHash('md5').update(value).digest('hex');
 }
@@ -104,7 +105,7 @@ function ha1Compute(algorithm: string | undefined, username: string, password: s
 function updateChallenge(challenge: Record<string, string>, wwwAuthenticate: string) {
 
   for (const item of wwwAuthenticate.split(',')) {
-    const match = /([a-z0-9_-]+)=(?:"([^"]+)"|([a-z0-9_-]+))/gi.exec(item);
+    const match = /([a-z0-9_-]+)=(?:"([^"]+)"|([a-z0-9_-]+))/giu.exec(item);
     if (match) {
       challenge[match[1]] = match[2] || match[3];
     }

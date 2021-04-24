@@ -5,8 +5,8 @@ import { URL } from 'url';
 import { environmentStore } from '../../environments';
 
 
-
-export async function clientCertVariableReplacer(text: string, type: VariableReplacerType | string, { request, httpRegion, httpFile }: ProcessorContext) : Promise<string | undefined> {
+export async function clientCertVariableReplacer(text: string, type: VariableReplacerType | string, context: ProcessorContext): Promise<string | undefined> {
+  const { request, httpRegion, httpFile } = context;
   if (request && !httpRegion.metaData.noClientCert) {
     if (type === VariableReplacerType.url && environmentStore.environmentConfig?.clientCertificates) {
       const url = new URL(text);
@@ -15,7 +15,7 @@ export async function clientCertVariableReplacer(text: string, type: VariableRep
         await setClientCertificateOptions(request, clientCertifcateOptions, httpFile);
       }
     } else if (type.toLowerCase().endsWith('clientcert')) {
-      const match = /^\s*(cert:\s*(?<cert>[^\s]*)\s*)?(key:\s*(?<key>[^\s]*)\s*)?(pfx:\s*(?<pfx>[^\s]*)\s*)?(passphrase:\s*(?<passphrase>[^\s]*)\s*)?\s*$/.exec(text);
+      const match = /^\s*(cert:\s*(?<cert>[^\s]*)\s*)?(key:\s*(?<key>[^\s]*)\s*)?(pfx:\s*(?<pfx>[^\s]*)\s*)?(passphrase:\s*(?<passphrase>[^\s]*)\s*)?\s*$/u.exec(text);
       if (match?.groups?.cert || match?.groups?.pfx) {
         await setClientCertificateOptions(request, {
           cert: match.groups.cert,

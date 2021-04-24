@@ -4,7 +4,6 @@ import { log } from '../logger';
 import { EnvironmentConfig } from '../models';
 
 
-
 export async function toAbsoluteFilename(fileName: string, baseName: string, isFolder = false) : Promise<string | undefined> {
   try {
     if (isAbsolute(fileName) && await fs.stat(fileName)) {
@@ -24,10 +23,9 @@ export async function toAbsoluteFilename(fileName: string, baseName: string, isF
   return undefined;
 }
 
-export function replaceInvalidChars(fileName: string) : string {
-  fileName = fileName.replace(/[/\\?%*:|"<>]/g, '_');
-
-  return fileName.split('_').filter(obj => obj.length > 0).join('_');
+export function replaceInvalidChars(fileName: string): string {
+  const result = fileName.replace(/[/\\?%*:|"<>]/gu, '_');
+  return result.split('_').filter(obj => obj.length > 0).join('_');
 }
 
 
@@ -39,17 +37,16 @@ export function shortenFileName(fileName: string, maxChars = 50): string {
     if (item.length + charLength < maxChars) {
       result.push(item);
       charLength += (item.length + 1);
-    } else if(result.length === 0) {
+    } else if (result.length === 0) {
       result.push(item);
     }
   }
   const joinedString = result.reverse().join('_');
-  return joinedString.substring(Math.max(joinedString.length - maxChars, 0));
+  return joinedString.slice(Math.max(joinedString.length - maxChars, 0));
 }
 
 
-
-export async function findPackageJson(currentDir: string, files: Array<string> = ['package.json', '.httpyac.json','env']): Promise<string | undefined> {
+export async function findPackageJson(currentDir: string, files: Array<string> = ['package.json', '.httpyac.json', 'env']): Promise<string | undefined> {
   for (const file of files) {
     try {
       const dir = join(currentDir, file);
@@ -77,7 +74,7 @@ export async function parseJson<T>(fileName: string) : Promise<T | undefined> {
 }
 
 
-export async function getHttpacJsonConfig(rootDir: string) : Promise<EnvironmentConfig | undefined>{
+export async function getHttpacJsonConfig(rootDir: string) : Promise<EnvironmentConfig | undefined> {
   let result = await parseJson<EnvironmentConfig>(join(rootDir, '.httpyac.json'));
   if (!result) {
     result = (await parseJson<Record<string, EnvironmentConfig>>(join(rootDir, 'package.json')))?.httpyac;

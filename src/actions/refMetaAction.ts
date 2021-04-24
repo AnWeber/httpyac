@@ -47,4 +47,3 @@ export class RefMetaAction implements HttpRegionAction {
     return true;
   }
 }
-

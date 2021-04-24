@@ -1,6 +1,6 @@
 import { Variables, EnvironmentProvider } from '../models';
 import { join } from 'path';
-import {promises as fs, watchFile, unwatchFile } from 'fs';
+import { promises as fs, watchFile, unwatchFile } from 'fs';
 import { log } from '../logger';
 import { environmentStore } from './environmentStore';
 
