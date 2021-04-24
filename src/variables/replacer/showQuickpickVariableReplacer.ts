@@ -1,8 +1,8 @@
-import { ProcessorContext, VariableReplacer } from '../../models';
+import { ProcessorContext, VariableReplacer, VariableReplacerType } from '../../models';
 
 
 export class ShowQuickpickVariableReplacer implements VariableReplacer {
-  type = 'showQuickpick';
+  type = VariableReplacerType.showQuickPick;
   constructor(private readonly showListPrompt: (message: string, values: string[]) => Promise<string | undefined>) { }
 
   async replace(text: string, _type: string, context: ProcessorContext): Promise<string | undefined> {

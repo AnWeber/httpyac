@@ -1,11 +1,11 @@
-import { ProcessorContext, VariableReplacer } from '../../models';
+import { ProcessorContext, VariableReplacer, VariableReplacerType } from '../../models';
 import { CancelableRequest, OptionsOfUnknownResponseBody, Response } from 'got';
 import { createHash } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { URL } from 'url';
 
 export class DigestAuthVariableReplacer implements VariableReplacer {
-  type = 'digestAuth';
+  type = VariableReplacerType.digestAuth;
   async replace(text: string, type: string, { request }: ProcessorContext): Promise<string | undefined> {
     if (type.toLowerCase() === 'authorization' && text && request) {
       const match = /^\s*(d|D)(i|I)(g|G)(e|E)(s|S)(t|T)\s+(?<user>[^\s]*)\s+(?<password>([^\s]+.*))$/iu.exec(text);

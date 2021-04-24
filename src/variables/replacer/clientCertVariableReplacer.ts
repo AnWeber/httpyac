@@ -1,15 +1,15 @@
-import { ClientCertificateOptions, HttpFile, HttpRequest, ProcessorContext, VariableReplacer, VariableReplacerType } from '../../models';
+import { ClientCertificateOptions, HttpFile, HttpRequest, ProcessorContext, VariableReplacer, VariableReplacerType, VariableType } from '../../models';
 import { toAbsoluteFilename } from '../../utils';
 import { promises as fs } from 'fs';
 import { URL } from 'url';
 import { environmentStore } from '../../environments';
 
 export class ClientCertVariableReplacer implements VariableReplacer {
-  type = 'clientCert';
-  async replace(text: string, type: VariableReplacerType | string, context: ProcessorContext): Promise<string | undefined> {
+  type = VariableReplacerType.clientCertificate;
+  async replace(text: string, type: VariableType | string, context: ProcessorContext): Promise<string | undefined> {
     const { request, httpRegion, httpFile } = context;
     if (request && !httpRegion.metaData.noClientCert) {
-      if (type === VariableReplacerType.url && environmentStore.environmentConfig?.clientCertificates) {
+      if (type === VariableType.url && environmentStore.environmentConfig?.clientCertificates) {
         const url = new URL(text);
         const clientCertifcateOptions = environmentStore.environmentConfig?.clientCertificates[url.host];
         if (clientCertifcateOptions) {

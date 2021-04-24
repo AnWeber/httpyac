@@ -1,9 +1,9 @@
-import { ProcessorContext, VariableReplacer } from '../../models';
+import { ProcessorContext, VariableReplacer, VariableReplacerType } from '../../models';
 
 const lastValue: Record<string, string> = {};
 
 export class ShowInputBoxVariableReplacer implements VariableReplacer {
-  type = 'showInputBox';
+  type = VariableReplacerType.showInputBox;
   constructor(private readonly showInputPrompt: (message: string, defaultValue: string) => Promise<string | undefined>) { }
 
   async replace(text: string, _type: string, context: ProcessorContext): Promise<string | undefined> {

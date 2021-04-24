@@ -1,4 +1,4 @@
-export enum VariableReplacerType{
+export enum VariableType{
   variable ='Variable',
   url = 'Url',
   body = 'Body',

@@ -1,10 +1,10 @@
-import { ActionType, HttpRegionAction, HttpRequest, HttpRequestBodyLine, ProcessorContext, VariableReplacerType } from '../models';
+import { ActionType, HttpRegionAction, HttpRequest, HttpRequestBodyLine, ProcessorContext, VariableType } from '../models';
 import { replaceVariables } from './variableAction';
 import { isString } from '../utils';
 import { log } from '../logger';
 
 
-type VarReplacer = (value: string, type: VariableReplacerType | string) => Promise<string | undefined>;
+type VarReplacer = (value: string, type: VariableType | string) => Promise<string | undefined>;
 
 export class VariableReplacerAction implements HttpRegionAction {
   type = ActionType.variableReplacer;
@@ -17,7 +17,7 @@ export class VariableReplacerAction implements HttpRegionAction {
         cancel = true;
       };
 
-      const replacer: VarReplacer = async (value: string, type: VariableReplacerType | string) => {
+      const replacer: VarReplacer = async (value: string, type: VariableType | string) => {
         if (!cancel) {
           return await replaceVariables(value, type, context);
         }
@@ -27,7 +27,7 @@ export class VariableReplacerAction implements HttpRegionAction {
 
       if (context.request.url) {
         log.trace('variableReplacer replace url');
-        context.request.url = await replacer(context.request.url, VariableReplacerType.url) || context.request.url;
+        context.request.url = await replacer(context.request.url, VariableType.url) || context.request.url;
       }
       await this.replaceVariablesInBody(context.request, replacer);
       await this.replaceVariablesInHeader(context.request, replacer);
@@ -40,12 +40,12 @@ export class VariableReplacerAction implements HttpRegionAction {
     if (replacedReqeust.body) {
       log.trace('variableReplacer replace body');
       if (isString(replacedReqeust.body)) {
-        replacedReqeust.body = await replacer(replacedReqeust.body, VariableReplacerType.body);
+        replacedReqeust.body = await replacer(replacedReqeust.body, VariableType.body);
       } else if (Array.isArray(replacedReqeust.body)) {
         const replacedBody: Array<HttpRequestBodyLine> = [];
         for (const obj of replacedReqeust.body) {
           if (isString(obj)) {
-            const value = await replacer(obj, VariableReplacerType.body);
+            const value = await replacer(obj, VariableType.body);
             if (value) {
               replacedBody.push(value);
             }

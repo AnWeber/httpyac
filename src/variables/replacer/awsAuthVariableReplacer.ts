@@ -1,9 +1,9 @@
-import { ProcessorContext, VariableReplacer } from '../../models';
+import { ProcessorContext, VariableReplacer, VariableReplacerType } from '../../models';
 import { URL } from 'url';
 import aws4 = require('aws4');
 
 export class AwsAuthVariableReplacer implements VariableReplacer {
-  type = 'aws';
+  type = VariableReplacerType.aws;
 
   async replace(text: string, type: string, { request }: ProcessorContext) : Promise<string | undefined> {
     if (type.toLowerCase() === 'authorization' && text && request?.url) {

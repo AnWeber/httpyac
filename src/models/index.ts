@@ -22,7 +22,7 @@ export * from './parserContextData';
 export * from './processorContext';
 export * from './variableReplacer';
 export * from './variableProvider';
-export * from './variableReplacerType';
+export * from './variableType';
 export * from './variables';
 export * from './testResult';
 export * from './userSession';

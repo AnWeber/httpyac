@@ -1,3 +1,18 @@
+## 2.5.0 (2021-04-24)
+
+#### Breaking Change
+
+[Action](https://github.com/AnWeber/httpyac/blob/main/src/models/httpRegionAction.ts#L7) and [VariableReplacer](https://github.com/AnWeber/httpyac/blob/main/src/models/variableReplacer.ts#L5) changed to object to better support trust feature in future releases
+
+#### Features
+
+* better static code analysis
+
+#### Fix
+
+* ref and forceRef support is fixed
+* error on executing httpRegionScript
+
 ## 2.4.0 (2021-04-15)
 
 #### Features

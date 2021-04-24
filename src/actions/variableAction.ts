@@ -1,4 +1,4 @@
-import { ActionType, HttpRegionAction, ProcessorContext, VariableReplacerType } from '../models';
+import { ActionType, HttpRegionAction, ProcessorContext, VariableType } from '../models';
 import { httpYacApi } from '../httpYacApi';
 import { log } from '../logger';
 
@@ -17,7 +17,7 @@ export class VariableAction implements HttpRegionAction {
       };
       for (const [key, value] of Object.entries(this.data)) {
         if (result) {
-          context.variables[key] = await replaceVariables(value, VariableReplacerType.variable, context);
+          context.variables[key] = await replaceVariables(value, VariableType.variable, context);
         }
       }
     }
@@ -26,7 +26,7 @@ export class VariableAction implements HttpRegionAction {
 }
 
 
-export async function replaceVariables(text: string, type: VariableReplacerType | string, context: ProcessorContext): Promise<string | undefined> {
+export async function replaceVariables(text: string, type: VariableType | string, context: ProcessorContext): Promise<string | undefined> {
   let result: string | undefined = text;
   for (const variableReplacer of httpYacApi.variableReplacers) {
     if (result) {

@@ -1,8 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
-import { VariableReplacer } from '../../models';
+import { VariableReplacer, VariableReplacerType } from '../../models';
 
 export class IntellijVariableReplacer implements VariableReplacer {
-  type = 'intellij';
+  type = VariableReplacerType.intellijDynamic;
   async replace(text: string): Promise<string | undefined> {
 
     const variableRegex = /\{{2}(.+?)\}{2}/gu;

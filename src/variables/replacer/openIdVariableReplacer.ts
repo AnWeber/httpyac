@@ -1,10 +1,10 @@
-import { ProcessorContext, HttpClient, UserSession, VariableReplacer } from '../../models';
+import { ProcessorContext, HttpClient, UserSession, VariableReplacer, VariableReplacerType } from '../../models';
 import { userSessionStore } from '../../environments';
 import * as oauth from './oauth';
 import { log } from '../../logger';
 
 export class OpenIdVariableReplacer implements VariableReplacer {
-  type = 'openId';
+  type = VariableReplacerType.oauth2;
   async replace(text: string, type: string, context: ProcessorContext): Promise<string | undefined> {
     if (type.toLowerCase() === 'authorization' && text) {
       const match = /^\s*(openid|oauth2)\s+(?<flow>[^\s]*)\s+(?<variablePrefix>[^\s]*)\s*((token_exchange)\s+(?<tokenExchangePrefix>[^\s]*))?\s*$/iu.exec(text);

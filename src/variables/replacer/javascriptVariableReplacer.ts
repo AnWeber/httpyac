@@ -1,10 +1,10 @@
-import { ProcessorContext, VariableReplacer } from '../../models';
+import { ProcessorContext, VariableReplacer, VariableReplacerType } from '../../models';
 import { executeScript } from '../../actions';
 import { isString, toMultiLineArray } from '../../utils';
 
 
 export class JavascriptVariableReplacer implements VariableReplacer {
-  type = 'javascript';
+  type = VariableReplacerType.javascript;
   async replace(text: string, _type: string, context: ProcessorContext): Promise<string | undefined> {
     const { httpRegion, httpFile, variables, progress } = context;
     const variableRegex = /\{{2}([^}{2}]+)\}{2}/gu;
