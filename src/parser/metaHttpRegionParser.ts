@@ -6,7 +6,7 @@ import { toAbsoluteFilename } from '../utils';
 import { RefMetaAction } from '../actions';
 export class MetaHttpRegionParser implements HttpRegionParser {
   private static isMetaTag(textLine: string) {
-    return /^\s*(#{1,}|\/{2})/u.test(textLine);
+    return /^\s*(#+|\/{2})/u.test(textLine);
   }
 
   private isDelimiter(textLine: string) {
@@ -25,7 +25,7 @@ export class MetaHttpRegionParser implements HttpRegionParser {
         if (this.isDelimiter(textLine)) {
           result.newRegion = true;
         } else {
-          const match = /^\s*(#{1,}|\/{2,})\s+@(?<key>[^\s]*)(\s+)?"?(?<value>.*)?"?$/u.exec(textLine);
+          const match = /^\s*(#+|\/{2,})\s+@(?<key>[^\s]*)(\s+)?"?(?<value>.*)?"?$/u.exec(textLine);
 
           if (match && match.groups && match.groups.key) {
             const symbol: HttpSymbol = {
