@@ -81,6 +81,7 @@ httpyac --version
   -e   --env          list of environemnts
   -h   --help         help
        --insecure     allow insecure server connections when using ssl
+  -i   --interactive  do not exit the program after request, go back to selection
   -l   --line         line of the region
   -n   --name         name of the region
   -r   --repeat       repeat count for requests

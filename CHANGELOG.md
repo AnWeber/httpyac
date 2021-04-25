@@ -1,12 +1,13 @@
 ## 2.5.0 (2021-04-24)
 
-#### Breaking Change
+#### Breaking Changes
 
-[Action](https://github.com/AnWeber/httpyac/blob/main/src/models/httpRegionAction.ts#L7) and [VariableReplacer](https://github.com/AnWeber/httpyac/blob/main/src/models/variableReplacer.ts#L5) changed to object to better support trust feature in future releases
-
+* [Action](https://github.com/AnWeber/httpyac/blob/main/src/models/httpRegionAction.ts#L7) method changed to process instead of processor
+*  [VariableReplacer](https://github.com/AnWeber/httpyac/blob/main/src/models/variableReplacer.ts#L5) changed to object with replace method, to implement better trust support
 #### Features
 
 * better static code analysis
+* interactive mode, which do not close cli command
 
 #### Fix
 

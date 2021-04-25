@@ -21,6 +21,7 @@ interface HttpCliOptions{
   help?: boolean,
   httpRegionLine?: number,
   httpRegionName?: string,
+  interactive?: boolean,
   rejectUnauthorized?: boolean;
   repeat?: RepeatOptions,
   requestTimeout?: number;
@@ -62,8 +63,12 @@ export async function send(rawArgs: string[]) : Promise<void> {
     }
 
     if (httpFile) {
-      const sendContext = await getSendContext(httpFile, cliOptions, environmentConfig);
-      await httpYacApi.send(sendContext);
+      let isFirstRequest = true;
+      while (cliOptions.interactive || isFirstRequest) {
+        const sendContext = await getSendContext(httpFile, cliOptions, environmentConfig);
+        await httpYacApi.send(sendContext);
+        isFirstRequest = false;
+      }
     } else {
       renderHelp();
       return;
@@ -89,6 +94,7 @@ function parseCliOptions(rawArgs: string[]): HttpCliOptions | undefined {
         '--env': [String],
         '--help': Boolean,
         '--insecure': Boolean,
+        '--interactive': Boolean,
         '--line': Number,
         '--name': String,
         '--repeat': Number,
@@ -100,6 +106,7 @@ function parseCliOptions(rawArgs: string[]): HttpCliOptions | undefined {
 
         '-e': '--env',
         '-h': '--help',
+        '-i': '--interactive',
         '-l': '--line',
         '-n': '--name',
         '-v': '--verbose'
@@ -117,6 +124,7 @@ function parseCliOptions(rawArgs: string[]): HttpCliOptions | undefined {
       help: args['--help'],
       httpRegionLine: args['--line'],
       httpRegionName: args['--name'],
+      interactive: args['--interactive'],
       rejectUnauthorized: args['--insecure'] !== undefined ? !args['--insecure'] : undefined,
       repeat: args['--repeat'] ? {
         count: args['--repeat'],
@@ -146,6 +154,7 @@ usage: httpyac [options...] <file>
   -e   --env          list of environemnts
   -h   --help         help
        --insecure     allow insecure server connections when using ssl
+  -i   --interactive  do not exit the program after request, go back to selection
   -l   --line         line of the http requests
   -n   --name         name of the http requests
   -r   --repeat       repeat count for requests
