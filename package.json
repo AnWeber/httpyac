@@ -4,7 +4,7 @@
 	"license": "MIT",
 	"publisher": "weber.andreas",
 	"description": "HTTP/REST CLI Client for *.http files",
-	"version": "2.5.0",
+	"version": "2.5.1",
 	"homepage": "https://github.com/AnWeber/httpyac",
 	"repository": {
 		"type": "git",
@@ -31,7 +31,8 @@
 		"httpyac": "./bin/httpyac.js"
 	},
 	"scripts": {
-		"prepublishOnly": "npm run compile",
+		"prepublishOnly": "npm run tsc",
+		"tsc": "tsc -b",
 		"compile": "webpack --config ./webpack.config.js",
 		"watch": "webpack --watch --config ./webpack.config.js",
 		"lockfile-lint": "lockfile-lint --path package-lock.json --validate-https --allowed-hosts npm --validate-checksum --validate-integrity",

@@ -1,3 +1,9 @@
+
+## 2.5.1 (2021-04-25)
+
+#### Fix
+
+* declaration support added
 ## 2.5.0 (2021-04-25)
 
 #### Breaking Changes
