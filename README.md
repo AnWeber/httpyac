@@ -76,6 +76,7 @@ httpyac --version
 ```shell
 > httpyac --help
 
+usage: httpyac [options...] <file or glob pattern>
        --all          execute all regions in a http file
        --editor       enter a new request and execute it
   -e   --env          list of environemnts

@@ -25,8 +25,8 @@
 		"api",
 		"rest-client"
 	],
-	"main": "./src/index.ts",
-	"types2": "./dist/index.d.ts",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
 	"bin": {
 		"httpyac": "./bin/httpyac.js"
 	},
@@ -71,6 +71,7 @@
 		"dotenv": "^8.2.0",
 		"encodeurl": "^1.0.2",
 		"filesize": "^6.3.0",
+		"globby": "^11.0.3",
 		"got": "^11.8.2",
 		"http-proxy-agent": "^4.0.1",
 		"https-proxy-agent": "^5.0.0",

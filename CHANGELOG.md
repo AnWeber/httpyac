@@ -8,6 +8,7 @@
 
 * better static code analysis
 * interactive mode, which do not close cli command
+* glob pattern support for filename
 
 #### Fix
 

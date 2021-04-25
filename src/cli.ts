@@ -2,7 +2,7 @@ import arg from 'arg';
 import inquirer from 'inquirer';
 import { promises as fs } from 'fs';
 import { join, isAbsolute } from 'path';
-import { EnvironmentConfig, HttpFile, HttpFileSendContext, HttpRegion, HttpRegionSendContext, HttpSymbolKind, RepeatOptions, RepeatOrder, SettingsConfig } from './models';
+import { EnvironmentConfig, HttpFile, HttpRegion, HttpSymbolKind, RepeatOptions, RepeatOrder, SettingsConfig } from './models';
 import { gotHttpClientFactory } from './gotHttpClientFactory';
 import { httpFileStore } from './httpFileStore';
 import { httpYacApi } from './httpYacApi';
@@ -12,6 +12,7 @@ import { environmentStore } from './environments';
 import { NoteMetaHttpRegionParser, SettingsScriptHttpRegionParser } from './parser';
 import { ShowInputBoxVariableReplacer, ShowQuickpickVariableReplacer } from './variables/replacer';
 import { testSymbols } from './actions';
+import { default as globby } from 'globby';
 
 interface HttpCliOptions{
   activeEnvironments?: Array<string>,
@@ -48,7 +49,7 @@ export async function send(rawArgs: string[]) : Promise<void> {
   const environmentConfig = await initEnviroment(cliOptions);
 
   try {
-    let httpFile: HttpFile | undefined;
+    const httpFiles: HttpFile[] = [];
 
     if (cliOptions.editor) {
       const answer = await inquirer.prompt([{
@@ -56,17 +57,43 @@ export async function send(rawArgs: string[]) : Promise<void> {
         message: 'input http request',
         name: 'httpFile'
       }]);
-      httpFile = await httpFileStore.getOrCreate(process.cwd(), async () => answer.httpFile, 0);
+      const file = await httpFileStore.getOrCreate(process.cwd(), async () => answer.httpFile, 0);
+      httpFiles.push(file);
     } else if (cliOptions.fileName) {
-      const fileName = isAbsolute(cliOptions.fileName) ? cliOptions.fileName : join(process.cwd(), cliOptions.fileName);
-      httpFile = await httpFileStore.getOrCreate(cliOptions.fileName, async () => await fs.readFile(fileName, 'utf8'), 0);
+      const paths = await globby(cliOptions.fileName, {
+        expandDirectories: {
+          files: ['*.rest', '*.http'],
+          extensions: ['http', 'rest']
+        }
+      });
+
+      for (const path of paths) {
+        const httpFile = await httpFileStore.getOrCreate(path, async () => await fs.readFile(path, 'utf8'), 0);
+        httpFiles.push(httpFile);
+      }
+
+
     }
 
-    if (httpFile) {
+    if (httpFiles.length > 0) {
       let isFirstRequest = true;
       while (cliOptions.interactive || isFirstRequest) {
-        const sendContext = await getSendContext(httpFile, cliOptions, environmentConfig);
-        await httpYacApi.send(sendContext);
+        const selection = await selectAction(httpFiles, cliOptions);
+
+        const context = {
+          httpClient: gotHttpClientFactory({
+            ...environmentConfig.request,
+            proxy: process.env.http_proxy
+          }),
+          repeat: cliOptions.repeat,
+        };
+        if (selection) {
+          await httpYacApi.send(Object.assign(context, selection));
+        } else {
+          for (const httpFile of httpFiles) {
+            await httpYacApi.send(Object.assign(context, { httpFile }));
+          }
+        }
         isFirstRequest = false;
       }
     } else {
@@ -148,7 +175,7 @@ function parseCliOptions(rawArgs: string[]): HttpCliOptions | undefined {
 function renderHelp() {
   const helpMessage = `send http requests of .http or .rest
 
-usage: httpyac [options...] <file>
+usage: httpyac [options...] <file or glob pattern>
        --all          execute all http requests in a http file
        --editor       enter a new request and execute it
   -e   --env          list of environemnts
@@ -168,43 +195,35 @@ usage: httpyac [options...] <file>
 }
 
 
-async function getSendContext(httpFile: HttpFile,
-  cliOptions: HttpCliOptions,
-  environmentConfig: SettingsConfig): Promise<HttpFileSendContext | HttpRegionSendContext> {
-  const request = {
-    ...environmentConfig.request,
-    proxy: process.env.http_proxy
-  };
-  const sendContext: HttpFileSendContext | HttpRegionSendContext = {
-    httpFile,
-    httpClient: gotHttpClientFactory(request),
-    repeat: cliOptions.repeat,
-  };
+async function selectAction(httpFiles: HttpFile[], cliOptions: HttpCliOptions): Promise<{ httpRegion?: HttpRegion | undefined, httpFile: HttpFile } | false> {
+  if (httpFiles.length === 1) {
+    const httpFile = httpFiles[0];
+    const httpRegion = getHttpRegion(httpFile, cliOptions);
+    if (httpRegion) {
+      return {
+        httpFile,
+        httpRegion
+      };
+    }
+  }
 
-  if (cliOptions.httpRegionName) {
-    Object.assign(sendContext, {
-      httpRegion: httpFile.httpRegions.find(obj => obj.metaData.name === cliOptions.httpRegionName)
-    });
-  } else if (cliOptions.httpRegionLine) {
-    Object.assign(sendContext, {
-      httpRegion: httpFile.httpRegions
-        .find(obj => cliOptions.httpRegionLine
-          && obj.symbol.startLine <= cliOptions.httpRegionLine
-          && obj.symbol.endLine >= cliOptions.httpRegionLine)
-    });
-  } else if (!cliOptions.allRegions && httpFile.httpRegions.length > 1) {
+  if (!cliOptions.allRegions) {
+    const httpRegionMap: Record<string, { httpRegion?: HttpRegion | undefined, httpFile: HttpFile }> = {};
+    const hasManyFiles = httpFiles.length > 0;
+    for (const httpFile of httpFiles) {
+      httpRegionMap[hasManyFiles ? `${httpFile.fileName}: all` : 'all'] = { httpFile };
 
-    const httpRegionMap = httpFile.httpRegions.reduce((prev: Record<string, HttpRegion| false>, current) => {
-      if (current.request) {
-        const line = current.symbol.children?.find(obj => obj.kind === HttpSymbolKind.requestLine)?.startLine || current.symbol.startLine;
-        const name = current.metaData.name || `${current.request.method} ${current.request.url} (line ${line + 1})`;
-        prev[name] = current;
+      for (const httpRegion of httpFile.httpRegions) {
+        if (httpRegion.request) {
+          const line = httpRegion.symbol.children?.find(obj => obj.kind === HttpSymbolKind.requestLine)?.startLine || httpRegion.symbol.startLine;
+          const name = httpRegion.metaData.name || `${httpRegion.request.method} ${httpRegion.request.url} (line ${line + 1})`;
+          httpRegionMap[hasManyFiles ? `${httpFile.fileName}: ${name}` : name] = {
+            httpRegion,
+            httpFile
+          };
+        }
       }
-      return prev;
-    }, {
-      'all': false
-    });
-
+    }
     const answer = await inquirer.prompt([{
       type: 'list',
       name: 'region',
@@ -212,12 +231,23 @@ async function getSendContext(httpFile: HttpFile,
       choices: Object.entries(httpRegionMap).map(([key]) => key),
     }]);
     if (answer.region && httpRegionMap[answer.region]) {
-      Object.assign(sendContext, {
-        httpRegion: httpRegionMap[answer.region]
-      });
+      return httpRegionMap[answer.region];
     }
   }
-  return sendContext;
+  return false;
+}
+
+function getHttpRegion(httpFile: HttpFile, cliOptions: HttpCliOptions) : HttpRegion | false {
+  let httpRegion: HttpRegion | false = false;
+  if (cliOptions.httpRegionName) {
+    httpRegion = httpFile.httpRegions.find(obj => obj.metaData.name === cliOptions.httpRegionName) || false;
+  } else {
+    httpRegion = httpFile.httpRegions
+      .find(obj => cliOptions.httpRegionLine
+        && obj.symbol.startLine <= cliOptions.httpRegionLine
+        && obj.symbol.endLine >= cliOptions.httpRegionLine) || false;
+  }
+  return httpRegion;
 }
 
 async function initEnviroment(cliOptions: HttpCliOptions) {
