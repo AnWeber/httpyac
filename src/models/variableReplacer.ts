@@ -16,6 +16,7 @@ export enum VariableReplacerType{
   oauth2 = 'oauth2',
   host = 'host',
   intellijDynamic = 'intellijDynamic',
+  restClientDynamic = 'restClientDynamic',
   javascript = 'javascript',
   showInputBox = 'showInputBox',
   showQuickPick = 'showQuickPick'

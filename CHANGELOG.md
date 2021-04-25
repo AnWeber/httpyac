@@ -1,4 +1,4 @@
-## 2.5.0 (2021-04-24)
+## 2.5.0 (2021-04-25)
 
 #### Breaking Changes
 
@@ -9,6 +9,7 @@
 * better static code analysis
 * interactive mode, which do not close cli command
 * glob pattern support for filename
+* rest client dynamic variable support ($guid, $randomInt, $timestamp, $datetime, $localDatetime, $processEnv, $dotenv)
 
 #### Fix
 

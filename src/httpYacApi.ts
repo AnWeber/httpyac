@@ -30,6 +30,7 @@ class HttpYacApi {
     ];
 
     this.variableReplacers = [
+      new replacer.RestClientVariableReplacer(),
       new replacer.IntellijVariableReplacer(),
       new replacer.JavascriptVariableReplacer(),
       new replacer.HostVariableReplacer(),

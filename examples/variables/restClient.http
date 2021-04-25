@@ -1,0 +1,40 @@
+
+GET /anything?q={{$guid}}
+
+GET /anything?q={{$randomInt 100 200}}
+
+GET /anything?q={{$timestamp]}}
+
+GET /anything?q={{$timestamp 2 h}}
+
+GET /anything?q={{$datetime rfc1123}}
+
+GET /anything?q={{$datetime rfc1123 2 h}}
+
+GET /anything?q={{$datetime iso8601}}
+
+GET /anything?q={{$datetime iso8601 2 h}}
+
+GET /anything?q={{$datetime "DD.MM.YYYY"}}
+
+GET /anything?q={{$datetime "DD.MM.YYYY" 2 d}}
+
+GET /anything?q={{$datetime 'DD.MM.YYYY'}}
+
+GET /anything?q={{$datetime 'DD.MM.YYYY' 3 d}}
+
+GET /anything?q={{$localDatetime rfc1123}}
+
+GET /anything?q={{$localDatetime rfc1123 2 h}}
+
+GET /anything?q={{$localDatetime iso8601}}
+
+GET /anything?q={{$localDatetime iso8601 2 h}}
+
+GET /anything?q={{$localDatetime "DD.MM.YYYY HH:mm"}}
+
+GET /anything?q={{$datetime "DD.MM.YYYY HH:mm" 2 d}}
+
+GET /anything?q={{$datetime 'DD.MM.YYYY HH:mm'}}
+
+GET /anything?q={{$datetime 'DD.MM.YYYY HH:mm' 3 d}}

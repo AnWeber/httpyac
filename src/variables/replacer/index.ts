@@ -6,5 +6,6 @@ export * from './hostVariableReplacer';
 export * from './intellijVariableReplacer';
 export * from './openIdVariableReplacer';
 export * from './javascriptVariableReplacer';
+export * from './restClientVariableReplacer';
 export * from './showInputBoxVariableReplacer';
 export * from './showQuickpickVariableReplacer';

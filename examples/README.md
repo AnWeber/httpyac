@@ -377,6 +377,18 @@ GET https://www.google.de?q={{searchVal}}
 
 > It is possible to create more complex scripts, but this is not recommended and you should use a separate script block instead.
 
+#### Rest Client Dynamic Variables
+[Rest Client dynamic variables](https://github.com/Huachao/vscode-restclient#system-variables) are partially supported.
+
+| Name | Description |
+| - | - |
+| $guid | generates a universally unique identifier (UUID-v4) |
+| $randomInt min max | generates a random integer between `min` and `max`. |
+| $timestamp [offset option] | generates the current UNIX timestamp |
+| $datetime rfc1123\|iso8601\|"custom format"\|'custom format' [offset option] | generates a datetime string in either ISO8601, RFC1123 or a custom display format |
+| $localDatetime rfc1123\|iso8601\|"custom format"\|'custom format' [offset option] | generates a local datetime string in either ISO8601, RFC1123 or a custom display format |
+
+[example](https://github.com/AnWeber/httpyac/blob/main/examples/variables/restClient.http)
 
 #### Intellij Dynamic Variables
 [Intellij dynamic variables](https://www.jetbrains.com/help/idea/exploring-http-syntax.html#dynamic-variables) are supported.
