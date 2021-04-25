@@ -1,10 +1,9 @@
 import { Variables, ProcessorContext, HttpRegion, HttpFile, ActionType, HttpRegionAction } from '../models';
 import { ScriptData, executeScript } from './javascriptAction';
-import { ok } from 'assert';
-import { log, scriptConsole, popupService } from '../logger';
+import { log, popupService } from '../logger';
 import { toAbsoluteFilename } from '../utils';
 import { promises as fs } from 'fs';
-import { testFactory } from './testMethod';
+import * as intellij from './intellij';
 
 export interface IntellijScriptData{
   fileName: string;
@@ -17,7 +16,7 @@ export class IntellijAction implements HttpRegionAction {
   constructor(private readonly scriptData: ScriptData | IntellijScriptData) { }
 
   async process({ httpRegion, httpFile, variables }: ProcessorContext): Promise<boolean> {
-    const intellijVars = initIntellijVariables(httpRegion, variables);
+    const intellijVars = initIntellijVariables(httpRegion, variables, httpFile.activeEnvironment);
 
     let data: ScriptData;
     if (this.isIntellijScriptData(this.scriptData)) {
@@ -32,7 +31,12 @@ export class IntellijAction implements HttpRegionAction {
     } else {
       data = this.scriptData;
     }
-    await executeScript({ script: data.script, fileName: httpFile.fileName, variables: intellijVars, lineOffset: data.lineOffset + 1 });
+    await executeScript({
+      script: data.script,
+      fileName: httpFile.fileName,
+      variables: intellijVars,
+      lineOffset: data.lineOffset + 1
+    });
     return true;
   }
 
@@ -61,70 +65,15 @@ export class IntellijAction implements HttpRegionAction {
   }
 }
 
-export class HttpClient {
-  global: HttpClientVariables;
-  constructor(private readonly httpRegion: HttpRegion, variables: Variables) {
-    this.global = new HttpClientVariables(variables);
-  }
-  test(testName: string, func: () => void): void {
-    testFactory(this.httpRegion)(testName, func);
-  }
-  assert(condition: boolean, message?: string) : void {
-    ok(condition, message);
-  }
-  log(text: string): void {
-    scriptConsole.info(text);
-  }
-}
 
-class HttpClientVariables {
-  constructor(private readonly variables: Variables) { }
-  set(varName: string, varValue: string): void {
-    this.variables[varName] = varValue;
-  }
-  get(varName: string): unknown {
-    return this.variables[varName];
-  }
-  isEmpty(): boolean {
-    return Object.entries(this.variables).length === 0;
-  }
-  clear(varName: string): void {
-    delete this.variables[varName];
-  }
-  clearAll(): void {
-    for (const [key] of Object.entries(this.variables)) {
-      delete this.variables[key];
-    }
-  }
-}
-
-function initIntellijVariables(httpRegion: HttpRegion, variables: Variables) {
+function initIntellijVariables(httpRegion: HttpRegion, variables: Variables, env: string[] | undefined) {
   let response: unknown;
   if (httpRegion.response) {
-    response = {
-      body: httpRegion.response.parsedBody || httpRegion.response.body,
-      headers: {
-        valueOf: (headerName: string) => {
-          if (httpRegion.response) {
-            return httpRegion.response.headers[headerName];
-          }
-          return undefined;
-        },
-        valuesOf: (headerName: string) => {
-          if (httpRegion.response) {
-            return [httpRegion.response.headers[headerName]];
-          }
-          return undefined;
-        }
-      },
-      status: httpRegion.response.statusCode,
-      contentType: httpRegion.response.contentType,
-    };
+    response = new intellij.IntellijHttpResponse(httpRegion.response);
   }
-  const client = new HttpClient(httpRegion, variables);
-  const intellijVars = {
+  const client = new intellij.IntellijHttpClient(httpRegion, variables, env);
+  return {
     client,
     response,
   };
-  return intellijVars;
 }

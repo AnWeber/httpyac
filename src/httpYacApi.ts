@@ -26,6 +26,7 @@ class HttpYacApi {
     this.variableProviders = [
       new provider.HttpFileImportsVariableProvider(),
       new provider.HttpFileVariableProvider(),
+      new provider.IntellijVariableProvider(),
     ];
 
     this.variableReplacers = [
