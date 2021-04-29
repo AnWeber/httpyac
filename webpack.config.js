@@ -29,39 +29,51 @@ module.exports = (env, argv) => {
           exclude: /node_modules/,
           use: [
             {
-              loader: 'thread-loader',
-              options: {
-                // there should be 1 cpu for the fork-ts-checker-webpack-plugin
-                workers: require('os').cpus().length - 1,
-              },
-            },
-            {
               loader: 'ts-loader',
-              options: {
-                happyPackMode: true
-              }
             }
           ]
         }
       ]
     },
-    plugins: [
-      new ForkTsCheckerWebpackPlugin({
-        typescript: {
-          diagnosticOptions: {
-            semantic: true,
-            syntactic: true,
-          },
-        },
-        eslint: {
-          files: ['./src/**/*.{ts,tsx,js,jsx}']
-        }
-      })
-    ],
+    plugins: [],
     cache: {
       type: 'memory',
     },
     externals: fs.readdirSync("node_modules"),
   };
+  if (argv.mode === 'development') {
+    config.module.rules.length = 0;
+    config.module.rules.push({
+      test: /\.ts$/,
+      exclude: /node_modules/,
+      use: [
+        {
+          loader: 'thread-loader',
+          options: {
+            // there should be 1 cpu for the fork-ts-checker-webpack-plugin
+            workers: require('os').cpus().length - 1,
+          },
+        },
+        {
+          loader: 'ts-loader',
+          options: {
+            happyPackMode: true
+          }
+        }
+      ]
+    });
+    config.plugins.push(new ForkTsCheckerWebpackPlugin({
+      typescript: {
+        diagnosticOptions: {
+          semantic: true,
+          syntactic: true,
+          declaration: true
+        },
+      },
+      eslint: {
+        files: ['./src/**/*.{ts,tsx,js,jsx}']
+      }
+    }));
+  }
   return config;
 }

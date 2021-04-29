@@ -31,10 +31,9 @@
 		"httpyac": "./bin/httpyac.js"
 	},
 	"scripts": {
-		"prepublishOnly": "npm run tsc",
-		"tsc": "tsc -b",
-		"compile": "webpack --config ./webpack.config.js",
-		"watch": "webpack --watch --config ./webpack.config.js",
+		"prepublishOnly": "npm run compile",
+		"compile": "webpack --config ./webpack.config.js --mode=production",
+		"watch": "webpack --watch --config ./webpack.config.js --mode=development",
 		"lockfile-lint": "lockfile-lint --path package-lock.json --validate-https --allowed-hosts npm --validate-checksum --validate-integrity",
 		"eslint": "eslint src --ext ts",
 		"lint": "npm run eslint && npm run lockfile-lint",
