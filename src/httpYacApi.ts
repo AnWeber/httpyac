@@ -1,9 +1,9 @@
-import { HttpFileSendContext, HttpRegionSendContext, HttpRegionParser, VariableReplacer, VariableProvider } from './models';
+import { HttpFileSendContext, HttpRegionSendContext, HttpRegionParser, VariableReplacer, VariableProvider, HttpRegionsSendContext } from './models';
 import * as parser from './parser';
 import { provider, replacer } from './variables';
-import { sendHttpFile, sendHttpRegion, isHttpRegionSendContext } from './utils';
+import * as utils from './utils';
 
-class HttpYacApi {
+export class HttpYacApi {
   readonly httpRegionParsers: Array<HttpRegionParser>;
   readonly variableProviders: Array<VariableProvider>;
   readonly variableReplacers: Array<VariableReplacer>;
@@ -47,12 +47,14 @@ class HttpYacApi {
    * process one httpRegion of HttpFile
    * @param httpFile httpFile
    */
-  async send(context: HttpFileSendContext | HttpRegionSendContext) {
-    if (isHttpRegionSendContext(context)) {
-      return await sendHttpRegion(context);
+  async send(context: HttpFileSendContext | HttpRegionSendContext | HttpRegionsSendContext) : Promise<boolean> {
+    if (utils.isHttpRegionSendContext(context)) {
+      return await utils.sendHttpRegion(context);
     }
-    return await sendHttpFile(context);
-
+    if (utils.isHttpRegionsSendContext(context)) {
+      return await utils.sendHttpRegions(context);
+    }
+    return await utils.sendHttpFile(context);
   }
 }
 

@@ -1,65 +1,44 @@
 import { EOL } from 'os';
-import { HttpResponse, HttpTimings, TestResult } from '../models';
+import { ContentType, HttpResponse, HttpTimings, TestResult } from '../models';
 import { isString, toMultiLineArray } from './stringUtils';
+import * as mimeTypeUtils from './mimeTypeUtils';
 import { NormalizedOptions } from 'got';
 import { testSymbols } from '../actions';
 
-export enum MarkdownParts{
-  response,
-  request,
-  timings,
-  metaData,
-}
-
-export interface MarkDownOptions{
-  contentParts: MarkdownParts[]
-  responseBody?: boolean;
-  requestBody?: boolean;
+export function toMarkdown(response: HttpResponse, options?: {
+  responseBody?: boolean,
+  requestBody?: boolean,
+  timings?: boolean,
+  meta?: boolean,
   prettyPrint?: boolean;
-}
-
-
-export function toMarkdown(response: HttpResponse) : string {
-  const result: Array<string> = [];
-  if (response.request) {
-    result.push(...toMarkdownRequest(response.request, true));
-    result.push('');
-  }
-  result.push(...toMarkdownResponse(response, true));
-  return joinMarkdown(result);
-}
-
-export function toMarkdownPreview(response: HttpResponse, testResults?: Array<TestResult>) : string {
+  testResults?: Array<TestResult>,
+}) : string {
   const result: Array<string> = [];
 
-  result.push(...toMarkdownResponse(response, false));
   if (response.request) {
+    result.push(...toMarkdownRequest(response.request, {
+      body: !!options?.requestBody
+    }));
     result.push('');
-    result.push('---');
+  }
+  result.push(...toMarkdownResponse(response, {
+    prettyPrint: !!options?.prettyPrint,
+    body: !!options?.responseBody
+  }));
+
+  if (options?.testResults) {
     result.push('');
     result.push('');
-    result.push(...toMarkdownRequest(response.request, true));
+    result.push(...toMarkdownTestResults(options.testResults));
   }
 
-  if (testResults) {
-    result.push('');
-    result.push('---');
-    result.push('');
-    result.push('');
-    result.push(...toMarkdownTestResults(testResults));
-  }
-
-  if (response.timings) {
-    result.push('');
-    result.push('---');
+  if (options?.timings && response.timings) {
     result.push('');
     result.push('');
     result.push(...toMarkdownTimings(response.timings));
   }
 
-  if (response.meta) {
-    result.push('');
-    result.push('---');
+  if (options?.meta && response.meta) {
     result.push('');
     result.push('');
     result.push(...toMarkdownMeta(response.meta));
@@ -69,26 +48,53 @@ export function toMarkdownPreview(response: HttpResponse, testResults?: Array<Te
   return joinMarkdown(result);
 }
 
-export function toMarkdownResponse(response: HttpResponse, outputBody: boolean) : Array<string> {
+export function toMarkdownResponse(response: HttpResponse, options?: {
+  prettyPrint?: boolean;
+  body?: boolean;
+}) : Array<string> {
   const result: Array<string> = [];
-  result.push(`### HTTP${response.httpVersion || ''} **${response.statusCode}** - ${response.statusMessage}`);
+  result.push(`\`HTTP${response.httpVersion || ''} ${response.statusCode} - ${response.statusMessage}\``);
   result.push(...toMarkdownHeader(response.headers));
-  if (outputBody && isString(response.body)) {
+  if (options?.body && isString(response.body)) {
     result.push('');
-    result.push('```json');
-    result.push(joinMarkdown(toMultiLineArray(response.body)));
+    result.push(`\`\`\`${getMarkdownSyntax(response.contentType)}`);
+    result.push(joinMarkdown(toMultiLineArray(options.prettyPrint && response.parsedBody ? JSON.stringify(response.parsedBody, null, 2) : response.body)));
     result.push('```');
   }
   return result;
 }
 
-function toMarkdownRequest(request: NormalizedOptions, outputBody: boolean) : Array<string> {
+export function getMarkdownSyntax(contentType: ContentType | undefined) : string {
+  if (mimeTypeUtils.isMimeTypeJSON(contentType)) {
+    return 'json';
+  }
+  if (mimeTypeUtils.isMimeTypeXml(contentType)) {
+    return 'xml';
+  }
+  if (mimeTypeUtils.isMimeTypeHtml(contentType)) {
+    return 'html';
+  }
+  if (mimeTypeUtils.isMimeTypeJavascript(contentType)) {
+    return 'js';
+  }
+  if (mimeTypeUtils.isMimeTypeCSS(contentType)) {
+    return 'css';
+  }
+  if (mimeTypeUtils.isMimeTypeMarkdown(contentType)) {
+    return 'markdown';
+  }
+  return '';
+}
+
+function toMarkdownRequest(request: NormalizedOptions, options?: {
+  body?: boolean;
+}) : Array<string> {
   const result: Array<string> = [];
-  result.push(`### ${request.method} ${request.url}`);
+  result.push(`\`${request.method} ${request.url}\``);
   if (request.headers) {
     result.push(...toMarkdownHeader(request.headers));
   }
-  if (outputBody && isString(request.body)) {
+  if (options?.body && isString(request.body)) {
     result.push('');
     result.push('```json');
     result.push(joinMarkdown(toMultiLineArray(request.body)));
@@ -99,7 +105,8 @@ function toMarkdownRequest(request: NormalizedOptions, outputBody: boolean) : Ar
 
 function toMarkdownTestResults(testResults: Array<TestResult>) : Array<string> {
   const result: Array<string> = [];
-  result.push('| TestResults |  |  |');
+  result.push('`TestResults`');
+  result.push('|   |  |  |');
   result.push('| --- | --- | --- |');
   for (const testResult of testResults) {
     result.push(`| ${testResult.result ? testSymbols.ok : testSymbols.error} | ${testResult.message} | ${testResult.error?.displayMessage || ''} |`);
@@ -116,14 +123,15 @@ export function toMarkdownHeader(headers: Record<string, string | string[] | und
           val = value.join(', ');
         }
       }
-      return `**${key}**: ${val}`;
+      return `*${key}*: ${val}`;
     })
     .sort();
 }
 
 export function toMarkdownMeta(meta: Record<string, unknown>) : Array<string> {
   const result: Array<string> = [];
-  result.push('| Meta |  |');
+  result.push('`Meta`');
+  result.push('|   |  |');
   result.push('| --- | --- |');
   for (const [key, value] of Object.entries(meta)) {
     if (Array.isArray(value)) {
@@ -139,7 +147,9 @@ export function toMarkdownMeta(meta: Record<string, unknown>) : Array<string> {
 
 export function toMarkdownTimings(timings: HttpTimings) : Array<string> {
   const result: Array<string> = [];
-  result.push('| Timings |  |');
+
+  result.push('`Timings`');
+  result.push('|   |  |');
   result.push('| --- | --- |');
   result.push(...Object.entries(timings)
     .map(([key, value]) => `| ${key.toUpperCase()} | ${value}ms |`)

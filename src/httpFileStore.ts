@@ -9,8 +9,6 @@ interface HttpFileStoreEntry{
 }
 
 export class HttpFileStore {
-
-
   private readonly storeCache: Array<HttpFileStoreEntry> = [];
 
   private getFromStore(fileName: string, version: number) {
@@ -36,7 +34,7 @@ export class HttpFileStore {
     try {
       const httpFileStoreEntry: HttpFileStoreEntry = this.getFromStore(fileName, version);
       if (version > httpFileStoreEntry.version || !httpFileStoreEntry.httpFile) {
-        const httpFile = (await parseHttpFile(await getText(), fileName));
+        const httpFile = (await parseHttpFile(await getText(), fileName, this));
         httpFile.fileName = fileName;
         if (httpFileStoreEntry.httpFile) {
           httpFile.variablesPerEnv = httpFileStoreEntry.httpFile.variablesPerEnv;
@@ -58,6 +56,10 @@ export class HttpFileStore {
     }
   }
 
+  async parse(fileName: string, text: string) : Promise<HttpFile> {
+    return await parseHttpFile(text, fileName, this);
+  }
+
   remove(fileName: string) : void {
     const index = this.storeCache.findIndex(obj => obj.fileName === fileName);
     if (index >= 0) {
@@ -76,5 +78,3 @@ export class HttpFileStore {
     this.storeCache.length = 0;
   }
 }
-
-export const httpFileStore = new HttpFileStore();

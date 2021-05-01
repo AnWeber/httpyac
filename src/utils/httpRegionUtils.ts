@@ -1,7 +1,8 @@
 import { environmentStore } from '../environments';
+import { gotHttpClientFactory } from '../gotHttpClientFactory';
 import { httpYacApi } from '../httpYacApi';
 import { log } from '../logger';
-import { HttpFileSendContext, HttpRegionSendContext, ProcessorContext, HttpFile, Variables, HttpClient, HttpRegion } from '../models';
+import { HttpFileSendContext, HttpRegionSendContext, ProcessorContext, HttpFile, Variables, HttpClient, HttpRegion, HttpRegionsSendContext } from '../models';
 
 
 export function getRegionName(httpRegion: HttpRegion, defaultName = 'global'): string {
@@ -21,12 +22,48 @@ export function getRegionName(httpRegion: HttpRegion, defaultName = 'global'): s
   return defaultName;
 }
 
+
+export function initHttpClient() : HttpClient {
+  const request = {
+    ...environmentStore.environmentConfig?.request || {},
+    proxy: environmentStore.environmentConfig?.proxy
+  };
+  return gotHttpClientFactory(request);
+}
+
 export async function sendHttpRegion(context: HttpRegionSendContext): Promise<boolean> {
   const variables = await getVariables(context.httpFile);
   if (!context.httpRegion.metaData.disabled) {
-    if (await executeGlobalScripts(context.httpFile, variables, context.httpClient)) {
-      return await processHttpRegionActions({ variables, ...context }, true);
+    const processorContext = {
+      variables,
+      ...context,
+      httpClient: context.httpClient || initHttpClient()
+    };
+    if (await executeGlobalScripts(context.httpFile, variables, processorContext.httpClient)) {
+      return await processHttpRegionActions(processorContext, true);
     }
+  }
+  return false;
+}
+
+export async function sendHttpRegions(context: HttpRegionsSendContext): Promise<boolean> {
+  const variables = await getVariables(context.httpFile);
+  const httpClient = context.httpClient || initHttpClient();
+  if (await executeGlobalScripts(context.httpFile, variables, httpClient)) {
+    for (const httpRegion of context.httpRegions) {
+      if (!httpRegion.metaData.disabled) {
+        const processorContext: ProcessorContext = {
+          variables,
+          httpRegion,
+          ...context,
+          httpClient
+        };
+        if (!await processHttpRegionActions(processorContext, false)) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
   return false;
 }
@@ -42,10 +79,17 @@ export async function sendHttpFile(context: HttpFileSendContext): Promise<boolea
       log.debug(`${getRegionName(httpRegion)} disabled by predicate`);
       continue;
     }
-    await processHttpRegionActions({ httpRegion, variables, ...context });
+    const processorContext = {
+      variables,
+      httpRegion,
+      ...context,
+      httpClient: context.httpClient || initHttpClient()
+    };
+    await processHttpRegionActions(processorContext);
   }
   return true;
 }
+
 
 export async function executeGlobalScripts(httpFile: HttpFile, variables: Variables, httpClient: HttpClient): Promise<boolean> {
   for (const httpRegion of httpFile.httpRegions) {
@@ -58,7 +102,7 @@ export async function executeGlobalScripts(httpFile: HttpFile, variables: Variab
   return true;
 }
 
-async function getVariables(httpFile: HttpFile): Promise<Record<string, unknown>> {
+export async function getVariables(httpFile: HttpFile): Promise<Record<string, unknown>> {
   const variables = Object.assign({
   },
   (await environmentStore.getVariables(httpFile.activeEnvironment)),
@@ -97,4 +141,9 @@ export async function processHttpRegionActions(context: ProcessorContext, showPr
 export function isHttpRegionSendContext(context: HttpRegionSendContext | HttpFileSendContext): context is HttpRegionSendContext {
   const guard = context as HttpRegionSendContext;
   return !!guard?.httpRegion;
+}
+
+export function isHttpRegionsSendContext(context: HttpRegionSendContext | HttpFileSendContext | HttpRegionsSendContext): context is HttpRegionsSendContext {
+  const guard = context as HttpRegionsSendContext;
+  return Array.isArray(guard?.httpRegions);
 }

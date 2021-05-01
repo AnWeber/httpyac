@@ -17,16 +17,20 @@ export interface Progress{
 export interface HttpFileSendContext{
   httpFile: HttpFile;
   progress?: Progress;
-  httpClient: HttpClient;
+  httpClient?: HttpClient;
   httpRegionPredicate?: (obj: HttpRegion) => boolean;
 }
 
+export interface HttpRegionsSendContext extends HttpFileSendContext{
+  httpRegions: HttpRegion[];
+}
 
 export interface HttpRegionSendContext extends HttpFileSendContext{
   httpRegion: HttpRegion;
   repeat?: RepeatOptions
 }
 export interface ProcessorContext extends HttpRegionSendContext{
+  httpClient: HttpClient;
   variables: Variables;
   request?: HttpRequest;
   cancelVariableReplacer?: () => void;

@@ -1,9 +1,9 @@
 import { HttpFile, HttpSymbol, HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, HttpRegion } from '../models';
-import { httpFileStore } from '../httpFileStore';
 import { log } from '../logger';
 import { promises as fs } from 'fs';
 import { toAbsoluteFilename } from '../utils';
 import { RefMetaAction } from '../actions';
+import { HttpFileStore } from '../httpFileStore';
 export class MetaHttpRegionParser implements HttpRegionParser {
   private static isMetaTag(textLine: string) {
     return /^\s*(#+|\/{2})/u.test(textLine);
@@ -13,7 +13,7 @@ export class MetaHttpRegionParser implements HttpRegionParser {
     return /^#{3,}\s*$/u.test(textLine);
   }
 
-  async parse(lineReader: HttpRegionParserGenerator, { httpRegion, httpFile }: ParserContext): Promise<HttpRegionParserResult> {
+  async parse(lineReader: HttpRegionParserGenerator, { httpRegion, httpFile, httpFileStore }: ParserContext): Promise<HttpRegionParserResult> {
     const next = lineReader.next();
     if (!next.done) {
       const textLine = next.value.textLine;
@@ -64,7 +64,7 @@ export class MetaHttpRegionParser implements HttpRegionParser {
             switch (key) {
               case 'import':
                 if (match.groups.value) {
-                  await this.importHttpFile(httpFile, match.groups.value);
+                  await this.importHttpFile(httpFile, match.groups.value, httpFileStore);
                 }
                 break;
               case 'ref':
@@ -91,7 +91,7 @@ export class MetaHttpRegionParser implements HttpRegionParser {
     return false;
   }
 
-  async importHttpFile(httpFile: HttpFile, fileName: string): Promise<void> {
+  async importHttpFile(httpFile: HttpFile, fileName: string, httpFileStore: HttpFileStore): Promise<void> {
     try {
       const absoluteFileName = await toAbsoluteFilename(fileName, httpFile.fileName);
       if (absoluteFileName) {

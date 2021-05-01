@@ -2,42 +2,42 @@ import { LogChannels } from './logChannels';
 import { LogLevel } from './logLevel';
 import { logOutputProvider } from './logOutputProvider';
 
-class Logger {
+export class Logger {
   public level: LogLevel;
   constructor(private readonly channel: LogChannels) {
     this.level = LogLevel.warn;
   }
-  info(...params: unknown[]) {
+  info(...params: unknown[]): void {
     if (LogLevel.info >= this.level) {
       logOutputProvider.log(this.channel, LogLevel.info, ...params);
     }
   }
-  log(...params: unknown[]) {
+  log(...params: unknown[]): void {
     if (LogLevel.info >= this.level) {
       logOutputProvider.log(this.channel, LogLevel.info, ...params);
     }
   }
-  trace(...params: unknown[]) {
+  trace(...params: unknown[]): void {
     if (LogLevel.trace >= this.level) {
       logOutputProvider.log(this.channel, LogLevel.trace, ...params);
     }
   }
-  debug(...params: unknown[]) {
+  debug(...params: unknown[]): void {
     if (LogLevel.debug >= this.level) {
       logOutputProvider.log(this.channel, LogLevel.debug, ...params);
     }
   }
-  error(...params: unknown[]) {
+  error(...params: unknown[]): void {
     if (LogLevel.error >= this.level) {
       logOutputProvider.log(this.channel, LogLevel.error, ...params);
     }
   }
-  warn(...params: unknown[]) {
+  warn(...params: unknown[]): void {
     if (LogLevel.warn >= this.level) {
       logOutputProvider.log(this.channel, LogLevel.warn, ...params);
     }
   }
-  clear() {
+  clear(): void {
     logOutputProvider.clear(this.channel);
   }
 }

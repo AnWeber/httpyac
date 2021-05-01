@@ -2,9 +2,10 @@ import { HttpFile, HttpRegion, HttpSymbolKind, ParserContext } from '../models';
 import { toMultiLineString, toMultiLineArray, getRegionName } from '../utils';
 import { environmentStore } from '../environments/environmentStore';
 import { httpYacApi } from '../httpYacApi';
+import { HttpFileStore } from '../httpFileStore';
 
 
-export async function parseHttpFile(text: string, fileName: string): Promise<HttpFile> {
+export async function parseHttpFile(text: string, fileName: string, httpFileStore: HttpFileStore): Promise<HttpFile> {
 
   const httpFile: HttpFile = {
     httpRegions: [],
@@ -17,7 +18,8 @@ export async function parseHttpFile(text: string, fileName: string): Promise<Htt
   const parserContext: ParserContext = {
     httpFile,
     httpRegion: initHttpRegion(0),
-    data: {}
+    data: {},
+    httpFileStore
   };
   for (let line = 0; line < lines.length; line++) {
 
@@ -67,7 +69,7 @@ function closeHttpRegion(parserContext: ParserContext) {
 
 function setSource(httpRegions: Array<HttpRegion>, lines: Array<string>) {
   for (const httpRegion of httpRegions) {
-    httpRegion.source = toMultiLineString(lines.slice(httpRegion.symbol.startLine, httpRegion.symbol.endLine));
+    httpRegion.source = toMultiLineString(lines.slice(httpRegion.symbol.startLine, httpRegion.symbol.endLine + 1)).trim();
   }
 }
 

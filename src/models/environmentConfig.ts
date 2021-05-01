@@ -17,6 +17,9 @@ export interface EnvironmentConfig{
     prettyPrint?: boolean,
   }
 
+  request?: HttpRequest;
+  proxy?: string;
+
   /** default request headers if not overwritten */
   defaultHeaders?: Record<string, string>,
 
@@ -43,12 +46,10 @@ export interface EnvironmentConfig{
 
     /** search for http-client.env.json file next to *.http files */
     variableProviderEnabled?: boolean;
-  }
+  },
 }
 
 export interface SettingsConfig {
-  request?: HttpRequest;
-  proxy?: string;
 
   /** absolute or relative path to a script which gets executed for every http request in a file */
   httpRegionScript?: string;

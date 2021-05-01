@@ -3,8 +3,7 @@ import inquirer from 'inquirer';
 import { promises as fs } from 'fs';
 import { join, isAbsolute } from 'path';
 import { EnvironmentConfig, HttpFile, HttpRegion, HttpSymbolKind, RepeatOptions, RepeatOrder, SettingsConfig } from './models';
-import { gotHttpClientFactory } from './gotHttpClientFactory';
-import { httpFileStore } from './httpFileStore';
+import { HttpFileStore } from './httpFileStore';
 import { httpYacApi } from './httpYacApi';
 import { log, LogLevel } from './logger';
 import { findPackageJson, parseJson } from './utils';
@@ -46,10 +45,11 @@ export async function send(rawArgs: string[]) : Promise<void> {
     renderHelp();
     return;
   }
-  const environmentConfig = await initEnviroment(cliOptions);
+  await initEnviroment(cliOptions);
 
   try {
     const httpFiles: HttpFile[] = [];
+    const httpFileStore = new HttpFileStore();
 
     if (cliOptions.editor) {
       const answer = await inquirer.prompt([{
@@ -81,10 +81,6 @@ export async function send(rawArgs: string[]) : Promise<void> {
         const selection = await selectAction(httpFiles, cliOptions);
 
         const context = {
-          httpClient: gotHttpClientFactory({
-            ...environmentConfig.request,
-            proxy: process.env.http_proxy
-          }),
           repeat: cliOptions.repeat,
         };
         if (selection) {
@@ -250,7 +246,7 @@ function getHttpRegion(httpFile: HttpFile, cliOptions: HttpCliOptions) : HttpReg
   return httpRegion;
 }
 
-async function initEnviroment(cliOptions: HttpCliOptions) {
+async function initEnviroment(cliOptions: HttpCliOptions): Promise<void> {
   const environmentConfig: EnvironmentConfig & SettingsConfig = {
     log: {
       level: cliOptions.verbose ? LogLevel.trace : undefined,
@@ -275,8 +271,6 @@ async function initEnviroment(cliOptions: HttpCliOptions) {
     testSymbols.ok = '[x]';
     testSymbols.error = '[ ]';
   }
-
-  return environmentConfig;
 }
 
 function initHttpYacApiExtensions(config: EnvironmentConfig & SettingsConfig, rootDir: string | undefined) {
