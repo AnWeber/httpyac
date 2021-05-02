@@ -63,6 +63,7 @@ module.exports = (env, argv) => {
       ]
     });
     config.plugins.push(new ForkTsCheckerWebpackPlugin({
+      async: true,
       typescript: {
         diagnosticOptions: {
           semantic: true,
