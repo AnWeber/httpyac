@@ -34,7 +34,7 @@ class EnvironmentStore {
   async getVariables(environments: string[] | undefined): Promise<Variables> {
     const result: Array<Variables> = [];
 
-    if (environments) {
+    if (environments && environments.length > 0) {
       for (const env of environments) {
         if (!this.environments[env]) {
           const variables = Object.assign({}, ...(await Promise.all(this.environmentProviders.map(obj => obj.getVariables(env)))));
