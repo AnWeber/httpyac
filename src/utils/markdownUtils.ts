@@ -86,7 +86,7 @@ export function getMarkdownSyntax(contentType: ContentType | undefined) : string
   return '';
 }
 
-function toMarkdownRequest(request: NormalizedOptions, options?: {
+export function toMarkdownRequest(request: NormalizedOptions, options?: {
   body?: boolean;
 }) : Array<string> {
   const result: Array<string> = [];
@@ -103,13 +103,16 @@ function toMarkdownRequest(request: NormalizedOptions, options?: {
   return result;
 }
 
-function toMarkdownTestResults(testResults: Array<TestResult>) : Array<string> {
+export function toMarkdownTestResults(testResults: Array<TestResult>) : Array<string> {
   const result: Array<string> = [];
   result.push('`TestResults`');
-  result.push('|   |  |  |');
-  result.push('| --- | --- | --- |');
+  result.push('');
   for (const testResult of testResults) {
-    result.push(`| ${testResult.result ? testSymbols.ok : testSymbols.error} | ${testResult.message} | ${testResult.error?.displayMessage || ''} |`);
+    let message = `${testResult.result ? testSymbols.ok : testSymbols.error}: ${testResult.message}`;
+    if (testResult.error) {
+      message += ` (${testResult.error.displayMessage})`;
+    }
+    result.push(message);
   }
   return result;
 }
@@ -131,15 +134,14 @@ export function toMarkdownHeader(headers: Record<string, string | string[] | und
 export function toMarkdownMeta(meta: Record<string, unknown>) : Array<string> {
   const result: Array<string> = [];
   result.push('`Meta`');
-  result.push('|   |  |');
-  result.push('| --- | --- |');
+  result.push('');
   for (const [key, value] of Object.entries(meta)) {
     if (Array.isArray(value)) {
       if (value.length > 0) {
-        result.push(`| ${key} | ${value.join(',')} |`);
+        result.push(`*${key}*: ${value.join(',')}`);
       }
     } else {
-      result.push(`| ${key} | ${value} |`);
+      result.push(`*${key}*: ${value}`);
     }
   }
   return result;
@@ -149,11 +151,21 @@ export function toMarkdownTimings(timings: HttpTimings) : Array<string> {
   const result: Array<string> = [];
 
   result.push('`Timings`');
-  result.push('|   |  |');
-  result.push('| --- | --- |');
-  result.push(...Object.entries(timings)
-    .map(([key, value]) => `| ${key.toUpperCase()} | ${value}ms |`)
-    .sort());
+  result.push('');
+  result.push(`*Wait*: ${timings.wait || 0} ms`);
+  result.push(`*DNS*: ${timings.dns || 0} ms`);
+  result.push(`*TCP*: ${timings.tcp || 0} ms`);
+  if (timings.tls) {
+    result.push(`*TLS*: ${timings.tls} ms`);
+  }
+  if (timings.request) {
+    result.push(`*Reqeust*: ${timings.request} ms`);
+  }
+  result.push(`*First Byte*: ${timings.firstByte} ms`);
+  if (timings.download) {
+    result.push(`*Download*: ${timings.download} ms`);
+  }
+  result.push(`*Total*: ${timings.total} ms`);
   return result;
 }
 
