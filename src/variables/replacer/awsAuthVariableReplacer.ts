@@ -1,13 +1,14 @@
 import { ProcessorContext, VariableReplacer, VariableReplacerType } from '../../models';
 import { URL } from 'url';
 import aws4 = require('aws4');
+import { ParserRegex } from '../../parser';
 
 export class AwsAuthVariableReplacer implements VariableReplacer {
   type = VariableReplacerType.aws;
 
   async replace(text: string, type: string, { request }: ProcessorContext) : Promise<string | undefined> {
     if (type.toLowerCase() === 'authorization' && text && request?.url) {
-      const match = /^\s*(aws)\s+(?<accessKeyId>[^\s]*)\s+(?<secretAccessKey>[^\s]*)\s*(token:\s*(?<token>[^\s]*))?\s*(region:\s*(?<region>[^\s]*))?\s*(service:\s*(?<service>[^\s]*))?\s*$/iu.exec(text);
+      const match = ParserRegex.auth.aws.exec(text);
 
       if (match && match.groups && match.groups.accessKeyId && match.groups.secretAccessKey) {
         const credentials = {

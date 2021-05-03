@@ -2,15 +2,15 @@ import { HttpRegion, HttpRequest, HttpSymbol, HttpSymbolKind, HttpRegionParser, 
 
 import { isString, isStringEmpty, parseMimeType, isRequestMethod, getHeader } from '../utils';
 import * as actions from '../actions';
+import { ParserRegex } from './parserRegex';
 
 type RequestLineParserMethod = (text: string, line: number, request: HttpRequest) => false | { symbols: HttpSymbol[], actions?: HttpRegionAction[] };
 
-const REGEX_REQUESTLINE = /^\s*(?<method>GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE|PROPFIND|PROPPATCH|MKCOL|COPY|MOVE|LOCK|UNLOCK|CHECKOUT|CHECKIN|REPORT|MERGE|MKACTIVITY|MKWORKSPACE|VERSION-CONTROL|BASELINE-CONTROL)\s*(?<url>.+?)(\s+HTTP\/(?<version>(\S+)))?$/u;
 export class RequestHttpRegionParser implements HttpRegionParser {
 
   private getRequestLine(textLine: string, line: number): { request: HttpRequest, requestSymbols: Array<HttpSymbol> } {
     const requestSymbols: Array<HttpSymbol> = [];
-    const urlMatch = REGEX_REQUESTLINE.exec(textLine);
+    const urlMatch = ParserRegex.request.requestLine.exec(textLine);
     if (urlMatch && urlMatch.length > 1 && urlMatch.groups) {
       requestSymbols.push({
         name: urlMatch.groups.method,
@@ -65,7 +65,7 @@ export class RequestHttpRegionParser implements HttpRegionParser {
       return false;
     }
     if (httpRegion.request) {
-      if (REGEX_REQUESTLINE.exec(textLine)?.groups?.method) {
+      if (ParserRegex.request.requestLine.exec(textLine)?.groups?.method) {
         return true;
       }
       return false;
@@ -150,7 +150,7 @@ export class RequestHttpRegionParser implements HttpRegionParser {
 
 
   private parseDefaultHeaders(textLine: string, line: number) {
-    const fileHeaders = /^\s*\.{3}(?<variableName>[^\s]+)\s*$/u.exec(textLine);
+    const fileHeaders = ParserRegex.request.headersSpread.exec(textLine);
     if (fileHeaders?.groups?.variableName) {
       const val = textLine.trim();
       return {
@@ -170,7 +170,7 @@ export class RequestHttpRegionParser implements HttpRegionParser {
   }
 
   private parseUrlLine(textLine: string, line: number, httpRequest: HttpRequest) {
-    if (/^\s*(\/).*$/u.test(textLine)) {
+    if (ParserRegex.request.urlLine.test(textLine)) {
       const val = textLine.trim();
       httpRequest.url += val;
       return {
@@ -190,7 +190,7 @@ export class RequestHttpRegionParser implements HttpRegionParser {
 
 
   private parseQueryLine(textLine: string, line: number, httpRequest: HttpRequest) {
-    if (/^\s*(\?|&)([^=\s]+)=(.*)$/u.test(textLine)) {
+    if (ParserRegex.request.queryLine.test(textLine)) {
       const val = textLine.trim();
       httpRequest.url += val;
       return {
@@ -213,7 +213,7 @@ export class RequestHttpRegionParser implements HttpRegionParser {
     if (!httpRequest.headers) {
       httpRequest.headers = {};
     }
-    const headerMatch = /^\s*(?<key>[\w-]+)\s*:\s*(?<value>.*?)\s*$/u.exec(textLine);
+    const headerMatch = ParserRegex.request.header.exec(textLine);
     if (headerMatch?.groups?.key && headerMatch?.groups?.value) {
       httpRequest.headers[headerMatch.groups.key] = headerMatch.groups.value;
 

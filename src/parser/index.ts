@@ -5,6 +5,7 @@ export * from './intellijHttpRegionParser';
 export * from './jsHttpRegionParser';
 export * from './metaHttpRegionParser';
 export * from './noteMetaHttpRegionParser';
+export * from './parserRegex';
 export * from './requestBodyHttpRegionParser';
 export * from './requestHttpRegionParser';
 export * from './responseHttpRegionParser';

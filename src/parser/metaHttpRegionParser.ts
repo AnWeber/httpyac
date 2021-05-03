@@ -4,28 +4,22 @@ import { promises as fs } from 'fs';
 import { toAbsoluteFilename } from '../utils';
 import { RefMetaAction } from '../actions';
 import { HttpFileStore } from '../httpFileStore';
+import { ParserRegex } from './parserRegex';
 export class MetaHttpRegionParser implements HttpRegionParser {
-  private static isMetaTag(textLine: string) {
-    return /^\s*(#+|\/{2})/u.test(textLine);
-  }
-
-  private isDelimiter(textLine: string) {
-    return /^#{3,}\s*$/u.test(textLine);
-  }
 
   async parse(lineReader: HttpRegionParserGenerator, { httpRegion, httpFile, httpFileStore }: ParserContext): Promise<HttpRegionParserResult> {
     const next = lineReader.next();
     if (!next.done) {
       const textLine = next.value.textLine;
-      if (MetaHttpRegionParser.isMetaTag(textLine)) {
+      if (ParserRegex.meta.all.test(textLine)) {
 
         const result: HttpRegionParserResult = {
           endLine: next.value.line
         };
-        if (this.isDelimiter(textLine)) {
+        if (ParserRegex.meta.delimiter.test(textLine)) {
           result.newRegion = true;
         } else {
-          const match = /^\s*(#+|\/{2,})\s+@(?<key>[^\s]*)(\s+)?"?(?<value>.*)?"?$/u.exec(textLine);
+          const match = ParserRegex.meta.data.exec(textLine);
 
           if (match && match.groups && match.groups.key) {
             const symbol: HttpSymbol = {

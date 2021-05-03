@@ -3,6 +3,7 @@ import { toAbsoluteFilename } from '../../utils';
 import { promises as fs } from 'fs';
 import { URL } from 'url';
 import { environmentStore } from '../../environments';
+import { ParserRegex } from '../../parser';
 
 export class ClientCertVariableReplacer implements VariableReplacer {
   type = VariableReplacerType.clientCertificate;
@@ -16,7 +17,7 @@ export class ClientCertVariableReplacer implements VariableReplacer {
           await this.setClientCertificateOptions(request, clientCertifcateOptions, httpFile);
         }
       } else if (type.toLowerCase().endsWith('clientcert')) {
-        const match = /^\s*(cert:\s*(?<cert>[^\s]*)\s*)?(key:\s*(?<key>[^\s]*)\s*)?(pfx:\s*(?<pfx>[^\s]*)\s*)?(passphrase:\s*(?<passphrase>[^\s]*)\s*)?\s*$/u.exec(text);
+        const match = ParserRegex.auth.clientCert.exec(text);
         if (match?.groups?.cert || match?.groups?.pfx) {
           await this.setClientCertificateOptions(request, {
             cert: match.groups.cert,

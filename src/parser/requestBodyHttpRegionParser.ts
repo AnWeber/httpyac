@@ -3,6 +3,7 @@ import { EOL } from 'os';
 import { toAbsoluteFilename, isString, isMimeTypeMultiPartFormData, isStringEmpty, isMimeTypeNewlineDelimitedJSON, isMimeTypeFormUrlEncoded } from '../utils';
 import { createReadStream, promises as fs } from 'fs';
 import { log, popupService } from '../logger';
+import { ParserRegex } from './parserRegex';
 
 
 export class RequestBodyHttpRegionParser implements HttpRegionParser {
@@ -64,7 +65,7 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
   }
 
   private async parseLine(textLine: string, httpFileName: string) {
-    const fileImport = /^<(?:(?<injectVariables>@)(?<encoding>\w+)?)?\s+(?<fileName>.+?)\s*$/u.exec(textLine);
+    const fileImport = ParserRegex.request.fileImport.exec(textLine);
     if (fileImport && fileImport.length === 4 && fileImport.groups) {
       try {
         const normalizedPath = await toAbsoluteFilename(fileImport.groups.fileName, httpFileName);

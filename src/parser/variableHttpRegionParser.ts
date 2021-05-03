@@ -1,5 +1,6 @@
 import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext } from '../models';
 import { VariableAction } from '../actions';
+import { ParserRegex } from './parserRegex';
 
 export class VariableHttpRegionParser implements HttpRegionParser {
 
@@ -8,7 +9,7 @@ export class VariableHttpRegionParser implements HttpRegionParser {
     if (!next.done) {
       const textLine = next.value.textLine;
 
-      const match = /^\s*@(?<key>[^\s=]*)\s*(?<operator>=\s*)"?(?<value>.*)"?\s*$/u.exec(textLine);
+      const match = ParserRegex.variable.exec(textLine);
 
       if (match && match.groups && match.groups.key && match.groups.value) {
         httpRegion.actions.push(new VariableAction({

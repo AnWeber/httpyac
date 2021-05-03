@@ -1,4 +1,5 @@
 import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, HttpSymbolKind, ParserContext } from '../models';
+import { ParserRegex } from './parserRegex';
 
 
 export class ResponseHttpRegionParser implements HttpRegionParser {
@@ -16,7 +17,7 @@ export class ResponseHttpRegionParser implements HttpRegionParser {
           endLine: next.value.line,
         };
       }
-      const match = /^\s*(HTTP\/\S+)\s*([1-5][0-9][0-9])\s*(.*)$/u.exec(next.value.textLine);
+      const match = ParserRegex.responseLine.exec(next.value.textLine);
       if (match) {
 
         context.data.httpResponseSymbol = {

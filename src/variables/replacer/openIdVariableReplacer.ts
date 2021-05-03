@@ -2,12 +2,13 @@ import { ProcessorContext, HttpClient, UserSession, VariableReplacer, VariableRe
 import { userSessionStore } from '../../environments';
 import * as oauth from './oauth';
 import { log } from '../../logger';
+import { ParserRegex } from '../../parser';
 
 export class OpenIdVariableReplacer implements VariableReplacer {
   type = VariableReplacerType.oauth2;
   async replace(text: string, type: string, context: ProcessorContext): Promise<string | undefined> {
     if (type.toLowerCase() === 'authorization' && text) {
-      const match = /^\s*(openid|oauth2)\s+(?<flow>[^\s]*)\s+(?<variablePrefix>[^\s]*)\s*((token_exchange)\s+(?<tokenExchangePrefix>[^\s]*))?\s*$/iu.exec(text);
+      const match = ParserRegex.auth.oauth2.exec(text);
       if (match && match.groups && match.groups.flow && match.groups.variablePrefix) {
 
         const config = oauth.getOpenIdConfiguration(match.groups.variablePrefix, context.variables);

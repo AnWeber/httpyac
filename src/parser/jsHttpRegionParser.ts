@@ -1,13 +1,14 @@
 import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, ActionType } from '../models';
 import { toMultiLineString, pushAfter } from '../utils';
 import { JavascriptAction, ScriptData } from '../actions';
+import { ParserRegex } from './parserRegex';
 
 export class JsHttpRegionParser implements HttpRegionParser {
   async parse(lineReader: HttpRegionParserGenerator, { httpRegion, data }: ParserContext): Promise<HttpRegionParserResult> {
     let next = lineReader.next();
 
     if (!next.done) {
-      const match = /^\s*\{\{(?<executeOnEveryRequest>\+(pre|post|after)?)?\s*$/u.exec(next.value.textLine);
+      const match = ParserRegex.javascript.scriptStart.exec(next.value.textLine);
       if (!match) {
         return false;
       }
@@ -16,7 +17,7 @@ export class JsHttpRegionParser implements HttpRegionParser {
       const script: Array<string> = [];
       while (!next.done) {
 
-        if (/^\s*\}\}\s*$/u.test(next.value.textLine)) {
+        if (ParserRegex.javascript.scriptEnd.test(next.value.textLine)) {
           const scriptData: ScriptData = {
             script: toMultiLineString(script),
             lineOffset,

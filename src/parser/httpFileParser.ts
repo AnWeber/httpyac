@@ -3,6 +3,7 @@ import { toMultiLineString, toMultiLineArray, getRegionName } from '../utils';
 import { environmentStore } from '../environments/environmentStore';
 import { httpYacApi } from '../httpYacApi';
 import { HttpFileStore } from '../httpFileStore';
+import { ParserRegex } from './parserRegex';
 
 
 export async function parseHttpFile(text: string, fileName: string, httpFileStore: HttpFileStore): Promise<HttpFile> {
@@ -23,7 +24,7 @@ export async function parseHttpFile(text: string, fileName: string, httpFileStor
   };
   for (let line = 0; line < lines.length; line++) {
 
-    const isLineEmpty = /^\s*$/u.test(lines[line]);
+    const isLineEmpty = ParserRegex.emptyLine.test(lines[line]);
     for (const httpRegionParser of httpYacApi.httpRegionParsers) {
       if (!isLineEmpty || httpRegionParser.supportsEmptyLine && isLineEmpty) {
         const httpRegionParserResult = await httpRegionParser.parse(createReader(line, lines, !!httpRegionParser.noStopOnMetaTag), parserContext);
@@ -99,7 +100,7 @@ function *createReader(startLine: number, lines: Array<string>, noStopOnMetaTag:
     if (!noStopOnMetaTag) {
 
       // if parser region is not closed stop at delimiter
-      if (/^\s*#{3,}/u.test(textLine)) {
+      if (ParserRegex.meta.delimiter.test(textLine)) {
         break;
       }
     }

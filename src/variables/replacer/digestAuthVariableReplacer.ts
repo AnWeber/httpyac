@@ -3,12 +3,13 @@ import { CancelableRequest, OptionsOfUnknownResponseBody, Response } from 'got';
 import { createHash } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { URL } from 'url';
+import { ParserRegex } from '../../parser';
 
 export class DigestAuthVariableReplacer implements VariableReplacer {
   type = VariableReplacerType.digestAuth;
   async replace(text: string, type: string, { request }: ProcessorContext): Promise<string | undefined> {
     if (type.toLowerCase() === 'authorization' && text && request) {
-      const match = /^\s*(d|D)(i|I)(g|G)(e|E)(s|S)(t|T)\s+(?<user>[^\s]*)\s+(?<password>([^\s]+.*))$/iu.exec(text);
+      const match = ParserRegex.auth.digest.exec(text);
 
       if (match && match.groups && match.groups.user && match.groups.password) {
         if (!request.hooks) {

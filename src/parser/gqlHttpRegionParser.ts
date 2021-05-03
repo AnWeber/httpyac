@@ -3,6 +3,7 @@ import { toMultiLineString, toAbsoluteFilename, pushAfter } from '../utils';
 import { promises as fs } from 'fs';
 import { log } from '../logger';
 import { GqlAction, GqlData } from '../actions';
+import { ParserRegex } from './parserRegex';
 
 export class GqlHttpRegionParser implements HttpRegionParser {
   async parse(lineReader: HttpRegionParserGenerator, context: ParserContext): Promise<HttpRegionParserResult> {
@@ -68,7 +69,7 @@ async function getGQLContent(lineReader: HttpRegionParserGenerator, httpFileName
 
     const startLine = next.value.line;
 
-    const fileMatches = /^\s*gql(\s+(?<name>[^\s(]+))?\s+<\s+(?<fileName>.+)\s*$/u.exec(next.value.textLine);
+    const fileMatches = ParserRegex.gql.fileImport.exec(next.value.textLine);
     if (fileMatches && fileMatches.groups?.fileName) {
       try {
         const normalizedPath = await toAbsoluteFilename(fileMatches.groups.fileName, httpFileName);
@@ -84,11 +85,11 @@ async function getGQLContent(lineReader: HttpRegionParserGenerator, httpFileName
         log.trace(err);
       }
     } else {
-      const queryMatch = /^\s*(query|mutation)(\s+(?<name>[^\s(]+))?/u.exec(next.value.textLine);
+      const queryMatch = ParserRegex.gql.query.exec(next.value.textLine);
       if (queryMatch) {
         return matchGqlContent(next.value, lineReader, queryMatch.groups?.name);
       }
-      const fragmentMatch = /^\s*(fragment)\s+(?<name>[^\s(]+)\s+on\s+/u.exec(next.value.textLine);
+      const fragmentMatch = ParserRegex.gql.fragment.exec(next.value.textLine);
       if (fragmentMatch) {
         return matchGqlContent(next.value, lineReader, fragmentMatch.groups?.name);
       }
@@ -103,7 +104,7 @@ function matchGqlContent(value: { textLine: string; line: number }, lineReader: 
   let next = lineReader.next();
   const gqlLines: Array<string> = [value.textLine];
   while (!next.done) {
-    if (/^\s*$/u.test(next.value.textLine)) {
+    if (ParserRegex.emptyLine.test(next.value.textLine)) {
       return {
         name,
         startLine,
