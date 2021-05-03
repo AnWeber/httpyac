@@ -64,9 +64,7 @@ function closeHttpRegion(parserContext: ParserContext) {
   } else {
     parserContext.httpRegion.symbol.description = '-';
   }
-  if (parserContext.httpRegion.actions.length > 0) {
-    parserContext.httpFile.httpRegions.push(parserContext.httpRegion);
-  }
+  parserContext.httpFile.httpRegions.push(parserContext.httpRegion);
 }
 
 function setSource(httpRegions: Array<HttpRegion>, lines: Array<string>) {
