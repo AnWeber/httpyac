@@ -1,3 +1,13 @@
+## 2.7.0 (2021-05-03)
+
+#### Features
+* all markdown utils exported
+* reuse parser promise on same version and filename
+
+#### Fix
+* use shared env on empty environment array
+* delimiter ignored on source of httpregion
+
 ## 2.6.0 (2021-05-01)
 
 #### Features
