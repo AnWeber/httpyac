@@ -16,7 +16,7 @@ export class VariableHttpRegionParser implements HttpRegionParser {
           [match.groups.key]: match.groups.value.trim(),
         }));
         return {
-          endLine: next.value.line,
+          nextParserLine: next.value.line,
           symbols: [{
             name: match.groups.key,
             description: match.groups.value,

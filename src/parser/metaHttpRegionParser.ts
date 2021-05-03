@@ -14,10 +14,10 @@ export class MetaHttpRegionParser implements HttpRegionParser {
       if (ParserRegex.meta.all.test(textLine)) {
 
         const result: HttpRegionParserResult = {
-          endLine: next.value.line
+          nextParserLine: next.value.line
         };
         if (ParserRegex.meta.delimiter.test(textLine)) {
-          result.newRegion = true;
+          result.endRegionLine = next.value.line - 1;
         } else {
           const match = ParserRegex.meta.data.exec(textLine);
 

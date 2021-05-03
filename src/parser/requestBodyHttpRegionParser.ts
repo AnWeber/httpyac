@@ -37,7 +37,7 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
           }
 
           return {
-            endLine: next.value.line,
+            nextParserLine: next.value.line,
             symbols,
           };
         }

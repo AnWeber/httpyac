@@ -78,8 +78,8 @@ export class RequestHttpRegionParser implements HttpRegionParser {
     if (!next.done && this.isValidRequestLine(next.value.textLine, httpRegion)) {
       if (httpRegion.request) {
         return {
-          newRegion: true,
-          endLine: next.value.line - 1,
+          endRegionLine: next.value.line - 1,
+          nextParserLine: next.value.line - 1,
           symbols: [],
         };
       }
@@ -100,12 +100,12 @@ export class RequestHttpRegionParser implements HttpRegionParser {
       requestSymbol.children = requestSymbols;
 
       const result: HttpRegionParserResult = {
-        endLine: next.value.line,
+        nextParserLine: next.value.line,
         symbols
       };
       next = lineReader.next();
       while (!next.done) {
-        result.endLine = next.value.line;
+        result.nextParserLine = next.value.line;
         if (isStringEmpty(next.value.textLine)) {
           break;
         }

@@ -14,7 +14,7 @@ export class ResponseHttpRegionParser implements HttpRegionParser {
         responseSymbol.endLine = next.value.line;
         responseSymbol.endOffset = next.value.textLine.length;
         return {
-          endLine: next.value.line,
+          nextParserLine: next.value.line,
         };
       }
       const match = ParserRegex.responseLine.exec(next.value.textLine);
@@ -30,7 +30,7 @@ export class ResponseHttpRegionParser implements HttpRegionParser {
           endOffset: next.value.textLine.length,
         };
         return {
-          endLine: next.value.line,
+          nextParserLine: next.value.line,
           symbols: [context.data.httpResponseSymbol],
         };
       }

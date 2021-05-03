@@ -1,9 +1,7 @@
 
-
 GET /xml
 
-
-GET /xml
+GET /json
 
 
 // url withouth method does not work in kibana style

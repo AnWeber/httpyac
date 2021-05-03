@@ -29,10 +29,10 @@ export async function parseHttpFile(text: string, fileName: string, httpFileStor
       if (!isLineEmpty || httpRegionParser.supportsEmptyLine && isLineEmpty) {
         const httpRegionParserResult = await httpRegionParser.parse(createReader(line, lines, !!httpRegionParser.noStopOnMetaTag), parserContext);
         if (httpRegionParserResult) {
-          if (httpRegionParserResult.newRegion) {
-            parserContext.httpRegion.symbol.endLine = httpRegionParserResult.endLine;
+          if (httpRegionParserResult.endRegionLine) {
+            parserContext.httpRegion.symbol.endLine = httpRegionParserResult.endRegionLine;
             closeHttpRegion(parserContext);
-            parserContext.httpRegion = initHttpRegion(httpRegionParserResult.endLine + 1);
+            parserContext.httpRegion = initHttpRegion(httpRegionParserResult.nextParserLine + 1);
           }
           if (httpRegionParserResult.symbols) {
             if (parserContext.httpRegion.symbol.children) {
@@ -41,7 +41,7 @@ export async function parseHttpFile(text: string, fileName: string, httpFileStor
               parserContext.httpRegion.symbol.children = httpRegionParserResult.symbols;
             }
           }
-          line = httpRegionParserResult.endLine;
+          line = httpRegionParserResult.nextParserLine;
           break;
         }
       }

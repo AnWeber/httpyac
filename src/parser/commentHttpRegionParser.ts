@@ -10,7 +10,7 @@ export class CommentHttpRegionParser implements HttpRegionParser {
     const comment = getCommentContent(lineReader);
     if (comment) {
       return {
-        endLine: comment.endLine,
+        nextParserLine: comment.endLine,
         symbols: [{
           name: 'comment',
           description: comment.comment,

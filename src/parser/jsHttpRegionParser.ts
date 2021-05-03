@@ -38,7 +38,7 @@ export class JsHttpRegionParser implements HttpRegionParser {
           }
 
           return {
-            endLine: next.value.line,
+            nextParserLine: next.value.line,
             symbols: [{
               name: 'script',
               description: 'nodejs script',

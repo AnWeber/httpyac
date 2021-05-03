@@ -20,7 +20,7 @@ export class IntellijHttpRegionParser implements HttpRegionParser {
       if (intellijContent) {
         httpRegion.actions.push(new IntellijAction(intellijContent.data));
         return {
-          endLine: intellijContent.endLine,
+          nextParserLine: intellijContent.endLine,
           symbols: [{
             name: 'Intellij Script',
             description: 'Intellij Script',

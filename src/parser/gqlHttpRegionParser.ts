@@ -37,7 +37,7 @@ export class GqlHttpRegionParser implements HttpRegionParser {
         gqlData.fragments[gqlContent.name] = gqlContent.gql;
       }
       return {
-        endLine: gqlContent.endLine,
+        nextParserLine: gqlContent.endLine,
         symbols: [{
           name: 'gql',
           description: 'gql',
