@@ -152,9 +152,15 @@ export function toMarkdownTimings(timings: HttpTimings) : Array<string> {
 
   result.push('`Timings`');
   result.push('');
-  result.push(`*Wait*: ${timings.wait || 0} ms`);
-  result.push(`*DNS*: ${timings.dns || 0} ms`);
-  result.push(`*TCP*: ${timings.tcp || 0} ms`);
+  if (timings.wait) {
+    result.push(`*Wait*: ${timings.wait} ms`);
+  }
+  if (timings.dns) {
+    result.push(`*DNS*: ${timings.dns} ms`);
+  }
+  if (timings.tcp) {
+    result.push(`*TCP*: ${timings.tcp} ms`);
+  }
   if (timings.tls) {
     result.push(`*TLS*: ${timings.tls} ms`);
   }
