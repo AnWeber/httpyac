@@ -90,9 +90,12 @@ export class HttpFileStore {
   }
 
   rename(oldFileName: string, newFileName: string) : void {
-    const httpFile = this.storeCache.find(obj => obj.fileName === oldFileName);
-    if (httpFile) {
-      httpFile.fileName = newFileName;
+    const httpFileStoreEntry = this.storeCache.find(obj => obj.fileName === oldFileName);
+    if (httpFileStoreEntry) {
+      httpFileStoreEntry.fileName = newFileName;
+      if (httpFileStoreEntry.httpFile) {
+        httpFileStoreEntry.httpFile.fileName = newFileName;
+      }
     }
   }
 

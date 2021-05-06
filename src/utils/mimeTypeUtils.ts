@@ -14,7 +14,8 @@ export function isMimeTypeJSON(contentType: ContentType | undefined) : boolean {
   );
 }
 export function isMimeTypeJavascript(contentType: ContentType | undefined) : boolean {
-  return contentType?.mimeType === 'application/javascript';
+  return contentType?.mimeType === 'application/javascript'
+    || contentType?.mimeType === 'text/x-javascript';
 }
 export function isMimeTypeXml(contentType: ContentType | undefined) : boolean {
   return !!contentType && (
