@@ -6,4 +6,5 @@ updates:
       interval: "daily"
     allowed_updates:
       - match:
+          dependency_type: "production"
           update_type: "security"
