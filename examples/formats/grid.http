@@ -1,0 +1,8 @@
+
+GET https://data.sbb.ch/api/v2/catalog/datasets/perronkante/exports/json
+
+###
+
+https://data.sbb.ch/api/v2/catalog/datasets/perronkante/exports/json
+
+# @grid.columnDefs linie,hilfstritt
