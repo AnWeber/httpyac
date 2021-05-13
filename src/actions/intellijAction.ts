@@ -2,7 +2,9 @@ import { Variables, ProcessorContext, HttpRegion, HttpFile, ActionType, HttpRegi
 import { ScriptData, executeScript } from './javascriptAction';
 import { log, popupService } from '../logger';
 import { toAbsoluteFilename } from '../utils';
-import { promises as fs } from 'fs';
+import { fileProvider } from '../fileProvider';
+
+
 import * as intellij from './intellij';
 
 export interface IntellijScriptData{
@@ -46,7 +48,7 @@ export class IntellijAction implements HttpRegionAction {
       let script: string | false = false;
       const filename = await toAbsoluteFilename(file, httpFile.fileName);
       if (filename) {
-        script = await fs.readFile(filename, 'utf-8');
+        script = await fileProvider.readFile(filename, 'utf-8');
       } else {
         popupService.error(`File not found: ${file}`);
         log.error(`File not found: ${file}`);

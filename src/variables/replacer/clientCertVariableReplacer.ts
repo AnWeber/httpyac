@@ -1,9 +1,9 @@
 import { ClientCertificateOptions, HttpFile, HttpRequest, ProcessorContext, VariableReplacer, VariableReplacerType, VariableType } from '../../models';
-import { toAbsoluteFilename } from '../../utils';
-import { promises as fs } from 'fs';
+import { toAbsoluteFilename, isString } from '../../utils';
 import { URL } from 'url';
 import { environmentStore } from '../../environments';
 import { ParserRegex } from '../../parser';
+import { fileProvider, PathLike } from '../../fileProvider';
 
 export class ClientCertVariableReplacer implements VariableReplacer {
   type = VariableReplacerType.clientCertificate;
@@ -42,11 +42,15 @@ export class ClientCertVariableReplacer implements VariableReplacer {
   }
 
 
-  private async resolveFile(fileName: string | undefined, currentFilename: string): Promise<unknown | undefined> {
+  private async resolveFile(fileName: PathLike | undefined, currentFilename: PathLike): Promise<Buffer | undefined> {
     if (fileName) {
-      const file = await toAbsoluteFilename(fileName, currentFilename);
-      if (file) {
-        return await fs.readFile(file);
+      if (isString(fileName)) {
+        const file = await toAbsoluteFilename(fileName, currentFilename);
+        if (file) {
+          return await fileProvider.readBuffer(file);
+        }
+      } else {
+        return await fileProvider.readBuffer(fileName);
       }
     }
     return undefined;

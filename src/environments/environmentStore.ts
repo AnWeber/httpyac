@@ -6,7 +6,7 @@ import { EnvVariableProvider } from '../variables/provider/envVariableProvider';
 import { IntellijProvider } from './intellijEnvProvider';
 import { DotenvProvider } from './dotenvProvider';
 import { log, logRequest, LogLevel } from '../logger';
-import { isAbsolute, join } from 'path';
+import { fileProvider, PathLike } from '../fileProvider';
 import merge from 'lodash/merge';
 
 class EnvironmentStore {
@@ -107,7 +107,7 @@ class EnvironmentStore {
   }
 
 
-  async configure(rootDirs: string[], config: EnvironmentConfig, defaultOverride: EnvironmentConfig = {}) {
+  async configure(rootDirs: PathLike[], config: EnvironmentConfig, defaultOverride: EnvironmentConfig = {}) {
     const defaultConfig: EnvironmentConfig = {
       log: {
         level: LogLevel.warn,
@@ -141,7 +141,7 @@ class EnvironmentStore {
   }
 
 
-  private async searchClientCertficates(environmentConfig: EnvironmentConfig, rootDirs: string[]) {
+  private async searchClientCertficates(environmentConfig: EnvironmentConfig, rootDirs: PathLike[]) {
     if (environmentConfig.clientCertificates) {
       for (const [, value] of Object.entries(environmentConfig.clientCertificates)) {
         value.cert = await this.findFileName(value.cert, rootDirs);
@@ -151,7 +151,7 @@ class EnvironmentStore {
     }
   }
 
-  private async loadFileEnvironemntConfigs(rootDirs: string[]): Promise<Array<EnvironmentConfig>> {
+  private async loadFileEnvironemntConfigs(rootDirs: PathLike[]): Promise<Array<EnvironmentConfig>> {
     const environmentConfigs: Array<EnvironmentConfig> = [];
     for (const rootDir of rootDirs) {
       const environmentConfig = await getHttpacJsonConfig(rootDir);
@@ -164,15 +164,17 @@ class EnvironmentStore {
   }
 
 
-  private async findFileName(fileName: string | undefined, rootDirs: string[]): Promise<string | undefined> {
+  private async findFileName(fileName: PathLike | undefined, rootDirs: PathLike[]): Promise<PathLike | undefined> {
     if (fileName) {
-      if (isAbsolute(fileName)) {
+      if (fileProvider.isAbsolute(fileName)) {
         return fileName;
       }
-      for (const rootDir of rootDirs) {
-        const absolute = await toAbsoluteFilename(fileName, rootDir, true);
-        if (absolute) {
-          return absolute;
+      if (isString(fileName)) {
+        for (const rootDir of rootDirs) {
+          const absolute = await toAbsoluteFilename(fileName, rootDir, true);
+          if (absolute) {
+            return absolute;
+          }
         }
       }
     }
@@ -191,14 +193,14 @@ class EnvironmentStore {
     }
   }
 
-  private async initEnvProviders(config: EnvironmentConfig, rootDirs: string[]): Promise<Dispose> {
+  private async initEnvProviders(config: EnvironmentConfig, rootDirs: PathLike[]): Promise<Dispose> {
 
     const environmentProviders: Array<EnvironmentProvider> = [];
     if (config.environments) {
       environmentProviders.push(new JsonEnvProvider(config.environments));
     }
-    environmentProviders.push(...this.initEnvProvider((path: string) => new IntellijProvider(path), config.intellij, rootDirs));
-    environmentProviders.push(...this.initEnvProvider((path: string) => new DotenvProvider(path, config.dotenv?.defaultFiles), config.dotenv, rootDirs));
+    environmentProviders.push(...this.initEnvProvider((path: PathLike) => new IntellijProvider(path), config.intellij, rootDirs));
+    environmentProviders.push(...this.initEnvProvider((path: PathLike) => new DotenvProvider(path, config.dotenv?.defaultFiles), config.dotenv, rootDirs));
 
     await this.reset();
     this.environmentProviders.push(...environmentProviders);
@@ -212,20 +214,20 @@ class EnvironmentStore {
     };
   }
 
-  private initEnvProvider(factory: (path: string) => EnvironmentProvider, config: {
+  private initEnvProvider(factory: (path: PathLike) => EnvironmentProvider, config: {
     enabled?: boolean;
     dirname?: string;
     variableProviderEnabled?: boolean;
-  } | undefined, rootDirs: string[]) {
+  } | undefined, rootDirs: PathLike[]) {
     const result = [];
     if (config?.enabled) {
       for (const rootDir of rootDirs) {
         result.push(factory(rootDir));
-        if (config.dirname && !isAbsolute(config.dirname)) {
-          result.push(factory(join(rootDir, config.dirname)));
+        if (config.dirname && !fileProvider.isAbsolute(config.dirname)) {
+          result.push(factory(fileProvider.joinPath(rootDir, config.dirname)));
         }
       }
-      if (config.dirname && isAbsolute(config.dirname)) {
+      if (config.dirname && fileProvider.isAbsolute(config.dirname)) {
         result.push(factory(config.dirname));
       }
       if (config.variableProviderEnabled) {

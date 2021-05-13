@@ -1,10 +1,11 @@
 import { HttpFile } from './models';
 import { parseHttpFile } from './parser';
 import { log } from './logger';
+import { fileProvider, PathLike } from './fileProvider';
 
 interface HttpFileStoreEntry{
   version: number;
-  fileName: string;
+  cacheKey: string;
   httpFile?: HttpFile;
   promise?: Promise<HttpFile>
 }
@@ -12,11 +13,12 @@ interface HttpFileStoreEntry{
 export class HttpFileStore {
   private readonly storeCache: Array<HttpFileStoreEntry> = [];
 
-  private getFromStore(fileName: string, version: number) {
-    let httpFileStoreEntry = this.storeCache.find(obj => obj.fileName === fileName);
+  private getFromStore(fileName: PathLike, version: number) {
+    const cacheKey = fileProvider.toString(fileName);
+    let httpFileStoreEntry = this.storeCache.find(obj => obj.cacheKey === cacheKey);
     if (!httpFileStoreEntry) {
       httpFileStoreEntry = {
-        fileName,
+        cacheKey,
         version,
       };
       this.storeCache.push(httpFileStoreEntry);
@@ -24,8 +26,9 @@ export class HttpFileStore {
     return httpFileStoreEntry;
   }
 
-  get(fileName: string): HttpFile | undefined {
-    return this.storeCache.find(obj => obj.fileName === fileName)?.httpFile;
+  get(fileName: PathLike): HttpFile | undefined {
+    const cacheKey = fileProvider.toString(fileName);
+    return this.storeCache.find(obj => obj.cacheKey === cacheKey)?.httpFile;
   }
 
   getAll(): Array<HttpFile> {
@@ -37,7 +40,7 @@ export class HttpFileStore {
     }
     return result;
   }
-  getOrCreate(fileName: string, getText: () => Promise<string>, version: number): Promise<HttpFile> {
+  getOrCreate(fileName: PathLike, getText: () => Promise<string>, version: number): Promise<HttpFile> {
     const startTime = Date.now();
     try {
       const httpFileStoreEntry: HttpFileStoreEntry = this.getFromStore(fileName, version);
@@ -73,26 +76,28 @@ export class HttpFileStore {
     }
   }
 
-  private async createHttpFile(fileName: string, getText: () => Promise<string>) {
+  private async createHttpFile(fileName: PathLike, getText: () => Promise<string>) {
     const text = await getText();
     return await parseHttpFile(text, fileName, this);
   }
 
-  async parse(fileName: string, text: string) : Promise<HttpFile> {
+  async parse(fileName: PathLike, text: string) : Promise<HttpFile> {
     return await parseHttpFile(text, fileName, this);
   }
 
-  remove(fileName: string) : void {
-    const index = this.storeCache.findIndex(obj => obj.fileName === fileName);
+  remove(fileName: PathLike): void {
+    const cacheKey = fileProvider.toString(fileName);
+    const index = this.storeCache.findIndex(obj => obj.cacheKey === cacheKey);
     if (index >= 0) {
       this.storeCache.splice(index, 1);
     }
   }
 
-  rename(oldFileName: string, newFileName: string) : void {
-    const httpFileStoreEntry = this.storeCache.find(obj => obj.fileName === oldFileName);
+  rename(oldFileName: PathLike, newFileName: PathLike) : void {
+    const oldCacheKey = fileProvider.toString(oldFileName);
+    const httpFileStoreEntry = this.storeCache.find(obj => obj.cacheKey === oldCacheKey);
     if (httpFileStoreEntry) {
-      httpFileStoreEntry.fileName = newFileName;
+      httpFileStoreEntry.cacheKey = fileProvider.toString(newFileName);
       if (httpFileStoreEntry.httpFile) {
         httpFileStoreEntry.httpFile.fileName = newFileName;
       }

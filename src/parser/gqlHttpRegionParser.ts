@@ -1,9 +1,9 @@
 import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, ActionType } from '../models';
 import { toMultiLineString, toAbsoluteFilename, pushAfter } from '../utils';
-import { promises as fs } from 'fs';
 import { log } from '../logger';
 import { GqlAction, GqlData } from '../actions';
 import { ParserRegex } from './parserRegex';
+import { fileProvider, PathLike } from '../fileProvider';
 
 export class GqlHttpRegionParser implements HttpRegionParser {
   async parse(lineReader: HttpRegionParserGenerator, context: ParserContext): Promise<HttpRegionParserResult> {
@@ -17,12 +17,6 @@ export class GqlHttpRegionParser implements HttpRegionParser {
       const gqlData: GqlData = {
         fragments: this.getGqlFragments(context),
       };
-      for (const [key, value] of Object.entries(gqlData.fragments)) {
-        const gql = gqlContent.gql;
-        if (gql.indexOf(`...${key}`) >= 0) {
-          gqlContent.gql = toMultiLineString([gqlContent.gql, value]);
-        }
-      }
 
       if (context.httpRegion.request) {
         gqlData.query = gqlContent.gql;
@@ -63,7 +57,7 @@ export class GqlHttpRegionParser implements HttpRegionParser {
 }
 
 
-async function getGQLContent(lineReader: HttpRegionParserGenerator, httpFileName: string): Promise<GqlParserResult | false> {
+async function getGQLContent(lineReader: HttpRegionParserGenerator, httpFileName: PathLike): Promise<GqlParserResult | false> {
   const next = lineReader.next();
   if (!next.done) {
 
@@ -78,7 +72,7 @@ async function getGQLContent(lineReader: HttpRegionParserGenerator, httpFileName
             startLine,
             endLine: startLine,
             name: fileMatches.groups.name || fileMatches.groups.fileName,
-            gql: await fs.readFile(normalizedPath, 'utf-8')
+            gql: () => fileProvider.readFile(normalizedPath, 'utf-8')
           };
         }
       } catch (err) {
@@ -122,5 +116,5 @@ export interface GqlParserResult{
   name?: string,
   startLine: number,
   endLine: number,
-  gql: string;
+  gql: string | (() => Promise<string>);
 }

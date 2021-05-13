@@ -1,13 +1,13 @@
 import { Variables, ProcessorContext, HttpRegionAction, ActionType } from '../models';
 import { Module } from 'module';
 import { runInThisContext } from 'vm';
-import { dirname } from 'path';
 import { log, scriptConsole } from '../logger';
 import { isPromise, toEnvironmentKey } from '../utils';
 import * as got from 'got';
 import { httpYacApi } from '../httpYacApi';
 import * as httpYac from '..';
 import { testFactory } from './testMethod';
+import { fileProvider, PathLike } from '../fileProvider';
 
 export interface ScriptData {
   script: string;
@@ -69,7 +69,7 @@ export class JavascriptAction implements HttpRegionAction {
 
 export interface ScriptContext {
   script: string,
-  fileName: string | undefined,
+  fileName: PathLike | undefined,
   variables: Variables,
   lineOffset: number,
   require?: Record<string, unknown>
@@ -77,8 +77,8 @@ export interface ScriptContext {
 
 export async function executeScript(context: ScriptContext): Promise<Variables> {
   try {
-    const filename = context.fileName || __filename;
-    const dir = dirname(filename);
+    const filename = context.fileName ? fileProvider.toString(context.fileName) : __filename;
+    const dir = fileProvider.toString(fileProvider.dirname(filename));
     const scriptModule = new Module(filename, require.main);
 
     scriptModule.filename = filename;

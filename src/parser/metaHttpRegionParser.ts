@@ -1,10 +1,10 @@
 import { HttpFile, HttpSymbol, HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, HttpRegion } from '../models';
 import { log } from '../logger';
-import { promises as fs } from 'fs';
 import { toAbsoluteFilename } from '../utils';
 import { RefMetaAction } from '../actions';
 import { HttpFileStore } from '../httpFileStore';
 import { ParserRegex } from './parserRegex';
+import { fileProvider } from '../fileProvider';
 export class MetaHttpRegionParser implements HttpRegionParser {
 
   async parse(lineReader: HttpRegionParserGenerator, { httpRegion, httpFile, httpFileStore }: ParserContext): Promise<HttpRegionParserResult> {
@@ -92,7 +92,7 @@ export class MetaHttpRegionParser implements HttpRegionParser {
         if (!httpFile.imports) {
           httpFile.imports = [];
         }
-        httpFile.imports.push(() => httpFileStore.getOrCreate(absoluteFileName, () => fs.readFile(absoluteFileName, 'utf-8'), 0));
+        httpFile.imports.push(() => httpFileStore.getOrCreate(absoluteFileName, () => fileProvider.readFile(absoluteFileName, 'utf-8'), 0));
       }
     } catch (err) {
       log.error('import error', fileName);

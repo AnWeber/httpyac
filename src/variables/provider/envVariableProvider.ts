@@ -1,11 +1,11 @@
-import { dirname } from 'path';
+import { fileProvider, PathLike } from '../../fileProvider';
 import { EnvironmentProvider, HttpFile, VariableProvider, Variables } from '../../models';
 
 export class EnvVariableProvider<T extends EnvironmentProvider> implements VariableProvider {
 
   private paths: Record<string, T> = {};
-  constructor(private readonly factory: (path: string) => T,
-    private readonly ignorePaths: Array<string>) { }
+  constructor(private readonly factory: (path: PathLike) => T,
+    private readonly ignorePaths: Array<PathLike>) { }
 
   reset(): void {
     for (const [, envProvider] of Object.entries(this.paths)) {
@@ -18,7 +18,7 @@ export class EnvVariableProvider<T extends EnvironmentProvider> implements Varia
 
 
   async getEnvironments?(httpFile: HttpFile): Promise<string[]> {
-    const basePath = dirname(httpFile.fileName);
+    const basePath = fileProvider.dirname(httpFile.fileName);
     if (this.ignorePaths.indexOf(basePath) >= 0) {
       return [];
     }
@@ -27,7 +27,7 @@ export class EnvVariableProvider<T extends EnvironmentProvider> implements Varia
   }
 
   async getVariables(env: string[] | undefined, httpFile: HttpFile): Promise<Variables> {
-    const basePath = dirname(httpFile.fileName);
+    const basePath = fileProvider.dirname(httpFile.fileName);
     if (this.ignorePaths.indexOf(basePath) >= 0) {
       return {};
     }
@@ -38,11 +38,12 @@ export class EnvVariableProvider<T extends EnvironmentProvider> implements Varia
     return envProvider.getVariables(env);
   }
 
-  private getEnvProvider(basePath: string) : T {
-    let envProvider: T = this.paths[basePath];
+  private getEnvProvider(basePath: PathLike): T {
+    const cacheKey = fileProvider.toString(basePath);
+    let envProvider: T = this.paths[cacheKey];
     if (!envProvider) {
       envProvider = this.factory(basePath);
-      this.paths[basePath] = envProvider;
+      this.paths[cacheKey] = envProvider;
     }
     return envProvider;
   }

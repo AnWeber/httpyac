@@ -1,6 +1,8 @@
+import { PathLike } from '../fileProvider';
+
 export interface ClientCertificateOptions{
-  cert?: string;
-  key?: string;
-  pfx?: string;
+  cert?: PathLike;
+  key?: PathLike;
+  pfx?: PathLike;
   passphrase?: string;
 }

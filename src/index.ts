@@ -1,5 +1,6 @@
 export * from './httpYacApi';
 export * from './models';
+export * from './fileProvider';
 export * from './httpFileStore';
 export * from './gotHttpClientFactory';
 export * from './logger';

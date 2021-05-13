@@ -1,8 +1,8 @@
 import { Variables, EnvironmentProvider } from '../models';
-import { join } from 'path';
-import { promises as fs, watchFile, unwatchFile } from 'fs';
 import { log } from '../logger';
 import { environmentStore } from './environmentStore';
+
+import { fileProvider, PathLike, WatchDispose } from '../fileProvider';
 
 function storeReset() {
   environmentStore.reset();
@@ -11,18 +11,17 @@ function storeReset() {
 
 export class IntellijProvider implements EnvironmentProvider {
 
-  private watchFiles: Array<string> = [];
+  private watchDisposes: Record<string, WatchDispose> = {};
 
   private env: Array<Record<string, Variables>> |undefined;
 
-  constructor(public readonly basepath: string) { }
+  constructor(public readonly basepath: PathLike) { }
 
-  reset(): void {
-    delete this.env;
-    for (const watchFile of this.watchFiles) {
-      unwatchFile(watchFile, storeReset);
+  reset() : void {
+    for (const [fileName, watchDispose] of Object.entries(this.watchDisposes)) {
+      watchDispose();
+      delete this.watchDisposes[fileName];
     }
-    this.watchFiles.length = 0;
   }
 
   async getEnvironments(): Promise<string[]> {
@@ -47,21 +46,19 @@ export class IntellijProvider implements EnvironmentProvider {
     const environments = await this.parseIntellijVariables(this.basepath);
     return Object.assign({}, ...environments.map(obj => obj[env] || {}));
   }
-  private async parseIntellijVariables(dirname: string): Promise<Array<Record<string, Variables >>> {
+  private async parseIntellijVariables(dirname: PathLike): Promise<Array<Record<string, Variables >>> {
     if (!this.env) {
 
       const fileNames = ['http-client.env.json', 'http-client.private.env.json'];
       const environments: Array<Record<string, Variables>> = [];
-      const validFilesNames: Array<string> = [];
+      const validFilesNames: Array<PathLike> = [];
       for (const fileName of fileNames) {
-        const envFileName = join(dirname, fileName);
+        const envFileName = fileProvider.joinPath(dirname, fileName);
         try {
-          if ((await fs.stat(envFileName))) {
-            const content = await fs.readFile(envFileName, 'utf-8');
-            const variables = JSON.parse(content);
-            environments.push(variables);
-            validFilesNames.push(envFileName);
-          }
+          const content = await fileProvider.readFile(envFileName, 'utf-8');
+          const variables = JSON.parse(content);
+          environments.push(variables);
+          validFilesNames.push(envFileName);
         } catch (err) {
           log.trace(err);
         }
@@ -72,12 +69,12 @@ export class IntellijProvider implements EnvironmentProvider {
     return this.env;
   }
 
-  private watchEnvFiles(validFilesNames: string[]) {
+  private watchEnvFiles(validFilesNames: PathLike[]) {
     if (validFilesNames.length > 0) {
       for (const file of validFilesNames) {
-        if (this.watchFiles.indexOf(file) < 0) {
-          this.watchFiles.push(file);
-          watchFile(file, storeReset);
+        const fileString = fileProvider.toString(file);
+        if (!this.watchDisposes[fileString]) {
+          this.watchDisposes[fileString] = fileProvider.watchFile(file, storeReset);
         }
       }
     }

@@ -1,7 +1,7 @@
 import arg from 'arg';
 import inquirer from 'inquirer';
 import { promises as fs } from 'fs';
-import { join, isAbsolute } from 'path';
+import { join } from 'path';
 import { EnvironmentConfig, HttpFile, HttpRegion, HttpSymbolKind, RepeatOptions, RepeatOrder, SettingsConfig } from './models';
 import { HttpFileStore } from './httpFileStore';
 import { httpYacApi } from './httpYacApi';
@@ -12,6 +12,7 @@ import { NoteMetaHttpRegionParser, SettingsScriptHttpRegionParser } from './pars
 import { ShowInputBoxVariableReplacer, ShowQuickpickVariableReplacer } from './variables/replacer';
 import { testSymbols } from './actions';
 import { default as globby } from 'globby';
+import { PathLike, fileProvider } from './fileProvider';
 
 interface HttpCliOptions{
   activeEnvironments?: Array<string>,
@@ -273,7 +274,7 @@ async function initEnviroment(cliOptions: HttpCliOptions): Promise<void> {
   }
 }
 
-function initHttpYacApiExtensions(config: EnvironmentConfig & SettingsConfig, rootDir: string | undefined) {
+function initHttpYacApiExtensions(config: EnvironmentConfig & SettingsConfig, rootDir: PathLike | undefined) {
   httpYacApi.httpRegionParsers.push(new NoteMetaHttpRegionParser(async (note: string) => {
     const answer = await inquirer.prompt([{
       type: 'confirm',
@@ -302,13 +303,13 @@ function initHttpYacApiExtensions(config: EnvironmentConfig & SettingsConfig, ro
   }));
   if (rootDir && config.httpRegionScript) {
     httpYacApi.httpRegionParsers.push(new SettingsScriptHttpRegionParser(async () => {
-      let fileName = config.httpRegionScript;
+      let fileName: PathLike | undefined = config.httpRegionScript;
       if (fileName) {
-        if (!isAbsolute(fileName)) {
-          fileName = join(rootDir, fileName);
+        if (!fileProvider.isAbsolute(fileName)) {
+          fileName = fileProvider.joinPath(rootDir, fileName);
         }
         try {
-          const script = await fs.readFile(fileName, 'utf-8');
+          const script = await fileProvider.readFile(fileName, 'utf-8');
           return { script, lineOffset: 0 };
         } catch (err) {
           log.trace(`file not found: ${fileName}`);

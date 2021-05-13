@@ -1,9 +1,8 @@
 import { Variables, EnvironmentProvider } from '../models';
-import { promises as fs, watchFile, unwatchFile } from 'fs';
 import { parse } from 'dotenv';
 import { log } from '../logger';
 import { environmentStore } from './environmentStore';
-import { join } from 'path';
+import { fileProvider, PathLike, WatchDispose } from '../fileProvider';
 
 function storeReset() {
   environmentStore.reset();
@@ -11,20 +10,20 @@ function storeReset() {
 
 export class DotenvProvider implements EnvironmentProvider {
 
-  private watchFiles: Array<string> = [];
+  private watchDisposes: Record<string, WatchDispose> = {};
 
-  constructor(private readonly basepath: string, private readonly defaultFiles: Array<string> = ['.env']) { }
+  constructor(private readonly basepath: PathLike, private readonly defaultFiles: Array<string> = ['.env']) { }
 
   reset() : void {
-    for (const watchFile of this.watchFiles) {
-      unwatchFile(watchFile, storeReset);
+    for (const [fileName, watchDispose] of Object.entries(this.watchDisposes)) {
+      watchDispose();
+      delete this.watchDisposes[fileName];
     }
-    this.watchFiles.length = 0;
   }
 
   async getEnvironments(): Promise<string[]> {
     try {
-      const files = await fs.readdir(this.basepath);
+      const files = await fileProvider.readdir(this.basepath);
 
       return files
         .filter(file => file.startsWith('.env') || file.endsWith('.env'))
@@ -41,9 +40,9 @@ export class DotenvProvider implements EnvironmentProvider {
     const { variables, validFilesNames } = await this.parseDotenv(this.basepath, this.getDotenvFiles(this.defaultFiles, env));
     if (validFilesNames.length > 0) {
       for (const file of validFilesNames) {
-        if (this.watchFiles.indexOf(file) < 0) {
-          this.watchFiles.push(file);
-          watchFile(file, storeReset);
+        const fileString = fileProvider.toString(file);
+        if (!this.watchDisposes[fileString]) {
+          this.watchDisposes[fileString] = fileProvider.watchFile(file, storeReset);
         }
       }
     }
@@ -60,18 +59,16 @@ export class DotenvProvider implements EnvironmentProvider {
   }
 
 
-  private async parseDotenv(dirname: string, fileNames: Array<string>): Promise<{ variables: Variables; validFilesNames: Array<string>; }> {
+  private async parseDotenv(dirname: PathLike, fileNames: Array<string>): Promise<{ variables: Variables; validFilesNames: Array<PathLike>; }> {
     const vars: Array<Variables> = [];
-    const validFilesNames: Array<string> = [];
+    const validFilesNames: Array<PathLike> = [];
     for (const fileName of fileNames) {
-      const envFileName = join(dirname, fileName);
+      const envFileName = fileProvider.joinPath(dirname, fileName);
       try {
-        if ((await fs.stat(envFileName))) {
-          const content = await fs.readFile(envFileName);
-          const variables = parse(content);
-          vars.push(variables);
-          validFilesNames.push(envFileName);
-        }
+        const content = await fileProvider.readFile(envFileName, 'utf-8');
+        const variables = parse(content);
+        vars.push(variables);
+        validFilesNames.push(envFileName);
       } catch (err) {
         log.trace(err);
       }

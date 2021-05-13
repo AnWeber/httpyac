@@ -1,9 +1,10 @@
 import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, HttpRequestBodyLine, HttpSymbol, HttpSymbolKind, ParserContext } from '../models';
 import { EOL } from 'os';
 import { toAbsoluteFilename, isString, isMimeTypeMultiPartFormData, isStringEmpty, isMimeTypeNewlineDelimitedJSON, isMimeTypeFormUrlEncoded } from '../utils';
-import { createReadStream, promises as fs } from 'fs';
+
 import { log, popupService } from '../logger';
 import { ParserRegex } from './parserRegex';
+import { fileProvider, PathLike } from '../fileProvider';
 
 
 export class RequestBodyHttpRegionParser implements HttpRegionParser {
@@ -64,18 +65,16 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
     return result;
   }
 
-  private async parseLine(textLine: string, httpFileName: string) {
+  private async parseLine(textLine: string, httpFileName: PathLike) {
     const fileImport = ParserRegex.request.fileImport.exec(textLine);
     if (fileImport && fileImport.length === 4 && fileImport.groups) {
       try {
         const normalizedPath = await toAbsoluteFilename(fileImport.groups.fileName, httpFileName);
         if (normalizedPath) {
           if (fileImport.groups.injectVariables) {
-            return await fs.readFile(normalizedPath, { encoding: this.getBufferEncoding(fileImport.groups.encoding) });
+            return await fileProvider.readFile(normalizedPath, this.getBufferEncoding(fileImport.groups.encoding));
           }
-          const stream = createReadStream(normalizedPath);
-          return async () => await this.toBuffer(stream);
-
+          return async () => fileProvider.readBuffer(normalizedPath);
         }
         popupService.warn(`request body file ${fileImport.groups.filename} not found`);
         log.warn(`request body file ${fileImport.groups.filename} not found`);
@@ -100,23 +99,6 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
     }
     return 'utf8';
   }
-
-  private toBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
-    return new Promise<Buffer>((resolve, reject) => {
-      const buffers: Buffer[] = [];
-      stream.on('data', obj => {
-        if (Buffer.isBuffer(obj)) {
-          buffers.push(obj);
-        } else {
-          buffers.push(Buffer.from(obj));
-        }
-      });
-      stream.on('end', () => resolve(Buffer.concat(buffers)));
-      stream.on('error', error => reject(error));
-      stream.resume();
-    });
-  }
-
 
   close(context: ParserContext): void {
     const requestBody = this.getAndRemoveRequestBody(context);

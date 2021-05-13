@@ -1,11 +1,11 @@
 import { ActionType, HttpRegionAction, ProcessorContext } from '../models';
-import { isString } from '../utils';
+import { isString, toMultiLineString } from '../utils';
 
 
 export interface GqlData{
   operationName?: string;
-  query?: string;
-  fragments: Record<string, string>
+  query?: string | (() => Promise<string>);
+  fragments: Record<string, string | (() => Promise<string>)>
 }
 
 export interface GqlPostRequest{
@@ -22,8 +22,28 @@ export class GqlAction implements HttpRegionAction {
 
   async process(context: ProcessorContext): Promise<boolean> {
     if (context.request?.body && this.gqlData?.query) {
+      let query: string;
+      if (isString(this.gqlData.query)) {
+        query = this.gqlData.query;
+      } else {
+        query = await this.gqlData.query();
+      }
+
+
+      for (const [key, value] of Object.entries(this.gqlData.fragments)) {
+        if (query.indexOf(`...${key}`) >= 0) {
+          let fragment: string;
+          if (isString(value)) {
+            fragment = value;
+          } else {
+            fragment = await value();
+          }
+          query = toMultiLineString([query, fragment]);
+        }
+      }
+
       const gqlRequestBody: GqlPostRequest = {
-        query: this.gqlData.query
+        query
       };
       if (this.gqlData.operationName) {
         gqlRequestBody.operationName = this.gqlData.operationName;

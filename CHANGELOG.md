@@ -1,3 +1,10 @@
+## 2.8.0 (2021-05-13)
+
+#### Features
+* allow custom filesystem provider (e.g. vscode.workspaces.fs)
+* add support for mimetype application/x-javascript
+* update dotenv to 9.0.2
+
 ## 2.7.0 (2021-05-03)
 
 #### Features
