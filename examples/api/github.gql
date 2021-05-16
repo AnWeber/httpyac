@@ -1,0 +1,14 @@
+query foo($name: String!, $owner: String!) {
+  repository(name: $name, owner: $owner) {
+    name
+    fullName: nameWithOwner
+    watchers {
+        totalCount
+    }
+  }
+}
+query bar($name: String!, $owner: String!) {
+  repository(name: $name, owner: $owner) {
+    name
+  }
+}

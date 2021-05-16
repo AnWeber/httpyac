@@ -1,0 +1,14 @@
+
+POST  http://www.learnwebservices.com/services/hello
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+  <soapenv:Header /> \
+  <soapenv:Body>
+    <SayHello xmlns="http://learnwebservices.com/services/hello"> \
+      <HelloRequest>
+        <Name>John Doe</Name>
+      </HelloRequest> \
+    </SayHello>
+  </soapenv:Body>
+</soapenv:Envelope>

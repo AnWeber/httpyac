@@ -1,0 +1,46 @@
+
+fragment IOParts on Repository {
+  description
+  diskUsage
+}
+
+POST https://api.github.com/graphql
+Content-Type: application/json
+Authorization: Bearer {{git_api_key}}
+
+query test($name: String!, $owner: String!) {
+  repository(name: $name, owner: $owner) {
+    name
+    fullName: nameWithOwner
+    ...IOParts
+    forkCount
+    stargazers(first: 5) {
+        totalCount
+        nodes {
+            login
+            name
+        }
+    }
+    watchers {
+        totalCount
+    }
+  }
+}
+
+{
+    "name": "vscode-httpyac",
+    "owner": "AnWeber"
+}
+
+
+POST https://api.github.com/graphql
+Content-Type: application/json
+Authorization: Bearer {{git_api_key}}
+
+
+gql foo < ./graphql.gql
+
+{
+    "name": "vscode-httpyac",
+    "owner": "AnWeber"
+}
