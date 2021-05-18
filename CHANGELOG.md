@@ -1,3 +1,8 @@
+## 2.9.0 (2021-05-18)
+
+#### Features
+* force inject variables with metadata setting (`# @injectVariables`)
+
 ## 2.8.0 (2021-05-13)
 
 #### Features

@@ -645,6 +645,16 @@ POST {{keycloak}}/auth/realms/test/protocol/openid-connect/token
 
 ```
 
+### injectVariables
+inject variables in request body (needed because of compatibility with Intellij)
+```html
+# @injectVariables
+
+GET /anything
+
+< ./variables.json
+
+```
 
 ### note
 shows a confirmation dialog before sending request
