@@ -21,7 +21,8 @@ export async function parseHttpFile(text: string, fileName: PathLike, httpFileSt
     httpFile,
     httpRegion: initHttpRegion(0),
     data: {},
-    httpFileStore
+    httpFileStore,
+    environmentConfig: environmentStore.environmentConfig,
   };
   for (let line = 0; line < lines.length; line++) {
 

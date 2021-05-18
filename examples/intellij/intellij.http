@@ -43,3 +43,15 @@ email=user@domain.loc&password=3
 
 
 > {% client.global.set("email", response.body.form.email); %}
+
+
+###
+# @injectVariables
+
+@testVariable=foo
+
+POST https://httpbin.org/anything
+accept: application/json
+
+
+< ./variables.json

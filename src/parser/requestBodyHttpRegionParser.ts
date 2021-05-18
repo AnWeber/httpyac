@@ -16,7 +16,8 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
       const next = lineReader.next();
       if (!next.done) {
         if (requestBody.textLines.length > 0 || !isStringEmpty(next.value.textLine)) {
-          requestBody.textLines.push(await this.parseLine(next.value.textLine, context.httpFile.fileName));
+          const forceInjectVariables = context.environmentConfig?.requestBodyForceInjectVariables || !!context.httpRegion.metaData.injectVariables;
+          requestBody.textLines.push(await this.parseLine(next.value.textLine, context.httpFile.fileName, forceInjectVariables));
 
           const symbols: Array<HttpSymbol> = [];
 
@@ -65,13 +66,13 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
     return result;
   }
 
-  private async parseLine(textLine: string, httpFileName: PathLike) {
+  private async parseLine(textLine: string, httpFileName: PathLike, forceInjectVariables: boolean) {
     const fileImport = ParserRegex.request.fileImport.exec(textLine);
     if (fileImport && fileImport.length === 4 && fileImport.groups) {
       try {
         const normalizedPath = await toAbsoluteFilename(fileImport.groups.fileName, httpFileName);
         if (normalizedPath) {
-          if (fileImport.groups.injectVariables) {
+          if (forceInjectVariables || fileImport.groups.injectVariables) {
             return await fileProvider.readFile(normalizedPath, this.getBufferEncoding(fileImport.groups.encoding));
           }
           return async () => fileProvider.readBuffer(normalizedPath);
