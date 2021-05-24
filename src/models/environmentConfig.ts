@@ -19,7 +19,7 @@ export interface EnvironmentConfig{
 
   request?: HttpRequest;
   proxy?: string;
-  requestBodyForceInjectVariables?: boolean;
+  requestBodyInjectVariablesExtensions?: Array<string>;
 
   /** default request headers if not overwritten */
   defaultHeaders?: Record<string, string>,

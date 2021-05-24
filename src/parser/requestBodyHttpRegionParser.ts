@@ -15,10 +15,21 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
       const requestBody = this.getRequestBody(context);
       const next = lineReader.next();
       if (!next.done) {
-        if (requestBody.textLines.length > 0 || !isStringEmpty(next.value.textLine)) {
-          const forceInjectVariables = context.environmentConfig?.requestBodyForceInjectVariables || !!context.httpRegion.metaData.injectVariables;
-          requestBody.textLines.push(await this.parseLine(next.value.textLine, context.httpFile.fileName, forceInjectVariables));
 
+
+        if (requestBody.textLines.length > 0 || !isStringEmpty(next.value.textLine)) {
+          const forceInjectVariables = (filename: string) => {
+            if (context.httpRegion.metaData.injectVariables) {
+              return true;
+            }
+            if (context.environmentConfig?.requestBodyInjectVariablesExtensions) {
+              const extname = fileProvider.extname(filename);
+              return context.environmentConfig.requestBodyInjectVariablesExtensions
+                .indexOf(extname) >= 0;
+            }
+            return false;
+          };
+          requestBody.textLines.push(await this.parseLine(next.value.textLine, context.httpFile.fileName, forceInjectVariables));
           const symbols: Array<HttpSymbol> = [];
 
 
@@ -66,19 +77,19 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
     return result;
   }
 
-  private async parseLine(textLine: string, httpFileName: PathLike, forceInjectVariables: boolean) {
+  private async parseLine(textLine: string, httpFileName: PathLike, forceInjectVariables: (fileName: string) => boolean) {
     const fileImport = ParserRegex.request.fileImport.exec(textLine);
     if (fileImport && fileImport.length === 4 && fileImport.groups) {
       try {
         const normalizedPath = await toAbsoluteFilename(fileImport.groups.fileName, httpFileName);
         if (normalizedPath) {
-          if (forceInjectVariables || fileImport.groups.injectVariables) {
+          if (forceInjectVariables(fileImport.groups.fileName) || fileImport.groups.injectVariables) {
             return await fileProvider.readFile(normalizedPath, this.getBufferEncoding(fileImport.groups.encoding));
           }
           return async () => fileProvider.readBuffer(normalizedPath);
         }
-        popupService.warn(`request body file ${fileImport.groups.filename} not found`);
-        log.warn(`request body file ${fileImport.groups.filename} not found`);
+        popupService.warn(`request body file ${fileImport.groups.fileName} not found`);
+        log.warn(`request body file ${fileImport.groups.fileName} not found`);
 
       } catch (err) {
         log.trace(err);

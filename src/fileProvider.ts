@@ -1,5 +1,5 @@
 import { promises as fs, watchFile, unwatchFile, createReadStream } from 'fs';
-import { join, isAbsolute, dirname } from 'path';
+import { join, isAbsolute, dirname, extname } from 'path';
 export type FileEnconding = 'ascii' | 'utf8' | 'utf-8' | 'utf16le' | 'ucs2' | 'ucs-2' | 'base64' | 'base64url' | 'latin1' | 'binary' | 'hex';
 
 export type PathLike = string | { fsPath: string; };
@@ -7,6 +7,7 @@ export type PathLike = string | { fsPath: string; };
 export interface FileProvider{
   exists(fileName: PathLike): Promise<boolean>;
   joinPath(fileName: PathLike, path: string): PathLike;
+  extname(fileName: PathLike): string;
   dirname(fileName: PathLike): PathLike;
   isAbsolute(fileName: PathLike): boolean;
   readFile(fileName: PathLike, encoding: FileEnconding): Promise<string>;
@@ -34,6 +35,7 @@ export const fileProvider: FileProvider = {
       return false;
     }
   },
+  extname: (fileName: string) => extname(fileName),
   dirname: (fileName: string) => dirname(toString(fileName)),
   isAbsolute: (fileName: PathLike) => isAbsolute(toString(fileName)),
   joinPath: (fileName: PathLike, path: string) => join(toString(fileName), path),
