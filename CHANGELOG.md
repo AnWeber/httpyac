@@ -1,3 +1,8 @@
+## 2.10.0 (2021-05-24)
+
+#### Features
+* dependency updates of open, inquirer and dotenv
+
 ## 2.9.0 (2021-05-18)
 
 #### Features
