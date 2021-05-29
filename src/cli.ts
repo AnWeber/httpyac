@@ -304,7 +304,7 @@ function initHttpYacApiExtensions(config: EnvironmentConfig & SettingsConfig, ro
   if (rootDir && config.httpRegionScript) {
     httpYacApi.httpRegionParsers.push(new SettingsScriptHttpRegionParser(async () => {
       let fileName: PathLike | undefined = config.httpRegionScript;
-      if (fileName) {
+      if (typeof fileName === 'string') {
         if (!fileProvider.isAbsolute(fileName)) {
           fileName = fileProvider.joinPath(rootDir, fileName);
         }

@@ -2,7 +2,7 @@ import { promises as fs, watchFile, unwatchFile, createReadStream } from 'fs';
 import { join, isAbsolute, dirname, extname } from 'path';
 export type FileEnconding = 'ascii' | 'utf8' | 'utf-8' | 'utf16le' | 'ucs2' | 'ucs-2' | 'base64' | 'base64url' | 'latin1' | 'binary' | 'hex';
 
-export type PathLike = string | { getPath(): string; };
+export type PathLike = string | { toString(): string };
 
 export interface FileProvider{
   exists(fileName: PathLike): Promise<boolean>;
@@ -24,7 +24,7 @@ function toString(fileName: PathLike): string {
   if (typeof fileName === 'string') {
     return fileName;
   }
-  return fileName.getPath();
+  return fileName.toString();
 }
 
 export const fileProvider: FileProvider = {
