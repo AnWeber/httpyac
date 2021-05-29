@@ -1,26 +1,35 @@
 import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, HttpSymbolKind, ParserContext } from '../models';
 import { ParserRegex } from './parserRegex';
-
+import { toMultiLineString, parseContentType } from '../utils';
+import { setParseBody } from '../gotHttpClientFactory';
 
 export class ResponseHttpRegionParser implements HttpRegionParser {
   supportsEmptyLine = true;
 
   async parse(lineReader: HttpRegionParserGenerator, context: ParserContext): Promise<HttpRegionParserResult> {
 
-    const next = lineReader.next();
+    let next = lineReader.next();
     if (!next.done) {
       const responseSymbol = context.data.httpResponseSymbol;
       if (responseSymbol) {
-        responseSymbol.endLine = next.value.line;
-        responseSymbol.endOffset = next.value.textLine.length;
+        responseSymbol.body.push(next.value.textLine);
+
+        responseSymbol.symbol.endLine = next.value.line;
+        responseSymbol.symbol.endOffset = next.value.textLine.length;
         return {
           nextParserLine: next.value.line,
         };
       }
       const match = ParserRegex.responseLine.exec(next.value.textLine);
-      if (match) {
+      if (match && match.groups?.statusCode) {
 
-        context.data.httpResponseSymbol = {
+        context.httpRegion.response = {
+          httpVersion: match.groups.httpVersion,
+          statusCode: +match.groups.statusCode,
+          statusMessage: match.groups.statusMessage,
+          headers: {}
+        };
+        const symbol = {
           name: 'response',
           description: 'response',
           kind: HttpSymbolKind.response,
@@ -29,9 +38,28 @@ export class ResponseHttpRegionParser implements HttpRegionParser {
           endLine: next.value.line,
           endOffset: next.value.textLine.length,
         };
+
+        next = lineReader.next();
+        while (!next.done) {
+          symbol.endLine = next.value.line;
+          symbol.endOffset = next.value.textLine.length;
+          const headerMatch = ParserRegex.request.header.exec(next.value.textLine);
+          if (headerMatch?.groups?.key && headerMatch?.groups?.value) {
+            context.httpRegion.response.headers[headerMatch.groups.key] = headerMatch.groups.value;
+          } else {
+            break;
+          }
+          next = lineReader.next();
+        }
+
+        context.data.httpResponseSymbol = {
+          symbol,
+          body: [],
+        };
+
         return {
-          nextParserLine: next.value.line,
-          symbols: [context.data.httpResponseSymbol],
+          nextParserLine: symbol.endLine,
+          symbols: [symbol],
         };
       }
     }
@@ -39,6 +67,18 @@ export class ResponseHttpRegionParser implements HttpRegionParser {
   }
 
   close(context: ParserContext): void {
-    delete context.data.httpResponseSymbol;
+    if (context.data.httpResponseSymbol) {
+      if (context.httpRegion.response
+        && context.data.httpResponseSymbol.body.length > 0) {
+        const response = context.httpRegion.response;
+        const body = toMultiLineString(context.data.httpResponseSymbol.body);
+        response.body = body;
+        response.rawBody = Buffer.from(body);
+        response.contentType = parseContentType(response.headers);
+        setParseBody(response);
+      }
+
+      delete context.data.httpResponseSymbol;
+    }
   }
 }

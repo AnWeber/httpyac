@@ -1,3 +1,8 @@
+## 2.11.0 (2021-05-29)
+
+#### Features
+* add parser for response and responseRef
+
 ## 2.10.0 (2021-05-24)
 
 #### Features

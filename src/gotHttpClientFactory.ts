@@ -1,5 +1,5 @@
 import { HttpClient, HttpClientContext, HttpRequest, HttpResponse, RepeatOrder } from './models';
-import { getHeader, isString, parseMimeType, isMimeTypeJSON } from './utils';
+import { isString, isMimeTypeJSON, parseContentType } from './utils';
 import { default as got, OptionsOfUnknownResponseBody, CancelError, Response } from 'got';
 import merge from 'lodash/merge';
 import { HttpProxyAgent } from 'http-proxy-agent';
@@ -117,14 +117,6 @@ function initProxy(request: HttpRequest) {
 }
 
 
-function parseContentType(headers: Record<string, string | string[] | undefined>) {
-  const contentType = getHeader(headers, 'content-type');
-  if (isString(contentType)) {
-    return parseMimeType(contentType);
-  }
-  return undefined;
-}
-
 function toHttpResponse(response: Response<unknown>): HttpResponse {
   const httpResponse: HttpResponse = {
     statusCode: response.statusCode,
@@ -143,9 +135,14 @@ function toHttpResponse(response: Response<unknown>): HttpResponse {
     }
   };
 
+  setParseBody(httpResponse);
+  return httpResponse;
+}
+
+export function setParseBody(httpResponse: HttpResponse) : void {
   if (isMimeTypeJSON(httpResponse.contentType)
-      && isString(httpResponse.body)
-      && httpResponse.body.length > 0) {
+    && isString(httpResponse.body)
+    && httpResponse.body.length > 0) {
     try {
       httpResponse.parsedBody = JSON.parse(httpResponse.body);
     } catch (err) {
@@ -153,7 +150,6 @@ function toHttpResponse(response: Response<unknown>): HttpResponse {
       log.warn('json parse error', httpResponse.body, err);
     }
   }
-  return httpResponse;
 }
 
 function mergeHttpResponse(responses: Array<HttpResponse>): HttpResponse | false {

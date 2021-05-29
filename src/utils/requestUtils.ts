@@ -1,5 +1,7 @@
-import { HttpMethod } from '../models';
+import { ContentType, HttpMethod } from '../models';
 import { log } from '../logger';
+import { isString } from './stringUtils';
+import { parseMimeType } from './mimeTypeUtils';
 
 
 export function isRequestMethod(method: string | undefined): method is HttpMethod {
@@ -21,6 +23,15 @@ export function getHeader(headers: Record<string, string | string[] | undefined 
     }
   }
   return null;
+}
+
+
+export function parseContentType(headers: Record<string, string | string[] | null | undefined>) : ContentType | undefined {
+  const contentType = getHeader(headers, 'content-type');
+  if (isString(contentType)) {
+    return parseMimeType(contentType);
+  }
+  return undefined;
 }
 
 

@@ -16,7 +16,10 @@ export interface ParserRequestBody{
 
 export interface ParserContextData {
   request_body?: ParserRequestBody,
-  httpResponseSymbol?: HttpSymbol,
+  httpResponseSymbol?: {
+    symbol: HttpSymbol,
+    body: Array<string>,
+  },
   gql?: Record<string, string>,
   jsOnEveryRequest?: ParserEveryRequestScript[],
   readonly [key: string]: unknown;

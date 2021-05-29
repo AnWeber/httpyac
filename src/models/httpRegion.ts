@@ -14,4 +14,5 @@ export interface HttpRegion{
   metaData: Record<string, string>;
   symbol: HttpSymbol;
   testResults?: Array<TestResult>;
+  responseRefs?: string[];
 }
