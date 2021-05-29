@@ -1,8 +1,7 @@
 import { EOL } from 'os';
-import { ContentType, HttpResponse, HttpTimings, TestResult } from '../models';
+import { ContentType, HttpResponse, HttpResponseRequest, HttpTimings, TestResult } from '../models';
 import { isString, toMultiLineArray } from './stringUtils';
 import * as mimeTypeUtils from './mimeTypeUtils';
-import { NormalizedOptions } from 'got';
 import { testSymbols } from '../actions';
 
 export function toMarkdown(response: HttpResponse, options?: {
@@ -86,7 +85,7 @@ export function getMarkdownSyntax(contentType: ContentType | undefined) : string
   return '';
 }
 
-export function toMarkdownRequest(request: NormalizedOptions, options?: {
+export function toMarkdownRequest(request: HttpResponseRequest, options?: {
   body?: boolean;
 }) : Array<string> {
   const result: Array<string> = [];

@@ -1,17 +1,30 @@
-import { NormalizedOptions } from 'got';
 import { ContentType } from './contentType';
+import { HttpMethod } from './httpMethod';
 import { HttpTimings } from './httpTimings';
 
 export interface HttpResponse{
   httpVersion?: string;
   statusCode: number;
-  statusMessage: string | undefined;
-  timings: HttpTimings,
-  headers: Record<string, string | string[] | undefined | null>;
+  statusMessage?: string;
+  timings?: HttpTimings,
+  headers: HttpHeaders;
   contentType?: ContentType;
-  body: unknown;
+  body?: unknown;
   parsedBody?: unknown;
   rawBody?: Buffer;
-  request?: NormalizedOptions;
+  request?: HttpResponseRequest;
   meta?: Record<string, unknown>
 }
+
+export interface HttpResponseRequest{
+  method: HttpMethod;
+  url: unknown;
+  headers: HttpHeaders;
+  body?: unknown;
+  https?: {
+    certificate?: unknown;
+    pfx?: unknown;
+  }
+}
+
+export type HttpHeaders = Record<string, string | string[] | undefined | null>;

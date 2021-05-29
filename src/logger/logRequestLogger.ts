@@ -1,10 +1,9 @@
-import { HttpResponse } from '../models';
+import { HttpResponse, HttpResponseRequest } from '../models';
 import { isString, toMultiLineString } from '../utils';
 import { LogChannels } from './logChannels';
 import { LogLevel } from './logLevel';
 import { logOutputProvider } from './logOutputProvider';
 
-import { NormalizedOptions } from 'got';
 import { chalkInstance } from './chalk';
 
 class LogRequestsLogger {
@@ -56,7 +55,7 @@ class LogRequestsLogger {
     logOutputProvider.log(LogChannels.Request, LogLevel.info, toMultiLineString(result));
   }
 
-  private logRequest(request: NormalizedOptions) {
+  private logRequest(request: HttpResponseRequest) {
     const chalk = chalkInstance();
     const result: Array<string> = [];
     result.push(chalk`{bold ${request.method} ${request.url}}`);
