@@ -1,9 +1,6 @@
 version: 2
 updates:
-  - package-ecosystem: npm
+  - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: daily
-    allowed_updates:
-      - match:
-          dependency_type: production
+      interval: "daily"
