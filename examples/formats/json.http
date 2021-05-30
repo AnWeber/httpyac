@@ -1,14 +1,21 @@
 
 
+/*
+## call https://httpbin.org/json
+
+return dummy json
+*/
+
 GET /json
 
-HTTP/2.0 200 OK
-access-control-allow-credentials: true
-access-control-allow-origin: *
-content-length: 429
+
+HTTP/2.0 200
+date: Sun, 30 May 2021 19:42:12 GMT
 content-type: application/json
-date: Sat, 29 May 2021 19:39:41 GMT
+content-length: 429
 server: gunicorn/19.9.0
+access-control-allow-origin: *
+access-control-allow-credentials: true
 
 {
   "slideshow": {

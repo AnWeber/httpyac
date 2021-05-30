@@ -1,3 +1,9 @@
+## 2.12.1 (2021-05-30)
+
+#### Fix
+* Spelling mistake in symbol
+* small error in Http version output
+
 ## 2.12.0 (2021-05-30)
 
 #### Features

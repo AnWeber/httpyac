@@ -14,7 +14,7 @@ export class CommentHttpRegionParser implements HttpRegionParser {
         symbols: [{
           name: 'comment',
           description: comment.comment,
-          kind: HttpSymbolKind.commnet,
+          kind: HttpSymbolKind.comment,
           startLine: comment.startLine,
           startOffset: 0,
           endLine: comment.endLine,

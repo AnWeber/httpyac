@@ -15,7 +15,7 @@ export function toHttpString(response: HttpResponse) : string {
 
 export function toHttpStringResponse(response: HttpResponse) : Array<string> {
   const result: Array<string> = [];
-  result.push(`HTTP${response.httpVersion || ''} ${response.statusCode} ${response.statusMessage ? `- ${response.statusMessage}` : ''}`);
+  result.push(`HTTP/${response.httpVersion || ''} ${response.statusCode} ${response.statusMessage ? `- ${response.statusMessage}` : ''}`);
   result.push(...toHttpStringHeader(response.headers));
   if (isString(response.body)) {
     result.push('');

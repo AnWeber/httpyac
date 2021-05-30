@@ -52,7 +52,7 @@ export function toMarkdownResponse(response: HttpResponse, options?: {
   body?: boolean;
 }) : Array<string> {
   const result: Array<string> = [];
-  result.push(`\`HTTP${response.httpVersion || ''} ${response.statusCode} - ${response.statusMessage}\``);
+  result.push(`\`HTTP/${response.httpVersion || ''} ${response.statusCode} - ${response.statusMessage}\``);
   result.push(...toMarkdownHeader(response.headers));
   if (options?.body && isString(response.body)) {
     result.push('');
