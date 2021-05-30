@@ -1,9 +1,10 @@
 import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext } from '../models';
 import { ParserRegex } from './parserRegex';
-
+import { toAbsoluteFilename } from '../utils';
+import { fileProvider } from '../fileProvider';
 export class ResponseRefHttpRegionParser implements HttpRegionParser {
 
-  async parse(lineReader: HttpRegionParserGenerator, { httpRegion }: ParserContext): Promise<HttpRegionParserResult> {
+  async parse(lineReader: HttpRegionParserGenerator, { httpRegion, httpFile, httpFileStore }: ParserContext): Promise<HttpRegionParserResult> {
     const next = lineReader.next();
     if (!next.done) {
       const textLine = next.value.textLine;
@@ -11,9 +12,11 @@ export class ResponseRefHttpRegionParser implements HttpRegionParser {
       const match = ParserRegex.responseRef.exec(textLine);
       if (match && match.groups?.fileName) {
         if (!httpRegion.responseRefs) {
-          httpRegion.responseRefs = [match.groups.fileName];
-        } else {
-          httpRegion.responseRefs.push(match.groups.fileName);
+          httpRegion.responseRefs = [];
+        }
+        const fileName = toAbsoluteFilename(match.groups.fileName, httpFile.fileName);
+        if (fileName) {
+          httpRegion.responseRefs.push(async () => await httpFileStore.parse(fileName, await fileProvider.readFile(fileName, 'utf-8')));
         }
         return {
           nextParserLine: next.value.line,

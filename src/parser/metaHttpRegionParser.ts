@@ -61,6 +61,17 @@ export class MetaHttpRegionParser implements HttpRegionParser {
                   await this.importHttpFile(httpFile, match.groups.value, httpFileStore);
                 }
                 break;
+              case 'responseRef':
+                if (match.groups.value) {
+                  if (!httpRegion.responseRefs) {
+                    httpRegion.responseRefs = [];
+                  }
+                  const fileName = toAbsoluteFilename(match.groups.fileName, httpFile.fileName);
+                  if (fileName) {
+                    httpRegion.responseRefs.push(async () => await httpFileStore.parse(fileName, await fileProvider.readFile(fileName, 'utf-8')));
+                  }
+                }
+                break;
               case 'ref':
                 if (match.groups.value) {
                   this.addRefHttpRegion(httpRegion, match.groups.value, false);
