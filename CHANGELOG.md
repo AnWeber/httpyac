@@ -1,3 +1,9 @@
+## 2.12.0 (2021-05-30)
+
+#### Features
+* change signature of responseRef array
+* HttpSymbol provides property source
+* utils for http file output
 ## 2.11.0 (2021-05-29)
 
 #### Features
