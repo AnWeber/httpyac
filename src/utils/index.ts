@@ -3,6 +3,7 @@ export * from './environmentUtils';
 export * from './errorUtils';
 export * from './fsUtils';
 export * from './httpRegionUtils';
+export * from './httpStringUtils';
 export * from './markdownUtils';
 export * from './mimeTypeUtils';
 export * from './stringUtils';
