@@ -15,8 +15,8 @@ export class JavascriptVariableReplacer implements VariableReplacer {
       const script = `exports.$result = (${jsVariable});`;
 
       let lineOffset = httpRegion.symbol.startLine;
-      if (httpRegion.source) {
-        const index = toMultiLineArray(httpRegion.source).findIndex(line => line.indexOf(searchValue) >= 0);
+      if (httpRegion.symbol.source) {
+        const index = toMultiLineArray(httpRegion.symbol.source).findIndex(line => line.indexOf(searchValue) >= 0);
         if (index >= 0) {
           lineOffset = httpRegion.symbol.startLine + index;
         }

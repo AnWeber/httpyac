@@ -18,7 +18,7 @@ export class CommentHttpRegionParser implements HttpRegionParser {
           startLine: comment.startLine,
           startOffset: 0,
           endLine: comment.endLine,
-          endOffset: 0,
+          endOffset: comment.endOffset,
         }],
       };
     }
@@ -30,6 +30,7 @@ export class CommentHttpRegionParser implements HttpRegionParser {
 export interface CommentParserResult{
   startLine: number,
   endLine: number,
+  endOffset: number;
   comment: string;
 }
 
@@ -46,6 +47,7 @@ function getCommentContent(lineReader: HttpRegionParserGenerator): CommentParser
       return {
         startLine,
         endLine: startLine,
+        endOffset: next.value.textLine.length,
         comment: singleLineMatch.groups.comment
       };
     }
@@ -59,6 +61,7 @@ function getCommentContent(lineReader: HttpRegionParserGenerator): CommentParser
           return {
             startLine,
             endLine: next.value.line,
+            endOffset: next.value.textLine.length,
             comment: toMultiLineString(lines),
           };
         }

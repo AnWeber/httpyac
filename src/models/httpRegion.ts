@@ -10,7 +10,6 @@ export interface HttpRegion{
   request?: HttpRequest;
   response?: HttpResponse;
   requestLine?: number;
-  source?: string;
   metaData: Record<string, string>;
   symbol: HttpSymbol;
   testResults?: Array<TestResult>;

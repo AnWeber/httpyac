@@ -7,6 +7,7 @@ import { ParserRegex } from './parserRegex';
 export interface IntelliJParserResult{
   startLine: number,
   endLine: number,
+  endOffset: number;
   data: ScriptData | IntellijScriptData;
 }
 
@@ -28,7 +29,7 @@ export class IntellijHttpRegionParser implements HttpRegionParser {
             startLine: intellijContent.startLine,
             startOffset: 0,
             endLine: intellijContent.endLine,
-            endOffset: 0,
+            endOffset: intellijContent.endOffset,
           }],
         };
       }
@@ -49,6 +50,7 @@ function getIntellijContent(lineReader: HttpRegionParserGenerator): IntelliJPars
       return {
         startLine,
         endLine: startLine,
+        endOffset: next.value.textLine.length,
         data: {
           fileName: fileMatches.groups.fileName
         }
@@ -60,6 +62,7 @@ function getIntellijContent(lineReader: HttpRegionParserGenerator): IntelliJPars
       return {
         startLine,
         endLine: startLine,
+        endOffset: next.value.textLine.length,
         data: {
           script: singleLineMatch.groups.script,
           lineOffset: startLine,
@@ -76,6 +79,7 @@ function getIntellijContent(lineReader: HttpRegionParserGenerator): IntelliJPars
           return {
             startLine,
             endLine: next.value.line,
+            endOffset: next.value.textLine.length,
             data: {
               script: toMultiLineString(scriptLines),
               lineOffset: startLine

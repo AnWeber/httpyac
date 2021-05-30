@@ -1,4 +1,4 @@
-import { HttpFile, HttpRegion, HttpSymbolKind, ParserContext } from '../models';
+import { HttpFile, HttpRegion, HttpSymbol, HttpSymbolKind, ParserContext } from '../models';
 import { toMultiLineString, toMultiLineArray, getRegionName } from '../utils';
 import { environmentStore } from '../environments/environmentStore';
 import { httpYacApi } from '../httpYacApi';
@@ -33,6 +33,7 @@ export async function parseHttpFile(text: string, fileName: PathLike, httpFileSt
         if (httpRegionParserResult) {
           if (httpRegionParserResult.endRegionLine) {
             parserContext.httpRegion.symbol.endLine = httpRegionParserResult.endRegionLine;
+            parserContext.httpRegion.symbol.endOffset = lines[httpRegionParserResult.endRegionLine].length;
             closeHttpRegion(parserContext);
             parserContext.httpRegion = initHttpRegion(httpRegionParserResult.nextParserLine + 1);
           }
@@ -51,6 +52,7 @@ export async function parseHttpFile(text: string, fileName: PathLike, httpFileSt
   }
   closeHttpRegion(parserContext);
   parserContext.httpRegion.symbol.endLine = lines.length - 1;
+  parserContext.httpRegion.symbol.endOffset = lines[lines.length - 1].length;
   setSource(httpFile.httpRegions, lines);
   return httpFile;
 }
@@ -72,7 +74,21 @@ function closeHttpRegion(parserContext: ParserContext) {
 
 function setSource(httpRegions: Array<HttpRegion>, lines: Array<string>) {
   for (const httpRegion of httpRegions) {
-    httpRegion.source = toMultiLineString(lines.slice(httpRegion.symbol.startLine, httpRegion.symbol.endLine + 1)).trim();
+    setSymbolSource(httpRegion.symbol, lines);
+  }
+}
+
+function setSymbolSource(symbol: HttpSymbol, lines: Array<string>): void {
+  symbol.source = toMultiLineString(lines.slice(symbol.startLine, symbol.endLine + 1));
+  let endOffset: number | undefined = symbol.endOffset - lines[symbol.endLine].length;
+  if (endOffset >= 0) {
+    endOffset = undefined;
+  }
+  symbol.source = symbol.source.slice(symbol.startOffset, endOffset);
+  if (symbol.children) {
+    for (const child of symbol.children) {
+      setSymbolSource(child, lines);
+    }
   }
 }
 

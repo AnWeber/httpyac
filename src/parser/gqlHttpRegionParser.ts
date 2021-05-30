@@ -39,7 +39,7 @@ export class GqlHttpRegionParser implements HttpRegionParser {
           startLine: gqlContent.startLine,
           startOffset: 0,
           endLine: gqlContent.endLine,
-          endOffset: 0,
+          endOffset: gqlContent.endOffset,
         }]
       };
     }
@@ -71,6 +71,7 @@ async function getGQLContent(lineReader: HttpRegionParserGenerator, httpFileName
           return {
             startLine,
             endLine: startLine,
+            endOffset: next.value.textLine.length,
             name: fileMatches.groups.name || fileMatches.groups.fileName,
             gql: () => fileProvider.readFile(normalizedPath, 'utf-8')
           };
@@ -103,6 +104,7 @@ function matchGqlContent(value: { textLine: string; line: number }, lineReader: 
         name,
         startLine,
         endLine: next.value.line,
+        endOffset: next.value.textLine.length,
         gql: toMultiLineString(gqlLines),
       };
     }
@@ -116,5 +118,6 @@ export interface GqlParserResult{
   name?: string,
   startLine: number,
   endLine: number,
+  endOffset: number;
   gql: string | (() => Promise<string>);
 }
