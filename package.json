@@ -4,7 +4,7 @@
 	"license": "MIT",
 	"publisher": "weber.andreas",
 	"description": "HTTP/REST CLI Client for *.http files",
-	"version": "2.12.2",
+	"version": "2.12.3",
 	"homepage": "https://github.com/AnWeber/httpyac",
 	"repository": {
 		"type": "git",
@@ -25,8 +25,8 @@
 		"api",
 		"rest-client"
 	],
-	"main": "./src/index.ts",
-	"types2": "./dist/index.d.ts",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
 	"bin": {
 		"httpyac": "./bin/httpyac.js"
 	},
