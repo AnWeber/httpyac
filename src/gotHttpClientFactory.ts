@@ -134,6 +134,10 @@ function toHttpResponse(response: Response<unknown>): HttpResponse {
       size: filesize(response.rawHeaders.map(obj => obj.length).reduce((size, current) => size + current, 0) + response.rawBody.length),
     }
   };
+  delete response.headers[':status'];
+  if (httpResponse.httpVersion && httpResponse.httpVersion.startsWith('HTTP/')) {
+    httpResponse.httpVersion = httpResponse.httpVersion.slice('HTTP/'.length);
+  }
 
   setParseBody(httpResponse);
   return httpResponse;
