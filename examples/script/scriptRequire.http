@@ -1,0 +1,12 @@
+
+{{
+  const { authenticate } = require('./scriptRequire');
+  const authDate = new Date();
+
+  exports.authDate = authDate.toUTCString();
+  exports.authentication = authenticate(authDate, request);
+}}
+
+GET /anything
+Authentication: {{authentication}}
+Date: {{authDate}}

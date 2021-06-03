@@ -77,8 +77,8 @@ export interface ScriptContext {
 
 export async function executeScript(context: ScriptContext): Promise<Variables> {
   try {
-    const filename = context.fileName ? fileProvider.toString(context.fileName) : __filename;
-    const dir = fileProvider.toString(fileProvider.dirname(filename));
+    const filename = context.fileName ? fileProvider.fsPath(context.fileName) : __filename;
+    const dir = fileProvider.fsPath(fileProvider.dirname(filename));
     const scriptModule = new Module(filename, require.main);
 
     scriptModule.filename = filename;

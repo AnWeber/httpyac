@@ -14,6 +14,7 @@ export interface FileProvider{
   readBuffer(fileName: PathLike): Promise<Buffer>;
   readdir: (dirname: PathLike) => Promise<string[]>;
   watchFile(fileName: PathLike, listener: () => void): WatchDispose,
+  fsPath(fileName: PathLike): string;
   toString(fileName: PathLike): string;
 }
 
@@ -49,6 +50,7 @@ export const fileProvider: FileProvider = {
     watchFile(toString(fileName), listener);
     return () => unwatchFile(toString(fileName), listener);
   },
+  fsPath: toString,
   toString
 };
 

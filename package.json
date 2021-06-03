@@ -4,7 +4,7 @@
 	"license": "MIT",
 	"publisher": "weber.andreas",
 	"description": "HTTP/REST CLI Client for *.http files",
-	"version": "2.12.3",
+	"version": "2.12.4",
 	"homepage": "https://github.com/AnWeber/httpyac",
 	"repository": {
 		"type": "git",
@@ -47,7 +47,7 @@
 		"@types/encodeurl": "^1.0.0",
 		"@types/inquirer": "^7.3.1",
 		"@types/lodash": "^4.14.170",
-		"@types/node": "^15.6.1",
+		"@types/node": "^15.12.0",
 		"@types/tough-cookie": "^4.0.0",
 		"@types/uuid": "^8.3.0",
 		"@typescript-eslint/eslint-plugin": "^4.26.0",
