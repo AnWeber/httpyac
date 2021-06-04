@@ -1,3 +1,8 @@
+## 2.12.5 (2021-06-04)
+
+#### Fix
+* region delimiter ignore chars after delimiter
+
 ## 2.12.4 (2021-06-03)
 
 #### Fix
