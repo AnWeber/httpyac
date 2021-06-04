@@ -2,3 +2,10 @@
 @invoiceId = 21060216492001061854
 
 PUT {{host}}/anything?invoiceId={{invoiceId}}
+
+
+
+### second
+
+@sth = abc
+GET http://sth/{{sth}}
