@@ -1,0 +1,4 @@
+### regenerate invoice
+@invoiceId = 21060216492001061854
+
+PUT {{host}}/anything?invoiceId={{invoiceId}}
