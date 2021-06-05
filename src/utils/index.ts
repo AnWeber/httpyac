@@ -1,4 +1,5 @@
 export * from './arrayUtils';
+export * from './assertUtils';
 export * from './environmentUtils';
 export * from './errorUtils';
 export * from './fsUtils';

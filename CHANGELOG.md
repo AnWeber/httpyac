@@ -1,3 +1,9 @@
+## 2.13.0 (2021-06-05)
+
+#### Features
+* assertUtils for simple tests
+#### Fix
+* empty line after requestline not needed anymore
 ## 2.12.5 (2021-06-04)
 
 #### Fix
