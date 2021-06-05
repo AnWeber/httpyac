@@ -9,3 +9,10 @@ PUT {{host}}/anything?invoiceId={{invoiceId}}
 
 @sth = abc
 GET http://sth/{{sth}}
+
+###
+@vara = 3
+GET {{host}}/{{vara}} HTTP/1.1
+###
+@varb = 2
+GET {{host}}/{{varb}} HTTP/1.1

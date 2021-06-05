@@ -105,10 +105,6 @@ export class RequestHttpRegionParser implements HttpRegionParser {
       };
       next = lineReader.next();
       while (!next.done) {
-        result.nextParserLine = next.value.line;
-        if (isStringEmpty(next.value.textLine)) {
-          break;
-        }
 
         const requestLineParser: Array<RequestLineParserMethod> = [
           this.parseRequestHeader,
@@ -116,9 +112,11 @@ export class RequestHttpRegionParser implements HttpRegionParser {
           this.parseQueryLine,
           this.parseUrlLine
         ];
+        let hasResult = false;
         for (const lineParser of requestLineParser) {
           const parseResult = lineParser(next.value.textLine, next.value.line, request);
           if (parseResult) {
+            hasResult = true;
             symbols.push(...parseResult.symbols);
             if (parseResult.actions) {
               httpRegion.actions.push(...parseResult.actions);
@@ -126,6 +124,10 @@ export class RequestHttpRegionParser implements HttpRegionParser {
             break;
           }
         }
+        if (!hasResult) {
+          break;
+        }
+        result.nextParserLine = next.value.line;
         next = lineReader.next();
       }
 
