@@ -1,7 +1,13 @@
+## 2.14.0 (2021-06-06)
+
+#### Features
+* better test method support
+
 ## 2.13.1 (2021-06-05)
 
 #### Fix
 * error parsing http version in inline response
+
 ## 2.13.0 (2021-06-05)
 
 #### Features

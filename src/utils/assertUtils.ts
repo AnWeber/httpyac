@@ -28,6 +28,9 @@ export function assertResponsetimeLower(response: HttpResponse, maxTotal: number
 export function assertHasResponseBody(response: HttpResponse): void {
   ok(!!response.body, 'response body exists');
 }
+export function assertHasNoResponseBody(response: HttpResponse): void {
+  ok(!response.body, 'response body does not exists');
+}
 
 export function assertResponseBodyEquals(response: HttpResponse, val: unknown): void {
   strictEqual(response.body, val, `response body equals ${val}`);
