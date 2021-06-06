@@ -8,9 +8,8 @@ return dummy json
 
 GET /json
 
-
-HTTP/2.0 200
-date: Sun, 30 May 2021 19:42:12 GMT
+HTTP/2.0 200 - OK
+date: Sun, 06 Jun 2021 20:01:36 GMT
 content-type: application/json
 content-length: 429
 server: gunicorn/19.9.0
@@ -19,22 +18,22 @@ access-control-allow-credentials: true
 
 {
   "slideshow": {
-    "author": "Yours Truly",
-    "date": "date of publication",
+    "author": "Yours Truly", 
+    "date": "date of publication", 
     "slides": [
       {
-        "title": "Wake up to WonderWidgets!",
+        "title": "Wake up to WonderWidgets!", 
         "type": "all"
-      },
+      }, 
       {
         "items": [
-          "Why <em>WonderWidgets</em> are great",
+          "Why <em>WonderWidgets</em> are great", 
           "Who <em>buys</em> WonderWidgets"
-        ],
-        "title": "Overview",
+        ], 
+        "title": "Overview", 
         "type": "all"
       }
-    ],
+    ], 
     "title": "Sample Slide Show"
   }
 }
