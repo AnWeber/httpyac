@@ -20,9 +20,16 @@ A simple HTTP Request & Response Service
 Testing different HTTP verbs
 */
 
+
+/*
+## Status Codes
+
+Generates responses with given status code
+*/
+
 DELETE https://httpbin.org/delete
 
-HTTP/2.0 200 - - OK
+HTTP/2.0 200 - - - - - - OK
 date: Mon, 07 Jun 2021 13:29:24 GMT
 content-type: application/json
 content-length: 340
@@ -50,9 +57,19 @@ access-control-allow-credentials: true
 
 
 
+
+
+
+
+
+
+
+
+
+
 GET https://httpbin.org/get
 
-HTTP/2.0 200 - - - OK
+HTTP/2.0 200 - - - - - - - OK
 date: Mon, 07 Jun 2021 13:29:13 GMT
 content-type: application/json
 content-length: 274
@@ -77,17 +94,20 @@ access-control-allow-credentials: true
 
 
 
-/*
-## Status Codes
 
-Generates responses with given status code
-*/
+
+
+
+
+
+
+
 
 
 
 PATCH https://httpbin.org/patch
 
-HTTP/2.0 200 - OK
+HTTP/2.0 200 - - - - - OK
 date: Mon, 07 Jun 2021 13:30:06 GMT
 content-type: application/json
 content-length: 376
@@ -114,9 +134,17 @@ access-control-allow-credentials: true
 
 
 
+
+
+
+
+
+
+
+
 POST https://httpbin.org/post
 
-HTTP/2.0 200 - OK
+HTTP/2.0 200 - - - - - OK
 date: Mon, 07 Jun 2021 13:30:09 GMT
 content-type: application/json
 content-length: 375
@@ -143,9 +171,17 @@ access-control-allow-credentials: true
 
 
 
+
+
+
+
+
+
+
+
 PUT https://httpbin.org/put
 
-HTTP/2.0 200 - OK
+HTTP/2.0 200 - - - - - OK
 date: Mon, 07 Jun 2021 13:30:11 GMT
 content-type: application/json
 content-length: 374
@@ -172,9 +208,17 @@ access-control-allow-credentials: true
 
 
 
+
+
+
+
+
+
+
+
 DELETE https://httpbin.org/status/200
 
-HTTP/2.0 200 - OK
+HTTP/2.0 200 - - - - - OK
 date: Mon, 07 Jun 2021 13:30:14 GMT
 content-type: text/html; charset=utf-8
 content-length: 0
@@ -185,15 +229,31 @@ access-control-allow-credentials: true
 
 
 
+
+
+
+
+
+
+
+
 GET https://httpbin.org/status/200
 
-HTTP/2.0 200 - OK
+HTTP/2.0 200 - - - - - OK
 date: Mon, 07 Jun 2021 13:30:17 GMT
 content-type: text/html; charset=utf-8
 content-length: 0
 server: gunicorn/19.9.0
 access-control-allow-origin: *
 access-control-allow-credentials: true
+
+
+
+
+
+
+
+
 
 
 
