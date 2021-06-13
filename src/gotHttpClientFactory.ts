@@ -5,7 +5,7 @@ import merge from 'lodash/merge';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { default as filesize } from 'filesize';
-import { log, popupService } from './logger';
+import { log } from './logger';
 
 
 export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined) : HttpClient {
@@ -151,7 +151,6 @@ export function setParseBody(httpResponse: HttpResponse) : void {
     try {
       httpResponse.parsedBody = JSON.parse(httpResponse.body);
     } catch (err) {
-      popupService.warn('json parse error', httpResponse.body);
       log.warn('json parse error', httpResponse.body, err);
     }
   }
