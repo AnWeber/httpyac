@@ -66,10 +66,7 @@ export class MetaHttpRegionParser implements HttpRegionParser {
                   if (!httpRegion.responseRefs) {
                     httpRegion.responseRefs = [];
                   }
-                  const fileName = toAbsoluteFilename(match.groups.fileName, httpFile.fileName);
-                  if (fileName) {
-                    httpRegion.responseRefs.push(async () => await httpFileStore.parse(fileName, await fileProvider.readFile(fileName, 'utf-8')));
-                  }
+                  httpRegion.responseRefs.push(match.groups.value);
                 }
                 break;
               case 'ref':
@@ -98,13 +95,17 @@ export class MetaHttpRegionParser implements HttpRegionParser {
 
   async importHttpFile(httpFile: HttpFile, fileName: string, httpFileStore: HttpFileStore): Promise<void> {
     try {
-      const absoluteFileName = await toAbsoluteFilename(fileName, httpFile.fileName);
-      if (absoluteFileName) {
-        if (!httpFile.imports) {
-          httpFile.imports = [];
-        }
-        httpFile.imports.push(() => httpFileStore.getOrCreate(absoluteFileName, () => fileProvider.readFile(absoluteFileName, 'utf-8'), 0));
+      if (!httpFile.imports) {
+        httpFile.imports = [];
       }
+      httpFile.imports.push(async (httpFile: HttpFile) => {
+        const absoluteFileName = await toAbsoluteFilename(fileName, httpFile.fileName);
+        if (absoluteFileName) {
+          return await httpFileStore.getOrCreate(absoluteFileName, () => fileProvider.readFile(absoluteFileName, 'utf-8'), 0);
+        }
+        return false;
+      });
+
     } catch (err) {
       log.error('import error', fileName);
     }

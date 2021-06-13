@@ -7,7 +7,17 @@ export const testSymbols = {
   error: '✖',
 };
 
-export function testFactory(httpRegion: HttpRegion) {
+export interface TestFunction{
+  (message: string, testMethod: () => void): void;
+  status(status: number): void;
+  header(headerKey: string, val: string | string[] | null | undefined): void;
+  headerContains(headerKey: string, val: string): void;
+  responseBody(val: unknown): void;
+  hasResponseBody(): void;
+  hasNoResponseBody(): void;
+}
+
+export function testFactory(httpRegion: HttpRegion) : TestFunction {
   const testFunction = function test(message: string, testMethod: () => void): void {
     const chalk = chalkInstance();
     const testResult: TestResult = {

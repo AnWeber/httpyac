@@ -38,10 +38,12 @@ export class RefMetaAction implements HttpRegionAction {
     }
     if (context.httpFile.imports) {
       for (const httpFileLoader of context.httpFile.imports) {
-        const refHttpFile = await httpFileLoader();
-        data.globalScriptExecution = true;
-        const fileContext = { ...context, httpFile: refHttpFile };
-        await this.processInternal(data, fileContext);
+        const refHttpFile = await httpFileLoader(context.httpFile);
+        if (refHttpFile) {
+          data.globalScriptExecution = true;
+          const fileContext = { ...context, httpFile: refHttpFile };
+          await this.processInternal(data, fileContext);
+        }
       }
     }
     return true;

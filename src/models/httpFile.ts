@@ -7,5 +7,5 @@ export interface HttpFile{
   httpRegions: Array<HttpRegion>;
   variablesPerEnv: Record<string, Variables>;
   activeEnvironment: string[] | undefined;
-  imports?: Array<() => Promise<HttpFile>>;
+  imports?: Array<(httpFile: HttpFile) => Promise<HttpFile | false>>;
 }

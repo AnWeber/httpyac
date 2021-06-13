@@ -1,4 +1,3 @@
-import { HttpFile } from './httpFile';
 import { HttpRegionAction } from './httpRegionAction';
 import { HttpRequest } from './httpRequest';
 import { HttpResponse } from './httpResponse';
@@ -14,5 +13,5 @@ export interface HttpRegion{
   metaData: Record<string, string>;
   symbol: HttpSymbol;
   testResults?: Array<TestResult>;
-  responseRefs?: Array<() => Promise<HttpFile>>;
+  responseRefs?: Array<string>;
 }

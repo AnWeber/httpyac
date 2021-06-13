@@ -12,7 +12,7 @@ export class GqlHttpRegionParser implements HttpRegionParser {
       return false;
     }
 
-    const gqlContent = await getGQLContent(lineReader, context.httpFile.fileName);
+    const gqlContent = await getGQLContent(lineReader);
     if (gqlContent) {
       const gqlData: GqlData = {
         fragments: this.getGqlFragments(context),
@@ -57,7 +57,7 @@ export class GqlHttpRegionParser implements HttpRegionParser {
 }
 
 
-async function getGQLContent(lineReader: HttpRegionParserGenerator, httpFileName: PathLike): Promise<GqlParserResult | false> {
+async function getGQLContent(lineReader: HttpRegionParserGenerator): Promise<GqlParserResult | false> {
   const next = lineReader.next();
   if (!next.done) {
 
@@ -66,16 +66,21 @@ async function getGQLContent(lineReader: HttpRegionParserGenerator, httpFileName
     const fileMatches = ParserRegex.gql.fileImport.exec(next.value.textLine);
     if (fileMatches && fileMatches.groups?.fileName) {
       try {
-        const normalizedPath = await toAbsoluteFilename(fileMatches.groups.fileName, httpFileName);
-        if (normalizedPath) {
-          return {
-            startLine,
-            endLine: startLine,
-            endOffset: next.value.textLine.length,
-            name: fileMatches.groups.name || fileMatches.groups.fileName,
-            gql: () => fileProvider.readFile(normalizedPath, 'utf-8')
-          };
-        }
+        const parserPath = fileMatches.groups.fileName;
+        return {
+          startLine,
+          endLine: startLine,
+          endOffset: next.value.textLine.length,
+          name: fileMatches.groups.name || fileMatches.groups.fileName,
+          gql: async (httpFileName: PathLike) => {
+            const normalizedPath = await toAbsoluteFilename(parserPath, httpFileName);
+            if (normalizedPath) {
+              return fileProvider.readFile(normalizedPath, 'utf-8');
+            }
+            return false;
+          }
+        };
+
       } catch (err) {
         log.trace(err);
       }
@@ -119,5 +124,5 @@ export interface GqlParserResult{
   startLine: number,
   endLine: number,
   endOffset: number;
-  gql: string | (() => Promise<string>);
+  gql: string | ((httpFileName: PathLike) => Promise<string | false>);
 }
