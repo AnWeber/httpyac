@@ -19,6 +19,7 @@ export enum ActionType{
   request = 'request',
   httpClient = 'httpClient',
   ref = 'ref',
+  requestBodyImport = 'requestBodyImport',
   response = 'response',
   variable = 'variable',
   variableReplacer = 'variableReplacer',

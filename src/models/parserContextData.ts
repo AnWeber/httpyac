@@ -1,5 +1,5 @@
 import { ScriptData } from '../actions';
-import { HttpRequestBodyLine } from './httpRequest';
+import { RequestBodyImport } from './httpRequest';
 import { HttpSymbol } from './httpSymbol';
 
 
@@ -9,7 +9,7 @@ export interface ParserEveryRequestScript {
 }
 
 export interface ParserRequestBody{
-  textLines: Array<HttpRequestBodyLine>;
+  rawBody: Array<string | RequestBodyImport>;
   symbol?: HttpSymbol;
 }
 

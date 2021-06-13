@@ -8,6 +8,7 @@ export * from './httpClientAction';
 export * from './intellijAction';
 export * from './javascriptAction';
 export * from './httpClientAction';
+export * from './requestBodyImportAction';
 export * from './responseAsVariableAction';
 export * from './refMetaAction';
 export * from './testMethod';

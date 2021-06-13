@@ -54,4 +54,4 @@ POST https://httpbin.org/anything
 accept: application/json
 
 
-< ./variables.json
+< ../assets/variables.json

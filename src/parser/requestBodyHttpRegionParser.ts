@@ -1,10 +1,7 @@
-import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, HttpRequestBodyLine, HttpSymbol, HttpSymbolKind, ParserContext } from '../models';
-import { EOL } from 'os';
-import { toAbsoluteFilename, isString, isMimeTypeMultiPartFormData, isStringEmpty, isMimeTypeNewlineDelimitedJSON, isMimeTypeFormUrlEncoded } from '../utils';
+import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, HttpSymbol, HttpSymbolKind, ParserContext } from '../models';
+import { isString, isStringEmpty } from '../utils';
 
-import { log, popupService } from '../logger';
 import { ParserRegex } from './parserRegex';
-import { fileProvider, PathLike } from '../fileProvider';
 
 
 export class RequestBodyHttpRegionParser implements HttpRegionParser {
@@ -17,19 +14,9 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
       if (!next.done) {
 
 
-        if (requestBody.textLines.length > 0 || !isStringEmpty(next.value.textLine)) {
-          const forceInjectVariables = (filename: string) => {
-            if (context.httpRegion.metaData.injectVariables) {
-              return true;
-            }
-            if (context.environmentConfig?.requestBodyInjectVariablesExtensions) {
-              const extname = fileProvider.extname(filename);
-              return context.environmentConfig.requestBodyInjectVariablesExtensions
-                .indexOf(extname) >= 0;
-            }
-            return false;
-          };
-          requestBody.textLines.push(await this.parseLine(next.value.textLine, context.httpFile.fileName, forceInjectVariables));
+        if (requestBody.rawBody.length > 0 || !isStringEmpty(next.value.textLine)) {
+
+          requestBody.rawBody.push(this.parseLine(next.value.textLine));
           const symbols: Array<HttpSymbol> = [];
 
 
@@ -63,7 +50,7 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
     let result = context.data.request_body;
     if (!result) {
       result = {
-        textLines: [],
+        rawBody: [],
       };
       context.data.request_body = result;
     }
@@ -77,23 +64,14 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
     return result;
   }
 
-  private async parseLine(textLine: string, httpFileName: PathLike, forceInjectVariables: (fileName: string) => boolean) {
+  private parseLine(textLine: string) {
     const fileImport = ParserRegex.request.fileImport.exec(textLine);
     if (fileImport && fileImport.length === 4 && fileImport.groups) {
-      try {
-        const normalizedPath = await toAbsoluteFilename(fileImport.groups.fileName, httpFileName);
-        if (normalizedPath) {
-          if (forceInjectVariables(fileImport.groups.fileName) || fileImport.groups.injectVariables) {
-            return await fileProvider.readFile(normalizedPath, this.getBufferEncoding(fileImport.groups.encoding));
-          }
-          return async () => fileProvider.readBuffer(normalizedPath);
-        }
-        popupService.warn(`request body file ${fileImport.groups.fileName} not found`);
-        log.warn(`request body file ${fileImport.groups.fileName} not found`);
-
-      } catch (err) {
-        log.trace(err);
-      }
+      return {
+        fileName: fileImport.groups.fileName,
+        injectVariables: !!fileImport.groups.injectVariables,
+        encoding: this.getBufferEncoding(fileImport.groups.encoding),
+      };
     }
     return textLine;
   }
@@ -115,59 +93,11 @@ export class RequestBodyHttpRegionParser implements HttpRegionParser {
   close(context: ParserContext): void {
     const requestBody = this.getAndRemoveRequestBody(context);
     if (context.httpRegion.request && !!requestBody) {
-      const contentType = context.httpRegion.request.contentType;
 
-      this.removeTrailingEmptyLines(requestBody.textLines);
-      if (requestBody.textLines.length > 0) {
-        if (isMimeTypeFormUrlEncoded(contentType)) {
-          context.httpRegion.request.body = this.formUrlEncodedJoin(requestBody.textLines);
-        } else {
-          if (requestBody.textLines.every(obj => isString(obj)) && isMimeTypeNewlineDelimitedJSON(contentType)) {
-            requestBody.textLines.push('');
-          }
+      this.removeTrailingEmptyLines(requestBody.rawBody);
+      context.httpRegion.request.rawBody = requestBody.rawBody;
 
-          const body: Array<HttpRequestBodyLine> = [];
-          const strings: Array<string> = [];
-          const lineEnding = isMimeTypeMultiPartFormData(contentType) ? '\r\n' : EOL;
-
-          for (const line of requestBody.textLines) {
-            if (isString(line)) {
-              strings.push(line);
-            } else {
-              if (strings.length > 0) {
-                strings.push(lineEnding);
-                body.push(strings.join(lineEnding));
-                strings.length = 0;
-              }
-              body.push(line);
-            }
-          }
-
-          if (strings.length > 0 && body.length === 0) {
-            context.httpRegion.request.body = strings.join(lineEnding);
-          } else {
-            if (strings.length > 0) {
-              body.push(strings.join(lineEnding));
-            }
-            context.httpRegion.request.body = body;
-          }
-        }
-      }
     }
-  }
-
-  private formUrlEncodedJoin(body: Array<HttpRequestBodyLine>): string {
-    const result = body.reduce((previousValue, currentValue, currentIndex) => {
-      let prev = previousValue;
-      if (isString(currentValue)) {
-        prev += `${(currentIndex === 0 || currentValue.startsWith('&') ? '' : EOL)}${currentValue}`;
-      }
-      return prev;
-    }, '');
-    if (isString(result)) {
-      return result;
-    }
-    return '';
   }
 
   removeTrailingEmptyLines(obj: Array<unknown>) : void {

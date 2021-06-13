@@ -8,8 +8,16 @@ export interface HttpRequest extends Omit<OptionsOfUnknownResponseBody, 'body'>{
   headers?: Record<string, string | string[] | undefined>;
   contentType?: ContentType;
   body?: string | Array<HttpRequestBodyLine> | Buffer;
+  rawBody?: Array<string | RequestBodyImport>,
   proxy?: string;
 }
 
 
 export type HttpRequestBodyLine = string | (() => Promise<Buffer>);
+
+
+export interface RequestBodyImport {
+  fileName: string;
+  injectVariables: boolean;
+  encoding: BufferEncoding
+}

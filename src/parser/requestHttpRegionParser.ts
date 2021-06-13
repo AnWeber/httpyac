@@ -134,6 +134,7 @@ export class RequestHttpRegionParser implements HttpRegionParser {
       httpRegion.actions.splice(0, 0, new actions.CreateRequestAction());
       httpRegion.actions.push(
         new actions.EnvDefaultHeadersAction(),
+        new actions.RequestBodyImportAction(),
         new actions.VariableReplacerAction(),
         new actions.CookieJarAction(),
         new actions.HttpClientAction(),
