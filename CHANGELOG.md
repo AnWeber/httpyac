@@ -2,6 +2,7 @@
 
 #### Features
 * add default accept header */*
+* faster parsing with lazy access of fs
 
 ## 2.14.1 (2021-06-11)
 

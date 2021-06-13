@@ -4,7 +4,7 @@
 	"license": "MIT",
 	"publisher": "weber.andreas",
 	"description": "HTTP/REST CLI Client for *.http files",
-	"version": "2.14.1",
+	"version": "2.15.0",
 	"homepage": "https://github.com/AnWeber/httpyac",
 	"repository": {
 		"type": "git",
@@ -43,15 +43,15 @@
 		"*.ts": "eslint --cache --fix"
 	},
 	"devDependencies": {
-		"@types/aws4": "^1.5.1",
+		"@types/aws4": "^1.5.2",
 		"@types/encodeurl": "^1.0.0",
 		"@types/inquirer": "^7.3.1",
 		"@types/lodash": "^4.14.170",
-		"@types/node": "^15.12.1",
+		"@types/node": "^15.12.2",
 		"@types/tough-cookie": "^4.0.0",
 		"@types/uuid": "^8.3.0",
-		"@typescript-eslint/eslint-plugin": "^4.26.0",
-		"@typescript-eslint/parser": "^4.26.0",
+		"@typescript-eslint/eslint-plugin": "^4.26.1",
+		"@typescript-eslint/parser": "^4.26.1",
 		"eslint": "^7.28.0",
 		"eslint-plugin-node": "^11.1.0",
 		"fork-ts-checker-webpack-plugin": "^6.2.10",
@@ -62,7 +62,7 @@
 		"ts-loader": "^9.2.3",
 		"typescript": "^4.3.2",
 		"webpack": "^5.38.1",
-		"webpack-cli": "^4.7.0"
+		"webpack-cli": "^4.7.2"
 	},
 	"dependencies": {
 		"arg": "^5.0.0",
