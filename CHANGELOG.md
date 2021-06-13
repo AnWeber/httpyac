@@ -1,3 +1,8 @@
+## 2.15.0 (2021-06-13)
+
+#### Features
+* add default accept header */*
+
 ## 2.14.1 (2021-06-11)
 
 #### Fix
