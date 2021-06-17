@@ -11,7 +11,7 @@ export class SettingsScriptHttpRegionParser implements HttpRegionParser {
 
   close({ httpRegion }: ParserContext): void {
     if (httpRegion.request) {
-      pushAfter(httpRegion.actions, obj => obj.type === ActionType.request, new GenericAction('settings_js', async context => {
+      pushAfter(httpRegion.actions, obj => obj.type === ActionType.requestBodyImport, new GenericAction('settings_js', async context => {
         const scriptData = await this.getScriptData();
         if (scriptData) {
           const javascriptAction = new JavascriptAction(scriptData);

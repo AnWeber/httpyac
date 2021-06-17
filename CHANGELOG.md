@@ -1,3 +1,8 @@
+## 2.15.1 (2021-06-17)
+
+#### Features
+* fix gql (wrong Execution Order)
+
 ## 2.15.0 (2021-06-13)
 
 #### Features

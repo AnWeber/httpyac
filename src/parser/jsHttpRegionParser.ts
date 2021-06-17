@@ -64,7 +64,7 @@ export class JsHttpRegionParser implements HttpRegionParser {
         if (everyRequestScript.postScript) {
           httpRegion.actions.push(new JavascriptAction(everyRequestScript.scriptData));
         } else {
-          pushAfter(httpRegion.actions, obj => obj.type === ActionType.request, new JavascriptAction(everyRequestScript.scriptData));
+          pushAfter(httpRegion.actions, obj => obj.type === ActionType.requestBodyImport, new JavascriptAction(everyRequestScript.scriptData));
         }
       }
     }

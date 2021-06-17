@@ -26,7 +26,7 @@ export class GqlHttpRegionParser implements HttpRegionParser {
             context.httpRegion.metaData.name = gqlContent.name;
           }
         }
-        pushAfter(context.httpRegion.actions, obj => obj.type === ActionType.request, new GqlAction(gqlData));
+        pushAfter(context.httpRegion.actions, obj => obj.type === ActionType.requestBodyImport, new GqlAction(gqlData));
       } else if (gqlContent.name) {
         gqlData.fragments[gqlContent.name] = gqlContent.gql;
       }
