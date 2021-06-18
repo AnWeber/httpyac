@@ -12,10 +12,13 @@ export class HttpClientAction implements HttpRegionAction {
     if (request) {
       await this.initBody(request);
       request.proxy = httpRegion.metaData.proxy;
-      request.followRedirect = !httpRegion.metaData.noRedirect;
+      if (httpRegion.metaData.noRedirect) {
+        request.followRedirect = !httpRegion.metaData.noRedirect;
+      }
       try {
         const response = await httpClient(request, context);
         if (response) {
+          log.info(`${request.url} => ${response.statusCode}`);
           httpRegion.response = response;
           return true;
         }

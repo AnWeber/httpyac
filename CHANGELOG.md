@@ -1,6 +1,11 @@
+## 2.15.2 (2021-06-xx)
+
+#### Fix
+* error while using metadata followRedirect fixed
+
 ## 2.15.1 (2021-06-17)
 
-#### Features
+#### Fix
 * fix gql (wrong Execution Order)
 
 ## 2.15.0 (2021-06-13)
