@@ -1,7 +1,8 @@
-## 2.15.2 (2021-06-xx)
+## 2.16.0 (2021-06-20)
 
 #### Fix
 * error while using metadata followRedirect fixed
+* http2 needs to explicitly activated
 
 ## 2.15.1 (2021-06-17)
 

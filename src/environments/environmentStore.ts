@@ -132,8 +132,9 @@ class EnvironmentStore {
       ...(await this.loadFileEnvironemntConfigs(rootDirs)),
       config
     );
-
     this.initLogConfiguration(environmentConfig);
+    log.trace(environmentConfig);
+
     await this.searchClientCertficates(environmentConfig, rootDirs);
 
     this.environmentConfig = environmentConfig;
