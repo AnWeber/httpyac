@@ -15,7 +15,6 @@ export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined) 
         decompress: true,
         retry: 0,
         throwHttpErrors: false,
-        http2: true,
         headers: {
           'accept': '*/*',
           'user-agent': 'httpyac',
