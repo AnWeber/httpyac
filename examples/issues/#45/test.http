@@ -1,0 +1,6 @@
+@va=123
+### test va
+GET {{host}}/num/{{va}}
+
+### test va2
+GET {{host}}/num/{{va}}

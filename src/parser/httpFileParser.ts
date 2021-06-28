@@ -31,7 +31,7 @@ export async function parseHttpFile(text: string, fileName: PathLike, httpFileSt
       if (!isLineEmpty || httpRegionParser.supportsEmptyLine && isLineEmpty) {
         const httpRegionParserResult = await httpRegionParser.parse(createReader(line, lines, !!httpRegionParser.noStopOnMetaTag), parserContext);
         if (httpRegionParserResult) {
-          if (httpRegionParserResult.endRegionLine && httpRegionParserResult.endRegionLine > 0) {
+          if (httpRegionParserResult.endRegionLine !== undefined && httpRegionParserResult.endRegionLine >= 0) {
             parserContext.httpRegion.symbol.endLine = httpRegionParserResult.endRegionLine;
             parserContext.httpRegion.symbol.endOffset = lines[httpRegionParserResult.endRegionLine].length;
             closeHttpRegion(parserContext);
