@@ -47,11 +47,11 @@
 		"@types/encodeurl": "^1.0.0",
 		"@types/inquirer": "^7.3.2",
 		"@types/lodash": "^4.14.170",
-		"@types/node": "^15.12.4",
+		"@types/node": "^15.12.5",
 		"@types/tough-cookie": "^4.0.0",
 		"@types/uuid": "^8.3.0",
-		"@typescript-eslint/eslint-plugin": "^4.27.0",
-		"@typescript-eslint/parser": "^4.27.0",
+		"@typescript-eslint/eslint-plugin": "^4.28.1",
+		"@typescript-eslint/parser": "^4.28.1",
 		"eslint": "^7.29.0",
 		"eslint-plugin-node": "^11.1.0",
 		"fork-ts-checker-webpack-plugin": "^6.2.12",
@@ -61,7 +61,7 @@
 		"thread-loader": "^3.0.4",
 		"ts-loader": "^9.2.3",
 		"typescript": "^4.3.4",
-		"webpack": "^5.39.1",
+		"webpack": "^5.41.0",
 		"webpack-cli": "^4.7.2"
 	},
 	"dependencies": {
