@@ -1,7 +1,9 @@
 ## 2.17.0 (2021-06-28)
 
+
 #### Fix
 * fixed parser, if global variable is used in first line (Anweber/vscode-httpyac#45)
+* http2 needs to explicitly activated (second attempt:-))
 
 ## 2.16.0 (2021-06-20)
 
