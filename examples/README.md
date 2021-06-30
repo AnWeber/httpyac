@@ -608,7 +608,7 @@ Authorization: Bearer {{keycloak.access_token}}
 > name must be unique in all imported files, there is no scope support and first found request with name will be used.
 
 ### ref and forceRef
-requests can reference other requests. When the request is called, it is ensured that the referenced request is called beforehand. `forceRef` always call the other request. `ref` only calls if no response is cached
+requests can reference other requests. When the request is called, it is ensured that the referenced request is called beforehand. `forceRef` always call the other request. `ref` only calls if no response is cached.
 
 ```html
 # @name keycloak
@@ -619,6 +619,8 @@ GET {{host}}/tasks
 # @ref keycloak
 Authorization: Bearer {{keycloak.access_token}}
 ```
+
+> It is possible to reference any number of requests.
 
 ### import
 To reference requests from other files, these must first be imported. Imported files are enabled for all requests in one file.
