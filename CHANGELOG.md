@@ -1,5 +1,9 @@
-## 2.17.0 (2021-06-28)
+## 2.18.0 (2021-06-30)
 
+#### Features
+* add new meta data @noRejectUnauthorized, to disable ssl verification
+
+## 2.17.0 (2021-06-28)
 
 #### Fix
 * fixed parser, if global variable is used in first line (Anweber/vscode-httpyac#45)

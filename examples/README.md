@@ -695,6 +695,17 @@ GET https://client.badssl.com/
 X-ClientCert: pfx: ../assets/badssl.com-client.p12 passphrase: badssl.com
 ```
 
+### no-reject-unauthorized
+
+all invalid SSL certificates will be ignored and no error will be thrown.
+
+```html
+# @no-reject-unauthorized
+
+GET https://client.badssl.com/
+X-ClientCert: pfx: ../assets/badssl.com-client.p12 passphrase: badssl.com
+```
+
 ## Environment Variables Support
 
 Simultaneous use of multiple environments is supported.

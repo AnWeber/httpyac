@@ -1,1 +1,10 @@
+GET https://localhost:5433/api/v2/users
+
+###
+
+GET http://localhost:5000/api/v2/users
+
+###
+
+# @noRejectUnauthorized
 GET http://localhost:5000/api/v2/users

@@ -17,7 +17,7 @@
     "docs"
   ],
   "scripts": {
-    "serve_23": "node ./issues/#23/express.js"
+    "serve": "node ./testServer/httpsTestServer.js"
   },
   "author": "anweber",
   "license": "ISC",

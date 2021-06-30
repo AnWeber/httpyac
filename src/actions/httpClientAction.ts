@@ -15,6 +15,9 @@ export class HttpClientAction implements HttpRegionAction {
       if (httpRegion.metaData.noRedirect) {
         request.followRedirect = !httpRegion.metaData.noRedirect;
       }
+      if (httpRegion.metaData.noRejectUnauthorized) {
+        request.rejectUnauthorized = false;
+      }
       try {
         const response = await httpClient(request, context);
         if (response) {

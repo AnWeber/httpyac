@@ -1,0 +1,18 @@
+
+/*
+start local test server
+```
+node ./testServer/httpsTestServer.js
+```
+*/
+
+# @noRejectUnauthorized
+GET http://localhost:5000/api/v2/users
+
+###
+// @noRejectUnauthorized
+GET http://localhost:5000/api/v2/users
+
+###
+
+GET http://localhost:5000/api/v2/users
