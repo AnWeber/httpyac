@@ -101,6 +101,8 @@ To load the environment variables, the root folder of the project is automatical
 
 The program can be configured either in the `.httpyac.json` file or in `the package.json` with `httpyac` key. See [interface](https://github.com/AnWeber/httpyac/blob/main/src/models/environmentConfig.ts) for supported settings.
 
+> if the file has been newly created or changed, the program must be restarted or the environments must be reset/ reloaded
+
 
 ## Features
 

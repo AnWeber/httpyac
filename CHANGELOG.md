@@ -2,6 +2,7 @@
 
 #### Features
 * add new meta data @noRejectUnauthorized, to disable ssl verification
+* update filesize dependency
 
 ## 2.17.0 (2021-06-28)
 
