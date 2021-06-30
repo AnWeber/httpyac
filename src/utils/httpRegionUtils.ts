@@ -123,15 +123,17 @@ export async function processHttpRegionActions(context: ProcessorContext, showPr
     if (context.progress) {
       context.showProgressBar = showProgressBar;
     }
-    context.progress?.report({ message: `${getRegionName(context.httpRegion)}` });
-    if (!context.httpRegion.metaData.disabled) {
-      if (!await action.process(context)) {
-        log.trace(`processs canceled by action ${action.type}`);
-        return false;
-      }
-      if (context.progress?.isCanceled()) {
-        log.trace(`processs canceled by progress after ${action.type}`);
-        return false;
+    if (context.progress?.report) {
+      context.progress.report({ message: `${getRegionName(context.httpRegion)}` });
+      if (!context.httpRegion.metaData.disabled) {
+        if (!await action.process(context)) {
+          log.trace(`processs canceled by action ${action.type}`);
+          return false;
+        }
+        if (context.progress?.isCanceled()) {
+          log.trace(`processs canceled by progress after ${action.type}`);
+          return false;
+        }
       }
     }
   }

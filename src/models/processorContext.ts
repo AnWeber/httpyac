@@ -11,7 +11,7 @@ export type Dispose = () => void;
 export interface Progress{
   isCanceled: () => boolean;
   register: (event: (() => void)) => Dispose;
-  report: (value: { message?: string, increment?: number }) => void;
+  report?: (value: { message?: string, increment?: number }) => void;
 }
 
 export interface HttpFileSendContext{

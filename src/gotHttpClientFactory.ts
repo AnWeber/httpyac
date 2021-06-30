@@ -88,7 +88,7 @@ async function load(url: string, options: OptionsOfUnknownResponseBody, context:
     responsePromise.on('downloadProgress', data => {
       const newData = data.percent - prevPercent;
       prevPercent = data.percent;
-      if (context.progress) {
+      if (context.progress?.report) {
         context.progress.report({
           message: url,
           increment: newData * 100,
