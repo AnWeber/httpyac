@@ -441,18 +441,20 @@ Authorization: openid {{grant_type}} {{variable_prefix}}
 ```
 To configure the flow, the following variables must be specified
 
-| variable | flow | description |
-| - | - | - |
-| {{prefix}}_tokenEndpoint | authorization_code, implicit, password, client_credentials | Token Endpoint URI |
-| {{prefix}}_clientId | authorization_code, implicit, password, client_credentials | OAuth 2.0 Client Identifier |
-| {{prefix}}_clientSecret | authorization_code, implicit, password, client_credentials | OAuth 2.0 Client Secret |
-| {{prefix}}_authorizationEndpoint | authorization_code, implicit | Authorization Endpoint URI |
-| {{prefix}}_scope | authorization_code, implicit, password, client_credentials | Scope |
-| {{prefix}}_responseType | authorization_code, implicit | response type of auth server |
-| {{prefix}}_audience | authorization_code, implicit | audience |
-| {{prefix}}_username | password | username for password flow |
-| {{prefix}}_password | password | password for password flow |
-| {{prefix}}_keepAlive | authorization_code, password, client_credentials | AccessToken is automatically renewed in the background before expiration with RequestToken |
+| variable | description | authorization_code | implicit | password | client_credentials |
+| - | - | -  |- | - | - |
+| {{prefix}}_tokenEndpoint | Token Endpoint URI | x | x | x | x |
+| {{prefix}}_clientId |OAuth 2.0 Client Identifier | x | x | x | x |
+| {{prefix}}_clientSecret | OAuth 2.0 Client Secret | x | x | x | x |
+| {{prefix}}_authorizationEndpoint |  Authorization Endpoint URI | x | x | - | - |
+| {{prefix}}_scope | Scope | x (default: openid) | x (default: openid) | x | x |
+| {{prefix}}_responseType | response type of auth server | - | x (default: code) | - | - |
+| {{prefix}}_audience | audience | x | x | - | - |
+| {{prefix}}_username | username| - | - | x | - |
+| {{prefix}}_password | password | - | - | x | - |
+| {{prefix}}_keepAlive |  AccessToken is automatically renewed in the background, if request_token is provided | x | - | x | x |
+
+> To get the code from the Open ID server, a http server is started for the Authorization Flow and Implicit Flow on port 3000. The server is stopped after receiving the code (delay 2 minutes). You need to configure your OpenId Provider to allow localhost:3000 as valid redirect url
 
 ##### example
 ```html
@@ -467,7 +469,7 @@ GET /secured_service
 Authorization: openid client_credentials local
 ```
 
-> To get the code from the Open ID server, a http server must be started for the Authorization Flow and Implicit Flow on port 3000 (default). The server is stopped immediatly after receiving the code. You need to configure your OpenId Provider to allow localhost:3000 as valid redirect url
+
 
 
 It is possible to convert the generated token into a token of another realm using [Token Exchange](https://tools.ietf.org/html/rfc8693)
