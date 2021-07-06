@@ -23,7 +23,7 @@ export function getRegionName(httpRegion: HttpRegion, defaultName = 'global'): s
 }
 
 
-export function initHttpClient() : HttpClient {
+export function initHttpClient(): HttpClient {
   const request = {
     ...environmentStore.environmentConfig?.request || {},
     proxy: environmentStore.environmentConfig?.proxy
@@ -125,17 +125,18 @@ export async function processHttpRegionActions(context: ProcessorContext, showPr
     }
     if (context.progress?.report) {
       context.progress.report({ message: `${getRegionName(context.httpRegion)}` });
-      if (!context.httpRegion.metaData.disabled) {
-        if (!await action.process(context)) {
-          log.trace(`processs canceled by action ${action.type}`);
-          return false;
-        }
-        if (context.progress?.isCanceled()) {
-          log.trace(`processs canceled by progress after ${action.type}`);
-          return false;
-        }
+    }
+    if (!context.httpRegion.metaData.disabled) {
+      if (!await action.process(context)) {
+        log.trace(`processs canceled by action ${action.type}`);
+        return false;
+      }
+      if (context.progress?.isCanceled()) {
+        log.trace(`processs canceled by progress after ${action.type}`);
+        return false;
       }
     }
+
   }
   return true;
 }
