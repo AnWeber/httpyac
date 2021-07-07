@@ -1,6 +1,11 @@
-## 2.18.1 (2021-07-06)
+## 2.19.0 (2021-07-07)
 
 #### Features
+* simple escaping of template strings in body with `\{\{...\}\}` (is replaced with `{{...}}`)
+
+## 2.18.1 (2021-07-06)
+
+#### Fix
 * fix error with global variables (Anweber/vscode-httpyac#48)
 
 ## 2.18.0 (2021-06-30)

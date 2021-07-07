@@ -366,6 +366,8 @@ Scripts with no request in the same region are always executed (Global Scripts).
 
 Before the request is sent, all variables in the request (request line, headers, request body) are replaced with the value of the variable.
 
+> If the replacement is not desired, this can be prevented using `\{\{...\}\}`. This is replaced by `{{...}}`
+
 #### NodeJs Script Replacement
 All entries of the form {{...}} are interpreted as NodeJS Javascript which returns exactly one value. Since all variables can be easily accessed on the global scope, this allows for simple substitution.
 

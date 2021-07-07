@@ -2,6 +2,7 @@ export * from './awsAuthVariableReplacer';
 export * from './basicAuthVariableReplacer';
 export * from './clientCertVariableReplacer';
 export * from './digestAuthVariableReplacer';
+export * from './escapeVariableReplacer';
 export * from './hostVariableReplacer';
 export * from './intellijVariableReplacer';
 export * from './openIdVariableReplacer';

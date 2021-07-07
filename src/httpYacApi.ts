@@ -40,6 +40,7 @@ export class HttpYacApi {
       new replacer.ClientCertVariableReplacer(),
       new replacer.BasicAuthVariableReplacer(),
       new replacer.DigestAuthVariableReplacer(),
+      new replacer.EscapeVariableReplacer(),
     ];
   }
 

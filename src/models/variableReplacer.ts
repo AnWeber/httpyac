@@ -13,6 +13,7 @@ export enum VariableReplacerType{
   basicAuth = 'basicAuth',
   clientCertificate = 'clientCertificate',
   digestAuth = 'digestAuth',
+  escape = 'escape',
   oauth2 = 'oauth2',
   host = 'host',
   intellijDynamic = 'intellijDynamic',
