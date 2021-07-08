@@ -755,14 +755,14 @@ Environments can be provided with setting `environmentVariables`. All settings w
 ##### Dotenv File Support
 [dotenv](https://www.npmjs.com/package/dotenv) support is enabled by default.  This automatically scans the root folder of the project and a configurable folder for .env file. All files with the {{name}}.env or .env.{{name}} scheme are interpreted as different environment and can be picked while switching environments
 
-> .env files are automatically monitored by File Watcher and when changes are made, the environment is reinitialized.
+>.env files are automatically monitored by File Watcher and when changes are made, the environment is reinitialized. If a new file is created, the environments may have to be actively updated (restart application, command `httpyac.reset`).
 
 > it is possible to enable a dotenvVariableProvider, which scans the directory of the current *.http file. The default for this setting is disabled.
 
 ##### Intellij Environment Variables
 [intellij environment variables support](https://www.jetbrains.com/help/idea/exploring-http-syntax.html#environment-variables) support is enabled by default. This automatically scans the root folder of the project and a configurable folder for http-client.env.json/ http-client.private.env.json file.
 
-> http-client.env.json files are automatically monitored by File Watcher and when changes are made, the environment is reinitialized.
+> http-client.env.json files are automatically monitored by File Watcher and when changes are made, the environment is reinitialized. If a new file is created, the environments may have to be actively updated (restart application, command `httpyac.reset`).
 
 > it is possible to enable a intellijVariableProvider, which scans the directory of the current *.http file. The default for this setting is disabled.
 
