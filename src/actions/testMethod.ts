@@ -81,3 +81,21 @@ export function testFactory(httpRegion: HttpRegion) : TestFunction {
   };
   return testFunction;
 }
+
+
+export function testSummary(httpRegions: Array<HttpRegion>): { total: number; success: number; failed: number;} {
+  const result = {
+    total: 0,
+    success: 0,
+    failed: 0,
+  };
+
+  for (const httpRegion of httpRegions) {
+    if (httpRegion.testResults) {
+      result.total += httpRegion.testResults.length;
+      result.success += httpRegion.testResults.filter(obj => obj.result).length;
+      result.failed += httpRegion.testResults.filter(obj => !obj.result).length;
+    }
+  }
+  return result;
+}

@@ -19,6 +19,7 @@ export interface HttpFileSendContext{
   progress?: Progress;
   httpClient?: HttpClient;
   httpRegionPredicate?: (obj: HttpRegion) => boolean;
+  processedHttpRegions?: Array<HttpRegion>;
 }
 
 export interface HttpRegionsSendContext extends HttpFileSendContext{

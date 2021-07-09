@@ -72,8 +72,6 @@ export async function send(rawArgs: string[]) : Promise<void> {
         const httpFile = await httpFileStore.getOrCreate(path, async () => await fs.readFile(path, 'utf8'), 0);
         httpFiles.push(httpFile);
       }
-
-
     }
 
     if (httpFiles.length > 0) {

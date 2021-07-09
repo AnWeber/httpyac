@@ -1,12 +1,14 @@
-import { HttpFileSendContext, HttpRegionSendContext, HttpRegionParser, VariableReplacer, VariableProvider, HttpRegionsSendContext } from './models';
+import * as models from './models';
 import * as parser from './parser';
 import { provider, replacer } from './variables';
 import * as utils from './utils';
+import { scriptConsole, chalkInstance } from './logger';
+import { testSummary } from './actions';
 
 export class HttpYacApi {
-  readonly httpRegionParsers: Array<HttpRegionParser>;
-  readonly variableProviders: Array<VariableProvider>;
-  readonly variableReplacers: Array<VariableReplacer>;
+  readonly httpRegionParsers: Array<models.HttpRegionParser>;
+  readonly variableProviders: Array<models.VariableProvider>;
+  readonly variableReplacers: Array<models.VariableReplacer>;
 
   readonly additionalRequire: Record<string, unknown> = {};
 
@@ -49,14 +51,25 @@ export class HttpYacApi {
    * process one httpRegion of HttpFile
    * @param httpFile httpFile
    */
-  async send(context: HttpFileSendContext | HttpRegionSendContext | HttpRegionsSendContext) : Promise<boolean> {
+  async send(context: models.HttpFileSendContext | models.HttpRegionSendContext | models.HttpRegionsSendContext): Promise<boolean> {
+    if (!context.processedHttpRegions) {
+      context.processedHttpRegions = [];
+    }
+    let result = false;
     if (utils.isHttpRegionSendContext(context)) {
-      return await utils.sendHttpRegion(context);
+      result = await utils.sendHttpRegion(context);
+    } else if (utils.isHttpRegionsSendContext(context)) {
+      result = await utils.sendHttpRegions(context);
+    } else {
+      result = await utils.sendHttpFile(context);
     }
-    if (utils.isHttpRegionsSendContext(context)) {
-      return await utils.sendHttpRegions(context);
+    if (!!context.processedHttpRegions && context.processedHttpRegions.length > 0) {
+      const summary = testSummary(context.processedHttpRegions);
+      const chalk = chalkInstance();
+      scriptConsole.info();
+      scriptConsole.info(chalk`{bold ${context.processedHttpRegions.length}} requests with {bold ${summary.total}} tests tested ({green ${summary.success} succeeded}, {red ${summary.failed} failed})`);
     }
-    return await utils.sendHttpFile(context);
+    return result;
   }
 }
 

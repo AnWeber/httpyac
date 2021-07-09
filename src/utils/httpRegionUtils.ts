@@ -118,6 +118,10 @@ export async function processHttpRegionActions(context: ProcessorContext, showPr
   delete context.httpRegion.response;
   delete context.httpRegion.testResults;
 
+  if (context.processedHttpRegions) {
+    context.processedHttpRegions.push(context.httpRegion);
+  }
+
   for (const action of context.httpRegion.actions) {
     log.trace(`action ${action.type} executing`);
     if (context.progress) {
