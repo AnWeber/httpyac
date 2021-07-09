@@ -24,6 +24,7 @@ export async function requestOpenIdInformation(request: HttpRequest | false, con
 }): Promise<OpenIdInformation | false> {
   if (request) {
     const time = new Date().getTime();
+    request.throwHttpErrors = true;
     const response = await context.httpClient(request, { showProgressBar: false });
     if (response) {
 
