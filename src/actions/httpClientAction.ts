@@ -21,7 +21,7 @@ export class HttpClientAction implements HttpRegionAction {
       try {
         const response = await httpClient(request, context);
         if (response) {
-          log.info(`${request.url} => ${response.statusCode}`);
+          log.debug(`${request.url} => ${response.statusCode}`);
           httpRegion.response = response;
           return true;
         }

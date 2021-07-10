@@ -12,9 +12,6 @@ export interface EnvironmentConfig{
 
     /** enable ansi color support */
     supportAnsiColors?: boolean,
-    isRequestLogEnabled?: boolean,
-    responseBodyLength?: number,
-    prettyPrint?: boolean,
   }
 
   request?: HttpRequest;

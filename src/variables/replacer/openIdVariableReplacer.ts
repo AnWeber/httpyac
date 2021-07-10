@@ -1,4 +1,4 @@
-import { ProcessorContext, HttpClient, UserSession, VariableReplacer, VariableReplacerType } from '../../models';
+import { ProcessorContext, HttpClient, UserSession, VariableReplacer, VariableReplacerType, RequestLogger } from '../../models';
 import { userSessionStore } from '../../environments';
 import * as oauth from './oauth';
 import { log } from '../../logger';
@@ -30,7 +30,8 @@ export class OpenIdVariableReplacer implements VariableReplacer {
               openIdInformation = await openIdFlow.perform(config, {
                 httpClient: context.httpClient,
                 cacheKey,
-                progress: context.progress
+                progress: context.progress,
+                logRequest: context.logRequest
               });
               if (openIdInformation && tokenExchangeConfig) {
                 openIdInformation = await oauth.TokenExchangeFlow.perform(tokenExchangeConfig, openIdInformation, context);
@@ -39,7 +40,7 @@ export class OpenIdVariableReplacer implements VariableReplacer {
             if (openIdInformation) {
               log.trace(`openid flow ${match.groups.flow} finished`);
               userSessionStore.setUserSession(openIdInformation);
-              this.keepAlive(cacheKey, context.httpClient);
+              this.keepAlive(cacheKey, context.httpClient, context.logRequest);
               return `Bearer ${openIdInformation.accessToken}`;
             }
           }
@@ -77,15 +78,15 @@ export class OpenIdVariableReplacer implements VariableReplacer {
     return openIdFlows.find(flow => flow.supportsFlow(flowType));
   }
 
-  private keepAlive(cacheKey: string, httpClient: HttpClient) {
+  private keepAlive(cacheKey: string, httpClient: HttpClient, logRequest: RequestLogger | undefined) {
     const openIdInformation = userSessionStore.userSessions.find(obj => obj.id === cacheKey);
     if (this.isOpenIdInformation(openIdInformation) && openIdInformation.refreshToken && openIdInformation.config.keepAlive) {
       const timeoutId = setTimeout(async () => {
-        const result = await oauth.refreshTokenFlow.perform(openIdInformation, { httpClient });
+        const result = await oauth.refreshTokenFlow.perform(openIdInformation, { httpClient, logRequest });
         if (result) {
-          log.info(`token ${result.title} refreshed`);
+          log.debug(`token ${result.title} refreshed`);
           userSessionStore.setUserSession(result);
-          this.keepAlive(cacheKey, httpClient);
+          this.keepAlive(cacheKey, httpClient, logRequest);
         }
       }, (openIdInformation.expiresIn - openIdInformation.timeSkew) * 1000);
       openIdInformation.logout = () => clearTimeout(timeoutId);

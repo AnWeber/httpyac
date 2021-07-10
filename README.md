@@ -85,6 +85,7 @@ usage: httpyac [options...] <file or glob pattern>
   -i   --interactive  do not exit the program after request, go back to selection
   -l   --line         line of the region
   -n   --name         name of the region
+  -o   --output       output format of response (short, body, headers, response, exchange, none)
   -r   --repeat       repeat count for requests
        --repeat-mode  repeat mode: sequential, parallel (default)
        --root         absolute path to root dir of project

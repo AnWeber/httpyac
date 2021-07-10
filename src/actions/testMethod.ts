@@ -1,4 +1,3 @@
-import { chalkInstance } from '../logger';
 import { HttpRegion, ProcessorContext, TestResult } from '../models';
 import * as utils from '../utils';
 
@@ -19,7 +18,7 @@ export interface TestFunction{
 
 export function testFactory({ httpRegion, scriptConsole }: ProcessorContext): TestFunction {
   const testFunction = function test(message: string, testMethod: () => void): void {
-    const chalk = chalkInstance();
+    const chalk = utils.chalkInstance();
     const testResult: TestResult = {
       message,
       result: true

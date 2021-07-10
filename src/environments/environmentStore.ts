@@ -5,7 +5,7 @@ import { JsonEnvProvider } from './jsonEnvProvider';
 import { EnvVariableProvider } from '../variables/provider/envVariableProvider';
 import { IntellijProvider } from './intellijEnvProvider';
 import { DotenvProvider } from './dotenvProvider';
-import { log, logRequest, LogLevel } from '../logger';
+import { log, LogLevel } from '../logger';
 import { fileProvider, PathLike } from '../fileProvider';
 import merge from 'lodash/merge';
 
@@ -111,10 +111,7 @@ class EnvironmentStore {
     const defaultConfig: EnvironmentConfig = {
       log: {
         level: LogLevel.warn,
-        responseBodyLength: 0,
-        isRequestLogEnabled: true,
         supportAnsiColors: true,
-        prettyPrint: true,
       },
       cookieJarEnabled: true,
       dotenv: {
@@ -188,9 +185,6 @@ class EnvironmentStore {
       if (config.log.level !== undefined) {
         log.level = config.log.level;
       }
-      logRequest.logResponseBodyLength = config.log.responseBodyLength || 0;
-      logRequest.isRequestLogEnabled = !!config.log.isRequestLogEnabled;
-      logRequest.prettyPrint = !!config.log.prettyPrint;
     }
   }
 

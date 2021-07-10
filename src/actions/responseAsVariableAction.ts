@@ -1,5 +1,5 @@
 import { ActionType, HttpRegion, HttpRegionAction, ProcessorContext } from '../models';
-import { log, popupService, logRequest } from '../logger';
+import { log, popupService } from '../logger';
 import { decodeJWT, isString, JWTToken, toEnvironmentKey } from '../utils';
 import { isValidVariableName } from './javascriptAction';
 
@@ -16,8 +16,8 @@ export class ResponseAsVariableAction implements HttpRegionAction {
         this.handleJWTMetaData(body, context.httpRegion);
         this.handleNameMetaData(body, context);
       }
-      if (!context.httpRegion.metaData.noLog) {
-        logRequest.info(context.httpRegion.response);
+      if (!context.httpRegion.metaData.noLog && context.logRequest) {
+        context.logRequest(context.httpRegion.response);
       }
     }
     return true;

@@ -1,12 +1,13 @@
+/* eslint-disable no-console */
 import arg from 'arg';
 import inquirer from 'inquirer';
 import { promises as fs } from 'fs';
 import { join } from 'path';
-import { EnvironmentConfig, HttpFile, HttpRegion, HttpSymbolKind, RepeatOptions, RepeatOrder, SettingsConfig } from './models';
+import { EnvironmentConfig, HttpFile, HttpRegion, HttpSymbolKind, RepeatOptions, RepeatOrder, RequestLogger, SettingsConfig } from './models';
 import { HttpFileStore } from './httpFileStore';
 import { httpYacApi } from './httpYacApi';
-import { log, LogLevel } from './logger';
-import { findPackageJson, parseJson } from './utils';
+import { LogLevel } from './logger';
+import * as utils from './utils';
 import { environmentStore } from './environments';
 import { NoteMetaHttpRegionParser, SettingsScriptHttpRegionParser } from './parser';
 import { ShowInputBoxVariableReplacer, ShowQuickpickVariableReplacer } from './variables/replacer';
@@ -14,7 +15,7 @@ import { testSymbols } from './actions';
 import { default as globby } from 'globby';
 import { PathLike, fileProvider } from './fileProvider';
 
-interface HttpCliOptions{
+interface HttpCliOptions {
   activeEnvironments?: Array<string>,
   allRegions?: boolean,
   editor?: boolean;
@@ -23,6 +24,7 @@ interface HttpCliOptions{
   httpRegionLine?: number,
   httpRegionName?: string,
   interactive?: boolean,
+  output?: string,
   rejectUnauthorized?: boolean;
   repeat?: RepeatOptions,
   requestTimeout?: number;
@@ -32,14 +34,14 @@ interface HttpCliOptions{
 }
 
 
-export async function send(rawArgs: string[]) : Promise<void> {
+export async function send(rawArgs: string[]): Promise<void> {
   const cliOptions = parseCliOptions(rawArgs);
   if (!cliOptions) {
     return;
   }
   if (cliOptions.version) {
-    const packageJson = await parseJson<Record<string, string>>(join(__dirname, '../package.json'));
-    log.info(`httpyac v${packageJson?.version}`);
+    const packageJson = await utils.parseJson<Record<string, string>>(join(__dirname, '../package.json'));
+    console.info(`httpyac v${packageJson?.version}`);
     return;
   }
   if (cliOptions.help) {
@@ -82,6 +84,7 @@ export async function send(rawArgs: string[]) : Promise<void> {
         const context = {
           repeat: cliOptions.repeat,
           scriptConsole: console,
+          logRequest: getRequestLogger(cliOptions.output),
         };
         if (selection) {
           await httpYacApi.send(Object.assign(context, selection));
@@ -97,7 +100,7 @@ export async function send(rawArgs: string[]) : Promise<void> {
       return;
     }
   } catch (err) {
-    log.error(err);
+    console.error(err);
     throw err;
   } finally {
 
@@ -120,6 +123,7 @@ function parseCliOptions(rawArgs: string[]): HttpCliOptions | undefined {
         '--interactive': Boolean,
         '--line': Number,
         '--name': String,
+        '--output': String,
         '--repeat': Number,
         '--repeat-mode': String,
         '--root': String,
@@ -132,6 +136,7 @@ function parseCliOptions(rawArgs: string[]): HttpCliOptions | undefined {
         '-i': '--interactive',
         '-l': '--line',
         '-n': '--name',
+        '-o': '--output',
         '-v': '--verbose'
       },
       {
@@ -148,6 +153,7 @@ function parseCliOptions(rawArgs: string[]): HttpCliOptions | undefined {
       httpRegionLine: args['--line'],
       httpRegionName: args['--name'],
       interactive: args['--interactive'],
+      output: args['--output'],
       rejectUnauthorized: args['--insecure'] !== undefined ? !args['--insecure'] : undefined,
       repeat: args['--repeat'] ? {
         count: args['--repeat'],
@@ -160,9 +166,9 @@ function parseCliOptions(rawArgs: string[]): HttpCliOptions | undefined {
     };
   } catch (error) {
     if (error instanceof arg.ArgError) {
-      log.error(error.message);
+      console.error(error.message);
     } else {
-      log.error(error);
+      console.error(error);
     }
   }
   return undefined;
@@ -180,6 +186,7 @@ usage: httpyac [options...] <file or glob pattern>
   -i   --interactive  do not exit the program after request, go back to selection
   -l   --line         line of the http requests
   -n   --name         name of the http requests
+  -o   --output       output format of response (short, body, headers, response, exchange, none)
   -r   --repeat       repeat count for requests
        --repeat-mode  repeat mode: sequential, parallel (default)
        --root         absolute path to root dir of project
@@ -187,7 +194,7 @@ usage: httpyac [options...] <file or glob pattern>
   -v   --verbose      make the operation more talkative
        --version      version of httpyac`;
 
-  log.info(helpMessage);
+  console.info(helpMessage);
 }
 
 
@@ -233,7 +240,7 @@ async function selectAction(httpFiles: HttpFile[], cliOptions: HttpCliOptions): 
   return false;
 }
 
-function getHttpRegion(httpFile: HttpFile, cliOptions: HttpCliOptions) : HttpRegion | false {
+function getHttpRegion(httpFile: HttpFile, cliOptions: HttpCliOptions): HttpRegion | false {
   let httpRegion: HttpRegion | false = false;
   if (cliOptions.httpRegionName) {
     httpRegion = httpFile.httpRegions.find(obj => obj.metaData.name === cliOptions.httpRegionName) || false;
@@ -259,7 +266,7 @@ async function initEnviroment(cliOptions: HttpCliOptions): Promise<void> {
     }
   };
 
-  const rootDir = cliOptions.rootDir || await findPackageJson(process.cwd()) || process.cwd();
+  const rootDir = cliOptions.rootDir || await utils.findPackageJson(process.cwd()) || process.cwd();
   await environmentStore.configure([rootDir], environmentConfig);
   initHttpYacApiExtensions(environmentConfig, rootDir);
   environmentStore.activeEnvironments = cliOptions.activeEnvironments;
@@ -311,10 +318,48 @@ function initHttpYacApiExtensions(config: EnvironmentConfig & SettingsConfig, ro
           const script = await fileProvider.readFile(fileName, 'utf-8');
           return { script, lineOffset: 0 };
         } catch (err) {
-          log.trace(`file not found: ${fileName}`);
+          console.trace(`file not found: ${fileName}`);
         }
       }
       return undefined;
     }));
+  }
+}
+
+
+function getRequestLogger(output: string | undefined): RequestLogger | undefined {
+  switch (output) {
+    case 'body':
+      return utils.requestLoggerFactory(console.info, {
+        isFirstRequest: true,
+        responseBodyLength: 0,
+      });
+    case 'headers':
+      return utils.requestLoggerFactory(console.info, {
+        isFirstRequest: true,
+        requestOutput: true,
+        requestHeaders: true,
+        responseHeaders: true,
+      });
+    case 'response':
+      return utils.requestLoggerFactory(console.info, {
+        isFirstRequest: true,
+        responseHeaders: true,
+        responseBodyLength: 0,
+      });
+    case 'none':
+      return undefined;
+    case 'short':
+      return utils.requestLoggerFactoryShort(console.info);
+    case 'exchange':
+    default:
+      return utils.requestLoggerFactory(console.info, {
+        isFirstRequest: true,
+        requestOutput: true,
+        requestHeaders: true,
+        requestBodyLength: 0,
+        responseHeaders: true,
+        responseBodyLength: 0,
+      });
   }
 }

@@ -1,8 +1,7 @@
 import { OpenIdConfiguration } from './openIdConfiguration';
-import { log, logRequest } from '../../../logger';
-import { HttpClient, HttpRequest, UserSession } from '../../../models';
+import { log } from '../../../logger';
+import { HttpClient, HttpRequest, RequestLogger, UserSession } from '../../../models';
 import { decodeJWT } from '../../../utils';
-import { environmentStore } from '../../../environments';
 
 export interface OpenIdInformation extends UserSession{
   time: number;
@@ -21,6 +20,7 @@ export async function requestOpenIdInformation(request: HttpRequest | false, con
   id: string,
   title: string,
   description: string,
+  logRequest?: RequestLogger,
 }): Promise<OpenIdInformation | false> {
   if (request) {
     const time = new Date().getTime();
@@ -28,8 +28,8 @@ export async function requestOpenIdInformation(request: HttpRequest | false, con
     const response = await context.httpClient(request, { showProgressBar: false });
     if (response) {
 
-      if (environmentStore.environmentConfig?.log?.isRequestLogEnabled) {
-        logRequest.info(response);
+      if (context.logRequest) {
+        context.logRequest(response);
       }
       if (response.statusCode === 200 && response.parsedBody) {
         return toOpenIdInformation(response.parsedBody, time, context);
@@ -47,9 +47,7 @@ export function toOpenIdInformation(jwtToken: unknown, time: number, context: {
 }): OpenIdInformation | false {
   if (isAuthToken(jwtToken)) {
     const parsedToken = decodeJWT(jwtToken.access_token);
-    if (environmentStore.environmentConfig?.log?.isRequestLogEnabled) {
-      log.info(JSON.stringify(parsedToken, null, 2));
-    }
+    log.debug(JSON.stringify(parsedToken, null, 2));
     return {
       id: context.id,
       title: context.title,

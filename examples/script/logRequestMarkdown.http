@@ -1,7 +1,0 @@
-{{
-  const {logRequest, utils} = require('httpyac');
-  logRequest.info = (obj) => log.info(utils.toMarkdown(obj));
-}}
-
-GET /json
-

@@ -1,6 +1,6 @@
 import { OpenIdInformation, requestOpenIdInformation } from './openIdInformation';
 import { toQueryParams } from '../../../utils';
-import { HttpClient } from '../../../models';
+import { HttpClient, RequestLogger } from '../../../models';
 
 class RefreshTokenFlow {
 
@@ -8,7 +8,7 @@ class RefreshTokenFlow {
     return time + 1000 * (expiresIn - timeSkew) < (new Date()).getTime();
   }
 
-  async perform(openIdInformation: OpenIdInformation, context: {httpClient: HttpClient}): Promise<OpenIdInformation | false> {
+  async perform(openIdInformation: OpenIdInformation, context: {httpClient: HttpClient, logRequest?: RequestLogger}): Promise<OpenIdInformation | false> {
     if (!this.isTokenExpired(openIdInformation.time, openIdInformation.expiresIn, openIdInformation.timeSkew)) {
       return openIdInformation;
     }
@@ -32,7 +32,8 @@ class RefreshTokenFlow {
         config: openIdInformation.config,
         id: openIdInformation.id,
         title: openIdInformation.title,
-        description: openIdInformation.description
+        description: openIdInformation.description,
+        logRequest: context.logRequest,
       });
     }
     return false;

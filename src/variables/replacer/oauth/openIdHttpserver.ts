@@ -57,7 +57,7 @@ function closeServer() {
       if (err) {
         log.error(err);
       } else {
-        log.info('http server closed');
+        log.debug('http server closed');
       }
     });
     server = false;

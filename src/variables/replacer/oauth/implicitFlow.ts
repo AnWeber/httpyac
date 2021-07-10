@@ -67,7 +67,8 @@ class ImplicitFlow implements OpenIdFlow {
                   config,
                   id: context.cacheKey,
                   title: `implicit: ${config.clientId}`,
-                  description: `${config.variablePrefix} - ${config.tokenEndpoint}`
+                  description: `${config.variablePrefix} - ${config.tokenEndpoint}`,
+                  logRequest: context.logRequest,
                 });
                 resolve(openIdInformation);
                 return {

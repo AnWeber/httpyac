@@ -5,6 +5,7 @@ import { HttpRegion } from './httpRegion';
 import { HttpRequest } from './httpRequest';
 import { RepeatOptions } from './repeatOptions';
 import { Variables } from './variables';
+import { HttpResponse } from './httpResponse';
 
 
 export type Dispose = () => void;
@@ -15,6 +16,8 @@ export interface Progress{
   report?: (value: { message?: string, increment?: number }) => void;
 }
 
+export type RequestLogger = (response: HttpResponse) => void;
+
 export interface HttpFileSendContext{
   httpFile: HttpFile;
   progress?: Progress;
@@ -22,6 +25,7 @@ export interface HttpFileSendContext{
   httpRegionPredicate?: (obj: HttpRegion) => boolean;
   processedHttpRegions?: Array<HttpRegion>;
   scriptConsole?: LogHandler;
+  logRequest?: RequestLogger;
 }
 
 export interface HttpRegionsSendContext extends HttpFileSendContext{

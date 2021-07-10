@@ -1,7 +1,8 @@
-import { ContentType, HttpMethod } from '../models';
+import { ContentType, HttpMethod, HttpResponse, HttpResponseRequest, RequestLogger } from '../models';
 import { log } from '../logger';
-import { isString } from './stringUtils';
+import { isString, toMultiLineString } from './stringUtils';
 import { parseMimeType } from './mimeTypeUtils';
+import { chalkInstance } from './chalk';
 
 
 export function isRequestMethod(method: string | undefined): method is HttpMethod {
@@ -84,4 +85,102 @@ export function toQueryParams(params: Record<string, undefined | string | number
     .filter(([, value]) => !!value)
     .map(([key, value]) => `${key}=${encodeURIComponent(value || '')}`)
     .join('&');
+}
+
+export function requestLoggerFactoryShort(log: (args: string) => void) : RequestLogger {
+  return function logRequestShort(response: HttpResponse) {
+    const chalk = chalkInstance();
+    log(chalk`{yellow ${response.request?.method || 'GET'}} {gray ${response.request?.url || '?'} =>} {cyan.bold ${response.statusCode}} ({yellow ${response.timings?.total || '?'} ms}, {yellow ${response.meta?.size || '?'}})`);
+  };
+}
+
+export function requestLoggerFactory(log: (args: string) => void, options: {
+  isFirstRequest?: boolean;
+  requestOutput?: boolean;
+  requestHeaders?: boolean;
+  requestBodyLength?: number;
+  responseHeaders?: boolean;
+  responseBodyLength?: number;
+}) : RequestLogger {
+
+  return function logResponse(response: HttpResponse) {
+    const chalk = chalkInstance();
+    const result: Array<string> = [];
+    if (options.isFirstRequest) {
+      options.isFirstRequest = false;
+    } else {
+      result.push(chalk`{gray --------------------------------------------------}`);
+    }
+
+    if (response.request && options.requestOutput) {
+      result.push(...logRequest(response.request, {
+        headers: options.requestHeaders,
+        bodyLength: options.requestBodyLength,
+      }));
+    }
+
+    if (options.responseHeaders) {
+      if (result.length > 0) {
+        result.push('');
+      }
+      result.push(...logResponseHeader(response));
+    }
+
+    if (isString(response.body) && options.responseBodyLength !== undefined) {
+      if (result.length > 0) {
+        result.push('');
+      }
+      let body = response.body;
+      if (response.parsedBody) {
+        body = JSON.stringify(response.parsedBody, null, 2);
+      }
+      body = getPartOfBody(body, options.responseBodyLength);
+      result.push(body);
+    }
+    log(toMultiLineString(result));
+  };
+}
+
+function getPartOfBody(body: string, length: number) {
+  let result = body;
+  if (length > 0) {
+    result = body.slice(0, Math.min(body.length, length));
+    if (body.length >= length) {
+      result += `... (${body.length - length} characters  more)`;
+    }
+  }
+  return result;
+}
+
+function logRequest(request: HttpResponseRequest, options: {
+  headers?: boolean,
+  bodyLength?: number,
+}) {
+  const chalk = chalkInstance();
+  const result: Array<string> = [];
+  result.push(chalk`{cyan.bold ${request.method} ${request.url}}`);
+  if (request.headers && options.headers) {
+    result.push(...Object.entries(request.headers)
+      .map(([key, value]) => chalk`{yellow ${key}}: ${value}`)
+      .sort());
+  }
+  if (request.https?.certificate || request.https?.pfx) {
+    result.push(chalk`{yellow client-cert}: true`);
+  }
+  if (isString(request.body) && options.bodyLength !== undefined) {
+    result.push('');
+    result.push(chalk`{gray ${getPartOfBody(request.body, options.bodyLength)}}`);
+  }
+  return result;
+}
+
+function logResponseHeader(response: HttpResponse) {
+  const chalk = chalkInstance();
+  const result: Array<string> = [];
+  result.push(chalk`{cyan.bold HTTP/${response.httpVersion || ''}} {cyan.bold ${response.statusCode}} {bold ${response.statusMessage}}`);
+  result.push(...Object.entries(response.headers)
+    .filter(([key]) => !key.startsWith(':'))
+    .map(([key, value]) => chalk`{yellow ${key}}: ${value}`)
+    .sort());
+  return result;
 }
