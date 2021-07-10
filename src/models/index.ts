@@ -15,6 +15,7 @@ export * from './httpResponse';
 export * from './httpSymbol';
 export * from './httpSymbolKind';
 export * from './httpTimings';
+export * from './logHandler';
 export * from './index';
 export * from './repeatOptions';
 export * from './parserContext';

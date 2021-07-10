@@ -1,8 +1,9 @@
+import { LogHandler } from '../models';
 import { LogChannels } from './logChannels';
 import { LogLevel } from './logLevel';
 import { logOutputProvider } from './logOutputProvider';
 
-export class Logger {
+export class Logger implements LogHandler {
   public level: LogLevel;
   constructor(private readonly channel: LogChannels) {
     this.level = LogLevel.warn;
@@ -43,6 +44,5 @@ export class Logger {
 }
 
 export const log = new Logger(LogChannels.Log);
-export const scriptConsole = new Logger(LogChannels.ScriptConsole);
 
 export const popupService = new Logger(LogChannels.PopupChannel);

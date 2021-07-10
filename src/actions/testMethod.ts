@@ -1,5 +1,5 @@
-import { chalkInstance, scriptConsole } from '../logger';
-import { HttpRegion, TestResult } from '../models';
+import { chalkInstance } from '../logger';
+import { HttpRegion, ProcessorContext, TestResult } from '../models';
 import * as utils from '../utils';
 
 export const testSymbols = {
@@ -17,7 +17,7 @@ export interface TestFunction{
   hasNoResponseBody(): void;
 }
 
-export function testFactory(httpRegion: HttpRegion) : TestFunction {
+export function testFactory({ httpRegion, scriptConsole }: ProcessorContext): TestFunction {
   const testFunction = function test(message: string, testMethod: () => void): void {
     const chalk = chalkInstance();
     const testResult: TestResult = {
@@ -26,18 +26,24 @@ export function testFactory(httpRegion: HttpRegion) : TestFunction {
     };
     if (!httpRegion.testResults) {
       httpRegion.testResults = [];
-      scriptConsole.info(chalk`{bold Tests for ${utils.getRegionName(httpRegion)}}`);
+      if (scriptConsole) {
+        scriptConsole.info(chalk`{bold Tests for ${utils.getRegionName(httpRegion)}}`);
+      }
     }
     httpRegion.testResults.push(testResult);
     if (typeof testMethod === 'function') {
       try {
         testMethod();
-        scriptConsole.info(chalk`{green ${testSymbols.ok} ${message || 'Test passed'}}`);
+        if (scriptConsole) {
+          scriptConsole.info(chalk`{green ${testSymbols.ok} ${message || 'Test passed'}}`);
+        }
       } catch (err) {
         process.exitCode = 20;
         testResult.result = false;
         testResult.error = utils.parseError(err);
-        scriptConsole.error(chalk`{red ${testSymbols.error} ${message || 'Test failed'} (${testResult.error.displayMessage})}`);
+        if (scriptConsole) {
+          scriptConsole.error(chalk`{red ${testSymbols.error} ${message || 'Test failed'} (${testResult.error.displayMessage})}`);
+        }
       }
     }
   };

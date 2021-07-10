@@ -81,6 +81,7 @@ export async function send(rawArgs: string[]) : Promise<void> {
 
         const context = {
           repeat: cliOptions.repeat,
+          scriptConsole: console,
         };
         if (selection) {
           await httpYacApi.send(Object.assign(context, selection));

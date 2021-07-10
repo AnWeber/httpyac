@@ -1,4 +1,4 @@
-import { Variables, ProcessorContext, HttpRegion, HttpFile, ActionType, HttpRegionAction } from '../models';
+import { ProcessorContext, HttpFile, ActionType, HttpRegionAction } from '../models';
 import { ScriptData, executeScript } from './javascriptAction';
 import { log, popupService } from '../logger';
 import { toAbsoluteFilename } from '../utils';
@@ -17,12 +17,12 @@ export class IntellijAction implements HttpRegionAction {
 
   constructor(private readonly scriptData: ScriptData | IntellijScriptData) { }
 
-  async process({ httpRegion, httpFile, variables }: ProcessorContext): Promise<boolean> {
-    const intellijVars = initIntellijVariables(httpRegion, variables, httpFile.activeEnvironment);
+  async process(context: ProcessorContext): Promise<boolean> {
+    const intellijVars = initIntellijVariables(context);
 
     let data: ScriptData;
     if (this.isIntellijScriptData(this.scriptData)) {
-      const script = await this.loadScript(this.scriptData.fileName, httpFile);
+      const script = await this.loadScript(this.scriptData.fileName, context.httpFile);
       if (!script) {
         return false;
       }
@@ -35,7 +35,7 @@ export class IntellijAction implements HttpRegionAction {
     }
     await executeScript({
       script: data.script,
-      fileName: httpFile.fileName,
+      fileName: context.httpFile.fileName,
       variables: intellijVars,
       lineOffset: data.lineOffset + 1
     });
@@ -68,12 +68,12 @@ export class IntellijAction implements HttpRegionAction {
 }
 
 
-function initIntellijVariables(httpRegion: HttpRegion, variables: Variables, env: string[] | undefined) {
+function initIntellijVariables(context: ProcessorContext) {
   let response: unknown;
-  if (httpRegion.response) {
-    response = new intellij.IntellijHttpResponse(httpRegion.response);
+  if (context.httpRegion.response) {
+    response = new intellij.IntellijHttpResponse(context.httpRegion.response);
   }
-  const client = new intellij.IntellijHttpClient(httpRegion, variables, env);
+  const client = new intellij.IntellijHttpClient(context);
   return {
     client,
     response,

@@ -2,7 +2,7 @@ import * as models from './models';
 import * as parser from './parser';
 import { provider, replacer } from './variables';
 import * as utils from './utils';
-import { scriptConsole, chalkInstance } from './logger';
+import { chalkInstance } from './logger';
 import { testSummary } from './actions';
 
 export class HttpYacApi {
@@ -63,11 +63,13 @@ export class HttpYacApi {
     } else {
       result = await utils.sendHttpFile(context);
     }
-    if (!!context.processedHttpRegions && context.processedHttpRegions.length > 0) {
+    if (context.scriptConsole
+      && !!context.processedHttpRegions
+      && context.processedHttpRegions.length > 0) {
       const summary = testSummary(context.processedHttpRegions);
       const chalk = chalkInstance();
-      scriptConsole.info();
-      scriptConsole.info(chalk`{bold ${context.processedHttpRegions.length}} requests with {bold ${summary.total}} tests tested ({green ${summary.success} succeeded}, {red ${summary.failed} failed})`);
+      context.scriptConsole.info();
+      context.scriptConsole.info(chalk`{bold ${context.processedHttpRegions.length}} requests with {bold ${summary.total}} tests tested ({green ${summary.success} succeeded}, {red ${summary.failed} failed})`);
     }
     return result;
   }

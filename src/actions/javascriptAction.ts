@@ -1,7 +1,7 @@
 import { Variables, ProcessorContext, HttpRegionAction, ActionType } from '../models';
 import { Module } from 'module';
 import { runInThisContext } from 'vm';
-import { log, scriptConsole } from '../logger';
+import { log } from '../logger';
 import { isPromise, toEnvironmentKey } from '../utils';
 import * as got from 'got';
 import { httpYacApi } from '../httpYacApi';
@@ -36,14 +36,15 @@ export class JavascriptAction implements HttpRegionAction {
 
   constructor(private readonly scriptData: ScriptData) { }
 
-  async process({ httpRegion, httpFile, request, variables, progress }: ProcessorContext): Promise<boolean> {
+  async process(context: ProcessorContext): Promise<boolean> {
+    const { httpRegion, httpFile, request, variables, progress, scriptConsole } = context;
     const defaultVariables = {
       request,
       httpRegion,
       httpFile,
       log,
       console: scriptConsole,
-      test: testFactory(httpRegion),
+      test: testFactory(context),
     };
     Object.assign(variables, defaultVariables);
 

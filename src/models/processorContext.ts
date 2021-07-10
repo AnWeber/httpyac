@@ -1,3 +1,4 @@
+import { LogHandler } from './logHandler';
 import { HttpClient } from './httpClient';
 import { HttpFile } from './httpFile';
 import { HttpRegion } from './httpRegion';
@@ -20,6 +21,7 @@ export interface HttpFileSendContext{
   httpClient?: HttpClient;
   httpRegionPredicate?: (obj: HttpRegion) => boolean;
   processedHttpRegions?: Array<HttpRegion>;
+  scriptConsole?: LogHandler;
 }
 
 export interface HttpRegionsSendContext extends HttpFileSendContext{
