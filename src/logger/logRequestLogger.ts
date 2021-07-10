@@ -58,7 +58,7 @@ class LogRequestsLogger {
   private logRequest(request: HttpResponseRequest) {
     const chalk = chalkInstance();
     const result: Array<string> = [];
-    result.push(chalk`{bold ${request.method} ${request.url}}`);
+    result.push(chalk`{cyan.bold ${request.method} ${request.url}}`);
     if (request.headers) {
       result.push(...Object.entries(request.headers)
         .map(([key, value]) => chalk`{yellow ${key}}: ${value}`)
@@ -81,11 +81,7 @@ class LogRequestsLogger {
   private logResponseHeader(response: HttpResponse) {
     const chalk = chalkInstance();
     const result: Array<string> = [];
-    if (response.statusCode >= 400) {
-      result.push(chalk`{red.bold HTTP/${response.httpVersion || ''}} {red.bold ${response.statusCode}} {red ${response.statusMessage}}`);
-    } else {
-      result.push(chalk`{green.bold HTTP/${response.httpVersion || ''}} {green.bold ${response.statusCode}} {bold ${response.statusMessage}}`);
-    }
+    result.push(chalk`{cyan.bold HTTP/${response.httpVersion || ''}} {cyan.bold ${response.statusCode}} {bold ${response.statusMessage}}`);
     result.push(...Object.entries(response.headers)
       .filter(([key]) => !key.startsWith(':'))
       .map(([key, value]) => chalk`{yellow ${key}}: ${value}`)
