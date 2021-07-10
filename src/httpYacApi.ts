@@ -3,7 +3,6 @@ import * as parser from './parser';
 import { provider, replacer } from './variables';
 import * as utils from './utils';
 import { chalkInstance } from './logger';
-import { testSummary } from './actions';
 
 export class HttpYacApi {
   readonly httpRegionParsers: Array<models.HttpRegionParser>;
@@ -66,10 +65,11 @@ export class HttpYacApi {
     if (context.scriptConsole
       && !!context.processedHttpRegions
       && context.processedHttpRegions.length > 0) {
-      const summary = testSummary(context.processedHttpRegions);
       const chalk = chalkInstance();
       context.scriptConsole.info();
-      context.scriptConsole.info(chalk`{bold ${context.processedHttpRegions.length}} requests with {bold ${summary.total}} tests tested ({green ${summary.success} succeeded}, {red ${summary.failed} failed})`);
+      const succededRequests = context.processedHttpRegions.filter(obj => !obj.testResults || obj.testResults.every(test => test.result)).length;
+      const failedRequests = context.processedHttpRegions.filter(obj => !!obj.testResults && obj.testResults.some(test => !test.result)).length;
+      context.scriptConsole.info(chalk`{bold ${context.processedHttpRegions.length}} requests with tested ({green ${succededRequests} succeeded}, {red ${failedRequests} failed})`);
     }
     return result;
   }
