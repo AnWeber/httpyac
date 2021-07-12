@@ -72,7 +72,7 @@
 		"dayjs-plugin-utc": "^0.1.2",
 		"dotenv": "^10.0.0",
 		"encodeurl": "^1.0.2",
-		"filesize": "^6.4.0",
+		"filesize": "^7.0.0",
 		"globby": "^11.0.4",
 		"got": "^11.8.2",
 		"http-proxy-agent": "^4.0.1",
