@@ -68,7 +68,7 @@ rules:
     no-array-constructor: "error"
     no-caller: "error"
     no-confusing-arrow: "error"
-    no-console: "error"
+    no-console: "off"
     no-delete-var: "error"
     no-else-return: ["error", { allowElseIf: false }]
     no-eval: "error"

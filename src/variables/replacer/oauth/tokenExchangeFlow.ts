@@ -14,7 +14,7 @@ export class TokenExchangeFlow {
 
   static async perform(config: OpenIdConfiguration,
     openIdInformation: OpenIdInformation,
-    context: { httpClient: HttpClient, logRequest?: RequestLogger }): Promise<OpenIdInformation | false> {
+    context: { httpClient: HttpClient, logResponse?: RequestLogger }): Promise<OpenIdInformation | false> {
     if (openIdInformation) {
       const jwtToken = decodeJWT(openIdInformation.accessToken);
 
@@ -39,7 +39,7 @@ export class TokenExchangeFlow {
         id: openIdInformation.id,
         title: `${openIdInformation.title} (token exchange)`,
         description: openIdInformation.description,
-        logRequest: context.logRequest,
+        logResponse: context.logResponse,
       });
 
     }

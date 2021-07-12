@@ -20,7 +20,7 @@ export async function requestOpenIdInformation(request: HttpRequest | false, con
   id: string,
   title: string,
   description: string,
-  logRequest?: RequestLogger,
+  logResponse?: RequestLogger,
 }): Promise<OpenIdInformation | false> {
   if (request) {
     const time = new Date().getTime();
@@ -28,8 +28,8 @@ export async function requestOpenIdInformation(request: HttpRequest | false, con
     const response = await context.httpClient(request, { showProgressBar: false });
     if (response) {
 
-      if (context.logRequest) {
-        context.logRequest(response);
+      if (context.logResponse) {
+        context.logResponse(response);
       }
       if (response.statusCode === 200 && response.parsedBody) {
         return toOpenIdInformation(response.parsedBody, time, context);

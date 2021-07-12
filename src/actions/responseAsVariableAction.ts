@@ -16,8 +16,8 @@ export class ResponseAsVariableAction implements HttpRegionAction {
         this.handleJWTMetaData(body, context.httpRegion);
         this.handleNameMetaData(body, context);
       }
-      if (!context.httpRegion.metaData.noLog && context.logRequest) {
-        context.logRequest(context.httpRegion.response);
+      if (!context.httpRegion.metaData.noLog && context.logResponse) {
+        context.logResponse(context.httpRegion.response);
       }
     }
     return true;

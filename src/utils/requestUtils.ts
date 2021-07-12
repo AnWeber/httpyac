@@ -15,7 +15,7 @@ export function isRequestMethod(method: string | undefined): method is HttpMetho
   return false;
 }
 
-export function getHeader(headers: Record<string, string | string[] | undefined | null>, headerName: string) : string | string[] | undefined | null {
+export function getHeader(headers: Record<string, string | string[] | undefined | null>, headerName: string): string | string[] | undefined | null {
   if (headers) {
     const value = Object.entries(headers)
       .find(obj => obj[0].toLowerCase() === headerName.toLowerCase());
@@ -27,7 +27,7 @@ export function getHeader(headers: Record<string, string | string[] | undefined 
 }
 
 
-export function parseContentType(headers: Record<string, string | string[] | null | undefined>) : ContentType | undefined {
+export function parseContentType(headers: Record<string, string | string[] | null | undefined>): ContentType | undefined {
   const contentType = getHeader(headers, 'content-type');
   if (isString(contentType)) {
     return parseMimeType(contentType);
@@ -48,7 +48,7 @@ export interface JWTToken {
 }
 
 
-export function decodeJWT(str: string) : JWTToken | null {
+export function decodeJWT(str: string): JWTToken | null {
   try {
     const jwtComponents = str.split('.');
     if (jwtComponents.length !== 3) {
@@ -87,8 +87,8 @@ export function toQueryParams(params: Record<string, undefined | string | number
     .join('&');
 }
 
-export function requestLoggerFactoryShort(log: (args: string) => void) : RequestLogger {
-  return function logRequestShort(response: HttpResponse) {
+export function requestLoggerFactoryShort(log: (args: string) => void): RequestLogger {
+  return function logResponseShort(response: HttpResponse) {
     const chalk = chalkInstance();
     log(chalk`{yellow ${response.request?.method || 'GET'}} {gray ${response.request?.url || '?'} =>} {cyan.bold ${response.statusCode}} ({yellow ${response.timings?.total || '?'} ms}, {yellow ${response.meta?.size || '?'}})`);
   };
@@ -101,7 +101,7 @@ export function requestLoggerFactory(log: (args: string) => void, options: {
   requestBodyLength?: number;
   responseHeaders?: boolean;
   responseBodyLength?: number;
-}) : RequestLogger {
+}): RequestLogger {
 
   return function logResponse(response: HttpResponse) {
     const chalk = chalkInstance();

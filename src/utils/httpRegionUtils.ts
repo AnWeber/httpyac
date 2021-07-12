@@ -140,7 +140,6 @@ export async function processHttpRegionActions(context: ProcessorContext, showPr
         return false;
       }
     }
-
   }
   return true;
 }

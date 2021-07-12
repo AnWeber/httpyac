@@ -25,7 +25,8 @@ export interface HttpFileSendContext{
   httpRegionPredicate?: (obj: HttpRegion) => boolean;
   processedHttpRegions?: Array<HttpRegion>;
   scriptConsole?: LogHandler;
-  logRequest?: RequestLogger;
+  logResponse?: RequestLogger;
+  repeat?: RepeatOptions;
 }
 
 export interface HttpRegionsSendContext extends HttpFileSendContext{
@@ -34,7 +35,6 @@ export interface HttpRegionsSendContext extends HttpFileSendContext{
 
 export interface HttpRegionSendContext extends HttpFileSendContext{
   httpRegion: HttpRegion;
-  repeat?: RepeatOptions
 }
 export interface ProcessorContext extends HttpRegionSendContext{
   httpClient: HttpClient;

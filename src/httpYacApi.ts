@@ -50,9 +50,6 @@ export class HttpYacApi {
    * @param httpFile httpFile
    */
   async send(context: models.HttpFileSendContext | models.HttpRegionSendContext | models.HttpRegionsSendContext): Promise<boolean> {
-    if (!context.processedHttpRegions) {
-      context.processedHttpRegions = [];
-    }
     let result = false;
     if (utils.isHttpRegionSendContext(context)) {
       result = await utils.sendHttpRegion(context);
@@ -60,15 +57,6 @@ export class HttpYacApi {
       result = await utils.sendHttpRegions(context);
     } else {
       result = await utils.sendHttpFile(context);
-    }
-    if (context.scriptConsole
-      && !!context.processedHttpRegions
-      && context.processedHttpRegions.filter(obj => obj.testResults).length > 0) {
-      const chalk = utils.chalkInstance();
-      context.scriptConsole.info();
-      const succededRequests = context.processedHttpRegions.filter(obj => !obj.testResults || obj.testResults.every(test => test.result)).length;
-      const failedRequests = context.processedHttpRegions.filter(obj => !!obj.testResults && obj.testResults.some(test => !test.result)).length;
-      context.scriptConsole.info(chalk`{bold ${context.processedHttpRegions.length}} requests with tested ({green ${succededRequests} succeeded}, {red ${failedRequests} failed})`);
     }
     return result;
   }

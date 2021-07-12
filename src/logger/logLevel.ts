@@ -1,10 +1,10 @@
 export enum LogLevel{
-  none = 0,
   trace = 0,
   debug = 2,
   warn = 5,
   info = 10,
   error = 100,
+  none = 1000,
 }
 
 export function toLogLevel(level: string | undefined) : LogLevel {

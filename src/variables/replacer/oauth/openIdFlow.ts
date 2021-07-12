@@ -7,7 +7,7 @@ export interface OpenIdFlowContext{
   httpClient: HttpClient,
   progress?: Progress | undefined,
   cacheKey: string,
-  logRequest?: RequestLogger,
+  logResponse?: RequestLogger,
 }
 
 export interface OpenIdFlow{

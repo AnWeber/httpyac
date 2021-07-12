@@ -26,7 +26,7 @@ export function testFactory({ httpRegion, scriptConsole }: ProcessorContext): Te
     if (!httpRegion.testResults) {
       httpRegion.testResults = [];
       if (scriptConsole) {
-        scriptConsole.info(chalk`{bold Tests for ${utils.getRegionName(httpRegion)}}`);
+        scriptConsole.debug(chalk`{bold Tests for ${utils.getRegionName(httpRegion)}}`);
       }
     }
     httpRegion.testResults.push(testResult);

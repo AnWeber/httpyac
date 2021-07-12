@@ -31,7 +31,7 @@ export class OpenIdVariableReplacer implements VariableReplacer {
                 httpClient: context.httpClient,
                 cacheKey,
                 progress: context.progress,
-                logRequest: context.logRequest
+                logResponse: context.logResponse
               });
               if (openIdInformation && tokenExchangeConfig) {
                 openIdInformation = await oauth.TokenExchangeFlow.perform(tokenExchangeConfig, openIdInformation, context);
@@ -40,7 +40,7 @@ export class OpenIdVariableReplacer implements VariableReplacer {
             if (openIdInformation) {
               log.trace(`openid flow ${match.groups.flow} finished`);
               userSessionStore.setUserSession(openIdInformation);
-              this.keepAlive(cacheKey, context.httpClient, context.logRequest);
+              this.keepAlive(cacheKey, context.httpClient, context.logResponse);
               return `Bearer ${openIdInformation.accessToken}`;
             }
           }
@@ -78,15 +78,15 @@ export class OpenIdVariableReplacer implements VariableReplacer {
     return openIdFlows.find(flow => flow.supportsFlow(flowType));
   }
 
-  private keepAlive(cacheKey: string, httpClient: HttpClient, logRequest: RequestLogger | undefined) {
+  private keepAlive(cacheKey: string, httpClient: HttpClient, logResponse: RequestLogger | undefined) {
     const openIdInformation = userSessionStore.userSessions.find(obj => obj.id === cacheKey);
     if (this.isOpenIdInformation(openIdInformation) && openIdInformation.refreshToken && openIdInformation.config.keepAlive) {
       const timeoutId = setTimeout(async () => {
-        const result = await oauth.refreshTokenFlow.perform(openIdInformation, { httpClient, logRequest });
+        const result = await oauth.refreshTokenFlow.perform(openIdInformation, { httpClient, logResponse });
         if (result) {
           log.debug(`token ${result.title} refreshed`);
           userSessionStore.setUserSession(result);
-          this.keepAlive(cacheKey, httpClient, logRequest);
+          this.keepAlive(cacheKey, httpClient, logResponse);
         }
       }, (openIdInformation.expiresIn - openIdInformation.timeSkew) * 1000);
       openIdInformation.logout = () => clearTimeout(timeoutId);

@@ -8,7 +8,7 @@ class RefreshTokenFlow {
     return time + 1000 * (expiresIn - timeSkew) < (new Date()).getTime();
   }
 
-  async perform(openIdInformation: OpenIdInformation, context: {httpClient: HttpClient, logRequest?: RequestLogger}): Promise<OpenIdInformation | false> {
+  async perform(openIdInformation: OpenIdInformation, context: {httpClient: HttpClient, logResponse?: RequestLogger}): Promise<OpenIdInformation | false> {
     if (!this.isTokenExpired(openIdInformation.time, openIdInformation.expiresIn, openIdInformation.timeSkew)) {
       return openIdInformation;
     }
@@ -33,7 +33,7 @@ class RefreshTokenFlow {
         id: openIdInformation.id,
         title: openIdInformation.title,
         description: openIdInformation.description,
-        logRequest: context.logRequest,
+        logResponse: context.logResponse,
       });
     }
     return false;
