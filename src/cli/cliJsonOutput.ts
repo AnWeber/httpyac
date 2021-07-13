@@ -40,7 +40,10 @@ export function toCliJsonOutput(context: Record<string, Array<HttpRegion>>, opti
   for (const [fileName, httpRegions] of Object.entries(context)) {
     requests.push(...httpRegions.map(httpRegion => ({
       fileName,
-      response: convertResponse(httpRegion.response, options.output),
+      response: convertResponse(
+        httpRegion.response,
+        options.outputFailed && httpRegion.testResults?.some?.(test => !test.result) ? options.outputFailed : options.output
+      ),
       name: httpRegion.metaData?.name,
       line: httpRegion.symbol.startLine,
       testResults: httpRegion.testResults,

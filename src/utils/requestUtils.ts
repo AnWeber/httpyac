@@ -87,25 +87,8 @@ export function toQueryParams(params: Record<string, undefined | string | number
     .join('&');
 }
 
-export function requestLoggerFactoryShort(log: (args: string) => void, options?: {
-  onlyFailed?: boolean;
-  testResultLog?: (args: string) => void
-}): RequestLogger {
-  return function logResponseShort(response: HttpResponse, testResults?: Array<TestResult>) {
-    if (options?.onlyFailed
-      && (!testResults || testResults.every(obj => obj.result))) {
-      return;
-    }
-    const chalk = chalkInstance();
-    log(chalk`{yellow ${response.request?.method || 'GET'}} {gray ${response.request?.url || '?'}}`);
-    log(chalk`{gray =>} {cyan.bold ${response.statusCode}} ({yellow ${response.timings?.total || '?'} ms}, {yellow ${response.meta?.size || '?'}})`);
-    if (testResults) {
-      (options?.testResultLog || log)(toMultiLineString(logTestResults(testResults, !!options?.onlyFailed)));
-    }
-  };
-}
-
-export function requestLoggerFactory(log: (args: string) => void, options: {
+export interface RequestLoggerFactoryOptions {
+  useShort?: boolean;
   requestOutput?: boolean;
   requestHeaders?: boolean;
   requestBodyLength?: number;
@@ -113,40 +96,59 @@ export function requestLoggerFactory(log: (args: string) => void, options: {
   responseBodyLength?: number;
   onlyFailed?: boolean;
   testResultLog?: (args: string) => void
-}): RequestLogger {
+}
+
+export function requestLoggerFactory(
+  log: (args: string) => void,
+  options: RequestLoggerFactoryOptions,
+  optionsFailed?: RequestLoggerFactoryOptions
+): RequestLogger {
 
   return function logResponse(response: HttpResponse, testResults?: Array<TestResult>) {
-    if (options.onlyFailed
-      && (!testResults || testResults.every(obj => obj.result))) {
+
+    let opt = options;
+    if (optionsFailed && testResults && testResults.some(obj => !obj.result)) {
+      opt = optionsFailed;
+    }
+
+    if (opt.onlyFailed
+        && (!testResults || testResults.every(obj => obj.result))) {
       return;
     }
-    const result: Array<string> = [];
-    if (response.request && options.requestOutput) {
-      result.push(...logRequest(response.request, {
-        headers: options.requestHeaders,
-        bodyLength: options.requestBodyLength,
-      }));
-    }
+    if (opt.useShort) {
+      const chalk = chalkInstance();
+      log(chalk`{yellow ${response.request?.method || 'GET'}} {gray ${response.request?.url || '?'}}`);
+      log(chalk`{gray =>} {cyan.bold ${response.statusCode}} ({yellow ${response.timings?.total || '?'} ms}, {yellow ${response.meta?.size || '?'}})`);
+    } else {
 
-    if (options.responseHeaders) {
-      if (result.length > 0) {
-        result.push('');
+      const result: Array<string> = [];
+      if (response.request && opt.requestOutput) {
+        result.push(...logRequest(response.request, {
+          headers: opt.requestHeaders,
+          bodyLength: opt.requestBodyLength,
+        }));
       }
-      result.push(...logResponseHeader(response));
-    }
 
-    if (isString(response.body) && options.responseBodyLength !== undefined) {
-      if (result.length > 0) {
-        result.push('');
+      if (opt.responseHeaders) {
+        if (result.length > 0) {
+          result.push('');
+        }
+        result.push(...logResponseHeader(response));
       }
-      let body = response.body;
-      if (response.parsedBody) {
-        body = JSON.stringify(response.parsedBody, null, 2);
+
+      if (isString(response.body) && opt.responseBodyLength !== undefined) {
+        if (result.length > 0) {
+          result.push('');
+        }
+        let body = response.body;
+        if (response.parsedBody) {
+          body = JSON.stringify(response.parsedBody, null, 2);
+        }
+        body = getPartOfBody(body, opt.responseBodyLength);
+        result.push(body);
       }
-      body = getPartOfBody(body, options.responseBodyLength);
-      result.push(body);
+      log(toMultiLineString(result));
     }
-    log(toMultiLineString(result));
     if (testResults) {
       (options?.testResultLog || log)(toMultiLineString(logTestResults(testResults, !!options?.onlyFailed)));
     }

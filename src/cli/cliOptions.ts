@@ -14,6 +14,7 @@ export interface CliOptions {
   interactive?: boolean,
   json?: boolean;
   output?: string,
+  outputFailed?: string,
   rejectUnauthorized?: boolean;
   repeat?: RepeatOptions,
   requestTimeout?: number;
@@ -52,6 +53,7 @@ export function parseCliOptions(rawArgs: string[]): CliOptions | undefined {
         '--line': Number,
         '--name': String,
         '--output': String,
+        '--output-failed': String,
         '--quiet': Boolean,
         '--repeat': Number,
         '--repeat-mode': String,
@@ -87,6 +89,7 @@ export function parseCliOptions(rawArgs: string[]): CliOptions | undefined {
       interactive: args['--interactive'],
       json: args['--json'],
       output: args['--output'],
+      outputFailed: args['--output-failed'],
       rejectUnauthorized: args['--insecure'] !== undefined ? !args['--insecure'] : undefined,
       repeat: args['--repeat'] ? {
         count: args['--repeat'],
@@ -113,24 +116,25 @@ export function renderHelp() : void {
   const helpMessage = `send http requests of .http or .rest
 
 usage: httpyac [options...] <file or glob pattern>
-       --all          execute all http requests in a http file
-       --editor       enter a new request and execute it
-  -e   --env          list of environemnts
-       --filter       filter requests output (only-failed)
-  -h   --help         help
-       --insecure     allow insecure server connections when using ssl
-  -i   --interactive  do not exit the program after request, go back to selection
-       --json         use json output
-  -l   --line         line of the http requests
-  -n   --name         name of the http requests
-  -o   --output       output format of response (short, body, headers, response, exchange, none)
-  -r   --repeat       repeat count for requests
-       --repeat-mode  repeat mode: sequential, parallel (default)
-       --root         absolute path to root dir of project
-  -s   --silent       log only request
-       --timeout      maximum time allowed for connections
-  -v   --verbose      make the operation more talkative
-       --version      version of httpyac`;
+       --all           execute all http requests in a http file
+       --editor        enter a new request and execute it
+  -e   --env           list of environemnts
+       --filter        filter requests output (only-failed)
+  -h   --help          help
+       --insecure      allow insecure server connections when using ssl
+  -i   --interactive   do not exit the program after request, go back to selection
+       --json          use json output
+  -l   --line          line of the http requests
+  -n   --name          name of the http requests
+  -o   --output        output format of response (short, body, headers, response, exchange, none)
+       --output-failed output format of failed response (short, body, headers, response, exchange, none)
+  -r   --repeat        repeat count for requests
+       --repeat-mode   repeat mode: sequential, parallel (default)
+       --root          absolute path to root dir of project
+  -s   --silent        log only request
+       --timeout       maximum time allowed for connections
+  -v   --verbose       make the operation more talkative
+       --version       version of httpyac`;
 
   console.info(helpMessage);
 }

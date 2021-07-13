@@ -88,7 +88,7 @@ function convertCliOptionsToContext(cliOptions: CliOptions): CliContext {
   const context : CliContext = {
     repeat: cliOptions.repeat,
     scriptConsole: new CliLogger(getLogLevel(cliOptions), cliOptions.json ? [] : undefined),
-    logResponse: cliOptions.json ? undefined : getRequestLogger(cliOptions.output, cliOptions.filter === 'only-failed'),
+    logResponse: cliOptions.json ? undefined : getRequestLogger(cliOptions),
   };
 
   return context;
@@ -254,39 +254,50 @@ function initHttpYacApiExtensions(config: models.EnvironmentConfig & models.Sett
 }
 
 
-function getRequestLogger(output: string | undefined, onlyFailed: boolean): models.RequestLogger | undefined {
+function getRequestLogger(options: CliOptions): models.RequestLogger | undefined {
+  const requestLoggerOptions = getOptions(options.output, options.filter === 'only-failed');
+  if (requestLoggerOptions) {
+    return utils.requestLoggerFactory(
+      console.info,
+      requestLoggerOptions,
+      options.outputFailed ? getOptions(options.outputFailed, options.filter === 'only-failed') : undefined
+    );
+  }
+  return undefined;
+}
+function getOptions(output: string | undefined, onlyFailed: boolean) : utils.RequestLoggerFactoryOptions | undefined {
   switch (output) {
     case 'body':
-      return utils.requestLoggerFactory(console.info, {
+      return {
         responseBodyLength: 0,
         onlyFailed
-      });
+      };
     case 'headers':
-      return utils.requestLoggerFactory(console.info, {
+      return {
         requestOutput: true,
         requestHeaders: true,
         responseHeaders: true,
         onlyFailed
-      });
+      };
     case 'response':
-      return utils.requestLoggerFactory(console.info, {
+      return {
         responseHeaders: true,
         responseBodyLength: 0,
         onlyFailed
-      });
+      };
     case 'none':
       return undefined;
     case 'short':
-      return utils.requestLoggerFactoryShort(console.info, { onlyFailed });
+      return { useShort: true, onlyFailed };
     case 'exchange':
     default:
-      return utils.requestLoggerFactory(console.info, {
+      return {
         requestOutput: true,
         requestHeaders: true,
         requestBodyLength: 0,
         responseHeaders: true,
         responseBodyLength: 0,
         onlyFailed
-      });
+      };
   }
 }
