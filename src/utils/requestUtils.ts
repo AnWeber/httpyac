@@ -97,7 +97,8 @@ export function requestLoggerFactoryShort(log: (args: string) => void, options?:
       return;
     }
     const chalk = chalkInstance();
-    log(chalk`{yellow ${response.request?.method || 'GET'}} {gray ${response.request?.url || '?'} =>} {cyan.bold ${response.statusCode}} ({yellow ${response.timings?.total || '?'} ms}, {yellow ${response.meta?.size || '?'}})`);
+    log(chalk`{yellow ${response.request?.method || 'GET'}} {gray ${response.request?.url || '?'}}`);
+    log(chalk`{gray =>} {cyan.bold ${response.statusCode}} ({yellow ${response.timings?.total || '?'} ms}, {yellow ${response.meta?.size || '?'}})`);
     if (testResults) {
       (options?.testResultLog || log)(toMultiLineString(logTestResults(testResults, !!options?.onlyFailed)));
     }
