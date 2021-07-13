@@ -1,20 +1,6 @@
-import { HttpRegion, ProcessorContext, TestResult } from '../models';
+import { ProcessorContext, TestFunction, TestResult } from '../models';
 import * as utils from '../utils';
 
-export const testSymbols = {
-  ok: '✓',
-  error: '✖',
-};
-
-export interface TestFunction{
-  (message: string, testMethod: () => void): void;
-  status(status: number): void;
-  header(headerKey: string, val: string | string[] | null | undefined): void;
-  headerContains(headerKey: string, val: string): void;
-  responseBody(val: unknown): void;
-  hasResponseBody(): void;
-  hasNoResponseBody(): void;
-}
 
 export function testFactory({ httpRegion, scriptConsole }: ProcessorContext): TestFunction {
   const testFunction = function test(message: string, testMethod: () => void): void {
@@ -33,16 +19,10 @@ export function testFactory({ httpRegion, scriptConsole }: ProcessorContext): Te
     if (typeof testMethod === 'function') {
       try {
         testMethod();
-        if (scriptConsole) {
-          scriptConsole.info(chalk`{green ${testSymbols.ok} ${message || 'Test passed'}}`);
-        }
       } catch (err) {
         process.exitCode = 20;
         testResult.result = false;
         testResult.error = utils.parseError(err);
-        if (scriptConsole) {
-          scriptConsole.error(chalk`{red ${testSymbols.error} ${message || 'Test failed'} (${testResult.error.displayMessage})}`);
-        }
       }
     }
   };
@@ -51,6 +31,12 @@ export function testFactory({ httpRegion, scriptConsole }: ProcessorContext): Te
     if (httpRegion.response) {
       const response = httpRegion.response;
       testFunction(`response status equals to ${status}`, () => utils.assertStatusEquals(response, status));
+    }
+  };
+  testFunction.totalTime = (maxTotalTime: number) => {
+    if (httpRegion.response) {
+      const response = httpRegion.response;
+      testFunction(`total time exceeded ${maxTotalTime}`, () => utils.assertMaxTotalTime(response, maxTotalTime));
     }
   };
   testFunction.header = (headerKey: string, val: string | string[] | null | undefined) => {
@@ -85,22 +71,4 @@ export function testFactory({ httpRegion, scriptConsole }: ProcessorContext): Te
     }
   };
   return testFunction;
-}
-
-
-export function testSummary(httpRegions: Array<HttpRegion>): { total: number; success: number; failed: number;} {
-  const result = {
-    total: 0,
-    success: 0,
-    failed: 0,
-  };
-
-  for (const httpRegion of httpRegions) {
-    if (httpRegion.testResults) {
-      result.total += httpRegion.testResults.length;
-      result.success += httpRegion.testResults.filter(obj => obj.result).length;
-      result.failed += httpRegion.testResults.filter(obj => !obj.result).length;
-    }
-  }
-  return result;
 }

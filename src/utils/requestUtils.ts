@@ -1,4 +1,4 @@
-import { ContentType, HttpMethod, HttpResponse, HttpResponseRequest, RequestLogger } from '../models';
+import { ContentType, HttpMethod, HttpResponse, HttpResponseRequest, RequestLogger, TestResult, testSymbols } from '../models';
 import { log } from '../logger';
 import { isString, toMultiLineString } from './stringUtils';
 import { parseMimeType } from './mimeTypeUtils';
@@ -87,31 +87,39 @@ export function toQueryParams(params: Record<string, undefined | string | number
     .join('&');
 }
 
-export function requestLoggerFactoryShort(log: (args: string) => void): RequestLogger {
-  return function logResponseShort(response: HttpResponse) {
+export function requestLoggerFactoryShort(log: (args: string) => void, options?: {
+  onlyFailed?: boolean;
+  testResultLog?: (args: string) => void
+}): RequestLogger {
+  return function logResponseShort(response: HttpResponse, testResults?: Array<TestResult>) {
+    if (options?.onlyFailed
+      && (!testResults || testResults.every(obj => obj.result))) {
+      return;
+    }
     const chalk = chalkInstance();
     log(chalk`{yellow ${response.request?.method || 'GET'}} {gray ${response.request?.url || '?'} =>} {cyan.bold ${response.statusCode}} ({yellow ${response.timings?.total || '?'} ms}, {yellow ${response.meta?.size || '?'}})`);
+    if (testResults) {
+      (options?.testResultLog || log)(toMultiLineString(logTestResults(testResults, !!options?.onlyFailed)));
+    }
   };
 }
 
 export function requestLoggerFactory(log: (args: string) => void, options: {
-  isFirstRequest?: boolean;
   requestOutput?: boolean;
   requestHeaders?: boolean;
   requestBodyLength?: number;
   responseHeaders?: boolean;
   responseBodyLength?: number;
+  onlyFailed?: boolean;
+  testResultLog?: (args: string) => void
 }): RequestLogger {
 
-  return function logResponse(response: HttpResponse) {
-    const chalk = chalkInstance();
-    const result: Array<string> = [];
-    if (options.isFirstRequest) {
-      options.isFirstRequest = false;
-    } else {
-      result.push(chalk`{gray --------------------------------------------------}`);
+  return function logResponse(response: HttpResponse, testResults?: Array<TestResult>) {
+    if (options.onlyFailed
+      && (!testResults || testResults.every(obj => obj.result))) {
+      return;
     }
-
+    const result: Array<string> = [];
     if (response.request && options.requestOutput) {
       result.push(...logRequest(response.request, {
         headers: options.requestHeaders,
@@ -138,6 +146,9 @@ export function requestLoggerFactory(log: (args: string) => void, options: {
       result.push(body);
     }
     log(toMultiLineString(result));
+    if (testResults) {
+      (options?.testResultLog || log)(toMultiLineString(logTestResults(testResults, !!options?.onlyFailed)));
+    }
   };
 }
 
@@ -183,4 +194,16 @@ function logResponseHeader(response: HttpResponse) {
     .map(([key, value]) => chalk`{yellow ${key}}: ${value}`)
     .sort());
   return result;
+}
+
+function logTestResults(testResults: Array<TestResult>, onlyFailed: boolean) {
+  const chalk = chalkInstance();
+  return testResults
+    .filter(testResult => !onlyFailed || !testResult.result)
+    .map(testResult => {
+      if (testResult.result) {
+        return chalk`{green ${testSymbols.ok} ${testResult.message || 'Test passed'}}`;
+      }
+      return chalk`{red ${testSymbols.error} ${testResult.message || 'Test failed'} (${testResult.error?.displayMessage})}`;
+    });
 }

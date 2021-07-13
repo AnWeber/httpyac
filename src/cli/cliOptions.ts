@@ -7,6 +7,7 @@ export interface CliOptions {
   allRegions?: boolean,
   editor?: boolean;
   fileName?: string,
+  filter?: string;
   help?: boolean,
   httpRegionLine?: number,
   httpRegionName?: string,
@@ -43,6 +44,7 @@ export function parseCliOptions(rawArgs: string[]): CliOptions | undefined {
         '--all': Boolean,
         '--editor': Boolean,
         '--env': [String],
+        '--filter': String,
         '--help': Boolean,
         '--insecure': Boolean,
         '--interactive': Boolean,
@@ -78,6 +80,7 @@ export function parseCliOptions(rawArgs: string[]): CliOptions | undefined {
       allRegions: args['--all'],
       editor: args['--editor'],
       fileName: args._.length > 0 ? args._[args._.length - 1] : undefined,
+      filter: args['--filter'],
       help: args['--help'],
       httpRegionLine: args['--line'],
       httpRegionName: args['--name'],
@@ -113,6 +116,7 @@ usage: httpyac [options...] <file or glob pattern>
        --all          execute all http requests in a http file
        --editor       enter a new request and execute it
   -e   --env          list of environemnts
+       --filter       filter requests output (only-failed)
   -h   --help         help
        --insecure     allow insecure server connections when using ssl
   -i   --interactive  do not exit the program after request, go back to selection

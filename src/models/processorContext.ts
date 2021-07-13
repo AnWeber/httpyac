@@ -1,11 +1,10 @@
-import { LogHandler } from './logHandler';
+import { LogHandler, RequestLogger } from './logHandler';
 import { HttpClient } from './httpClient';
 import { HttpFile } from './httpFile';
 import { HttpRegion } from './httpRegion';
 import { HttpRequest } from './httpRequest';
 import { RepeatOptions } from './repeatOptions';
 import { Variables } from './variables';
-import { HttpResponse } from './httpResponse';
 
 
 export type Dispose = () => void;
@@ -15,8 +14,6 @@ export interface Progress{
   register: (event: (() => void)) => Dispose;
   report?: (value: { message?: string, increment?: number }) => void;
 }
-
-export type RequestLogger = (response: HttpResponse) => void;
 
 export interface HttpFileSendContext{
   httpFile: HttpFile;

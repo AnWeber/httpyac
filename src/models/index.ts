@@ -25,5 +25,6 @@ export * from './variableReplacer';
 export * from './variableProvider';
 export * from './variableType';
 export * from './variables';
+export * from './testFunction';
 export * from './testResult';
 export * from './userSession';

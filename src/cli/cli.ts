@@ -8,7 +8,6 @@ import * as utils from '../utils';
 import { environmentStore } from '../environments';
 import { NoteMetaHttpRegionParser, SettingsScriptHttpRegionParser } from '../parser';
 import { ShowInputBoxVariableReplacer, ShowQuickpickVariableReplacer } from '../variables/replacer';
-import { testSymbols } from '../actions';
 import { default as globby } from 'globby';
 import { PathLike, fileProvider } from '../fileProvider';
 import { CliOptions, parseCliOptions, renderHelp, getLogLevel } from './cliOptions';
@@ -89,7 +88,7 @@ function convertCliOptionsToContext(cliOptions: CliOptions): CliContext {
   const context : CliContext = {
     repeat: cliOptions.repeat,
     scriptConsole: new CliLogger(getLogLevel(cliOptions), cliOptions.json ? [] : undefined),
-    logResponse: cliOptions.json ? undefined : getRequestLogger(cliOptions.output),
+    logResponse: cliOptions.json ? undefined : getRequestLogger(cliOptions.output, cliOptions.filter === 'only-failed'),
   };
 
   return context;
@@ -203,8 +202,8 @@ async function initEnviroment(cliOptions: CliOptions): Promise<void> {
   if (process.platform === 'win32') {
 
     // https://github.com/nodejs/node-v0.x-archive/issues/7940
-    testSymbols.ok = '[x]';
-    testSymbols.error = '[ ]';
+    models.testSymbols.ok = '[x]';
+    models.testSymbols.error = '[-]';
   }
 }
 
@@ -255,39 +254,39 @@ function initHttpYacApiExtensions(config: models.EnvironmentConfig & models.Sett
 }
 
 
-function getRequestLogger(output: string | undefined): models.RequestLogger | undefined {
+function getRequestLogger(output: string | undefined, onlyFailed: boolean): models.RequestLogger | undefined {
   switch (output) {
     case 'body':
       return utils.requestLoggerFactory(console.info, {
-        isFirstRequest: true,
-        responseBodyLength: 0
+        responseBodyLength: 0,
+        onlyFailed
       });
     case 'headers':
       return utils.requestLoggerFactory(console.info, {
-        isFirstRequest: true,
         requestOutput: true,
         requestHeaders: true,
-        responseHeaders: true
+        responseHeaders: true,
+        onlyFailed
       });
     case 'response':
       return utils.requestLoggerFactory(console.info, {
-        isFirstRequest: true,
         responseHeaders: true,
-        responseBodyLength: 0
+        responseBodyLength: 0,
+        onlyFailed
       });
     case 'none':
       return undefined;
     case 'short':
-      return utils.requestLoggerFactoryShort(console.info);
+      return utils.requestLoggerFactoryShort(console.info, { onlyFailed });
     case 'exchange':
     default:
       return utils.requestLoggerFactory(console.info, {
-        isFirstRequest: true,
         requestOutput: true,
         requestHeaders: true,
         requestBodyLength: 0,
         responseHeaders: true,
-        responseBodyLength: 0
+        responseBodyLength: 0,
+        onlyFailed
       });
   }
 }
