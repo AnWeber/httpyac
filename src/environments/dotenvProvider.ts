@@ -28,8 +28,12 @@ export class DotenvProvider implements EnvironmentProvider {
       return files
         .filter(file => file.startsWith('.env') || file.endsWith('.env'))
         .filter(fileName => this.defaultFiles.indexOf(fileName) < 0)
-        .map(fileName => fileName.replace('.env', ''));
-
+        .map(fileName => {
+          if (fileName.startsWith('.env')) {
+            return fileName.slice(5);
+          }
+          return fileName.slice(0, fileName.length - 4);
+        });
     } catch (err) {
       log.trace(err);
     }
