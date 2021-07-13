@@ -92,9 +92,7 @@ function convertResponse(response: HttpResponse | undefined, output: string | un
       case 'response':
         delete clone.request;
         return clone;
-      case 'headers':
-        delete clone.body;
-        delete clone.request?.body;
+      case 'exchange':
         return clone;
       case 'short':
         delete clone.body;
@@ -102,8 +100,10 @@ function convertResponse(response: HttpResponse | undefined, output: string | un
         return clone;
       case 'none':
         return undefined;
-      case 'exchange':
+      case 'headers':
       default:
+        delete clone.body;
+        delete clone.request?.body;
         return clone;
     }
   }
