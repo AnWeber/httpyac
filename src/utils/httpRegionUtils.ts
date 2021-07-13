@@ -145,7 +145,7 @@ export async function processHttpRegionActions(context: ProcessorContext, showPr
   if (context.httpRegion.response
     && !context.httpRegion.metaData.noLog
     && context.logResponse) {
-    context.logResponse(context.httpRegion.response, context.httpRegion.testResults);
+    context.logResponse(context.httpRegion.response, context.httpRegion);
   }
   return true;
 }

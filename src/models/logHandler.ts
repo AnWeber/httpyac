@@ -1,5 +1,5 @@
+import { HttpRegion } from './httpRegion';
 import { HttpResponse } from './httpResponse';
-import { TestResult } from './testResult';
 
 export interface LogHandler {
   info(...params: unknown[]): void;
@@ -12,4 +12,4 @@ export interface LogHandler {
 }
 
 
-export type RequestLogger = (response: HttpResponse, testResults?: Array<TestResult>) => void;
+export type RequestLogger = (response: HttpResponse, httpRegion?: HttpRegion) => void;

@@ -29,7 +29,7 @@ export const ParserRegex = {
   },
   meta: {
     all: /^\s*(#+|\/{2})/u,
-    delimiter: /^\s*#{3,}.*$/u,
+    delimiter: /^\s*#{3,}(?<description>.*)$/u,
     data: /^\s*(#+|\/{2,})\s+@(?<key>[^\s]*)(\s+)?"?(?<value>.*)?"?$/u,
   },
   request: {

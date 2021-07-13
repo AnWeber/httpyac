@@ -15,6 +15,7 @@ export interface ParserRequestBody{
 
 
 export interface ParserContextData {
+  metaDescription?: string;
   request_body?: ParserRequestBody,
   httpResponseSymbol?: {
     symbol: HttpSymbol,

@@ -7,7 +7,11 @@ import { ParserRegex } from './parserRegex';
 import { fileProvider } from '../fileProvider';
 export class MetaHttpRegionParser implements HttpRegionParser {
 
-  async parse(lineReader: HttpRegionParserGenerator, { httpRegion, httpFile, httpFileStore }: ParserContext): Promise<HttpRegionParserResult> {
+  async parse(lineReader: HttpRegionParserGenerator, { httpRegion, httpFile, httpFileStore, data }: ParserContext): Promise<HttpRegionParserResult> {
+    if (data.metaDescription) {
+      httpRegion.metaData.description = data.metaDescription.trim();
+      delete data.metaDescription;
+    }
     const next = lineReader.next();
     if (!next.done) {
       const textLine = next.value.textLine;
@@ -16,8 +20,10 @@ export class MetaHttpRegionParser implements HttpRegionParser {
         const result: HttpRegionParserResult = {
           nextParserLine: next.value.line
         };
-        if (ParserRegex.meta.delimiter.test(textLine)) {
+        const delimiterMatch = ParserRegex.meta.delimiter.exec(textLine);
+        if (delimiterMatch) {
           result.endRegionLine = next.value.line - 1;
+          data.metaDescription = delimiterMatch.groups?.description;
         } else {
           const match = ParserRegex.meta.data.exec(textLine);
 

@@ -1,4 +1,4 @@
-import { ContentType, HttpMethod, HttpResponse, HttpResponseRequest, RequestLogger, TestResult, testSymbols } from '../models';
+import { ContentType, HttpMethod, HttpRegion, HttpResponse, HttpResponseRequest, RequestLogger, TestResult, testSymbols } from '../models';
 import { log } from '../logger';
 import { isString, toMultiLineString } from './stringUtils';
 import { parseMimeType } from './mimeTypeUtils';
@@ -104,19 +104,22 @@ export function requestLoggerFactory(
   optionsFailed?: RequestLoggerFactoryOptions
 ): RequestLogger {
 
-  return function logResponse(response: HttpResponse, testResults?: Array<TestResult>) {
+  return function logResponse(response: HttpResponse, httpRegion?: HttpRegion) {
 
     let opt = options;
-    if (optionsFailed && testResults && testResults.some(obj => !obj.result)) {
+    if (optionsFailed && httpRegion?.testResults && httpRegion.testResults.some(obj => !obj.result)) {
       opt = optionsFailed;
     }
 
     if (opt.onlyFailed
-        && (!testResults || testResults.every(obj => obj.result))) {
+        && (!httpRegion?.testResults || httpRegion.testResults.every(obj => obj.result))) {
       return;
     }
+    const chalk = chalkInstance();
+    if (httpRegion?.metaData?.description) {
+      log(chalk`{gray === ${httpRegion.metaData.description} ===}`);
+    }
     if (opt.useShort) {
-      const chalk = chalkInstance();
       log(chalk`{yellow ${response.request?.method || 'GET'}} {gray ${response.request?.url || '?'}}`);
       log(chalk`{gray =>} {cyan.bold ${response.statusCode}} ({yellow ${response.timings?.total || '?'} ms}, {yellow ${response.meta?.size || '?'}})`);
     } else {
@@ -149,8 +152,8 @@ export function requestLoggerFactory(
       }
       log(toMultiLineString(result));
     }
-    if (testResults) {
-      (options?.testResultLog || log)(toMultiLineString(logTestResults(testResults, !!options?.onlyFailed)));
+    if (httpRegion?.testResults) {
+      (options?.testResultLog || log)(toMultiLineString(logTestResults(httpRegion.testResults, !!options?.onlyFailed)));
     }
   };
 }
