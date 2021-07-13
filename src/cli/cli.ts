@@ -47,7 +47,7 @@ export async function send(rawArgs: string[]): Promise<void> {
         const context = convertCliOptionsToContext(cliOptions);
         if (selection) {
           await httpYacApi.send(Object.assign({ processedHttpRegions }, context, selection));
-          jsonOutput[fileProvider.toString(selection.httpFile.fileName)] = context.processedHttpRegions || [];
+          jsonOutput[fileProvider.toString(selection.httpFile.fileName)] = [...processedHttpRegions];
         } else {
           for (const httpFile of httpFiles) {
             await httpYacApi.send(Object.assign({ processedHttpRegions }, context, { httpFile }));
