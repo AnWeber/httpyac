@@ -31,6 +31,9 @@ export const ParserRegex = {
     all: /^\s*(#+|\/{2})/u,
     delimiter: /^\s*#{3,}(?<description>.*)$/u,
     data: /^\s*(#+|\/{2,})\s+@(?<key>[^\s]*)(\s+)?"?(?<value>.*)?"?$/u,
+    forOf: /^\s*for\s*(?<variable>.*)\s*of\s*(?<iterable>.*)\s*/u,
+    for: /^\s*for\s*(?<counter>\d*)\s*$/u,
+    while: /^\s*while\s*(?<expression>.*)\s*$/u,
   },
   request: {
     fileImport: /^<(?:(?<injectVariables>@)(?<encoding>\w+)?)?\s+(?<fileName>.+?)\s*$/u,

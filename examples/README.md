@@ -669,6 +669,26 @@ shows a confirmation dialog before sending request
 # @note are you sure?
 DELETE /invoices
 ```
+### loop
+allows multiple invocations of a request with different parameters. A `for <variable> of <iterable>`, a `for <number>` and a `while <condition>` is supported.
+
+```html
+{{
+  exports.expression = {
+    index: 0,
+  };
+  exports.data = [1, 2, 3];
+}}
+###
+# @loop for item of data
+GET /anything?item={{item}}
+###
+# @loop for 3
+GET /anything?item={{$index}}
+###
+# @loop while expression.index < 3
+GET /anything?item={{6 + expression.index++}}
+```
 
 ### save
 

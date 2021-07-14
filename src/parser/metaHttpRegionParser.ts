@@ -1,7 +1,7 @@
 import { HttpFile, HttpSymbol, HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, HttpRegion } from '../models';
 import { log } from '../logger';
 import { toAbsoluteFilename } from '../utils';
-import { RefMetaAction } from '../actions';
+import { RefMetaAction, LoopMetaAction, LoopMetaType } from '../actions';
 import { HttpFileStore } from '../httpFileStore';
 import { ParserRegex } from './parserRegex';
 import { fileProvider } from '../fileProvider';
@@ -73,6 +73,34 @@ export class MetaHttpRegionParser implements HttpRegionParser {
                     httpRegion.responseRefs = [];
                   }
                   httpRegion.responseRefs.push(match.groups.value);
+                }
+                break;
+              case 'loop':
+                if (match.groups.value) {
+                  const forOfMatch = ParserRegex.meta.forOf.exec(match.groups.value);
+                  if (forOfMatch?.groups?.iterable && forOfMatch?.groups?.variable) {
+                    httpRegion.actions.splice(0, 0, new LoopMetaAction({
+                      type: LoopMetaType.forOf,
+                      variable: forOfMatch.groups.variable,
+                      iterable: forOfMatch.groups.iterable,
+                    }));
+                  } else {
+                    const forMatch = ParserRegex.meta.for.exec(match.groups.value);
+                    if (forMatch?.groups?.counter) {
+                      httpRegion.actions.splice(0, 0, new LoopMetaAction({
+                        type: LoopMetaType.for,
+                        counter: Number.parseInt(forMatch.groups.counter, 10),
+                      }));
+                    } else {
+                      const whileMatch = ParserRegex.meta.while.exec(match.groups.value);
+                      if (whileMatch?.groups?.expression) {
+                        httpRegion.actions.splice(0, 0, new LoopMetaAction({
+                          type: LoopMetaType.while,
+                          expression: whileMatch.groups.expression,
+                        }));
+                      }
+                    }
+                  }
                 }
                 break;
               case 'ref':

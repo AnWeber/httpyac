@@ -1,0 +1,19 @@
+{{
+  exports.expression = {
+    index: 0,
+  };
+  exports.data = [1, 2, 3];
+}}
+
+###
+# @loop for item of data
+GET /anything?item={{item}}
+
+###
+# @loop for 3
+GET /anything?item={{$index}}
+
+###
+# @loop while expression.index < 3
+GET /anything?item={{6 + expression.index++}}
+

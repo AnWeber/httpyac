@@ -5,6 +5,7 @@ export * from './envDefaultsHeaderAction';
 export * from './genericAction';
 export * from './gqlAction';
 export * from './httpClientAction';
+export * from './loopMetaAction';
 export * from './intellijAction';
 export * from './javascriptAction';
 export * from './httpClientAction';

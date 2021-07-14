@@ -15,6 +15,7 @@ export enum ActionType{
   defaultHeaders = 'defaultHeaders',
   intellij = 'intellij',
   gql = 'gql',
+  loop = 'loop',
   js = 'js',
   request = 'request',
   httpClient = 'httpClient',
