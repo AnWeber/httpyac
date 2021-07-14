@@ -611,6 +611,16 @@ Authorization: Bearer {{keycloak.access_token}}
 
 > name must be unique in all imported files, there is no scope support and first found request with name will be used.
 
+It is possible to define name directly on region delimiter
+
+```html
+GET /other
+
+### tasks
+POST {{host}}/tasks
+
+```
+
 ### ref and forceRef
 requests can reference other requests. When the request is called, it is ensured that the referenced request is called beforehand. `forceRef` always call the other request. `ref` only calls if no response is cached.
 

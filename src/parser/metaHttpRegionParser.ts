@@ -8,9 +8,9 @@ import { fileProvider } from '../fileProvider';
 export class MetaHttpRegionParser implements HttpRegionParser {
 
   async parse(lineReader: HttpRegionParserGenerator, { httpRegion, httpFile, httpFileStore, data }: ParserContext): Promise<HttpRegionParserResult> {
-    if (data.metaDescription) {
-      httpRegion.metaData.description = data.metaDescription.trim();
-      delete data.metaDescription;
+    if (data.metaName) {
+      httpRegion.metaData.title = data.metaName.trim();
+      delete data.metaName;
     }
     const next = lineReader.next();
     if (!next.done) {
@@ -23,7 +23,7 @@ export class MetaHttpRegionParser implements HttpRegionParser {
         const delimiterMatch = ParserRegex.meta.delimiter.exec(textLine);
         if (delimiterMatch) {
           result.endRegionLine = next.value.line - 1;
-          data.metaDescription = delimiterMatch.groups?.description;
+          data.metaName = delimiterMatch.groups?.name;
         } else {
           const match = ParserRegex.meta.data.exec(textLine);
 

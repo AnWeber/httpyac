@@ -2,18 +2,14 @@ import { ProcessorContext, TestFunction, TestResult } from '../models';
 import * as utils from '../utils';
 
 
-export function testFactory({ httpRegion, scriptConsole }: ProcessorContext): TestFunction {
+export function testFactory({ httpRegion }: ProcessorContext): TestFunction {
   const testFunction = function test(message: string, testMethod: () => void): void {
-    const chalk = utils.chalkInstance();
     const testResult: TestResult = {
       message,
       result: true
     };
     if (!httpRegion.testResults) {
       httpRegion.testResults = [];
-      if (scriptConsole) {
-        scriptConsole.debug(chalk`{bold Tests for ${utils.getRegionName(httpRegion)}}`);
-      }
     }
     httpRegion.testResults.push(testResult);
     if (typeof testMethod === 'function') {
