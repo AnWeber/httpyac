@@ -35,9 +35,11 @@ export class LoopMetaAction implements HttpRegionAction {
             iterable = array;
           }
           if (iterable) {
+            let index = 0;
             for (const variable of iterable) {
-              const cloneContext = this.createContextClone(context);
+              const cloneContext = this.createContextClone(context, index);
               context.variables[this.data.variable] = variable;
+              context.variables.$index = index++;
               await utils.processHttpRegionActions(cloneContext);
             }
           }
@@ -46,7 +48,7 @@ export class LoopMetaAction implements HttpRegionAction {
       case LoopMetaType.for:
         if (this.data.counter) {
           for (let index = 0; index < this.data.counter; index++) {
-            const cloneContext = this.createContextClone(context);
+            const cloneContext = this.createContextClone(context, index);
             context.variables.$index = index;
             await utils.processHttpRegionActions(cloneContext);
           }
@@ -54,8 +56,10 @@ export class LoopMetaAction implements HttpRegionAction {
         break;
       case LoopMetaType.while:
         if (this.data.expression) {
+          let index = 0;
           while (await this.execExpression(this.data.expression, context)) {
-            const cloneContext = this.createContextClone(context);
+            const cloneContext = this.createContextClone(context, index);
+            context.variables.$index = index++;
             await utils.processHttpRegionActions(cloneContext);
           }
         }
@@ -86,18 +90,22 @@ export class LoopMetaAction implements HttpRegionAction {
   }
 
 
-  private createContextClone(context: ProcessorContext) {
+  private createContextClone(context: ProcessorContext, index: number) {
     const result = {
       ...context,
     };
     result.httpRegion = {
       actions: [...context.httpRegion.actions.filter(obj => obj.type !== ActionType.loop)],
-      metaData: context.httpRegion.metaData,
+      metaData: { ...context.httpRegion.metaData },
       request: context.httpRegion.request ? {
         ...context.httpRegion.request
       } : undefined,
       symbol: context.httpRegion.symbol
     };
+
+    if (result.httpRegion.metaData.name) {
+      result.httpRegion.metaData.name = `${result.httpRegion.metaData.name}${index}`;
+    }
 
     return result;
   }

@@ -2,18 +2,33 @@
   exports.expression = {
     index: 0,
   };
-  exports.data = [1, 2, 3];
+  exports.data = ['alpha', 'beta', 'gamma'];
 }}
 
 ###
 # @loop for item of data
+# @name forOfLoop
 GET /anything?item={{item}}
+
+{{
+  console.info(this[`forOfLoop${$index}`].args);
+}}
 
 ###
 # @loop for 3
+# @name forLoop
 GET /anything?item={{$index}}
+
+{{
+  console.info(this[`forLoop${$index}`].args);
+}}
 
 ###
 # @loop while expression.index < 3
+# @name whileLoop
 GET /anything?item={{6 + expression.index++}}
+
+{{
+  console.info(this[`whileLoop${$index}`].args);
+}}
 
