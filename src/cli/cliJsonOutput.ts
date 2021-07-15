@@ -13,6 +13,7 @@ export interface CliJsonOutput {
 export interface CliOutputRequest {
   fileName: string;
   name?: string;
+  title?: string;
   description?: string;
   line?: number;
   summary: CliTestSummary,
@@ -48,6 +49,7 @@ export function toCliJsonOutput(context: Record<string, Array<HttpRegion>>, opti
           options.outputFailed && httpRegion.testResults?.some?.(test => !test.result) ? options.outputFailed : options.output
         ),
         name: httpRegion.metaData?.name,
+        title: httpRegion.metaData?.title,
         description: httpRegion.metaData?.description,
         line: httpRegion.symbol.startLine,
         testResults: httpRegion.testResults,

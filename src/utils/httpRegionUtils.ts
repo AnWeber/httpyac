@@ -5,7 +5,10 @@ import { log } from '../logger';
 import { HttpFileSendContext, HttpRegionSendContext, ProcessorContext, HttpFile, Variables, HttpClient, HttpRegion, HttpRegionsSendContext } from '../models';
 
 
-export function getRegionName(httpRegion: HttpRegion, defaultName = 'global'): string {
+export function getDisplayName(httpRegion: HttpRegion, defaultName = 'global'): string {
+  if (httpRegion.metaData.title) {
+    return httpRegion.metaData.title;
+  }
   if (httpRegion.metaData.name) {
     return httpRegion.metaData.name;
   }
@@ -81,11 +84,11 @@ export async function sendHttpFile(context: HttpFileSendContext): Promise<boolea
   const variables = await getVariables(context.httpFile);
   for (const httpRegion of context.httpFile.httpRegions) {
     if (httpRegion.metaData.disabled) {
-      log.debug(`${getRegionName(httpRegion)} is disabled`);
+      log.debug(`${getDisplayName(httpRegion)} is disabled`);
       continue;
     }
     if (httpRegion.request && context.httpRegionPredicate && !context.httpRegionPredicate(httpRegion)) {
-      log.debug(`${getRegionName(httpRegion)} disabled by predicate`);
+      log.debug(`${getDisplayName(httpRegion)} disabled by predicate`);
       continue;
     }
     const processorContext = {
@@ -137,7 +140,7 @@ export async function processHttpRegionActions(context: ProcessorContext, showPr
       context.showProgressBar = showProgressBar;
     }
     if (context.progress?.report) {
-      context.progress.report({ message: `${getRegionName(context.httpRegion)}` });
+      context.progress.report({ message: `${getDisplayName(context.httpRegion)}` });
     }
     if (!context.httpRegion.metaData.disabled) {
       if (!await action.process(context)) {

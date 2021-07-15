@@ -1,5 +1,5 @@
 import { HttpFile, HttpRegion, HttpSymbol, HttpSymbolKind, ParserContext } from '../models';
-import { toMultiLineString, toMultiLineArray, getRegionName, getRegionDescription } from '../utils';
+import { toMultiLineString, toMultiLineArray, getDisplayName, getRegionDescription } from '../utils';
 import { environmentStore } from '../environments/environmentStore';
 import { httpYacApi } from '../httpYacApi';
 import { HttpFileStore } from '../httpFileStore';
@@ -64,7 +64,7 @@ function closeHttpRegion(parserContext: ParserContext) {
     }
   }
   const { httpRegion } = parserContext;
-  parserContext.httpRegion.symbol.name = getRegionName(httpRegion);
+  parserContext.httpRegion.symbol.name = getDisplayName(httpRegion);
   parserContext.httpRegion.symbol.description = getRegionDescription(httpRegion);
   parserContext.httpFile.httpRegions.push(parserContext.httpRegion);
 }

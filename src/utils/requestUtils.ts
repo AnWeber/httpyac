@@ -116,8 +116,8 @@ export function requestLoggerFactory(
       return;
     }
     const chalk = chalkInstance();
-    if (httpRegion?.metaData?.name) {
-      log(chalk`{gray === ${httpRegion.metaData.name} ===}`);
+    if (httpRegion?.metaData?.title) {
+      log(chalk`{gray === ${httpRegion.metaData.title} ===}`);
     }
     if (httpRegion?.metaData?.description) {
       log(chalk`{gray ${httpRegion.metaData.description}}`);
