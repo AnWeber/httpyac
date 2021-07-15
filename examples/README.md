@@ -611,13 +611,15 @@ Authorization: Bearer {{keycloak.access_token}}
 
 > name must be unique in all imported files, there is no scope support and first found request with name will be used.
 
-It is possible to define name directly on region delimiter
+### title
+additional title of region (used in cli output and outline view). It is possible to define title in region delimiter
 
 ```html
-GET /other
+# @title tasks
+GET /tasks
 
-### tasks
-POST {{host}}/tasks
+### otherTasks
+GET /tasks
 
 ```
 
@@ -711,6 +713,8 @@ GET /anything?item={{$index}}
 # @loop while expression.index < 3
 GET /anything?item={{6 + expression.index++}}
 ```
+
+> An index is automatically appended to the name of the request, which can be used to access it in subsequent requests (name=tasks => tasks0, tasks1,...).
 
 ### save
 

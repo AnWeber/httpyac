@@ -1,0 +1,66 @@
+
+GET /json
+
+{{
+  const { equal } = require('assert');
+  test('status code 200', () => {
+    equal(response.statusCode, 200);
+  });
+  test('status code 200', () => {
+    equal(response.statusCode, 200);
+  });
+}}
+
+
+
+
+GET /json
+
+{{
+  const { equal } = require('assert');
+  test('status code 200', () => {
+    equal(response.statusCode, 200);
+  });
+  test('status code 200', () => {
+    equal(response.statusCode, 200);
+  });
+}}
+
+
+GET /json
+
+{{
+  const { equal } = require('assert');
+  test('status code 200', () => {
+    equal(response.statusCode, 200);
+  });
+  test('status code 200', () => {
+    equal(response.statusCode, 200);
+  });
+}}
+
+
+GET /json
+
+{{
+  const { equal } = require('assert');
+  test('status code 200', () => {
+    equal(response.statusCode, 201);
+  });
+  test('status code 200', () => {
+    equal(response.statusCode, 200);
+  });
+}}
+
+
+GET /json
+
+{{
+  const { equal } = require('assert');
+  test('status code 200', () => {
+    equal(response.statusCode, 200);
+  });
+  test('status code 200', () => {
+    equal(response.statusCode, 200);
+  });
+}}
