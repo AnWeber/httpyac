@@ -1,4 +1,4 @@
-import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult } from '../models';
+import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext } from '../models';
 import { toMultiLineString } from '../utils';
 import { ParserRegex } from './parserRegex';
 
@@ -6,9 +6,12 @@ import { ParserRegex } from './parserRegex';
 export class CommentHttpRegionParser implements HttpRegionParser {
 
   noStopOnMetaTag = true;
-  async parse(lineReader: HttpRegionParserGenerator): Promise<HttpRegionParserResult> {
+  async parse(lineReader: HttpRegionParserGenerator, { httpRegion }: ParserContext): Promise<HttpRegionParserResult> {
     const comment = getCommentContent(lineReader);
     if (comment) {
+      if (!httpRegion.metaData.description) { // first comment gets description
+        httpRegion.metaData.description = comment.comment;
+      }
       return {
         nextParserLine: comment.endLine,
         symbols: [{

@@ -621,6 +621,18 @@ POST {{host}}/tasks
 
 ```
 
+### description
+additional description of region (used in cli output and outline view)
+```html
+# @description get all tasks
+
+GET {{host}}/tasks
+Authorization: Bearer {{keycloak.access_token}}
+```
+
+> first comment of a region is automatically used as description
+
+
 ### ref and forceRef
 requests can reference other requests. When the request is called, it is ensured that the referenced request is called beforehand. `forceRef` always call the other request. `ref` only calls if no response is cached.
 

@@ -1,5 +1,5 @@
 import { ActionType, HttpRegion, HttpRegionAction, ProcessorContext } from '../models';
-import { log, popupService } from '../logger';
+import { log } from '../logger';
 import { decodeJWT, isString, JWTToken, toEnvironmentKey } from '../utils';
 import { isValidVariableName } from './javascriptAction';
 
@@ -22,13 +22,19 @@ export class ResponseAsVariableAction implements HttpRegionAction {
 
   private handleNameMetaData(body: unknown, context: ProcessorContext) {
     const { httpRegion, httpFile, variables } = context;
-    if (httpRegion.metaData.name && isValidVariableName(httpRegion.metaData.name)) {
-      variables[httpRegion.metaData.name] = body;
-      httpFile.variablesPerEnv[toEnvironmentKey(httpFile.activeEnvironment)][httpRegion.metaData.name] = body;
-    } else if (httpRegion.metaData.name) {
-      popupService.warn(`Javascript Keyword ${httpRegion.metaData.name} not allowed as name`);
-      log.warn(`Javascript Keyword ${httpRegion.metaData.name} not allowed as name`);
+    if (httpRegion.metaData.name) {
+      const name = httpRegion.metaData.name
+        .trim()
+        .replace(/\s/u, '_')
+        .replace(/-./gu, value => value[1].toUpperCase());
+      if (isValidVariableName(name)) {
+        variables[httpRegion.metaData.name] = body;
+        httpFile.variablesPerEnv[toEnvironmentKey(httpFile.activeEnvironment)][name] = body;
+      } else {
+        log.warn(`Javascript Keyword ${name} not allowed as name`);
+      }
     }
+
   }
 
   private handleJWTMetaData(body: unknown, httpRegion: HttpRegion) {

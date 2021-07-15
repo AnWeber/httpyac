@@ -2,6 +2,10 @@ import arg from 'arg';
 import { LogLevel } from '../logger';
 import { RepeatOptions, RepeatOrder } from '../models';
 
+export enum CliFilterOptions{
+  onlyFailed = 'only-failed',
+}
+
 export interface CliOptions {
   activeEnvironments?: Array<string>,
   allRegions?: boolean,

@@ -22,6 +22,15 @@ export function getRegionName(httpRegion: HttpRegion, defaultName = 'global'): s
   return defaultName;
 }
 
+export function getRegionDescription(httpRegion: HttpRegion, defaultName = '-'): string {
+  if (httpRegion.metaData.description) {
+    return httpRegion.metaData.description;
+  }
+  if (httpRegion.request?.url) {
+    return `${httpRegion.request.method} ${httpRegion.request.url}`;
+  }
+  return defaultName;
+}
 
 export function initHttpClient(): HttpClient {
   const request = {

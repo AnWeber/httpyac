@@ -9,7 +9,7 @@ export class MetaHttpRegionParser implements HttpRegionParser {
 
   async parse(lineReader: HttpRegionParserGenerator, { httpRegion, httpFile, httpFileStore, data }: ParserContext): Promise<HttpRegionParserResult> {
     if (data.metaName) {
-      httpRegion.metaData.title = data.metaName.trim();
+      httpRegion.metaData.name = data.metaName.trim();
       delete data.metaName;
     }
     const next = lineReader.next();

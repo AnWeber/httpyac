@@ -10,7 +10,7 @@ import { NoteMetaHttpRegionParser, SettingsScriptHttpRegionParser } from '../par
 import { ShowInputBoxVariableReplacer, ShowQuickpickVariableReplacer } from '../variables/replacer';
 import { default as globby } from 'globby';
 import { PathLike, fileProvider } from '../fileProvider';
-import { CliOptions, parseCliOptions, renderHelp, getLogLevel } from './cliOptions';
+import { CliOptions, parseCliOptions, renderHelp, getLogLevel, CliFilterOptions } from './cliOptions';
 import { CliLogger } from './cliLogger';
 import { CliContext } from './cliContext';
 import { toCliJsonOutput } from './cliJsonOutput';
@@ -87,7 +87,7 @@ export async function send(rawArgs: string[]): Promise<void> {
 function convertCliOptionsToContext(cliOptions: CliOptions): CliContext {
   const context : CliContext = {
     repeat: cliOptions.repeat,
-    scriptConsole: new CliLogger(getLogLevel(cliOptions), cliOptions.json ? [] : undefined),
+    scriptConsole: new CliLogger(getLogLevel(cliOptions)),
     logResponse: cliOptions.json ? undefined : getRequestLogger(cliOptions),
   };
 
@@ -255,12 +255,12 @@ function initHttpYacApiExtensions(config: models.EnvironmentConfig & models.Sett
 
 
 function getRequestLogger(options: CliOptions): models.RequestLogger | undefined {
-  const requestLoggerOptions = getOptions(options.output, options.filter === 'only-failed');
+  const requestLoggerOptions = getOptions(options.output, options.filter === CliFilterOptions.onlyFailed);
   if (requestLoggerOptions) {
     return utils.requestLoggerFactory(
       console.info,
       requestLoggerOptions,
-      options.outputFailed ? getOptions(options.outputFailed, options.filter === 'only-failed') : undefined
+      options.outputFailed ? getOptions(options.outputFailed, options.filter === CliFilterOptions.onlyFailed) : undefined
     );
   }
   return undefined;

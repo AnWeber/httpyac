@@ -158,6 +158,7 @@ export function requestLoggerFactory(
     if (httpRegion?.testResults) {
       (options?.testResultLog || log)(toMultiLineString(logTestResults(httpRegion.testResults, !!options?.onlyFailed)));
     }
+    log('');
   };
 }
 
