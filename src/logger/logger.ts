@@ -1,9 +1,8 @@
-import { LogHandler } from '../models';
 import { LogChannels } from './logChannels';
 import { LogLevel } from './logLevel';
 import { logOutputProvider } from './logOutputProvider';
 
-export class Logger implements LogHandler {
+export class Logger {
   public level: LogLevel;
   constructor(private readonly channel: LogChannels) {
     this.level = LogLevel.warn;

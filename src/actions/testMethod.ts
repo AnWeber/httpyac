@@ -2,7 +2,7 @@ import { ProcessorContext, TestFunction, TestResult } from '../models';
 import * as utils from '../utils';
 
 
-export function testFactory({ httpRegion }: ProcessorContext): TestFunction {
+export function testFactory({ httpRegion, scriptConsole }: ProcessorContext): TestFunction {
   const testFunction = function test(message: string, testMethod: () => void): void {
     const testResult: TestResult = {
       message,
@@ -11,7 +11,6 @@ export function testFactory({ httpRegion }: ProcessorContext): TestFunction {
     if (!httpRegion.testResults) {
       httpRegion.testResults = [];
     }
-    httpRegion.testResults.push(testResult);
     if (typeof testMethod === 'function') {
       try {
         testMethod();
@@ -21,6 +20,8 @@ export function testFactory({ httpRegion }: ProcessorContext): TestFunction {
         testResult.error = utils.parseError(err);
       }
     }
+    httpRegion.testResults.push(testResult);
+    scriptConsole?.logTest?.(testResult);
   };
 
   testFunction.status = (status: number) => {

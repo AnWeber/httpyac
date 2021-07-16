@@ -87,7 +87,7 @@ export async function send(rawArgs: string[]): Promise<void> {
 function convertCliOptionsToContext(cliOptions: CliOptions): CliContext {
   const context : CliContext = {
     repeat: cliOptions.repeat,
-    scriptConsole: new CliLogger(getLogLevel(cliOptions)),
+    scriptConsole: new CliLogger(getLogLevel(cliOptions), cliOptions.filter === CliFilterOptions.onlyFailed),
     logResponse: cliOptions.json ? undefined : getRequestLogger(cliOptions),
   };
 

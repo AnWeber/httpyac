@@ -134,6 +134,8 @@ export async function processHttpRegionActions(context: ProcessorContext, showPr
     context.processedHttpRegions.push(context.httpRegion);
   }
 
+  context.scriptConsole?.collectMessages?.();
+
   for (const action of context.httpRegion.actions) {
     log.trace(`action ${action.type} executing`);
     if (context.progress) {
@@ -154,10 +156,12 @@ export async function processHttpRegionActions(context: ProcessorContext, showPr
     }
   }
 
-  if (context.httpRegion.response
-    && !context.httpRegion.metaData.noLog
-    && context.logResponse) {
-    context.logResponse(context.httpRegion.response, context.httpRegion);
+  if (!context.httpRegion.metaData.noLog) {
+    if (context.httpRegion.response
+      && context.logResponse) {
+      context.logResponse(context.httpRegion.response, context.httpRegion);
+    }
+    context.scriptConsole?.flush?.();
   }
   return true;
 }

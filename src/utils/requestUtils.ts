@@ -1,4 +1,4 @@
-import { ContentType, HttpMethod, HttpRegion, HttpResponse, HttpResponseRequest, RequestLogger, TestResult, testSymbols } from '../models';
+import { ContentType, HttpMethod, HttpRegion, HttpResponse, HttpResponseRequest, RequestLogger } from '../models';
 import { log } from '../logger';
 import { isString, toMultiLineString } from './stringUtils';
 import { parseMimeType } from './mimeTypeUtils';
@@ -95,7 +95,6 @@ export interface RequestLoggerFactoryOptions {
   responseHeaders?: boolean;
   responseBodyLength?: number;
   onlyFailed?: boolean;
-  testResultLog?: (args: string) => void
 }
 
 export function requestLoggerFactory(
@@ -155,10 +154,6 @@ export function requestLoggerFactory(
       }
       log(toMultiLineString(result));
     }
-    if (httpRegion?.testResults) {
-      (options?.testResultLog || log)(toMultiLineString(logTestResults(httpRegion.testResults, !!options?.onlyFailed)));
-    }
-    log('');
   };
 }
 
@@ -204,16 +199,4 @@ function logResponseHeader(response: HttpResponse) {
     .map(([key, value]) => chalk`{yellow ${key}}: ${value}`)
     .sort());
   return result;
-}
-
-function logTestResults(testResults: Array<TestResult>, onlyFailed: boolean) {
-  const chalk = chalkInstance();
-  return testResults
-    .filter(testResult => !onlyFailed || !testResult.result)
-    .map(testResult => {
-      if (testResult.result) {
-        return chalk`{green ${testSymbols.ok} ${testResult.message || 'Test passed'}}`;
-      }
-      return chalk`{red ${testSymbols.error} ${testResult.message || 'Test failed'} (${testResult.error?.displayMessage})}`;
-    });
 }
