@@ -31,18 +31,3 @@ export interface ConsoleLogHandler extends LogHandler{
 
 
 export type RequestLogger = (response: HttpResponse, httpRegion?: HttpRegion) => void;
-
-export function toLogLevel(level: string | undefined) : LogLevel {
-  switch (level) {
-    case 'trace':
-      return LogLevel.trace;
-    case 'debug':
-      return LogLevel.debug;
-    case 'warn':
-      return LogLevel.warn;
-    case 'error':
-      return LogLevel.error;
-    default:
-      return LogLevel.info;
-  }
-}
