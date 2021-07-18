@@ -1,4 +1,4 @@
-import { LogLevel } from '../logger';
+import { LogLevel } from '../models';
 import { ClientCertificateOptions } from './clientCertifcateOptions';
 import { HttpRequest } from './httpRequest';
 import { Variables } from './variables';

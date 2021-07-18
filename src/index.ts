@@ -1,9 +1,7 @@
 export * from './httpYacApi';
 export * from './models';
-export * from './fileProvider';
+export * from './io';
 export * from './httpFileStore';
-export * from './gotHttpClientFactory';
-export * from './logger';
 
 export * as actions from './actions';
 export * as parser from './parser';

@@ -1,4 +1,4 @@
-import { ProcessorContext, TestFunction, TestResult } from '../models';
+import { ProcessorContext, TestFunction, TestResult, testSymbols } from '../models';
 import * as utils from '../utils';
 
 
@@ -21,7 +21,13 @@ export function testFactory({ httpRegion, scriptConsole }: ProcessorContext): Te
       }
     }
     httpRegion.testResults.push(testResult);
-    scriptConsole?.logTest?.(testResult);
+
+    const chalk = utils.chalkInstance();
+
+    scriptConsole?.logTest?.(
+      testResult.result,
+      testResult.result ? chalk`{green ${testSymbols.ok} ${testResult.message || 'Test passed'}}` : chalk`{red ${testSymbols.error} ${testResult.message || 'Test failed'} (${testResult.error?.displayMessage})}`
+    );
   };
 
   testFunction.status = (status: number) => {

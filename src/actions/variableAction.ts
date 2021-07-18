@@ -1,6 +1,6 @@
 import { ActionType, HttpRegionAction, ProcessorContext, VariableType } from '../models';
 import { httpYacApi } from '../httpYacApi';
-import { log } from '../logger';
+import { log } from '../io';
 
 
 export class VariableAction implements HttpRegionAction {

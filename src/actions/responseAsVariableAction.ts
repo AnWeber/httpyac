@@ -1,5 +1,5 @@
-import { ActionType, HttpRegion, HttpRegionAction, ProcessorContext } from '../models';
-import { log } from '../logger';
+import { log } from '../io';
+import { ActionType, HttpRegionAction, ProcessorContext } from '../models';
 import { decodeJWT, isString, JWTToken, toEnvironmentKey } from '../utils';
 import { isValidVariableName } from './javascriptAction';
 
@@ -13,7 +13,7 @@ export class ResponseAsVariableAction implements HttpRegionAction {
       const body = response.parsedBody || response.body;
       context.variables.response = response;
       if (context.httpRegion.metaData.name || context.httpRegion.metaData.jwt) {
-        this.handleJWTMetaData(body, context.httpRegion);
+        this.handleJWTMetaData(body, context);
         this.handleNameMetaData(body, context);
       }
     }
@@ -37,7 +37,7 @@ export class ResponseAsVariableAction implements HttpRegionAction {
 
   }
 
-  private handleJWTMetaData(body: unknown, httpRegion: HttpRegion) {
+  private handleJWTMetaData(body: unknown, { httpRegion }: ProcessorContext) {
     if (httpRegion.metaData.jwt && httpRegion.response) {
       if (body && typeof body === 'object') {
         const entries = Object.entries(body);

@@ -1,8 +1,7 @@
 import { environmentStore } from '../environments';
-import { gotHttpClientFactory } from '../gotHttpClientFactory';
 import { httpYacApi } from '../httpYacApi';
-import { log } from '../logger';
 import { HttpFileSendContext, HttpRegionSendContext, ProcessorContext, HttpFile, Variables, HttpClient, HttpRegion, HttpRegionsSendContext } from '../models';
+import { log, gotHttpClientFactory } from '../io';
 
 
 export function getDisplayName(httpRegion: HttpRegion, defaultName = 'global'): string {
@@ -130,40 +129,41 @@ export async function processHttpRegionActions(context: ProcessorContext, showPr
   delete context.httpRegion.response;
   delete context.httpRegion.testResults;
 
-  if (context.processedHttpRegions) {
-    context.processedHttpRegions.push(context.httpRegion);
-  }
-
-  context.scriptConsole?.collectMessages?.();
-
-  for (const action of context.httpRegion.actions) {
-    log.trace(`action ${action.type} executing`);
-    if (context.progress) {
-      context.showProgressBar = showProgressBar;
+  try {
+    context.scriptConsole?.collectMessages?.();
+    if (context.processedHttpRegions) {
+      context.processedHttpRegions.push(context.httpRegion);
     }
-    if (context.progress?.report) {
-      context.progress.report({ message: `${getDisplayName(context.httpRegion)}` });
-    }
-    if (!context.httpRegion.metaData.disabled) {
-      if (!await action.process(context)) {
-        log.trace(`processs canceled by action ${action.type}`);
-        return false;
+    for (const action of context.httpRegion.actions) {
+      log.trace(`action ${action.type} executing`);
+      if (context.progress) {
+        context.showProgressBar = showProgressBar;
       }
-      if (context.progress?.isCanceled()) {
-        log.trace(`processs canceled by progress after ${action.type}`);
-        return false;
+      if (context.progress?.report) {
+        context.progress.report({ message: `${getDisplayName(context.httpRegion)}` });
+      }
+      if (!context.httpRegion.metaData.disabled) {
+        if (!await action.process(context)) {
+          log.trace(`processs canceled by action ${action.type}`);
+          return false;
+        }
+        if (context.progress?.isCanceled()) {
+          log.trace(`processs canceled by progress after ${action.type}`);
+          return false;
+        }
       }
     }
-  }
-
-  if (!context.httpRegion.metaData.noLog) {
-    if (context.httpRegion.response
+    if (!context.httpRegion.metaData.noLog
+      && context.httpRegion.response
       && context.logResponse) {
       context.logResponse(context.httpRegion.response, context.httpRegion);
     }
-    context.scriptConsole?.flush?.();
+    return true;
+  } finally {
+    if (!context.httpRegion.metaData.noLog) {
+      context.scriptConsole?.flush?.();
+    }
   }
-  return true;
 }
 
 export function isHttpRegionSendContext(context: HttpRegionSendContext | HttpFileSendContext): context is HttpRegionSendContext {

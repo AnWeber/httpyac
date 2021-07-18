@@ -1,7 +1,7 @@
 import { ActionType, ProcessorContext, HttpRequest, HttpRequestBodyLine, HttpRegionAction } from '../models';
 import { isString, isMimeTypeFormUrlEncoded } from '../utils';
-import { log } from '../logger';
 import encodeUrl from 'encodeurl';
+import { log } from '../io';
 
 
 export class HttpClientAction implements HttpRegionAction {

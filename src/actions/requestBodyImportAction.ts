@@ -1,7 +1,6 @@
 import { ActionType, HttpRegionAction, HttpRequestBodyLine, ProcessorContext, RequestBodyImport } from '../models';
-import { log, popupService } from '../logger';
 import { isMimeTypeFormUrlEncoded, isMimeTypeMultiPartFormData, isMimeTypeNewlineDelimitedJSON, isString, toAbsoluteFilename } from '../utils';
-import { fileProvider } from '../fileProvider';
+import { fileProvider, userInteractionProvider, log } from '../io';
 import { EOL } from 'os';
 import { environmentStore } from '../environments';
 
@@ -82,7 +81,7 @@ export class RequestBodyImportAction implements HttpRegionAction {
             result.push(async () => fileProvider.readBuffer(normalizedPath));
           }
         } else {
-          popupService.warn(`request body file ${line.fileName} not found`);
+          userInteractionProvider.showWarnMessage?.(`request body file ${line.fileName} not found`);
           log.warn(`request body file ${line.fileName} not found`);
         }
       }

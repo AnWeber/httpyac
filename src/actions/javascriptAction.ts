@@ -1,13 +1,12 @@
 import { Variables, ProcessorContext, HttpRegionAction, ActionType } from '../models';
 import { Module } from 'module';
 import { runInThisContext } from 'vm';
-import { log } from '../logger';
 import { isPromise, toEnvironmentKey } from '../utils';
 import * as got from 'got';
 import { httpYacApi } from '../httpYacApi';
 import * as httpYac from '..';
 import { testFactory } from './testMethod';
-import { fileProvider, PathLike } from '../fileProvider';
+import { fileProvider, PathLike, log } from '../io';
 
 export interface ScriptData {
   script: string;
@@ -55,7 +54,7 @@ export class JavascriptAction implements HttpRegionAction {
       lineOffset: this.scriptData.lineOffset + 1,
       require: {
         progress,
-      }
+      },
     });
     for (const [key] of Object.entries(defaultVariables)) {
       delete variables[key];
@@ -73,7 +72,7 @@ export interface ScriptContext {
   fileName: PathLike | undefined,
   variables: Variables,
   lineOffset: number,
-  require?: Record<string, unknown>
+  require?: Record<string, unknown>,
 }
 
 export async function executeScript(context: ScriptContext): Promise<Variables> {

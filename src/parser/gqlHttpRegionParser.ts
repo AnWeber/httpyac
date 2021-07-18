@@ -1,9 +1,8 @@
 import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, ActionType } from '../models';
 import { toMultiLineString, toAbsoluteFilename, pushAfter } from '../utils';
-import { log } from '../logger';
 import { GqlAction, GqlData } from '../actions';
 import { ParserRegex } from './parserRegex';
-import { fileProvider, PathLike } from '../fileProvider';
+import { fileProvider, PathLike, log } from '../io';
 
 export class GqlHttpRegionParser implements HttpRegionParser {
   async parse(lineReader: HttpRegionParserGenerator, context: ParserContext): Promise<HttpRegionParserResult> {

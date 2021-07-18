@@ -1,7 +1,6 @@
 import { HttpFile } from './models';
 import { parseHttpFile } from './parser';
-import { log } from './logger';
-import { fileProvider, PathLike } from './fileProvider';
+import { fileProvider, PathLike } from './io';
 
 interface HttpFileStoreEntry{
   version: number;
@@ -41,39 +40,32 @@ export class HttpFileStore {
     return result;
   }
   getOrCreate(fileName: PathLike, getText: () => Promise<string>, version: number): Promise<HttpFile> {
-    const startTime = Date.now();
-    try {
-      const httpFileStoreEntry: HttpFileStoreEntry = this.getFromStore(fileName, version);
-      if (version > httpFileStoreEntry.version || !httpFileStoreEntry.httpFile) {
-        if (httpFileStoreEntry.promise
+    const httpFileStoreEntry: HttpFileStoreEntry = this.getFromStore(fileName, version);
+    if (version > httpFileStoreEntry.version || !httpFileStoreEntry.httpFile) {
+      if (httpFileStoreEntry.promise
           && version <= httpFileStoreEntry.version) {
-          return httpFileStoreEntry.promise;
-        }
-        httpFileStoreEntry.promise = this.createHttpFile(fileName, getText)
-          .then(httpFile => {
-            delete httpFileStoreEntry.promise;
-            if (httpFileStoreEntry.httpFile) {
-              httpFile.variablesPerEnv = httpFileStoreEntry.httpFile.variablesPerEnv;
-              httpFile.activeEnvironment = httpFileStoreEntry.httpFile.activeEnvironment;
-              for (const httpRegion of httpFile.httpRegions) {
-                const cachedHttpRegion = httpFileStoreEntry.httpFile.httpRegions.find(obj => obj.symbol.source === httpRegion.symbol.source);
-                if (cachedHttpRegion) {
-                  httpRegion.response = cachedHttpRegion.response;
-                }
-              }
-            }
-            httpFileStoreEntry.version = version;
-            httpFileStoreEntry.httpFile = httpFile;
-            log.trace(`httpFileStore.getOrCreate: ${Math.floor((Date.now() - startTime))}ms`);
-            return httpFile;
-          });
         return httpFileStoreEntry.promise;
       }
-      return httpFileStoreEntry.promise || Promise.resolve(httpFileStoreEntry.httpFile);
-    } catch (err) {
-      log.error(fileName);
-      throw err;
+      httpFileStoreEntry.promise = this.createHttpFile(fileName, getText)
+        .then(httpFile => {
+          delete httpFileStoreEntry.promise;
+          if (httpFileStoreEntry.httpFile) {
+            httpFile.variablesPerEnv = httpFileStoreEntry.httpFile.variablesPerEnv;
+            httpFile.activeEnvironment = httpFileStoreEntry.httpFile.activeEnvironment;
+            for (const httpRegion of httpFile.httpRegions) {
+              const cachedHttpRegion = httpFileStoreEntry.httpFile.httpRegions.find(obj => obj.symbol.source === httpRegion.symbol.source);
+              if (cachedHttpRegion) {
+                httpRegion.response = cachedHttpRegion.response;
+              }
+            }
+          }
+          httpFileStoreEntry.version = version;
+          httpFileStoreEntry.httpFile = httpFile;
+          return httpFile;
+        });
+      return httpFileStoreEntry.promise;
     }
+    return httpFileStoreEntry.promise || Promise.resolve(httpFileStoreEntry.httpFile);
   }
 
   private async createHttpFile(fileName: PathLike, getText: () => Promise<string>) {

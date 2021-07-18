@@ -1,10 +1,10 @@
 import { ProcessorContext, VariableReplacer, VariableReplacerType } from '../../models';
+import { userInteractionProvider } from '../../io';
 
 const lastValue: Record<string, string> = {};
 
 export class ShowInputBoxVariableReplacer implements VariableReplacer {
   type = VariableReplacerType.showInputBox;
-  constructor(private readonly showInputPrompt: (message: string, defaultValue: string) => Promise<string | undefined>) { }
 
   async replace(text: string, _type: string, context: ProcessorContext): Promise<string | undefined> {
 
@@ -19,7 +19,7 @@ export class ShowInputBoxVariableReplacer implements VariableReplacer {
 
         const placeholder = matchInput.groups.placeholder;
 
-        const answer = await this.showInputPrompt(placeholder, lastValue[placeholder] || matchInput.groups.value);
+        const answer = await userInteractionProvider.showInputPrompt(placeholder, lastValue[placeholder] || matchInput.groups.value);
 
         if (answer) {
           lastValue[placeholder] = answer;

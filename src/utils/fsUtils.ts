@@ -1,6 +1,5 @@
-import { log } from '../logger';
 import { EnvironmentConfig } from '../models';
-import { fileProvider, PathLike } from '../fileProvider';
+import { fileProvider, PathLike, log } from '../io';
 
 
 export async function toAbsoluteFilename(fileName: string, baseName: PathLike, isFolder = false) : Promise<PathLike | undefined> {

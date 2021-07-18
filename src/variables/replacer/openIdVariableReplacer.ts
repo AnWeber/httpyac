@@ -1,8 +1,8 @@
 import { ProcessorContext, HttpClient, UserSession, VariableReplacer, VariableReplacerType, RequestLogger } from '../../models';
 import { userSessionStore } from '../../environments';
 import * as oauth from './oauth';
-import { log } from '../../logger';
 import { ParserRegex } from '../../parser';
+import { log } from '../../io';
 
 export class OpenIdVariableReplacer implements VariableReplacer {
   type = VariableReplacerType.oauth2;

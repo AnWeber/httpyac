@@ -1,12 +1,11 @@
 import { ENVIRONMENT_NONE, getHttpacJsonConfig, isString, toAbsoluteFilename } from '../utils';
-import { Variables, EnvironmentProvider, HttpFile, EnvironmentConfig } from '../models';
+import { Variables, EnvironmentProvider, HttpFile, EnvironmentConfig, LogLevel } from '../models';
 import { httpYacApi } from '../httpYacApi';
 import { JsonEnvProvider } from './jsonEnvProvider';
 import { EnvVariableProvider } from '../variables/provider/envVariableProvider';
 import { IntellijProvider } from './intellijEnvProvider';
 import { DotenvProvider } from './dotenvProvider';
-import { log, LogLevel } from '../logger';
-import { fileProvider, PathLike } from '../fileProvider';
+import { fileProvider, PathLike, log } from '../io';
 import merge from 'lodash/merge';
 
 class EnvironmentStore {
@@ -129,7 +128,6 @@ class EnvironmentStore {
       ...(await this.loadFileEnvironemntConfigs(rootDirs)),
       config
     );
-    this.initLogConfiguration(environmentConfig);
     log.trace(environmentConfig);
 
     await this.searchClientCertficates(environmentConfig, rootDirs);
@@ -177,15 +175,6 @@ class EnvironmentStore {
       }
     }
     return fileName;
-  }
-
-
-  private initLogConfiguration(config: EnvironmentConfig) {
-    if (config.log) {
-      if (config.log.level !== undefined) {
-        log.level = config.log.level;
-      }
-    }
   }
 
   private async initEnvProviders(config: EnvironmentConfig, rootDirs: PathLike[]): Promise<Dispose> {

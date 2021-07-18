@@ -1,7 +1,7 @@
 import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, HttpSymbolKind, ParserContext } from '../models';
 import { ParserRegex } from './parserRegex';
 import { toMultiLineString, parseContentType } from '../utils';
-import { setParseBody } from '../gotHttpClientFactory';
+import { setParseBody } from '../io';
 
 export class ResponseHttpRegionParser implements HttpRegionParser {
   supportsEmptyLine = true;

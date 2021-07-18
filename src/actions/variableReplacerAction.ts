@@ -1,7 +1,7 @@
 import { ActionType, HttpRegionAction, HttpRequest, HttpRequestBodyLine, ProcessorContext, VariableType } from '../models';
 import { replaceVariables } from './variableAction';
 import { isString } from '../utils';
-import { log } from '../logger';
+import { log } from '../io';
 
 
 type VarReplacer = (value: string, type: VariableType | string) => Promise<string | undefined>;

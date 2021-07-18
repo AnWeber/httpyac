@@ -1,7 +1,7 @@
 import { OpenIdConfiguration } from './openIdConfiguration';
-import { log } from '../../../logger';
 import { HttpClient, HttpRequest, RequestLogger, UserSession } from '../../../models';
 import { decodeJWT } from '../../../utils';
+import { log } from '../../../io';
 
 export interface OpenIdInformation extends UserSession{
   time: number;

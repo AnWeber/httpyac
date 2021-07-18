@@ -1,9 +1,9 @@
 import { ProcessorContext, VariableReplacer, VariableReplacerType } from '../../models';
+import { userInteractionProvider } from '../../io';
 
 
 export class ShowQuickpickVariableReplacer implements VariableReplacer {
   type = VariableReplacerType.showQuickPick;
-  constructor(private readonly showListPrompt: (message: string, values: string[]) => Promise<string | undefined>) { }
 
   async replace(text: string, _type: string, context: ProcessorContext): Promise<string | undefined> {
 
@@ -19,7 +19,7 @@ export class ShowQuickpickVariableReplacer implements VariableReplacer {
         const placeholder = matchInput.groups.placeholder;
         const value = matchInput.groups.value;
 
-        const answer = await this.showListPrompt(placeholder, value.split(','));
+        const answer = await userInteractionProvider.showListPrompt(placeholder, value.split(','));
 
 
         if (answer && result) {

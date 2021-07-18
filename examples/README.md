@@ -349,11 +349,11 @@ Scripts with no request in the same region are always executed (Global Scripts).
 }}
 {{+
   // executed before every requests in http file
-  log.info(httpRegion.request.url)
+  console.info(httpRegion.request.url)
 }}
 {{+after
   // executed after every requests in http file
-  log.info(response)
+  console.info(response)
 }}
 ```
 

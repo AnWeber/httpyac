@@ -1,8 +1,6 @@
 import { Variables, EnvironmentProvider } from '../models';
-import { log } from '../logger';
 import { environmentStore } from './environmentStore';
-
-import { fileProvider, PathLike, WatchDispose } from '../fileProvider';
+import { fileProvider, PathLike, WatchDispose, log } from '../io';
 
 function storeReset() {
   environmentStore.reset();

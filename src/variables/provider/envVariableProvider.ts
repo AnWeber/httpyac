@@ -1,4 +1,4 @@
-import { fileProvider, PathLike } from '../../fileProvider';
+import { fileProvider, PathLike } from '../../io';
 import { EnvironmentProvider, HttpFile, VariableProvider, Variables } from '../../models';
 
 export class EnvVariableProvider<T extends EnvironmentProvider> implements VariableProvider {

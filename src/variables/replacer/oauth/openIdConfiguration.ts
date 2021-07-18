@@ -1,6 +1,6 @@
 import get from 'lodash/get';
-import { popupService, log } from '../../../logger';
 import { Variables } from '../../../models';
+import { log, userInteractionProvider } from '../../../io';
 
 export interface OpenIdConfiguration{
   variablePrefix: string;
@@ -55,8 +55,7 @@ export function assertConfiguration(config: OpenIdConfiguration, keys: string[])
   if (missingKeys.length > 0) {
     const message = `missing configuration: ${missingKeys.map(obj => `${config.variablePrefix}_${obj}`).join(', ')}`;
     log.error(message);
-    popupService.error(message);
-    log.error(message);
+    userInteractionProvider.showErrorMessage?.(message);
     return false;
   }
   return true;

@@ -1,5 +1,5 @@
-import { HttpClient, HttpClientContext, HttpRequest, HttpResponse, RepeatOrder } from './models';
-import { isString, isMimeTypeJSON, parseContentType } from './utils';
+import { HttpClient, HttpClientContext, HttpRequest, HttpResponse, RepeatOrder } from '../models';
+import { isString, isMimeTypeJSON, parseContentType } from '../utils';
 import { default as got, OptionsOfUnknownResponseBody, CancelError, Response } from 'got';
 import merge from 'lodash/merge';
 import { HttpProxyAgent } from 'http-proxy-agent';

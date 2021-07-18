@@ -16,6 +16,7 @@ export class HttpYacApi {
       new parser.CommentHttpRegionParser(),
       new parser.VariableHttpRegionParser(),
       new parser.JsHttpRegionParser(),
+      new parser.NoteMetaHttpRegionParser(),
       new parser.IntellijHttpRegionParser(),
       new parser.GqlHttpRegionParser(),
       new parser.RequestHttpRegionParser(),
@@ -31,6 +32,8 @@ export class HttpYacApi {
     ];
 
     this.variableReplacers = [
+      new replacer.ShowInputBoxVariableReplacer(),
+      new replacer.ShowQuickpickVariableReplacer(),
       new replacer.RestClientVariableReplacer(),
       new replacer.IntellijVariableReplacer(),
       new replacer.JavascriptVariableReplacer(),

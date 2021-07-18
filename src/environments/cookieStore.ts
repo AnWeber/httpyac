@@ -1,5 +1,5 @@
 import { Cookie, CookieJar, MemoryCookieStore } from 'tough-cookie';
-import { log } from '../logger';
+import { log } from '../io';
 
 
 class CookieStore {

@@ -6,12 +6,10 @@ import { HttpFileStore } from '../httpFileStore';
 import { httpYacApi } from '../httpYacApi';
 import * as utils from '../utils';
 import { environmentStore } from '../environments';
-import { NoteMetaHttpRegionParser, SettingsScriptHttpRegionParser } from '../parser';
-import { ShowInputBoxVariableReplacer, ShowQuickpickVariableReplacer } from '../variables/replacer';
+import { SettingsScriptHttpRegionParser } from '../parser';
 import { default as globby } from 'globby';
-import { PathLike, fileProvider } from '../fileProvider';
+import { PathLike, fileProvider, Logger } from '../io';
 import { CliOptions, parseCliOptions, renderHelp, getLogLevel, CliFilterOptions } from './cliOptions';
-import { CliLogger } from './cliLogger';
 import { CliContext } from './cliContext';
 import { toCliJsonOutput } from './cliJsonOutput';
 import { chalkInstance } from '../utils';
@@ -87,7 +85,10 @@ export async function send(rawArgs: string[]): Promise<void> {
 function convertCliOptionsToContext(cliOptions: CliOptions): CliContext {
   const context : CliContext = {
     repeat: cliOptions.repeat,
-    scriptConsole: new CliLogger(getLogLevel(cliOptions), cliOptions.filter === CliFilterOptions.onlyFailed),
+    scriptConsole: new Logger({
+      level: getLogLevel(cliOptions),
+      onlyFailedTests: cliOptions.filter === CliFilterOptions.onlyFailed
+    }),
     logResponse: cliOptions.json ? undefined : getRequestLogger(cliOptions),
   };
 
@@ -208,32 +209,6 @@ async function initEnviroment(cliOptions: CliOptions): Promise<void> {
 }
 
 function initHttpYacApiExtensions(config: models.EnvironmentConfig & models.SettingsConfig, rootDir: PathLike | undefined) {
-  httpYacApi.httpRegionParsers.push(new NoteMetaHttpRegionParser(async (note: string) => {
-    const answer = await inquirer.prompt([{
-      type: 'confirm',
-      name: 'note',
-      message: note,
-    }]);
-    return answer.note;
-  }));
-  httpYacApi.variableReplacers.splice(0, 0, new ShowInputBoxVariableReplacer(async (message: string, defaultValue: string) => {
-    const answer = await inquirer.prompt([{
-      type: 'input',
-      name: 'placeholder',
-      message,
-      default: defaultValue
-    }]);
-    return answer.placeholder;
-  }));
-  httpYacApi.variableReplacers.splice(0, 0, new ShowQuickpickVariableReplacer(async (message: string, values: string[]) => {
-    const answer = await inquirer.prompt([{
-      type: 'list',
-      name: 'placeholder',
-      message,
-      choices: values
-    }]);
-    return answer.placeholder;
-  }));
   if (rootDir && config.httpRegionScript) {
     httpYacApi.httpRegionParsers.push(new SettingsScriptHttpRegionParser(async () => {
       let fileName: PathLike | undefined = config.httpRegionScript;

@@ -1,4 +1,4 @@
-import { PathLike } from '../fileProvider';
+import { PathLike } from '../io';
 
 export interface ClientCertificateOptions{
   cert?: PathLike;

@@ -4,7 +4,7 @@ import { OpenIdFlow, OpenIdFlowContext } from './openIdFlow';
 import { toQueryParams, stateGenerator } from '../../../utils';
 import open from 'open';
 import { registerListener, unregisterListener } from './openIdHttpserver';
-import { log } from '../../../logger';
+import { log } from '../../../io';
 
 class ImplicitFlow implements OpenIdFlow {
   supportsFlow(flow: string): boolean {

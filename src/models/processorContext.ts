@@ -1,4 +1,4 @@
-import { LogHandler, RequestLogger } from './logHandler';
+import { ConsoleLogHandler, RequestLogger } from './logHandler';
 import { HttpClient } from './httpClient';
 import { HttpFile } from './httpFile';
 import { HttpRegion } from './httpRegion';
@@ -21,7 +21,7 @@ export interface HttpFileSendContext{
   httpClient?: HttpClient;
   httpRegionPredicate?: (obj: HttpRegion) => boolean;
   processedHttpRegions?: Array<HttpRegion>;
-  scriptConsole?: LogHandler;
+  scriptConsole?: ConsoleLogHandler;
   logResponse?: RequestLogger;
   repeat?: RepeatOptions;
 }

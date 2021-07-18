@@ -1,10 +1,10 @@
 import { HttpFile, HttpSymbol, HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, HttpRegion } from '../models';
-import { log } from '../logger';
 import { toAbsoluteFilename } from '../utils';
 import { RefMetaAction, LoopMetaAction, LoopMetaType } from '../actions';
 import { HttpFileStore } from '../httpFileStore';
 import { ParserRegex } from './parserRegex';
-import { fileProvider } from '../fileProvider';
+import { fileProvider, log } from '../io';
+
 export class MetaHttpRegionParser implements HttpRegionParser {
 
   async parse(lineReader: HttpRegionParserGenerator, { httpRegion, httpFile, httpFileStore, data }: ParserContext): Promise<HttpRegionParserResult> {

@@ -3,7 +3,7 @@ import { toAbsoluteFilename, isString } from '../../utils';
 import { URL } from 'url';
 import { environmentStore } from '../../environments';
 import { ParserRegex } from '../../parser';
-import { fileProvider, PathLike } from '../../fileProvider';
+import { fileProvider, PathLike } from '../../io';
 
 export class ClientCertVariableReplacer implements VariableReplacer {
   type = VariableReplacerType.clientCertificate;

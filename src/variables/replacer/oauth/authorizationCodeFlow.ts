@@ -4,7 +4,6 @@ import { OpenIdFlow, OpenIdFlowContext } from './openIdFlow';
 import { toQueryParams, stateGenerator } from '../../../utils';
 import open from 'open';
 import { registerListener, unregisterListener } from './openIdHttpserver';
-import { log } from '../../../logger';
 
 class AuthorizationCodeFlow implements OpenIdFlow {
   supportsFlow(flow: string): boolean {
@@ -91,7 +90,6 @@ class AuthorizationCodeFlow implements OpenIdFlow {
           },
           reject,
         });
-        log.trace(`open browser: ${authUrl}`);
         open(authUrl);
       } catch (err) {
         unregisterListener(state);

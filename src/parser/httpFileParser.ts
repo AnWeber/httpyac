@@ -4,7 +4,7 @@ import { environmentStore } from '../environments/environmentStore';
 import { httpYacApi } from '../httpYacApi';
 import { HttpFileStore } from '../httpFileStore';
 import { ParserRegex } from './parserRegex';
-import { PathLike } from '../fileProvider';
+import { PathLike } from '../io';
 
 
 export async function parseHttpFile(text: string, fileName: PathLike, httpFileStore: HttpFileStore): Promise<HttpFile> {
