@@ -11,6 +11,44 @@ Command Line Interface for *.http and *.rest files
 > This program is used to execute *.http files on the command line. These can be created most easily in [VSCode](https://marketplace.visualstudio.com/items?itemName=anweber.vscode-httpyac), [VSCodium](https://open-vsx.org/extension/anweber/vscode-httpyac) or [Theia](https://open-vsx.org/extension/anweber/vscode-httpyac).
 
 
+## Installation
+
+```
+npm install -g httpyac
+httpyac --version
+```
+
+## Commands
+
+```shell
+> httpyac --help
+
+usage: httpyac [options...] <file or glob pattern>
+       --all           execute all http requests in a http file
+       --editor        enter a new request and execute it
+  -e   --env           list of environemnts
+       --filter        filter requests output (only-failed)
+  -h   --help          help
+       --insecure      allow insecure server connections when using ssl
+  -i   --interactive   do not exit the program after request, go back to selection
+       --json          use json output
+  -l   --line          line of the http requests
+  -n   --name          name of the http requests
+  -o   --output        output format of response (short, body, headers, response, exchange, none)
+       --output-failed output format of failed response (short, body, headers, response, exchange, none)
+  -r   --repeat        repeat count for requests
+       --repeat-mode   repeat mode: sequential, parallel (default)
+       --root          absolute path to root dir of project
+  -s   --silent        log only request
+       --timeout       maximum time allowed for connections
+  -v   --verbose       make the operation more talkative
+       --version       version of httpyac
+
+```
+
+> --editor option only works on linux and mac ([see](https://github.com/nodejs/node/issues/21771))
+
+
 ## Examples
 
 ```html
@@ -63,43 +101,6 @@ query test($name: String!, $owner: String!) {
 
 A complete specification / documentation can be found [here](https://github.com/AnWeber/httpyac/tree/main/examples/README.md)
 
-
-## Installation
-
-```
-npm install -g httpyac
-httpyac --version
-```
-
-## Commands
-
-```shell
-> httpyac --help
-
-usage: httpyac [options...] <file or glob pattern>
-       --all           execute all http requests in a http file
-       --editor        enter a new request and execute it
-  -e   --env           list of environemnts
-       --filter        filter requests output (only-failed)
-  -h   --help          help
-       --insecure      allow insecure server connections when using ssl
-  -i   --interactive   do not exit the program after request, go back to selection
-       --json          use json output
-  -l   --line          line of the http requests
-  -n   --name          name of the http requests
-  -o   --output        output format of response (short, body, headers, response, exchange, none)
-       --output-failed output format of failed response (short, body, headers, response, exchange, none)
-  -r   --repeat        repeat count for requests
-       --repeat-mode   repeat mode: sequential, parallel (default)
-       --root          absolute path to root dir of project
-  -s   --silent        log only request
-       --timeout       maximum time allowed for connections
-  -v   --verbose       make the operation more talkative
-       --version       version of httpyac
-
-```
-
-> --editor option only works on linux and mac ([see](https://github.com/nodejs/node/issues/21771))
 
 ## Settings
 

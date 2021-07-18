@@ -1,3 +1,18 @@
+## 2.20.0 (2021-07-18)
+
+#### Features
+* advanced logging (#49)
+  * `--output` and `--output-failed` option to [format output](https://github.com/AnWeber/httpyac#commands)
+  * `--json` option to create json output
+  * `--filter` option to output only-failed requests
+  * added meta data `title` and `description` to extend information of the logging
+  * added summary after executing more requests
+* allow [loop](https://github.com/AnWeber/httpyac/blob/main/examples/metaData/loop.http) one requests multiple times with `for <var> of <iterable>`, `for <count>` or `while <condition>`
+
+#### Fix
+* error in dotenv import with `.env.{{system}}` notation (Anweber/vscode-httpyac#51)
+* line break issue with comment in last line #56
+
 ## 2.19.0 (2021-07-09)
 
 #### Features
