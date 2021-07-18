@@ -113,7 +113,8 @@ export async function executeScript(context: ScriptContext): Promise<Variables> 
     scriptRequire.resolve = (req: unknown) => (Module as any)._resolveFilename(req, scriptModule);
 
     const vars = Object.entries(context.variables).map(([key]) => key).join(', ').trim();
-    const wrappedFunction = `(function userJS(exports, require, module, __filename, __dirname${vars.length > 0 ? `, ${vars}` : ''}){${context.script}})`;
+    const wrappedFunction = `(function userJS(exports, require, module, __filename, __dirname${vars.length > 0 ? `, ${vars}` : ''}){${context.script}
+      })`;
 
     const compiledWrapper = runInThisContext(wrappedFunction, {
       filename,
