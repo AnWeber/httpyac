@@ -4,14 +4,7 @@ const path = require('path');
 const https = require('https');
 
 
-const app = express();
-app.get('*', (req, res) => {
-  res.redirect(`https://localhost:5433${req.url}`);
-});
 
-app.listen(5000, () => {
-  console.log(`HTTP  listening at http://localhost:5000`)
-});
 
 const httpsApp = express()
 httpsApp.get('/api/v2/users', (req, res) => {
@@ -35,4 +28,16 @@ https.createServer({
 }, httpsApp)
   .listen(5433, () => {
   console.log(`HTTPS listening at https://localhost:5433`)
+  });
+
+const app = express();
+app.get('*', (req, res) => {
+  if (httpsApp._router.stack.some(obj => obj.route?.path === req.url)) {
+    res.redirect(`https://localhost:5433${req.url}`);
+  }
+  res.redirect(`https://localhost:5433`);
+});
+
+app.listen(5000, () => {
+  console.log(`HTTP  listening at http://localhost:5000`)
 });
