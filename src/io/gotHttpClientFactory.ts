@@ -1,4 +1,4 @@
-import { HttpClient, HttpClientContext, HttpRequest, HttpResponse, RepeatOrder } from '../models';
+import { HttpClient, HttpClientContext, HttpRequest, HttpResponse, RepeatOrder, VariableProviderContext } from '../models';
 import { isString, isMimeTypeJSON, isMimeTypeXml, parseContentType } from '../utils';
 import { default as got, OptionsOfUnknownResponseBody, CancelError, Response } from 'got';
 import merge from 'lodash/merge';
@@ -192,4 +192,12 @@ function mergeHttpResponse(responses: Array<HttpResponse>): HttpResponse | false
     };
   }
   return false;
+}
+
+export function initHttpClient(content: VariableProviderContext): HttpClient {
+  const request = {
+    ...content.config?.request || {},
+    proxy: content.config?.proxy
+  };
+  return gotHttpClientFactory(request);
 }

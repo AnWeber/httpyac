@@ -1,6 +1,5 @@
 export * from './arrayUtils';
 export * from './assertUtils';
-export * from './chalk';
 export * from './environmentUtils';
 export * from './errorUtils';
 export * from './fsUtils';
@@ -11,3 +10,4 @@ export * from './mimeTypeUtils';
 export * from './stringUtils';
 export * from './requestUtils';
 export * from './promiseUtils';
+export * from './variableUtils';

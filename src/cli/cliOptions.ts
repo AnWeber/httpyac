@@ -22,9 +22,8 @@ export interface CliOptions {
   rejectUnauthorized?: boolean;
   repeat?: RepeatOptions,
   requestTimeout?: number;
-  rootDir?: string;
-  silent?: boolean
-  verbose?: boolean
+  silent?: boolean;
+  verbose?: boolean;
   version?: boolean;
 }
 
@@ -56,13 +55,13 @@ export function parseCliOptions(rawArgs: string[]): CliOptions | undefined {
         '--json': Boolean,
         '--line': Number,
         '--name': String,
+        '--no-color': Boolean,
         '--output': String,
         '--output-failed': String,
         '--raw': Boolean,
         '--quiet': Boolean,
         '--repeat': Number,
         '--repeat-mode': String,
-        '--root': String,
         '--silent': Boolean,
         '--timeout': Number,
         '--verbose': Boolean,
@@ -102,7 +101,6 @@ export function parseCliOptions(rawArgs: string[]): CliOptions | undefined {
         type: args['--repeat-mode'] === 'sequential' ? RepeatOrder.sequential : RepeatOrder.parallel,
       } : undefined,
       requestTimeout: args['--timeout'],
-      rootDir: args['--root'],
       silent: args['--silent'],
       verbose: args['--verbose'],
       version: args['--version'],
@@ -132,12 +130,12 @@ usage: httpyac [options...] <file or glob pattern>
        --json          use json output
   -l   --line          line of the http requests
   -n   --name          name of the http requests
+       --no-color      disable color support
   -o   --output        output format of response (short, body, headers, response, exchange, none)
        --output-failed output format of failed response (short, body, headers, response, exchange, none)
        --raw           prevent formatting of response body
   -r   --repeat        repeat count for requests
        --repeat-mode   repeat mode: sequential, parallel (default)
-       --root          absolute path to root dir of project
   -s   --silent        log only request
        --timeout       maximum time allowed for connections
   -v   --verbose       make the operation more talkative

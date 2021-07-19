@@ -25,7 +25,7 @@ export class RefMetaAction implements HttpRegionAction {
         && !refHttpRegion.metaData.disabled
         && refHttpRegion !== context.httpRegion) {
         if (data.force || !refHttpRegion.response || !context.variables[data.name]) {
-          if (!data.globalScriptExecution || await executeGlobalScripts(context.httpFile, context.variables, context.httpClient)) {
+          if (!data.globalScriptExecution || await executeGlobalScripts(context)) {
             delete data.globalScriptExecution;
 
             const refContext = { ...context, httpRegion: refHttpRegion };

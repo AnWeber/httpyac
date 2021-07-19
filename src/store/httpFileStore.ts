@@ -1,6 +1,7 @@
-import { HttpFile } from './models';
-import { parseHttpFile } from './parser';
-import { fileProvider, PathLike } from './io';
+import { HttpFile, ParseOptions } from '../models';
+import { parseHttpFile } from '../parser';
+import { fileProvider, PathLike } from '../io';
+import { getEnvironments } from '../httpYacApi';
 
 interface HttpFileStoreEntry{
   version: number;
@@ -8,6 +9,8 @@ interface HttpFileStoreEntry{
   httpFile?: HttpFile;
   promise?: Promise<HttpFile>
 }
+
+export type HttpFileStoreOptions = Omit<ParseOptions, 'httpFileStore'>
 
 export class HttpFileStore {
   private readonly storeCache: Array<HttpFileStoreEntry> = [];
@@ -39,14 +42,18 @@ export class HttpFileStore {
     }
     return result;
   }
-  getOrCreate(fileName: PathLike, getText: () => Promise<string>, version: number): Promise<HttpFile> {
+
+  getOrCreate(fileName: PathLike, getText: () => Promise<string>, version: number, options: HttpFileStoreOptions): Promise<HttpFile> {
     const httpFileStoreEntry: HttpFileStoreEntry = this.getFromStore(fileName, version);
     if (version > httpFileStoreEntry.version || !httpFileStoreEntry.httpFile) {
       if (httpFileStoreEntry.promise
-          && version <= httpFileStoreEntry.version) {
+        && version <= httpFileStoreEntry.version) {
         return httpFileStoreEntry.promise;
       }
-      httpFileStoreEntry.promise = this.createHttpFile(fileName, getText)
+
+      httpFileStoreEntry.promise = getText()
+        .then(text => this.parse(fileName, text, options))
+        .then(httpFile => this.validateActiveEnvironemnt(httpFile, options))
         .then(httpFile => {
           delete httpFileStoreEntry.promise;
           if (httpFileStoreEntry.httpFile) {
@@ -68,13 +75,28 @@ export class HttpFileStore {
     return httpFileStoreEntry.promise || Promise.resolve(httpFileStoreEntry.httpFile);
   }
 
-  private async createHttpFile(fileName: PathLike, getText: () => Promise<string>) {
-    const text = await getText();
-    return await parseHttpFile(text, fileName, this);
+  private async validateActiveEnvironemnt(httpFile: HttpFile, options: HttpFileStoreOptions) {
+    if (httpFile.activeEnvironment) {
+      const environments = await getEnvironments({
+        httpFile,
+        config: options.config,
+      });
+      httpFile.activeEnvironment = httpFile.activeEnvironment.filter(env => environments.indexOf(env) >= 0);
+      if (httpFile.activeEnvironment.length === 0) {
+        httpFile.activeEnvironment = undefined;
+      }
+    }
+    return httpFile;
   }
 
-  async parse(fileName: PathLike, text: string) : Promise<HttpFile> {
-    return await parseHttpFile(text, fileName, this);
+
+  async parse(fileName: PathLike, text: string, options: HttpFileStoreOptions) : Promise<HttpFile> {
+    return await parseHttpFile(fileName, text, Object.assign({
+      httpFileStore: this,
+    }, {
+      httpFileStore: this,
+      ...options
+    }));
   }
 
   remove(fileName: PathLike): void {

@@ -1,40 +1,43 @@
-import { HttpFile, HttpRegion, HttpSymbol, HttpSymbolKind, ParserContext } from '../models';
-import { toMultiLineString, toMultiLineArray, getDisplayName, getRegionDescription } from '../utils';
-import { environmentStore } from '../environments/environmentStore';
-import { httpYacApi } from '../httpYacApi';
-import { HttpFileStore } from '../httpFileStore';
+import { HttpFile, HttpRegion, HttpRegionParser, HttpSymbol, HttpSymbolKind, ParseOptions, ParserContext } from '../models';
+import * as utils from '../utils';
+import { defaultParsers } from './defaultParser';
 import { ParserRegex } from './parserRegex';
 import { PathLike } from '../io';
+import { replacer, provider } from '../variables';
 
+export async function parseHttpFile(fileName: PathLike, text: string, options: ParseOptions): Promise<HttpFile> {
 
-export async function parseHttpFile(text: string, fileName: PathLike, httpFileStore: HttpFileStore): Promise<HttpFile> {
-
+  const rootDir = await utils.findRootDirOfFile(fileName, options.workingDir, options.config?.envDirName || 'env');
   const httpFile: HttpFile = {
-    httpRegions: [],
     fileName,
+    rootDir,
+    variableReplacers: [...replacer.defaultVariableReplacers],
+    variableProviders: [...provider.defaultVariableProviders],
+    httpRegions: [],
     variablesPerEnv: {},
-    activeEnvironment: environmentStore.activeEnvironments,
+    activeEnvironment: options.activeEnvironment
   };
-  const lines = toMultiLineArray(text);
+  const lines = utils.toMultiLineArray(text);
 
   const parserContext: ParserContext = {
     httpFile,
     httpRegion: initHttpRegion(0),
     data: {},
-    httpFileStore,
-    environmentConfig: environmentStore.environmentConfig,
+    httpFileStore: options.httpFileStore,
   };
+
+  const parsers = [...defaultParsers];
   for (let line = 0; line < lines.length; line++) {
 
     const isLineEmpty = ParserRegex.emptyLine.test(lines[line]);
-    for (const httpRegionParser of httpYacApi.httpRegionParsers) {
+    for (const httpRegionParser of parsers) {
       if (!isLineEmpty || httpRegionParser.supportsEmptyLine && isLineEmpty) {
         const httpRegionParserResult = await httpRegionParser.parse(createReader(line, lines, !!httpRegionParser.noStopOnMetaTag), parserContext);
         if (httpRegionParserResult) {
           if (httpRegionParserResult.endRegionLine !== undefined && httpRegionParserResult.endRegionLine >= 0) {
             parserContext.httpRegion.symbol.endLine = httpRegionParserResult.endRegionLine;
             parserContext.httpRegion.symbol.endOffset = lines[httpRegionParserResult.endRegionLine].length;
-            closeHttpRegion(parserContext);
+            closeHttpRegion(parserContext, parsers);
             parserContext.httpRegion = initHttpRegion(httpRegionParserResult.nextParserLine + 1);
           }
           if (httpRegionParserResult.symbols) {
@@ -50,22 +53,22 @@ export async function parseHttpFile(text: string, fileName: PathLike, httpFileSt
       }
     }
   }
-  closeHttpRegion(parserContext);
+  closeHttpRegion(parserContext, parsers);
   parserContext.httpRegion.symbol.endLine = lines.length - 1;
   parserContext.httpRegion.symbol.endOffset = lines[lines.length - 1].length;
   setSource(httpFile.httpRegions, lines);
   return httpFile;
 }
 
-function closeHttpRegion(parserContext: ParserContext) {
-  for (const obj of httpYacApi.httpRegionParsers) {
+function closeHttpRegion(parserContext: ParserContext, parsers: Array<HttpRegionParser>) {
+  for (const obj of parsers) {
     if (obj.close) {
       obj.close(parserContext);
     }
   }
   const { httpRegion } = parserContext;
-  parserContext.httpRegion.symbol.name = getDisplayName(httpRegion);
-  parserContext.httpRegion.symbol.description = getRegionDescription(httpRegion);
+  parserContext.httpRegion.symbol.name = utils.getDisplayName(httpRegion);
+  parserContext.httpRegion.symbol.description = utils.getRegionDescription(httpRegion);
   parserContext.httpFile.httpRegions.push(parserContext.httpRegion);
 }
 
@@ -76,7 +79,7 @@ function setSource(httpRegions: Array<HttpRegion>, lines: Array<string>) {
 }
 
 function setSymbolSource(symbol: HttpSymbol, lines: Array<string>): void {
-  symbol.source = toMultiLineString(lines.slice(symbol.startLine, symbol.endLine + 1));
+  symbol.source = utils.toMultiLineString(lines.slice(symbol.startLine, symbol.endLine + 1));
   let endOffset: number | undefined = symbol.endOffset - lines[symbol.endLine].length;
   if (endOffset >= 0) {
     endOffset = undefined;
@@ -113,7 +116,6 @@ function *createReader(startLine: number, lines: Array<string>, noStopOnMetaTag:
       line
     };
     if (!noStopOnMetaTag) {
-
       // if parser region is not closed stop at delimiter
       if (ParserRegex.meta.delimiter.test(textLine)) {
         break;

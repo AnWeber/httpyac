@@ -1,6 +1,6 @@
 import { ProcessorContext, TestFunction, TestResult, testSymbols } from '../models';
 import * as utils from '../utils';
-
+import { default as chalk } from 'chalk';
 
 export function testFactory({ httpRegion, scriptConsole }: ProcessorContext): TestFunction {
   const testFunction = function test(message: string, testMethod: () => void): void {
@@ -21,8 +21,6 @@ export function testFactory({ httpRegion, scriptConsole }: ProcessorContext): Te
       }
     }
     httpRegion.testResults.push(testResult);
-
-    const chalk = utils.chalkInstance();
 
     scriptConsole?.logTest?.(
       testResult.result,

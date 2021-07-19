@@ -1,7 +1,6 @@
 import { ClientCertificateOptions, HttpFile, HttpRequest, ProcessorContext, VariableReplacer, VariableReplacerType, VariableType } from '../../models';
 import { toAbsoluteFilename, isString } from '../../utils';
 import { URL } from 'url';
-import { environmentStore } from '../../environments';
 import { ParserRegex } from '../../parser';
 import { fileProvider, PathLike } from '../../io';
 
@@ -10,9 +9,9 @@ export class ClientCertVariableReplacer implements VariableReplacer {
   async replace(text: string, type: VariableType | string, context: ProcessorContext): Promise<string | undefined> {
     const { request, httpRegion, httpFile } = context;
     if (request && !httpRegion.metaData.noClientCert) {
-      if (type === VariableType.url && environmentStore.environmentConfig?.clientCertificates) {
+      if (type === VariableType.url && context.config?.clientCertificates) {
         const url = new URL(text);
-        const clientCertifcateOptions = environmentStore.environmentConfig?.clientCertificates[url.host];
+        const clientCertifcateOptions = context.config?.clientCertificates[url.host];
         if (clientCertifcateOptions) {
           await this.setClientCertificateOptions(request, clientCertifcateOptions, httpFile);
         }

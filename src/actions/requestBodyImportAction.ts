@@ -2,7 +2,6 @@ import { ActionType, HttpRegionAction, HttpRequestBodyLine, ProcessorContext, Re
 import { isMimeTypeFormUrlEncoded, isMimeTypeMultiPartFormData, isMimeTypeNewlineDelimitedJSON, isString, toAbsoluteFilename } from '../utils';
 import { fileProvider, userInteractionProvider, log } from '../io';
 import { EOL } from 'os';
-import { environmentStore } from '../environments';
 
 
 export class RequestBodyImportAction implements HttpRegionAction {
@@ -62,9 +61,9 @@ export class RequestBodyImportAction implements HttpRegionAction {
       if (context.httpRegion.metaData.injectVariables) {
         return true;
       }
-      if (environmentStore.environmentConfig?.requestBodyInjectVariablesExtensions) {
+      if (context.config?.requestBodyInjectVariablesExtensions) {
         const extname = fileProvider.extname(filename);
-        return environmentStore.environmentConfig.requestBodyInjectVariablesExtensions
+        return context.config.requestBodyInjectVariablesExtensions
           .indexOf(extname) >= 0;
       }
       return false;

@@ -1,6 +1,7 @@
 export * from './awsAuthVariableReplacer';
 export * from './basicAuthVariableReplacer';
 export * from './clientCertVariableReplacer';
+export * from './defaultVariableReplacers';
 export * from './digestAuthVariableReplacer';
 export * from './escapeVariableReplacer';
 export * from './hostVariableReplacer';

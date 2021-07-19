@@ -3,7 +3,6 @@ import { Module } from 'module';
 import { runInThisContext } from 'vm';
 import { isPromise, toEnvironmentKey } from '../utils';
 import * as got from 'got';
-import { httpYacApi } from '../httpYacApi';
 import * as httpYac from '..';
 import { testFactory } from './testMethod';
 import { fileProvider, PathLike, log } from '../io';
@@ -36,7 +35,7 @@ export class JavascriptAction implements HttpRegionAction {
   constructor(private readonly scriptData: ScriptData) { }
 
   async process(context: ProcessorContext): Promise<boolean> {
-    const { httpRegion, httpFile, request, variables, progress, scriptConsole } = context;
+    const { httpRegion, httpFile, request, variables, scriptConsole } = context;
     const defaultVariables = {
       request,
       httpRegion,
@@ -51,10 +50,8 @@ export class JavascriptAction implements HttpRegionAction {
       script: this.scriptData.script,
       fileName: httpFile.fileName,
       variables,
-      lineOffset: this.scriptData.lineOffset + 1,
-      require: {
-        progress,
-      },
+      lineOffset: this.scriptData.lineOffset,
+      require: context.require,
     });
     for (const [key] of Object.entries(defaultVariables)) {
       delete variables[key];
@@ -97,11 +94,10 @@ export async function executeScript(context: ScriptContext): Promise<Variables> 
         if (id === 'httpyac') {
           return {
             ...httpYac,
-            ...context.require || {},
           };
         }
-        if (httpYacApi.additionalRequire[id]) {
-          return httpYacApi.additionalRequire[id];
+        if (context.require && context.require[id]) {
+          return context.require[id];
         }
         return scriptModule.require(id);
       }
@@ -114,9 +110,8 @@ export async function executeScript(context: ScriptContext): Promise<Variables> 
 
     const vars = Object.entries(context.variables).map(([key]) => key).join(', ').trim();
 
-    // function call and content needs to be in one line for correct line number on error,
-    // end of function needs to be in separated line, because of comments in last line of script
-    const wrappedFunction = `(function userJS(exports, require, module, __filename, __dirname${vars.length > 0 ? `, ${vars}` : ''}){${context.script}
+    const wrappedFunction = `(function userJS(exports, require, module, __filename, __dirname${vars.length > 0 ? `, ${vars}` : ''}){
+        ${context.script}
       })`;
 
     const compiledWrapper = runInThisContext(wrappedFunction, {

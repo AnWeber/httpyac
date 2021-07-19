@@ -36,7 +36,7 @@ export class IntellijAction implements HttpRegionAction {
       script: data.script,
       fileName: context.httpFile.fileName,
       variables: intellijVars,
-      lineOffset: data.lineOffset + 1
+      lineOffset: data.lineOffset
     });
     return true;
   }

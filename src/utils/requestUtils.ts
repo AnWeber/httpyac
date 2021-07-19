@@ -1,7 +1,7 @@
 import { ContentType, HttpMethod, HttpRegion, HttpResponse, HttpResponseRequest, RequestLogger } from '../models';
 import { isString, toMultiLineString } from './stringUtils';
 import { parseMimeType } from './mimeTypeUtils';
-import { chalkInstance } from './chalk';
+import { default as chalk } from 'chalk';
 import { log } from '../io';
 
 
@@ -115,12 +115,15 @@ export function requestLoggerFactory(
         && (!httpRegion?.testResults || httpRegion.testResults.every(obj => obj.result))) {
       return;
     }
-    const chalk = chalkInstance();
-    if (httpRegion?.metaData?.title) {
-      log(chalk`{gray === ${httpRegion.metaData.title} ===}`);
-    }
-    if (httpRegion?.metaData?.description) {
-      log(chalk`{gray ${httpRegion.metaData.description}}`);
+    log('');
+    if (httpRegion?.metaData?.title || httpRegion?.metaData?.description) {
+      if (httpRegion?.metaData?.title) {
+        log(chalk`{gray === ${httpRegion.metaData.title} ===}`);
+      }
+      if (httpRegion?.metaData?.description) {
+        log(chalk`{gray ${httpRegion.metaData.description}}`);
+      }
+      log('');
     }
     if (opt.useShort) {
       log(chalk`{yellow ${response.request?.method || 'GET'}} {gray ${response.request?.url || '?'}}`);
@@ -173,7 +176,6 @@ function logRequest(request: HttpResponseRequest, options: {
   headers?: boolean,
   bodyLength?: number,
 }) {
-  const chalk = chalkInstance();
   const result: Array<string> = [];
   result.push(chalk`{cyan.bold ${request.method} ${request.url}}`);
   if (request.headers && options.headers) {
@@ -192,7 +194,6 @@ function logRequest(request: HttpResponseRequest, options: {
 }
 
 function logResponseHeader(response: HttpResponse) {
-  const chalk = chalkInstance();
   const result: Array<string> = [];
   result.push(chalk`{cyan.bold HTTP/${response.httpVersion || ''}} {cyan.bold ${response.statusCode}} {bold ${response.statusMessage}}`);
   result.push(...Object.entries(response.headers)

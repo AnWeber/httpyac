@@ -9,3 +9,6 @@ Cookie: bar=foo
 GET /cookies/delete?foo=bar
 
 
+GET /cookies/delete?bar=foo
+
+

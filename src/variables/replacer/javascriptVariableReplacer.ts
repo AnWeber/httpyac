@@ -6,7 +6,7 @@ import { isString, toMultiLineArray } from '../../utils';
 export class JavascriptVariableReplacer implements VariableReplacer {
   type = VariableReplacerType.javascript;
   async replace(text: string, _type: string, context: ProcessorContext): Promise<string | undefined> {
-    const { httpRegion, httpFile, variables, progress } = context;
+    const { httpRegion, httpFile, variables } = context;
     const variableRegex = /\{{2}([^}{2}]+)\}{2}/gu;
     let match: RegExpExecArray | null;
     let result = text;
@@ -14,11 +14,11 @@ export class JavascriptVariableReplacer implements VariableReplacer {
       const [searchValue, jsVariable] = match;
       const script = `exports.$result = (${jsVariable});`;
 
-      let lineOffset = httpRegion.symbol.startLine;
+      let lineOffset = httpRegion.symbol.startLine - 1;
       if (httpRegion.symbol.source) {
         const index = toMultiLineArray(httpRegion.symbol.source).findIndex(line => line.indexOf(searchValue) >= 0);
         if (index >= 0) {
-          lineOffset = httpRegion.symbol.startLine + index;
+          lineOffset += index;
         }
       }
       const value = await executeScript({
@@ -26,9 +26,7 @@ export class JavascriptVariableReplacer implements VariableReplacer {
         fileName: httpFile.fileName,
         variables,
         lineOffset,
-        require: {
-          progress
-        }
+        require: context.require,
       });
       if (isString(value.$result) || typeof value.$result === 'number') {
         result = result.replace(searchValue, `${value.$result}`);

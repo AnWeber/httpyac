@@ -18,6 +18,7 @@ export * from './httpTimings';
 export * from './logHandler';
 export * from './index';
 export * from './repeatOptions';
+export * from './parseOptions';
 export * from './parserContext';
 export * from './parserContextData';
 export * from './processorContext';

@@ -1,16 +1,16 @@
-import { HttpFile, VariableProvider, Variables } from '../../models';
+import { VariableProvider, VariableProviderContext, Variables } from '../../models';
 import { toEnvironmentKey } from '../../utils';
 
 export class HttpFileImportsVariableProvider implements VariableProvider {
 
-  async getVariables(env: string[] | undefined, httpFile: HttpFile): Promise<Variables> {
+  async getVariables(env: string[] | undefined, context: VariableProviderContext): Promise<Variables> {
 
     const envkey = toEnvironmentKey(env);
 
-    if (httpFile.imports) {
+    if (context.httpFile.imports) {
       const variables: Array<Variables> = [];
-      for (const httpFileLoader of httpFile.imports) {
-        const refHttpFile = await httpFileLoader(httpFile);
+      for (const httpFileLoader of context.httpFile.imports) {
+        const refHttpFile = await httpFileLoader(context.httpFile);
         if (refHttpFile) {
           if (!refHttpFile.variablesPerEnv[envkey]) {
             refHttpFile.variablesPerEnv[envkey] = {};

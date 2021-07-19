@@ -1,4 +1,4 @@
-import { promises as fs, watchFile, unwatchFile, createReadStream } from 'fs';
+import { promises as fs, createReadStream } from 'fs';
 import { join, isAbsolute, dirname, extname } from 'path';
 export type FileEnconding = 'ascii' | 'utf8' | 'utf-8' | 'utf16le' | 'ucs2' | 'ucs-2' | 'base64' | 'base64url' | 'latin1' | 'binary' | 'hex';
 
@@ -13,13 +13,9 @@ export interface FileProvider{
   readFile(fileName: PathLike, encoding: FileEnconding): Promise<string>;
   readBuffer(fileName: PathLike): Promise<Buffer>;
   readdir: (dirname: PathLike) => Promise<string[]>;
-  watchFile(fileName: PathLike, listener: () => void): WatchDispose,
   fsPath(fileName: PathLike): string;
   toString(fileName: PathLike): string;
 }
-
-export type WatchDispose = () => void;
-
 
 function toString(fileName: PathLike): string {
   if (typeof fileName === 'string') {
@@ -46,10 +42,6 @@ export const fileProvider: FileProvider = {
     return toBuffer(stream);
   },
   readdir: (path: PathLike) => fs.readdir(toString(path)),
-  watchFile: (fileName: PathLike, listener: () => void) => {
-    watchFile(toString(fileName), listener);
-    return () => unwatchFile(toString(fileName), listener);
-  },
   fsPath: toString,
   toString
 };

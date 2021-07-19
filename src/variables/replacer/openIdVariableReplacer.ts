@@ -1,5 +1,5 @@
 import { ProcessorContext, HttpClient, UserSession, VariableReplacer, VariableReplacerType, RequestLogger } from '../../models';
-import { userSessionStore } from '../../environments';
+import { userSessionStore } from '../../store';
 import * as oauth from './oauth';
 import { ParserRegex } from '../../parser';
 import { log } from '../../io';

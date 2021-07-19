@@ -1,8 +1,14 @@
+import { EnvironmentConfig } from './environmentConfig';
 import { HttpFile } from './httpFile';
 import { Variables } from './variables';
 
+export interface VariableProviderContext{
+  httpFile: HttpFile;
+  config?: EnvironmentConfig,
+}
+
 export interface VariableProvider {
   reset?(): void;
-  getEnvironments?(httpFile: HttpFile): Promise<string[]>;
-  getVariables(env: string[] | undefined, httpFile: HttpFile): Promise<Variables>;
+  getEnvironments?(context: VariableProviderContext): Promise<string[]>;
+  getVariables(env: string[] | undefined, context: VariableProviderContext): Promise<Variables>;
 }

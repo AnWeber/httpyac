@@ -2,20 +2,18 @@ import inquirer from 'inquirer';
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import * as models from '../models';
-import { HttpFileStore } from '../httpFileStore';
-import { httpYacApi } from '../httpYacApi';
+import { HttpFileStore } from '../store';
+import { send } from '../httpYacApi';
 import * as utils from '../utils';
-import { environmentStore } from '../environments';
-import { SettingsScriptHttpRegionParser } from '../parser';
 import { default as globby } from 'globby';
-import { PathLike, fileProvider, Logger } from '../io';
+import { fileProvider, Logger } from '../io';
 import { CliOptions, parseCliOptions, renderHelp, getLogLevel, CliFilterOptions } from './cliOptions';
 import { CliContext } from './cliContext';
 import { toCliJsonOutput } from './cliJsonOutput';
-import { chalkInstance } from '../utils';
+import { default as chalk } from 'chalk';
 
 
-export async function send(rawArgs: string[]): Promise<void> {
+export async function execute(rawArgs: string[]): Promise<void> {
   const cliOptions = parseCliOptions(rawArgs);
   if (!cliOptions) {
     return;
@@ -29,7 +27,12 @@ export async function send(rawArgs: string[]): Promise<void> {
     renderHelp();
     return;
   }
-  await initEnviroment(cliOptions);
+
+  if (process.platform === 'win32') {
+    // https://github.com/nodejs/node-v0.x-archive/issues/7940
+    models.testSymbols.ok = '[x]';
+    models.testSymbols.error = '[-]';
+  }
 
   try {
     const httpFiles: models.HttpFile[] = await getHttpFiles(cliOptions.fileName, !!cliOptions.editor);
@@ -44,11 +47,11 @@ export async function send(rawArgs: string[]): Promise<void> {
 
         const context = convertCliOptionsToContext(cliOptions);
         if (selection) {
-          await httpYacApi.send(Object.assign({ processedHttpRegions }, context, selection));
+          await send(Object.assign({ processedHttpRegions }, context, selection));
           jsonOutput[fileProvider.toString(selection.httpFile.fileName)] = [...processedHttpRegions];
         } else {
           for (const httpFile of httpFiles) {
-            await httpYacApi.send(Object.assign({ processedHttpRegions }, context, { httpFile }));
+            await send(Object.assign({ processedHttpRegions }, context, { httpFile }));
             jsonOutput[fileProvider.toString(httpFile.fileName)] = [...processedHttpRegions];
             processedHttpRegions.length = 0;
           }
@@ -62,7 +65,7 @@ export async function send(rawArgs: string[]): Promise<void> {
           if (cliOptions.json) {
             console.info(JSON.stringify(cliJsonOutput, null, 2));
           } else if (context.scriptConsole) {
-            const chalk = chalkInstance();
+            context.scriptConsole.info('');
             context.scriptConsole.info(chalk`{bold ${cliJsonOutput.summary.totalRequests}} requests tested ({green ${cliJsonOutput.summary.successRequests} succeeded}, {red ${cliJsonOutput.summary.failedRequests} failed})`);
           }
         }
@@ -89,6 +92,17 @@ function convertCliOptionsToContext(cliOptions: CliOptions): CliContext {
       level: getLogLevel(cliOptions),
       onlyFailedTests: cliOptions.filter === CliFilterOptions.onlyFailed
     }),
+    config: {
+      log: {
+        level: getLogLevel(cliOptions),
+      },
+      request: {
+        timeout: cliOptions.requestTimeout,
+        https: {
+          rejectUnauthorized: cliOptions.rejectUnauthorized
+        }
+      }
+    },
     logResponse: cliOptions.json ? undefined : getRequestLogger(cliOptions),
   };
 
@@ -99,13 +113,17 @@ async function getHttpFiles(fileName: string | undefined, useEditor: boolean) {
   const httpFiles: models.HttpFile[] = [];
   const httpFileStore = new HttpFileStore();
 
+  const parseOptions = {
+    workingDir: process.cwd(),
+  };
+
   if (useEditor) {
     const answer = await inquirer.prompt([{
       type: 'editor',
       message: 'input http request',
       name: 'httpFile'
     }]);
-    const file = await httpFileStore.getOrCreate(process.cwd(), async () => answer.httpFile, 0);
+    const file = await httpFileStore.getOrCreate(process.cwd(), async () => answer.httpFile, 0, parseOptions);
     httpFiles.push(file);
   } else if (fileName) {
     const paths = await globby(fileName, {
@@ -116,7 +134,7 @@ async function getHttpFiles(fileName: string | undefined, useEditor: boolean) {
     });
 
     for (const path of paths) {
-      const httpFile = await httpFileStore.getOrCreate(path, async () => await fs.readFile(path, 'utf8'), 0);
+      const httpFile = await httpFileStore.getOrCreate(path, async () => await fs.readFile(path, 'utf8'), 0, parseOptions);
       httpFiles.push(httpFile);
     }
   }
@@ -140,7 +158,7 @@ async function selectAction(httpFiles: models.HttpFile[], cliOptions: CliOptions
 
   if (!cliOptions.allRegions) {
     const httpRegionMap: Record<string, { httpRegion?: models.HttpRegion | undefined, httpFile: models.HttpFile }> = {};
-    const hasManyFiles = httpFiles.length > 0;
+    const hasManyFiles = httpFiles.length > 1;
     for (const httpFile of httpFiles) {
       httpRegionMap[hasManyFiles ? `${httpFile.fileName}: all` : 'all'] = { httpFile };
 
@@ -181,33 +199,8 @@ function getHttpRegion(httpFile: models.HttpFile, cliOptions: CliOptions): model
   return httpRegion;
 }
 
-async function initEnviroment(cliOptions: CliOptions): Promise<void> {
-  const environmentConfig: models.EnvironmentConfig & models.SettingsConfig = {
-    log: {
-      level: getLogLevel(cliOptions),
-    },
-    request: {
-      timeout: cliOptions.requestTimeout,
-      https: {
-        rejectUnauthorized: cliOptions.rejectUnauthorized
-      }
-    }
-  };
-
-  const rootDir = cliOptions.rootDir || await utils.findPackageJson(process.cwd()) || process.cwd();
-  await environmentStore.configure([rootDir], environmentConfig);
-  initHttpYacApiExtensions(environmentConfig, rootDir);
-  environmentStore.activeEnvironments = cliOptions.activeEnvironments;
-
-
-  if (process.platform === 'win32') {
-
-    // https://github.com/nodejs/node-v0.x-archive/issues/7940
-    models.testSymbols.ok = '[x]';
-    models.testSymbols.error = '[-]';
-  }
-}
-
+/*
+// TODO add settinsgscript
 function initHttpYacApiExtensions(config: models.EnvironmentConfig & models.SettingsConfig, rootDir: PathLike | undefined) {
   if (rootDir && config.httpRegionScript) {
     httpYacApi.httpRegionParsers.push(new SettingsScriptHttpRegionParser(async () => {
@@ -227,7 +220,7 @@ function initHttpYacApiExtensions(config: models.EnvironmentConfig & models.Sett
     }));
   }
 }
-
+*/
 
 function getRequestLogger(options: CliOptions): models.RequestLogger | undefined {
   const requestLoggerOptions = getRequestLoggerOptions(

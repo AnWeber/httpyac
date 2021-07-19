@@ -17,34 +17,14 @@ export interface EnvironmentConfig{
   request?: HttpRequest;
   proxy?: string;
   requestBodyInjectVariablesExtensions?: Array<string>;
-
+  clientCertificates?: Record<string, ClientCertificateOptions>,
   /** default request headers if not overwritten */
   defaultHeaders?: Record<string, string>,
 
   /** environment variables  */
   environments?: Record<string, Variables>;
-  clientCertificates?: Record<string, ClientCertificateOptions>,
-  dotenv?: {
-    enabled?: boolean;
-
-    /** default dotenv files which is active in all profiles */
-    defaultFiles?: string[];
-
-    /** relative or absolute path to folder with dotenv files */
-    dirname?: string;
-
-    /** search for .env file next to *.http files */
-    variableProviderEnabled?: boolean;
-  },
-  intellij?: {
-    enabled?: boolean;
-
-    /** relative or absolute path to folder with intellij variables files */
-    dirname?: string;
-
-    /** search for http-client.env.json file next to *.http files */
-    variableProviderEnabled?: boolean;
-  },
+  /** relative or absoulte path to env dir */
+  envDirName?: string;
 }
 
 export interface SettingsConfig {

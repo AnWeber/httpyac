@@ -5,6 +5,7 @@ import { HttpRegion } from './httpRegion';
 import { HttpRequest } from './httpRequest';
 import { RepeatOptions } from './repeatOptions';
 import { Variables } from './variables';
+import { EnvironmentConfig } from './environmentConfig';
 
 
 export type Dispose = () => void;
@@ -17,6 +18,7 @@ export interface Progress{
 
 export interface HttpFileSendContext{
   httpFile: HttpFile;
+  config?: EnvironmentConfig,
   progress?: Progress;
   httpClient?: HttpClient;
   httpRegionPredicate?: (obj: HttpRegion) => boolean;
@@ -24,6 +26,7 @@ export interface HttpFileSendContext{
   scriptConsole?: ConsoleLogHandler;
   logResponse?: RequestLogger;
   repeat?: RepeatOptions;
+  require?: Record<string, unknown>,
 }
 
 export interface HttpRegionsSendContext extends HttpFileSendContext{
@@ -40,3 +43,6 @@ export interface ProcessorContext extends HttpRegionSendContext{
   cancelVariableReplacer?: () => void;
   showProgressBar?: boolean;
 }
+
+
+export type SendContext = HttpRegionSendContext | HttpFileSendContext | HttpRegionsSendContext;

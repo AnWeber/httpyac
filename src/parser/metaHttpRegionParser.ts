@@ -1,7 +1,7 @@
 import { HttpFile, HttpSymbol, HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, HttpRegion } from '../models';
 import { toAbsoluteFilename } from '../utils';
 import { RefMetaAction, LoopMetaAction, LoopMetaType } from '../actions';
-import { HttpFileStore } from '../httpFileStore';
+import { HttpFileStore } from '../store';
 import { ParserRegex } from './parserRegex';
 import { fileProvider, log } from '../io';
 
@@ -135,7 +135,10 @@ export class MetaHttpRegionParser implements HttpRegionParser {
       httpFile.imports.push(async (httpFile: HttpFile) => {
         const absoluteFileName = await toAbsoluteFilename(fileName, httpFile.fileName);
         if (absoluteFileName) {
-          return await httpFileStore.getOrCreate(absoluteFileName, () => fileProvider.readFile(absoluteFileName, 'utf-8'), 0);
+          return await httpFileStore.getOrCreate(absoluteFileName, () => fileProvider.readFile(absoluteFileName, 'utf-8'), 0, {
+            workingDir: httpFile.rootDir,
+            activeEnvironment: httpFile.activeEnvironment,
+          });
         }
         return false;
       });

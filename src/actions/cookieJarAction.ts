@@ -1,15 +1,15 @@
 import { ActionType, HttpRegionAction, ProcessorContext } from '../models';
-import { cookieStore, environmentStore } from '../environments';
+import { cookieStore } from '../store';
 import { getHeader, isString } from '../utils';
 
 export class CookieJarAction implements HttpRegionAction {
   type = ActionType.cookieJar;
 
-  async process({ request, httpRegion }: ProcessorContext) : Promise<boolean> {
+  async process({ request, httpRegion, httpFile, config }: ProcessorContext) : Promise<boolean> {
     if (request
       && !httpRegion.metaData.noCookieJar
-      && environmentStore.environmentConfig?.cookieJarEnabled) {
-      const jar = cookieStore.jar;
+      && config?.cookieJarEnabled) {
+      const jar = cookieStore.getCookieJar(httpFile);
       if (request.headers && request.url) {
         const cookieHeader = getHeader(request.headers, 'cookie');
         if (cookieHeader) {
