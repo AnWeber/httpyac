@@ -113,6 +113,9 @@ export async function executeScript(context: ScriptContext): Promise<Variables> 
     scriptRequire.resolve = (req: unknown) => (Module as any)._resolveFilename(req, scriptModule);
 
     const vars = Object.entries(context.variables).map(([key]) => key).join(', ').trim();
+
+    // function call and content needs to be in one line for correct line number on error,
+    // end of function needs to be in separated line, because of comments in last line of script
     const wrappedFunction = `(function userJS(exports, require, module, __filename, __dirname${vars.length > 0 ? `, ${vars}` : ''}){${context.script}
       })`;
 
