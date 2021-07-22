@@ -37,6 +37,7 @@ export class RequestBodyImportAction implements HttpRegionAction {
                 strings.length = 0;
               }
               body.push(line);
+              strings.push('');
             }
           }
 
