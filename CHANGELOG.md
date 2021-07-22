@@ -2,7 +2,7 @@
 
 #### Features
 * add new option `--raw` to prevent pretty print of body
-* add pretty print for xml (Anweber/vscode#56)
+* add pretty print for xml (Anweber/vscode-httpyac#56)
 
 #### Fix
 * missing blank line after file import in multipart/formdata (#57)
