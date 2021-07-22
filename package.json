@@ -73,7 +73,7 @@
 		"dotenv": "^10.0.0",
 		"encodeurl": "^1.0.2",
 		"filesize": "^7.0.0",
-		"globby": "^11.0.4",
+		"globby": "^12.0.0",
 		"got": "^11.8.2",
 		"http-proxy-agent": "^4.0.1",
 		"https-proxy-agent": "^5.0.0",
