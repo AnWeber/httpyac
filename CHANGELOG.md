@@ -1,3 +1,13 @@
+## 2.21.0 (2021-07-22)
+
+#### Features
+* add new option `--raw` to prevent pretty print of body
+* add pretty print for xml (Anweber/vscode#56)
+
+#### Fix
+* missing blank line after file import in multipart/formdata (#57)
+
+
 ## 2.20.0 (2021-07-18)
 
 #### Features
