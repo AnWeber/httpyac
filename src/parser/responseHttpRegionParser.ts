@@ -1,7 +1,7 @@
 import { HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, HttpSymbolKind, ParserContext } from '../models';
 import { ParserRegex } from './parserRegex';
 import { toMultiLineString, parseContentType } from '../utils';
-import { setParseBody } from '../io';
+import { setAdditionalBody } from '../io';
 
 export class ResponseHttpRegionParser implements HttpRegionParser {
   supportsEmptyLine = true;
@@ -75,7 +75,7 @@ export class ResponseHttpRegionParser implements HttpRegionParser {
         response.body = body;
         response.rawBody = Buffer.from(body);
         response.contentType = parseContentType(response.headers);
-        setParseBody(response);
+        setAdditionalBody(response);
       }
 
       delete context.data.httpResponseSymbol;

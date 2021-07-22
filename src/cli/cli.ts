@@ -230,21 +230,34 @@ function initHttpYacApiExtensions(config: models.EnvironmentConfig & models.Sett
 
 
 function getRequestLogger(options: CliOptions): models.RequestLogger | undefined {
-  const requestLoggerOptions = getOptions(options.output, options.filter === CliFilterOptions.onlyFailed);
+  const requestLoggerOptions = getRequestLoggerOptions(
+    options.output,
+    options.filter === CliFilterOptions.onlyFailed,
+    !options.raw
+  );
   if (requestLoggerOptions) {
     return utils.requestLoggerFactory(
       console.info,
       requestLoggerOptions,
-      options.outputFailed ? getOptions(options.outputFailed, options.filter === CliFilterOptions.onlyFailed) : undefined
+      options.outputFailed ? getRequestLoggerOptions(
+        options.outputFailed,
+        options.filter === CliFilterOptions.onlyFailed,
+        !options.raw
+      ) : undefined
     );
   }
   return undefined;
 }
-function getOptions(output: string | undefined, onlyFailed: boolean) : utils.RequestLoggerFactoryOptions | undefined {
+function getRequestLoggerOptions(
+  output: string | undefined,
+  onlyFailed: boolean,
+  responseBodyPrettyPrint: boolean
+): utils.RequestLoggerFactoryOptions | undefined {
   switch (output) {
     case 'body':
       return {
         responseBodyLength: 0,
+        responseBodyPrettyPrint,
         onlyFailed
       };
     case 'headers':
@@ -257,6 +270,7 @@ function getOptions(output: string | undefined, onlyFailed: boolean) : utils.Req
     case 'response':
       return {
         responseHeaders: true,
+        responseBodyPrettyPrint,
         responseBodyLength: 0,
         onlyFailed
       };
@@ -269,6 +283,7 @@ function getOptions(output: string | undefined, onlyFailed: boolean) : utils.Req
       return {
         requestOutput: true,
         requestHeaders: true,
+        responseBodyPrettyPrint,
         requestBodyLength: 0,
         responseHeaders: true,
         responseBodyLength: 0,

@@ -1,12 +1,12 @@
 import { HttpClient, HttpClientContext, HttpRequest, HttpResponse, RepeatOrder } from '../models';
-import { isString, isMimeTypeJSON, parseContentType } from '../utils';
+import { isString, isMimeTypeJSON, isMimeTypeXml, parseContentType } from '../utils';
 import { default as got, OptionsOfUnknownResponseBody, CancelError, Response } from 'got';
 import merge from 'lodash/merge';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { default as filesize } from 'filesize';
 import { log } from './logger';
-
+import xmlFormat from 'xml-formatter';
 
 export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined) : HttpClient {
   return async function gotHttpClient(request: HttpRequest, context: HttpClientContext) : Promise<HttpResponse | false> {
@@ -140,18 +140,29 @@ function toHttpResponse(response: Response<unknown>): HttpResponse {
     httpResponse.httpVersion = httpResponse.httpVersion.slice('HTTP/'.length);
   }
 
-  setParseBody(httpResponse);
+  setAdditionalBody(httpResponse);
   return httpResponse;
 }
 
-export function setParseBody(httpResponse: HttpResponse) : void {
-  if (isMimeTypeJSON(httpResponse.contentType)
-    && isString(httpResponse.body)
+export function setAdditionalBody(httpResponse: HttpResponse): void {
+  if (isString(httpResponse.body)
     && httpResponse.body.length > 0) {
-    try {
-      httpResponse.parsedBody = JSON.parse(httpResponse.body);
-    } catch (err) {
-      log.warn('json parse error', httpResponse.body, err);
+    if (isMimeTypeJSON(httpResponse.contentType)) {
+      try {
+        httpResponse.parsedBody = JSON.parse(httpResponse.body);
+        httpResponse.prettyPrintBody = JSON.stringify(httpResponse.parsedBody, null, 2);
+      } catch (err) {
+        log.warn('json parse error', httpResponse.body, err);
+      }
+    } else if (isMimeTypeXml(httpResponse.contentType)) {
+      try {
+        httpResponse.prettyPrintBody = xmlFormat(httpResponse.body, {
+          collapseContent: true,
+          indentation: '  ',
+        });
+      } catch (err) {
+        log.warn('xml format error', httpResponse.body, err);
+      }
     }
   }
 }

@@ -36,6 +36,7 @@ usage: httpyac [options...] <file or glob pattern>
   -n   --name          name of the http requests
   -o   --output        output format of response (short, body, headers, response, exchange, none)
        --output-failed output format of failed response (short, body, headers, response, exchange, none)
+       --raw           prevent formatting of response body
   -r   --repeat        repeat count for requests
        --repeat-mode   repeat mode: sequential, parallel (default)
        --root          absolute path to root dir of project

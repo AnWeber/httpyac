@@ -43,7 +43,7 @@ access-control-allow-credentials: true
 
 <!--  A SAMPLE set of slides  -->
 
-<slideshow 
+<slideshow
     title="Sample Slide Show"
     date="Date of publication"
     author="Yours Truly"
@@ -63,3 +63,5 @@ access-control-allow-credentials: true
     </slide>
 
 </slideshow>
+
+GET http://www.thomas-bayer.com/axis2/services/CSV2XMLService?wsdl

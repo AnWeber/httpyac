@@ -56,7 +56,7 @@ export function toMarkdownResponse(response: HttpResponse, options?: {
   if (options?.body && isString(response.body)) {
     result.push('');
     result.push(`\`\`\`${getMarkdownSyntax(response.contentType)}`);
-    result.push(joinMarkdown(toMultiLineArray(options.prettyPrint && response.parsedBody ? JSON.stringify(response.parsedBody, null, 2) : response.body)));
+    result.push(joinMarkdown(toMultiLineArray(options.prettyPrint && response.prettyPrintBody ? response.prettyPrintBody : response.body)));
     result.push('```');
   }
   return result;

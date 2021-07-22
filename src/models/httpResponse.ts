@@ -11,6 +11,7 @@ export interface HttpResponse{
   contentType?: ContentType;
   body?: unknown;
   parsedBody?: unknown;
+  prettyPrintBody?: string;
   rawBody?: Buffer;
   request?: HttpResponseRequest;
   meta?: Record<string, unknown>

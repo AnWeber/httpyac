@@ -93,6 +93,7 @@ export interface RequestLoggerFactoryOptions {
   requestHeaders?: boolean;
   requestBodyLength?: number;
   responseHeaders?: boolean;
+  responseBodyPrettyPrint?: boolean,
   responseBodyLength?: number;
   onlyFailed?: boolean;
 }
@@ -146,8 +147,8 @@ export function requestLoggerFactory(
           result.push('');
         }
         let body = response.body;
-        if (response.parsedBody) {
-          body = JSON.stringify(response.parsedBody, null, 2);
+        if (options.responseBodyPrettyPrint && response.prettyPrintBody) {
+          body = response.prettyPrintBody;
         }
         body = getPartOfBody(body, opt.responseBodyLength);
         result.push(body);

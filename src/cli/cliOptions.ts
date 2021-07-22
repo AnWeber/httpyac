@@ -18,6 +18,7 @@ export interface CliOptions {
   json?: boolean;
   output?: string,
   outputFailed?: string,
+  raw?: boolean,
   rejectUnauthorized?: boolean;
   repeat?: RepeatOptions,
   requestTimeout?: number;
@@ -57,6 +58,7 @@ export function parseCliOptions(rawArgs: string[]): CliOptions | undefined {
         '--name': String,
         '--output': String,
         '--output-failed': String,
+        '--raw': Boolean,
         '--quiet': Boolean,
         '--repeat': Number,
         '--repeat-mode': String,
@@ -93,6 +95,7 @@ export function parseCliOptions(rawArgs: string[]): CliOptions | undefined {
       json: args['--json'],
       output: args['--output'],
       outputFailed: args['--output-failed'],
+      raw: args['--raw'],
       rejectUnauthorized: args['--insecure'] !== undefined ? !args['--insecure'] : undefined,
       repeat: args['--repeat'] ? {
         count: args['--repeat'],
@@ -131,6 +134,7 @@ usage: httpyac [options...] <file or glob pattern>
   -n   --name          name of the http requests
   -o   --output        output format of response (short, body, headers, response, exchange, none)
        --output-failed output format of failed response (short, body, headers, response, exchange, none)
+       --raw           prevent formatting of response body
   -r   --repeat        repeat count for requests
        --repeat-mode   repeat mode: sequential, parallel (default)
        --root          absolute path to root dir of project
