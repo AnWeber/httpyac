@@ -1,7 +1,6 @@
 import { initHttpClient, log } from './io';
 import * as models from './models';
 import * as utils from './utils';
-import { defaultVariableProviders } from './variables/provider';
 import { default as chalk } from 'chalk';
 
 
@@ -77,7 +76,7 @@ async function createEmptyProcessorContext<T extends models.VariableProviderCont
 }> {
   context.config = await getEnviromentConfig(context);
 
-  log.options.level = context.config?.log?.level || models.LogLevel.warn;
+  log.options.level = context.config?.log?.level ?? models.LogLevel.warn;
   if (context.config?.log?.supportAnsiColors === false) {
     chalk.level = 0;
   }
@@ -91,7 +90,7 @@ async function createEmptyProcessorContext<T extends models.VariableProviderCont
 async function getEnviromentConfig(context: models.VariableProviderContext) {
   const environmentConfigs : Array<models.EnvironmentConfig> = [];
   if (context.httpFile.rootDir) {
-    const fileConfig = await utils.getHttpacJsonConfig(context.httpFile.rootDir);
+    const fileConfig = await utils.getHttpacConfig(context.httpFile.rootDir);
     if (fileConfig) {
       environmentConfigs.push(fileConfig);
     }
@@ -135,31 +134,33 @@ function showDeprectationWarning(config: models.EnvironmentConfig) {
 
 
 async function getVariables(context: models.VariableProviderContext): Promise<Record<string, unknown>> {
-  const variables = Object.assign({
-  },
-  ...(await Promise.all(
-    defaultVariableProviders
-      .map(variableProvider => variableProvider.getVariables(context.httpFile.activeEnvironment, context))
-  )));
+
+  const vars = (await context.httpFile.hooks.provideVariables.trigger(context.httpFile.activeEnvironment, context));
+  if (vars === models.HookCancel) {
+    return {};
+  }
+  const variables = Object.assign(
+    {},
+    ...vars
+  );
   log.debug(variables);
   return variables;
 }
 
 
 export async function getEnvironments(context: models.VariableProviderContext) : Promise<Array<string>> {
-  const result: Array<string> = [];
-  for (const variableProvider of context.httpFile.variableProviders) {
-    if (variableProvider.getEnvironments) {
-      result.push(...await variableProvider.getEnvironments(context));
-    }
-  }
-  if (result && result.length > 0) {
+
+  const result = (await context.httpFile.hooks.provideEnvironments.trigger(context));
+
+  if (result !== models.HookCancel && result.length > 0) {
     return result.reduce((prev, current) => {
-      if (prev.indexOf(current) < 0) {
-        prev.push(current);
+      for (const cur of current) {
+        if (prev.indexOf(cur) < 0) {
+          prev.push(cur);
+        }
       }
       return prev;
     }, [] as Array<string>).sort();
   }
-  return result;
+  return [];
 }

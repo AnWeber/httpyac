@@ -3,7 +3,7 @@ import { cookieStore } from '../store';
 import { getHeader, isString } from '../utils';
 
 export class CookieJarAction implements HttpRegionAction {
-  type = ActionType.cookieJar;
+  id = ActionType.cookieJar;
 
   async process({ request, httpRegion, httpFile, config }: ProcessorContext) : Promise<boolean> {
     if (request

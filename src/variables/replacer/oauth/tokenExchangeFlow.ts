@@ -1,7 +1,7 @@
 import { OpenIdConfiguration, assertConfiguration } from './openIdConfiguration';
 import { OpenIdInformation, requestOpenIdInformation } from './openIdInformation';
 import { toQueryParams, decodeJWT } from '../../../utils';
-import { HttpClient, RequestLogger } from '../../../models';
+import { ProcessorContext } from '../../../models';
 import encodeUrl from 'encodeurl';
 
 export class TokenExchangeFlow {
@@ -14,7 +14,7 @@ export class TokenExchangeFlow {
 
   static async perform(config: OpenIdConfiguration,
     openIdInformation: OpenIdInformation,
-    context: { httpClient: HttpClient, logResponse?: RequestLogger }): Promise<OpenIdInformation | false> {
+    context: ProcessorContext): Promise<OpenIdInformation | false> {
     if (openIdInformation) {
       const jwtToken = decodeJWT(openIdInformation.accessToken);
 
@@ -39,8 +39,7 @@ export class TokenExchangeFlow {
         id: openIdInformation.id,
         title: `${openIdInformation.title} (token exchange)`,
         description: openIdInformation.description,
-        logResponse: context.logResponse,
-      });
+      }, context);
 
     }
     return false;

@@ -2,6 +2,7 @@ import { OpenIdConfiguration, assertConfiguration } from './openIdConfiguration'
 import { OpenIdInformation, requestOpenIdInformation } from './openIdInformation';
 import { OpenIdFlow, OpenIdFlowContext } from './openIdFlow';
 import { toQueryParams } from '../../../utils';
+import { ProcessorContext } from '../../../models';
 
 class ClientCredentialsFlow implements OpenIdFlow {
   supportsFlow(flow: string): boolean {
@@ -16,7 +17,7 @@ class ClientCredentialsFlow implements OpenIdFlow {
   }
 
 
-  async perform(config: OpenIdConfiguration, context: OpenIdFlowContext): Promise<OpenIdInformation | false> {
+  async perform(config: OpenIdConfiguration, options: OpenIdFlowContext, context: ProcessorContext): Promise<OpenIdInformation | false> {
     return requestOpenIdInformation({
       url: config.tokenEndpoint,
       method: 'POST',
@@ -31,10 +32,10 @@ class ClientCredentialsFlow implements OpenIdFlow {
     }, {
       httpClient: context.httpClient,
       config,
-      id: context.cacheKey,
+      id: options.cacheKey,
       title: `clientCredentials: ${config.clientId}`,
-      description: `${config.variablePrefix} - ${config.tokenEndpoint}`
-    });
+      description: `${config.variablePrefix} - ${config.tokenEndpoint}`,
+    }, context);
   }
 }
 

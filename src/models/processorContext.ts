@@ -1,7 +1,7 @@
 import { ConsoleLogHandler, RequestLogger } from './logHandler';
 import { HttpClient } from './httpClient';
 import { HttpFile } from './httpFile';
-import { HttpRegion } from './httpRegion';
+import { HttpRegion, ProcessedHttpRegion } from './httpRegion';
 import { HttpRequest } from './httpRequest';
 import { RepeatOptions } from './repeatOptions';
 import { Variables } from './variables';
@@ -16,13 +16,18 @@ export interface Progress{
   report?: (value: { message?: string, increment?: number }) => void;
 }
 
+export interface VariableProviderContext{
+  httpFile: HttpFile;
+  config?: EnvironmentConfig,
+}
+
 export interface HttpFileSendContext{
   httpFile: HttpFile;
   config?: EnvironmentConfig,
   progress?: Progress;
   httpClient?: HttpClient;
   httpRegionPredicate?: (obj: HttpRegion) => boolean;
-  processedHttpRegions?: Array<HttpRegion>;
+  processedHttpRegions?: Array<ProcessedHttpRegion>;
   scriptConsole?: ConsoleLogHandler;
   logResponse?: RequestLogger;
   repeat?: RepeatOptions;
@@ -40,7 +45,6 @@ export interface ProcessorContext extends HttpRegionSendContext{
   httpClient: HttpClient;
   variables: Variables;
   request?: HttpRequest;
-  cancelVariableReplacer?: () => void;
   showProgressBar?: boolean;
 }
 

@@ -11,7 +11,7 @@ interface InternalRefData {
 }
 
 export class RefMetaAction implements HttpRegionAction {
-  type = ActionType.ref;
+  id = ActionType.ref;
 
   constructor(private readonly data: RefMetaHttpRegionData) { }
 

@@ -1,16 +1,18 @@
-import { HttpFile, ParseOptions } from '../models';
-import { parseHttpFile } from '../parser';
-import { fileProvider, PathLike } from '../io';
+import * as models from '../models';
+import { initParseAfterRegionHook, initParseHook, parseHttpFile } from '../parser';
+import { fileProvider, PathLike, log } from '../io';
 import { getEnvironments } from '../httpYacApi';
+import { replacer, provider } from '../variables';
+import * as utils from '../utils';
 
 interface HttpFileStoreEntry{
   version: number;
   cacheKey: string;
-  httpFile?: HttpFile;
-  promise?: Promise<HttpFile>
+  httpFile?: models.HttpFile;
+  promise?: Promise<models.HttpFile>
 }
 
-export type HttpFileStoreOptions = Omit<ParseOptions, 'httpFileStore'>
+export type HttpFileStoreOptions = Omit<models.ParseOptions, 'httpFileStore'>
 
 export class HttpFileStore {
   private readonly storeCache: Array<HttpFileStoreEntry> = [];
@@ -28,13 +30,13 @@ export class HttpFileStore {
     return httpFileStoreEntry;
   }
 
-  get(fileName: PathLike): HttpFile | undefined {
+  get(fileName: PathLike): models.HttpFile | undefined {
     const cacheKey = fileProvider.toString(fileName);
     return this.storeCache.find(obj => obj.cacheKey === cacheKey)?.httpFile;
   }
 
-  getAll(): Array<HttpFile> {
-    const result: Array<HttpFile> = [];
+  getAll(): Array<models.HttpFile> {
+    const result: Array<models.HttpFile> = [];
     for (const store of this.storeCache) {
       if (store.httpFile) {
         result.push(store.httpFile);
@@ -43,7 +45,7 @@ export class HttpFileStore {
     return result;
   }
 
-  getOrCreate(fileName: PathLike, getText: () => Promise<string>, version: number, options: HttpFileStoreOptions): Promise<HttpFile> {
+  getOrCreate(fileName: PathLike, getText: () => Promise<string>, version: number, options: HttpFileStoreOptions): Promise<models.HttpFile> {
     const httpFileStoreEntry: HttpFileStoreEntry = this.getFromStore(fileName, version);
     if (version > httpFileStoreEntry.version || !httpFileStoreEntry.httpFile) {
       if (httpFileStoreEntry.promise
@@ -75,7 +77,7 @@ export class HttpFileStore {
     return httpFileStoreEntry.promise || Promise.resolve(httpFileStoreEntry.httpFile);
   }
 
-  private async validateActiveEnvironemnt(httpFile: HttpFile, options: HttpFileStoreOptions) {
+  private async validateActiveEnvironemnt(httpFile: models.HttpFile, options: HttpFileStoreOptions) {
     if (httpFile.activeEnvironment) {
       const environments = await getEnvironments({
         httpFile,
@@ -90,13 +92,9 @@ export class HttpFileStore {
   }
 
 
-  async parse(fileName: PathLike, text: string, options: HttpFileStoreOptions) : Promise<HttpFile> {
-    return await parseHttpFile(fileName, text, Object.assign({
-      httpFileStore: this,
-    }, {
-      httpFileStore: this,
-      ...options
-    }));
+  async parse(fileName: PathLike, text: string, options: HttpFileStoreOptions): Promise<models.HttpFile> {
+    const httpFile = await this.initHttpFile(fileName, options);
+    return await parseHttpFile(httpFile, text, this);
   }
 
   remove(fileName: PathLike): void {
@@ -120,5 +118,37 @@ export class HttpFileStore {
 
   clear() : void {
     this.storeCache.length = 0;
+  }
+
+  private async initHttpFile(fileName: PathLike, options: HttpFileStoreOptions) {
+    const rootDir = await utils.findRootDirOfFile(fileName, options.workingDir, options.config?.envDirName || 'env');
+    const httpFile: models.HttpFile = {
+      fileName,
+      rootDir,
+      hooks: {
+        parse: initParseHook(),
+        parseAfterRegion: initParseAfterRegionHook(),
+        replaceVariable: replacer.initReplaceVariableHook(),
+        provideEnvironments: provider.initProvideEnvironmentsHook(),
+        provideVariables: provider.initProvideVariablesHook(),
+        beforeRequest: new models.BeforeRequestHook(),
+        afterRequest: new models.AfterRequestHook(),
+        responseLogging: new models.ResponseLoggingHook(),
+      },
+      httpRegions: [],
+      variablesPerEnv: {},
+      activeEnvironment: options.activeEnvironment
+    };
+
+    if (rootDir) {
+      const fileConfig = await utils.getHttpacConfig(rootDir);
+
+      const result = fileConfig?.configureHooks?.(httpFile.hooks, { httpFile, log });
+      if (utils.isPromise(result)) {
+        await result;
+      }
+    }
+
+    return httpFile;
   }
 }

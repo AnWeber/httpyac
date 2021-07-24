@@ -17,7 +17,8 @@ export interface GqlPostRequest{
 
 
 export class GqlAction implements HttpRegionAction {
-  type = ActionType.gql;
+  id = ActionType.gql;
+  after = ActionType.requestBodyImport;
 
   constructor(private readonly gqlData: GqlData) {}
 

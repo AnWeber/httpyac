@@ -4,7 +4,7 @@ import { decodeJWT, isString, JWTToken, toEnvironmentKey } from '../utils';
 import { isValidVariableName } from './javascriptAction';
 
 export class ResponseAsVariableAction implements HttpRegionAction {
-  type = ActionType.response;
+  id = ActionType.response;
 
 
   async process(context: ProcessorContext): Promise<boolean> {
@@ -44,7 +44,8 @@ export class ResponseAsVariableAction implements HttpRegionAction {
 
         let checkEntries = entries;
         if (isString(httpRegion.metaData.jwt)) {
-          checkEntries = entries.filter(([key]) => httpRegion.metaData.jwt.indexOf(key) >= 0);
+          const jwt = httpRegion.metaData.jwt;
+          checkEntries = entries.filter(([key]) => jwt.indexOf(key) >= 0);
         }
         for (const [key, value] of checkEntries) {
           const val = this.parseJwtToken(value);

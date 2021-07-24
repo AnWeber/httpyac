@@ -1,5 +1,5 @@
-import { log } from '../io';
 import * as models from '../models';
+import { cloneResponse } from './requestUtils';
 
 
 export function getDisplayName(httpRegion: models.HttpRegion, defaultName = 'global'): string {
@@ -39,38 +39,35 @@ export async function processHttpRegionActions(context: models.ProcessorContext,
 
   try {
     context.scriptConsole?.collectMessages?.();
-    if (context.processedHttpRegions && !isGlobalHttpRegion(context.httpRegion)) {
-      context.processedHttpRegions.push(context.httpRegion);
+
+
+    if (context.progress) {
+      context.showProgressBar = showProgressBar;
     }
-    for (const action of context.httpRegion.actions) {
-      log.trace(`action ${action.type} executing`);
-      if (context.progress) {
-        context.showProgressBar = showProgressBar;
+    if (context.progress?.report) {
+      context.progress.report({ message: `${getDisplayName(context.httpRegion)}` });
+    }
+
+    const result = await context.httpRegion.hooks.execute.trigger(context);
+
+
+    const processedHttpRegion = await toProcessedHttpRegion(context);
+    if (processedHttpRegion) {
+      if (!processedHttpRegion.metaData.noLog
+        && processedHttpRegion.response
+        && context.logResponse) {
+        context.logResponse(processedHttpRegion.response, context.httpRegion);
       }
-      if (context.progress?.report) {
-        context.progress.report({ message: `${getDisplayName(context.httpRegion)}` });
-      }
-      if (!context.httpRegion.metaData.disabled) {
-        if (!await action.process(context)) {
-          log.trace(`processs canceled by action ${action.type}`);
-          return false;
-        }
-        if (context.progress?.isCanceled()) {
-          log.trace(`processs canceled by progress after ${action.type}`);
-          return false;
-        }
+      if (context.processedHttpRegions && !isGlobalHttpRegion(context.httpRegion)) {
+        context.processedHttpRegions.push(processedHttpRegion);
       }
     }
-    if (!context.httpRegion.metaData.noLog
-      && context.httpRegion.response
-      && context.logResponse) {
-      context.logResponse(context.httpRegion.response, context.httpRegion);
-    }
-    return true;
+    return result !== models.HookCancel && result.every(obj => !!obj);
   } finally {
     if (!context.httpRegion.metaData.noLog) {
       context.scriptConsole?.flush?.();
     }
+
   }
 }
 
@@ -91,6 +88,27 @@ export async function executeGlobalScripts(context: {
     }
   }
   return true;
+}
+
+export async function toProcessedHttpRegion(context: models.ProcessorContext): Promise<models.ProcessedHttpRegion | undefined> {
+  let response: models.HttpResponse | undefined;
+  if (context.httpRegion.response) {
+    const result = await context.httpFile.hooks.responseLogging.trigger(cloneResponse(context.httpRegion.response), context);
+    if (result === models.HookCancel) {
+      return undefined;
+    }
+    response = result;
+  }
+  return {
+    metaData: context.httpRegion.metaData && {
+      ...context.httpRegion.metaData,
+    },
+    testResults: context.httpRegion.testResults,
+    request: context.httpRegion.request && {
+      ...context.httpRegion.request,
+    },
+    response
+  };
 }
 
 

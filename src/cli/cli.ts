@@ -199,29 +199,6 @@ function getHttpRegion(httpFile: models.HttpFile, cliOptions: CliOptions): model
   return httpRegion;
 }
 
-/*
-// TODO add settinsgscript
-function initHttpYacApiExtensions(config: models.EnvironmentConfig & models.SettingsConfig, rootDir: PathLike | undefined) {
-  if (rootDir && config.httpRegionScript) {
-    httpYacApi.httpRegionParsers.push(new SettingsScriptHttpRegionParser(async () => {
-      let fileName: PathLike | undefined = config.httpRegionScript;
-      if (typeof fileName === 'string') {
-        if (!fileProvider.isAbsolute(fileName)) {
-          fileName = fileProvider.joinPath(rootDir, fileName);
-        }
-        try {
-          const script = await fileProvider.readFile(fileName, 'utf-8');
-          return { script, lineOffset: 0 };
-        } catch (err) {
-          console.trace(`file not found: ${fileName}`);
-        }
-      }
-      return undefined;
-    }));
-  }
-}
-*/
-
 function getRequestLogger(options: CliOptions): models.RequestLogger | undefined {
   const requestLoggerOptions = getRequestLoggerOptions(
     options.output,

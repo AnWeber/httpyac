@@ -202,3 +202,24 @@ function logResponseHeader(response: HttpResponse) {
     .sort());
   return result;
 }
+
+
+export function cloneResponse(response: HttpResponse): HttpResponse {
+  const clone: HttpResponse = {
+    statusCode: response.statusCode,
+    statusMessage: response.statusMessage,
+    headers: response.headers,
+    body: response.body,
+    timings: response.timings,
+    meta: response.meta,
+  };
+  if (response.request) {
+    clone.request = {
+      method: response.request.method,
+      url: response.request.url,
+      headers: response.request.headers,
+      body: response.request.body,
+    };
+  }
+  return clone;
+}

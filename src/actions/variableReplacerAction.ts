@@ -1,53 +1,52 @@
-import { ActionType, HttpRegionAction, HttpRequest, HttpRequestBodyLine, ProcessorContext, VariableType } from '../models';
+import { ActionType, HttpRegionAction, HttpRequest, HttpRequestBodyLine, ProcessorContext, VariableType, HookCancel } from '../models';
 import { replaceVariables } from './variableAction';
 import { isString } from '../utils';
 import { log } from '../io';
 
 
-type VarReplacer = (value: string, type: VariableType | string) => Promise<string | undefined>;
-
 export class VariableReplacerAction implements HttpRegionAction {
-  type = ActionType.variableReplacer;
+  id = ActionType.variableReplacer;
 
 
   async process(context: ProcessorContext): Promise<boolean> {
     if (context.request) {
-      let cancel = false;
-      context.cancelVariableReplacer = () => {
-        cancel = true;
-      };
 
-      const replacer: VarReplacer = async (value: string, type: VariableType | string) => {
-        if (!cancel) {
-          return await replaceVariables(value, type, context);
-        }
-        log.trace(`variableReplacer canceled with type ${type}: ${value}`);
-        return value;
-      };
 
       if (context.request.url) {
         log.trace('variableReplacer replace url');
-        context.request.url = await replacer(context.request.url, VariableType.url) || context.request.url;
+        const result = await replaceVariables(context.request.url, VariableType.url, context) || context.request.url;
+        if (result === HookCancel) {
+          return false;
+        }
+        context.request.url = result;
       }
-      await this.replaceVariablesInBody(context.request, replacer);
-      await this.replaceVariablesInHeader(context.request, replacer);
-      return !cancel;
+      if (await this.replaceVariablesInBody(context.request, context) === false) {
+        return false;
+      }
+      return await this.replaceVariablesInHeader(context.request, context);
     }
     return true;
   }
 
-  private async replaceVariablesInBody(replacedReqeust: HttpRequest, replacer: VarReplacer) {
+  private async replaceVariablesInBody(replacedReqeust: HttpRequest, context: ProcessorContext) : Promise<boolean> {
     if (replacedReqeust.body) {
       log.trace('variableReplacer replace body');
       if (isString(replacedReqeust.body)) {
-        replacedReqeust.body = await replacer(replacedReqeust.body, VariableType.body);
+        const replacedVariable = await replaceVariables(replacedReqeust.body, VariableType.body, context);
+        if (replacedVariable === HookCancel) {
+          return false;
+        }
+        replacedReqeust.body = replacedVariable;
       } else if (Array.isArray(replacedReqeust.body)) {
         const replacedBody: Array<HttpRequestBodyLine> = [];
         for (const obj of replacedReqeust.body) {
           if (isString(obj)) {
-            const value = await replacer(obj, VariableType.body);
-            if (value) {
-              replacedBody.push(value);
+            const replacedVariable = await replaceVariables(obj, VariableType.body, context);
+            if (replacedVariable === HookCancel) {
+              return false;
+            }
+            if (replacedVariable) {
+              replacedBody.push(replacedVariable);
             }
           } else {
             replacedBody.push(obj);
@@ -56,22 +55,24 @@ export class VariableReplacerAction implements HttpRegionAction {
         replacedReqeust.body = replacedBody;
       }
     }
+    return true;
   }
 
-  private async replaceVariablesInHeader(replacedReqeust: HttpRequest, replacer: VarReplacer) {
+  private async replaceVariablesInHeader(replacedReqeust: HttpRequest, context: ProcessorContext) : Promise<boolean> {
     if (replacedReqeust.headers) {
       for (const [headerName, headerValue] of Object.entries(replacedReqeust.headers)) {
         if (isString(headerValue)) {
           log.trace(`variableReplacer replace header ${headerName}`);
-          const value = await replacer(headerValue, headerName);
-          if (value === undefined) {
-            delete replacedReqeust.headers[headerName];
-          } else {
-            replacedReqeust.headers[headerName] = value;
+          const value = await replaceVariables(headerValue, headerName, context);
+          if (value === HookCancel) {
+            return false;
           }
+          replacedReqeust.headers[headerName] = value;
+
         }
       }
     }
+    return true;
   }
 
 }

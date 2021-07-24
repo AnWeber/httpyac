@@ -5,6 +5,7 @@ import { toQueryParams, stateGenerator } from '../../../utils';
 import open from 'open';
 import { registerListener, unregisterListener } from './openIdHttpserver';
 import { log } from '../../../io';
+import { ProcessorContext } from '../../../models';
 
 class ImplicitFlow implements OpenIdFlow {
   supportsFlow(flow: string): boolean {
@@ -18,7 +19,7 @@ class ImplicitFlow implements OpenIdFlow {
     return false;
   }
 
-  async perform(config: OpenIdConfiguration, context: OpenIdFlowContext): Promise<OpenIdInformation | false> {
+  async perform(config: OpenIdConfiguration, options: OpenIdFlowContext, context: ProcessorContext): Promise<OpenIdInformation | false> {
     return new Promise<OpenIdInformation | false>((resolve, reject) => {
       const state = stateGenerator();
       try {
@@ -35,8 +36,8 @@ class ImplicitFlow implements OpenIdFlow {
         })}`;
 
         let unregisterProgress: (() => void) | undefined;
-        if (context.progress) {
-          unregisterProgress = context.progress.register(() => {
+        if (options.progress) {
+          unregisterProgress = options.progress.register(() => {
             unregisterListener(state);
             reject(new Error('progress cancel'));
           });
@@ -65,11 +66,10 @@ class ImplicitFlow implements OpenIdFlow {
                 }, {
                   httpClient: context.httpClient,
                   config,
-                  id: context.cacheKey,
+                  id: options.cacheKey,
                   title: `implicit: ${config.clientId}`,
                   description: `${config.variablePrefix} - ${config.tokenEndpoint}`,
-                  logResponse: context.logResponse,
-                });
+                }, context);
                 resolve(openIdInformation);
                 return {
                   valid: true,
@@ -83,7 +83,7 @@ class ImplicitFlow implements OpenIdFlow {
                 }
                 const openIdInformation = toOpenIdInformation(params, (new Date()).getTime(), {
                   config,
-                  id: context.cacheKey,
+                  id: options.cacheKey,
                   title: `implicit: ${config.clientId}`,
                   description: config.tokenEndpoint
                 });

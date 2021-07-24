@@ -5,7 +5,7 @@ import { EOL } from 'os';
 
 
 export class RequestBodyImportAction implements HttpRegionAction {
-  type = ActionType.requestBodyImport;
+  id = ActionType.requestBodyImport;
 
 
   async process(context: ProcessorContext): Promise<boolean> {

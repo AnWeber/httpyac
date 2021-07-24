@@ -1,6 +1,6 @@
 import { OpenIdConfiguration } from './openIdConfiguration';
-import { HttpClient, HttpRequest, RequestLogger, UserSession } from '../../../models';
-import { decodeJWT } from '../../../utils';
+import { HookCancel, HttpClient, HttpRequest, ProcessorContext, UserSession } from '../../../models';
+import { cloneResponse, decodeJWT } from '../../../utils';
 import { log } from '../../../io';
 
 export interface OpenIdInformation extends UserSession{
@@ -14,25 +14,28 @@ export interface OpenIdInformation extends UserSession{
 }
 
 
-export async function requestOpenIdInformation(request: HttpRequest | false, context: {
+export async function requestOpenIdInformation(request: HttpRequest | false, options: {
   config: OpenIdConfiguration,
   httpClient: HttpClient,
   id: string,
   title: string,
   description: string,
-  logResponse?: RequestLogger,
-}): Promise<OpenIdInformation | false> {
+}, context?: ProcessorContext): Promise<OpenIdInformation | false> {
   if (request) {
     const time = new Date().getTime();
     request.throwHttpErrors = true;
-    const response = await context.httpClient(request, { showProgressBar: false });
+    const response = await options.httpClient(request, { showProgressBar: false });
     if (response) {
 
-      if (context.logResponse) {
-        context.logResponse(response);
+      if (context?.logResponse) {
+        const clone = cloneResponse(response);
+        if (await context.httpFile.hooks.responseLogging.trigger(clone, context) === HookCancel) {
+          return false;
+        }
+        context.logResponse(clone);
       }
       if (response.statusCode === 200 && response.parsedBody) {
-        return toOpenIdInformation(response.parsedBody, time, context);
+        return toOpenIdInformation(response.parsedBody, time, options);
       }
     }
   }

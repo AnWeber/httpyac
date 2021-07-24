@@ -1,7 +1,7 @@
 import { ActionType, HttpRegionAction, ProcessorContext } from '../models';
 
 export class EnvDefaultHeadersAction implements HttpRegionAction {
-  type = ActionType.envDefaultHeaders;
+  id = ActionType.envDefaultHeaders;
 
   async process({ request, config }: ProcessorContext) : Promise<boolean> {
     if (request && config?.defaultHeaders) {

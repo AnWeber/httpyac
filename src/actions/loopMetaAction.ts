@@ -1,6 +1,5 @@
-import { ActionType, HttpRegionAction, ProcessorContext } from '../models';
+import { ActionType, SeriesHook, ProcessorContext, HookInterceptor, HookTriggerContext, Variables, HttpRegion } from '../models';
 import * as utils from '../utils';
-import { executeScript } from './javascriptAction';
 
 
 export enum LoopMetaType{
@@ -18,14 +17,40 @@ export interface LoopMetaData {
 }
 
 
-export class LoopMetaAction implements HttpRegionAction {
-  type = ActionType.loop;
+export class LoopMetaAction implements HookInterceptor<ProcessorContext, boolean> {
+  id = ActionType.loop;
+  private iteration: AsyncGenerator<{
+    index: number;
+    variables: Variables
+  }> | undefined;
 
+  name: string | undefined;
   constructor(private readonly data: LoopMetaData) { }
 
-  async process(context: ProcessorContext): Promise<boolean> {
+  async beforeLoop(context: HookTriggerContext<ProcessorContext, boolean>) : Promise<boolean> {
+    this.iteration = this.iterate(context.arg);
+    this.name = context.arg.httpRegion.metaData.name;
+    const next = await this.iteration.next();
+    if (!next.done) {
+      Object.assign(context.arg.variables, next.value.variables);
+      return true;
+    }
+    return false;
+  }
 
+  async afterTrigger(context: HookTriggerContext<ProcessorContext, boolean>): Promise<boolean> {
+    if (this.iteration && context.index + 1 === context.length) {
+      const next = await this.iteration.next();
+      if (!next.done) {
+        Object.assign(context.arg.variables, next.value.variables);
+        context.arg.httpRegion = this.createHttpRegionClone(context.arg.httpRegion, next.value.index);
+        context.index = 0;
+      }
+    }
+    return true;
+  }
 
+  private async *iterate(context: ProcessorContext) {
     switch (this.data.type) {
       case LoopMetaType.forOf:
         if (this.data.variable && this.data.iterable) {
@@ -37,10 +62,15 @@ export class LoopMetaAction implements HttpRegionAction {
           if (iterable) {
             let index = 0;
             for (const variable of iterable) {
-              const cloneContext = this.createContextClone(context, index);
-              context.variables[this.data.variable] = variable;
-              context.variables.$index = index++;
-              await utils.processHttpRegionActions(cloneContext);
+              const variables: Variables = {
+                '$index': index,
+              };
+              variables[this.data.variable] = variable;
+              yield {
+                index,
+                variables
+              };
+              index++;
             }
           }
         }
@@ -48,9 +78,12 @@ export class LoopMetaAction implements HttpRegionAction {
       case LoopMetaType.for:
         if (this.data.counter) {
           for (let index = 0; index < this.data.counter; index++) {
-            const cloneContext = this.createContextClone(context, index);
-            context.variables.$index = index;
-            await utils.processHttpRegionActions(cloneContext);
+            yield {
+              index,
+              variables: {
+                '$index': index,
+              }
+            };
           }
         }
         break;
@@ -58,17 +91,19 @@ export class LoopMetaAction implements HttpRegionAction {
         if (this.data.expression) {
           let index = 0;
           while (await this.execExpression(this.data.expression, context)) {
-            const cloneContext = this.createContextClone(context, index);
-            context.variables.$index = index++;
-            await utils.processHttpRegionActions(cloneContext);
+            yield {
+              index,
+              variables: {
+                '$index': index,
+              }
+            };
+            index++;
           }
         }
         break;
       default:
         break;
     }
-
-    return false;
   }
 
   private async execExpression(expression: string, context: ProcessorContext) {
@@ -80,33 +115,33 @@ export class LoopMetaAction implements HttpRegionAction {
         lineOffset += index;
       }
     }
-    const value = await executeScript({
-      script,
+    const value = await utils.runScript(script, {
       fileName: context.httpFile.fileName,
-      variables: context.variables,
+      context: {
+        httpFile: context.httpFile,
+        httpRegion: context.httpRegion,
+        console: context.scriptConsole,
+        ...context.variables,
+      },
       lineOffset,
     });
     return !!value.$result;
   }
 
 
-  private createContextClone(context: ProcessorContext, index: number) {
-    const result = {
-      ...context,
-    };
-    result.httpRegion = {
-      actions: [...context.httpRegion.actions.filter(obj => obj.type !== ActionType.loop)],
-      metaData: { ...context.httpRegion.metaData },
-      request: context.httpRegion.request ? {
-        ...context.httpRegion.request
+  private createHttpRegionClone(httpRegion: HttpRegion, index: number): HttpRegion {
+    return {
+      metaData: {
+        ...httpRegion.metaData,
+        name: this.name ? `${this.name || 'unknown'}${index}` : undefined
+      },
+      request: httpRegion.request ? {
+        ...httpRegion.request
       } : undefined,
-      symbol: context.httpRegion.symbol
+      symbol: httpRegion.symbol,
+      hooks: {
+        execute: new SeriesHook(obj => !obj)
+      }
     };
-
-    if (result.httpRegion.metaData.name) {
-      result.httpRegion.metaData.name = `${result.httpRegion.metaData.name}${index}`;
-    }
-
-    return result;
   }
 }

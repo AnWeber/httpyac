@@ -11,7 +11,7 @@
 GET /anything?item={{item}}
 
 {{
-  console.info(this[`forOfLoop${$index}`].args);
+  console.info(this[`forOfLoop${$index > 0 ? $index: ''}`].args);
 }}
 
 ###
@@ -20,7 +20,7 @@ GET /anything?item={{item}}
 GET /anything?item={{$index}}
 
 {{
-  console.info(this[`forLoop${$index}`].args);
+  console.info(this[`forLoop${$index > 0 ? $index: ''}`].args);
 }}
 
 ###
@@ -29,6 +29,6 @@ GET /anything?item={{$index}}
 GET /anything?item={{6 + expression.index++}}
 
 {{
-  console.info(this[`whileLoop${$index}`].args);
+  console.info(this[`whileLoop${$index > 0 ? $index: ''}`].args);
 }}
 

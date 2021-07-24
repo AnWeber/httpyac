@@ -1,51 +1,51 @@
-import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext } from '../models';
+import { HttpSymbolKind, getHttpLineGenerator, HttpRegionParserResult, ParserContext } from '../models';
 import { VariableAction } from '../actions';
 import { ParserRegex } from './parserRegex';
 
-export class VariableHttpRegionParser implements HttpRegionParser {
 
-  async parse(lineReader: HttpRegionParserGenerator, { httpRegion }: ParserContext): Promise<HttpRegionParserResult> {
-    const next = lineReader.next();
-    if (!next.done) {
-      const textLine = next.value.textLine;
+export async function parseVariable(getLineReader: getHttpLineGenerator, { httpRegion }: ParserContext): Promise<HttpRegionParserResult> {
+  const lineReader = getLineReader();
 
-      const match = ParserRegex.variable.exec(textLine);
+  const next = lineReader.next();
+  if (!next.done) {
+    const textLine = next.value.textLine;
 
-      if (match && match.groups && match.groups.key && match.groups.value) {
-        httpRegion.actions.push(new VariableAction({
-          [match.groups.key]: match.groups.value.trim(),
-        }));
-        return {
-          nextParserLine: next.value.line,
-          symbols: [{
+    const match = ParserRegex.variable.exec(textLine);
+
+    if (match && match.groups && match.groups.key && match.groups.value) {
+      httpRegion.hooks.execute.addObjHook(obj => obj.process, new VariableAction({
+        [match.groups.key]: match.groups.value.trim(),
+      }));
+      return {
+        nextParserLine: next.value.line,
+        symbols: [{
+          name: match.groups.key,
+          description: match.groups.value,
+          kind: HttpSymbolKind.variable,
+          startLine: next.value.line,
+          startOffset: 0,
+          endLine: next.value.line,
+          endOffset: next.value.textLine.length,
+          children: [{
             name: match.groups.key,
-            description: match.groups.value,
-            kind: HttpSymbolKind.variable,
+            description: 'key',
+            kind: HttpSymbolKind.variableName,
             startLine: next.value.line,
-            startOffset: 0,
+            startOffset: next.value.textLine.indexOf(match.groups.key),
             endLine: next.value.line,
-            endOffset: next.value.textLine.length,
-            children: [{
-              name: match.groups.key,
-              description: 'key',
-              kind: HttpSymbolKind.variableName,
-              startLine: next.value.line,
-              startOffset: next.value.textLine.indexOf(match.groups.key),
-              endLine: next.value.line,
-              endOffset: next.value.textLine.indexOf(match.groups.key) + match.groups.key.length,
-            }, {
-              name: match.groups.value,
-              description: 'value',
-              kind: HttpSymbolKind.varialbeValue,
-              startLine: next.value.line,
-              startOffset: next.value.textLine.indexOf(match.groups.value),
-              endLine: next.value.line,
-              endOffset: next.value.textLine.indexOf(match.groups.value) + match.groups.value.length,
-            }]
-          }],
-        };
-      }
+            endOffset: next.value.textLine.indexOf(match.groups.key) + match.groups.key.length,
+          }, {
+            name: match.groups.value,
+            description: 'value',
+            kind: HttpSymbolKind.varialbeValue,
+            startLine: next.value.line,
+            startOffset: next.value.textLine.indexOf(match.groups.value),
+            endLine: next.value.line,
+            endOffset: next.value.textLine.indexOf(match.groups.value) + match.groups.value.length,
+          }]
+        }],
+      };
     }
-    return false;
   }
+  return false;
 }

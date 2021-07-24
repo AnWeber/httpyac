@@ -1,30 +1,29 @@
-import { ProcessorContext, VariableReplacer, VariableReplacerType } from '../../models';
+import { ProcessorContext } from '../../models';
 import { CancelableRequest, OptionsOfUnknownResponseBody, Response } from 'got';
 import { createHash } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { URL } from 'url';
 import { ParserRegex } from '../../parser';
 
-export class DigestAuthVariableReplacer implements VariableReplacer {
-  type = VariableReplacerType.digestAuth;
-  async replace(text: string, type: string, { request }: ProcessorContext): Promise<string | undefined> {
-    if (type.toLowerCase() === 'authorization' && text && request) {
-      const match = ParserRegex.auth.digest.exec(text);
 
-      if (match && match.groups && match.groups.user && match.groups.password) {
-        if (!request.hooks) {
-          request.hooks = {};
-        }
-        if (!request.hooks.afterResponse) {
-          request.hooks.afterResponse = [];
-        }
-        request.hooks.afterResponse.push(digestFactory(match.groups.user, match.groups.password));
-        return undefined;
+export async function digestAuthVariableReplacer(text: string, type: string, { request }: ProcessorContext): Promise<string | undefined> {
+  if (type.toLowerCase() === 'authorization' && text && request) {
+    const match = ParserRegex.auth.digest.exec(text);
+
+    if (match && match.groups && match.groups.user && match.groups.password) {
+      if (!request.hooks) {
+        request.hooks = {};
       }
+      if (!request.hooks.afterResponse) {
+        request.hooks.afterResponse = [];
+      }
+      request.hooks.afterResponse.push(digestFactory(match.groups.user, match.groups.password));
+      return undefined;
     }
-    return text;
   }
+  return text;
 }
+
 
 function digestFactory(username: string, password: string) {
   return function digestAfterResponse(response: Response, retryWithMergedOptions: (options: OptionsOfUnknownResponseBody) => CancelableRequest<Response>) {

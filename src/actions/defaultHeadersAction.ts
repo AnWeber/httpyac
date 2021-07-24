@@ -2,7 +2,7 @@ import { ActionType, HttpRegionAction, ProcessorContext } from '../models';
 import get from 'lodash/get';
 
 export class DefaultHeadersAction implements HttpRegionAction {
-  type = ActionType.defaultHeaders;
+  id = ActionType.defaultHeaders;
 
   constructor(private readonly data: string) {}
 

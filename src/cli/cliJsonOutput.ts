@@ -82,40 +82,24 @@ export function toCliJsonOutput(context: Record<string, Array<HttpRegion>>, opti
 
 function convertResponse(response: HttpResponse | undefined, output: string | undefined) {
   if (response) {
-    const clone: HttpResponse = {
-      statusCode: response.statusCode,
-      statusMessage: response.statusMessage,
-      headers: response.headers,
-      body: response.body,
-      timings: response.timings,
-      meta: response.meta,
-    };
-    if (response.request) {
-      clone.request = {
-        method: response.request.method,
-        url: response.request.url,
-        headers: response.request.headers,
-        body: response.request.body,
-      };
-    }
     switch (output) {
       case 'body':
       case 'response':
-        delete clone.request;
-        return clone;
+        delete response.request;
+        return response;
       case 'short':
-        delete clone.body;
-        delete clone.request;
-        return clone;
+        delete response.body;
+        delete response.request;
+        return response;
       case 'none':
         return undefined;
       case 'headers':
-        delete clone.body;
-        delete clone.request?.body;
-        return clone;
+        delete response.body;
+        delete response.request?.body;
+        return response;
       case 'exchange':
       default:
-        return clone;
+        return response;
     }
   }
   return undefined;

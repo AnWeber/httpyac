@@ -1,11 +1,11 @@
-import { ActionType, ProcessorContext, HttpRequest, HttpRequestBodyLine, HttpRegionAction } from '../models';
+import { ActionType, ProcessorContext, HttpRequest, HttpRequestBodyLine, HttpRegionAction, HookCancel } from '../models';
 import { isString, isMimeTypeFormUrlEncoded } from '../utils';
 import encodeUrl from 'encodeurl';
 import { log } from '../io';
 
 
 export class HttpClientAction implements HttpRegionAction {
-  type = ActionType.httpClient;
+  id = ActionType.httpClient;
 
   async process(context: ProcessorContext): Promise<boolean> {
     const { httpRegion, httpClient, request } = context;
@@ -18,9 +18,15 @@ export class HttpClientAction implements HttpRegionAction {
       if (httpRegion.metaData.noRejectUnauthorized) {
         request.rejectUnauthorized = false;
       }
+      if (await context.httpFile.hooks.beforeRequest.trigger(request, context) === HookCancel) {
+        return false;
+      }
       try {
         const response = await httpClient(request, context);
         if (response) {
+          if (await context.httpFile.hooks.afterRequest.trigger(response, context) === HookCancel) {
+            return false;
+          }
           httpRegion.response = response;
           return true;
         }

@@ -4,6 +4,7 @@ import { OpenIdFlow, OpenIdFlowContext } from './openIdFlow';
 import { toQueryParams, stateGenerator } from '../../../utils';
 import open from 'open';
 import { registerListener, unregisterListener } from './openIdHttpserver';
+import { ProcessorContext } from '../../../models';
 
 class AuthorizationCodeFlow implements OpenIdFlow {
   supportsFlow(flow: string): boolean {
@@ -17,7 +18,7 @@ class AuthorizationCodeFlow implements OpenIdFlow {
     return false;
   }
 
-  async perform(config: OpenIdConfiguration, context: OpenIdFlowContext): Promise<OpenIdInformation | false> {
+  async perform(config: OpenIdConfiguration, options: OpenIdFlowContext, context: ProcessorContext): Promise<OpenIdInformation | false> {
     return new Promise<OpenIdInformation | false>((resolve, reject) => {
       const state = stateGenerator();
       try {
@@ -32,8 +33,8 @@ class AuthorizationCodeFlow implements OpenIdFlow {
         })}`;
 
         let unregisterProgress: (() => void) | undefined;
-        if (context.progress) {
-          unregisterProgress = context.progress.register(() => {
+        if (options.progress) {
+          unregisterProgress = options.progress.register(() => {
             unregisterListener(state);
             reject(new Error('process canceled'));
           });
@@ -63,10 +64,10 @@ class AuthorizationCodeFlow implements OpenIdFlow {
               }, {
                 httpClient: context.httpClient,
                 config,
-                id: context.cacheKey,
+                id: options.cacheKey,
                 title: `authorization_code: ${config.clientId}`,
                 description: `${config.variablePrefix} - ${config.tokenEndpoint}`
-              });
+              }, context);
               resolve(openIdInformation);
               return {
                 valid: true,

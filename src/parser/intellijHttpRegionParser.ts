@@ -1,10 +1,10 @@
-import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext } from '../models';
+import { HttpSymbolKind, HttpLineGenerator, HttpRegionParserResult, ParserContext, getHttpLineGenerator } from '../models';
 import { toMultiLineString } from '../utils';
 import { ScriptData, IntellijScriptData, IntellijAction } from '../actions';
 import { ParserRegex } from './parserRegex';
 
 
-export interface IntelliJParserResult{
+export interface IntelliJParserResult {
   startLine: number,
   endLine: number,
   endOffset: number;
@@ -12,34 +12,33 @@ export interface IntelliJParserResult{
 }
 
 
-export class IntellijHttpRegionParser implements HttpRegionParser {
-  async parse(lineReader: HttpRegionParserGenerator, { httpRegion }: ParserContext): Promise<HttpRegionParserResult> {
-    if (httpRegion.request) {
+export async function parseIntellijScript(getLineReader: getHttpLineGenerator, { httpRegion }: ParserContext): Promise<HttpRegionParserResult> {
+  const lineReader = getLineReader();
+  if (httpRegion.request) {
 
-      const intellijContent = getIntellijContent(lineReader);
+    const intellijContent = getIntellijContent(lineReader);
 
-      if (intellijContent) {
-        httpRegion.actions.push(new IntellijAction(intellijContent.data));
-        return {
-          nextParserLine: intellijContent.endLine,
-          symbols: [{
-            name: 'Intellij Script',
-            description: 'Intellij Script',
-            kind: HttpSymbolKind.script,
-            startLine: intellijContent.startLine,
-            startOffset: 0,
-            endLine: intellijContent.endLine,
-            endOffset: intellijContent.endOffset,
-          }],
-        };
-      }
+    if (intellijContent) {
+      httpRegion.hooks.execute.addObjHook(obj => obj.process, new IntellijAction(intellijContent.data));
+      return {
+        nextParserLine: intellijContent.endLine,
+        symbols: [{
+          name: 'Intellij Script',
+          description: 'Intellij Script',
+          kind: HttpSymbolKind.script,
+          startLine: intellijContent.startLine,
+          startOffset: 0,
+          endLine: intellijContent.endLine,
+          endOffset: intellijContent.endOffset,
+        }],
+      };
     }
-    return false;
   }
+  return false;
 }
 
 
-function getIntellijContent(lineReader: HttpRegionParserGenerator): IntelliJParserResult | false {
+function getIntellijContent(lineReader: HttpLineGenerator): IntelliJParserResult | false {
   let next = lineReader.next();
   if (!next.done) {
 

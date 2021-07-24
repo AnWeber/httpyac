@@ -1,4 +1,4 @@
-import { LogLevel } from '../models';
+import { HttpFile, HttpFileHooks, LogLevel, LogHandler } from '../models';
 import { ClientCertificateOptions } from './clientCertifcateOptions';
 import { HttpRequest } from './httpRequest';
 import { Variables } from './variables';
@@ -25,10 +25,8 @@ export interface EnvironmentConfig{
   environments?: Record<string, Variables>;
   /** relative or absoulte path to env dir */
   envDirName?: string;
-}
-
-export interface SettingsConfig {
-
-  /** absolute or relative path to a script which gets executed for every http request in a file */
-  httpRegionScript?: string;
+  configureHooks?: (hooks: HttpFileHooks, context: {
+    httpFile: HttpFile,
+    log: LogHandler
+  }) => void | Promise<void>;
 }

@@ -1,37 +1,27 @@
-import { ActionType, HttpRegionAction, ProcessorContext, VariableType } from '../models';
-import { log } from '../io';
+import { ActionType, HttpRegionAction, ProcessorContext, VariableType, HookCancel } from '../models';
 
 
 export class VariableAction implements HttpRegionAction {
-  type = ActionType.variable;
+  id = ActionType.variable;
 
-  constructor(private readonly data: Record<string, string>) {}
+  constructor(private readonly data: Record<string, string>) { }
 
-
-  async process(context: ProcessorContext) : Promise<boolean> {
-    let result = true;
+  async process(context: ProcessorContext): Promise<boolean> {
     if (this.data) {
-      context.cancelVariableReplacer = () => {
-        result = false;
-      };
       for (const [key, value] of Object.entries(this.data)) {
-        if (result) {
-          context.variables[key] = await replaceVariables(value, VariableType.variable, context);
+
+        const result = await replaceVariables(value, VariableType.variable, context);
+        if (result === HookCancel) {
+          return false;
         }
+        context.variables[key] = result;
       }
     }
-    return result;
+    return true;
   }
 }
 
 
-export async function replaceVariables(text: string, type: VariableType | string, context: ProcessorContext): Promise<string | undefined> {
-  let result: string | undefined = text;
-  for (const variableReplacer of context.httpFile.variableReplacers) {
-    if (result) {
-      log.trace(`replacer ${variableReplacer.type} executing`);
-      result = await variableReplacer.replace(result, type, context);
-    }
-  }
-  return result;
+export async function replaceVariables(text: string, type: VariableType | string, context: ProcessorContext): Promise<string | undefined | typeof HookCancel> {
+  return await context.httpFile.hooks.replaceVariable.trigger(text, type, context);
 }

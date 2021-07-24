@@ -1,5 +1,4 @@
-import { EnvironmentConfig } from '../models';
-import { fileProvider, PathLike, log } from '../io';
+import { fileProvider, PathLike } from '../io';
 
 
 export async function toAbsoluteFilename(fileName: PathLike, baseName: PathLike |undefined, isFolder = false) : Promise<PathLike | undefined> {
@@ -74,43 +73,4 @@ export async function findRootDir(currentDir: PathLike, ...files: Array<string>)
     return findRootDir(fileProvider.dirname(currentDir), ...files);
   }
   return undefined;
-}
-
-export async function parseJson<T>(fileName: PathLike) : Promise<T | undefined> {
-  try {
-    const text = await fileProvider.readFile(fileName, 'utf-8');
-    return JSON.parse(text);
-  } catch (err) {
-    log.trace(err);
-  }
-  return undefined;
-}
-
-
-export async function getHttpacJsonConfig(rootDir: PathLike) : Promise<EnvironmentConfig | undefined> {
-  let result = await parseJson<EnvironmentConfig>(fileProvider.joinPath(rootDir, '.httpyac.json'));
-  if (!result) {
-    result = (await parseJson<Record<string, EnvironmentConfig>>(fileProvider.joinPath(rootDir, 'package.json')))?.httpyac;
-  }
-  if (result) {
-    await resolveClientCertficates(result, rootDir);
-  }
-  return result;
-}
-
-
-export async function resolveClientCertficates(config: EnvironmentConfig, rootDir: PathLike) : Promise<void> {
-  if (config.clientCertificates) {
-    for (const [, value] of Object.entries(config.clientCertificates)) {
-      if (value.cert) {
-        value.cert = await toAbsoluteFilename(value.cert, rootDir, true) || value.cert;
-      }
-      if (value.key) {
-        value.key = await toAbsoluteFilename(value.key, rootDir, true) || value.key;
-      }
-      if (value.pfx) {
-        value.pfx = await toAbsoluteFilename(value.pfx, rootDir, true) || value.pfx;
-      }
-    }
-  }
 }

@@ -37,7 +37,7 @@ export function getOpenIdConfiguration(variablePrefix: string, variables: Variab
       username: getVariable(variables, variablePrefix, 'username'),
       password: getVariable(variables, variablePrefix, 'password'),
       subjectIssuer: getVariable(variables, variablePrefix, 'subjectIssuer'),
-      keepAlive: ['false', '0', false].indexOf(getVariable(variables, variablePrefix, 'keepAlive')) < 0,
+      keepAlive: ['true', '1', true].indexOf(getVariable(variables, variablePrefix, 'keepAlive')) < 0,
     };
     return config;
   }

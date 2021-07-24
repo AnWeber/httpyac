@@ -2,7 +2,7 @@ import { HttpRegion } from './httpRegion';
 import { HttpResponse } from './httpResponse';
 
 export enum LogLevel{
-  trace = 0,
+  trace = 1,
   debug = 2,
   warn = 5,
   info = 10,

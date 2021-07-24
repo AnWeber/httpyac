@@ -1,6 +1,6 @@
 import { ProcessorContext, ActionType, HttpRegionAction } from '../models';
-import { ScriptData, executeScript } from './javascriptAction';
-import { toAbsoluteFilename } from '../utils';
+import { ScriptData } from './javascriptAction';
+import * as utils from '../utils';
 import { fileProvider, userInteractionProvider, log } from '../io';
 
 
@@ -12,7 +12,7 @@ export interface IntellijScriptData{
 
 
 export class IntellijAction implements HttpRegionAction {
-  type = ActionType.intellij;
+  id = ActionType.intellij;
 
   constructor(private readonly scriptData: ScriptData | IntellijScriptData) { }
 
@@ -32,10 +32,12 @@ export class IntellijAction implements HttpRegionAction {
     } else {
       data = this.scriptData;
     }
-    await executeScript({
-      script: data.script,
+    await utils.runScript(data.script, {
       fileName: context.httpFile.fileName,
-      variables: intellijVars,
+      context: {
+        console: context.scriptConsole,
+        ...intellijVars,
+      },
       lineOffset: data.lineOffset
     });
     return true;
@@ -45,7 +47,7 @@ export class IntellijAction implements HttpRegionAction {
   private async loadScript(file: string, { httpFile }: ProcessorContext) {
     try {
       let script: string | false = false;
-      const filename = await toAbsoluteFilename(file, httpFile.fileName);
+      const filename = await utils.toAbsoluteFilename(file, httpFile.fileName);
       if (filename) {
         script = await fileProvider.readFile(filename, 'utf-8');
       } else {

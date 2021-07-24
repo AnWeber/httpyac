@@ -1,5 +1,5 @@
-export * from './arrayUtils';
 export * from './assertUtils';
+export * from './configUtils';
 export * from './environmentUtils';
 export * from './errorUtils';
 export * from './fsUtils';
@@ -7,6 +7,7 @@ export * from './httpRegionUtils';
 export * from './httpStringUtils';
 export * from './markdownUtils';
 export * from './mimeTypeUtils';
+export * from './moduleUtils';
 export * from './stringUtils';
 export * from './requestUtils';
 export * from './promiseUtils';

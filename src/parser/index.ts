@@ -1,8 +1,8 @@
 export * from './commentHttpRegionParser';
-export * from './defaultParser';
 export * from './gqlHttpRegionParser';
 export * from './httpFileParser';
 export * from './intellijHttpRegionParser';
+export * from './initHooks';
 export * from './jsHttpRegionParser';
 export * from './metaHttpRegionParser';
 export * from './noteMetaHttpRegionParser';
@@ -11,5 +11,4 @@ export * from './requestBodyHttpRegionParser';
 export * from './requestHttpRegionParser';
 export * from './responseRefHttpRegionParser';
 export * from './responseHttpRegionParser';
-export * from './settingsScriptHttpRegionParser';
 export * from './variableHttpRegionParser';

@@ -1,62 +1,61 @@
-import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext, ActionType } from '../models';
-import { toMultiLineString, toAbsoluteFilename, pushAfter } from '../utils';
+import { HttpSymbolKind, getHttpLineGenerator, HttpLineGenerator, HttpRegionParserResult, ParserContext } from '../models';
+import { toMultiLineString, toAbsoluteFilename } from '../utils';
 import { GqlAction, GqlData } from '../actions';
 import { ParserRegex } from './parserRegex';
 import { fileProvider, PathLike, log } from '../io';
 
-export class GqlHttpRegionParser implements HttpRegionParser {
-  async parse(lineReader: HttpRegionParserGenerator, context: ParserContext): Promise<HttpRegionParserResult> {
 
-    if (context.httpRegion.metaData.noGqlParsing) {
-      return false;
-    }
-
-    const gqlContent = await getGQLContent(lineReader);
-    if (gqlContent) {
-      const gqlData: GqlData = {
-        fragments: this.getGqlFragments(context),
-      };
-
-      if (context.httpRegion.request) {
-        gqlData.query = gqlContent.gql;
-        if (gqlContent.name) {
-          gqlData.operationName = gqlContent.name;
-          if (!context.httpRegion.metaData.name) {
-            context.httpRegion.metaData.name = gqlContent.name;
-          }
-        }
-        pushAfter(context.httpRegion.actions, obj => obj.type === ActionType.requestBodyImport, new GqlAction(gqlData));
-      } else if (gqlContent.name) {
-        gqlData.fragments[gqlContent.name] = gqlContent.gql;
-      }
-      return {
-        nextParserLine: gqlContent.endLine,
-        symbols: [{
-          name: 'gql',
-          description: 'gql',
-          kind: HttpSymbolKind.gql,
-          startLine: gqlContent.startLine,
-          startOffset: 0,
-          endLine: gqlContent.endLine,
-          endOffset: gqlContent.endOffset,
-        }]
-      };
-    }
+export async function parseGraphql(getLineReader: getHttpLineGenerator, context: ParserContext): Promise<HttpRegionParserResult> {
+  const lineReader = getLineReader();
+  if (context.httpRegion.metaData.noGqlParsing) {
     return false;
   }
 
-  private getGqlFragments(context: ParserContext) {
-    let result = context.data.gql;
-    if (!result) {
-      result = {};
-      context.data.gql = result;
+  const gqlContent = await getGQLContent(lineReader);
+  if (gqlContent) {
+    const gqlData: GqlData = {
+      fragments: getGqlFragments(context),
+    };
+
+    if (context.httpRegion.request) {
+      gqlData.query = gqlContent.gql;
+      if (gqlContent.name) {
+        gqlData.operationName = gqlContent.name;
+        if (!context.httpRegion.metaData.name) {
+          context.httpRegion.metaData.name = gqlContent.name;
+        }
+      }
+      context.httpRegion.hooks.execute.addObjHook(obj => obj.process, new GqlAction(gqlData));
+    } else if (gqlContent.name) {
+      gqlData.fragments[gqlContent.name] = gqlContent.gql;
     }
-    return result;
+    return {
+      nextParserLine: gqlContent.endLine,
+      symbols: [{
+        name: 'gql',
+        description: 'gql',
+        kind: HttpSymbolKind.gql,
+        startLine: gqlContent.startLine,
+        startOffset: 0,
+        endLine: gqlContent.endLine,
+        endOffset: gqlContent.endOffset,
+      }]
+    };
   }
+  return false;
+}
+
+function getGqlFragments(context: ParserContext) {
+  let result = context.data.gql;
+  if (!result) {
+    result = {};
+    context.data.gql = result;
+  }
+  return result;
 }
 
 
-async function getGQLContent(lineReader: HttpRegionParserGenerator): Promise<GqlParserResult | false> {
+async function getGQLContent(lineReader: HttpLineGenerator): Promise<GqlParserResult | false> {
   const next = lineReader.next();
   if (!next.done) {
 
@@ -98,7 +97,7 @@ async function getGQLContent(lineReader: HttpRegionParserGenerator): Promise<Gql
 }
 
 
-function matchGqlContent(value: { textLine: string; line: number }, lineReader: HttpRegionParserGenerator, name: string | undefined): GqlParserResult | false {
+function matchGqlContent(value: { textLine: string; line: number }, lineReader: HttpLineGenerator, name: string | undefined): GqlParserResult | false {
   const startLine = value.line;
   let next = lineReader.next();
   const gqlLines: Array<string> = [value.textLine];

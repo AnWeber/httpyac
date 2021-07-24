@@ -1,32 +1,29 @@
-import { HttpSymbolKind, HttpRegionParser, HttpRegionParserGenerator, HttpRegionParserResult, ParserContext } from '../models';
+import { HttpSymbolKind, getHttpLineGenerator, HttpLineGenerator, HttpRegionParserResult, ParserContext } from '../models';
 import { toMultiLineString } from '../utils';
 import { ParserRegex } from './parserRegex';
 
 
-export class CommentHttpRegionParser implements HttpRegionParser {
-
-  noStopOnMetaTag = true;
-  async parse(lineReader: HttpRegionParserGenerator, { httpRegion }: ParserContext): Promise<HttpRegionParserResult> {
-    const comment = getCommentContent(lineReader);
-    if (comment) {
-      if (!httpRegion.metaData.description) { // first comment gets description
-        httpRegion.metaData.description = comment.comment;
-      }
-      return {
-        nextParserLine: comment.endLine,
-        symbols: [{
-          name: 'comment',
-          description: comment.comment,
-          kind: HttpSymbolKind.comment,
-          startLine: comment.startLine,
-          startOffset: 0,
-          endLine: comment.endLine,
-          endOffset: comment.endOffset,
-        }],
-      };
+export async function parseComment(getLineReader: getHttpLineGenerator, { httpRegion }: ParserContext): Promise<HttpRegionParserResult> {
+  const lineReader = getLineReader(true);
+  const comment = getCommentContent(lineReader);
+  if (comment) {
+    if (!httpRegion.metaData.description) { // first comment gets description
+      httpRegion.metaData.description = comment.comment;
     }
-    return false;
+    return {
+      nextParserLine: comment.endLine,
+      symbols: [{
+        name: 'comment',
+        description: comment.comment,
+        kind: HttpSymbolKind.comment,
+        startLine: comment.startLine,
+        startOffset: 0,
+        endLine: comment.endLine,
+        endOffset: comment.endOffset,
+      }],
+    };
   }
+  return false;
 }
 
 
@@ -38,13 +35,11 @@ export interface CommentParserResult{
 }
 
 
-function getCommentContent(lineReader: HttpRegionParserGenerator): CommentParserResult | false {
+function getCommentContent(lineReader: HttpLineGenerator): CommentParserResult | false {
   let next = lineReader.next();
   if (!next.done) {
 
     const startLine = next.value.line;
-
-
     const singleLineMatch = ParserRegex.comment.singleline.exec(next.value.textLine);
     if (singleLineMatch?.groups?.comment) {
       return {
