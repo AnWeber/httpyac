@@ -23,7 +23,7 @@ export class Logger implements ConsoleLogHandler {
   }
 
   private writeLog(logLevel: LogLevel, action: (...params: unknown[]) => void, params: unknown[]) {
-    if (logLevel >= (this.options?.level || LogLevel.warn)) {
+    if (!this.options?.level || logLevel >= (this.options.level)) {
       const log = this.options?.logMethod ? () => this.options?.logMethod?.(logLevel, ...params) : () => action(...params);
       if (this.collectCache) {
         this.collectCache.push(log);
@@ -64,4 +64,6 @@ export class Logger implements ConsoleLogHandler {
 }
 
 
-export const log: LogHandler = new Logger({});
+export const log: LogHandler = new Logger({
+  level: LogLevel.warn,
+});

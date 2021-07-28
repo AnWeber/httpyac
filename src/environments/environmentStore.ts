@@ -128,6 +128,7 @@ class EnvironmentStore {
       ...(await this.loadFileEnvironemntConfigs(rootDirs)),
       config
     );
+    log.options.level = environmentConfig.log?.level;
     log.trace(environmentConfig);
 
     await this.searchClientCertficates(environmentConfig, rootDirs);
