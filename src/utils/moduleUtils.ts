@@ -8,12 +8,8 @@ import { EOL } from 'os';
 // eslint-disable-next-line no-underscore-dangle, no-undef
 declare const __non_webpack_require__: NodeJS.Require;
 
-// https://github.com/benmosher/eslint-plugin-import/pull/1591
-// https://github.com/benmosher/eslint-plugin-import/pull/1602
-// Polyfill Node's `Module.createRequireFromPath` if not present (added in Node v10.12.0)
 // Use `Module.createRequire` if available (added in Node v12.2.0)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, no-underscore-dangle, node/no-deprecated-api
-const createRequire = Module.createRequire || (Module as any).createRequireFromPath || function createModuleRequire(fileName) {
+const createRequire = Module.createRequire || function createModuleRequire(fileName) {
   return createModule(fileName as string, 'module.exports = require;').exports;
 };
 
@@ -34,7 +30,7 @@ export function resolveModule(request: string, context: string): string | undefi
 export function loadModule<T>(request: string, context: string, force = false): T | undefined {
   try {
     if (force) {
-      clearRequireCache(request);
+      clearModule(request, context);
     }
     return createRequire(path.resolve(context, 'package.json'))(request);
   } catch (e) {
@@ -107,6 +103,10 @@ export async function runScript(source: string, options: {
     ...global,
     Buffer,
     process,
+    requireUncached: (id: string) => {
+      clearModule(id, fileProvider.fsPath(fileProvider.joinPath(filename, '..')));
+      return mod.require(id);
+    },
     ...options.context,
   });
 
