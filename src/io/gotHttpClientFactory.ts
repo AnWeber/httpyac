@@ -33,7 +33,7 @@ export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined) 
       initProxy(mergedRequest);
 
       const options: OptionsOfUnknownResponseBody = toGotOptions(mergedRequest);
-      log.trace('request', options);
+      log.debug('request', options);
       let response: HttpResponse | false;
       if (context.repeat && context.repeat.count > 0) {
         response = await loadRepeat(url, options, context.repeat.type, context.repeat.count);

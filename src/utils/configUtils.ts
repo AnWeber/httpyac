@@ -1,6 +1,6 @@
 import { PathLike, fileProvider, log } from '../io';
-import { EnvironmentConfig } from '../models';
-import { toAbsoluteFilename } from './fsUtils';
+import { ConfigureHooks, EnvironmentConfig } from '../models';
+import { toAbsoluteFilename, findRootDir } from './fsUtils';
 import { loadModule } from './moduleUtils';
 
 export async function getHttpacConfig(rootDir: PathLike) : Promise<EnvironmentConfig | undefined> {
@@ -31,7 +31,7 @@ async function loadFileConfig(rootDir: PathLike): Promise<EnvironmentConfig | un
     }
   }
   if (fileConfigPath) {
-    const fileConfig = loadModule<EnvironmentConfig>(fileProvider.fsPath(fileConfigPath), fileProvider.fsPath(rootDir), true);
+    const fileConfig = loadModule<EnvironmentConfig |(() => EnvironmentConfig)>(fileProvider.fsPath(fileConfigPath), fileProvider.fsPath(rootDir), true);
     if (typeof fileConfig === 'function') {
       return fileConfig();
     }
@@ -47,7 +47,7 @@ export async function parseJson<T>(fileName: PathLike) : Promise<T | undefined> 
     const text = await fileProvider.readFile(fileName, 'utf-8');
     return JSON.parse(text);
   } catch (err) {
-    log.trace(err);
+    log.debug(`json parse of ${fileName} failed`);
   }
   return undefined;
 }
@@ -67,4 +67,44 @@ export async function resolveClientCertficates(config: EnvironmentConfig, rootDi
       }
     }
   }
+}
+
+
+interface PackageJson{
+  dependencies?: Record<string, unknown>,
+  devDependencies?: Record<string, unknown>
+}
+
+
+export async function getPlugins(rootDir: PathLike) : Promise<Record<string, ConfigureHooks>> {
+  const packageJson = await getPackageJson(rootDir);
+  const hooks: Record<string, ConfigureHooks> = {};
+  if (packageJson?.json) {
+    const plugins = [
+      ...Object.keys(packageJson.json.dependencies || {}),
+      ...Object.keys(packageJson.json.devDependencies || {})
+    ].filter(isPlugin);
+    for (const dep of plugins) {
+      const hook = loadModule<ConfigureHooks>(dep, fileProvider.fsPath(packageJson.dir));
+      if (hook) {
+        hooks[dep] = hook;
+      }
+    }
+  }
+  return hooks;
+}
+async function getPackageJson(rootDir: PathLike) {
+  const packageDir = await findRootDir(rootDir, 'package.json');
+
+  if (packageDir) {
+    return {
+      dir: packageDir,
+      json: await parseJson<PackageJson>(fileProvider.joinPath(packageDir, 'package.json')),
+    };
+  }
+  return undefined;
+}
+
+function isPlugin(dep: string) {
+  return /^(httpyac-|@[\w-]+(\.)?[\w-]+\/httpyac-)plugin-/u.test(dep);
 }

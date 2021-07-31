@@ -5,20 +5,15 @@ import { expandVariables, toAbsoluteFilename } from '../../utils';
 const defaultFiles: Array<string> = ['http-client.env.json', 'http-client.private.env.json'];
 
 export async function provideIntellijEnvironments(context: VariableProviderContext): Promise<string[]> {
-  try {
-    const environments = await getAllEnvironmentVariables(context);
+  const environments = await getAllEnvironmentVariables(context);
+  return environments
+    .reduce((prev, current) => {
+      for (const [env] of Object.entries(current)) {
+        prev.push(env);
+      }
+      return prev;
+    }, [] as Array<string>);
 
-    return environments
-      .reduce((prev, current) => {
-        for (const [env] of Object.entries(current)) {
-          prev.push(env);
-        }
-        return prev;
-      }, [] as Array<string>);
-  } catch (err) {
-    log.trace(err);
-  }
-  return [];
 }
 
 async function getAllEnvironmentVariables(context: VariableProviderContext) {
@@ -59,7 +54,7 @@ async function getEnvironmentVariables(workingDir: PathLike) {
         environments.push(JSON.parse(content));
       }
     } catch (err) {
-      log.trace(err);
+      log.debug(`${file} in ${fileProvider.toString(workingDir)} not found`);
     }
   }
   return environments;

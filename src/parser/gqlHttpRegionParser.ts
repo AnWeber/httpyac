@@ -2,7 +2,7 @@ import { HttpSymbolKind, getHttpLineGenerator, HttpLineGenerator, HttpRegionPars
 import { toMultiLineString, toAbsoluteFilename } from '../utils';
 import { GqlAction, GqlData } from '../actions';
 import { ParserRegex } from './parserRegex';
-import { fileProvider, PathLike, log } from '../io';
+import { fileProvider, PathLike } from '../io';
 
 
 export async function parseGraphql(getLineReader: getHttpLineGenerator, context: ParserContext): Promise<HttpRegionParserResult> {
@@ -63,35 +63,31 @@ async function getGQLContent(lineReader: HttpLineGenerator): Promise<GqlParserRe
 
     const fileMatches = ParserRegex.gql.fileImport.exec(next.value.textLine);
     if (fileMatches && fileMatches.groups?.fileName) {
-      try {
-        const parserPath = fileMatches.groups.fileName;
-        return {
-          startLine,
-          endLine: startLine,
-          endOffset: next.value.textLine.length,
-          name: fileMatches.groups.name || fileMatches.groups.fileName,
-          gql: async (httpFileName: PathLike) => {
-            const normalizedPath = await toAbsoluteFilename(parserPath, httpFileName);
-            if (normalizedPath) {
-              return fileProvider.readFile(normalizedPath, 'utf-8');
-            }
-            return false;
-          }
-        };
 
-      } catch (err) {
-        log.trace(err);
-      }
-    } else {
-      const queryMatch = ParserRegex.gql.query.exec(next.value.textLine);
-      if (queryMatch) {
-        return matchGqlContent(next.value, lineReader, queryMatch.groups?.name);
-      }
-      const fragmentMatch = ParserRegex.gql.fragment.exec(next.value.textLine);
-      if (fragmentMatch) {
-        return matchGqlContent(next.value, lineReader, fragmentMatch.groups?.name);
-      }
+      const parserPath = fileMatches.groups.fileName;
+      return {
+        startLine,
+        endLine: startLine,
+        endOffset: next.value.textLine.length,
+        name: fileMatches.groups.name || fileMatches.groups.fileName,
+        gql: async (httpFileName: PathLike) => {
+          const normalizedPath = await toAbsoluteFilename(parserPath, httpFileName);
+          if (normalizedPath) {
+            return fileProvider.readFile(normalizedPath, 'utf-8');
+          }
+          return false;
+        }
+      };
     }
+    const queryMatch = ParserRegex.gql.query.exec(next.value.textLine);
+    if (queryMatch) {
+      return matchGqlContent(next.value, lineReader, queryMatch.groups?.name);
+    }
+    const fragmentMatch = ParserRegex.gql.fragment.exec(next.value.textLine);
+    if (fragmentMatch) {
+      return matchGqlContent(next.value, lineReader, fragmentMatch.groups?.name);
+    }
+
   }
   return false;
 }

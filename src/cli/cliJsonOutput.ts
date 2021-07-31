@@ -65,7 +65,7 @@ export function toCliJsonOutput(context: Record<string, Array<HttpRegion>>, opti
   }
   return {
     _meta: {
-      version: '0.1',
+      version: '1.0.0',
     },
     requests: options.filter === CliFilterOptions.onlyFailed ? requests.filter(obj => obj.summary.failedTests > 0) : requests,
     summary: {

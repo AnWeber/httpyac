@@ -21,11 +21,11 @@ export async function openIdVariableReplacer(text: string, type: string, context
           let openIdInformation = getOpenIdConfiguration(cacheKey, tokenExchangeConfig || config);
           userSessionStore.removeUserSession(cacheKey);
           if (openIdInformation) {
-            log.trace(`openid refresh token flow used: ${cacheKey}`);
+            log.debug(`openid refresh token flow used: ${cacheKey}`);
             openIdInformation = await oauth.refreshTokenFlow.perform(openIdInformation, { httpClient: context.httpClient }, context);
           }
           if (!openIdInformation) {
-            log.trace(`openid flow ${match.groups.flow} used: ${cacheKey}`);
+            log.debug(`openid flow ${match.groups.flow} used: ${cacheKey}`);
             openIdInformation = await openIdFlow.perform(config, {
               cacheKey,
               progress: context.progress,
@@ -35,7 +35,7 @@ export async function openIdVariableReplacer(text: string, type: string, context
             }
           }
           if (openIdInformation) {
-            log.trace(`openid flow ${match.groups.flow} finished`);
+            log.debug(`openid flow ${match.groups.flow} finished`);
             userSessionStore.setUserSession(openIdInformation);
             keepAlive(cacheKey, context.httpClient);
             return `Bearer ${openIdInformation.accessToken}`;

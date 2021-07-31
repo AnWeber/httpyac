@@ -49,24 +49,26 @@ export async function findRootDirOfFile(filename: PathLike, workingDir?: PathLik
   return await findRootDir(fileProvider.dirname(file), ...files);
 }
 
+export const DefaultRootFiles = [
+  'package.json',
+  '.httpyac.json',
+  '.httpyac.js',
+  '.httpyac.config.js',
+  'httpyac.config.json',
+];
+
 export async function findRootDir(currentDir: PathLike, ...files: Array<string>): Promise<PathLike | undefined> {
-  const searchFiles = [
-    'package.json',
-    '.httpyac.json',
-    '.httpyac.js',
-    '.env',
-    'http-client.env.json',
-    'http-client.private.env.json',
-  ];
   const dirFiles = await fileProvider.readdir(currentDir);
 
-  if (dirFiles.some(file => searchFiles.indexOf(file) >= 0)) {
+  if (dirFiles.some(file => files.indexOf(file) >= 0)) {
     return currentDir;
   }
   for (const file of files) {
-    const dir = fileProvider.joinPath(currentDir, file);
-    if (await fileProvider.exists(dir)) {
-      return fileProvider.dirname(dir);
+    if (dirFiles.some(obj => file.startsWith(obj))) {
+      const dir = fileProvider.joinPath(currentDir, file);
+      if (await fileProvider.exists(dir)) {
+        return fileProvider.dirname(dir);
+      }
     }
   }
   if (fileProvider.dirname(currentDir) !== currentDir) {

@@ -1,4 +1,5 @@
-import { HttpFile, HttpFileHooks, LogLevel, LogHandler } from '../models';
+import { PathLike, FileProvider } from '../io';
+import { HttpFile, HttpFileHooks, LogLevel, LogHandler, SessionStore } from '../models';
 import { ClientCertificateOptions } from './clientCertifcateOptions';
 import { HttpRequest } from './httpRequest';
 import { Variables } from './variables';
@@ -25,8 +26,32 @@ export interface EnvironmentConfig{
   environments?: Record<string, Variables>;
   /** relative or absoulte path to env dir */
   envDirName?: string;
-  configureHooks?: (hooks: HttpFileHooks, context: {
-    httpFile: HttpFile,
-    log: LogHandler
-  }) => void | Promise<void>;
+  /** hookApi for extending httpyac */
+  configureHooks?: ConfigureHooks;
+  /** configuration for plugins */
+  plugins?: Record<string, unknown>
+}
+
+export type ConfigureHooks = (api: HttpyacHooksApi) => void | Promise<void>;
+
+
+export interface UserInteractonProvider{
+  showNote: (note: string) => Promise<boolean>;
+  showInputPrompt: (message: string, defaultValue?: string) => Promise<string | undefined>,
+  showListPrompt: (message: string, values: string[]) => Promise<string | undefined>,
+  showWarnMessage?: (message: string) => Promise<void>,
+  showErrorMessage?: (message: string) => Promise<void>,
+}
+
+export interface HttpyacHooksApi{
+  readonly version: string;
+  readonly rootDir?: PathLike;
+  readonly httpFile: Readonly<HttpFile>;
+  readonly config: EnvironmentConfig;
+  readonly hooks: HttpFileHooks;
+  readonly log: LogHandler;
+  readonly fileProvider: FileProvider,
+  readonly sessionStore: SessionStore,
+  readonly userInteractionProvider: UserInteractonProvider;
+  getHookCancel(): symbol;
 }

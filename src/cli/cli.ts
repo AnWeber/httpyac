@@ -35,7 +35,7 @@ export async function execute(rawArgs: string[]): Promise<void> {
   }
 
   try {
-    const httpFiles: models.HttpFile[] = await getHttpFiles(cliOptions.fileName, !!cliOptions.editor);
+    const httpFiles: models.HttpFile[] = await getHttpFiles(cliOptions);
 
     if (httpFiles.length > 0) {
       let isFirstRequest = true;
@@ -109,15 +109,14 @@ function convertCliOptionsToContext(cliOptions: CliOptions): CliContext {
   return context;
 }
 
-async function getHttpFiles(fileName: string | undefined, useEditor: boolean) {
+async function getHttpFiles(options: CliOptions) {
   const httpFiles: models.HttpFile[] = [];
   const httpFileStore = new HttpFileStore();
 
   const parseOptions = {
     workingDir: process.cwd(),
   };
-
-  if (useEditor) {
+  if (options.editor) {
     const answer = await inquirer.prompt([{
       type: 'editor',
       message: 'input http request',
@@ -125,8 +124,8 @@ async function getHttpFiles(fileName: string | undefined, useEditor: boolean) {
     }]);
     const file = await httpFileStore.getOrCreate(process.cwd(), async () => answer.httpFile, 0, parseOptions);
     httpFiles.push(file);
-  } else if (fileName) {
-    const paths = await globby(fileName, {
+  } else if (options.fileName) {
+    const paths = await globby(options.fileName, {
       expandDirectories: {
         files: ['*.rest', '*.http'],
         extensions: ['http', 'rest']

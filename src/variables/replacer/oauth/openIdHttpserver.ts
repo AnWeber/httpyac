@@ -66,7 +66,7 @@ function closeServer() {
 function initServer(port = 3000) {
   resetServer(600);
   if (!server) {
-    log.trace(`open http server on port ${port}`);
+    log.debug(`open http server on port ${port}`);
     server = createServer((req, res) => {
       try {
         let statusMessage = 'invalid';

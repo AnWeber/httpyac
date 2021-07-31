@@ -1,9 +1,13 @@
 import * as models from '../models';
 import { initParseAfterRegionHook, initParseHook, parseHttpFile } from '../parser';
-import { fileProvider, PathLike, log } from '../io';
+import { fileProvider, PathLike, log, userInteractionProvider } from '../io';
+import { userSessionStore as sessionStore } from '../store';
 import { getEnvironments } from '../httpYacApi';
 import { replacer, provider } from '../variables';
 import * as utils from '../utils';
+import merge from 'lodash/merge';
+import { default as chalk } from 'chalk';
+import { HookCancel } from '../models';
 
 interface HttpFileStoreEntry{
   version: number;
@@ -121,7 +125,9 @@ export class HttpFileStore {
   }
 
   private async initHttpFile(fileName: PathLike, options: HttpFileStoreOptions) {
-    const rootDir = await utils.findRootDirOfFile(fileName, options.workingDir, options.config?.envDirName || 'env');
+    const rootDir = await utils.findRootDirOfFile(fileName, options.workingDir,
+      ...utils.DefaultRootFiles, options.config?.envDirName || 'env');
+
     const httpFile: models.HttpFile = {
       fileName,
       rootDir,
@@ -140,15 +146,94 @@ export class HttpFileStore {
       activeEnvironment: options.activeEnvironment
     };
 
-    if (rootDir) {
-      const fileConfig = await utils.getHttpacConfig(rootDir);
+    httpFile.config = await getEnviromentConfig({
+      httpFile,
+      config: options.config,
+    });
 
-      const result = fileConfig?.configureHooks?.(httpFile.hooks, { httpFile, log });
-      if (utils.isPromise(result)) {
-        await result;
+    if (rootDir) {
+      const hooks = await utils.getPlugins(rootDir);
+      if (httpFile.config?.configureHooks) {
+        hooks['.httpyac.js'] = httpFile.config.configureHooks;
+      }
+      const api: models.HttpyacHooksApi = {
+        version: '1.0.0',
+        rootDir,
+        config: httpFile.config,
+        httpFile,
+        hooks: httpFile.hooks,
+        log,
+        fileProvider,
+        sessionStore,
+        userInteractionProvider,
+        getHookCancel: () => HookCancel,
+      };
+      for (const [plugin, hook] of Object.entries(hooks)) {
+        try {
+          log.debug(`load ${plugin}`);
+          const result = hook(api);
+          if (utils.isPromise(result)) {
+            await result;
+          }
+        } catch (err) {
+          log.error(`error in ${plugin}`, err);
+        }
       }
     }
-
     return httpFile;
   }
+}
+
+
+export async function getEnviromentConfig(context: models.VariableProviderContext) : Promise<models.EnvironmentConfig> {
+  const environmentConfigs : Array<models.EnvironmentConfig> = [];
+  if (context.httpFile.rootDir) {
+    const fileConfig = await utils.getHttpacConfig(context.httpFile.rootDir);
+    if (fileConfig) {
+      environmentConfigs.push(fileConfig);
+    }
+  }
+  if (context.config) {
+    environmentConfigs.push(context.config);
+  }
+
+  const config = merge({
+    log: {
+      level: models.LogLevel.warn,
+      supportAnsiColors: true,
+    },
+    cookieJarEnabled: true,
+    envDirName: 'env',
+  }, ...environmentConfigs);
+
+  refreshStaticConfig(config);
+  showDeprectationWarning(config);
+  return config;
+}
+
+function refreshStaticConfig(config: models.EnvironmentConfig) {
+  log.options.level = config?.log?.level ?? models.LogLevel.warn;
+  if (config?.log?.supportAnsiColors === false) {
+    chalk.level = 0;
+  }
+}
+
+
+function showDeprectationWarning(config: models.EnvironmentConfig) {
+  const deprecated = config as {
+    dotenv: unknown;
+    intellij: unknown;
+    httpRegionScript: unknown;
+  };
+
+  if (deprecated.dotenv) {
+    log.warn('setting dotenv is deprecated. Please use envDirName instead, if needed');
+  }
+  if (deprecated.intellij) {
+    log.warn('setting intellij is deprecated. Please use envDirName instead, if needed');
+  }
+  if (deprecated.httpRegionScript) {
+    log.warn('setting httpRegionScript is deprecated. Please use hooks.beforeRequest instead.');
+  }
+
 }

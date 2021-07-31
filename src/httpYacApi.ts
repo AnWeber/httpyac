@@ -1,7 +1,6 @@
 import { initHttpClient, log } from './io';
 import * as models from './models';
 import * as utils from './utils';
-import { default as chalk } from 'chalk';
 
 
 /**
@@ -74,62 +73,11 @@ async function createEmptyProcessorContext<T extends models.VariableProviderCont
   variables: models.Variables,
   httpClient: models.HttpClient,
 }> {
-  context.config = await getEnviromentConfig(context);
-
-  log.options.level = context.config?.log?.level ?? models.LogLevel.warn;
-  if (context.config?.log?.supportAnsiColors === false) {
-    chalk.level = 0;
-  }
+  context.config = context.httpFile.config;
   return Object.assign(context, {
     variables: await getVariables(context),
     httpClient: initHttpClient(context)
   });
-}
-
-
-async function getEnviromentConfig(context: models.VariableProviderContext) {
-  const environmentConfigs : Array<models.EnvironmentConfig> = [];
-  if (context.httpFile.rootDir) {
-    const fileConfig = await utils.getHttpacConfig(context.httpFile.rootDir);
-    if (fileConfig) {
-      environmentConfigs.push(fileConfig);
-    }
-  }
-  if (context.config) {
-    environmentConfigs.push(context.config);
-  }
-
-  const config = Object.assign({
-    log: {
-      level: models.LogLevel.warn,
-      supportAnsiColors: true,
-    },
-    cookieJarEnabled: true,
-    envDirName: 'env',
-  }, ...environmentConfigs);
-
-  showDeprectationWarning(config);
-  return config;
-}
-
-
-function showDeprectationWarning(config: models.EnvironmentConfig) {
-  const deprecated = config as {
-    dotenv: unknown;
-    intellij: unknown;
-    httpRegionScript: unknown;
-  };
-
-  if (deprecated.dotenv) {
-    log.warn('setting dotenv is deprecated. Please use envDirName instead, if needed');
-  }
-  if (deprecated.intellij) {
-    log.warn('setting intellij is deprecated. Please use envDirName instead, if needed');
-  }
-  if (deprecated.httpRegionScript) {
-    log.warn('setting httpRegionScript is deprecated. Please use hooks.beforeRequest instead.');
-  }
-
 }
 
 
@@ -149,9 +97,7 @@ async function getVariables(context: models.VariableProviderContext): Promise<Re
 
 
 export async function getEnvironments(context: models.VariableProviderContext) : Promise<Array<string>> {
-
   const result = (await context.httpFile.hooks.provideEnvironments.trigger(context));
-
   if (result !== models.HookCancel && result.length > 0) {
     return result.reduce((prev, current) => {
       for (const cur of current) {

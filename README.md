@@ -40,6 +40,7 @@ usage: httpyac [options...] <file or glob pattern>
        --raw           prevent formatting of response body
   -r   --repeat        repeat count for requests
        --repeat-mode   repeat mode: sequential, parallel (default)
+       --root          root path of project
   -s   --silent        log only request
        --timeout       maximum time allowed for connections
   -v   --verbose       make the operation more talkative

@@ -31,7 +31,7 @@ export function resolveModule(request: string, context: string): string | undefi
   return resolvedPath;
 }
 
-export function loadModule<T>(request: string, context: string, force = false): T | (() => T) | undefined {
+export function loadModule<T>(request: string, context: string, force = false): T | undefined {
   try {
     if (force) {
       clearRequireCache(request);
