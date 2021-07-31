@@ -111,7 +111,7 @@ class ImplicitFlow implements OpenIdFlow {
           },
           reject,
         });
-        log.debug(`open browser: ${authUrl}`);
+        log.trace(`open browser: ${authUrl}`);
         open(authUrl);
       } catch (err) {
         unregisterListener(state);

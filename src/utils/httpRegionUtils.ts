@@ -49,18 +49,10 @@ export async function processHttpRegionActions(context: models.ProcessorContext,
     }
 
     const result = await context.httpRegion.hooks.execute.trigger(context);
+    const processedHttpRegion = await logResponse(context);
 
-
-    const processedHttpRegion = await toProcessedHttpRegion(context);
-    if (processedHttpRegion) {
-      if (!processedHttpRegion.metaData.noLog
-        && processedHttpRegion.response
-        && context.logResponse) {
-        context.logResponse(processedHttpRegion.response, context.httpRegion);
-      }
-      if (context.processedHttpRegions && !isGlobalHttpRegion(context.httpRegion)) {
-        context.processedHttpRegions.push(processedHttpRegion);
-      }
+    if (processedHttpRegion && context.processedHttpRegions && !isGlobalHttpRegion(context.httpRegion)) {
+      context.processedHttpRegions.push(processedHttpRegion);
     }
     return result !== models.HookCancel && result.every(obj => !!obj);
   } finally {
@@ -71,6 +63,18 @@ export async function processHttpRegionActions(context: models.ProcessorContext,
   }
 }
 
+
+export async function logResponse(context: models.ProcessorContext) : Promise<models.ProcessedHttpRegion | undefined> {
+  const processedHttpRegion = await toProcessedHttpRegion(context);
+  if (processedHttpRegion) {
+    if (!processedHttpRegion.metaData.noLog
+      && processedHttpRegion.response
+      && context.logResponse) {
+      context.logResponse(processedHttpRegion.response, context.httpRegion);
+    }
+  }
+  return processedHttpRegion;
+}
 
 export async function executeGlobalScripts(context: {
   variables: models.Variables,

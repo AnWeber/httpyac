@@ -2,7 +2,6 @@ import { ProcessorContext, HttpRegionAction, ActionType } from '../models';
 
 import * as utils from '../utils';
 import { testFactory } from './testMethod';
-import { log } from '../io';
 
 export interface ScriptData {
   script: string;
@@ -29,23 +28,16 @@ export function isValidVariableName(name: string): boolean {
 export class JavascriptAction implements HttpRegionAction {
   id = ActionType.js;
 
-  constructor(private readonly scriptData: ScriptData, public readonly after?: string) { }
+  constructor(private readonly scriptData: ScriptData, public readonly after?: string[]) { }
 
   async process(context: ProcessorContext): Promise<boolean> {
-    const { httpRegion, httpFile, request, variables, scriptConsole } = context;
-    const defaultVariables = {
-      request,
-      httpRegion,
-      httpFile,
-      log,
-      console: scriptConsole,
-      test: testFactory(context),
-    };
-    Object.assign(variables, defaultVariables);
+    const { httpFile, request, variables } = context;
 
     const result = await utils.runScript(this.scriptData.script, {
       fileName: httpFile.fileName,
       context: {
+        request,
+        test: testFactory(context),
         httpFile: context.httpFile,
         httpRegion: context.httpRegion,
         console: context.scriptConsole,
@@ -54,12 +46,13 @@ export class JavascriptAction implements HttpRegionAction {
       lineOffset: this.scriptData.lineOffset,
       require: context.require,
     });
-    for (const [key] of Object.entries(defaultVariables)) {
-      delete variables[key];
-    }
     if (result) {
       Object.assign(variables, result);
-      Object.assign(httpFile.variablesPerEnv[utils.toEnvironmentKey(httpFile.activeEnvironment)], result);
+      const envKey = utils.toEnvironmentKey(context.httpFile.activeEnvironment);
+      if (!context.httpFile.variablesPerEnv[envKey]) {
+        context.httpFile.variablesPerEnv[envKey] = {};
+      }
+      Object.assign(context.httpFile.variablesPerEnv[envKey], result);
     }
     return !result.$cancel;
   }

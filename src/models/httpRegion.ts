@@ -1,8 +1,7 @@
-import { SeriesHook } from './hook';
+import { ExecuteHook } from './httpFileHooks';
 import { HttpRequest } from './httpRequest';
 import { HttpResponse } from './httpResponse';
 import { HttpSymbol } from './httpSymbol';
-import { ProcessorContext } from './processorContext';
 import { TestResult } from './testResult';
 
 export interface ProcessedHttpRegion{
@@ -17,6 +16,6 @@ export interface ProcessedHttpRegion{
 export interface HttpRegion extends ProcessedHttpRegion{
   symbol: HttpSymbol;
   hooks: {
-    execute: SeriesHook<ProcessorContext, boolean>;
+    execute: ExecuteHook;
   }
 }

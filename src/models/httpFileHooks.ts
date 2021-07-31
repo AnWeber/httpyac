@@ -26,17 +26,55 @@ export class ParseHook extends BailSeriesHook<getHttpLineGenerator,
 > {
   constructor() {
     super(obj => !!obj);
+    this.id = 'ParseHook';
   }
 }
 
-export class ParseAfterRegionHook extends SeriesHook<ParserContext, void> {}
-export class ProvideVariablesHook extends SeriesHook<string[] | undefined, Variables, string, VariableProviderContext> {}
-export class ProvideEnvironmentsHook extends SeriesHook<VariableProviderContext, string[], string> { }
+export class ParseAfterRegionHook extends SeriesHook<ParserContext, void> {
+  constructor() {
+    super();
+    this.id = 'ParseAfterRegionHook';
+  }
+}
+export class ProvideVariablesHook extends SeriesHook<string[] | undefined, Variables, string, VariableProviderContext> {
+  constructor() {
+    super();
+    this.id = 'ParseAfterRegionHook';
+  }
+}
+export class ProvideEnvironmentsHook extends SeriesHook<VariableProviderContext, string[], string> {
+  constructor() {
+    super();
+    this.id = 'ProvideEnvironmentsHook';
+  }
+}
 export class ReplaceVariableHook extends WaterfallHook<string, undefined, string, ProcessorContext> {
   constructor() {
     super(obj => obj === undefined);
+    this.id = 'ReplaceVariableHook';
   }
 }
-export class BeforeRequestHook extends SeriesHook<HttpRequest, void, HttpRequest, ProcessorContext> {}
-export class AfterRequestHook extends SeriesHook<HttpResponse, void, HttpResponse, ProcessorContext> {}
-export class ResponseLoggingHook extends WaterfallHook<HttpResponse, HttpResponse, ProcessorContext> {}
+export class BeforeRequestHook extends SeriesHook<HttpRequest, void, HttpRequest, ProcessorContext> {
+  constructor() {
+    super();
+    this.id = 'BeforeRequestHook';
+  }
+}
+export class AfterRequestHook extends SeriesHook<HttpResponse, void, HttpResponse, ProcessorContext> {
+  constructor() {
+    super();
+    this.id = 'AfterRequestHook';
+  }
+}
+export class ResponseLoggingHook extends WaterfallHook<HttpResponse, HttpResponse, ProcessorContext> {
+  constructor() {
+    super();
+    this.id = 'ResponseLoggingHook';
+  }
+}
+export class ExecuteHook extends SeriesHook<ProcessorContext, boolean> {
+  constructor() {
+    super(obj => !obj);
+    this.id = 'ExecuteHook';
+  }
+}

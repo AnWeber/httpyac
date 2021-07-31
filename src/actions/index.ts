@@ -7,6 +7,7 @@ export * from './gqlAction';
 export * from './httpClientAction';
 export * from './loopMetaAction';
 export * from './intellijAction';
+export * from './importMetaAction';
 export * from './javascriptAction';
 export * from './httpClientAction';
 export * from './requestBodyImportAction';

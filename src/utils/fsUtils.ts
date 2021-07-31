@@ -1,4 +1,5 @@
 import { fileProvider, PathLike } from '../io';
+import { isString } from './stringUtils';
 
 
 export async function toAbsoluteFilename(fileName: PathLike, baseName: PathLike |undefined, isFolder = false) : Promise<PathLike | undefined> {
@@ -10,9 +11,11 @@ export async function toAbsoluteFilename(fileName: PathLike, baseName: PathLike 
     if (!isFolder) {
       dirName = fileProvider.dirname(baseName);
     }
-    const absolute = fileProvider.joinPath(dirName, fileProvider.fsPath(fileName));
-    if (await fileProvider.exists(absolute)) {
-      return absolute;
+    if (isString(fileName)) {
+      const absolute = fileProvider.joinPath(dirName, fileName);
+      if (await fileProvider.exists(absolute)) {
+        return absolute;
+      }
     }
   }
   return undefined;
@@ -43,8 +46,8 @@ export function shortenFileName(fileName: string, maxChars = 50): string {
 
 export async function findRootDirOfFile(filename: PathLike, workingDir?: PathLike, ...files: Array<string>): Promise<PathLike | undefined> {
   let file = filename;
-  if (!fileProvider.isAbsolute(filename) && workingDir) {
-    file = fileProvider.joinPath(workingDir, fileProvider.fsPath(filename));
+  if (isString(filename) && !fileProvider.isAbsolute(filename) && workingDir) {
+    file = fileProvider.joinPath(workingDir, filename);
   }
   return await findRootDir(fileProvider.dirname(file), ...files);
 }

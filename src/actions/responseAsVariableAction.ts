@@ -29,7 +29,16 @@ export class ResponseAsVariableAction implements HttpRegionAction {
         .replace(/-./gu, value => value[1].toUpperCase());
       if (isValidVariableName(name)) {
         variables[httpRegion.metaData.name] = body;
-        httpFile.variablesPerEnv[toEnvironmentKey(httpFile.activeEnvironment)][name] = body;
+
+
+        const envKey = toEnvironmentKey(httpFile.activeEnvironment);
+        if (httpFile.variablesPerEnv[envKey]) {
+          httpFile.variablesPerEnv[envKey][name] = body;
+        } else {
+          httpFile.variablesPerEnv[envKey] = {
+            [name]: body,
+          };
+        }
       } else {
         log.warn(`Javascript Keyword ${name} not allowed as name`);
       }

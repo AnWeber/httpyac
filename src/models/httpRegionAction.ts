@@ -19,6 +19,7 @@ export enum ActionType{
   js = 'js',
   request = 'request',
   httpClient = 'httpClient',
+  import = 'import',
   ref = 'ref',
   requestBodyImport = 'requestBodyImport',
   response = 'response',

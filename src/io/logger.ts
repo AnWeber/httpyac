@@ -6,6 +6,7 @@ export class Logger implements ConsoleLogHandler {
     level?: LogLevel,
     logMethod?: (level: LogLevel, ...params: unknown[]) => void,
     onlyFailedTests?: boolean;
+    noTrace?: boolean;
   }) {
   }
 
@@ -40,7 +41,7 @@ export class Logger implements ConsoleLogHandler {
     this.writeLog(LogLevel.info, console.log, params);
   }
   trace(...params: unknown[]): void {
-    this.writeLog(LogLevel.trace, console.trace, params);
+    this.writeLog(LogLevel.trace, this.options.noTrace ? console.debug : console.trace, params);
   }
   debug(...params: unknown[]): void {
     this.writeLog(LogLevel.debug, console.debug, params);
@@ -66,4 +67,5 @@ export class Logger implements ConsoleLogHandler {
 
 export const log: LogHandler = new Logger({
   level: LogLevel.warn,
+  noTrace: true,
 });

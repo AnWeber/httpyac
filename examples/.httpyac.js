@@ -9,17 +9,12 @@ module.exports = {
 			"passphrase": "badssl.com"
 		}
 	},
-	configureHooks: function (hooks) {
+	configureHooks: function (api) {
 
-		/*
-		hooks.beforeRequest.addHook('funky', function (request) {
+
+		api.hooks.beforeRequest.addHook('funky', function (request) {
 			request.headers['foo'] = 'bar';
 		});
-		hooks.afterRequest.addHook('funky', function (response) {
-			response.body = 'foo';
-			delete response.parsedBody;
-			delete response.prettyPrintBody;
-		});
-		*/
+
 	}
 }

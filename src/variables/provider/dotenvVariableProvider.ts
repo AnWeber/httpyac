@@ -17,7 +17,12 @@ export async function provideDotenvEnvironments(context: VariableProviderContext
     if (absolute) {
       files.push(...await fileProvider.readdir(absolute));
     }
+    const dirOfFile = await toAbsoluteFilename(fileProvider.dirname(context.httpFile.fileName), context.httpFile.rootDir);
+    if (dirOfFile) {
+      files.push(...await fileProvider.readdir(dirOfFile));
+    }
   }
+
   return files
     .filter(file => file.startsWith('.env') || file.endsWith('.env'))
     .filter(fileName => defaultFiles.indexOf(fileName) < 0)
@@ -41,6 +46,10 @@ export async function provideDotenvVariables(env: string[] | undefined, context:
     if (absolute) {
       variables.push(...await getVariablesOfFolder(searchFiles, absolute));
     }
+  }
+  const dirOfFile = await toAbsoluteFilename(fileProvider.dirname(context.httpFile.fileName), context.httpFile.rootDir);
+  if (dirOfFile) {
+    variables.push(...await getVariablesOfFolder(searchFiles, dirOfFile));
   }
   const result = Object.assign({}, ...variables);
   return expandVariables(result);
@@ -67,7 +76,7 @@ async function getVariablesOfFolder(searchFiles: string[], workingDir: PathLike)
       const variables = parse(content);
       vars.push(variables);
     } catch (err) {
-      log.debug(`${fileName} in ${fileProvider.toString(workingDir)} not found`);
+      log.trace(`${fileProvider.toString(workingDir)}/${fileName} not found`);
     }
   }
   return vars;

@@ -65,7 +65,7 @@ export async function injectOnEveryRequestJavascript({ data, httpRegion }: Parse
       if (everyRequestScript.postScript) {
         httpRegion.hooks.execute.addObjHook(obj => obj.process, new JavascriptAction(everyRequestScript.scriptData));
       } else {
-        httpRegion.hooks.execute.addObjHook(obj => obj.process, new JavascriptAction(everyRequestScript.scriptData, ActionType.requestBodyImport));
+        httpRegion.hooks.execute.addObjHook(obj => obj.process, new JavascriptAction(everyRequestScript.scriptData, [ActionType.requestBodyImport]));
       }
     }
   }

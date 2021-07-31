@@ -22,6 +22,7 @@
   "author": "anweber",
   "license": "ISC",
   "dependencies": {
+    "httpyac-plugin-odav": "^4.3.4",
     "chai": "^4.3.4",
     "express": "^4.17.1",
     "faker": "^5.5.3",

@@ -43,9 +43,12 @@ export class LoopMetaAction implements HookInterceptor<ProcessorContext, boolean
       const next = await this.iteration.next();
       if (!next.done) {
         Object.assign(context.arg.variables, next.value.variables);
+        await utils.logResponse(context.arg);
         context.arg.httpRegion = this.createHttpRegionClone(context.arg.httpRegion, next.value.index);
-        context.index = 0;
+        context.index = -1;
       }
+    } else if (this.name && context.arg.variables[this.name]) {
+      context.arg.variables[`${this.name}0`] = context.arg.variables[this.name];
     }
     return true;
   }
@@ -133,7 +136,7 @@ export class LoopMetaAction implements HookInterceptor<ProcessorContext, boolean
     return {
       metaData: {
         ...httpRegion.metaData,
-        name: this.name ? `${this.name || 'unknown'}${index}` : undefined
+        name: this.name ? `${this.name}${index}` : undefined
       },
       request: httpRegion.request ? {
         ...httpRegion.request

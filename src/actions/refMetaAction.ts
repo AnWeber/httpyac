@@ -1,13 +1,10 @@
-import { executeGlobalScripts, processHttpRegionActions } from '../utils';
-import { ActionType, HttpRegionAction, ProcessorContext } from '../models';
+import { processHttpRegionActions } from '../utils';
+import { ActionType, HttpRegionAction } from '../models';
+import { ImportProcessorContext } from './importMetaAction';
 
 export interface RefMetaHttpRegionData {
   name: string;
   force: boolean;
-}
-
-interface InternalRefData {
-  globalScriptExecution?: boolean;
 }
 
 export class RefMetaAction implements HttpRegionAction {
@@ -15,35 +12,27 @@ export class RefMetaAction implements HttpRegionAction {
 
   constructor(private readonly data: RefMetaHttpRegionData) { }
 
-  async process(context: ProcessorContext): Promise<boolean> {
-    return await this.processInternal(this.data, context);
-  }
-
-  private async processInternal(data: RefMetaHttpRegionData & InternalRefData, context: ProcessorContext): Promise<boolean> {
+  async process(context: ImportProcessorContext): Promise<boolean> {
     for (const refHttpRegion of context.httpFile.httpRegions) {
-      if (refHttpRegion.metaData.name === data.name
+      if (refHttpRegion.metaData.name === this.data.name
         && !refHttpRegion.metaData.disabled
         && refHttpRegion !== context.httpRegion) {
-        if (data.force || !refHttpRegion.response || !context.variables[data.name]) {
-          if (!data.globalScriptExecution || await executeGlobalScripts(context)) {
-            delete data.globalScriptExecution;
-
-            const refContext = { ...context, httpRegion: refHttpRegion };
-            if (await processHttpRegionActions(refContext)) {
-              return true;
-            }
+        if (this.data.force || !refHttpRegion.response || !context.variables[this.data.name]) {
+          const refContext = { ...context, httpRegion: refHttpRegion };
+          if (await processHttpRegionActions(refContext)) {
+            return true;
           }
         }
       }
     }
-    if (context.httpFile.imports) {
-      for (const httpFileLoader of context.httpFile.imports) {
-        const refHttpFile = await httpFileLoader(context.httpFile);
-        if (refHttpFile) {
-          data.globalScriptExecution = true;
-          const fileContext = { ...context, httpFile: refHttpFile };
-          await this.processInternal(data, fileContext);
-        }
+    if (context.httpFiles) {
+      for (const refHttpFile of context.httpFiles) {
+        const cloneContext = {
+          ...context,
+          httpFile: refHttpFile
+        };
+        delete cloneContext.httpFiles;
+        await this.process(cloneContext);
       }
     }
     return true;

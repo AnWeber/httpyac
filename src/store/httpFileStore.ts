@@ -75,6 +75,13 @@ export class HttpFileStore {
           httpFileStoreEntry.version = version;
           httpFileStoreEntry.httpFile = httpFile;
           return httpFile;
+        })
+        .catch(err => {
+          delete httpFileStoreEntry.promise;
+          if (httpFileStoreEntry.httpFile) {
+            this.remove(httpFileStoreEntry.httpFile.fileName);
+          }
+          throw err;
         });
       return httpFileStoreEntry.promise;
     }

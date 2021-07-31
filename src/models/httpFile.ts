@@ -12,5 +12,4 @@ export interface HttpFile{
   config?: EnvironmentConfig;
   variablesPerEnv: Record<string, Variables>;
   activeEnvironment?: string[];
-  imports?: Array<(httpFile: HttpFile) => Promise<HttpFile | false>>;
 }

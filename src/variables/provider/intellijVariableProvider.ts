@@ -13,20 +13,23 @@ export async function provideIntellijEnvironments(context: VariableProviderConte
       }
       return prev;
     }, [] as Array<string>);
-
 }
 
 async function getAllEnvironmentVariables(context: VariableProviderContext) {
   const environments: Array<Record<string, Variables>> = [];
 
   if (context.httpFile.rootDir) {
-    await getEnvironmentVariables(context.httpFile.rootDir);
+    environments.push(...await getEnvironmentVariables(context.httpFile.rootDir));
   }
   if (context.config?.envDirName) {
     const absolute = await toAbsoluteFilename(context.config.envDirName, context.httpFile.rootDir, true);
     if (absolute) {
       environments.push(...await getEnvironmentVariables(absolute));
     }
+  }
+  const dirOfFile = await toAbsoluteFilename(fileProvider.dirname(context.httpFile.fileName), context.httpFile.rootDir);
+  if (dirOfFile) {
+    environments.push(...await getEnvironmentVariables(dirOfFile));
   }
   return environments;
 }
@@ -54,7 +57,7 @@ async function getEnvironmentVariables(workingDir: PathLike) {
         environments.push(JSON.parse(content));
       }
     } catch (err) {
-      log.debug(`${file} in ${fileProvider.toString(workingDir)} not found`);
+      log.trace(`${fileProvider.toString(workingDir)}/${file} not found`);
     }
   }
   return environments;

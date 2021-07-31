@@ -19,7 +19,7 @@ export interface OpenIdConfiguration{
 }
 
 function getVariable(variables: Variables, variablePrefix: string, name: string): string {
-  return `${variables[`${variablePrefix}_${name}`] || get(variables, `${variablePrefix}.${name}`)}`;
+  return (variables[`${variablePrefix}_${name}`] || get(variables, `${variablePrefix}.${name}`)) as string;
 }
 
 export function getOpenIdConfiguration(variablePrefix: string, variables: Variables) : OpenIdConfiguration | false {

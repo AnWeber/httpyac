@@ -22,7 +22,7 @@ Authentication: {{authentcation}}
 Date: {{authDate}}
 
 
-GET /anything
+GET /json
 Authentication: {{authentcation}}
 Date: {{authDate}}
 

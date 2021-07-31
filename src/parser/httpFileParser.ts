@@ -2,7 +2,7 @@ import * as models from '../models';
 import * as utils from '../utils';
 import { ParserRegex } from './parserRegex';
 import { HttpFileStore } from '../store';
-import { SeriesHook } from '../models';
+import { ExecuteHook } from '../models';
 
 export async function parseHttpFile(httpFile: models.HttpFile, text: string, httpFileStore: HttpFileStore): Promise<models.HttpFile> {
 
@@ -87,7 +87,7 @@ function initHttpRegion(start: number): models.HttpRegion {
       endOffset: 0,
     },
     hooks: {
-      execute: new SeriesHook(obj => !obj)
+      execute: new ExecuteHook()
     }
   };
 }

@@ -3,7 +3,7 @@ import cloneDeep = require('lodash/cloneDeep');
 
 export class CreateRequestAction implements HttpRegionAction {
   id = ActionType.request;
-  beforeAll = true;
+  before = Object.keys(ActionType);
 
   async process(context: ProcessorContext) : Promise<boolean> {
     if (context.httpRegion.request) {

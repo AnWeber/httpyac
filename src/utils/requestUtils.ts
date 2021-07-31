@@ -115,6 +115,9 @@ export function requestLoggerFactory(
         && (!httpRegion?.testResults || httpRegion.testResults.every(obj => obj.result))) {
       return;
     }
+
+    log('');
+    log('---------------------');
     log('');
     if (httpRegion?.metaData?.title || httpRegion?.metaData?.description) {
       if (httpRegion?.metaData?.title) {

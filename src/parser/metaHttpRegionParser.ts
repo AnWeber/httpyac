@@ -1,14 +1,11 @@
-import { HttpFile, HttpSymbol, HttpSymbolKind, getHttpLineGenerator, HttpRegionParserResult, ParserContext, HttpRegion } from '../models';
-import { toAbsoluteFilename } from '../utils';
-import { LoopMetaAction, LoopMetaType, RefMetaAction } from '../actions';
-import { HttpFileStore } from '../store';
+import { HttpSymbol, HttpSymbolKind, getHttpLineGenerator, HttpRegionParserResult, ParserContext, HttpRegion } from '../models';
+import * as actions from '../actions';
 import { ParserRegex } from './parserRegex';
-import { fileProvider, log } from '../io';
 
 
 export async function parseMetaData(getLineReader: getHttpLineGenerator, context: ParserContext): Promise<HttpRegionParserResult> {
   const lineReader = getLineReader();
-  const { httpRegion, httpFile, httpFileStore, data } = context;
+  const { httpRegion, data } = context;
   if (data.metaTitle) {
     httpRegion.metaData.title = data.metaTitle.trim();
     delete data.metaTitle;
@@ -65,7 +62,10 @@ export async function parseMetaData(getLineReader: getHttpLineGenerator, context
           switch (key) {
             case 'import':
               if (match.groups.value) {
-                await importHttpFile(httpFile, match.groups.value, httpFileStore);
+                httpRegion.hooks.execute.addObjHook(obj => obj.process, new actions.ImportMetaAction(
+                  match.groups.value, context.httpFileStore
+                ));
+
               }
               break;
             case 'responseRef':
@@ -80,23 +80,23 @@ export async function parseMetaData(getLineReader: getHttpLineGenerator, context
               if (match.groups.value) {
                 const forOfMatch = ParserRegex.meta.forOf.exec(match.groups.value);
                 if (forOfMatch?.groups?.iterable && forOfMatch?.groups?.variable) {
-                  httpRegion.hooks.execute.addInterceptor(new LoopMetaAction({
-                    type: LoopMetaType.forOf,
+                  httpRegion.hooks.execute.addInterceptor(new actions.LoopMetaAction({
+                    type: actions.LoopMetaType.forOf,
                     variable: forOfMatch.groups.variable,
                     iterable: forOfMatch.groups.iterable,
                   }));
                 } else {
                   const forMatch = ParserRegex.meta.for.exec(match.groups.value);
                   if (forMatch?.groups?.counter) {
-                    httpRegion.hooks.execute.addInterceptor(new LoopMetaAction({
-                      type: LoopMetaType.for,
+                    httpRegion.hooks.execute.addInterceptor(new actions.LoopMetaAction({
+                      type: actions.LoopMetaType.for,
                       counter: Number.parseInt(forMatch.groups.counter, 10),
                     }));
                   } else {
                     const whileMatch = ParserRegex.meta.while.exec(match.groups.value);
                     if (whileMatch?.groups?.expression) {
-                      httpRegion.hooks.execute.addInterceptor(new LoopMetaAction({
-                        type: LoopMetaType.while,
+                      httpRegion.hooks.execute.addInterceptor(new actions.LoopMetaAction({
+                        type: actions.LoopMetaType.while,
                         expression: whileMatch.groups.expression,
                       }));
                     }
@@ -128,29 +128,8 @@ export async function parseMetaData(getLineReader: getHttpLineGenerator, context
   return false;
 }
 
-async function importHttpFile(httpFile: HttpFile, fileName: string, httpFileStore: HttpFileStore): Promise<void> {
-  try {
-    if (!httpFile.imports) {
-      httpFile.imports = [];
-    }
-    httpFile.imports.push(async (httpFile: HttpFile) => {
-      const absoluteFileName = await toAbsoluteFilename(fileName, httpFile.fileName);
-      if (absoluteFileName) {
-        return await httpFileStore.getOrCreate(absoluteFileName, () => fileProvider.readFile(absoluteFileName, 'utf-8'), 0, {
-          workingDir: httpFile.rootDir,
-          activeEnvironment: httpFile.activeEnvironment,
-        });
-      }
-      return false;
-    });
-
-  } catch (err) {
-    log.error('import error', fileName);
-  }
-}
-
 function addRefHttpRegion(httpRegion: HttpRegion, name: string, force: boolean) {
-  httpRegion.hooks.execute.addObjHook(obj => obj.process, new RefMetaAction({
+  httpRegion.hooks.execute.addObjHook(obj => obj.process, new actions.RefMetaAction({
     name,
     force
   }));

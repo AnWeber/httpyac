@@ -21,6 +21,7 @@ export async function javascriptVariableReplacer(text: string, _type: string, co
     const value = await runScript(script, {
       fileName: context.httpFile.fileName,
       context: {
+        request: context.request,
         httpFile: context.httpFile,
         httpRegion: context.httpRegion,
         console: context.scriptConsole,
