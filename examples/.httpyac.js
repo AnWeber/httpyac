@@ -10,11 +10,10 @@ module.exports = {
 		}
 	},
 	configureHooks: function (api) {
-
-
-		api.hooks.beforeRequest.addHook('funky', function (request) {
-			request.headers['foo'] = 'bar';
+		api.hooks.responseLogging.addHook('removeSensitiveData', function (response) {
+			if (response.request) {
+				delete response.request.headers['authorization'];
+			}
 		});
-
 	}
 }
