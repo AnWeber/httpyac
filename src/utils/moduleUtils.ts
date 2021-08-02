@@ -104,7 +104,10 @@ export async function runScript(source: string, options: {
     Buffer,
     process,
     requireUncached: (id: string) => {
-      clearModule(id, fileProvider.fsPath(fileProvider.dirname(filename)));
+      const dirName = fileProvider.dirname(filename);
+      if (dirName) {
+        clearModule(id, fileProvider.fsPath(dirName));
+      }
       return mod.require(id);
     },
     ...options.context,
