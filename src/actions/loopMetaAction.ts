@@ -57,7 +57,7 @@ export class LoopMetaAction implements HookInterceptor<ProcessorContext, boolean
     switch (this.data.type) {
       case LoopMetaType.forOf:
         if (this.data.variable && this.data.iterable) {
-          const array = context.variables[this.data.iterable];
+          const array = await this.execExpression(this.data.iterable, context);
           let iterable: Array<unknown> | undefined;
           if (Array.isArray(array)) {
             iterable = array;
@@ -128,7 +128,7 @@ export class LoopMetaAction implements HookInterceptor<ProcessorContext, boolean
       },
       lineOffset,
     });
-    return !!value.$result;
+    return value.$result;
   }
 
 
