@@ -3,7 +3,7 @@ import * as models from '../models';
 import { parseComment } from './commentHttpRegionParser';
 import { parseGraphql } from './gqlHttpRegionParser';
 import { parseIntellijScript } from './intellijHttpRegionParser';
-import { parseJavascript } from './jsHttpRegionParser';
+import { parseJavascript } from './javascriptHttpRegionParser';
 import { parseMetaData } from './metaHttpRegionParser';
 import { parseRequestBody, closeRequestBody } from './requestBodyHttpRegionParser';
 import { parseRequestLine } from './requestHttpRegionParser';
@@ -11,7 +11,7 @@ import { parseResponse, closeResponseBody } from './responseHttpRegionParser';
 import { parseResponseRef } from './responseRefHttpRegionParser';
 import { parseVariable } from './variableHttpRegionParser';
 
-import { injectOnEveryRequestJavascript } from './jsHttpRegionParser';
+import { injectOnEveryRequestJavascript } from './javascriptHttpRegionParser';
 import { injectNote } from './noteMetaHttpRegionParser';
 
 

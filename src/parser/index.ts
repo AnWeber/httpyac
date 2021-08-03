@@ -3,7 +3,7 @@ export * from './gqlHttpRegionParser';
 export * from './httpFileParser';
 export * from './intellijHttpRegionParser';
 export * from './initHooks';
-export * from './jsHttpRegionParser';
+export * from './javascriptHttpRegionParser';
 export * from './metaHttpRegionParser';
 export * from './noteMetaHttpRegionParser';
 export * from './parserRegex';
