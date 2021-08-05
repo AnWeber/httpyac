@@ -107,6 +107,7 @@ export async function toProcessedHttpRegion(context: models.ProcessorContext): P
     metaData: context.httpRegion.metaData && {
       ...context.httpRegion.metaData,
     },
+    symbol: context.httpRegion.symbol,
     testResults: context.httpRegion.testResults,
     request: context.httpRegion.request && {
       ...context.httpRegion.request,
