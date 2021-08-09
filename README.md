@@ -10,9 +10,9 @@
 <a href="https://httpyac.github.io/">
 <img src="https://httpyac.github.io/httpyac_site.png" alt="HttpYac" />
 </a>
+<img src="https://raw.githubusercontent.com/AnWeber/httpyac/main/assets/cli.gif" alt="HttpYac CLI" />
 </p>
 
-![example](https://raw.githubusercontent.com/AnWeber/httpyac/main/assets/cli.gif)
 
 
 
