@@ -47,8 +47,8 @@ export function initParseHook(): models.ParseHook {
 }
 
 
-export function initParseAfterRegionHook(): models.ParseAfterRegionHook {
-  const hook = new models.ParseAfterRegionHook();
+export function initParseEndHook(): models.ParseEndRegionHook {
+  const hook = new models.ParseEndRegionHook();
 
   hook.addHook(ParserId.javascript, injectOnEveryRequestJavascript);
   hook.addHook(ParserId.note, injectNote);

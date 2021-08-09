@@ -1,7 +1,7 @@
-import { PathLike, FileProvider } from '../io';
-import { HttpFile, HttpFileHooks, LogLevel, LogHandler, SessionStore } from '../models';
 import { ClientCertificateOptions } from './clientCertifcateOptions';
+import { HttpyacHooksApi } from './httpHooksApi';
 import { HttpRequest } from './httpRequest';
+import { LogLevel } from './logHandler';
 import { Variables } from './variables';
 
 export interface EnvironmentConfig{
@@ -33,25 +33,3 @@ export interface EnvironmentConfig{
 }
 
 export type ConfigureHooks = (api: HttpyacHooksApi) => void | Promise<void>;
-
-
-export interface UserInteractonProvider{
-  showNote: (note: string) => Promise<boolean>;
-  showInputPrompt: (message: string, defaultValue?: string) => Promise<string | undefined>,
-  showListPrompt: (message: string, values: string[]) => Promise<string | undefined>,
-  showWarnMessage?: (message: string) => Promise<void>,
-  showErrorMessage?: (message: string) => Promise<void>,
-}
-
-export interface HttpyacHooksApi{
-  readonly version: string;
-  readonly rootDir?: PathLike;
-  readonly httpFile: Readonly<HttpFile>;
-  readonly config: EnvironmentConfig;
-  readonly hooks: HttpFileHooks;
-  readonly log: LogHandler;
-  readonly fileProvider: FileProvider,
-  readonly sessionStore: SessionStore,
-  readonly userInteractionProvider: UserInteractonProvider;
-  getHookCancel(): symbol;
-}

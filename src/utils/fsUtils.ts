@@ -1,4 +1,5 @@
-import { fileProvider, PathLike } from '../io';
+import { fileProvider } from '../io';
+import { PathLike } from '../models';
 import { isString } from './stringUtils';
 
 

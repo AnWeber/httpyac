@@ -1,5 +1,5 @@
-import { fileProvider, log, PathLike } from '../../io';
-import { VariableProviderContext, Variables } from '../../models';
+import { fileProvider, log } from '../../io';
+import { PathLike, VariableProviderContext, Variables } from '../../models';
 import { expandVariables, toAbsoluteFilename } from '../../utils';
 
 const defaultFiles: Array<string> = ['http-client.env.json', 'http-client.private.env.json'];

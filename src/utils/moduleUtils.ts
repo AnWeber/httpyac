@@ -1,9 +1,10 @@
 import path from 'path';
 import Module from 'module';
 import vm from 'vm';
-import { log, PathLike, fileProvider } from '../io';
+import { log, fileProvider } from '../io';
 import { isPromise } from './promiseUtils';
 import { EOL } from 'os';
+import { PathLike } from '../models';
 
 // eslint-disable-next-line no-underscore-dangle, no-undef
 declare const __non_webpack_require__: NodeJS.Require;

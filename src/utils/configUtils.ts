@@ -1,5 +1,5 @@
-import { PathLike, fileProvider, log } from '../io';
-import { ConfigureHooks, EnvironmentConfig } from '../models';
+import { fileProvider, log } from '../io';
+import { ConfigureHooks, EnvironmentConfig, PathLike } from '../models';
 import { toAbsoluteFilename, findRootDir } from './fsUtils';
 import { loadModule } from './moduleUtils';
 

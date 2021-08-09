@@ -46,7 +46,7 @@ export async function parseHttpFile(httpFile: models.HttpFile, text: string, htt
 }
 
 async function closeHttpRegion(parserContext: models.ParserContext) : Promise<void> {
-  await parserContext.httpFile.hooks.parseAfterRegion.trigger(parserContext);
+  await parserContext.httpFile.hooks.parseEndRegion.trigger(parserContext);
 
   const { httpRegion } = parserContext;
   parserContext.httpRegion.symbol.name = utils.getDisplayName(httpRegion);

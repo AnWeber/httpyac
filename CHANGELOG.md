@@ -1,3 +1,15 @@
+## 3.0.0 (2021-08-xx)
+
+#### Breaking Changes
+* removed extensionScript (use instead [hook api](https://httpyac.github.io/guide/hooks.html#project-local-hooks))
+* removed dotenv and intellij configuration (use instead [envDirName](https://httpyac.github.io/config/#envdirname), if needed)
+
+#### Features
+* [httpyac plugin support](https://httpyac.github.io/plugins/#getting-started)
+* [hook api support](https://httpyac.github.io/guide/hooks.html#project-local-hooks)
+* [better documentation](https://httpyac.github.io/guide)
+* [new location for examples](https://github.com/httpyac/httpyac.github.io/tree/main/examples)
+
 ## 2.21.1 (2021-07-28)
 
 #### Fix

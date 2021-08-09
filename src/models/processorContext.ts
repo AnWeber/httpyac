@@ -16,11 +16,6 @@ export interface Progress{
   report?: (value: { message?: string, increment?: number }) => void;
 }
 
-export interface VariableProviderContext{
-  httpFile: HttpFile;
-  config?: EnvironmentConfig,
-}
-
 export interface HttpFileSendContext{
   httpFile: HttpFile;
   config?: EnvironmentConfig,

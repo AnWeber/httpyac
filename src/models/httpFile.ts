@@ -1,4 +1,4 @@
-import { PathLike } from '../io';
+import { PathLike } from './pathLike';
 import { HttpRegion } from './httpRegion';
 import { HttpFileHooks } from './httpFileHooks';
 import { Variables } from './variables';

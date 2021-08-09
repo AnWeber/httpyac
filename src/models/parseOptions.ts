@@ -1,4 +1,4 @@
-import { PathLike } from '../io';
+import { PathLike } from './pathLike';
 import { HttpFileStore } from '../store';
 import { EnvironmentConfig } from './environmentConfig';
 

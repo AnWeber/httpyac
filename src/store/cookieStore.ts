@@ -1,6 +1,6 @@
 import { Cookie, CookieJar, MemoryCookieStore } from 'tough-cookie';
-import { log, PathLike } from '../io';
-import { HttpFile } from '../models';
+import { log } from '../io';
+import { HttpFile, PathLike } from '../models';
 import { toEnvironmentKey } from '../utils';
 
 

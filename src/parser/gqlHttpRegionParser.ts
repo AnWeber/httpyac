@@ -1,8 +1,8 @@
-import { HttpSymbolKind, getHttpLineGenerator, HttpLineGenerator, HttpRegionParserResult, ParserContext } from '../models';
+import { HttpSymbolKind, getHttpLineGenerator, HttpLineGenerator, HttpRegionParserResult, ParserContext, PathLike } from '../models';
 import { toMultiLineString, toAbsoluteFilename } from '../utils';
 import { GqlAction, GqlData } from '../actions';
 import { ParserRegex } from './parserRegex';
-import { fileProvider, PathLike } from '../io';
+import { fileProvider } from '../io';
 
 
 export async function parseGraphql(getLineReader: getHttpLineGenerator, context: ParserContext): Promise<HttpRegionParserResult> {

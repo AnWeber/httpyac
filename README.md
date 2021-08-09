@@ -1,19 +1,24 @@
 <p align="center">
-<img src="https://raw.githubusercontent.com/AnWeber/httpyac/main/icon.png" alt="HttpYac Logo" />
+<img src="https://httpyac.github.io/favicon.png" alt="HttpYac" />
 </p>
 
 # Http Yac - Yet another Rest Client
 
-Command Line Interface for *.http and *.rest files
+> httpyac CLI provides a command line interface to execute *.http and *.rest files. This can be used to quickly execute a single *.http file, but also to execute all files in a folder.
+
+<p align="center">
+<a href="https://httpyac.github.io/">
+<img src="https://httpyac.github.io/httpyac_site.png" alt="HttpYac" />
+</a>
+</p>
 
 ![example](https://raw.githubusercontent.com/AnWeber/httpyac/main/assets/cli.gif)
 
-> This program is used to execute *.http files on the command line. These can be created most easily in [VSCode](https://marketplace.visualstudio.com/items?itemName=anweber.vscode-httpyac), [VSCodium](https://open-vsx.org/extension/anweber/vscode-httpyac) or [Theia](https://open-vsx.org/extension/anweber/vscode-httpyac).
 
 
 ## Installation
 
-```
+```shell
 npm install -g httpyac
 httpyac --version
 ```
@@ -61,96 +66,7 @@ Authorization: Basic {{user}} {{password}}
 
 ```
 
-```html
-
-fragment IOParts on Repository {
-  description
-  diskUsage
-}
-
-POST https://api.github.com/graphql
-Content-Type: application/json
-Authorization: Bearer {{git_api_key}}
-
-
-query test($name: String!, $owner: String!) {
-  repository(name: $name, owner: $owner) {
-    name
-    fullName: nameWithOwner
-    ...IOParts
-    forkCount
-    stargazers(first: 5) {
-        totalCount
-        nodes {
-            login
-            name
-        }
-    }
-    watchers {
-        totalCount
-    }
-  }
-}
-
-{
-    "name": "vscode-httpyac",
-    "owner": "AnWeber"
-}
-```
-
-> [more examples](https://github.com/AnWeber/httpyac/tree/main/examples)
-
-A complete specification / documentation can be found [here](https://github.com/AnWeber/httpyac/tree/main/examples/README.md)
-
-
-## Settings
-
-To load the environment variables, the root folder of the project is automatically searched. The root folder is determined where a `package.json`, `.httpyac.json` or a folder `env` is searched.
-
-The program can be configured either in the `.httpyac.json` file or in `the package.json` with `httpyac` key. See [interface](https://github.com/AnWeber/httpyac/blob/main/src/models/environmentConfig.ts) for supported settings.
-
-> if the file has been newly created or changed, the program must be restarted or the environments must be reset/ reloaded
-
-
-## Features
-
-### send/ resend
-
-Execute any REST, SOAP, and GraphQL queries of *.http Files on the command line
-
-### variables
-
-Built in support for variables and enviroments.
-  * [dotenv](https://www.npmjs.com/package/dotenv) support
-  * [intellij variable support](https://www.jetbrains.com/help/idea/exploring-http-syntax.html#environment-variables)
-  * provide custom variables with scripts
-
-### Manage Authentication
-
-There are many authentications already built in
-* OAuth2 / Open Id Connect
-* Basic
-* Digest
-* AWS
-
-Others can be added independently by means of scripting
-
-### script support
-
-enrich requests with custom scripts
-  * create custom variables
-  * add Custom Authentication to the requests
-  * Node JS scripting support (pre request and post request)
-  * Node JS require possible
-
-### Intellij HTTP Client compatibility
-
-*.http files of [Intellij HTTP Client](https://www.jetbrains.com/help/idea/http-client-in-product-code-editor.html) can be parsed and executed
-
-
-### VSCode, VSCodium and Theia support
-
-develop *.http Files in VSCode with [vscode-httpyac](https://marketplace.visualstudio.com/items?itemName=anweber.vscode-httpyac) extension or use [VSCodium](https://open-vsx.org/extension/anweber/vscode-httpyac)
+more [examples](https://httpyac.github.io/guide/examples) and [guide](https://httpyac.github.io/guide/)
 
 
 ## License

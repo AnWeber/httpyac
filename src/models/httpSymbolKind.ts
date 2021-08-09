@@ -1,14 +1,14 @@
-export enum HttpSymbolKind{
+export enum HttpSymbolKind {
   request = 'request',
   requestLine = 'requestLine',
   requestMethod = 'requestMethod',
   requestUrl = 'requestUrl',
-  requestHeader ='requestHeader',
+  requestHeader = 'requestHeader',
   requestHeaderKey = 'requestHeaderKey',
   requestHeaderValue = 'requestHeaderValue',
   requestBody = 'requestBody',
   response = 'response',
-  gql ='gql',
+  gql = 'gql',
   script = 'script',
   metaData = 'metaData',
   metaDataKey = 'metaDataKey',

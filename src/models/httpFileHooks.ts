@@ -3,12 +3,13 @@ import { HttpRegionParserResult } from './httpRegionParserResult';
 import { HttpRequest } from './httpRequest';
 import { HttpResponse } from './httpResponse';
 import { getHttpLineGenerator, ParserContext } from './parserContext';
-import { VariableProviderContext, ProcessorContext } from './processorContext';
+import { ProcessorContext } from './processorContext';
+import { VariableProviderContext } from './variableProviderContext';
 import { Variables } from './variables';
 
 export interface HttpFileHooks{
   readonly parse: ParseHook,
-  readonly parseAfterRegion: ParseAfterRegionHook,
+  readonly parseEndRegion: ParseEndRegionHook,
   readonly replaceVariable: ReplaceVariableHook;
   readonly provideEnvironments: ProvideEnvironmentsHook;
   readonly provideVariables: ProvideVariablesHook;
@@ -30,16 +31,16 @@ export class ParseHook extends BailSeriesHook<getHttpLineGenerator,
   }
 }
 
-export class ParseAfterRegionHook extends SeriesHook<ParserContext, void> {
+export class ParseEndRegionHook extends SeriesHook<ParserContext, void> {
   constructor() {
     super();
-    this.id = 'ParseAfterRegionHook';
+    this.id = 'ParseEndRegionHook';
   }
 }
 export class ProvideVariablesHook extends SeriesHook<string[] | undefined, Variables, string, VariableProviderContext> {
   constructor() {
     super();
-    this.id = 'ParseAfterRegionHook';
+    this.id = 'ProvideVariablesHook';
   }
 }
 export class ProvideEnvironmentsHook extends SeriesHook<VariableProviderContext, string[], string> {

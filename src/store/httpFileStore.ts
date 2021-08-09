@@ -1,6 +1,6 @@
 import * as models from '../models';
-import { initParseAfterRegionHook, initParseHook, parseHttpFile } from '../parser';
-import { fileProvider, PathLike, log, userInteractionProvider } from '../io';
+import { initParseEndHook, initParseHook, parseHttpFile } from '../parser';
+import { fileProvider, log, userInteractionProvider } from '../io';
 import { userSessionStore as sessionStore } from '../store';
 import { getEnvironments } from '../httpYacApi';
 import { replacer, provider } from '../variables';
@@ -21,7 +21,7 @@ export type HttpFileStoreOptions = Omit<models.ParseOptions, 'httpFileStore'>
 export class HttpFileStore {
   private readonly storeCache: Array<HttpFileStoreEntry> = [];
 
-  private getFromStore(fileName: PathLike, version: number) {
+  private getFromStore(fileName: models.PathLike, version: number) {
     const cacheKey = fileProvider.toString(fileName);
     let httpFileStoreEntry = this.storeCache.find(obj => obj.cacheKey === cacheKey);
     if (!httpFileStoreEntry) {
@@ -34,7 +34,7 @@ export class HttpFileStore {
     return httpFileStoreEntry;
   }
 
-  get(fileName: PathLike): models.HttpFile | undefined {
+  get(fileName: models.PathLike): models.HttpFile | undefined {
     const cacheKey = fileProvider.toString(fileName);
     return this.storeCache.find(obj => obj.cacheKey === cacheKey)?.httpFile;
   }
@@ -49,7 +49,7 @@ export class HttpFileStore {
     return result;
   }
 
-  getOrCreate(fileName: PathLike, getText: () => Promise<string>, version: number, options: HttpFileStoreOptions): Promise<models.HttpFile> {
+  getOrCreate(fileName: models.PathLike, getText: () => Promise<string>, version: number, options: HttpFileStoreOptions): Promise<models.HttpFile> {
     const httpFileStoreEntry: HttpFileStoreEntry = this.getFromStore(fileName, version);
     if (version > httpFileStoreEntry.version || !httpFileStoreEntry.httpFile) {
       if (httpFileStoreEntry.promise
@@ -103,12 +103,12 @@ export class HttpFileStore {
   }
 
 
-  async parse(fileName: PathLike, text: string, options: HttpFileStoreOptions): Promise<models.HttpFile> {
+  async parse(fileName: models.PathLike, text: string, options: HttpFileStoreOptions): Promise<models.HttpFile> {
     const httpFile = await this.initHttpFile(fileName, options);
     return await parseHttpFile(httpFile, text, this);
   }
 
-  remove(fileName: PathLike): void {
+  remove(fileName: models.PathLike): void {
     const cacheKey = fileProvider.toString(fileName);
     const index = this.storeCache.findIndex(obj => obj.cacheKey === cacheKey);
     if (index >= 0) {
@@ -116,7 +116,7 @@ export class HttpFileStore {
     }
   }
 
-  rename(oldFileName: PathLike, newFileName: PathLike) : void {
+  rename(oldFileName: models.PathLike, newFileName: models.PathLike) : void {
     const oldCacheKey = fileProvider.toString(oldFileName);
     const httpFileStoreEntry = this.storeCache.find(obj => obj.cacheKey === oldCacheKey);
     if (httpFileStoreEntry) {
@@ -131,7 +131,7 @@ export class HttpFileStore {
     this.storeCache.length = 0;
   }
 
-  private async initHttpFile(fileName: PathLike, options: HttpFileStoreOptions) {
+  private async initHttpFile(fileName: models.PathLike, options: HttpFileStoreOptions) {
     const rootDir = await utils.findRootDirOfFile(fileName, options.workingDir,
       ...utils.DefaultRootFiles, options.config?.envDirName || 'env');
 
@@ -140,7 +140,7 @@ export class HttpFileStore {
       rootDir,
       hooks: {
         parse: initParseHook(),
-        parseAfterRegion: initParseAfterRegionHook(),
+        parseEndRegion: initParseEndHook(),
         replaceVariable: replacer.initReplaceVariableHook(),
         provideEnvironments: provider.initProvideEnvironmentsHook(),
         provideVariables: provider.initProvideVariablesHook(),

@@ -1,5 +1,5 @@
-import { log, PathLike } from '../io';
-import { ActionType, HttpRegionAction, ProcessorContext } from '../models';
+import { log } from '../io';
+import { ActionType, HttpRegionAction, PathLike, ProcessorContext } from '../models';
 import { isString, toMultiLineString } from '../utils';
 
 
