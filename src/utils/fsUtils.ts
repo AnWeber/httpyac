@@ -59,7 +59,6 @@ export const DefaultRootFiles = [
   '.httpyac.json',
   '.httpyac.js',
   '.httpyac.config.js',
-  'httpyac.config.json',
 ];
 
 export async function findRootDir(currentDir: PathLike | undefined, ...files: Array<string>): Promise<PathLike | undefined> {
