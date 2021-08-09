@@ -2,7 +2,7 @@
 <img src="https://httpyac.github.io/favicon.png" alt="HttpYac" />
 </p>
 
-# Http Yac - Yet another Rest Client
+# httpYac - Yet another Rest Client
 
 > httpyac CLI provides a command line interface to execute *.http and *.rest files. This can be used to quickly execute a single *.http file, but also to execute all files in a folder.
 
@@ -12,9 +12,6 @@
 </a>
 <img src="https://raw.githubusercontent.com/AnWeber/httpyac/main/assets/cli.gif" alt="HttpYac CLI" />
 </p>
-
-
-
 
 ## Installation
 
@@ -55,9 +52,9 @@ usage: httpyac [options...] <file or glob pattern>
 > --editor option only works on linux and mac ([see](https://github.com/nodejs/node/issues/21771))
 
 
-## Examples
+## Example
 
-```html
+```http
 @user = doe
 @password = 12345678
 

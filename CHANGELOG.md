@@ -1,4 +1,4 @@
-## 3.0.0 (2021-08-xx)
+## 3.0.0 (2021-08-09)
 
 #### Breaking Changes
 * removed extensionScript (use instead [hook api](https://httpyac.github.io/guide/hooks.html#project-local-hooks))
