@@ -51,15 +51,11 @@ class AuthorizationCodeFlow implements OpenIdFlow {
               const openIdInformation = requestOpenIdInformation({
                 url: config.tokenEndpoint,
                 method: 'POST',
-                headers: {
-                  'authorization': `Basic ${Buffer.from(`${config.clientId}:${config.clientSecret}`).toString('base64')}`,
-                  'content-type': 'application/x-www-form-urlencoded',
-                },
                 body: toQueryParams({
                   grant_type: 'authorization_code',
                   scope: config.scope,
                   code: params.code,
-                  redirect_uri: redirectUri
+                  redirect_uri: redirectUri,
                 })
               }, {
                 httpClient: context.httpClient,

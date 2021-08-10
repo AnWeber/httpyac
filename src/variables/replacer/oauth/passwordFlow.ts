@@ -20,10 +20,6 @@ class PasswordFlow implements OpenIdFlow {
     return requestOpenIdInformation({
       url: config.tokenEndpoint,
       method: 'POST',
-      headers: {
-        'authorization': `Basic ${Buffer.from(`${config.clientId}:${config.clientSecret}`).toString('base64')}`,
-        'content-type': 'application/x-www-form-urlencoded'
-      },
       body: toQueryParams({
         grant_type: 'password',
         scope: config.scope,

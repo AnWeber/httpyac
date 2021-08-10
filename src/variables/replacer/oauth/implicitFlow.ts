@@ -53,10 +53,6 @@ class ImplicitFlow implements OpenIdFlow {
                 const openIdInformation = requestOpenIdInformation({
                   url: config.tokenEndpoint,
                   method: 'POST',
-                  headers: {
-                    'authorization': `Basic ${Buffer.from(`${config.clientId}:${config.clientSecret}`).toString('base64')}`,
-                    'content-type': 'application/x-www-form-urlencoded',
-                  },
                   body: toQueryParams({
                     grant_type: 'authorization_code',
                     scope: config.scope,

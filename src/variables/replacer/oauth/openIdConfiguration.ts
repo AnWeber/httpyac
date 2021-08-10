@@ -16,6 +16,7 @@ export interface OpenIdConfiguration{
   username?: string;
   password?: string;
   subjectIssuer?: string;
+  useAuthorizationHeader: boolean;
 }
 
 function getVariable(variables: Variables, variablePrefix: string, name: string): string {
@@ -38,6 +39,7 @@ export function getOpenIdConfiguration(variablePrefix: string, variables: Variab
       password: getVariable(variables, variablePrefix, 'password'),
       subjectIssuer: getVariable(variables, variablePrefix, 'subjectIssuer'),
       keepAlive: ['true', '1', true].indexOf(getVariable(variables, variablePrefix, 'keepAlive')) < 0,
+      useAuthorizationHeader: ['false', '0', false].indexOf(getVariable(variables, variablePrefix, 'useAuthorizationHeader')) < 0,
     };
     return config;
   }

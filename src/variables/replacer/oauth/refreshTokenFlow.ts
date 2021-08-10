@@ -19,10 +19,6 @@ class RefreshTokenFlow {
       return requestOpenIdInformation({
         url: openIdInformation.config.tokenEndpoint,
         method: 'POST',
-        headers: {
-          'authorization': `Basic ${Buffer.from(`${openIdInformation.config.clientId}:${openIdInformation.config.clientSecret}`).toString('base64')}`,
-          'content-type': 'application/x-www-form-urlencoded',
-        },
         body: toQueryParams({
           grant_type: 'refresh_token',
           refresh_token: openIdInformation.refreshToken
