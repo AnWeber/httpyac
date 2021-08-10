@@ -67,7 +67,7 @@ export class AfterRequestHook extends SeriesHook<HttpResponse, void, HttpRespons
     this.id = 'AfterRequestHook';
   }
 }
-export class ResponseLoggingHook extends WaterfallHook<HttpResponse, HttpResponse, ProcessorContext> {
+export class ResponseLoggingHook extends BailSeriesHook<HttpResponse, void, HttpResponse, ProcessorContext> {
   constructor() {
     super();
     this.id = 'ResponseLoggingHook';

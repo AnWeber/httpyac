@@ -97,11 +97,11 @@ export async function executeGlobalScripts(context: {
 export async function toProcessedHttpRegion(context: models.ProcessorContext): Promise<models.ProcessedHttpRegion | undefined> {
   let response: models.HttpResponse | undefined;
   if (context.httpRegion.response) {
-    const result = await context.httpFile.hooks.responseLogging.trigger(cloneResponse(context.httpRegion.response), context);
+    response = cloneResponse(context.httpRegion.response);
+    const result = await context.httpFile.hooks.responseLogging.trigger(response, context);
     if (result === models.HookCancel) {
       return undefined;
     }
-    response = result;
   }
   return {
     metaData: context.httpRegion.metaData && {
