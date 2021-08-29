@@ -1,3 +1,8 @@
+## 3.2.0 (2021-08-29)
+
+#### Fix
+* markdown requests supports sending heading
+
 ## 3.1.0 (2021-08-09)
 
 #### Features
