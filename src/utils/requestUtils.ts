@@ -211,8 +211,13 @@ export function cloneResponse(response: HttpResponse): HttpResponse {
   const clone: HttpResponse = {
     statusCode: response.statusCode,
     statusMessage: response.statusMessage,
+    httpVersion: response.httpVersion,
     headers: response.headers,
     body: response.body,
+    rawBody: response.rawBody,
+    parsedBody: response.parsedBody,
+    prettyPrintBody: response.prettyPrintBody,
+    contentType: response.contentType,
     timings: response.timings,
     meta: response.meta,
   };

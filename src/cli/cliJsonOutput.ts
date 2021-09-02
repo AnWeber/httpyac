@@ -82,6 +82,11 @@ export function toCliJsonOutput(context: Record<string, Array<HttpRegion>>, opti
 
 function convertResponse(response: HttpResponse | undefined, output: string | undefined) {
   if (response) {
+    delete response.rawBody;
+    delete response.prettyPrintBody;
+    delete response.parsedBody;
+    delete response.contentType;
+
     switch (output) {
       case 'body':
       case 'response':
