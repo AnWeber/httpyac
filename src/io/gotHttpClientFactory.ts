@@ -34,9 +34,9 @@ export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined) 
 
       const options: OptionsOfUnknownResponseBody = toGotOptions(mergedRequest);
       log.debug('request', options);
-      let response: HttpResponse | false;
+      let response: HttpResponse | undefined;
       if (context.repeat && context.repeat.count > 0) {
-        response = await loadRepeat(url, options, context.repeat.type, context.repeat.count);
+        response = await loadRepeat(url, options, context);
       } else {
         response = await load(url, options, context);
       }
@@ -62,21 +62,26 @@ export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined) 
 }
 
 
-async function loadRepeat(url: string, options: OptionsOfUnknownResponseBody, repeatOrder: RepeatOrder, count: number) {
+async function loadRepeat(url: string, options: OptionsOfUnknownResponseBody, context: HttpClientContext) {
 
-  const loadFunc = async () => toHttpResponse(await got(url, options));
+  const loadFunc = async () => {
+    const response = toHttpResponse(await got(url, options));
+    context.logResponse?.(response, context.httpRegion);
+    return response;
+  };
   const loader: Array<() => Promise<HttpResponse>> = [];
-  for (let index = 0; index < count; index++) {
+  for (let index = 0; index < (context.repeat?.count || 1); index++) {
     loader.push(loadFunc);
   }
-  if (repeatOrder === RepeatOrder.parallel) {
-    return mergeHttpResponse(await Promise.all(loader.map(obj => obj())));
+  if (context.repeat?.type === RepeatOrder.parallel) {
+    const responses = await Promise.all(loader.map(obj => obj()));
+    return responses.pop();
   }
   const responses = [];
   for (const load of loader) {
     responses.push(await load());
   }
-  return mergeHttpResponse(responses);
+  return responses.pop();
 }
 
 async function load(url: string, options: OptionsOfUnknownResponseBody, context: HttpClientContext) {
@@ -167,32 +172,6 @@ export function setAdditionalBody(httpResponse: HttpResponse): void {
   }
 }
 
-function mergeHttpResponse(responses: Array<HttpResponse>): HttpResponse | false {
-  const statusCode = responses.map(obj => obj.statusCode)
-    .reduce((prev, curr) => Math.max(prev, curr), 0);
-  const response = responses.find(obj => obj.statusCode === statusCode);
-  if (response) {
-
-    response.parsedBody = responses.map(obj => {
-      if (isString(obj.body) && isMimeTypeJSON(obj.contentType)) {
-        obj.body = JSON.parse(obj.body);
-      }
-      delete obj.rawBody;
-      return obj;
-    });
-    response.body = JSON.stringify(response.parsedBody);
-
-    return {
-      statusCode: response.statusCode,
-      statusMessage: response.statusMessage,
-      body: response.body,
-      rawBody: response.rawBody,
-      headers: response.headers,
-      timings: response.timings
-    };
-  }
-  return false;
-}
 
 export function initHttpClient(content: VariableProviderContext): HttpClient {
   const request = {

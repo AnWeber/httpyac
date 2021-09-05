@@ -163,8 +163,7 @@ async function selectAction(httpFiles: models.HttpFile[], cliOptions: CliOptions
 
       for (const httpRegion of httpFile.httpRegions) {
         if (httpRegion.request) {
-          const line = httpRegion.symbol.children?.find(obj => obj.kind === models.HttpSymbolKind.requestLine)?.startLine || httpRegion.symbol.startLine;
-          const name = httpRegion.metaData.name || `${httpRegion.request.method} ${httpRegion.request.url} (line ${line + 1})`;
+          const name = httpRegion.symbol.name;
           httpRegionMap[hasManyFiles ? `${httpFile.fileName}: ${name}` : name] = {
             httpRegion,
             httpFile

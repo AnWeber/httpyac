@@ -10,14 +10,12 @@ export function getDisplayName(httpRegion: models.HttpRegion, defaultName = 'glo
     return httpRegion.metaData.name;
   }
   if (httpRegion.request?.url) {
-    const index = httpRegion.request.url.indexOf('/');
-    if (index >= 0) {
-      let indexQuery = httpRegion.request.url.indexOf('?');
-      if (indexQuery < 0) {
-        indexQuery = httpRegion.request.url.length;
-      }
-      return httpRegion.request.url.slice(index, indexQuery);
+    let indexQuery = httpRegion.request.url.indexOf('?');
+    if (indexQuery < 0) {
+      indexQuery = httpRegion.request.url.length;
     }
+    const line = httpRegion.symbol.children?.find?.(obj => obj.kind === models.HttpSymbolKind.requestLine)?.startLine || httpRegion.symbol.startLine;
+    return `${httpRegion.request.method} ${httpRegion.request.url.slice(0, indexQuery)} (line: ${line + 1})`;
   }
   return defaultName;
 }

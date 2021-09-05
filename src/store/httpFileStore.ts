@@ -214,7 +214,6 @@ export async function getEnviromentConfig(context: models.VariableProviderContex
   }, ...environmentConfigs);
 
   refreshStaticConfig(config);
-  showDeprectationWarning(config);
   return config;
 }
 
@@ -223,24 +222,4 @@ function refreshStaticConfig(config: models.EnvironmentConfig) {
   if (config?.log?.supportAnsiColors === false) {
     chalk.level = 0;
   }
-}
-
-
-function showDeprectationWarning(config: models.EnvironmentConfig) {
-  const deprecated = config as {
-    dotenv: unknown;
-    intellij: unknown;
-    httpRegionScript: unknown;
-  };
-
-  if (deprecated.dotenv) {
-    log.warn('setting dotenv is deprecated. Please use envDirName instead, if needed');
-  }
-  if (deprecated.intellij) {
-    log.warn('setting intellij is deprecated. Please use envDirName instead, if needed');
-  }
-  if (deprecated.httpRegionScript) {
-    log.warn('setting httpRegionScript is deprecated. Please use hooks.beforeRequest instead.');
-  }
-
 }
