@@ -4,10 +4,11 @@ import { createHash } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { URL } from 'url';
 import { ParserRegex } from '../../parser';
+import { isHttpRequest, isString } from '../../utils';
 
 
-export async function digestAuthVariableReplacer(text: string, type: string, { request }: ProcessorContext): Promise<string | undefined> {
-  if (type.toLowerCase() === 'authorization' && text && request) {
+export async function digestAuthVariableReplacer(text: unknown, type: string, { request }: ProcessorContext): Promise<unknown> {
+  if (type.toLowerCase() === 'authorization' && isString(text) && isHttpRequest(request)) {
     const match = ParserRegex.auth.digest.exec(text);
 
     if (match && match.groups && match.groups.user && match.groups.password) {

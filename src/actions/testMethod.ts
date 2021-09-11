@@ -47,7 +47,7 @@ export function testFactory({ httpRegion, scriptConsole }: ProcessorContext): Te
       testFunction(`total time exceeded ${maxTotalTime}`, () => utils.assertMaxTotalTime(response, maxTotalTime));
     }
   };
-  testFunction.header = (headerKey: string, val: string | string[] | null | undefined) => {
+  testFunction.header = (headerKey: string, val: string | string[] | undefined) => {
     if (httpRegion.response) {
       const response = httpRegion.response;
       testFunction(`response header equals ${val}`, () => utils.assertHeaderEquals(response, headerKey, val));

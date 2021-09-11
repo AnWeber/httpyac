@@ -1,6 +1,6 @@
 import { BailSeriesHook, WaterfallHook, SeriesHook } from './hook';
 import { HttpRegionParserResult } from './httpRegionParserResult';
-import { HttpRequest } from './httpRequest';
+import { Request } from './httpRequest';
 import { HttpResponse } from './httpResponse';
 import { getHttpLineGenerator, ParserContext } from './parserContext';
 import { ProcessorContext } from './processorContext';
@@ -15,8 +15,8 @@ export interface HttpFileHooks{
   readonly provideVariables: ProvideVariablesHook;
 
 
-  readonly beforeRequest: BeforeRequestHook;
-  readonly afterRequest: AfterRequestHook,
+  readonly onRequest: OnRequestHook;
+  readonly onResponse: OnResponseHook,
   readonly responseLogging: ResponseLoggingHook,
 }
 
@@ -49,22 +49,29 @@ export class ProvideEnvironmentsHook extends SeriesHook<VariableProviderContext,
     this.id = 'ProvideEnvironmentsHook';
   }
 }
-export class ReplaceVariableHook extends WaterfallHook<string, undefined, string, ProcessorContext> {
+export class ReplaceVariableHook extends WaterfallHook<unknown, undefined, string, ProcessorContext> {
   constructor() {
     super(obj => obj === undefined);
     this.id = 'ReplaceVariableHook';
   }
 }
-export class BeforeRequestHook extends SeriesHook<HttpRequest, void, HttpRequest, ProcessorContext> {
+export class OnRequestHook extends SeriesHook<Request, void, Request, ProcessorContext> {
   constructor() {
     super();
     this.id = 'BeforeRequestHook';
   }
 }
-export class AfterRequestHook extends SeriesHook<HttpResponse, void, HttpResponse, ProcessorContext> {
+export class OnResponseHook extends SeriesHook<HttpResponse, void, HttpResponse, ProcessorContext> {
   constructor() {
     super();
     this.id = 'AfterRequestHook';
+  }
+}
+
+export class OnStreaming extends SeriesHook<ProcessorContext, void> {
+  constructor() {
+    super();
+    this.id = 'OnStreaming';
   }
 }
 export class ResponseLoggingHook extends BailSeriesHook<HttpResponse, void, HttpResponse, ProcessorContext> {

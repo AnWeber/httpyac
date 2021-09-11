@@ -1,9 +1,9 @@
 import { OpenIdConfiguration } from './openIdConfiguration';
-import { HookCancel, HttpClient, HttpRequest, ProcessorContext, UserSession } from '../../../models';
-import { cloneResponse, decodeJWT, toQueryParams } from '../../../utils';
+import * as models from '../../../models';
+import * as utils from '../../../utils';
 import { log } from '../../../io';
 
-export interface OpenIdInformation extends UserSession{
+export interface OpenIdInformation extends models.UserSession{
   time: number;
   config: OpenIdConfiguration;
   accessToken: string;
@@ -13,14 +13,20 @@ export interface OpenIdInformation extends UserSession{
   refreshExpiresIn?: number;
 }
 
+export interface OpenIdContext{
+  httpClient: models.HttpClient,
+}
 
-export async function requestOpenIdInformation(request: HttpRequest | false, options: {
+
+export interface OpenIdSesssion extends Omit<models.UserSession, 'type'>{
   config: OpenIdConfiguration,
-  httpClient: HttpClient,
-  id: string,
-  title: string,
-  description: string,
-}, context?: ProcessorContext): Promise<OpenIdInformation | false> {
+}
+
+export async function requestOpenIdInformation(
+  request: models.HttpRequest | false,
+  options: OpenIdSesssion,
+  context: OpenIdContext
+): Promise<OpenIdInformation | false> {
   if (request) {
     const time = new Date().getTime();
 
@@ -33,44 +39,33 @@ export async function requestOpenIdInformation(request: HttpRequest | false, opt
     if (request.headers && options.config.useAuthorizationHeader) {
       request.headers.authorization = `Basic ${Buffer.from(`${options.config.clientId}:${options.config.clientSecret}`).toString('base64')}`;
     } else {
-      request.body = `${request.body}&${toQueryParams({
+      request.body = `${request.body}&${utils.toQueryParams({
         client_id: options.config.clientId,
         client_secret: options.config.clientSecret
       })}`;
     }
 
-    const response = await options.httpClient(request, { showProgressBar: false });
+    const response = await context?.httpClient(request, { showProgressBar: false });
     if (response) {
-      if (context?.logResponse) {
-        const clone = cloneResponse(response);
-        if (await context.httpFile.hooks.responseLogging.trigger(clone, context) === HookCancel) {
-          return false;
-        }
-        context.logResponse(clone);
+      if (models.isProcessorContext(context)) {
+        await utils.logResponse(response, context);
       }
-      if (response.statusCode === 200 && response.parsedBody) {
-        return toOpenIdInformation(response.parsedBody, time, options);
+      if (response.statusCode === 200 && utils.isString(response.body)) {
+        return toOpenIdInformation(JSON.parse(response.body), time, options);
       }
     }
   }
   return false;
 }
 
-export function toOpenIdInformation(jwtToken: unknown, time: number, context: {
-  config: OpenIdConfiguration,
-  id: string,
-  title: string,
-  description: string,
-}): OpenIdInformation | false {
+export function toOpenIdInformation(jwtToken: unknown, time: number, session: OpenIdSesssion): OpenIdInformation | false {
   if (isAuthToken(jwtToken)) {
-    const parsedToken = decodeJWT(jwtToken.access_token);
+    const parsedToken = utils.decodeJWT(jwtToken.access_token);
     log.debug(JSON.stringify(parsedToken, null, 2));
     return {
-      id: context.id,
-      title: context.title,
-      description: context.description,
+      ...session,
+      type: 'OAuth2',
       time,
-      config: context.config,
       accessToken: jwtToken.access_token,
       expiresIn: jwtToken.expires_in,
       refreshToken: jwtToken.refresh_token,

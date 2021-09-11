@@ -30,11 +30,15 @@ export class TokenExchangeFlow {
           subject_token: encodeUrl(openIdInformation.accessToken)
         })
       }, {
-        httpClient: context.httpClient,
         config,
         id: openIdInformation.id,
         title: `${openIdInformation.title} (token exchange)`,
         description: openIdInformation.description,
+        details: {
+          clientId: config.clientId,
+          tokenEndpoint: config.tokenEndpoint,
+          grantType: 'urn:ietf:params:oauth:grant-type:token-exchange',
+        }
       }, context);
 
     }

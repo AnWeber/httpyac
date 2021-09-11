@@ -1,22 +1,22 @@
-import { ActionType, HttpRegionAction, HttpRequest, HttpRequestBodyLine, ProcessorContext, VariableType, HookCancel } from '../models';
+import * as models from '../models';
 import { replaceVariables } from './variableAction';
 import { isString } from '../utils';
 
 
-export class VariableReplacerAction implements HttpRegionAction {
-  id = ActionType.variableReplacer;
+export class VariableReplacerAction implements models.HttpRegionAction {
+  id = models.ActionType.variableReplacer;
 
 
-  async process(context: ProcessorContext): Promise<boolean> {
+  async process(context: models.ProcessorContext): Promise<boolean> {
     if (context.request) {
-
-
       if (context.request.url) {
-        const result = await replaceVariables(context.request.url, VariableType.url, context) || context.request.url;
-        if (result === HookCancel) {
+        const result = await replaceVariables(context.request.url, models.VariableType.url, context) || context.request.url;
+        if (result === models.HookCancel) {
           return false;
         }
-        context.request.url = result;
+        if (isString(result)) {
+          context.request.url = result;
+        }
       }
       if (await this.replaceVariablesInBody(context.request, context) === false) {
         return false;
@@ -26,24 +26,26 @@ export class VariableReplacerAction implements HttpRegionAction {
     return true;
   }
 
-  private async replaceVariablesInBody(replacedReqeust: HttpRequest, context: ProcessorContext) : Promise<boolean> {
+  private async replaceVariablesInBody(replacedReqeust: models.Request, context: models.ProcessorContext) : Promise<boolean> {
     if (replacedReqeust.body) {
       if (isString(replacedReqeust.body)) {
-        const replacedVariable = await replaceVariables(replacedReqeust.body, VariableType.body, context);
-        if (replacedVariable === HookCancel) {
+        const result = await replaceVariables(replacedReqeust.body, models.VariableType.body, context);
+        if (result === models.HookCancel) {
           return false;
         }
-        replacedReqeust.body = replacedVariable;
+        if (isString(result) || Buffer.isBuffer(result)) {
+          replacedReqeust.body = result;
+        }
       } else if (Array.isArray(replacedReqeust.body)) {
-        const replacedBody: Array<HttpRequestBodyLine> = [];
+        const replacedBody: Array<models.HttpRequestBodyLine> = [];
         for (const obj of replacedReqeust.body) {
           if (isString(obj)) {
-            const replacedVariable = await replaceVariables(obj, VariableType.body, context);
-            if (replacedVariable === HookCancel) {
+            const result = await replaceVariables(obj, models.VariableType.body, context);
+            if (result === models.HookCancel) {
               return false;
             }
-            if (replacedVariable) {
-              replacedBody.push(replacedVariable);
+            if (isString(result)) {
+              replacedBody.push(result);
             }
           } else {
             replacedBody.push(obj);
@@ -55,17 +57,14 @@ export class VariableReplacerAction implements HttpRegionAction {
     return true;
   }
 
-  private async replaceVariablesInHeader(replacedReqeust: HttpRequest, context: ProcessorContext) : Promise<boolean> {
-    if (replacedReqeust.headers) {
-      for (const [headerName, headerValue] of Object.entries(replacedReqeust.headers)) {
-        if (isString(headerValue)) {
-          const value = await replaceVariables(headerValue, headerName, context);
-          if (value === HookCancel) {
-            return false;
-          }
-          replacedReqeust.headers[headerName] = value;
-
+  private async replaceVariablesInHeader(request: models.Request, context: models.ProcessorContext) : Promise<boolean> {
+    if (request.headers) {
+      for (const [headerName, headerValue] of Object.entries(request.headers)) {
+        const value = await replaceVariables(headerValue, headerName, context);
+        if (value === models.HookCancel) {
+          return false;
         }
+        request.headers[headerName] = value;
       }
     }
     return true;

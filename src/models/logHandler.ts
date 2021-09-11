@@ -30,4 +30,4 @@ export interface ConsoleLogHandler extends LogHandler{
 }
 
 
-export type RequestLogger = (response: HttpResponse, httpRegion?: HttpRegion) => void;
+export type RequestLogger = (response: HttpResponse, httpRegion?: HttpRegion) => Promise<void>;

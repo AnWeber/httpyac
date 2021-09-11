@@ -2,6 +2,7 @@ export const ParserRegex = {
   auth: {
     aws: /^\s*(aws)\s+(?<accessKeyId>[^\s]*)\s+(?<secretAccessKey>[^\s]*)\s*(token:\s*(?<token>[^\s]*))?\s*(region:\s*(?<region>[^\s]*))?\s*(service:\s*(?<service>[^\s]*))?\s*$/iu,
     basic: /^\s*(basic)\s+(?<user>[^\s]*)\s+(?<password>([^\s]+.*))$/iu,
+    basicColon: /^\s*(basic)\s+(?<user>.*):(?<password>.*)$/iu,
     clientCert: /^\s*(cert:\s*(?<cert>[^\s]*)\s*)?(key:\s*(?<key>[^\s]*)\s*)?(pfx:\s*(?<pfx>[^\s]*)\s*)?(passphrase:\s*(?<passphrase>[^\s]*)\s*)?\s*$/u,
     digest: /^\s*(digest)\s+(?<user>[^\s]*)\s+(?<password>([^\s]+.*))$/iu,
     oauth2: /^\s*(openid|oauth2)\s+(?<flow>[^\s]*)\s+(?<variablePrefix>[^\s]*)\s*((token_exchange)\s+(?<tokenExchangePrefix>[^\s]*))?\s*$/iu,
@@ -17,6 +18,13 @@ export const ParserRegex = {
     fragment: /^\s*(fragment)\s+(?<name>[^\s(]+)\s+on\s+/u,
     query: /^\s*(query|mutation)(\s+(?<name>[^\s(]+))?/u,
   },
+  grpc: {
+    proto: /^\s*proto\s+<\s+(?<fileName>.+)\s*$/u,
+    grpcLine: /^\s*(GRPC|grpc)\s*(?<url>.+?)\s*$/u,
+    grpcProtocol: /^\s*grpc:\/\/(?<url>.+?)\s*$/u,
+    grpcUrl: /^\s*(grpc:\/\/)?(?<server>.+?)\/(?<service>[^/]+?)\/(?<method>[^/]+?)$/u,
+    sslAuthorization: /^\s*(ssl)\s+(?<root>[^\s]*)\s+(?<cert>[^\s]*)\s+(?<key>[^\s]*)\s*$/iu,
+  },
   intellij: {
     import: /^\s*>\s+(?<fileName>[^\s{%}]+\s*)$/u,
     scriptEnd: /^\s*%\}\s*$/u,
@@ -24,7 +32,7 @@ export const ParserRegex = {
     scriptStart: /^\s*>\s+\{%\s*$/u,
   },
   javascript: {
-    scriptStart: /^\s*\{\{(?<executeOnEveryRequest>\+(pre|post|after)?)?\s*$/u,
+    scriptStart: /^\s*\{\{(@js\s+)?(?<modifier>\+|@)?(?<event>(request|streaming|response|after)?)?\s*$/u,
     scriptEnd: /^\s*\}\}\s*$/u,
   },
   meta: {

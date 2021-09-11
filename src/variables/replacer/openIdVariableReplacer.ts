@@ -3,10 +3,11 @@ import { userSessionStore } from '../../store';
 import * as oauth from './oauth';
 import { ParserRegex } from '../../parser';
 import { log } from '../../io';
+import { isString } from '../../utils';
 
 
-export async function openIdVariableReplacer(text: string, type: string, context: ProcessorContext): Promise<string | undefined | typeof HookCancel> {
-  if (type.toLowerCase() === 'authorization' && text) {
+export async function openIdVariableReplacer(text: unknown, type: string, context: ProcessorContext): Promise<unknown> {
+  if (type.toLowerCase() === 'authorization' && isString(text)) {
     const match = ParserRegex.auth.oauth2.exec(text);
     if (match && match.groups && match.groups.flow && match.groups.variablePrefix) {
 
@@ -22,14 +23,11 @@ export async function openIdVariableReplacer(text: string, type: string, context
           userSessionStore.removeUserSession(cacheKey);
           if (openIdInformation) {
             log.debug(`openid refresh token flow used: ${cacheKey}`);
-            openIdInformation = await oauth.refreshTokenFlow.perform(openIdInformation, { httpClient: context.httpClient }, context);
+            openIdInformation = await oauth.refreshTokenFlow.perform(openIdInformation, context);
           }
           if (!openIdInformation) {
             log.debug(`openid flow ${match.groups.flow} used: ${cacheKey}`);
-            openIdInformation = await openIdFlow.perform(config, {
-              cacheKey,
-              progress: context.progress,
-            }, context);
+            openIdInformation = await openIdFlow.perform(config, context);
             if (openIdInformation && tokenExchangeConfig) {
               openIdInformation = await oauth.TokenExchangeFlow.perform(tokenExchangeConfig, openIdInformation, context);
             }
@@ -82,6 +80,6 @@ function keepAlive(cacheKey: string, httpClient: HttpClient) {
         keepAlive(cacheKey, httpClient);
       }
     }, (openIdInformation.expiresIn - openIdInformation.timeSkew) * 1000);
-    openIdInformation.logout = () => clearTimeout(timeoutId);
+    openIdInformation.delete = () => clearTimeout(timeoutId);
   }
 }

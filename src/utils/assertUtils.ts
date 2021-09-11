@@ -1,6 +1,7 @@
 import { HttpResponse } from '../models';
 import { strictEqual, ok } from 'assert';
 import { getHeader } from './requestUtils';
+import { isString } from './stringUtils';
 
 
 export function assertStatusEquals(response: HttpResponse, status: number): void {
@@ -11,14 +12,14 @@ export function assertMaxTotalTime(response: HttpResponse, maxTotalTime: number)
   ok(response.timings?.total ? response.timings.total < maxTotalTime : true, `total time exceeded ${maxTotalTime}`);
 }
 
-export function assertHeaderEquals(response: HttpResponse, headerKey: string, val: string | string[] | undefined | null): void {
+export function assertHeaderEquals(response: HttpResponse, headerKey: string, val: string | string[] | undefined): void {
   const headerValue = getHeader(response.headers, headerKey);
   strictEqual(headerValue, val, `response header equals ${val}`);
 }
 
 export function assertHeaderContains(response: HttpResponse, headerKey: string, val: string): void {
   const headerValue = getHeader(response.headers, headerKey);
-  if (headerValue) {
+  if (isString(headerValue) || Array.isArray(headerValue)) {
     ok(headerValue.indexOf(val), `response header contains ${val}`);
   }
 }

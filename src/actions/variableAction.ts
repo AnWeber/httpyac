@@ -22,6 +22,6 @@ export class VariableAction implements HttpRegionAction {
 }
 
 
-export async function replaceVariables(text: string, type: VariableType | string, context: ProcessorContext): Promise<string | undefined | typeof HookCancel> {
+export async function replaceVariables(text: unknown, type: VariableType | string, context: ProcessorContext): Promise<unknown> {
   return await context.httpFile.hooks.replaceVariable.trigger(text, type, context);
 }

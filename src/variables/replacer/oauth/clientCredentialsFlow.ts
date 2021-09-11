@@ -2,7 +2,6 @@ import { OpenIdConfiguration, assertConfiguration } from './openIdConfiguration'
 import { OpenIdInformation, requestOpenIdInformation } from './openIdInformation';
 import { OpenIdFlow, OpenIdFlowContext } from './openIdFlow';
 import { toQueryParams } from '../../../utils';
-import { ProcessorContext } from '../../../models';
 
 class ClientCredentialsFlow implements OpenIdFlow {
   supportsFlow(flow: string): boolean {
@@ -17,21 +16,29 @@ class ClientCredentialsFlow implements OpenIdFlow {
   }
 
 
-  async perform(config: OpenIdConfiguration, options: OpenIdFlowContext, context: ProcessorContext): Promise<OpenIdInformation | false> {
-    return requestOpenIdInformation({
-      url: config.tokenEndpoint,
-      method: 'POST',
-      body: toQueryParams({
-        grant_type: 'client_credentials',
-        scope: config.scope,
-      })
-    }, {
-      httpClient: context.httpClient,
-      config,
-      id: options.cacheKey,
-      title: `clientCredentials: ${config.clientId}`,
-      description: `${config.variablePrefix} - ${config.tokenEndpoint}`,
-    }, context);
+  async perform(config: OpenIdConfiguration, context: OpenIdFlowContext): Promise<OpenIdInformation | false> {
+    const id = this.getCacheKey(config);
+    if (id) {
+      return requestOpenIdInformation({
+        url: config.tokenEndpoint,
+        method: 'POST',
+        body: toQueryParams({
+          grant_type: 'client_credentials',
+          scope: config.scope,
+        })
+      }, {
+        config,
+        id,
+        title: `clientCredentials: ${config.clientId}`,
+        description: `${config.variablePrefix} - ${config.tokenEndpoint}`,
+        details: {
+          clientId: config.clientId,
+          tokenEndpoint: config.tokenEndpoint,
+          grantType: 'client_credentials',
+        }
+      }, context);
+    }
+    return false;
   }
 }
 

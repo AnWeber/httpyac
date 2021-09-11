@@ -1,7 +1,6 @@
 import { getHttpLineGenerator, HttpRegionParserResult, HttpSymbolKind, ParserContext } from '../models';
 import { ParserRegex } from './parserRegex';
-import { toMultiLineString, parseContentType } from '../utils';
-import { setAdditionalBody } from '../io';
+import { toMultiLineString, parseContentType, setAdditionalResponseBody } from '../utils';
 
 
 export async function parseResponse(getLineReader: getHttpLineGenerator, context: ParserContext): Promise<HttpRegionParserResult> {
@@ -23,6 +22,7 @@ export async function parseResponse(getLineReader: getHttpLineGenerator, context
     if (match && match.groups?.statusCode) {
 
       context.httpRegion.response = {
+        protocol: `HTTP/${match.groups.httpVersion || '1.1'}`,
         httpVersion: match.groups.httpVersion,
         statusCode: +match.groups.statusCode,
         statusMessage: match.groups.statusMessage,
@@ -74,7 +74,7 @@ export async function closeResponseBody(context: ParserContext): Promise<void> {
       response.body = body;
       response.rawBody = Buffer.from(body);
       response.contentType = parseContentType(response.headers);
-      setAdditionalBody(response);
+      setAdditionalResponseBody(response);
     }
 
     delete context.data.httpResponseSymbol;

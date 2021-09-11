@@ -2,7 +2,10 @@ import { ProcessorContext } from '../../models';
 import { isString, toMultiLineArray, runScript } from '../../utils';
 
 
-export async function javascriptVariableReplacer(text: string, _type: string, context: ProcessorContext): Promise<string | undefined> {
+export async function javascriptVariableReplacer(text: unknown, _type: string, context: ProcessorContext): Promise<unknown> {
+  if (!isString(text)) {
+    return text;
+  }
   const { httpRegion } = context;
   const variableRegex = /\{{2}([^}{2}]+)\}{2}/gu;
   let match: RegExpExecArray | null;

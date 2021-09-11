@@ -1,5 +1,4 @@
-import { ProcessorContext, ActionType, HttpRegionAction } from '../models';
-import { ScriptData } from './javascriptAction';
+import * as models from '../models';
 import * as utils from '../utils';
 import { fileProvider, userInteractionProvider, log } from '../io';
 
@@ -11,15 +10,15 @@ export interface IntellijScriptData{
 }
 
 
-export class IntellijAction implements HttpRegionAction {
-  id = ActionType.intellij;
+export class IntellijAction implements models.HttpRegionAction {
+  id = models.ActionType.intellij;
 
-  constructor(private readonly scriptData: ScriptData | IntellijScriptData) { }
+  constructor(private readonly scriptData: models.ScriptData | IntellijScriptData) { }
 
-  async process(context: ProcessorContext): Promise<boolean> {
+  async process(context: models.ProcessorContext): Promise<boolean> {
     const intellijVars = initIntellijVariables(context);
 
-    let data: ScriptData;
+    let data: models.ScriptData;
     if (this.isIntellijScriptData(this.scriptData)) {
       const script = await this.loadScript(this.scriptData.fileName, context);
       if (!script) {
@@ -44,7 +43,7 @@ export class IntellijAction implements HttpRegionAction {
   }
 
 
-  private async loadScript(file: string, { httpFile }: ProcessorContext) {
+  private async loadScript(file: string, { httpFile }: models.ProcessorContext) {
     try {
       let script: string | false = false;
       const filename = await utils.toAbsoluteFilename(file, httpFile.fileName);
@@ -62,14 +61,14 @@ export class IntellijAction implements HttpRegionAction {
     }
   }
 
-  private isIntellijScriptData(scriptData: IntellijScriptData | ScriptData): scriptData is IntellijScriptData {
+  private isIntellijScriptData(scriptData: IntellijScriptData | models.ScriptData): scriptData is IntellijScriptData {
     const guard = scriptData as IntellijScriptData;
     return !!guard.fileName;
   }
 }
 
 
-function initIntellijVariables(context: ProcessorContext) {
+function initIntellijVariables(context: models.ProcessorContext) {
   let response: unknown;
   if (context.httpRegion.response) {
     response = new intellij.IntellijHttpResponse(context.httpRegion.response);

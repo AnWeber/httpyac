@@ -10,7 +10,7 @@ export const HookCancel = Symbol('cancel hook run');
 
 
 export interface HookItem<T, TReturn> extends BaseHookItem {
-  action(arg: T, arg1?: unknown, arg2?: unknown): Promise<TReturn | typeof HookCancel>;
+  action(arg: T, arg1?: unknown, arg2?: unknown): TReturn | typeof HookCancel | Promise<TReturn | typeof HookCancel>;
 }
 
 export interface HookInterceptor<T, TReturn> {
@@ -29,6 +29,7 @@ export interface HookTriggerContext<T, TReturn> {
   hookItem?: HookItem<T, TReturn>
 }
 
+
 export abstract class Hook<T, TReturn, TTriggerResult, TArg = undefined, TArg2 = undefined> {
   protected items: Array<HookItem<T, TReturn>>;
   protected interceptors: Array<HookInterceptor<T, TReturn>>;
@@ -41,7 +42,7 @@ export abstract class Hook<T, TReturn, TTriggerResult, TArg = undefined, TArg2 =
     this.interceptors = [];
   }
 
-  addHook(id: string, action: (arg: T, arg1: TArg, arg2: TArg2) => Promise<TReturn | typeof HookCancel>, options?: {
+  addHook(id: string, action: (arg: T, arg1: TArg, arg2: TArg2) => TReturn | typeof HookCancel | Promise<TReturn | typeof HookCancel>, options?: {
     before?: Array<string>;
     after?: Array<string>;
   }): void {

@@ -1,4 +1,4 @@
-import { ActionType, SeriesHook, ProcessorContext, HookInterceptor, HookTriggerContext, Variables, HttpRegion } from '../models';
+import * as models from '../models';
 import * as utils from '../utils';
 
 
@@ -17,17 +17,17 @@ export interface LoopMetaData {
 }
 
 
-export class LoopMetaAction implements HookInterceptor<ProcessorContext, boolean> {
-  id = ActionType.loop;
+export class LoopMetaAction implements models.HookInterceptor<models.ProcessorContext, boolean> {
+  id = models.ActionType.loop;
   private iteration: AsyncGenerator<{
     index: number;
-    variables: Variables
+    variables: models.Variables
   }> | undefined;
 
   name: string | undefined;
   constructor(private readonly data: LoopMetaData) { }
 
-  async beforeLoop(context: HookTriggerContext<ProcessorContext, boolean>) : Promise<boolean> {
+  async beforeLoop(context: models.HookTriggerContext<models.ProcessorContext, boolean>) : Promise<boolean> {
     this.iteration = this.iterate(context.arg);
     this.name = context.arg.httpRegion.metaData.name;
     const next = await this.iteration.next();
@@ -38,12 +38,12 @@ export class LoopMetaAction implements HookInterceptor<ProcessorContext, boolean
     return false;
   }
 
-  async afterTrigger(context: HookTriggerContext<ProcessorContext, boolean>): Promise<boolean> {
+  async afterTrigger(context: models.HookTriggerContext<models.ProcessorContext, boolean>): Promise<boolean> {
     if (this.iteration && context.index + 1 === context.length) {
       const next = await this.iteration.next();
       if (!next.done) {
         Object.assign(context.arg.variables, next.value.variables);
-        await utils.logResponse(context.arg);
+        await utils.logResponse(context.arg.httpRegion.response, context.arg);
         context.arg.httpRegion = this.createHttpRegionClone(context.arg.httpRegion, next.value.index);
         context.index = -1;
       }
@@ -53,11 +53,11 @@ export class LoopMetaAction implements HookInterceptor<ProcessorContext, boolean
     return true;
   }
 
-  private async *iterate(context: ProcessorContext) {
+  private async *iterate(context: models.ProcessorContext) {
     switch (this.data.type) {
       case LoopMetaType.forOf:
         if (this.data.variable && this.data.iterable) {
-          const array = await this.execExpression(this.data.iterable, context);
+          const array = await utils.evalExpression(this.data.iterable, context);
           let iterable: Array<unknown> | undefined;
           if (Array.isArray(array)) {
             iterable = array;
@@ -65,7 +65,7 @@ export class LoopMetaAction implements HookInterceptor<ProcessorContext, boolean
           if (iterable) {
             let index = 0;
             for (const variable of iterable) {
-              const variables: Variables = {
+              const variables: models.Variables = {
                 '$index': index,
               };
               variables[this.data.variable] = variable;
@@ -93,7 +93,7 @@ export class LoopMetaAction implements HookInterceptor<ProcessorContext, boolean
       case LoopMetaType.while:
         if (this.data.expression) {
           let index = 0;
-          while (await this.execExpression(this.data.expression, context)) {
+          while (await utils.evalExpression(this.data.expression, context)) {
             yield {
               index,
               variables: {
@@ -109,30 +109,8 @@ export class LoopMetaAction implements HookInterceptor<ProcessorContext, boolean
     }
   }
 
-  private async execExpression(expression: string, context: ProcessorContext) {
-    const script = `exports.$result = (${expression});`;
-    let lineOffset = context.httpRegion.symbol.startLine;
-    if (context.httpRegion.symbol.source) {
-      const index = utils.toMultiLineArray(context.httpRegion.symbol.source).findIndex(line => line.indexOf(expression) >= 0);
-      if (index >= 0) {
-        lineOffset += index;
-      }
-    }
-    const value = await utils.runScript(script, {
-      fileName: context.httpFile.fileName,
-      context: {
-        httpFile: context.httpFile,
-        httpRegion: context.httpRegion,
-        console: context.scriptConsole,
-        ...context.variables,
-      },
-      lineOffset,
-    });
-    return value.$result;
-  }
 
-
-  private createHttpRegionClone(httpRegion: HttpRegion, index: number): HttpRegion {
+  private createHttpRegionClone(httpRegion: models.HttpRegion, index: number): models.HttpRegion {
     return {
       metaData: {
         ...httpRegion.metaData,
@@ -143,7 +121,10 @@ export class LoopMetaAction implements HookInterceptor<ProcessorContext, boolean
       } : undefined,
       symbol: httpRegion.symbol,
       hooks: {
-        execute: new SeriesHook(obj => !obj)
+        execute: new models.ExecuteHook(),
+        onRequest: new models.OnRequestHook(),
+        onStreaming: new models.OnStreaming(),
+        onResponse: new models.OnResponseHook(),
       }
     };
   }

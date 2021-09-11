@@ -11,4 +11,5 @@ export * from './requestBodyHttpRegionParser';
 export * from './requestHttpRegionParser';
 export * from './responseRefHttpRegionParser';
 export * from './responseHttpRegionParser';
+export * from './protoHttpRegionParser';
 export * from './variableHttpRegionParser';

@@ -1,6 +1,6 @@
-import { HttpSymbolKind, HttpLineGenerator, HttpRegionParserResult, ParserContext, getHttpLineGenerator } from '../models';
+import * as models from '../models';
 import { toMultiLineString } from '../utils';
-import { ScriptData, IntellijScriptData, IntellijAction } from '../actions';
+import { IntellijScriptData, IntellijAction } from '../actions';
 import { ParserRegex } from './parserRegex';
 
 
@@ -8,11 +8,14 @@ export interface IntelliJParserResult {
   startLine: number,
   endLine: number,
   endOffset: number;
-  data: ScriptData | IntellijScriptData;
+  data: models.ScriptData | IntellijScriptData;
 }
 
 
-export async function parseIntellijScript(getLineReader: getHttpLineGenerator, { httpRegion }: ParserContext): Promise<HttpRegionParserResult> {
+export async function parseIntellijScript(
+  getLineReader: models.getHttpLineGenerator,
+  { httpRegion }: models.ParserContext
+): Promise<models.HttpRegionParserResult> {
   const lineReader = getLineReader();
   if (httpRegion.request) {
 
@@ -25,7 +28,7 @@ export async function parseIntellijScript(getLineReader: getHttpLineGenerator, {
         symbols: [{
           name: 'Intellij Script',
           description: 'Intellij Script',
-          kind: HttpSymbolKind.script,
+          kind: models.HttpSymbolKind.script,
           startLine: intellijContent.startLine,
           startOffset: 0,
           endLine: intellijContent.endLine,
@@ -38,7 +41,7 @@ export async function parseIntellijScript(getLineReader: getHttpLineGenerator, {
 }
 
 
-function getIntellijContent(lineReader: HttpLineGenerator): IntelliJParserResult | false {
+function getIntellijContent(lineReader: models.HttpLineGenerator): IntelliJParserResult | false {
   let next = lineReader.next();
   if (!next.done) {
 

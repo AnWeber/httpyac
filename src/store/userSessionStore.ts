@@ -8,8 +8,8 @@ export class UserSessionStore implements SessionStore {
 
   async reset() : Promise<void> {
     for (const userSession of this.userSessions) {
-      if (userSession.logout) {
-        userSession.logout();
+      if (userSession.delete) {
+        userSession.delete();
       }
     }
     this.userSessions.length = 0;
@@ -27,8 +27,8 @@ export class UserSessionStore implements SessionStore {
   removeUserSession(id: string) : void {
     const userSession = this.userSessions.find(obj => obj.id === id);
     if (userSession) {
-      if (userSession.logout) {
-        userSession.logout();
+      if (userSession.delete) {
+        userSession.delete();
       }
       this.userSessions.splice(this.userSessions.indexOf(userSession), 1);
     }

@@ -1,10 +1,13 @@
-import { getHttpLineGenerator, HttpRegionParserResult, HttpSymbol, HttpSymbolKind, ParserContext } from '../models';
-import { isString, isStringEmpty } from '../utils';
-
+import * as models from '../models';
+import * as utils from '../utils';
+import { CreateRequestBodyInterceptor } from '../actions';
 import { ParserRegex } from './parserRegex';
 
 
-export async function parseRequestBody(getLineReader: getHttpLineGenerator, context: ParserContext): Promise<HttpRegionParserResult> {
+export async function parseRequestBody(
+  getLineReader: models.getHttpLineGenerator,
+  context: models.ParserContext
+): Promise<models.HttpRegionParserResult> {
   const lineReader = getLineReader();
 
   if (context.httpRegion.request) {
@@ -13,17 +16,17 @@ export async function parseRequestBody(getLineReader: getHttpLineGenerator, cont
     if (!next.done) {
 
 
-      if (requestBody.rawBody.length > 0 || !isStringEmpty(next.value.textLine)) {
+      if (requestBody.rawBody.length > 0 || !utils.isStringEmpty(next.value.textLine)) {
 
         requestBody.rawBody.push(parseLine(next.value.textLine));
-        const symbols: Array<HttpSymbol> = [];
+        const symbols: Array<models.HttpSymbol> = [];
 
 
         if (!requestBody.symbol || requestBody.symbol.endLine !== next.value.line - 1) {
           requestBody.symbol = {
             name: 'request body',
             description: 'request body',
-            kind: HttpSymbolKind.requestBody,
+            kind: models.HttpSymbolKind.requestBody,
             startLine: next.value.line,
             startOffset: 0,
             endLine: next.value.line,
@@ -45,7 +48,7 @@ export async function parseRequestBody(getLineReader: getHttpLineGenerator, cont
   return false;
 }
 
-function getRequestBody(context: ParserContext) {
+function getRequestBody(context: models.ParserContext) {
   let result = context.data.request_body;
   if (!result) {
     result = {
@@ -55,7 +58,7 @@ function getRequestBody(context: ParserContext) {
   }
   return result;
 }
-function getAndRemoveRequestBody(context: ParserContext) {
+function getAndRemoveRequestBody(context: models.ParserContext) {
   const result = context.data.request_body;
   if (result) {
     delete context.data.request_body;
@@ -89,23 +92,21 @@ function getBufferEncoding(encoding: string) : BufferEncoding {
   return 'utf8';
 }
 
-export async function closeRequestBody(context: ParserContext): Promise<void> {
+export async function closeRequestBody(context: models.ParserContext): Promise<void> {
   const requestBody = getAndRemoveRequestBody(context);
   if (context.httpRegion.request && !!requestBody) {
-
     removeTrailingEmptyLines(requestBody.rawBody);
-    context.httpRegion.request.rawBody = requestBody.rawBody;
-
+    context.httpRegion.hooks.execute.addInterceptor(new CreateRequestBodyInterceptor(requestBody.rawBody));
   }
 }
 
 function removeTrailingEmptyLines(obj: Array<unknown>) : void {
-  while (obj.length > 0 && isStringEmpty(obj[obj.length - 1])) {
+  while (obj.length > 0 && utils.isStringEmpty(obj[obj.length - 1])) {
     obj.pop();
   }
   if (obj.length > 0) {
     const lastLine = obj[obj.length - 1];
-    if (isString(lastLine)) {
+    if (utils.isString(lastLine)) {
       if (/\s*<--->\s*/u.test(lastLine)) {
         obj.pop();
       }

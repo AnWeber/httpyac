@@ -31,7 +31,6 @@ export class RefMetaAction implements HttpRegionAction {
           ...context,
           httpFile: refHttpFile
         };
-        delete cloneContext.options.httpFiles;
         await this.process(cloneContext);
       }
     }

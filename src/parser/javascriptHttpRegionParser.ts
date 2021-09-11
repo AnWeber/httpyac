@@ -2,7 +2,10 @@ import { testFactory } from '../actions';
 import * as models from '../models';
 import * as utils from '../utils';
 import { ParserRegex } from './parserRegex';
-
+import * as httpyac from '..';
+import * as grpc from '@grpc/grpc-js';
+import { default as got } from 'got';
+import { default as chalk } from 'chalk';
 
 export interface ScriptData {
   script: string;
@@ -18,97 +21,140 @@ export async function parseJavascript(
 
   if (!next.done) {
     const match = ParserRegex.javascript.scriptStart.exec(next.value.textLine);
-    if (!match) {
-      return false;
-    }
-    const lineOffset = next.value.line;
-    next = lineReader.next();
-    const script: Array<string> = [];
-    while (!next.done) {
+    if (match?.groups) {
 
-      if (ParserRegex.javascript.scriptEnd.test(next.value.textLine)) {
-        const scriptData: ScriptData = {
-          script: utils.toMultiLineString(script),
-          lineOffset,
-        };
 
-        if (!match.groups?.executeOnEveryRequest) {
-          httpRegion.hooks.execute.addObjHook(obj => obj.process, new JavascriptAction(scriptData));
-        } else {
-
-          let onEveryRequestArray = data.jsOnEveryRequest;
-          if (!onEveryRequestArray) {
-            data.jsOnEveryRequest = onEveryRequestArray = [];
-          }
-          onEveryRequestArray.push({
-            scriptData,
-            postScript: ['+after', '+post'].indexOf(match.groups?.executeOnEveryRequest) >= 0,
-          });
-        }
-
-        return {
-          nextParserLine: next.value.line,
-          symbols: [{
-            name: 'script',
-            description: 'nodejs script',
-            kind: models.HttpSymbolKind.script,
-            startLine: lineOffset,
-            startOffset: 0,
-            endLine: next.value.line,
-            endOffset: next.value.textLine.length,
-          }]
-        };
-      }
-      script.push(next.value.textLine);
+      const lineOffset = next.value.line;
       next = lineReader.next();
+      const script: Array<string> = [];
+      while (!next.done) {
+
+        if (ParserRegex.javascript.scriptEnd.test(next.value.textLine)) {
+          const scriptData: ScriptData = {
+            script: utils.toMultiLineString(script),
+            lineOffset,
+          };
+
+          if (!match.groups.modifier || match.groups.modifier === '@') {
+            switch (match.groups.event) {
+              case 'request':
+                httpRegion.hooks.onRequest.addHook(models.ActionType.js, async (_request, context) => {
+                  await executeScriptData(scriptData, context);
+                });
+                break;
+              case 'streaming':
+                httpRegion.hooks.onStreaming.addHook(models.ActionType.js, async context => {
+                  await executeScriptData(scriptData, context);
+                });
+                break;
+              case 'response':
+                httpRegion.hooks.onResponse.addHook(models.ActionType.js, async (_response, context) => {
+                  await executeScriptData(scriptData, context);
+                });
+                break;
+              default:
+                httpRegion.hooks.execute.addHook(models.ActionType.js, context => executeScriptData(scriptData, context));
+                break;
+            }
+          } else if (match.groups.modifier === '+') {
+            let onEveryRequestArray = data.jsOnEveryRequest;
+            if (!onEveryRequestArray) {
+              data.jsOnEveryRequest = onEveryRequestArray = [];
+            }
+            onEveryRequestArray.push({
+              scriptData,
+              event: match.groups.event
+            });
+          }
+
+          return {
+            nextParserLine: next.value.line,
+            symbols: [{
+              name: 'script',
+              description: 'nodejs script',
+              kind: models.HttpSymbolKind.script,
+              startLine: lineOffset,
+              startOffset: 0,
+              endLine: next.value.line,
+              endOffset: next.value.textLine.length,
+            }]
+          };
+        }
+        script.push(next.value.textLine);
+        next = lineReader.next();
+      }
     }
   }
   return false;
 }
 
+
 export async function injectOnEveryRequestJavascript({ data, httpRegion }: models.ParserContext): Promise<void> {
   const onEveryRequestArray = data.jsOnEveryRequest;
   if (onEveryRequestArray && httpRegion.request) {
     for (const everyRequestScript of onEveryRequestArray) {
-      if (everyRequestScript.postScript) {
-        httpRegion.hooks.execute.addObjHook(obj => obj.process, new JavascriptAction(everyRequestScript.scriptData));
-      } else {
-        httpRegion.hooks.execute.addObjHook(obj => obj.process, new JavascriptAction(everyRequestScript.scriptData, [models.ActionType.requestBodyImport]));
+      const scriptData = everyRequestScript.scriptData;
+      switch (everyRequestScript.event) {
+        case 'streaming':
+          httpRegion.hooks.onStreaming.addHook(models.ActionType.js, async context => {
+            await executeScriptData(scriptData, context);
+          });
+          break;
+        case 'response':
+          httpRegion.hooks.onResponse.addHook(models.ActionType.js, async (_response, context) => {
+            await executeScriptData(scriptData, context);
+          });
+          break;
+        case 'after':
+          httpRegion.hooks.execute.addHook(models.ActionType.js, context => executeScriptData(scriptData, context));
+          break;
+        case 'request':
+          httpRegion.hooks.onRequest.addHook(models.ActionType.js, async (_request, context) => {
+            await executeScriptData(scriptData, context);
+          });
+          break;
+        default:
+          httpRegion.hooks.execute.addInterceptor(new BeforeJavascriptHookInterceptor(everyRequestScript.scriptData));
+          break;
       }
     }
   }
 }
 
-
-export class JavascriptAction implements models.HttpRegionAction {
-  id = models.ActionType.js;
-
-  constructor(private readonly scriptData: ScriptData, public readonly after?: string[]) { }
-
-  async process(context: models.ProcessorContext): Promise<boolean> {
-    const { httpFile, request, variables } = context;
-
-    const result = await utils.runScript(this.scriptData.script, {
-      fileName: httpFile.fileName,
-      context: {
-        request,
-        test: testFactory(context),
-        httpFile: context.httpFile,
-        httpRegion: context.httpRegion,
-        console: context.scriptConsole,
-        ...variables,
-      },
-      lineOffset: this.scriptData.lineOffset,
-      require: context.require,
-    });
-    if (result) {
-      Object.assign(variables, result);
-      const envKey = utils.toEnvironmentKey(context.httpFile.activeEnvironment);
-      if (!context.httpFile.variablesPerEnv[envKey]) {
-        context.httpFile.variablesPerEnv[envKey] = {};
-      }
-      Object.assign(context.httpFile.variablesPerEnv[envKey], result);
-    }
-    return !result.$cancel;
+export class BeforeJavascriptHookInterceptor implements models.HookInterceptor<models.ProcessorContext, boolean> {
+  constructor(private readonly scriptData: ScriptData) { }
+  async beforeTrigger(context: models.HookTriggerContext<models.ProcessorContext, boolean | undefined>): Promise<boolean | undefined> {
+    return await executeScriptData(this.scriptData, context.arg);
   }
+}
+async function executeScriptData(scriptData: ScriptData, context: models.ProcessorContext) {
+  const result = await utils.runScript(scriptData.script, {
+    fileName: context.httpFile.fileName,
+    context: {
+      request: context.request,
+      sleep: utils.sleep,
+      test: testFactory(context),
+      httpFile: context.httpFile,
+      httpRegion: context.httpRegion,
+      console: context.scriptConsole,
+      ...context.variables,
+    },
+    lineOffset: scriptData.lineOffset,
+    require: {
+      httpyac,
+      chalk,
+      got,
+      '@grpc/grpc-js': grpc,
+      ...context.require,
+    }
+  });
+  if (result) {
+    Object.assign(context.variables, result);
+    const envKey = utils.toEnvironmentKey(context.httpFile.activeEnvironment);
+    if (!context.httpFile.variablesPerEnv[envKey]) {
+      context.httpFile.variablesPerEnv[envKey] = {};
+    }
+    Object.assign(context.httpFile.variablesPerEnv[envKey], result);
+  }
+  return !result.$cancel;
 }

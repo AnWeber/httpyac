@@ -1,6 +1,7 @@
 import * as models from '../models';
 import { initParseEndHook, initParseHook, parseHttpFile } from '../parser';
 import { fileProvider, log, userInteractionProvider } from '../io';
+import { initOnRequestHook, initOnResponseHook } from '../actions';
 import { userSessionStore as sessionStore } from '../store';
 import { getEnvironments } from '../httpYacApi';
 import { replacer, provider } from '../variables';
@@ -144,8 +145,8 @@ export class HttpFileStore {
         replaceVariable: replacer.initReplaceVariableHook(),
         provideEnvironments: provider.initProvideEnvironmentsHook(),
         provideVariables: provider.initProvideVariablesHook(),
-        beforeRequest: new models.BeforeRequestHook(),
-        afterRequest: new models.AfterRequestHook(),
+        onRequest: initOnRequestHook(),
+        onResponse: initOnResponseHook(),
         responseLogging: new models.ResponseLoggingHook(),
       },
       httpRegions: [],

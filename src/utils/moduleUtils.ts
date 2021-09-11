@@ -4,7 +4,8 @@ import vm from 'vm';
 import { log, fileProvider } from '../io';
 import { isPromise } from './promiseUtils';
 import { EOL } from 'os';
-import { PathLike } from '../models';
+import { PathLike, ProcessorContext } from '../models';
+import { toMultiLineArray } from './stringUtils';
 
 // eslint-disable-next-line no-underscore-dangle, no-undef
 declare const __non_webpack_require__: NodeJS.Require;
@@ -138,5 +139,43 @@ export async function runScript(source: string, options: {
     }
   }
   return result;
+}
 
+export async function evalExpression(expression: string, context: ProcessorContext) : Promise<unknown> {
+  const script = `exports.$result = (${expression});`;
+  let lineOffset = context.httpRegion.symbol.startLine;
+  if (context.httpRegion.symbol.source) {
+    const index = toMultiLineArray(context.httpRegion.symbol.source).findIndex(line => line.indexOf(expression) >= 0);
+    if (index >= 0) {
+      lineOffset += index;
+    }
+  }
+  const value = await runScript(script, {
+    fileName: context.httpFile.fileName,
+    context: {
+      httpFile: context.httpFile,
+      httpRegion: context.httpRegion,
+      console: context.scriptConsole,
+      ...context.variables,
+    },
+    lineOffset,
+  });
+  return value.$result;
+}
+
+
+export const JAVASCRIPT_KEYWORDS = ['await', 'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'else', 'enum', 'export', 'extends', 'false', 'finally', 'for', 'function', 'if', 'implements', 'import', 'in', 'instanceof', 'interface', 'let', 'new', 'null', 'package', 'private', 'protected', 'public', 'return', 'super', 'switch', 'static', 'this', 'throw', 'try', 'true', 'typeof', 'var', 'void', 'while', 'with', 'yield'];
+
+
+export function isValidVariableName(name: string): boolean {
+  if (JAVASCRIPT_KEYWORDS.indexOf(name) <= 0) {
+    try {
+      // eslint-disable-next-line no-new-func
+      Function(`var ${name}`);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  return false;
 }

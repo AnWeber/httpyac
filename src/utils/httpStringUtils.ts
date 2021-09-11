@@ -1,4 +1,4 @@
-import { HttpResponse, HttpResponseRequest } from '../models';
+import { HttpResponse, Request } from '../models';
 import { isString, toMultiLineString } from './stringUtils';
 
 export function toHttpString(response: HttpResponse) : string {
@@ -15,7 +15,7 @@ export function toHttpString(response: HttpResponse) : string {
 
 export function toHttpStringResponse(response: HttpResponse) : Array<string> {
   const result: Array<string> = [];
-  result.push(`HTTP/${response.httpVersion || ''} ${response.statusCode} ${response.statusMessage ? `- ${response.statusMessage}` : ''}`);
+  result.push(`${response.protocol} ${response.statusCode} ${response.statusMessage ? `- ${response.statusMessage}` : ''}`);
   result.push(...toHttpStringHeader(response.headers));
   if (isString(response.body)) {
     result.push('');
@@ -25,7 +25,7 @@ export function toHttpStringResponse(response: HttpResponse) : Array<string> {
 }
 
 
-export function toHttpStringRequest(request: HttpResponseRequest) : Array<string> {
+export function toHttpStringRequest(request: Request) : Array<string> {
   const result: Array<string> = [];
   result.push(`${request.method} ${request.url}`);
   if (request.headers) {
@@ -38,7 +38,7 @@ export function toHttpStringRequest(request: HttpResponseRequest) : Array<string
   return result;
 }
 
-export function toHttpStringHeader(headers: Record<string, string | string[] | undefined | null>): Array<string> {
+export function toHttpStringHeader(headers: Record<string, unknown>): Array<string> {
   return Object.entries(headers)
     .map(([key, value]) => {
       let val = value || '';

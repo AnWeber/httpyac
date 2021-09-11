@@ -1,21 +1,23 @@
 import { ClientCertificateOptions, HttpFile, HttpRequest, PathLike, ProcessorContext, VariableType } from '../../models';
-import { toAbsoluteFilename, isString } from '../../utils';
+import { toAbsoluteFilename, isString, isHttpRequest } from '../../utils';
 import { URL } from 'url';
 import { ParserRegex } from '../../parser';
 import { fileProvider } from '../../io';
 
 export async function clientCertVariableReplacer(
-  text: string | undefined,
+  text: unknown,
   type: VariableType | string,
   context: ProcessorContext
-): Promise<string | undefined> {
+): Promise<unknown> {
   const { request, httpRegion, httpFile } = context;
-  if (text && request && !httpRegion.metaData.noClientCert) {
+  if (isString(text) && isHttpRequest(request) && !httpRegion.metaData.noClientCert) {
     if (type === VariableType.url && context.config?.clientCertificates) {
-      const url = new URL(text);
-      const clientCertifcateOptions = context.config?.clientCertificates[url.host];
-      if (clientCertifcateOptions) {
-        await setClientCertificateOptions(request, clientCertifcateOptions, httpFile);
+      const url = createUrl(text);
+      if (url) {
+        const clientCertifcateOptions = context.config?.clientCertificates[url.host];
+        if (clientCertifcateOptions) {
+          await setClientCertificateOptions(request, clientCertifcateOptions, httpFile);
+        }
       }
     } else if (type.toLowerCase().endsWith('clientcert')) {
       const match = ParserRegex.auth.clientCert.exec(text);
@@ -31,6 +33,14 @@ export async function clientCertVariableReplacer(
     }
   }
   return text;
+}
+
+function createUrl(url: string): URL | undefined {
+  try {
+    return new URL(url);
+  } catch (err) {
+    return undefined;
+  }
 }
 
 async function setClientCertificateOptions(request: HttpRequest, clientCertifcateOptions: ClientCertificateOptions, httpFile: HttpFile) {

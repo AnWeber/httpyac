@@ -1,15 +1,15 @@
 import { EOL } from 'os';
-import { ContentType, HttpResponse, HttpResponseRequest, HttpTimings, TestResult, testSymbols } from '../models';
+import * as models from '../models';
 import { isString, toMultiLineArray } from './stringUtils';
 import * as mimeTypeUtils from './mimeTypeUtils';
 
-export function toMarkdown(response: HttpResponse, options?: {
+export function toMarkdown(response: models.HttpResponse, options?: {
   responseBody?: boolean,
   requestBody?: boolean,
   timings?: boolean,
   meta?: boolean,
   prettyPrint?: boolean;
-  testResults?: Array<TestResult>,
+  testResults?: Array<models.TestResult>,
 }) : string {
   const result: Array<string> = [];
 
@@ -46,12 +46,12 @@ export function toMarkdown(response: HttpResponse, options?: {
   return joinMarkdown(result);
 }
 
-export function toMarkdownResponse(response: HttpResponse, options?: {
+export function toMarkdownResponse(response: models.HttpResponse, options?: {
   prettyPrint?: boolean;
   body?: boolean;
 }) : Array<string> {
   const result: Array<string> = [];
-  result.push(`\`HTTP/${response.httpVersion || ''} ${response.statusCode} - ${response.statusMessage}\``);
+  result.push(`\`${response.protocol} ${response.statusCode} - ${response.statusMessage}\``);
   result.push(...toMarkdownHeader(response.headers));
   if (options?.body && isString(response.body)) {
     result.push('');
@@ -62,7 +62,7 @@ export function toMarkdownResponse(response: HttpResponse, options?: {
   return result;
 }
 
-export function getMarkdownSyntax(contentType: ContentType | undefined) : string {
+export function getMarkdownSyntax(contentType: models.ContentType | undefined) : string {
   if (mimeTypeUtils.isMimeTypeJSON(contentType)) {
     return 'json';
   }
@@ -84,7 +84,7 @@ export function getMarkdownSyntax(contentType: ContentType | undefined) : string
   return '';
 }
 
-export function toMarkdownRequest(request: HttpResponseRequest, options?: {
+export function toMarkdownRequest(request: models.Request, options?: {
   body?: boolean;
 }) : Array<string> {
   const result: Array<string> = [];
@@ -101,12 +101,12 @@ export function toMarkdownRequest(request: HttpResponseRequest, options?: {
   return result;
 }
 
-export function toMarkdownTestResults(testResults: Array<TestResult>) : Array<string> {
+export function toMarkdownTestResults(testResults: Array<models.TestResult>) : Array<string> {
   const result: Array<string> = [];
   result.push('`TestResults`');
   result.push('');
   for (const testResult of testResults) {
-    let message = `${testResult.result ? testSymbols.ok : testSymbols.error}: ${testResult.message}`;
+    let message = `${testResult.result ? models.testSymbols.ok : models.testSymbols.error}: ${testResult.message}`;
     if (testResult.error) {
       message += ` (${testResult.error.displayMessage})`;
     }
@@ -115,7 +115,7 @@ export function toMarkdownTestResults(testResults: Array<TestResult>) : Array<st
   return result;
 }
 
-export function toMarkdownHeader(headers: Record<string, string | string[] | undefined | null>) : Array<string> {
+export function toMarkdownHeader(headers: Record<string, unknown>) : Array<string> {
   return Object.entries(headers)
     .map(([key, value]) => {
       let val = value || '';
@@ -145,7 +145,7 @@ export function toMarkdownMeta(meta: Record<string, unknown>) : Array<string> {
   return result;
 }
 
-export function toMarkdownTimings(timings: HttpTimings) : Array<string> {
+export function toMarkdownTimings(timings: models.HttpTimings) : Array<string> {
   const result: Array<string> = [];
 
   result.push('`Timings`');

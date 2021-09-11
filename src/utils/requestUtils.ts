@@ -1,11 +1,12 @@
-import { ContentType, HttpMethod, HttpRegion, HttpResponse, HttpResponseRequest, RequestLogger } from '../models';
+import * as models from '../models';
 import { isString, toMultiLineString } from './stringUtils';
-import { parseMimeType } from './mimeTypeUtils';
+import { isMimeTypeJSON, isMimeTypeXml, parseMimeType } from './mimeTypeUtils';
 import { default as chalk } from 'chalk';
 import { log } from '../io';
+import xmlFormat from 'xml-formatter';
 
 
-export function isRequestMethod(method: string | undefined): method is HttpMethod {
+export function isHttpRequestMethod(method: string | undefined): method is models.HttpMethod {
   if (method) {
     return ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS', 'CONNECT', 'TRACE',
       'PROPFIND', 'PROPPATCH', 'MKCOL', 'COPY', 'MOVE', 'LOCK', 'UNLOCK', 'CHECKOUT', 'CHECKIN', 'REPORT', 'MERGE', 'MKACTIVITY', 'MKWORKSPACE', 'VERSION-CONTROL', 'BASELINE-CONTROL' // cal-dav
@@ -15,19 +16,27 @@ export function isRequestMethod(method: string | undefined): method is HttpMetho
   return false;
 }
 
-export function getHeader(headers: Record<string, string | string[] | undefined | null>, headerName: string): string | string[] | undefined | null {
+export function isHttpRequest(request: models.Request | undefined) : request is models.HttpRequest {
+  return isHttpRequestMethod(request?.method);
+}
+
+export function isGrpcRequest(request: models.Request | undefined) : request is models.GrpcRequest {
+  return request?.method === 'GRPC';
+}
+
+export function getHeader(headers: Record<string, unknown>, headerName: string): unknown {
   if (headers) {
-    const value = Object.entries(headers)
-      .find(obj => obj[0].toLowerCase() === headerName.toLowerCase());
-    if (value && value.length > 1) {
-      return value[1];
+    const entry = Object.entries(headers)
+      .find(([key]) => key.toLowerCase() === headerName.toLowerCase());
+    if (entry && entry.length > 1) {
+      return entry[1];
     }
   }
   return null;
 }
 
 
-export function parseContentType(headers: Record<string, string | string[] | null | undefined>): ContentType | undefined {
+export function parseContentType(headers: Record<string, unknown>): models.ContentType | undefined {
   const contentType = getHeader(headers, 'content-type');
   if (isString(contentType)) {
     return parseMimeType(contentType);
@@ -102,9 +111,9 @@ export function requestLoggerFactory(
   log: (args: string) => void,
   options: RequestLoggerFactoryOptions,
   optionsFailed?: RequestLoggerFactoryOptions
-): RequestLogger {
+): models.RequestLogger {
 
-  return function logResponse(response: HttpResponse, httpRegion?: HttpRegion) {
+  return async function logResponse(response: models.HttpResponse, httpRegion?: models.HttpRegion) : Promise<void> {
 
     let opt = options;
     if (optionsFailed && httpRegion?.testResults && httpRegion.testResults.some(obj => !obj.result)) {
@@ -175,7 +184,7 @@ function getPartOfBody(body: string, length: number) {
   return result;
 }
 
-function logRequest(request: HttpResponseRequest, options: {
+function logRequest(request: models.Request, options: {
   headers?: boolean,
   bodyLength?: number,
 }) {
@@ -186,7 +195,7 @@ function logRequest(request: HttpResponseRequest, options: {
       .map(([key, value]) => chalk`{yellow ${key}}: ${value}`)
       .sort());
   }
-  if (request.https?.certificate || request.https?.pfx) {
+  if (isHttpRequest(request) && (request.https?.certificate || request.https?.pfx)) {
     result.push(chalk`{yellow client-cert}: true`);
   }
   if (isString(request.body) && options.bodyLength !== undefined) {
@@ -196,9 +205,9 @@ function logRequest(request: HttpResponseRequest, options: {
   return result;
 }
 
-function logResponseHeader(response: HttpResponse) {
+function logResponseHeader(response: models.HttpResponse) {
   const result: Array<string> = [];
-  result.push(chalk`{cyan.bold HTTP/${response.httpVersion || ''}} {cyan.bold ${response.statusCode}} {bold ${response.statusMessage}}`);
+  result.push(chalk`{cyan.bold ${response.protocol}} {cyan.bold ${response.statusCode}} {bold ${response.statusMessage}}`);
   result.push(...Object.entries(response.headers)
     .filter(([key]) => !key.startsWith(':'))
     .map(([key, value]) => chalk`{yellow ${key}}: ${value}`)
@@ -207,8 +216,9 @@ function logResponseHeader(response: HttpResponse) {
 }
 
 
-export function cloneResponse(response: HttpResponse): HttpResponse {
-  const clone: HttpResponse = {
+export function cloneResponse(response: models.HttpResponse): models.HttpResponse {
+  const clone: models.HttpResponse = {
+    protocol: response.protocol,
     statusCode: response.statusCode,
     statusMessage: response.statusMessage,
     httpVersion: response.httpVersion,
@@ -223,11 +233,65 @@ export function cloneResponse(response: HttpResponse): HttpResponse {
   };
   if (response.request) {
     clone.request = {
-      method: response.request.method,
-      url: response.request.url,
-      headers: response.request.headers,
-      body: response.request.body,
+      ...response.request,
     };
   }
   return clone;
+}
+
+
+export function setAdditionalResponseBody(httpResponse: models.HttpResponse): void {
+  if (isString(httpResponse.body)
+    && httpResponse.body.length > 0) {
+    if (isMimeTypeJSON(httpResponse.contentType)) {
+      try {
+        httpResponse.parsedBody = JSON.parse(httpResponse.body);
+        httpResponse.prettyPrintBody = JSON.stringify(httpResponse.parsedBody, null, 2);
+      } catch (err) {
+        log.warn('json parse error', httpResponse.body, err);
+      }
+    } else if (isMimeTypeXml(httpResponse.contentType)) {
+      try {
+        httpResponse.prettyPrintBody = xmlFormat(httpResponse.body, {
+          collapseContent: true,
+          indentation: '  ',
+        });
+      } catch (err) {
+        log.warn('xml format error', httpResponse.body, err);
+      }
+    }
+  }
+}
+
+
+export async function triggerRequestResponseHooks(
+  method: () => Promise<models.HttpResponse | false>,
+  context: models.ProcessorContext
+): Promise<boolean> {
+  try {
+    if (context.request && await context.httpFile.hooks.onRequest.trigger(context.request, context) === models.HookCancel) {
+      return false;
+    }
+    if (context.request && await context.httpRegion.hooks.onRequest.trigger(context.request, context) === models.HookCancel) {
+      return false;
+    }
+
+    const response = await method();
+    if (response) {
+
+      if (await context.httpRegion.hooks.onResponse.trigger(response, context) === models.HookCancel) {
+        return false;
+      }
+      if (await context.httpFile.hooks.onResponse.trigger(response, context) === models.HookCancel) {
+        return false;
+      }
+
+      context.httpRegion.response = response;
+    }
+    return true;
+  } catch (err) {
+    log.error(context.request?.url, context.request, err);
+    throw err;
+  }
+
 }

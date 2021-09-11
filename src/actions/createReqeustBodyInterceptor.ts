@@ -1,33 +1,31 @@
-import { ActionType, HttpRegionAction, HttpRequestBodyLine, ProcessorContext, RequestBodyImport } from '../models';
-import { isMimeTypeFormUrlEncoded, isMimeTypeMultiPartFormData, isMimeTypeNewlineDelimitedJSON, isString, toAbsoluteFilename } from '../utils';
+import * as models from '../models';
+import * as utils from '../utils';
 import { fileProvider, userInteractionProvider, log } from '../io';
 import { EOL } from 'os';
 
 
-export class RequestBodyImportAction implements HttpRegionAction {
-  id = ActionType.requestBodyImport;
+export class CreateRequestBodyInterceptor implements models.HookInterceptor<models.ProcessorContext, boolean | void> {
 
+  constructor(private readonly rawBody: Array<string | models.RequestBodyImport>) {}
 
-  async process(context: ProcessorContext): Promise<boolean> {
-
-    if (context.request?.rawBody) {
-
-      const contentType = context.request.contentType;
-      const requestBodyLines = await this.normalizeBody(context.request.rawBody, context);
+  async beforeTrigger(context: models.HookTriggerContext<models.ProcessorContext, boolean | undefined>): Promise<boolean | undefined> {
+    if (context.arg.request && context.index === 0) {
+      const contentType = context.arg.request.contentType;
+      const requestBodyLines = await this.normalizeBody(this.rawBody, context.arg);
       if (requestBodyLines.length > 0) {
-        if (isMimeTypeFormUrlEncoded(contentType)) {
-          context.request.body = this.formUrlEncodedJoin(requestBodyLines);
+        if (utils.isMimeTypeFormUrlEncoded(contentType)) {
+          context.arg.request.body = this.formUrlEncodedJoin(requestBodyLines);
         } else {
-          if (requestBodyLines.every(obj => isString(obj)) && isMimeTypeNewlineDelimitedJSON(contentType)) {
+          if (requestBodyLines.every(obj => utils.isString(obj)) && utils.isMimeTypeNewlineDelimitedJSON(contentType)) {
             requestBodyLines.push('');
           }
 
-          const body: Array<HttpRequestBodyLine> = [];
+          const body: Array<models.HttpRequestBodyLine> = [];
           const strings: Array<string> = [];
-          const lineEnding = isMimeTypeMultiPartFormData(contentType) ? '\r\n' : EOL;
+          const lineEnding = utils.isMimeTypeMultiPartFormData(contentType) ? '\r\n' : EOL;
 
           for (const line of requestBodyLines) {
-            if (isString(line)) {
+            if (utils.isString(line)) {
               strings.push(line);
             } else {
               if (strings.length > 0) {
@@ -41,12 +39,12 @@ export class RequestBodyImportAction implements HttpRegionAction {
           }
 
           if (strings.length > 0 && body.length === 0) {
-            context.request.body = strings.join(lineEnding);
+            context.arg.request.body = strings.join(lineEnding);
           } else {
             if (strings.length > 0) {
               body.push(strings.join(lineEnding));
             }
-            context.request.body = body;
+            context.arg.request.body = body;
           }
         }
       }
@@ -55,8 +53,8 @@ export class RequestBodyImportAction implements HttpRegionAction {
     return true;
   }
 
-  private async normalizeBody(rawBody: Array<string | RequestBodyImport>, context: ProcessorContext) {
-    const result: Array<HttpRequestBodyLine> = [];
+  private async normalizeBody(rawBody: Array<string | models.RequestBodyImport>, context: models.ProcessorContext) {
+    const result: Array<models.HttpRequestBodyLine> = [];
     const forceInjectVariables = (filename: string) => {
       if (context.httpRegion.metaData.injectVariables) {
         return true;
@@ -70,10 +68,10 @@ export class RequestBodyImportAction implements HttpRegionAction {
     };
 
     for (const line of rawBody) {
-      if (isString(line)) {
+      if (utils.isString(line)) {
         result.push(line);
       } else {
-        const normalizedPath = await toAbsoluteFilename(line.fileName, context.httpFile.fileName);
+        const normalizedPath = await utils.toAbsoluteFilename(line.fileName, context.httpFile.fileName);
         if (normalizedPath) {
           if (forceInjectVariables(line.fileName) || line.injectVariables) {
             result.push(await fileProvider.readFile(normalizedPath, line.encoding));
@@ -89,15 +87,15 @@ export class RequestBodyImportAction implements HttpRegionAction {
     return result;
   }
 
-  private formUrlEncodedJoin(body: Array<HttpRequestBodyLine>): string {
+  private formUrlEncodedJoin(body: Array<models.HttpRequestBodyLine>): string {
     const result = body.reduce((previousValue, currentValue, currentIndex) => {
       let prev = previousValue;
-      if (isString(currentValue)) {
+      if (utils.isString(currentValue)) {
         prev += `${(currentIndex === 0 || currentValue.startsWith('&') ? '' : EOL)}${currentValue}`;
       }
       return prev;
     }, '');
-    if (isString(result)) {
+    if (utils.isString(result)) {
       return result;
     }
     return '';

@@ -10,6 +10,8 @@ import { parseRequestLine } from './requestHttpRegionParser';
 import { parseResponse, closeResponseBody } from './responseHttpRegionParser';
 import { parseResponseRef } from './responseRefHttpRegionParser';
 import { parseVariable } from './variableHttpRegionParser';
+import { parseProtoImport } from './protoHttpRegionParser';
+import { parseGrpcLine } from './grpcHttpRegionParser';
 
 import { injectOnEveryRequestJavascript } from './javascriptHttpRegionParser';
 import { injectNote } from './noteMetaHttpRegionParser';
@@ -26,7 +28,9 @@ export enum ParserId {
   request = 'request',
   responseRef = 'responseRef',
   response = 'response',
-  requestBody = 'requestBody'
+  requestBody = 'requestBody',
+  proto = 'proto',
+  grpc = 'grpc'
 }
 
 export function initParseHook(): models.ParseHook {
@@ -38,6 +42,8 @@ export function initParseHook(): models.ParseHook {
   hook.addHook(ParserId.javascript, parseJavascript);
   hook.addHook(ParserId.intellijScript, parseIntellijScript);
   hook.addHook(ParserId.gql, parseGraphql);
+  hook.addHook(ParserId.proto, parseProtoImport);
+  hook.addHook(ParserId.grpc, parseGrpcLine);
   hook.addHook(ParserId.request, parseRequestLine);
   hook.addHook(ParserId.responseRef, parseResponseRef);
   hook.addHook(ParserId.response, parseResponse);
@@ -45,7 +51,6 @@ export function initParseHook(): models.ParseHook {
 
   return hook;
 }
-
 
 export function initParseEndHook(): models.ParseEndRegionHook {
   const hook = new models.ParseEndRegionHook();

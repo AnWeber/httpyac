@@ -29,7 +29,7 @@ export async function parseVariable(getLineReader: getHttpLineGenerator, { httpR
           children: [{
             name: match.groups.key,
             description: 'key',
-            kind: HttpSymbolKind.variableName,
+            kind: HttpSymbolKind.key,
             startLine: next.value.line,
             startOffset: next.value.textLine.indexOf(match.groups.key),
             endLine: next.value.line,
@@ -37,7 +37,7 @@ export async function parseVariable(getLineReader: getHttpLineGenerator, { httpR
           }, {
             name: match.groups.value,
             description: 'value',
-            kind: HttpSymbolKind.varialbeValue,
+            kind: HttpSymbolKind.value,
             startLine: next.value.line,
             startOffset: next.value.textLine.indexOf(match.groups.value),
             endLine: next.value.line,

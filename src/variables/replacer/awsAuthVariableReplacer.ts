@@ -2,9 +2,10 @@ import { ProcessorContext } from '../../models';
 import { URL } from 'url';
 import aws4 = require('aws4');
 import { ParserRegex } from '../../parser';
+import { isString } from '../../utils';
 
-export async function awsAuthVariableReplacer(text: string, type: string, { request }: ProcessorContext) : Promise<string | undefined> {
-  if (type.toLowerCase() === 'authorization' && text && request?.url) {
+export async function awsAuthVariableReplacer(text: unknown, type: string, { request }: ProcessorContext) : Promise<unknown> {
+  if (type.toLowerCase() === 'authorization' && isString(text) && request?.url) {
     const match = ParserRegex.auth.aws.exec(text);
 
     if (match && match.groups && match.groups.accessKeyId && match.groups.secretAccessKey) {

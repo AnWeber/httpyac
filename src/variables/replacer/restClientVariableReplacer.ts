@@ -2,12 +2,15 @@ import { v4 as uuidv4 } from 'uuid';
 import dayjs, { OpUnitType } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { ProcessorContext, VariableType } from '../../models';
+import { isString } from '../../utils';
 
 
 dayjs.extend(utc);
 
-export async function restClientVariableReplacer(text: string, _type: VariableType | string, { variables }: ProcessorContext): Promise<string | undefined> {
-
+export async function restClientVariableReplacer(text: unknown, _type: VariableType | string, { variables }: ProcessorContext): Promise<unknown> {
+  if (!isString(text)) {
+    return text;
+  }
   const variableRegex = /\{{2}(.+?)\}{2}/gu;
   let match: RegExpExecArray | null;
   let result = text;
@@ -81,6 +84,6 @@ export async function restClientVariableReplacer(text: string, _type: VariableTy
       result = result.replace(searchValue, `${replacement}`);
     }
   }
-  return Promise.resolve(result);
+  return result;
 
 }

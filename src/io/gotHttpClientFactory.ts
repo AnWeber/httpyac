@@ -1,12 +1,11 @@
 import { HttpClient, HttpClientContext, HttpRequest, HttpResponse, RepeatOrder, VariableProviderContext } from '../models';
-import { isString, isMimeTypeJSON, isMimeTypeXml, parseContentType } from '../utils';
+import * as utils from '../utils';
 import { default as got, OptionsOfUnknownResponseBody, CancelError, Response } from 'got';
 import merge from 'lodash/merge';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { default as filesize } from 'filesize';
 import { log } from './logger';
-import xmlFormat from 'xml-formatter';
 
 export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined) : HttpClient {
   return async function gotHttpClient(request: HttpRequest, context: HttpClientContext) : Promise<HttpResponse | false> {
@@ -64,11 +63,7 @@ export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined) 
 
 async function loadRepeat(url: string, options: OptionsOfUnknownResponseBody, context: HttpClientContext) {
 
-  const loadFunc = async () => {
-    const response = toHttpResponse(await got(url, options));
-    context.logResponse?.(response, context.httpRegion);
-    return response;
-  };
+  const loadFunc = async () => toHttpResponse(await got(url, options));
   const loader: Array<() => Promise<HttpResponse>> = [];
   for (let index = 0; index < (context.repeat?.count || 1); index++) {
     loader.push(loadFunc);
@@ -126,14 +121,20 @@ function initProxy(request: HttpRequest) {
 function toHttpResponse(response: Response<unknown>): HttpResponse {
   const httpResponse: HttpResponse = {
     statusCode: response.statusCode,
+    protocol: `HTTP/${response.httpVersion}`,
     statusMessage: response.statusMessage,
     body: response.body,
     rawBody: response.rawBody,
     headers: response.headers,
     timings: response.timings.phases,
     httpVersion: response.httpVersion,
-    request: response.request.options,
-    contentType: parseContentType(response.headers),
+    request: {
+      method: response.request.options.method,
+      url: `${response.request.options.url}`,
+      headers: response.request.options.headers,
+      body: getBody(response.request.options.body),
+    },
+    contentType: utils.parseContentType(response.headers),
     meta: {
       ip: response.ip,
       redirectUrls: response.redirectUrls,
@@ -145,31 +146,17 @@ function toHttpResponse(response: Response<unknown>): HttpResponse {
     httpResponse.httpVersion = httpResponse.httpVersion.slice('HTTP/'.length);
   }
 
-  setAdditionalBody(httpResponse);
   return httpResponse;
 }
 
-export function setAdditionalBody(httpResponse: HttpResponse): void {
-  if (isString(httpResponse.body)
-    && httpResponse.body.length > 0) {
-    if (isMimeTypeJSON(httpResponse.contentType)) {
-      try {
-        httpResponse.parsedBody = JSON.parse(httpResponse.body);
-        httpResponse.prettyPrintBody = JSON.stringify(httpResponse.parsedBody, null, 2);
-      } catch (err) {
-        log.warn('json parse error', httpResponse.body, err);
-      }
-    } else if (isMimeTypeXml(httpResponse.contentType)) {
-      try {
-        httpResponse.prettyPrintBody = xmlFormat(httpResponse.body, {
-          collapseContent: true,
-          indentation: '  ',
-        });
-      } catch (err) {
-        log.warn('xml format error', httpResponse.body, err);
-      }
-    }
+function getBody(body: unknown) {
+  if (utils.isString(body)) {
+    return body;
   }
+  if (Buffer.isBuffer(body)) {
+    return body;
+  }
+  return undefined;
 }
 
 

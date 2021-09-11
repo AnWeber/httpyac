@@ -2,7 +2,7 @@ import { ConsoleLogHandler, RequestLogger } from './logHandler';
 import { HttpClient } from './httpClient';
 import { HttpFile } from './httpFile';
 import { HttpRegion, ProcessedHttpRegion } from './httpRegion';
-import { HttpRequest } from './httpRequest';
+import { Request } from './httpRequest';
 import { RepeatOptions } from './repeatOptions';
 import { Variables } from './variables';
 import { EnvironmentConfig } from './environmentConfig';
@@ -39,9 +39,14 @@ export interface HttpRegionSendContext extends HttpFileSendContext{
 export interface ProcessorContext extends HttpRegionSendContext{
   httpClient: HttpClient;
   variables: Variables;
-  request?: HttpRequest;
+  request?: Request;
   showProgressBar?: boolean;
   options: Record<string, unknown>
+}
+
+export function isProcessorContext(context: unknown): context is ProcessorContext {
+  const test = context as ProcessorContext;
+  return !!test?.httpClient && !!test?.httpFile && !!test?.variables && !!test?.config;
 }
 
 

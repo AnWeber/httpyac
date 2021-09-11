@@ -1,11 +1,11 @@
-import { ScriptData } from '../actions';
 import { RequestBodyImport } from './httpRequest';
 import { HttpSymbol } from './httpSymbol';
+import { ScriptData } from './scriptData';
 
 
 export interface ParserEveryRequestScript {
   scriptData: ScriptData,
-  postScript: boolean
+  event: string
 }
 
 export interface ParserRequestBody{

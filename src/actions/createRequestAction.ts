@@ -1,13 +1,12 @@
-import { ActionType, HttpRegionAction, ProcessorContext } from '../models';
+import * as models from '../models';
 import cloneDeep = require('lodash/cloneDeep');
 
-export class CreateRequestAction implements HttpRegionAction {
-  id = ActionType.request;
-  before = Object.keys(ActionType);
 
-  async process(context: ProcessorContext) : Promise<boolean> {
-    if (context.httpRegion.request) {
-      context.request = cloneDeep(context.httpRegion.request);
+export class CreateRequestInterceptor implements models.HookInterceptor<models.ProcessorContext, boolean | void> {
+
+  async beforeTrigger(context: models.HookTriggerContext<models.ProcessorContext, boolean | undefined>): Promise<boolean | undefined> {
+    if (context.arg.httpRegion.request && context.index === 0) {
+      context.arg.request = cloneDeep(context.arg.httpRegion.request);
     }
     return true;
   }

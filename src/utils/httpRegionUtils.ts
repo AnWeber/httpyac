@@ -2,20 +2,22 @@ import * as models from '../models';
 import { cloneResponse } from './requestUtils';
 
 
-export function getDisplayName(httpRegion: models.HttpRegion, defaultName = 'global'): string {
-  if (httpRegion.metaData.title) {
-    return httpRegion.metaData.title;
-  }
-  if (httpRegion.metaData.name) {
-    return httpRegion.metaData.name;
-  }
-  if (httpRegion.request?.url) {
-    let indexQuery = httpRegion.request.url.indexOf('?');
-    if (indexQuery < 0) {
-      indexQuery = httpRegion.request.url.length;
+export function getDisplayName(httpRegion?: models.HttpRegion, defaultName = 'global'): string {
+  if (httpRegion) {
+    if (httpRegion.metaData.title) {
+      return httpRegion.metaData.title;
     }
-    const line = httpRegion.symbol.children?.find?.(obj => obj.kind === models.HttpSymbolKind.requestLine)?.startLine || httpRegion.symbol.startLine;
-    return `${httpRegion.request.method} ${httpRegion.request.url.slice(0, indexQuery)} (line: ${line + 1})`;
+    if (httpRegion.metaData.name) {
+      return httpRegion.metaData.name;
+    }
+    if (httpRegion.request?.url) {
+      let indexQuery = httpRegion.request.url.indexOf('?');
+      if (indexQuery < 0) {
+        indexQuery = httpRegion.request.url.length;
+      }
+      const line = httpRegion.symbol.children?.find?.(obj => obj.kind === models.HttpSymbolKind.requestLine)?.startLine || httpRegion.symbol.startLine;
+      return `${httpRegion.request.method} ${httpRegion.request.url.slice(0, indexQuery)} (line: ${line + 1})`;
+    }
   }
   return defaultName;
 }
@@ -47,9 +49,9 @@ export async function processHttpRegionActions(context: models.ProcessorContext,
     }
 
     const result = await context.httpRegion.hooks.execute.trigger(context);
-    const processedHttpRegion = await logResponse(context);
-
-    if (processedHttpRegion && context.processedHttpRegions && !isGlobalHttpRegion(context.httpRegion)) {
+    const processedHttpRegion = toProcessedHttpRegion(context);
+    processedHttpRegion.response = await logResponse(processedHttpRegion?.response, context);
+    if (context.processedHttpRegions && !isGlobalHttpRegion(context.httpRegion)) {
       context.processedHttpRegions.push(processedHttpRegion);
     }
     return result !== models.HookCancel && result.every(obj => !!obj);
@@ -62,16 +64,21 @@ export async function processHttpRegionActions(context: models.ProcessorContext,
 }
 
 
-export async function logResponse(context: models.ProcessorContext) : Promise<models.ProcessedHttpRegion | undefined> {
-  const processedHttpRegion = await toProcessedHttpRegion(context);
-  if (processedHttpRegion) {
-    if (!processedHttpRegion.metaData.noLog
-      && processedHttpRegion.response
-      && context.logResponse) {
-      context.logResponse(processedHttpRegion.response, context.httpRegion);
+export async function logResponse(response: models.HttpResponse | undefined, context: models.ProcessorContext): Promise<models.HttpResponse | undefined> {
+  if (response) {
+    const clone = cloneResponse(response);
+    const responseLoggingResult = await context.httpFile.hooks.responseLogging.trigger(clone, context);
+    if (responseLoggingResult === models.HookCancel) {
+      return undefined;
     }
+    if (!context.httpRegion.metaData.noLog
+      && clone
+      && context.logResponse) {
+      await context.logResponse(clone, context.httpRegion);
+    }
+    return clone;
   }
-  return processedHttpRegion;
+  return response;
 }
 
 export async function executeGlobalScripts(context: {
@@ -93,15 +100,7 @@ export async function executeGlobalScripts(context: {
   return true;
 }
 
-export async function toProcessedHttpRegion(context: models.ProcessorContext): Promise<models.ProcessedHttpRegion | undefined> {
-  let response: models.HttpResponse | undefined;
-  if (context.httpRegion.response) {
-    response = cloneResponse(context.httpRegion.response);
-    const result = await context.httpFile.hooks.responseLogging.trigger(response, context);
-    if (result === models.HookCancel) {
-      return undefined;
-    }
-  }
+export function toProcessedHttpRegion(context: models.ProcessorContext): models.ProcessedHttpRegion {
   return {
     metaData: context.httpRegion.metaData && {
       ...context.httpRegion.metaData,
@@ -111,7 +110,7 @@ export async function toProcessedHttpRegion(context: models.ProcessorContext): P
     request: context.httpRegion.request && {
       ...context.httpRegion.request,
     },
-    response
+    response: context.httpRegion.response && cloneResponse(context.httpRegion.response),
   };
 }
 

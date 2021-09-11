@@ -1,7 +1,6 @@
 import { log } from '../io';
 import { ActionType, HttpRegionAction, ProcessorContext } from '../models';
-import { decodeJWT, isString, JWTToken, toEnvironmentKey } from '../utils';
-import { isValidVariableName } from './javascriptAction';
+import * as utils from '../utils';
 
 export class ResponseAsVariableAction implements HttpRegionAction {
   id = ActionType.response;
@@ -27,11 +26,11 @@ export class ResponseAsVariableAction implements HttpRegionAction {
         .trim()
         .replace(/\s/u, '_')
         .replace(/-./gu, value => value[1].toUpperCase());
-      if (isValidVariableName(name)) {
+      if (utils.isValidVariableName(name)) {
         variables[httpRegion.metaData.name] = body;
 
 
-        const envKey = toEnvironmentKey(httpFile.activeEnvironment);
+        const envKey = utils.toEnvironmentKey(httpFile.activeEnvironment);
         if (httpFile.variablesPerEnv[envKey]) {
           httpFile.variablesPerEnv[envKey][name] = body;
         } else {
@@ -52,7 +51,7 @@ export class ResponseAsVariableAction implements HttpRegionAction {
         const entries = Object.entries(body);
 
         let checkEntries = entries;
-        if (isString(httpRegion.metaData.jwt)) {
+        if (utils.isString(httpRegion.metaData.jwt)) {
           const jwt = httpRegion.metaData.jwt;
           checkEntries = entries.filter(([key]) => jwt.indexOf(key) >= 0);
         }
@@ -69,10 +68,10 @@ export class ResponseAsVariableAction implements HttpRegionAction {
   }
 
 
-  private parseJwtToken(value: unknown) : JWTToken | null {
-    if (isString(value)) {
+  private parseJwtToken(value: unknown) : utils.JWTToken | null {
+    if (utils.isString(value)) {
       try {
-        return decodeJWT(value);
+        return utils.decodeJWT(value);
       } catch (err) {
         log.error(err);
       }

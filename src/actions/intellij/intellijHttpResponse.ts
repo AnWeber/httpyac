@@ -1,4 +1,5 @@
 import { HttpResponse } from '../../models';
+import { isString } from '../../utils';
 import {
   HttpResponse as JetbrainsHttpResponse,
   ContentType as JetbrainsContentType,
@@ -25,12 +26,12 @@ export class IntellijHttpResponse implements JetbrainsHttpResponse {
 
 export class IntellijHeaders implements JetbrainsResponseHeaders {
 
-  constructor(private readonly headers: Record<string, string | string[] | undefined | null>) {}
+  constructor(private readonly headers: Record<string, unknown>) {}
 
   valueOf(headerName: string): string | null {
     if (this.headers) {
       const obj = this.headers[headerName];
-      if (obj && !Array.isArray(obj)) {
+      if (obj && isString(obj)) {
         return obj;
       }
     }

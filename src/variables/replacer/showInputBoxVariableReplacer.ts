@@ -1,10 +1,14 @@
 import { HookCancel } from '../../models';
 import { userInteractionProvider } from '../../io';
+import { isString } from '../../utils';
 
 const lastValue: Record<string, string> = {};
 
 
-export async function showInputBoxVariableReplacer(text: string): Promise<string | undefined | typeof HookCancel> {
+export async function showInputBoxVariableReplacer(text: unknown): Promise<unknown> {
+  if (!isString(text)) {
+    return text;
+  }
   const variableRegex = /\{{2}(.+?)\}{2}/gu;
   let match: RegExpExecArray | null;
   let result = text;
@@ -21,8 +25,9 @@ export async function showInputBoxVariableReplacer(text: string): Promise<string
       if (answer) {
         lastValue[placeholder] = answer;
         result = result.replace(searchValue, `${answer}`);
+      } else {
+        return HookCancel;
       }
-      return HookCancel;
     }
   }
   return result;

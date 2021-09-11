@@ -2,7 +2,6 @@ import { OpenIdConfiguration, assertConfiguration } from './openIdConfiguration'
 import { OpenIdInformation, requestOpenIdInformation } from './openIdInformation';
 import { OpenIdFlow, OpenIdFlowContext } from './openIdFlow';
 import { toQueryParams } from '../../../utils';
-import { ProcessorContext } from '../../../models';
 
 class PasswordFlow implements OpenIdFlow {
   supportsFlow(flow: string): boolean {
@@ -16,23 +15,32 @@ class PasswordFlow implements OpenIdFlow {
     return false;
   }
 
-  async perform(config: OpenIdConfiguration, options: OpenIdFlowContext, context: ProcessorContext): Promise<OpenIdInformation | false> {
-    return requestOpenIdInformation({
-      url: config.tokenEndpoint,
-      method: 'POST',
-      body: toQueryParams({
-        grant_type: 'password',
-        scope: config.scope,
-        username: config.username,
-        password: config.password,
-      })
-    }, {
-      httpClient: context.httpClient,
-      config,
-      id: options.cacheKey,
-      title: `PasswordFlow: ${config.username} (${config.clientId})`,
-      description: `${config.variablePrefix} - ${config.tokenEndpoint}`,
-    }, context);
+  async perform(config: OpenIdConfiguration, context: OpenIdFlowContext): Promise<OpenIdInformation | false> {
+    const id = this.getCacheKey(config);
+    if (id) {
+      return requestOpenIdInformation({
+        url: config.tokenEndpoint,
+        method: 'POST',
+        body: toQueryParams({
+          grant_type: 'password',
+          scope: config.scope,
+          username: config.username,
+          password: config.password,
+        })
+      }, {
+        config,
+        id,
+        title: `PasswordFlow: ${config.username} (${config.clientId})`,
+        description: `${config.variablePrefix} - ${config.tokenEndpoint}`,
+        details: {
+          clientId: config.clientId,
+          tokenEndpoint: config.tokenEndpoint,
+          grantType: 'password',
+          username: config.username,
+        }
+      }, context);
+    }
+    return false;
   }
 }
 

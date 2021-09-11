@@ -1,8 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
+import { isString } from '../../utils';
 
 
-export async function intellijVariableReplacer(text: string): Promise<string | undefined> {
-
+export async function intellijVariableReplacer(text: unknown): Promise<unknown> {
+  if (!isString(text)) {
+    return text;
+  }
   const variableRegex = /\{{2}(.+?)\}{2}/gu;
   let match: RegExpExecArray | null;
   let result = text;
@@ -28,5 +31,5 @@ export async function intellijVariableReplacer(text: string): Promise<string | u
       result = result.replace(searchValue, `${replacement}`);
     }
   }
-  return Promise.resolve(result);
+  return result;
 }

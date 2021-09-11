@@ -1,14 +1,15 @@
-import { HttpRegion, HttpRequest, HttpSymbol, HttpSymbolKind, getHttpLineGenerator, HttpRegionParserResult, ParserContext, HttpRegionAction } from '../models';
-
-import { isString, isStringEmpty, parseMimeType, isRequestMethod, getHeader } from '../utils';
+import * as models from '../models';
+import * as utils from '../utils';
 import * as actions from '../actions';
 import { ParserRegex } from './parserRegex';
+import * as parserUtils from './parserUtils';
 
-type RequestLineParserMethod = (text: string, line: number, request: HttpRequest) => false | { symbols: HttpSymbol[], actions?: HttpRegionAction[] };
-
-export async function parseRequestLine(getLineReader: getHttpLineGenerator, { httpRegion }: ParserContext): Promise<HttpRegionParserResult> {
+export async function parseRequestLine(
+  getLineReader: models.getHttpLineGenerator,
+  { httpRegion }: models.ParserContext
+): Promise<models.HttpRegionParserResult> {
   const lineReader = getLineReader();
-  let next = lineReader.next();
+  const next = lineReader.next();
   if (!next.done && isValidRequestLine(next.value.textLine, httpRegion)) {
     if (httpRegion.request) {
       return {
@@ -18,10 +19,10 @@ export async function parseRequestLine(getLineReader: getHttpLineGenerator, { ht
       };
     }
 
-    const requestSymbol: HttpSymbol = {
+    const requestSymbol: models.HttpSymbol = {
       name: next.value.textLine,
       description: 'http request-line',
-      kind: HttpSymbolKind.requestLine,
+      kind: models.HttpSymbolKind.requestLine,
       startLine: next.value.line,
       startOffset: 0,
       endLine: next.value.line,
@@ -33,50 +34,45 @@ export async function parseRequestLine(getLineReader: getHttpLineGenerator, { ht
     httpRegion.request = request;
     requestSymbol.children = requestSymbols;
 
-    const result: HttpRegionParserResult = {
+    const result: models.HttpRegionParserResult = {
       nextParserLine: next.value.line,
       symbols
     };
-    next = lineReader.next();
-    while (!next.done) {
 
-      const requestLineParser: Array<RequestLineParserMethod> = [
-        parseRequestHeader,
-        parseDefaultHeaders,
-        parseQueryLine,
-        parseUrlLine
-      ];
-      let hasResult = false;
-      for (const lineParser of requestLineParser) {
-        const parseResult = lineParser(next.value.textLine, next.value.line, request);
-        if (parseResult) {
-          hasResult = true;
-          symbols.push(...parseResult.symbols);
-          if (parseResult.actions) {
-            httpRegion.hooks.execute.addObjHook(obj => obj.process, ...parseResult.actions);
-          }
-          break;
+
+    const headers = {};
+    request.headers = headers;
+
+    const headersResult = parserUtils.parseSubsequentLines(lineReader, [
+      parserUtils.parseRequestHeaderFactory(headers),
+      parserUtils.parseDefaultHeadersFactory((headers, context) => Object.assign(context.request?.headers, headers)),
+      parserUtils.parseQueryLineFactory(url => (request.url += url)),
+      parserUtils.parseUrlLineFactory(url => (request.url += url)),
+    ]);
+
+    if (headersResult) {
+      result.nextParserLine = headersResult.nextLine || result.nextParserLine;
+      for (const parseResult of headersResult.parseResults) {
+        symbols.push(...parseResult.symbols);
+        if (parseResult.actions) {
+          httpRegion.hooks.execute.addObjHook(obj => obj.process, ...parseResult.actions);
         }
       }
-      if (!hasResult) {
-        break;
-      }
-      result.nextParserLine = next.value.line;
-      next = lineReader.next();
     }
 
     httpRegion.hooks.execute.addObjHook(obj => obj.process,
-      new actions.CreateRequestAction(),
       new actions.EnvDefaultHeadersAction(),
-      new actions.RequestBodyImportAction(),
       new actions.VariableReplacerAction(),
       new actions.CookieJarAction(),
       new actions.HttpClientAction(),
       new actions.ResponseAsVariableAction());
+
+    httpRegion.hooks.execute.addInterceptor(new actions.CreateRequestInterceptor());
+
     if (httpRegion.request.headers) {
-      const contentType = getHeader(httpRegion.request.headers, 'content-type');
-      if (isString(contentType)) {
-        httpRegion.request.contentType = parseMimeType(contentType);
+      const contentType = utils.getHeader(httpRegion.request.headers, 'content-type');
+      if (utils.isString(contentType)) {
+        httpRegion.request.contentType = utils.parseMimeType(contentType);
       }
     }
     return result;
@@ -85,34 +81,33 @@ export async function parseRequestLine(getLineReader: getHttpLineGenerator, { ht
 }
 
 
-function getRequestLine(textLine: string, line: number): { request: HttpRequest, requestSymbols: Array<HttpSymbol> } {
-  const requestSymbols: Array<HttpSymbol> = [];
-  const urlMatch = ParserRegex.request.requestLine.exec(textLine);
-  if (urlMatch && urlMatch.length > 1 && urlMatch.groups) {
+function getRequestLine(textLine: string, line: number): { request: models.HttpRequest, requestSymbols: Array<models.HttpSymbol> } {
+  const requestSymbols: Array<models.HttpSymbol> = [];
+  const requestLineMatch = ParserRegex.request.requestLine.exec(textLine);
+  if (requestLineMatch && requestLineMatch.length > 1 && requestLineMatch.groups) {
     requestSymbols.push({
-      name: urlMatch.groups.method,
+      name: requestLineMatch.groups.method,
       description: 'request method',
-      kind: HttpSymbolKind.requestHeader,
+      kind: models.HttpSymbolKind.requestHeader,
       startLine: line,
-      startOffset: textLine.indexOf(urlMatch.groups.method),
+      startOffset: textLine.indexOf(requestLineMatch.groups.method),
       endLine: line,
-      endOffset: textLine.indexOf(urlMatch.groups.method) + urlMatch.groups.method.length,
+      endOffset: textLine.indexOf(requestLineMatch.groups.method) + requestLineMatch.groups.method.length,
     }, {
-      name: urlMatch.groups.url,
+      name: requestLineMatch.groups.url,
       description: 'request url',
-      kind: HttpSymbolKind.requestUrl,
+      kind: models.HttpSymbolKind.url,
       startLine: line,
-      startOffset: textLine.indexOf(urlMatch.groups.url),
+      startOffset: textLine.indexOf(requestLineMatch.groups.url),
       endLine: line,
       endOffset: textLine.length,
     });
 
     return {
       request: {
-        url: urlMatch.groups.url,
-        method: isRequestMethod(urlMatch.groups.method) ? urlMatch.groups.method : 'GET',
-        http2: urlMatch.groups.version ? ['1.1', '1.0'].indexOf(urlMatch.groups.version) < 0 : undefined,
-        headers: {},
+        url: requestLineMatch.groups.url,
+        method: utils.isHttpRequestMethod(requestLineMatch.groups.method) ? requestLineMatch.groups.method : 'GET',
+        http2: requestLineMatch.groups.version ? ['1.1', '1.0'].indexOf(requestLineMatch.groups.version) < 0 : undefined,
       },
       requestSymbols
     };
@@ -120,7 +115,7 @@ function getRequestLine(textLine: string, line: number): { request: HttpRequest,
   requestSymbols.push({
     name: textLine.trim(),
     description: 'request url',
-    kind: HttpSymbolKind.requestUrl,
+    kind: models.HttpSymbolKind.url,
     startLine: line,
     startOffset: 0,
     endLine: line,
@@ -130,15 +125,14 @@ function getRequestLine(textLine: string, line: number): { request: HttpRequest,
     request: {
       url: textLine.trim(),
       method: 'GET',
-      headers: {},
     },
     requestSymbols
   };
 }
 
 
-function isValidRequestLine(textLine: string, httpRegion: HttpRegion) {
-  if (isStringEmpty(textLine)) {
+function isValidRequestLine(textLine: string, httpRegion: models.HttpRegion) {
+  if (utils.isStringEmpty(textLine)) {
     return false;
   }
   if (httpRegion.request) {
@@ -148,106 +142,4 @@ function isValidRequestLine(textLine: string, httpRegion: HttpRegion) {
     return false;
   }
   return true;
-}
-
-
-function parseDefaultHeaders(textLine: string, line: number) {
-  const fileHeaders = ParserRegex.request.headersSpread.exec(textLine);
-  if (fileHeaders?.groups?.variableName) {
-    const val = textLine.trim();
-    return {
-      symbols: [{
-        name: val,
-        description: 'header variable',
-        kind: HttpSymbolKind.requestHeader,
-        startLine: line,
-        startOffset: textLine.indexOf(val),
-        endOffset: textLine.length,
-        endLine: line,
-      }],
-      actions: [new actions.DefaultHeadersAction(fileHeaders.groups.variableName)]
-    };
-  }
-  return false;
-}
-
-function parseUrlLine(textLine: string, line: number, httpRequest: HttpRequest) {
-  if (ParserRegex.request.urlLine.test(textLine)) {
-    const val = textLine.trim();
-    httpRequest.url += val;
-    return {
-      symbols: [{
-        name: val,
-        description: 'urlpart',
-        kind: HttpSymbolKind.requestUrl,
-        startLine: line,
-        startOffset: textLine.indexOf(val),
-        endOffset: textLine.length,
-        endLine: line,
-      }]
-    };
-  }
-  return false;
-}
-
-
-function parseQueryLine(textLine: string, line: number, httpRequest: HttpRequest) {
-  if (ParserRegex.request.queryLine.test(textLine)) {
-    const val = textLine.trim();
-    httpRequest.url += val;
-    return {
-      symbols: [{
-        name: val,
-        description: 'query',
-        kind: HttpSymbolKind.requestUrl,
-        startLine: line,
-        startOffset: textLine.indexOf(val),
-        endOffset: textLine.length,
-        endLine: line,
-      }]
-    };
-  }
-  return false;
-}
-
-
-function parseRequestHeader(textLine: string, line: number, httpRequest: HttpRequest) {
-  if (!httpRequest.headers) {
-    httpRequest.headers = {};
-  }
-  const headerMatch = ParserRegex.request.header.exec(textLine);
-  if (headerMatch?.groups?.key && headerMatch?.groups?.value) {
-    httpRequest.headers[headerMatch.groups.key] = headerMatch.groups.value;
-
-    return {
-      symbols: [{
-        name: headerMatch.groups.key,
-        description: headerMatch.groups.value,
-        kind: HttpSymbolKind.requestHeader,
-        startLine: line,
-        startOffset: textLine.indexOf(headerMatch.groups.key),
-        endLine: line,
-        endOffset: textLine.length,
-        children: [{
-          name: headerMatch.groups.key,
-          description: 'request header key',
-          kind: HttpSymbolKind.requestHeaderValue,
-          startLine: line,
-          startOffset: textLine.indexOf(headerMatch.groups.key),
-          endLine: line,
-          endOffset: textLine.indexOf(headerMatch.groups.key) + headerMatch.groups.key.length,
-        }, {
-          name: headerMatch.groups.value,
-          description: 'request header value',
-          kind: HttpSymbolKind.requestHeaderValue,
-          startLine: line,
-          startOffset: textLine.indexOf(headerMatch.groups.value),
-          endLine: line,
-          endOffset: textLine.indexOf(headerMatch.groups.value) + headerMatch.groups.value.length,
-        }
-        ]
-      }]
-    };
-  }
-  return false;
 }

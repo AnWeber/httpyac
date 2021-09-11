@@ -1,31 +1,20 @@
 import { ContentType } from './contentType';
-import { HttpMethod } from './httpMethod';
+import { Request } from './httpRequest';
 import { HttpTimings } from './httpTimings';
 
 export interface HttpResponse{
+  protocol: string;
   httpVersion?: string;
   statusCode: number;
   statusMessage?: string;
-  timings?: HttpTimings,
-  headers: HttpHeaders;
+  headers: Record<string, unknown>;
   contentType?: ContentType;
   body?: unknown;
   parsedBody?: unknown;
   prettyPrintBody?: string;
   rawBody?: Buffer;
-  request?: HttpResponseRequest;
+  request?: Request;
+
+  timings?: HttpTimings,
   meta?: Record<string, unknown>
 }
-
-export interface HttpResponseRequest{
-  method: HttpMethod;
-  url: unknown;
-  headers: HttpHeaders;
-  body?: unknown;
-  https?: {
-    certificate?: unknown;
-    pfx?: unknown;
-  }
-}
-
-export type HttpHeaders = Record<string, string | string[] | undefined | null>;
