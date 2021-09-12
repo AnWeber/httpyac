@@ -1,7 +1,9 @@
-## 3.2.0 (2021-08-29)
+## 3.2.0 (2021-09-12)
 
 #### Fix
 * markdown requests supports sending heading
+* fix detection of environemnts in cli usage
+* fix import of http files in global context
 
 ## 3.1.0 (2021-08-09)
 
