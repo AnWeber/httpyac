@@ -71,7 +71,7 @@ export async function execute(rawArgs: string[]): Promise<void> {
         }
       }
     } else {
-      renderHelp();
+      console.error('httpYac cannot find the specified file.');
       return;
     }
   } catch (err) {
