@@ -17,7 +17,14 @@ export function testFactory({ httpRegion, scriptConsole }: ProcessorContext): Te
       } catch (err) {
         process.exitCode = 20;
         testResult.result = false;
-        testResult.error = utils.parseError(err);
+        if (utils.isError(err)) {
+          testResult.error = utils.parseError(err);
+        } else {
+          testResult.error = {
+            displayMessage: `${err}`,
+            error: new Error(`${err}`)
+          };
+        }
       }
     }
     httpRegion.testResults.push(testResult);

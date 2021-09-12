@@ -126,7 +126,7 @@ function initServer(port = 3000) {
         res.end(getHtml(responseContent.join('')));
       } catch (err) {
         log.error(err);
-        res.end(getHtml(err));
+        res.end(getHtml(`${err}`));
       }
     });
     server.listen(port);

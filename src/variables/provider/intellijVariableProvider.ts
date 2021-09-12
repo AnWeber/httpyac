@@ -52,7 +52,7 @@ async function getEnvironmentVariables(workingDir: PathLike) {
   for (const file of defaultFiles) {
     try {
       const fileName = fileProvider.joinPath(workingDir, file);
-      if (fileProvider.exists(fileName)) {
+      if (await fileProvider.exists(fileName)) {
         const content = await fileProvider.readFile(fileName, 'utf-8');
         environments.push(JSON.parse(content));
       }
