@@ -72,11 +72,13 @@ async function sendHttpFile(context: models.HttpFileSendContext): Promise<boolea
 async function createEmptyProcessorContext<T extends models.VariableProviderContext>(context: T): Promise<T & {
   variables: models.Variables,
   httpClient: models.HttpClient,
+  options: Record<string, unknown>
 }> {
   context.config = context.httpFile.config;
   return Object.assign(context, {
     variables: await getVariables(context),
-    httpClient: initHttpClient(context)
+    httpClient: initHttpClient(context),
+    options: {}
   });
 }
 

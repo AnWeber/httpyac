@@ -41,6 +41,7 @@ export interface ProcessorContext extends HttpRegionSendContext{
   variables: Variables;
   request?: HttpRequest;
   showProgressBar?: boolean;
+  options: Record<string, unknown>
 }
 
 

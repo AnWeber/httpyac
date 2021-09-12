@@ -77,7 +77,8 @@ export async function logResponse(context: models.ProcessorContext) : Promise<mo
 export async function executeGlobalScripts(context: {
   variables: models.Variables,
   httpClient: models.HttpClient,
-  httpFile: models.HttpFile
+  httpFile: models.HttpFile,
+  options: Record<string, unknown>
 }): Promise<boolean> {
   for (const httpRegion of context.httpFile.httpRegions) {
     if (isGlobalHttpRegion(httpRegion) && !httpRegion.metaData.disabled) {

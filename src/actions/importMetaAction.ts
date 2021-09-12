@@ -5,7 +5,9 @@ import { fileProvider } from '../io';
 
 
 export interface ImportProcessorContext extends ProcessorContext{
-  httpFiles?: Array<HttpFile>
+  options: {
+    httpFiles?: Array<HttpFile>
+  }
 }
 
 export class ImportMetaAction implements HttpRegionAction {
@@ -25,17 +27,16 @@ export class ImportMetaAction implements HttpRegionAction {
         config: context.config,
         activeEnvironment: context.httpFile.activeEnvironment,
       });
-      if (!context.httpFiles) {
-        context.httpFiles = [importHttpFile];
+      if (!context.options.httpFiles) {
+        context.options.httpFiles = [importHttpFile];
       } else {
-        context.httpFiles.push(importHttpFile);
+        context.options.httpFiles.push(importHttpFile);
       }
 
       const cloneContext: ImportProcessorContext = {
         ...context,
         httpFile: importHttpFile,
       };
-      delete cloneContext.httpFiles;
       return await executeGlobalScripts(cloneContext);
     }
     return false;

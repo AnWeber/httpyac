@@ -25,13 +25,13 @@ export class RefMetaAction implements HttpRegionAction {
         }
       }
     }
-    if (context.httpFiles) {
-      for (const refHttpFile of context.httpFiles) {
+    if (context.options.httpFiles) {
+      for (const refHttpFile of context.options.httpFiles) {
         const cloneContext = {
           ...context,
           httpFile: refHttpFile
         };
-        delete cloneContext.httpFiles;
+        delete cloneContext.options.httpFiles;
         await this.process(cloneContext);
       }
     }
