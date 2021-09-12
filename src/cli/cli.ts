@@ -2,7 +2,7 @@ import inquirer from 'inquirer';
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import * as models from '../models';
-import { HttpFileStore } from '../store';
+import { HttpFileStore, HttpFileStoreOptions } from '../store';
 import { send } from '../httpYacApi';
 import * as utils from '../utils';
 import { default as globby } from 'globby';
@@ -35,7 +35,8 @@ export async function execute(rawArgs: string[]): Promise<void> {
   }
 
   try {
-    const httpFiles: models.HttpFile[] = await getHttpFiles(cliOptions);
+    const context = convertCliOptionsToContext(cliOptions);
+    const httpFiles: models.HttpFile[] = await getHttpFiles(cliOptions, context.config);
 
     if (httpFiles.length > 0) {
       let isFirstRequest = true;
@@ -45,7 +46,6 @@ export async function execute(rawArgs: string[]): Promise<void> {
 
         const processedHttpRegions: Array<models.HttpRegion> = [];
 
-        const context = convertCliOptionsToContext(cliOptions);
         if (selection) {
           await send(Object.assign({ processedHttpRegions }, context, selection));
           jsonOutput[fileProvider.toString(selection.httpFile.fileName)] = [...processedHttpRegions];
@@ -86,13 +86,14 @@ export async function execute(rawArgs: string[]): Promise<void> {
 }
 
 function convertCliOptionsToContext(cliOptions: CliOptions): CliContext {
-  const context : CliContext = {
+  const context: CliContext = {
     repeat: cliOptions.repeat,
     scriptConsole: new Logger({
       level: getLogLevel(cliOptions),
       onlyFailedTests: cliOptions.filter === CliFilterOptions.onlyFailed
     }),
     config: {
+      envDirName: 'env',
       log: {
         level: getLogLevel(cliOptions),
       },
@@ -109,12 +110,14 @@ function convertCliOptionsToContext(cliOptions: CliOptions): CliContext {
   return context;
 }
 
-async function getHttpFiles(options: CliOptions) {
+async function getHttpFiles(options: CliOptions, config: models.EnvironmentConfig | undefined) {
   const httpFiles: models.HttpFile[] = [];
   const httpFileStore = new HttpFileStore();
 
-  const parseOptions = {
+  const parseOptions: HttpFileStoreOptions = {
     workingDir: process.cwd(),
+    activeEnvironment: options.activeEnvironments,
+    config
   };
   if (options.editor) {
     const answer = await inquirer.prompt([{
