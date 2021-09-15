@@ -118,6 +118,16 @@ export async function parseMetaData(getLineReader: models.getHttpLineGenerator, 
                 addRefHttpRegion(httpRegion, match.groups.value, false);
               }
               break;
+            case 'sleep':
+              if (match.groups.value) {
+                const timeout = parseInt(match.groups.value, 10);
+                if (Number.isSafeInteger(timeout)) {
+                  httpRegion.hooks.execute.addHook('sleep', async () => await utils.sleep(timeout));
+                } else {
+                  log.debug(`meta sleep ${match.groups.value} is no valid Integer`);
+                }
+              }
+              break;
             case 'forceRef':
               if (match.groups.value) {
                 addRefHttpRegion(httpRegion, match.groups.value, true);

@@ -37,6 +37,7 @@ export class JavascriptAction implements HttpRegionAction {
       fileName: httpFile.fileName,
       context: {
         request,
+        sleep: utils.sleep,
         test: testFactory(context),
         httpFile: context.httpFile,
         httpRegion: context.httpRegion,
