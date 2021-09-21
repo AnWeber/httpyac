@@ -4,7 +4,7 @@
 
 # httpYac - Yet another Rest Client
 
-> httpyac CLI provides a command line interface to execute *.http and *.rest files. This can be used to quickly execute a single *.http file, but also to execute all files in a folder.
+> httpyac CLI provides a command line interface to execute *.http and *.rest files. This can be used to quickly execute a single *.http file, but also to execute all files in a folder. httpyac supports HTTP, Rest, GraphQL und gRPC Requests
 
 <p align="center">
 <a href="https://httpyac.github.io/">

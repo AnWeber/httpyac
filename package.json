@@ -21,6 +21,7 @@
 		"Intellij Http Client",
 		"Postman",
 		"Soap",
+		"gRPC",
 		"ci",
 		"api",
 		"rest-client"
