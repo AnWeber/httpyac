@@ -1,3 +1,0 @@
-@query = {{$pick select app? $value: foo,bar}}
-
-GET /json?q={{query}}

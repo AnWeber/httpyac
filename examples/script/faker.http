@@ -1,7 +1,0 @@
-POST /post
-
-{
-  "name": "{{require('faker').name.findName()}}"
-}
-
-

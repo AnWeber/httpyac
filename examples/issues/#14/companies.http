@@ -1,7 +1,0 @@
-
-@my_base_url=https://httpbin.org/get?
-
-
-### List companies
-GET {{my_base_url}}/api/companies
-Authorization: Bearer {{user_access_token}}

@@ -1,9 +1,0 @@
-
-@host=https://api.spacexdata.com/v4
-
-###
-
-GET https://api.spacexdata.com/v4/launches/latest
-
-
-GET /capsules

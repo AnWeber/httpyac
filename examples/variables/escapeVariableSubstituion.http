@@ -1,4 +1,0 @@
-POST /anything
-{
-  "template": "My \{\{someVerb\}\} template!!"
-}

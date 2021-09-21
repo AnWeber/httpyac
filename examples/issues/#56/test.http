@@ -1,7 +1,0 @@
-
-GET /json
-
-{{
-  console.log('I will be outputted')
-  // I have a feeling this will not end well
-}}

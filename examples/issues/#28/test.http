@@ -1,5 +1,0 @@
-
-POST https://httpbin.org/anything
-accept: application/json
-
-< ../../assets/sample.pdf
