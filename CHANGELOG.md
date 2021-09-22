@@ -1,3 +1,8 @@
+## 4.0.2 (2021-09-22)
+
+#### Fix
+* remove test script in root folder (package import error in vscode-httpyac)
+
 ## 4.0.1 (2021-09-22)
 
 #### Fix
