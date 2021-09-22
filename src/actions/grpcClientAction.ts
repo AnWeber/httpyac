@@ -41,6 +41,8 @@ export class GrpcClientAction implements models.HttpRegionAction {
     const data = this.getData(request);
     const metaData = this.getMetaData(request);
 
+    const startTime = new Date().getTime();
+
     return await new Promise<models.HttpResponse>((resolve, reject) => {
       const args: Array<unknown> = [
         metaData,
@@ -48,7 +50,7 @@ export class GrpcClientAction implements models.HttpRegionAction {
 
       let disposeCancellation: models.Dispose | undefined;
       let responseMetaData: Record<string, unknown> = {};
-      const grpcActions: Array<(call: GrpcStream) => void> = [
+      const grpcActions: Array<(stream: GrpcStream) => void> = [
         stream => stream.on('metadata', (metaData: grpc.Metadata) => {
           responseMetaData = metaData.getMap();
         }),
@@ -68,13 +70,25 @@ export class GrpcClientAction implements models.HttpRegionAction {
         grpcActions.push(stream => stream.on('data', chunk => {
           mergedData.push(chunk);
           if (!context.httpRegion.metaData.noStreamingLog) {
-            promises.push(utils.logResponse(this.toHttpResponse(chunk, responseMetaData), context));
+            promises.push(utils.logResponse(this.toHttpResponse(chunk, {
+              headers: responseMetaData,
+              request,
+              timings: {
+                total: new Date().getDate() - startTime,
+              }
+            }), context));
           }
         }));
         grpcActions.push(stream => stream.on('error', err => mergedData.push(err)));
         grpcActions.push(stream => stream.on('close', async () => {
           await Promise.all(promises);
-          const response = this.toMergedHttpResponse(mergedData, responseMetaData);
+          const response = this.toMergedHttpResponse(mergedData, {
+            headers: responseMetaData,
+            request,
+            timings: {
+              total: new Date().getDate() - startTime,
+            }
+          });
           if (disposeCancellation) {
             disposeCancellation();
           }
@@ -82,15 +96,21 @@ export class GrpcClientAction implements models.HttpRegionAction {
         }));
       } else {
         args.push((err: Error, data: unknown) => {
-          resolve(this.toHttpResponse(err || data, responseMetaData));
+          resolve(this.toHttpResponse(err || data, {
+            headers: responseMetaData,
+            request,
+            timings: {
+              total: new Date().getTime() - startTime,
+            }
+          }));
         });
       }
 
       if (methodDefinition?.requestStream) {
         // Client Streaming
-        grpcActions.push(call => {
-          if (data && call instanceof Writable || call instanceof Duplex) {
-            call.write(data);
+        grpcActions.push(stream => {
+          if (data && stream instanceof Writable || stream instanceof Duplex) {
+            stream.write(data);
           }
         });
         grpcActions.push(stream => {
@@ -106,8 +126,6 @@ export class GrpcClientAction implements models.HttpRegionAction {
         args.splice(0, 0, data);
       }
       const grpcStream = method(...args);
-
-
       grpcActions.forEach(obj => obj(grpcStream));
     });
   }
@@ -173,9 +191,11 @@ export class GrpcClientAction implements models.HttpRegionAction {
       throw new Error(`Url ${url} does not match pattern <server>/<service>/<method>`);
     }
   }
-  private toHttpResponse(data: unknown, headers: Record<string, unknown>): models.HttpResponse {
+  private toHttpResponse(data: unknown, responseTemplate: Partial<models.HttpResponse>): models.HttpResponse {
     const json = JSON.stringify(data, null, 2);
     const response: models.HttpResponse = {
+      headers: {},
+      ...responseTemplate,
       statusCode: 0,
       statusMessage: 'OK',
       protocol: 'GRPC',
@@ -183,12 +203,11 @@ export class GrpcClientAction implements models.HttpRegionAction {
       prettyPrintBody: json,
       parsedBody: data,
       rawBody: Buffer.from(json),
-      headers,
       contentType: {
         mimeType: 'application/grpc+json',
         charset: 'UTF-8',
         contentType: 'application/grpc+json; charset=utf-8'
-      }
+      },
     };
     if (this.isGrpcError(data)) {
       response.statusCode = data.code || -1;
@@ -197,8 +216,8 @@ export class GrpcClientAction implements models.HttpRegionAction {
     return response;
   }
 
-  private toMergedHttpResponse(data: Array<unknown>, metaData: Record<string, unknown>): models.HttpResponse {
-    const response = this.toHttpResponse(data, metaData);
+  private toMergedHttpResponse(data: Array<unknown>, responseTemplate: Partial<models.HttpResponse>): models.HttpResponse {
+    const response = this.toHttpResponse(data, responseTemplate);
     const error = data.find(obj => this.isGrpcError(obj));
     if (this.isGrpcError(error)) {
       response.statusCode = error.code || -1;
