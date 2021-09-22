@@ -1,3 +1,8 @@
+## 4.0.1 (2021-09-22)
+
+#### Fix
+* missing typescript types provided
+
 ## 4.0.0 (2021-09-22)
 
 #### Features
