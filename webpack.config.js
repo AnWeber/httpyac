@@ -18,7 +18,7 @@ module.exports = (env, argv) => {
         type: 'commonjs2',
       },
     },
-    devtool: argv.mode === 'development' ? 'eval-cheap-module-source-map' : 'nosources-source-map',
+    devtool: argv.mode === 'development' ? 'source-map' : 'nosources-source-map',
     resolve: {
       extensions: ['.ts', '.js']
     },

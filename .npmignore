@@ -4,6 +4,6 @@ webpack.config.js
 .eslintrc.json
 dev.env
 assets
-examples
+buildSrc
 icon.png
 .github
