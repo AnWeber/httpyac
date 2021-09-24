@@ -1,6 +1,5 @@
 .vscode
 src
-webpack.config.js
 .eslintrc.json
 dev.env
 assets

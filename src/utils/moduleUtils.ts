@@ -7,21 +7,14 @@ import { EOL } from 'os';
 import { PathLike, ProcessorContext } from '../models';
 import { toMultiLineArray } from './stringUtils';
 
-// eslint-disable-next-line no-underscore-dangle, no-undef
-declare const __non_webpack_require__: NodeJS.Require;
-
-// Use `Module.createRequire` if available (added in Node v12.2.0)
-const createRequire = Module.createRequire || function createModuleRequire(fileName) {
-  return createModule(fileName as string, 'module.exports = require;').exports;
-};
 
 export function resolveModule(request: string, context: string): string | undefined {
   let resolvedPath: string | undefined;
   try {
     try {
-      resolvedPath = createRequire(path.resolve(context, 'package.json')).resolve(request);
+      resolvedPath = Module.createRequire(path.resolve(context, 'package.json')).resolve(request);
     } catch (e) {
-      resolvedPath = __non_webpack_require__.resolve(request, { paths: [context] });
+      resolvedPath = require.resolve(request, { paths: [context] });
     }
   } catch (e) {
     log.debug(e);
@@ -34,14 +27,14 @@ export function loadModule<T>(request: string, context: string, force = false): 
     if (force) {
       clearModule(request, context);
     }
-    return createRequire(path.resolve(context, 'package.json'))(request);
+    return Module.createRequire(path.resolve(context, 'package.json'))(request);
   } catch (e) {
     const resolvedPath = resolveModule(request, context);
     if (resolvedPath) {
       if (force) {
         clearRequireCache(resolvedPath);
       }
-      return __non_webpack_require__(resolvedPath);
+      return require(resolvedPath);
     }
   }
   return undefined;
@@ -62,14 +55,14 @@ function createModule(filename: string, source?: string | undefined): Module {
 
 
 export function clearModule(request: string, context: string): void {
-  const resolvedPath = exports.resolveModule(request, context);
+  const resolvedPath = resolveModule(request, context);
   if (resolvedPath) {
     clearRequireCache(resolvedPath);
   }
 }
 
 function clearRequireCache(id: string, map = new Map()) {
-  const module = __non_webpack_require__.cache[id];
+  const module = require.cache[id];
   if (module) {
     map.set(id, true);
     // Clear children modules
@@ -78,7 +71,7 @@ function clearRequireCache(id: string, map = new Map()) {
         clearRequireCache(child.id, map);
       }
     });
-    delete __non_webpack_require__.cache[id];
+    delete require.cache[id];
   }
 }
 

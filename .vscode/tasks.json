@@ -9,18 +9,6 @@
 				"reveal": "never"
 			},
 			"group": "build"
-		},
-		{
-			"type": "npm",
-			"script": "watch",
-			"isBackground": true,
-			"presentation": {
-				"reveal": "never"
-			},
-			"group": "build",
-			"problemMatcher": [],
-			"label": "npm: watch",
-			"detail": "webpack --watch --config ./webpack.config.js"
 		}
 	]
 }

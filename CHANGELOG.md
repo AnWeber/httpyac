@@ -1,3 +1,9 @@
+## 4.0.4 (2021-09-23)
+
+#### Fix
+* use esbuild instead of webpack. Fixes require error in @grpc/proto-loader
+* stack overflow with multiple use of the same ref statement
+
 ## 4.0.3 (2021-09-22)
 
 #### Fix

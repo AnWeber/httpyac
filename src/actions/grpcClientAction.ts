@@ -37,7 +37,7 @@ export class GrpcClientAction implements models.HttpRegionAction {
   private async requestGrpc(method: (...args: unknown[]) => (Readable | Writable | Duplex),
     methodDefinition: grpc.MethodDefinition<unknown, unknown>,
     request: models.GrpcRequest,
-    context: models.ProcessorContext) : Promise<models.HttpResponse> {
+    context: models.ProcessorContext): Promise<models.HttpResponse> {
     const data = this.getData(request);
     const metaData = this.getMetaData(request);
 
@@ -63,71 +63,92 @@ export class GrpcClientAction implements models.HttpRegionAction {
         },
       ];
 
-      if (methodDefinition?.responseStream) {
-        const promises: Array<Promise<unknown>> = [];
-        // Server Streaming
-        const mergedData: Array<unknown> = [];
-        grpcActions.push(stream => stream.on('data', chunk => {
-          mergedData.push(chunk);
-          if (!context.httpRegion.metaData.noStreamingLog) {
-            promises.push(utils.logResponse(this.toHttpResponse(chunk, {
-              headers: responseMetaData,
-              request,
-              timings: {
-                total: new Date().getDate() - startTime,
-              }
-            }), context));
-          }
-        }));
-        grpcActions.push(stream => stream.on('error', err => mergedData.push(err)));
-        grpcActions.push(stream => stream.on('close', async () => {
-          await Promise.all(promises);
-          const response = this.toMergedHttpResponse(mergedData, {
-            headers: responseMetaData,
-            request,
-            timings: {
-              total: new Date().getDate() - startTime,
-            }
-          });
-          if (disposeCancellation) {
-            disposeCancellation();
-          }
-          resolve(response);
-        }));
-      } else {
-        args.push((err: Error, data: unknown) => {
-          resolve(this.toHttpResponse(err || data, {
-            headers: responseMetaData,
-            request,
-            timings: {
-              total: new Date().getTime() - startTime,
-            }
-          }));
-        });
-      }
+      const getResponseTemplate: (() => Partial<models.HttpResponse>) = () => ({
+        headers: responseMetaData,
+        request,
+        timings: {
+          total: new Date().getTime() - startTime,
+        }
+      });
+
+      const streamResolve = (response: models.HttpResponse) => {
+        if (disposeCancellation) {
+          disposeCancellation();
+        }
+        resolve(response);
+      };
 
       if (methodDefinition?.requestStream) {
-        // Client Streaming
-        grpcActions.push(stream => {
-          if (data && stream instanceof Writable || stream instanceof Duplex) {
-            stream.write(data);
-          }
-        });
-        grpcActions.push(stream => {
-          if (stream instanceof Writable || stream instanceof Duplex) {
-            context.variables.grpcStream = stream;
-            context.httpRegion.hooks.onStreaming.trigger(context)
-              .then(() => {
-                stream.end();
-              }).catch(err => reject(err));
-          }
-        });
+        grpcActions.push(...this.getRequestStreamActions(data, context, reject));
       } else {
         args.splice(0, 0, data);
       }
+
+      if (methodDefinition?.responseStream) {
+        grpcActions.push(...this.getResponseStreamActions(streamResolve, getResponseTemplate, context));
+      } else {
+        args.push((err: Error, data: unknown) => {
+          streamResolve(this.toHttpResponse(err || data, getResponseTemplate()));
+        });
+      }
+
       const grpcStream = method(...args);
       grpcActions.forEach(obj => obj(grpcStream));
     });
+  }
+
+  private getRequestStreamActions(
+    data: unknown,
+    context: models.ProcessorContext,
+    reject: (reason?: unknown) => void
+  ): Array<GrpcStreamAction> {
+    return [
+      stream => {
+        if (data && stream instanceof Writable || stream instanceof Duplex) {
+          stream.write(data);
+        }
+      },
+      stream => {
+        if (stream instanceof Writable || stream instanceof Duplex) {
+          context.variables.grpcStream = stream;
+          context.httpRegion.hooks.onStreaming.trigger(context)
+            .then(() => stream.end())
+            .catch(err => reject(err))
+            .finally(() => {
+              delete context.variables.grpcStream;
+            });
+        }
+      }
+    ];
+  }
+
+  private getResponseStreamActions(
+    resolve: (value: models.HttpResponse) => void,
+    getResponseTemplate: () => Partial<models.HttpResponse>,
+    context: models.ProcessorContext
+  ): Array<GrpcStreamAction> {
+    const loadingPromises: Array<Promise<unknown>> = [];
+    const mergedData: Array<unknown> = [];
+    let isResolved = false;
+    const resolveStream = async () => {
+      if (!isResolved) {
+        isResolved = true;
+        await Promise.all(loadingPromises);
+        const response = this.toMergedHttpResponse(mergedData, getResponseTemplate());
+        resolve(response);
+      }
+    };
+    return [
+      stream => stream.on('data', chunk => {
+        mergedData.push(chunk);
+        if (!context.httpRegion.metaData.noStreamingLog) {
+          loadingPromises.push(utils.logResponse(this.toHttpResponse(chunk, getResponseTemplate()), context));
+        }
+      }),
+      stream => stream.on('error', err => mergedData.push(err)),
+      stream => stream.on('end', resolveStream),
+      stream => stream.on('close', resolveStream),
+    ];
   }
 
   private getData(request: models.Request): unknown {
@@ -240,6 +261,8 @@ interface GrpcError {
 
 export type GrpcStream = Readable | Writable | Duplex;
 
-export interface GrpcSession extends models.UserSession{
+export interface GrpcSession extends models.UserSession {
   stream: Writable | Duplex;
 }
+
+export type GrpcStreamAction = (stream: GrpcStream) => void;

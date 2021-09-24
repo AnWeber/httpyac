@@ -16,8 +16,7 @@ extends:
 - plugin:node/recommended
 - plugin:@typescript-eslint/recommended
 ignorePatterns:
-- "**/examples/**/*.js"
-- webpack.config.js
+- '**/buildSrc/**'
 rules:
     array-bracket-spacing: "error"
     array-callback-return: "error"
