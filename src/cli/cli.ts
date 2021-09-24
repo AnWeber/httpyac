@@ -51,6 +51,9 @@ export async function execute(rawArgs: string[]): Promise<void> {
           jsonOutput[fileProvider.toString(selection.httpFile.fileName)] = [...processedHttpRegions];
         } else {
           for (const httpFile of httpFiles) {
+            if (!cliOptions.json && context.scriptConsole && httpFiles.length > 1) {
+              context.scriptConsole.info(`--------------------- ${httpFile.fileName}  --`);
+            }
             await send(Object.assign({ processedHttpRegions }, context, { httpFile }));
             jsonOutput[fileProvider.toString(httpFile.fileName)] = [...processedHttpRegions];
             processedHttpRegions.length = 0;
