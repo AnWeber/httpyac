@@ -52,6 +52,9 @@ export async function parseJavascript(
                   await executeScriptData(scriptData, context);
                 });
                 break;
+              case 'after':
+                httpRegion.hooks.execute.addInterceptor(new AfterJavascriptHookInterceptor(scriptData));
+                break;
               default:
                 httpRegion.hooks.execute.addHook(models.ActionType.js, context => executeScriptData(scriptData, context));
                 break;
@@ -124,6 +127,12 @@ export async function injectOnEveryRequestJavascript({ data, httpRegion }: model
 export class BeforeJavascriptHookInterceptor implements models.HookInterceptor<models.ProcessorContext, boolean> {
   constructor(private readonly scriptData: ScriptData) { }
   async beforeTrigger(context: models.HookTriggerContext<models.ProcessorContext, boolean | undefined>): Promise<boolean | undefined> {
+    return await executeScriptData(this.scriptData, context.arg);
+  }
+}
+export class AfterJavascriptHookInterceptor implements models.HookInterceptor<models.ProcessorContext, boolean> {
+  constructor(private readonly scriptData: ScriptData) { }
+  async afterTrigger(context: models.HookTriggerContext<models.ProcessorContext, boolean | undefined>): Promise<boolean | undefined> {
     return await executeScriptData(this.scriptData, context.arg);
   }
 }
