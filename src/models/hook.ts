@@ -86,7 +86,7 @@ export abstract class Hook<T, TReturn, TTriggerResult, TArg = undefined, TArg2 =
   removeHook(id: string): boolean {
     const index = this.items.findIndex(obj => obj.id === id);
     if (index >= 0) {
-      this.items.slice(index, 1);
+      this.items.splice(index, 1);
       return true;
     }
     return false;
