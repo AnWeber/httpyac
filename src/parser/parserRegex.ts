@@ -45,8 +45,8 @@ export const ParserRegex = {
   },
   request: {
     fileImport: /^<(?:(?<injectVariables>@)(?<encoding>\w+)?)?\s+(?<fileName>.+?)\s*$/u,
-    header: /^\s*(?<key>[\w-]+)\s*:\s*(?<value>.*?)\s*$/u,
-    headersSpread: /^\s*\.{3}(?<variableName>[^\s]+)\s*$/u,
+    header: /^\s*(?<key>[\w-]+)\s*:\s*(?<value>.*?),?\s*$/u,
+    headersSpread: /^\s*\.{3}(?<variableName>[^\s]+),?\s*$/u,
     queryLine: /^\s*(\?|&)([^=\s]+)=(.*)$/u,
     requestLine: /^\s*(?<method>GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE|PROPFIND|PROPPATCH|MKCOL|COPY|MOVE|LOCK|UNLOCK|CHECKOUT|CHECKIN|REPORT|MERGE|MKACTIVITY|MKWORKSPACE|VERSION-CONTROL|BASELINE-CONTROL)\s*(?<url>.+?)(\s+HTTP\/(?<version>(\S+)))?$/u,
     urlLine: /^\s*(\/).*$/u,

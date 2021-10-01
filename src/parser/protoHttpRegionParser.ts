@@ -2,8 +2,8 @@ import * as models from '../models';
 import { ParserRegex } from './parserRegex';
 import * as parserUtils from './parserUtils';
 import { load } from '@grpc/proto-loader';
-import { toAbsoluteFilename } from '../utils';
-import { fileProvider } from '../io';
+import * as utils from '../utils';
+import { fileProvider, log } from '../io';
 import { loadPackageDefinition } from '@grpc/grpc-js';
 
 
@@ -19,7 +19,7 @@ export async function parseProtoImport(
   { httpRegion }: models.ParserContext
 ): Promise<models.HttpRegionParserResult> {
   const lineReader = getLineReader();
-  let next = lineReader.next();
+  const next = lineReader.next();
   if (!next.done) {
 
     const matchProto = ParserRegex.grpc.proto.exec(next.value.textLine);
@@ -42,8 +42,6 @@ export async function parseProtoImport(
         nextParserLine: next.value.line,
         symbols
       };
-      next = lineReader.next();
-
 
       const headersResult = parserUtils.parseSubsequentLines(lineReader, [
         parserUtils.parseRequestHeaderFactory(protoDefinition.loaderOptions),
@@ -81,14 +79,29 @@ export class ProtoImportAction implements models.HttpRegionAction {
   async process(context: ProtoProcessorContext) : Promise<boolean> {
     const definition = context.options.protoDefinitions?.[this.protoDefinition.fileName];
     if (definition) {
-      const normalizedPath = await toAbsoluteFilename(this.protoDefinition.fileName, context.httpFile.fileName);
+      const normalizedPath = await utils.toAbsoluteFilename(this.protoDefinition.fileName, context.httpFile.fileName);
 
       if (normalizedPath) {
-        definition.packageDefinition = await load(fileProvider.fsPath(normalizedPath), definition.loaderOptions);
+        const options = await this.convertLoaderOptions(definition.loaderOptions, context);
+        definition.packageDefinition = await load(fileProvider.fsPath(normalizedPath), options);
         definition.grpcObject = loadPackageDefinition(definition.packageDefinition);
       }
     }
     return true;
+  }
+
+  private async convertLoaderOptions(loaderOptions: Record<string, unknown>, context: models.ProcessorContext) {
+    const options = { ...loaderOptions };
+    for (const [key, value] of Object.entries(options)) {
+      try {
+        if (utils.isString(value)) {
+          options[key] = await utils.evalExpression(value, context);
+        }
+      } catch (err) {
+        log.warn(`proto-loader options convert failed for ${key}=${value}`, err);
+      }
+    }
+    return options;
   }
 }
 
