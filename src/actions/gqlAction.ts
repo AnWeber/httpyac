@@ -1,12 +1,13 @@
 import { log } from '../io';
-import { ActionType, HttpRegionAction, PathLike, ProcessorContext } from '../models';
+import { ActionType, HttpRegionAction, ProcessorContext } from '../models';
 import { isString, toMultiLineString } from '../utils';
 
+export type GqlLoadData = string | ((context: ProcessorContext) => Promise<string | undefined>);
 
 export interface GqlData{
   operationName?: string;
-  query?: string | ((httpFileName: PathLike) => Promise<string | false>);
-  fragments: Record<string, string | ((httpFileName: PathLike) => Promise<string | false>)>
+  query?: GqlLoadData;
+  fragments: Record<string, GqlLoadData>
 }
 
 export interface GqlPostRequest{
@@ -28,7 +29,7 @@ export class GqlAction implements HttpRegionAction {
       if (isString(this.gqlData.query)) {
         query = this.gqlData.query;
       } else {
-        const result = await this.gqlData.query(context.httpFile.fileName);
+        const result = await this.gqlData.query(context);
         if (result) {
           query = result;
         } else {
@@ -43,7 +44,7 @@ export class GqlAction implements HttpRegionAction {
             if (isString(value)) {
               fragment = value;
             } else {
-              const result = await value(context.httpFile.fileName);
+              const result = await value(context);
               if (result) {
                 fragment = result;
               } else {

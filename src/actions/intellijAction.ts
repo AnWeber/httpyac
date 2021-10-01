@@ -43,17 +43,9 @@ export class IntellijAction implements models.HttpRegionAction {
   }
 
 
-  private async loadScript(file: string, { httpFile }: models.ProcessorContext) {
+  private async loadScript(file: string, context: models.ProcessorContext) {
     try {
-      let script: string | false = false;
-      const filename = await utils.toAbsoluteFilename(file, httpFile.fileName);
-      if (filename) {
-        script = await fileProvider.readFile(filename, 'utf-8');
-      } else {
-        userInteractionProvider.showErrorMessage?.(`File not found: ${file}`);
-        log.error(`File not found: ${file}`);
-      }
-      return script;
+      return await utils.replaceFilePath(file, context, path => fileProvider.readFile(path, 'utf-8'));
     } catch (err) {
       userInteractionProvider.showErrorMessage?.(`error loading script ${file}`);
       log.error(file, err);

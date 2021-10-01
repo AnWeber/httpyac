@@ -71,16 +71,14 @@ export class CreateRequestBodyInterceptor implements models.HookInterceptor<mode
       if (utils.isString(line)) {
         result.push(line);
       } else {
-        const normalizedPath = await utils.toAbsoluteFilename(line.fileName, context.httpFile.fileName);
-        if (normalizedPath) {
+        const buffer = await utils.replaceFilePath(line.fileName, context, async (path: models.PathLike) => {
           if (forceInjectVariables(line.fileName) || line.injectVariables) {
-            result.push(await fileProvider.readFile(normalizedPath, line.encoding));
-          } else {
-            result.push(async () => fileProvider.readBuffer(normalizedPath));
+            return await fileProvider.readFile(path, line.encoding);
           }
-        } else {
-          userInteractionProvider.showWarnMessage?.(`request body file ${line.fileName} not found`);
-          log.warn(`request body file ${line.fileName} not found`);
+          return () => fileProvider.readBuffer(path);
+        });
+        if (buffer) {
+          result.push(buffer);
         }
       }
     }

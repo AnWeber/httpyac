@@ -3,8 +3,9 @@ import { ParserRegex } from './parserRegex';
 import * as parserUtils from './parserUtils';
 import { load } from '@grpc/proto-loader';
 import * as utils from '../utils';
-import { fileProvider, log } from '../io';
+import { fileProvider, userInteractionProvider, log } from '../io';
 import { loadPackageDefinition } from '@grpc/grpc-js';
+import { replaceVariables } from '../actions';
 
 
 export interface ProtoProcessorContext extends models.ProcessorContext{
@@ -79,11 +80,13 @@ export class ProtoImportAction implements models.HttpRegionAction {
   async process(context: ProtoProcessorContext) : Promise<boolean> {
     const definition = context.options.protoDefinitions?.[this.protoDefinition.fileName];
     if (definition) {
-      const normalizedPath = await utils.toAbsoluteFilename(this.protoDefinition.fileName, context.httpFile.fileName);
-
-      if (normalizedPath) {
-        const options = await this.convertLoaderOptions(definition.loaderOptions, context);
-        definition.packageDefinition = await load(fileProvider.fsPath(normalizedPath), options);
+      const options = await this.convertLoaderOptions(definition.loaderOptions, context);
+      definition.packageDefinition = await utils.replaceFilePath(
+        this.protoDefinition.fileName,
+        context,
+        (path: models.PathLike) => load(fileProvider.fsPath(path), options)
+      );
+      if (definition.packageDefinition) {
         definition.grpcObject = loadPackageDefinition(definition.packageDefinition);
       }
     }
