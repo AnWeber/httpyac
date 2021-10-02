@@ -9,16 +9,15 @@ import { isString } from '../../utils';
 export async function openIdVariableReplacer(text: unknown, type: string, context: ProcessorContext): Promise<unknown> {
   if (type.toLowerCase() === 'authorization' && isString(text)) {
     const match = ParserRegex.auth.oauth2.exec(text);
-    if (match && match.groups && match.groups.flow && match.groups.variablePrefix) {
-
-      const config = oauth.getOpenIdConfiguration(match.groups.variablePrefix, context.variables);
+    if (match && match.groups) {
+      const flow = match.groups.flow || 'client_credentials';
+      const config = oauth.getOpenIdConfiguration(match.groups.variablePrefix || 'oauth2', context.variables);
       const tokenExchangeConfig = oauth.getOpenIdConfiguration(match.groups.tokenExchangePrefix, context.variables);
 
-      const openIdFlow = getOpenIdFlow(match.groups.flow);
+      const openIdFlow = getOpenIdFlow(flow);
       if (openIdFlow && config) {
         const cacheKey = openIdFlow.getCacheKey(config);
         if (cacheKey) {
-
           let openIdInformation = getOpenIdConfiguration(cacheKey, tokenExchangeConfig || config);
           userSessionStore.removeUserSession(cacheKey);
           if (openIdInformation) {
@@ -26,14 +25,14 @@ export async function openIdVariableReplacer(text: unknown, type: string, contex
             openIdInformation = await oauth.refreshTokenFlow.perform(openIdInformation, context);
           }
           if (!openIdInformation) {
-            log.debug(`openid flow ${match.groups.flow} used: ${cacheKey}`);
+            log.debug(`openid flow ${flow} used: ${cacheKey}`);
             openIdInformation = await openIdFlow.perform(config, context);
             if (openIdInformation && tokenExchangeConfig) {
               openIdInformation = await oauth.TokenExchangeFlow.perform(tokenExchangeConfig, openIdInformation, context);
             }
           }
           if (openIdInformation) {
-            log.debug(`openid flow ${match.groups.flow} finished`);
+            log.debug(`openid flow ${flow} finished`);
             userSessionStore.setUserSession(openIdInformation);
             keepAlive(cacheKey, context.httpClient);
             return `Bearer ${openIdInformation.accessToken}`;
