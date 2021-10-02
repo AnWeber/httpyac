@@ -159,14 +159,34 @@ export class HttpFileStore {
       config: options.config,
     });
 
+    const hooks: Record<string, models.ConfigureHooks> = {};
     if (rootDir) {
-      const hooks = await utils.getPlugins(rootDir);
+      Object.assign(hooks, await utils.getPlugins(rootDir));
       if (httpFile.config?.configureHooks) {
         hooks['.httpyac.js'] = httpFile.config.configureHooks;
       }
+    }
+    const envPluginLocation = process.env.HTTPYAC_PLUGIN;
+    if (envPluginLocation) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const envHook = require(envPluginLocation);
+        if (envHook.configureHooks) {
+          hooks.HTTPYAC_PLUGIN = envHook.configureHooks;
+        }
+      } catch (err) {
+        log.warn('Global Hook Plugin not loaded', err);
+      }
+    }
+    await this.configureHooks(httpFile, hooks);
+    return httpFile;
+  }
+
+  private async configureHooks(httpFile: models.HttpFile, hooks: Record<string, models.ConfigureHooks>) {
+    if (httpFile.config) {
       const api: models.HttpyacHooksApi = {
         version: '1.0.0',
-        rootDir,
+        rootDir: httpFile.rootDir,
         config: httpFile.config,
         httpFile,
         hooks: httpFile.hooks,
@@ -188,7 +208,6 @@ export class HttpFileStore {
         }
       }
     }
-    return httpFile;
   }
 }
 
