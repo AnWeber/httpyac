@@ -1,6 +1,6 @@
 import * as models from '../models';
 import * as utils from '../utils';
-import { fileProvider, userInteractionProvider, log } from '../io';
+import { fileProvider } from '../io';
 import { EOL } from 'os';
 
 

@@ -3,9 +3,8 @@ import { ParserRegex } from './parserRegex';
 import * as parserUtils from './parserUtils';
 import { load } from '@grpc/proto-loader';
 import * as utils from '../utils';
-import { fileProvider, userInteractionProvider, log } from '../io';
+import { fileProvider, log } from '../io';
 import { loadPackageDefinition } from '@grpc/grpc-js';
-import { replaceVariables } from '../actions';
 
 
 export interface ProtoProcessorContext extends models.ProcessorContext{

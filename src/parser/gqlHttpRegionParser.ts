@@ -1,8 +1,8 @@
 import * as models from '../models';
 import * as utils from '../utils';
-import { GqlAction, GqlData, replaceVariables } from '../actions';
+import { GqlAction, GqlData } from '../actions';
 import { ParserRegex } from './parserRegex';
-import { fileProvider, log, userInteractionProvider } from '../io';
+import { fileProvider } from '../io';
 
 
 export async function parseGraphql(
