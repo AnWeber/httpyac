@@ -8,15 +8,17 @@ const makeAllPackagesExternalPlugin = {
   },
 }
 
+const isWatchBuild = process.argv.indexOf('--watch') >= 0;
+
 esbuild.build({
   logLevel: "info",
   entryPoints: ['./src/index.ts'],
   outfile: 'dist/index.js',
   bundle: true,
-  minify: true,
+  minify: !isWatchBuild,
   platform: 'node',
   sourcemap: true,
   target: 'node14',
-  watch: process.argv.indexOf('--watch') >= 0,
+  watch: isWatchBuild,
   plugins: [makeAllPackagesExternalPlugin]
 }).catch(() => process.exit(1))
