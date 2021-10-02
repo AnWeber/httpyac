@@ -94,14 +94,16 @@ export class ProtoImportAction implements models.HttpRegionAction {
 
   private async convertLoaderOptions(loaderOptions: Record<string, unknown>, context: models.ProcessorContext) {
     const options = { ...loaderOptions };
-    for (const [key, value] of Object.entries(options)) {
-      try {
-        if (utils.isString(value)) {
-          options[key] = await utils.evalExpression(value, context);
-        }
-      } catch (err) {
-        log.warn(`proto-loader options convert failed for ${key}=${value}`, err);
-      }
+
+    const optionsScript = utils.toMultiLineString(
+      Object.entries(options)
+        .filter(([, value]) => utils.isString(value))
+        .map(([key, value]) => `${key}: ${value},`)
+    );
+    try {
+      Object.assign(options, await utils.evalExpression(`{${optionsScript}}`, context));
+    } catch (err) {
+      log.warn(`proto-loader options convert failed: ${optionsScript}`, err);
     }
     return options;
   }
