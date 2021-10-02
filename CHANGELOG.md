@@ -1,3 +1,15 @@
+## 4.1.0 (2021-10-02)
+
+#### Features
+* Variable Substitution for file import (proto, gql, request body)
+* env Variables in `process.env.HTTPYAC_ENV` are loaded
+* plugin in location `process.env.HTTPYAC_PLUGIN` is loaded
+* OAuth2 Variable Substitution uses sensible default (flow = client_credentials, prefix = oauth2)
+
+#### Fix
+* protoLoaderOptions conversion added (#75)
+
+
 ## 4.0.5 (2021-09-30)
 
 #### Fix
