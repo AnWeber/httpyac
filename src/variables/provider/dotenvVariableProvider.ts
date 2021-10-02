@@ -1,7 +1,7 @@
 import { fileProvider, log } from '../../io';
 import { PathLike, VariableProviderContext, Variables } from '../../models';
 import { parse } from 'dotenv';
-import { expandVariables, toAbsoluteFilename } from '../../utils';
+import * as utils from '../../utils';
 
 const defaultFiles: Array<string> = ['.env'];
 
@@ -9,15 +9,22 @@ export async function provideDotenvEnvironments(context: VariableProviderContext
 
   const files: Array<string> = [];
 
+  const globalEnv = process.env.HTTPYAC_ENV;
+  if (globalEnv && utils.isString(globalEnv)) {
+    const globalEnvAbsolute = await utils.toAbsoluteFilename(globalEnv, context.httpFile.rootDir, true);
+    if (globalEnvAbsolute) {
+      files.push(...await fileProvider.readdir(globalEnvAbsolute));
+    }
+  }
   if (context.httpFile.rootDir) {
     files.push(...await fileProvider.readdir(context.httpFile.rootDir));
   }
   if (context.config?.envDirName) {
-    const absolute = await toAbsoluteFilename(context.config.envDirName, context.httpFile.rootDir, true);
+    const absolute = await utils.toAbsoluteFilename(context.config.envDirName, context.httpFile.rootDir, true);
     if (absolute) {
       files.push(...await fileProvider.readdir(absolute));
     }
-    const dirOfFile = await toAbsoluteFilename(fileProvider.dirname(context.httpFile.fileName), context.httpFile.rootDir);
+    const dirOfFile = await utils.toAbsoluteFilename(fileProvider.dirname(context.httpFile.fileName), context.httpFile.rootDir);
     if (dirOfFile) {
       files.push(...await fileProvider.readdir(dirOfFile));
     }
@@ -38,21 +45,29 @@ export async function provideDotenvVariables(env: string[] | undefined, context:
   const searchFiles = getSearchFiles(env);
   const variables: Array<Variables> = [];
 
+  const globalEnv = process.env.HTTPYAC_ENV;
+  if (globalEnv && utils.isString(globalEnv)) {
+    const globalEnvAbsolute = await utils.toAbsoluteFilename(globalEnv, context.httpFile.rootDir, true);
+    if (globalEnvAbsolute) {
+      variables.push(...await getVariablesOfFolder(searchFiles, globalEnvAbsolute));
+    }
+  }
+
   if (context.httpFile.rootDir) {
     variables.push(...await getVariablesOfFolder(searchFiles, context.httpFile.rootDir));
   }
   if (context.config?.envDirName) {
-    const absolute = await toAbsoluteFilename(context.config.envDirName, context.httpFile.rootDir, true);
+    const absolute = await utils.toAbsoluteFilename(context.config.envDirName, context.httpFile.rootDir, true);
     if (absolute) {
       variables.push(...await getVariablesOfFolder(searchFiles, absolute));
     }
   }
-  const dirOfFile = await toAbsoluteFilename(fileProvider.dirname(context.httpFile.fileName), context.httpFile.rootDir);
+  const dirOfFile = await utils.toAbsoluteFilename(fileProvider.dirname(context.httpFile.fileName), context.httpFile.rootDir);
   if (dirOfFile) {
     variables.push(...await getVariablesOfFolder(searchFiles, dirOfFile));
   }
   const result = Object.assign({}, ...variables);
-  return expandVariables(result);
+  return utils.expandVariables(result);
 }
 
 function getSearchFiles(env: string[] | undefined) {
