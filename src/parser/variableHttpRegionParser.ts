@@ -1,9 +1,9 @@
-import { HttpSymbolKind, getHttpLineGenerator, HttpRegionParserResult, ParserContext } from '../models';
-import { VariableAction } from '../actions';
+import * as models from '../models';
 import { ParserRegex } from './parserRegex';
+import * as utils from '../utils';
+import { log, userInteractionProvider } from '../io';
 
-
-export async function parseVariable(getLineReader: getHttpLineGenerator, { httpRegion }: ParserContext): Promise<HttpRegionParserResult> {
+export async function parseVariable(getLineReader: models.getHttpLineGenerator, { httpRegion }: models.ParserContext): Promise<models.HttpRegionParserResult> {
   const lineReader = getLineReader();
 
   const next = lineReader.next();
@@ -21,7 +21,7 @@ export async function parseVariable(getLineReader: getHttpLineGenerator, { httpR
         symbols: [{
           name: match.groups.key,
           description: match.groups.value,
-          kind: HttpSymbolKind.variable,
+          kind: models.HttpSymbolKind.variable,
           startLine: next.value.line,
           startOffset: 0,
           endLine: next.value.line,
@@ -29,7 +29,7 @@ export async function parseVariable(getLineReader: getHttpLineGenerator, { httpR
           children: [{
             name: match.groups.key,
             description: 'key',
-            kind: HttpSymbolKind.key,
+            kind: models.HttpSymbolKind.key,
             startLine: next.value.line,
             startOffset: next.value.textLine.indexOf(match.groups.key),
             endLine: next.value.line,
@@ -37,7 +37,7 @@ export async function parseVariable(getLineReader: getHttpLineGenerator, { httpR
           }, {
             name: match.groups.value,
             description: 'value',
-            kind: HttpSymbolKind.value,
+            kind: models.HttpSymbolKind.value,
             startLine: next.value.line,
             startOffset: next.value.textLine.indexOf(match.groups.value),
             endLine: next.value.line,
@@ -48,4 +48,30 @@ export async function parseVariable(getLineReader: getHttpLineGenerator, { httpR
     }
   }
   return false;
+}
+
+
+class VariableAction {
+  id = models.ActionType.variable;
+
+  constructor(private readonly data: Record<string, string>) { }
+
+  async process(context: models.ProcessorContext): Promise<boolean> {
+    if (this.data) {
+      for (const [key, value] of Object.entries(this.data)) {
+        if (utils.isValidVariableName(key)) {
+          const result = await utils.replaceVariables(value, models.VariableType.variable, context);
+          if (result === models.HookCancel) {
+            return false;
+          }
+          context.variables[key] = result;
+        } else {
+          const message = `Javascript Keyword ${key} not allowed as variable`;
+          userInteractionProvider.showWarnMessage?.(message);
+          log.warn(message);
+        }
+      }
+    }
+    return true;
+  }
 }

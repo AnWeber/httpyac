@@ -1,3 +1,8 @@
+## 4.x.x (2021-10-xx)
+
+#### Fix
+* js keyword as variable name not allowed (#76)
+
 ## 4.1.0 (2021-10-02)
 
 #### Features

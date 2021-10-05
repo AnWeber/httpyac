@@ -3,7 +3,7 @@ import { ParserRegex } from './parserRegex';
 import * as parserUtils from './parserUtils';
 import { load } from '@grpc/proto-loader';
 import * as utils from '../utils';
-import { fileProvider, log } from '../io';
+import { fileProvider, log, userInteractionProvider } from '../io';
 import { loadPackageDefinition } from '@grpc/grpc-js';
 
 
@@ -103,7 +103,9 @@ export class ProtoImportAction implements models.HttpRegionAction {
     try {
       Object.assign(options, await utils.evalExpression(`{${optionsScript}}`, context));
     } catch (err) {
-      log.warn(`proto-loader options convert failed: ${optionsScript}`, err);
+      const message = `proto-loader options convert failed: ${optionsScript}`;
+      userInteractionProvider.showWarnMessage?.(message);
+      log.warn(message, err);
     }
     return options;
   }

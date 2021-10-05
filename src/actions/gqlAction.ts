@@ -1,4 +1,4 @@
-import { log } from '../io';
+import { log, userInteractionProvider } from '../io';
 import { ActionType, HttpRegionAction, ProcessorContext } from '../models';
 import { isString, toMultiLineString } from '../utils';
 
@@ -33,7 +33,9 @@ export class GqlAction implements HttpRegionAction {
         if (result) {
           query = result;
         } else {
-          log.warn('query import not found');
+          const message = 'query import not found';
+          userInteractionProvider.showWarnMessage?.(message);
+          log.warn(message);
         }
       }
 
@@ -48,7 +50,9 @@ export class GqlAction implements HttpRegionAction {
               if (result) {
                 fragment = result;
               } else {
-                log.warn(`query fragment ${key} not found`);
+                const message = `query fragment ${key} not found`;
+                userInteractionProvider.showWarnMessage?.(message);
+                log.warn(message);
               }
             }
             if (fragment) {

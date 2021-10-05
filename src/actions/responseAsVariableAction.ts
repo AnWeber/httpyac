@@ -1,4 +1,4 @@
-import { log } from '../io';
+import { log, userInteractionProvider } from '../io';
 import { ActionType, HttpRegionAction, ProcessorContext } from '../models';
 import * as utils from '../utils';
 
@@ -39,7 +39,9 @@ export class ResponseAsVariableAction implements HttpRegionAction {
           };
         }
       } else {
-        log.warn(`Javascript Keyword ${name} not allowed as name`);
+        const message = `Javascript Keyword ${name} not allowed as name`;
+        userInteractionProvider.showWarnMessage?.(message);
+        log.warn(message);
       }
     }
 

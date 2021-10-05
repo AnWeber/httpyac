@@ -15,5 +15,4 @@ export * from './createReqeustBodyInterceptor';
 export * from './responseAsVariableAction';
 export * from './refMetaAction';
 export * from './testMethod';
-export * from './variableAction';
 export * from './variableReplacerAction';
