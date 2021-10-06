@@ -1,6 +1,7 @@
-## 4.x.x (2021-10-xx)
+## 4.1.1 (2021-10-06)
 
 #### Fix
+* environments in .httpyac.js are not recognized (AnWeber/vscode-httpyac#71)
 * js keyword as variable name not allowed (#76)
 
 ## 4.1.0 (2021-10-02)
