@@ -55,13 +55,6 @@ export async function findRootDirOfFile(filename: PathLike, workingDir?: PathLik
   return await findRootDir(fileProvider.dirname(file), ...files);
 }
 
-export const DefaultRootFiles = [
-  'package.json',
-  '.httpyac.json',
-  '.httpyac.js',
-  '.httpyac.config.js',
-];
-
 export async function findRootDir(currentDir: PathLike | undefined, ...files: Array<string>): Promise<PathLike | undefined> {
   if (currentDir) {
     const dirFiles = await fileProvider.readdir(currentDir);

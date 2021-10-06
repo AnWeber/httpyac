@@ -14,16 +14,16 @@ export async function getHttpacConfig(rootDir: PathLike) : Promise<EnvironmentCo
   return result;
 }
 
+export const defaultConfigFiles = [
+  '.httpyac.js',
+  '.httpyac.config.js',
+  '.httpyac.json',
+  'httpyac.config.json'
+];
+
 async function loadFileConfig(rootDir: PathLike): Promise<EnvironmentConfig | undefined> {
-  const possibleConfigPaths: Array<string | undefined> = [
-    process.env.HTTPYAC_SERVICE_CONFIG_PATH,
-    './.httpyac.js',
-    './httpyac.config.js',
-    './.httpyac.json',
-    './httpyac.config.json',
-  ];
   let fileConfigPath: PathLike | undefined;
-  for (const fileName of possibleConfigPaths) {
+  for (const fileName of defaultConfigFiles) {
     const resolvedPath = fileName && fileProvider.joinPath(rootDir, fileName);
     if (resolvedPath && await fileProvider.exists(resolvedPath)) {
       fileConfigPath = resolvedPath;

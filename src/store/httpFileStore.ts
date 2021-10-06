@@ -3,7 +3,6 @@ import { initParseEndHook, initParseHook, parseHttpFile } from '../parser';
 import { fileProvider, log, userInteractionProvider } from '../io';
 import { initOnRequestHook, initOnResponseHook } from '../actions';
 import { userSessionStore as sessionStore } from '../store';
-import { getEnvironments } from '../httpYacApi';
 import { replacer, provider } from '../variables';
 import * as utils from '../utils';
 import merge from 'lodash/merge';
@@ -60,7 +59,6 @@ export class HttpFileStore {
 
       httpFileStoreEntry.promise = getText()
         .then(text => this.parse(fileName, text, options))
-        .then(httpFile => this.validateActiveEnvironemnt(httpFile, options))
         .then(httpFile => {
           delete httpFileStoreEntry.promise;
           if (httpFileStoreEntry.httpFile) {
@@ -88,21 +86,6 @@ export class HttpFileStore {
     }
     return httpFileStoreEntry.promise || Promise.resolve(httpFileStoreEntry.httpFile);
   }
-
-  private async validateActiveEnvironemnt(httpFile: models.HttpFile, options: HttpFileStoreOptions) {
-    if (httpFile.activeEnvironment) {
-      const environments = await getEnvironments({
-        httpFile,
-        config: options.config,
-      });
-      httpFile.activeEnvironment = httpFile.activeEnvironment.filter(env => environments.indexOf(env) >= 0);
-      if (httpFile.activeEnvironment.length === 0) {
-        httpFile.activeEnvironment = undefined;
-      }
-    }
-    return httpFile;
-  }
-
 
   async parse(fileName: models.PathLike, text: string, options: HttpFileStoreOptions): Promise<models.HttpFile> {
     const httpFile = await this.initHttpFile(fileName, options);
@@ -134,7 +117,7 @@ export class HttpFileStore {
 
   private async initHttpFile(fileName: models.PathLike, options: HttpFileStoreOptions) {
     const rootDir = await utils.findRootDirOfFile(fileName, options.workingDir,
-      ...utils.DefaultRootFiles, options.config?.envDirName || 'env');
+      'package.json', ...utils.defaultConfigFiles, options.config?.envDirName || 'env');
 
     const httpFile: models.HttpFile = {
       fileName,
@@ -154,16 +137,13 @@ export class HttpFileStore {
       activeEnvironment: options.activeEnvironment
     };
 
-    httpFile.config = await getEnviromentConfig({
-      httpFile,
-      config: options.config,
-    });
+    options.config = await getEnviromentConfig(options.config, httpFile.rootDir);
 
     const hooks: Record<string, models.ConfigureHooks> = {};
     if (rootDir) {
       Object.assign(hooks, await utils.getPlugins(rootDir));
-      if (httpFile.config?.configureHooks) {
-        hooks['.httpyac.js'] = httpFile.config.configureHooks;
+      if (options.config?.configureHooks) {
+        hooks['.httpyac.js'] = options.config.configureHooks;
       }
     }
     const envPluginLocation = process.env.HTTPYAC_PLUGIN;
@@ -178,16 +158,16 @@ export class HttpFileStore {
         log.warn('Global Hook Plugin not loaded', err);
       }
     }
-    await this.configureHooks(httpFile, hooks);
+    await this.configureHooks(httpFile, options, hooks);
     return httpFile;
   }
 
-  private async configureHooks(httpFile: models.HttpFile, hooks: Record<string, models.ConfigureHooks>) {
-    if (httpFile.config) {
+  private async configureHooks(httpFile: models.HttpFile, options: HttpFileStoreOptions, hooks: Record<string, models.ConfigureHooks>) {
+    if (options.config) {
       const api: models.HttpyacHooksApi = {
         version: '1.0.0',
         rootDir: httpFile.rootDir,
-        config: httpFile.config,
+        config: options.config,
         httpFile,
         hooks: httpFile.hooks,
         log,
@@ -212,19 +192,19 @@ export class HttpFileStore {
 }
 
 
-export async function getEnviromentConfig(context: models.VariableProviderContext) : Promise<models.EnvironmentConfig> {
+export async function getEnviromentConfig(config?: models.EnvironmentConfig, rootDir?: models.PathLike) : Promise<models.EnvironmentConfig> {
   const environmentConfigs : Array<models.EnvironmentConfig> = [];
-  if (context.httpFile.rootDir) {
-    const fileConfig = await utils.getHttpacConfig(context.httpFile.rootDir);
+  if (rootDir) {
+    const fileConfig = await utils.getHttpacConfig(rootDir);
     if (fileConfig) {
       environmentConfigs.push(fileConfig);
     }
   }
-  if (context.config) {
-    environmentConfigs.push(context.config);
+  if (config) {
+    environmentConfigs.push(config);
   }
 
-  const config = merge({
+  const result = merge({
     log: {
       level: models.LogLevel.warn,
       supportAnsiColors: true,
@@ -233,8 +213,8 @@ export async function getEnviromentConfig(context: models.VariableProviderContex
     envDirName: 'env',
   }, ...environmentConfigs);
 
-  refreshStaticConfig(config);
-  return config;
+  refreshStaticConfig(result);
+  return result;
 }
 
 function refreshStaticConfig(config: models.EnvironmentConfig) {

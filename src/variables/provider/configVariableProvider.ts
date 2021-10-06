@@ -16,11 +16,13 @@ export async function provideConfigVariables(envs: string[] | undefined, context
 
   const variables: Variables[] = [];
 
-  if (envs && context.config?.environments) {
+  if (context.config?.environments) {
     const environments = context.config.environments;
 
     variables.push(environments[DEFAULT_ENV]);
-    variables.push(...envs.map(env => environments[env]));
+    if (envs) {
+      variables.push(...envs.map(env => environments[env]));
+    }
   }
   return expandVariables(Object.assign({}, ...variables));
 }

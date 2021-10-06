@@ -1,6 +1,7 @@
 import { initHttpClient, log } from './io';
 import * as models from './models';
 import * as utils from './utils';
+import { getEnviromentConfig } from './store';
 
 
 /**
@@ -74,7 +75,7 @@ async function createEmptyProcessorContext<T extends models.VariableProviderCont
   httpClient: models.HttpClient,
   options: Record<string, unknown>
 }> {
-  context.config = context.httpFile.config;
+  context.config = await getEnviromentConfig(context.config, context.httpFile?.rootDir);
   return Object.assign(context, {
     variables: await getVariables(context),
     httpClient: initHttpClient(context),
@@ -98,7 +99,9 @@ export async function getVariables(context: models.VariableProviderContext): Pro
 }
 
 
-export async function getEnvironments(context: models.VariableProviderContext) : Promise<Array<string>> {
+export async function getEnvironments(context: models.VariableProviderContext): Promise<Array<string>> {
+  context.config = await getEnviromentConfig(context.config, context.httpFile?.rootDir);
+
   const result = (await context.httpFile.hooks.provideEnvironments.trigger(context));
   if (result !== models.HookCancel && result.length > 0) {
     return result.reduce((prev, current) => {
