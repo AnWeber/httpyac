@@ -75,7 +75,6 @@ async function createEmptyProcessorContext<T extends models.VariableProviderCont
   httpClient: models.HttpClient,
   options: Record<string, unknown>
 }> {
-  context.config = await getEnviromentConfig(context.config, context.httpFile?.rootDir);
   return Object.assign(context, {
     variables: await getVariables(context),
     httpClient: initHttpClient(context),
@@ -85,6 +84,7 @@ async function createEmptyProcessorContext<T extends models.VariableProviderCont
 
 
 export async function getVariables(context: models.VariableProviderContext): Promise<Record<string, unknown>> {
+  context.config = await getEnviromentConfig(context.config, context.httpFile?.rootDir);
 
   const vars = (await context.httpFile.hooks.provideVariables.trigger(context.httpFile.activeEnvironment, context));
   if (vars === models.HookCancel) {
