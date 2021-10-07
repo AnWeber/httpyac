@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import { ParserRegex } from '../../parser';
 import { isString } from '../../utils';
 
 
@@ -6,10 +7,9 @@ export async function intellijVariableReplacer(text: unknown): Promise<unknown> 
   if (!isString(text)) {
     return text;
   }
-  const variableRegex = /\{{2}(.+?)\}{2}/gu;
   let match: RegExpExecArray | null;
   let result = text;
-  while ((match = variableRegex.exec(text)) !== null) {
+  while ((match = ParserRegex.javascript.scriptSingleLine.exec(text)) !== null) {
     const [searchValue, variable] = match;
 
     let replacement: unknown = null;

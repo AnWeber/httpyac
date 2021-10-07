@@ -1,6 +1,7 @@
 import { HookCancel } from '../../models';
 import { userInteractionProvider } from '../../io';
 import { isString } from '../../utils';
+import { ParserRegex } from '../../parser';
 
 const lastValue: Record<string, string> = {};
 
@@ -9,10 +10,9 @@ export async function showInputBoxVariableReplacer(text: unknown): Promise<unkno
   if (!isString(text)) {
     return text;
   }
-  const variableRegex = /\{{2}(.+?)\}{2}/gu;
   let match: RegExpExecArray | null;
   let result = text;
-  while ((match = variableRegex.exec(text)) !== null) {
+  while ((match = ParserRegex.javascript.scriptSingleLine.exec(text)) !== null) {
     const [searchValue, variable] = match;
 
     const matchInput = /^\$input\s*(?<placeholder>[^$]*)(\$value:\s*(?<value>.*))?\s*$/u.exec(variable);

@@ -1,4 +1,5 @@
 import { ProcessorContext } from '../../models';
+import { ParserRegex } from '../../parser';
 import { isString, toMultiLineArray, runScript } from '../../utils';
 
 
@@ -7,10 +8,9 @@ export async function javascriptVariableReplacer(text: unknown, _type: string, c
     return text;
   }
   const { httpRegion } = context;
-  const variableRegex = /\{{2}([^}{2}]+)\}{2}/gu;
   let match: RegExpExecArray | null;
   let result = text;
-  while ((match = variableRegex.exec(text)) !== null) {
+  while ((match = ParserRegex.javascript.scriptSingleLine.exec(text)) !== null) {
     const [searchValue, jsVariable] = match;
     const script = `exports.$result = (${jsVariable});`;
 

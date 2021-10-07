@@ -1,16 +1,16 @@
 import { HookCancel } from '../../models';
 import { userInteractionProvider } from '../../io';
 import { isString } from '../../utils';
+import { ParserRegex } from '../../parser';
 
 
 export async function showQuickpickVariableReplacer(text: unknown): Promise<unknown> {
   if (!isString(text)) {
     return text;
   }
-  const variableRegex = /\{{2}(.+?)\}{2}/gu;
   let match: RegExpExecArray | null;
   let result = text;
-  while ((match = variableRegex.exec(result)) !== null) {
+  while ((match = ParserRegex.javascript.scriptSingleLine.exec(result)) !== null) {
     const [searchValue, variable] = match;
 
     const matchInput = /^\$pick\s*(?<placeholder>[^$]*)(\$value:\s*(?<value>.*))\s*$/u.exec(variable);

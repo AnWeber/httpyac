@@ -3,6 +3,7 @@ import dayjs, { OpUnitType } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { ProcessorContext, VariableType } from '../../models';
 import { isString } from '../../utils';
+import { ParserRegex } from '../../parser';
 
 
 dayjs.extend(utc);
@@ -11,10 +12,9 @@ export async function restClientVariableReplacer(text: unknown, _type: VariableT
   if (!isString(text)) {
     return text;
   }
-  const variableRegex = /\{{2}(.+?)\}{2}/gu;
   let match: RegExpExecArray | null;
   let result = text;
-  while ((match = variableRegex.exec(text)) !== null) {
+  while ((match = ParserRegex.javascript.scriptSingleLine.exec(text)) !== null) {
     const [searchValue, variable] = match;
 
     const trimmedVariable = variable.trim();
