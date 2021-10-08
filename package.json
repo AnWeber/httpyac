@@ -86,7 +86,7 @@
 		"https-proxy-agent": "^5.0.0",
 		"inquirer": "^8.2.0",
 		"lodash": "^4.17.21",
-		"open": "8.2.1",
+		"open": "8.3.0",
 		"tough-cookie": "^4.0.0",
 		"uuid": "^8.3.2",
 		"xml-formatter": "^2.4.1"
