@@ -98,7 +98,7 @@ export abstract class Hook<T, TReturn, TTriggerResult, TArg = undefined, TArg2 =
   removeInterceptor(interceptor: HookInterceptor<T, TReturn>): boolean {
     const index = this.interceptors.indexOf(interceptor);
     if (index >= 0) {
-      this.interceptors.slice(index, 1);
+      this.interceptors.splice(index, 1);
       return true;
     }
     return false;
