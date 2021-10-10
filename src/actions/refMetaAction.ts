@@ -16,7 +16,7 @@ export class RefMetaAction implements HttpRegionAction {
       if (refHttpRegion.metaData.name === this.data.name
         && !refHttpRegion.metaData.disabled
         && refHttpRegion !== context.httpRegion) {
-        if (this.data.force || !refHttpRegion.response || !context.variables[this.data.name]) {
+        if (this.data.force || !context.variables[this.data.name]) {
           const refContext = { ...context, httpRegion: refHttpRegion };
           await processHttpRegionActions(refContext);
         }
@@ -27,8 +27,12 @@ export class RefMetaAction implements HttpRegionAction {
       for (const refHttpFile of context.options.httpFiles) {
         const cloneContext = {
           ...context,
+          options: {
+            ...context.options,
+          },
           httpFile: refHttpFile
         };
+        delete context.options.httpFiles;
         await this.process(cloneContext);
       }
     }
