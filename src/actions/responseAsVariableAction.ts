@@ -63,8 +63,6 @@ export class ResponseAsVariableAction implements HttpRegionAction {
             entries.push([`${key}_parsed`, val]);
           }
         }
-        httpRegion.response.parsedBody = Object.fromEntries(entries);
-        httpRegion.response.prettyPrintBody = httpRegion.response.body = JSON.stringify(httpRegion.response.parsedBody, null, 2);
       }
     }
   }
