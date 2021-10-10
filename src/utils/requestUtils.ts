@@ -246,11 +246,13 @@ export function setAdditionalResponseBody(httpResponse: models.HttpResponse): vo
     if (isMimeTypeJSON(httpResponse.contentType)) {
       try {
         httpResponse.parsedBody = JSON.parse(httpResponse.body);
-        httpResponse.prettyPrintBody = JSON.stringify(httpResponse.parsedBody, null, 2);
+        if (httpResponse.body.length < 1024) {
+          httpResponse.prettyPrintBody = JSON.stringify(httpResponse.parsedBody, null, 2);
+        }
       } catch (err) {
         log.warn('json parse error', httpResponse.body, err);
       }
-    } else if (isMimeTypeXml(httpResponse.contentType)) {
+    } else if (isMimeTypeXml(httpResponse.contentType) && httpResponse.body.length < 1024) {
       try {
         httpResponse.prettyPrintBody = xmlFormat(httpResponse.body, {
           collapseContent: true,

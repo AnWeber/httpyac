@@ -64,12 +64,6 @@ export class HttpFileStore {
           if (httpFileStoreEntry.httpFile) {
             httpFile.variablesPerEnv = httpFileStoreEntry.httpFile.variablesPerEnv;
             httpFile.activeEnvironment = httpFileStoreEntry.httpFile.activeEnvironment;
-            for (const httpRegion of httpFile.httpRegions) {
-              const cachedHttpRegion = httpFileStoreEntry.httpFile.httpRegions.find(obj => obj.symbol.source === httpRegion.symbol.source);
-              if (cachedHttpRegion) {
-                httpRegion.response = cachedHttpRegion.response;
-              }
-            }
           }
           httpFileStoreEntry.version = version;
           httpFileStoreEntry.httpFile = httpFile;

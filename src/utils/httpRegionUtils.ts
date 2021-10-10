@@ -45,7 +45,7 @@ export async function processHttpRegionActions(context: models.ProcessorContext,
       context.showProgressBar = showProgressBar;
     }
     if (context.progress?.report) {
-      context.progress.report({ message: `${getDisplayName(context.httpRegion)}` });
+      context.progress.report({ message: `${context.httpRegion.symbol.name}` });
     }
 
     const result = await context.httpRegion.hooks.execute.trigger(context);
@@ -54,6 +54,7 @@ export async function processHttpRegionActions(context: models.ProcessorContext,
     if (context.processedHttpRegions && !isGlobalHttpRegion(context.httpRegion)) {
       context.processedHttpRegions.push(processedHttpRegion);
     }
+    delete context.httpRegion.response;
     return result !== models.HookCancel && result.every(obj => !!obj);
   } finally {
     if (!context.httpRegion.metaData.noLog) {

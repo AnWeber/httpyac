@@ -53,11 +53,11 @@ async function sendHttpFile(context: models.HttpFileSendContext): Promise<boolea
   const processorContext = await createEmptyProcessorContext(context);
   for (const httpRegion of context.httpFile.httpRegions) {
     if (httpRegion.metaData.disabled) {
-      log.debug(`${utils.getDisplayName(httpRegion)} is disabled`);
+      log.debug(`${httpRegion.symbol.name} is disabled`);
       continue;
     }
     if (httpRegion.request && context.httpRegionPredicate && !context.httpRegionPredicate(httpRegion)) {
-      log.debug(`${utils.getDisplayName(httpRegion)} disabled by predicate`);
+      log.debug(`${httpRegion.symbol.name} disabled by predicate`);
       continue;
     }
     const regionProcessorContext = {
