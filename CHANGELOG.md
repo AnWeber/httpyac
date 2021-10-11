@@ -1,3 +1,9 @@
+
+## 4.2.1 (2021-10-11)
+
+#### Fix
+* infinte loop if `@ref` in `@import` disabled or not found
+
 ## 4.2.0 (2021-10-10)
 
 #### Features

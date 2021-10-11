@@ -32,7 +32,7 @@ export class RefMetaAction implements HttpRegionAction {
           },
           httpFile: refHttpFile
         };
-        delete context.options.httpFiles;
+        delete cloneContext.options.httpFiles;
         await this.process(cloneContext);
       }
     }
