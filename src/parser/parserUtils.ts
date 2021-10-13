@@ -1,19 +1,20 @@
-import { DefaultHeadersAction } from '../actions';
+import * as actions from '../actions';
 import * as models from '../models';
 import { ParserRegex } from './parserRegex';
+import { parseComments as parseMetaComments } from './metaHttpRegionParser';
 
-export interface ParseLineResult {
-  symbols: Array<models.HttpSymbol>,
-  actions?: Array<models.HttpRegionAction>
-}
-export type ParseLineMethod = (textLine: string, line: number) => (ParseLineResult | false);
+export type ParseLineMethod = (httpLine: models.HttpLine, context: models.ParserContext) => (models.SymbolParserResult | false);
 
 export interface ParseSubsequentLinesResult{
   nextLine?: number;
-  parseResults: Array<ParseLineResult>
+  parseResults: Array<models.SymbolParserResult>
 }
 
-export function parseSubsequentLines(lineReader: models.HttpLineGenerator, requestLineParser: Array<ParseLineMethod>) : ParseSubsequentLinesResult {
+export function parseSubsequentLines(
+  lineReader: models.HttpLineGenerator,
+  requestLineParser: Array<ParseLineMethod>,
+  context: models.ParserContext
+): ParseSubsequentLinesResult {
   const result: ParseSubsequentLinesResult = {
     parseResults: [],
   };
@@ -21,7 +22,7 @@ export function parseSubsequentLines(lineReader: models.HttpLineGenerator, reque
   while (!next.done) {
     let hasResult = false;
     for (const lineParser of requestLineParser) {
-      const parseResult = lineParser(next.value.textLine, next.value.line);
+      const parseResult = lineParser(next.value, context);
       if (parseResult) {
         result.parseResults.push(parseResult);
         hasResult = true;
@@ -41,8 +42,8 @@ export function parseSubsequentLines(lineReader: models.HttpLineGenerator, reque
 
 
 export function parseRequestHeaderFactory(headers: Record<string, unknown>): ParseLineMethod {
-  return function parseRequestHeader(textLine: string, line: number) {
-    const headerMatch = ParserRegex.request.header.exec(textLine);
+  return function parseRequestHeader(httpLine: models.HttpLine) {
+    const headerMatch = ParserRegex.request.header.exec(httpLine.textLine);
     if (headerMatch?.groups?.key && headerMatch?.groups?.value) {
       headers[headerMatch.groups.key] = headerMatch.groups.value;
 
@@ -51,26 +52,26 @@ export function parseRequestHeaderFactory(headers: Record<string, unknown>): Par
           name: headerMatch.groups.key,
           description: headerMatch.groups.value,
           kind: models.HttpSymbolKind.requestHeader,
-          startLine: line,
-          startOffset: textLine.indexOf(headerMatch.groups.key),
-          endLine: line,
-          endOffset: textLine.length,
+          startLine: httpLine.line,
+          startOffset: httpLine.textLine.indexOf(headerMatch.groups.key),
+          endLine: httpLine.line,
+          endOffset: httpLine.textLine.length,
           children: [{
             name: headerMatch.groups.key,
             description: 'request header key',
             kind: models.HttpSymbolKind.key,
-            startLine: line,
-            startOffset: textLine.indexOf(headerMatch.groups.key),
-            endLine: line,
-            endOffset: textLine.indexOf(headerMatch.groups.key) + headerMatch.groups.key.length,
+            startLine: httpLine.line,
+            startOffset: httpLine.textLine.indexOf(headerMatch.groups.key),
+            endLine: httpLine.line,
+            endOffset: httpLine.textLine.indexOf(headerMatch.groups.key) + headerMatch.groups.key.length,
           }, {
             name: headerMatch.groups.value,
             description: 'request header value',
             kind: models.HttpSymbolKind.value,
-            startLine: line,
-            startOffset: textLine.indexOf(headerMatch.groups.value),
-            endLine: line,
-            endOffset: textLine.indexOf(headerMatch.groups.value) + headerMatch.groups.value.length,
+            startLine: httpLine.line,
+            startOffset: httpLine.textLine.indexOf(headerMatch.groups.value),
+            endLine: httpLine.line,
+            endOffset: httpLine.textLine.indexOf(headerMatch.groups.value) + headerMatch.groups.value.length,
           }
           ]
         }]
@@ -84,21 +85,21 @@ export function parseRequestHeaderFactory(headers: Record<string, unknown>): Par
 export function parseDefaultHeadersFactory(
   setHeaders: (headers: Record<string, unknown>, context: models.ProcessorContext) => void
 ): ParseLineMethod {
-  return function parseDefaultHeaders(textLine: string, line: number): ParseLineResult | false {
-    const fileHeaders = ParserRegex.request.headersSpread.exec(textLine);
+  return function parseDefaultHeaders(httpLine: models.HttpLine, parserContext: models.ParserContext): models.SymbolParserResult | false {
+    const fileHeaders = ParserRegex.request.headersSpread.exec(httpLine.textLine);
     if (fileHeaders?.groups?.variableName) {
-      const val = textLine.trim();
+      parserContext.httpRegion.hooks.execute.addObjHook(obj => obj.process, new actions.DefaultHeadersAction(fileHeaders.groups.variableName, setHeaders));
+      const val = httpLine.textLine.trim();
       return {
         symbols: [{
           name: val,
           description: 'header variable',
           kind: models.HttpSymbolKind.requestHeader,
-          startLine: line,
-          startOffset: textLine.indexOf(val),
-          endOffset: textLine.length,
-          endLine: line,
+          startLine: httpLine.line,
+          startOffset: httpLine.textLine.indexOf(val),
+          endOffset: httpLine.textLine.length,
+          endLine: httpLine.line,
         }],
-        actions: [new DefaultHeadersAction(fileHeaders.groups.variableName, setHeaders)]
       };
     }
     return false;
@@ -107,19 +108,19 @@ export function parseDefaultHeadersFactory(
 
 
 export function parseUrlLineFactory(attachUrl: ((url: string) => void)) : ParseLineMethod {
-  return function parseUrlLine(textLine: string, line: number) {
-    if (ParserRegex.request.urlLine.test(textLine)) {
-      const val = textLine.trim();
+  return function parseUrlLine(httpLine: models.HttpLine) {
+    if (ParserRegex.request.urlLine.test(httpLine.textLine)) {
+      const val = httpLine.textLine.trim();
       attachUrl(val);
       return {
         symbols: [{
           name: val,
           description: 'urlpart',
           kind: models.HttpSymbolKind.url,
-          startLine: line,
-          startOffset: textLine.indexOf(val),
-          endOffset: textLine.length,
-          endLine: line,
+          startLine: httpLine.line,
+          startOffset: httpLine.textLine.indexOf(val),
+          endOffset: httpLine.textLine.length,
+          endLine: httpLine.line,
         }]
       };
     }
@@ -128,22 +129,27 @@ export function parseUrlLineFactory(attachUrl: ((url: string) => void)) : ParseL
 }
 
 export function parseQueryLineFactory(attachUrl: ((url: string) => void)): ParseLineMethod {
-  return function parseQueryLine(textLine: string, line: number): ParseLineResult | false {
-    if (ParserRegex.request.queryLine.test(textLine)) {
-      const val = textLine.trim();
+  return function parseQueryLine(httpLine: models.HttpLine): models.SymbolParserResult | false {
+    if (ParserRegex.request.queryLine.test(httpLine.textLine)) {
+      const val = httpLine.textLine.trim();
       attachUrl(val);
       return {
         symbols: [{
           name: val,
           description: 'query',
           kind: models.HttpSymbolKind.url,
-          startLine: line,
-          startOffset: textLine.indexOf(val),
-          endOffset: textLine.length,
-          endLine: line,
+          startLine: httpLine.line,
+          startOffset: httpLine.textLine.indexOf(val),
+          endOffset: httpLine.textLine.length,
+          endLine: httpLine.line,
         }]
       };
     }
     return false;
   };
+}
+
+
+export function parseComments(httpLine: models.HttpLine, context: models.ParserContext): models.SymbolParserResult | false {
+  return parseMetaComments(httpLine, context, ParserRegex.meta.comment);
 }

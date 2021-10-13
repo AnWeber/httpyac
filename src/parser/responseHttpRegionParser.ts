@@ -16,6 +16,7 @@ export async function parseResponse(getLineReader: getHttpLineGenerator, context
       responseSymbol.symbol.endOffset = next.value.textLine.length;
       return {
         nextParserLine: next.value.line,
+        symbols: [],
       };
     }
     const match = ParserRegex.responseLine.exec(next.value.textLine);

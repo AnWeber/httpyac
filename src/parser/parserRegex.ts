@@ -38,6 +38,7 @@ export const ParserRegex = {
   },
   meta: {
     all: /^\s*(#+|\/{2})/u,
+    comment: /^\s*((#\s+)|(\/{2}))/u,
     delimiter: /^\s*#{3,}(?<title>.*)$/u,
     data: /^\s*(#+|\/{2,})\s+@(?<key>[^\s]*)(\s+)?"?(?<value>.*)?"?$/u,
     forOf: /^\s*for\s+(?<variable>.*)\s+of\s+(?<iterable>.*)\s*/u,

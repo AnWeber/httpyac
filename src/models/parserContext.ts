@@ -4,7 +4,9 @@ import { HttpRegion } from './httpRegion';
 import { ParserContextData } from './parserContextData';
 
 
-export type HttpLineGenerator = Generator<{ textLine: string; line: number; }, void, unknown>;
+export type HttpLine = { textLine: string; line: number; };
+
+export type HttpLineGenerator = Generator<HttpLine, void, unknown>;
 
 export type getHttpLineGenerator = (noStopOnMetaTag?: boolean) => HttpLineGenerator;
 

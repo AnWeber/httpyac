@@ -1,8 +1,11 @@
 import { HttpSymbol } from './httpSymbol';
 
-export interface HttpRegionParserResultValid {
+export interface SymbolParserResult {
+  symbols: Array<HttpSymbol>
+}
+
+export interface HttpRegionParserResultValid extends SymbolParserResult {
   endRegionLine?: number;
   nextParserLine: number,
-  symbols?: Array<HttpSymbol>
 }
 export type HttpRegionParserResult = HttpRegionParserResultValid | false;

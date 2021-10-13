@@ -6,12 +6,12 @@ import * as parserUtils from './parserUtils';
 
 export async function parseGrpcLine(
   getLineReader: models.getHttpLineGenerator,
-  { httpRegion }: models.ParserContext
+  context: models.ParserContext
 ): Promise<models.HttpRegionParserResult> {
   const lineReader = getLineReader();
   const next = lineReader.next();
-  if (!next.done && isValidGrpc(next.value.textLine, httpRegion)) {
-    if (httpRegion.request) {
+  if (!next.done && isValidGrpc(next.value.textLine, context.httpRegion)) {
+    if (context.httpRegion.request) {
       return {
         endRegionLine: next.value.line - 1,
         nextParserLine: next.value.line - 1,
@@ -24,7 +24,7 @@ export async function parseGrpcLine(
     if (!grpcLine) {
       return false;
     }
-    httpRegion.request = grpcLine.request;
+    context.httpRegion.request = grpcLine.request;
     const requestSymbol: models.HttpSymbol = {
       name: next.value.textLine,
       description: 'grpc request-line',
@@ -46,28 +46,26 @@ export async function parseGrpcLine(
     grpcLine.request.headers = headers;
 
     const headersResult = parserUtils.parseSubsequentLines(lineReader, [
+      parserUtils.parseComments,
       parserUtils.parseRequestHeaderFactory(headers),
       parserUtils.parseDefaultHeadersFactory((headers, context) => Object.assign(context.request?.headers, headers)),
       parserUtils.parseUrlLineFactory(url => (grpcLine.request.url += url)),
-    ]);
+    ], context);
 
     if (headersResult) {
       result.nextParserLine = headersResult.nextLine || result.nextParserLine;
       for (const parseResult of headersResult.parseResults) {
         result.symbols?.push?.(...parseResult.symbols);
-        if (parseResult.actions) {
-          httpRegion.hooks.execute.addObjHook(obj => obj.process, ...parseResult.actions);
-        }
       }
     }
 
-    httpRegion.hooks.execute.addObjHook(obj => obj.process,
+    context.httpRegion.hooks.execute.addObjHook(obj => obj.process,
       new actions.EnvDefaultHeadersAction(),
       new actions.VariableReplacerAction(),
       new actions.GrpcClientAction(),
       new actions.ResponseAsVariableAction());
 
-    httpRegion.hooks.execute.addInterceptor(new actions.CreateRequestInterceptor());
+    context.httpRegion.hooks.execute.addInterceptor(new actions.CreateRequestInterceptor());
 
     return result;
   }

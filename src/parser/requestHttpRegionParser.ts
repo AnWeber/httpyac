@@ -6,12 +6,12 @@ import * as parserUtils from './parserUtils';
 
 export async function parseRequestLine(
   getLineReader: models.getHttpLineGenerator,
-  { httpRegion }: models.ParserContext
+  context: models.ParserContext
 ): Promise<models.HttpRegionParserResult> {
   const lineReader = getLineReader();
   const next = lineReader.next();
-  if (!next.done && isValidRequestLine(next.value.textLine, httpRegion)) {
-    if (httpRegion.request) {
+  if (!next.done && isValidRequestLine(next.value.textLine, context.httpRegion)) {
+    if (context.httpRegion.request) {
       return {
         endRegionLine: next.value.line - 1,
         nextParserLine: next.value.line - 1,
@@ -31,7 +31,7 @@ export async function parseRequestLine(
     const symbols = [requestSymbol];
 
     const { request, requestSymbols } = getRequestLine(next.value.textLine, next.value.line);
-    httpRegion.request = request;
+    context.httpRegion.request = request;
     requestSymbol.children = requestSymbols;
 
     const result: models.HttpRegionParserResult = {
@@ -44,35 +44,33 @@ export async function parseRequestLine(
     request.headers = headers;
 
     const headersResult = parserUtils.parseSubsequentLines(lineReader, [
+      parserUtils.parseComments,
       parserUtils.parseRequestHeaderFactory(headers),
       parserUtils.parseDefaultHeadersFactory((headers, context) => Object.assign(context.request?.headers, headers)),
       parserUtils.parseQueryLineFactory(url => (request.url += url)),
       parserUtils.parseUrlLineFactory(url => (request.url += url)),
-    ]);
+    ], context);
 
     if (headersResult) {
       result.nextParserLine = headersResult.nextLine || result.nextParserLine;
       for (const parseResult of headersResult.parseResults) {
         symbols.push(...parseResult.symbols);
-        if (parseResult.actions) {
-          httpRegion.hooks.execute.addObjHook(obj => obj.process, ...parseResult.actions);
-        }
       }
     }
 
-    httpRegion.hooks.execute.addObjHook(obj => obj.process,
+    context.httpRegion.hooks.execute.addObjHook(obj => obj.process,
       new actions.EnvDefaultHeadersAction(),
       new actions.VariableReplacerAction(),
       new actions.CookieJarAction(),
       new actions.HttpClientAction(),
       new actions.ResponseAsVariableAction());
 
-    httpRegion.hooks.execute.addInterceptor(new actions.CreateRequestInterceptor());
+    context.httpRegion.hooks.execute.addInterceptor(new actions.CreateRequestInterceptor());
 
-    if (httpRegion.request.headers) {
-      const contentType = utils.getHeader(httpRegion.request.headers, 'content-type');
+    if (context.httpRegion.request.headers) {
+      const contentType = utils.getHeader(context.httpRegion.request.headers, 'content-type');
       if (utils.isString(contentType)) {
-        httpRegion.request.contentType = utils.parseMimeType(contentType);
+        context.httpRegion.request.contentType = utils.parseMimeType(contentType);
       }
     }
     return result;

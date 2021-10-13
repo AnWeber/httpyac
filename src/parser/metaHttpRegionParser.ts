@@ -25,120 +25,26 @@ export async function parseMetaData(getLineReader: models.getHttpLineGenerator, 
       }
 
       const result: models.HttpRegionParserResult = {
-        nextParserLine: next.value.line
+        nextParserLine: next.value.line,
+        symbols: [],
       };
       const delimiterMatch = ParserRegex.meta.delimiter.exec(textLine);
       if (delimiterMatch) {
         result.endRegionLine = next.value.line - 1;
+        result.symbols.push({
+          name: 'separator',
+          description: delimiterMatch.groups?.title || '-',
+          kind: models.HttpSymbolKind.metaData,
+          startLine: next.value.line,
+          startOffset: 0,
+          endLine: next.value.line,
+          endOffset: textLine.length
+        });
         data.metaTitle = delimiterMatch.groups?.title;
       } else {
-
-        const match = ParserRegex.meta.data.exec(textLine);
-        if (match && match.groups && match.groups.key) {
-          const symbol: models.HttpSymbol = {
-            name: match.groups.key,
-            description: match.groups.value || '-',
-            kind: models.HttpSymbolKind.metaData,
-            startLine: next.value.line,
-            startOffset: 0,
-            endLine: next.value.line,
-            endOffset: next.value.textLine.length,
-            children: [{
-              name: match.groups.key,
-              description: 'key of meta data',
-              kind: models.HttpSymbolKind.key,
-              startLine: next.value.line,
-              startOffset: next.value.textLine.indexOf(match.groups.key),
-              endLine: next.value.line,
-              endOffset: next.value.textLine.indexOf(match.groups.key) + match.groups.key.length,
-            }]
-          };
-          if (match.groups.value && symbol.children) {
-            symbol.children.push({
-              name: match.groups.value,
-              description: 'value of meta data',
-              kind: models.HttpSymbolKind.value,
-              startLine: next.value.line,
-              startOffset: next.value.textLine.indexOf(match.groups.value),
-              endLine: next.value.line,
-              endOffset: next.value.textLine.indexOf(match.groups.value) + match.groups.value.length,
-            });
-          }
-          result.symbols = [symbol];
-
-          const key = match.groups.key.replace(/-./gu, value => value[1].toUpperCase());
-
-          switch (key) {
-            case 'import':
-              if (match.groups.value) {
-                httpRegion.hooks.execute.addObjHook(obj => obj.process, new actions.ImportMetaAction(
-                  match.groups.value, context.httpFileStore
-                ));
-
-              }
-              break;
-            case 'responseRef':
-              if (match.groups.value) {
-                if (!httpRegion.responseRefs) {
-                  httpRegion.responseRefs = [];
-                }
-                httpRegion.responseRefs.push(match.groups.value);
-              }
-              break;
-            case 'loop':
-              if (match.groups.value) {
-                const forOfMatch = ParserRegex.meta.forOf.exec(match.groups.value);
-                if (forOfMatch?.groups?.iterable && forOfMatch?.groups?.variable) {
-                  httpRegion.hooks.execute.addInterceptor(new actions.LoopMetaAction({
-                    type: actions.LoopMetaType.forOf,
-                    variable: forOfMatch.groups.variable,
-                    iterable: forOfMatch.groups.iterable,
-                  }));
-                } else {
-                  const forMatch = ParserRegex.meta.for.exec(match.groups.value);
-                  if (forMatch?.groups?.counter) {
-                    httpRegion.hooks.execute.addInterceptor(new actions.LoopMetaAction({
-                      type: actions.LoopMetaType.for,
-                      counter: Number.parseInt(forMatch.groups.counter, 10),
-                    }));
-                  } else {
-                    const whileMatch = ParserRegex.meta.while.exec(match.groups.value);
-                    if (whileMatch?.groups?.expression) {
-                      httpRegion.hooks.execute.addInterceptor(new actions.LoopMetaAction({
-                        type: actions.LoopMetaType.while,
-                        expression: whileMatch.groups.expression,
-                      }));
-                    }
-                  }
-                }
-              }
-              break;
-            case 'ref':
-              if (match.groups.value) {
-                addRefHttpRegion(httpRegion, match.groups.value, false);
-              }
-              break;
-            case 'sleep':
-              if (match.groups.value) {
-                const timeout = parseInt(match.groups.value, 10);
-                if (Number.isSafeInteger(timeout)) {
-                  httpRegion.hooks.execute.addHook('sleep', async () => await utils.sleep(timeout));
-                } else {
-                  log.debug(`meta sleep ${match.groups.value} is no valid Integer`);
-                }
-              }
-              break;
-            case 'forceRef':
-              if (match.groups.value) {
-                addRefHttpRegion(httpRegion, match.groups.value, true);
-              }
-              break;
-            default:
-              httpRegion.metaData = Object.assign(httpRegion.metaData || {}, {
-                [key]: match.groups.value || true,
-              });
-              break;
-          }
+        const commentResult = parseComments(next.value, context, ParserRegex.meta.all);
+        if (commentResult) {
+          result.symbols = commentResult.symbols;
         }
       }
       return result;
@@ -146,6 +52,133 @@ export async function parseMetaData(getLineReader: models.getHttpLineGenerator, 
   }
   return false;
 }
+
+
+export function parseComments(httpLine: models.HttpLine, context: models.ParserContext, metaRegex: RegExp): models.SymbolParserResult | false {
+  const { httpRegion } = context;
+
+  if (metaRegex.test(httpLine.textLine)) {
+    const result: models.SymbolParserResult = {
+      symbols: [{
+        name: 'comment',
+        description: httpLine.textLine,
+        kind: models.HttpSymbolKind.metaData,
+        startLine: httpLine.line,
+        startOffset: 0,
+        endLine: httpLine.line,
+        endOffset: httpLine.textLine.length
+      }]
+    };
+    const match = ParserRegex.meta.data.exec(httpLine.textLine);
+    if (match && match.groups && match.groups.key) {
+      result.symbols[0].children = [{
+        name: match.groups.key,
+        description: match.groups.value || '-',
+        kind: models.HttpSymbolKind.metaData,
+        startLine: httpLine.line,
+        startOffset: 0,
+        endLine: httpLine.line,
+        endOffset: httpLine.textLine.length,
+        children: [{
+          name: match.groups.key,
+          description: 'key of meta data',
+          kind: models.HttpSymbolKind.key,
+          startLine: httpLine.line,
+          startOffset: httpLine.textLine.indexOf(match.groups.key),
+          endLine: httpLine.line,
+          endOffset: httpLine.textLine.indexOf(match.groups.key) + match.groups.key.length,
+        }]
+      }];
+      if (match.groups.value) {
+        result.symbols[0].children.push({
+          name: match.groups.value,
+          description: 'value of meta data',
+          kind: models.HttpSymbolKind.value,
+          startLine: httpLine.line,
+          startOffset: httpLine.textLine.indexOf(match.groups.value),
+          endLine: httpLine.line,
+          endOffset: httpLine.textLine.indexOf(match.groups.value) + match.groups.value.length,
+        });
+      }
+
+      const key = match.groups.key.replace(/-./gu, value => value[1].toUpperCase());
+
+      switch (key) {
+        case 'import':
+          if (match.groups.value) {
+            httpRegion.hooks.execute.addObjHook(obj => obj.process, new actions.ImportMetaAction(
+              match.groups.value, context.httpFileStore
+            ));
+          }
+          break;
+        case 'responseRef':
+          if (match.groups.value) {
+            if (!httpRegion.responseRefs) {
+              httpRegion.responseRefs = [];
+            }
+            httpRegion.responseRefs.push(match.groups.value);
+          }
+          break;
+        case 'loop':
+          if (match.groups.value) {
+            const forOfMatch = ParserRegex.meta.forOf.exec(match.groups.value);
+            if (forOfMatch?.groups?.iterable && forOfMatch?.groups?.variable) {
+              httpRegion.hooks.execute.addInterceptor(new actions.LoopMetaAction({
+                type: actions.LoopMetaType.forOf,
+                variable: forOfMatch.groups.variable,
+                iterable: forOfMatch.groups.iterable,
+              }));
+            } else {
+              const forMatch = ParserRegex.meta.for.exec(match.groups.value);
+              if (forMatch?.groups?.counter) {
+                httpRegion.hooks.execute.addInterceptor(new actions.LoopMetaAction({
+                  type: actions.LoopMetaType.for,
+                  counter: Number.parseInt(forMatch.groups.counter, 10),
+                }));
+              } else {
+                const whileMatch = ParserRegex.meta.while.exec(match.groups.value);
+                if (whileMatch?.groups?.expression) {
+                  httpRegion.hooks.execute.addInterceptor(new actions.LoopMetaAction({
+                    type: actions.LoopMetaType.while,
+                    expression: whileMatch.groups.expression,
+                  }));
+                }
+              }
+            }
+          }
+          break;
+        case 'ref':
+          if (match.groups.value) {
+            addRefHttpRegion(httpRegion, match.groups.value, false);
+          }
+          break;
+        case 'sleep':
+          if (match.groups.value) {
+            const timeout = parseInt(match.groups.value, 10);
+            if (Number.isSafeInteger(timeout)) {
+              httpRegion.hooks.execute.addHook('sleep', async () => await utils.sleep(timeout));
+            } else {
+              log.debug(`meta sleep ${match.groups.value} is no valid Integer`);
+            }
+          }
+          break;
+        case 'forceRef':
+          if (match.groups.value) {
+            addRefHttpRegion(httpRegion, match.groups.value, true);
+          }
+          break;
+        default:
+          httpRegion.metaData = Object.assign(httpRegion.metaData || {}, {
+            [key]: match.groups.value || true,
+          });
+          break;
+      }
+    }
+    return result;
+  }
+  return false;
+}
+
 
 function addRefHttpRegion(httpRegion: models.HttpRegion, name: string, force: boolean) {
   httpRegion.hooks.execute.addObjHook(obj => obj.process, new actions.RefMetaAction({

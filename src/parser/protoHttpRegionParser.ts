@@ -16,7 +16,7 @@ export interface ProtoProcessorContext extends models.ProcessorContext{
 
 export async function parseProtoImport(
   getLineReader: models.getHttpLineGenerator,
-  { httpRegion }: models.ParserContext
+  context: models.ParserContext
 ): Promise<models.HttpRegionParserResult> {
   const lineReader = getLineReader();
   const next = lineReader.next();
@@ -44,26 +44,24 @@ export async function parseProtoImport(
       };
 
       const headersResult = parserUtils.parseSubsequentLines(lineReader, [
+        parserUtils.parseComments,
         parserUtils.parseRequestHeaderFactory(protoDefinition.loaderOptions),
         parserUtils.parseDefaultHeadersFactory(
           (headers, context: ProtoProcessorContext) => Object.assign(context.options.protoDefinitions?.[protoDefinition.fileName].loaderOptions, headers)
         ),
-      ]);
+      ], context);
 
       if (headersResult) {
         result.nextParserLine = headersResult.nextLine || result.nextParserLine;
         for (const parseResult of headersResult.parseResults) {
           symbols.push(...parseResult.symbols);
-          if (parseResult.actions) {
-            httpRegion.hooks.execute.addObjHook(obj => obj.process, ...parseResult.actions);
-          }
         }
       }
 
-      httpRegion.hooks.execute.addObjHook(obj => obj.process,
+      context.httpRegion.hooks.execute.addObjHook(obj => obj.process,
         new ProtoImportAction(protoDefinition));
 
-      httpRegion.hooks.execute.addInterceptor(new ProtoDefinitionCreationInterceptor(protoDefinition));
+      context.httpRegion.hooks.execute.addInterceptor(new ProtoDefinitionCreationInterceptor(protoDefinition));
       return result;
     }
   }
