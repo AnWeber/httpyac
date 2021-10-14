@@ -1,25 +1,27 @@
 import { Cookie, CookieJar, MemoryCookieStore } from 'tough-cookie';
 import { log } from '../io';
-import { HttpFile, PathLike } from '../models';
+import * as models from '../models';
 import { toEnvironmentKey } from '../utils';
 
 
-interface CookieStoreEntry{
-  rootDir?: PathLike;
-  envKey: string;
+interface CookieStoreEntry {
+  id: string;
   memoryCookieStore: MemoryCookieStore;
 }
 
 class CookieStore {
   private storeCache: Array<CookieStoreEntry> = [];
 
-  getCookieStoreEntry(httpFile: HttpFile) {
-    const envKey = toEnvironmentKey(httpFile.activeEnvironment);
-    let result = this.storeCache.find(obj => obj.rootDir === httpFile.rootDir && obj.envKey === envKey);
+  private getCookieStoreId(httpFile: models.HttpFile) {
+    return `Cookies_${toEnvironmentKey(httpFile.activeEnvironment)}_${httpFile.rootDir?.toString?.() || 'none'}`;
+  }
+
+  getCookieStoreEntry(httpFile: models.HttpFile) {
+    const id = this.getCookieStoreId(httpFile);
+    let result = this.storeCache.find(obj => obj.id === id);
     if (!result) {
       result = {
-        rootDir: httpFile.rootDir,
-        envKey,
+        id,
         memoryCookieStore: new MemoryCookieStore(),
       };
       this.storeCache.push(result);
@@ -27,7 +29,7 @@ class CookieStore {
     return result;
   }
 
-  getCookies(httpFile: HttpFile) {
+  getCookies(httpFile: models.HttpFile) {
     const result: Cookie[] = [];
 
     const { memoryCookieStore } = this.getCookieStoreEntry(httpFile);
@@ -41,12 +43,12 @@ class CookieStore {
     return result;
   }
 
-  getCookieJar(httpFile: HttpFile) {
+  getCookieJar(httpFile: models.HttpFile) {
     const { memoryCookieStore } = this.getCookieStoreEntry(httpFile);
     return new CookieJar(memoryCookieStore);
   }
 
-  async reset(httpFile?: HttpFile) {
+  async reset(httpFile?: models.HttpFile) {
     if (httpFile) {
       const cacheObj = this.getCookieStoreEntry(httpFile);
       cacheObj.memoryCookieStore = new MemoryCookieStore();
@@ -55,7 +57,7 @@ class CookieStore {
     }
   }
 
-  removeCookies(httpFile: HttpFile, cookies: Cookie[]) {
+  removeCookies(httpFile: models.HttpFile, cookies: Cookie[]) {
     const { memoryCookieStore } = this.getCookieStoreEntry(httpFile);
     for (const cookie of cookies) {
       if (cookie.domain && cookie.path) {
