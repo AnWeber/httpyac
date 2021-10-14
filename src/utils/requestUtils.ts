@@ -240,19 +240,20 @@ export function cloneResponse(response: models.HttpResponse): models.HttpRespons
 }
 
 
-export function setAdditionalResponseBody(httpResponse: models.HttpResponse): void {
+export function setAdditionalResponseBody(httpResponse: models.HttpResponse, context?: models.ProcessorContext): void {
   if (isString(httpResponse.body)
     && httpResponse.body.length > 0) {
+    const requestPrettyPrintBodyMaxSize = context?.config?.requestPrettyPrintBodyMaxSize || 1000000;
     if (isMimeTypeJSON(httpResponse.contentType)) {
       try {
         httpResponse.parsedBody = JSON.parse(httpResponse.body);
-        if (httpResponse.body.length < 1024) {
+        if (httpResponse.body.length < requestPrettyPrintBodyMaxSize) {
           httpResponse.prettyPrintBody = JSON.stringify(httpResponse.parsedBody, null, 2);
         }
       } catch (err) {
         log.warn('json parse error', httpResponse.body, err);
       }
-    } else if (isMimeTypeXml(httpResponse.contentType) && httpResponse.body.length < 1024) {
+    } else if (isMimeTypeXml(httpResponse.contentType) && httpResponse.body.length < requestPrettyPrintBodyMaxSize) {
       try {
         httpResponse.prettyPrintBody = xmlFormat(httpResponse.body, {
           collapseContent: true,

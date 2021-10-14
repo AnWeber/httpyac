@@ -17,6 +17,8 @@ export interface EnvironmentConfig{
 
   request?: HttpRequest;
   proxy?: string;
+  /** count auf characters before pretty print is ommited (default: 1000000)*/
+  requestPrettyPrintBodyMaxSize?: number;
   requestBodyInjectVariablesExtensions?: Array<string>;
   clientCertificates?: Record<string, ClientCertificateOptions>,
   /** default request headers if not overwritten */
