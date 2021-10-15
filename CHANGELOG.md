@@ -1,3 +1,12 @@
+## 4.3.0 (2021-10-15)
+
+#### Features
+* support comments between request line and headers
+* update to @grpc/js v1.4.1
+
+#### Fix
+* pretty print max size too low, 1kb instead fo 1Mb (#84)
+* cookies are not cleared while editing in vscode (AnWeber/vscode-httpyac#77)
 
 ## 4.2.1 (2021-10-11)
 
