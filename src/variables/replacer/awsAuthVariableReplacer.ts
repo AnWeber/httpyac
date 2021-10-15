@@ -2,10 +2,14 @@ import { ProcessorContext } from '../../models';
 import { URL } from 'url';
 import aws4 = require('aws4');
 import { ParserRegex } from '../../parser';
-import { isString } from '../../utils';
+import * as utils from '../../utils';
 
 export async function awsAuthVariableReplacer(text: unknown, type: string, { request }: ProcessorContext) : Promise<unknown> {
-  if (type.toLowerCase() === 'authorization' && isString(text) && request?.url) {
+  if (type.toLowerCase() === 'authorization'
+    && utils.isString(text)
+    && utils.isHttpRequest(request)
+    && request?.url
+  ) {
     const match = ParserRegex.auth.aws.exec(text);
 
     if (match && match.groups && match.groups.accessKeyId && match.groups.secretAccessKey) {
@@ -15,8 +19,9 @@ export async function awsAuthVariableReplacer(text: unknown, type: string, { req
         sessionToken: match.groups.token
       };
       const url = new URL(request.url);
-      const requestOptions = {
-        ...request,
+      const requestOptions: aws4.Request = {
+        method: request.method,
+        headers: request.headers,
         host: url.host,
         path: url.pathname,
         region: match.groups.region,
@@ -25,7 +30,7 @@ export async function awsAuthVariableReplacer(text: unknown, type: string, { req
       const result = await aws4.sign(requestOptions, credentials);
 
       Object.assign(request, { http2: false });
-      return result.headers.Authorization;
+      return result.headers?.Authorization;
     }
   }
   return text;
