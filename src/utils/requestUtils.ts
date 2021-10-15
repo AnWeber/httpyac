@@ -16,11 +16,11 @@ export function isHttpRequestMethod(method: string | undefined): method is model
   return false;
 }
 
-export function isHttpRequest(request: models.Request | undefined) : request is models.HttpRequest {
+export function isHttpRequest(request: models.Request | undefined): request is models.HttpRequest {
   return isHttpRequestMethod(request?.method);
 }
 
-export function isGrpcRequest(request: models.Request | undefined) : request is models.GrpcRequest {
+export function isGrpcRequest(request: models.Request | undefined): request is models.GrpcRequest {
   return request?.method === 'GRPC';
 }
 
@@ -113,7 +113,7 @@ export function requestLoggerFactory(
   optionsFailed?: RequestLoggerFactoryOptions
 ): models.RequestLogger {
 
-  return async function logResponse(response: models.HttpResponse, httpRegion?: models.HttpRegion) : Promise<void> {
+  return async function logResponse(response: models.HttpResponse, httpRegion?: models.HttpRegion): Promise<void> {
 
     let opt = options;
     if (optionsFailed && httpRegion?.testResults && httpRegion.testResults.some(obj => !obj.result)) {
@@ -121,7 +121,7 @@ export function requestLoggerFactory(
     }
 
     if (opt.onlyFailed
-        && (!httpRegion?.testResults || httpRegion.testResults.every(obj => obj.result))) {
+      && (!httpRegion?.testResults || httpRegion.testResults.every(obj => obj.result))) {
       return;
     }
 
@@ -246,14 +246,18 @@ export function setAdditionalResponseBody(httpResponse: models.HttpResponse, con
     const requestPrettyPrintBodyMaxSize = context?.config?.requestPrettyPrintBodyMaxSize || 1000000;
     if (isMimeTypeJSON(httpResponse.contentType)) {
       try {
-        httpResponse.parsedBody = JSON.parse(httpResponse.body);
-        if (httpResponse.body.length < requestPrettyPrintBodyMaxSize) {
+        if (!httpResponse.parsedBody) {
+          httpResponse.parsedBody = JSON.parse(httpResponse.body);
+        }
+        if (!httpResponse.prettyPrintBody && httpResponse.body.length < requestPrettyPrintBodyMaxSize) {
           httpResponse.prettyPrintBody = JSON.stringify(httpResponse.parsedBody, null, 2);
         }
       } catch (err) {
         log.warn('json parse error', httpResponse.body, err);
       }
-    } else if (isMimeTypeXml(httpResponse.contentType) && httpResponse.body.length < requestPrettyPrintBodyMaxSize) {
+    } else if (isMimeTypeXml(httpResponse.contentType)
+      && !httpResponse.prettyPrintBody
+      && httpResponse.body.length < requestPrettyPrintBodyMaxSize) {
       try {
         httpResponse.prettyPrintBody = xmlFormat(httpResponse.body, {
           collapseContent: true,
