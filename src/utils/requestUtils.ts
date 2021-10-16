@@ -27,6 +27,9 @@ export function isGrpcRequest(request: models.Request | undefined): request is m
 export function isWebsocketRequest(request: models.Request | undefined): request is models.WebsocketRequest {
   return request?.method === 'WSS';
 }
+export function isEventSourceRequest(request: models.Request | undefined): request is models.EventSourceRequest {
+  return request?.method === 'SSE';
+}
 
 export function getHeader(headers: Record<string, unknown>, headerName: string): unknown {
   if (headers) {

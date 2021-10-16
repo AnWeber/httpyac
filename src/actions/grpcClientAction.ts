@@ -156,7 +156,7 @@ export class GrpcClientAction implements models.HttpRegionAction {
     ];
   }
 
-  private getData(request: models.Request): unknown {
+  private getData(request: models.GrpcRequest): unknown {
     if (utils.isString(request.body)) {
       return JSON.parse(request.body);
     }

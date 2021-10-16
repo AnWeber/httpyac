@@ -13,6 +13,7 @@ export enum ActionType{
   cookieJar = 'cookieJar',
   envDefaultHeaders = 'envDefaultHeaders',
   defaultHeaders = 'defaultHeaders',
+  eventSourceClient = 'eventSourceClient',
   intellij = 'intellij',
   gql = 'gql',
   loop = 'loop',

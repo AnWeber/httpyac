@@ -1,6 +1,9 @@
 import { ErrorDescription } from '../models';
 
 export function isError(val: unknown): val is Error {
+  if (!val) {
+    return false;
+  }
   if (val instanceof Error) {
     return true;
   }

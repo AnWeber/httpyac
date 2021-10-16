@@ -23,6 +23,7 @@
 		"Soap",
 		"gRPC",
 		"WebSocket",
+		"EventSource",
 		"ci",
 		"rest-client"
 	],
@@ -72,6 +73,7 @@
 	"dependencies": {
 		"@grpc/grpc-js": "^1.4.1",
 		"@grpc/proto-loader": "^0.6.5",
+		"@types/eventsource": "^1.1.6",
 		"@types/ws": "^8.2.0",
 		"arg": "^5.0.1",
 		"aws4": "^1.11.0",
@@ -80,6 +82,7 @@
 		"dayjs-plugin-utc": "^0.1.2",
 		"dotenv": "^10.0.0",
 		"encodeurl": "^1.0.2",
+		"eventsource": "^1.1.0",
 		"filesize": "^8.0.3",
 		"globby": "^11.0.4",
 		"got": "^11.8.2",

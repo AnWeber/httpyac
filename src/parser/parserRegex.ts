@@ -29,6 +29,9 @@ export const ParserRegex = {
     websocketLine: /^\s*(ws|wss|websocket)\s*(?<url>.+?)\s*$/ui,
     websocketProtocol: /^\s*ws(s)?:\/\/(?<url>.+?)\s*$/u,
   },
+  eventSource: {
+    line: /^\s*(sse|eventsource)\s*(?<url>.+?)\s*$/ui,
+  },
   intellij: {
     import: /^\s*>\s+(?<fileName>[^\s{%}]+\s*)$/u,
     scriptEnd: /^\s*%\}\s*$/u,

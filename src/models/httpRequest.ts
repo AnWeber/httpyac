@@ -7,7 +7,7 @@ export interface HeadersContainer {
 }
 
 
-export type Request = GrpcRequest | HttpRequest | WebsocketRequest;
+export type Request = GrpcRequest | HttpRequest | WebsocketRequest | EventSourceRequest;
 
 export interface GrpcRequest {
   url?: string;
@@ -22,8 +22,16 @@ export interface WebsocketRequest {
   method?: 'WSS';
   headers?: Record<string, string>;
   body?: unknown;
-  contentType?: undefined;
   options?: ClientOptions;
+  contentType?: undefined;
+}
+
+export interface EventSourceRequest {
+  url?: string;
+  method?: 'SSE';
+  headers?: Record<string, string>;
+  body?: undefined;
+  contentType?: undefined;
 }
 
 export interface HttpRequest extends Omit<OptionsOfUnknownResponseBody, 'body'>{

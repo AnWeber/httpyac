@@ -1,6 +1,7 @@
 import * as models from '../models';
 
 import { parseComment } from './commentHttpRegionParser';
+import { parseEventSource } from './eventSourceHttpRegionParser';
 import { parseGraphql } from './gqlHttpRegionParser';
 import { parseIntellijScript } from './intellijHttpRegionParser';
 import { parseJavascript } from './javascriptHttpRegionParser';
@@ -32,6 +33,7 @@ export enum ParserId {
   requestBody = 'requestBody',
   proto = 'proto',
   grpc = 'grpc',
+  eventSource = 'eventSource',
   websocket = 'websocket',
 }
 
@@ -47,6 +49,7 @@ export function initParseHook(): models.ParseHook {
   hook.addHook(ParserId.proto, parseProtoImport);
   hook.addHook(ParserId.grpc, parseGrpcLine);
   hook.addHook(ParserId.websocket, parseWebsocketLine);
+  hook.addHook(ParserId.eventSource, parseEventSource);
   hook.addHook(ParserId.request, parseRequestLine);
   hook.addHook(ParserId.responseRef, parseResponseRef);
   hook.addHook(ParserId.response, parseResponse);
