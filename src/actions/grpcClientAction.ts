@@ -130,7 +130,8 @@ export class GrpcClientAction implements models.HttpRegionAction {
     const loadingPromises: Array<Promise<unknown>> = [];
     const mergedData: Array<unknown> = [];
     let isResolved = false;
-    const resolveStream = async () => {
+    const resolveStreamFactory = (type: string) => async () => {
+      log.debug(`grpc ${type} received`);
       if (!isResolved) {
         isResolved = true;
         await Promise.all(loadingPromises);
@@ -140,14 +141,18 @@ export class GrpcClientAction implements models.HttpRegionAction {
     };
     return [
       stream => stream.on('data', chunk => {
+        log.debug('grpc data received', chunk);
         mergedData.push(chunk);
         if (!context.httpRegion.metaData.noStreamingLog) {
           loadingPromises.push(utils.logResponse(this.toHttpResponse(chunk, getResponseTemplate()), context));
         }
       }),
-      stream => stream.on('error', err => mergedData.push(err)),
-      stream => stream.on('end', resolveStream),
-      stream => stream.on('close', resolveStream),
+      stream => stream.on('error', err => {
+        log.debug('grpc error received', err);
+        mergedData.push(err);
+      }),
+      stream => stream.on('end', resolveStreamFactory('end')),
+      stream => stream.on('close', resolveStreamFactory('close')),
     ];
   }
 
