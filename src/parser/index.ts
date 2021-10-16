@@ -13,3 +13,4 @@ export * from './responseRefHttpRegionParser';
 export * from './responseHttpRegionParser';
 export * from './protoHttpRegionParser';
 export * from './variableHttpRegionParser';
+export * from './websocketHttpRegionParser';

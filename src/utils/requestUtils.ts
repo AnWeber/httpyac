@@ -24,6 +24,10 @@ export function isGrpcRequest(request: models.Request | undefined): request is m
   return request?.method === 'GRPC';
 }
 
+export function isWebsocketRequest(request: models.Request | undefined): request is models.WebsocketRequest {
+  return request?.method === 'WSS';
+}
+
 export function getHeader(headers: Record<string, unknown>, headerName: string): unknown {
   if (headers) {
     const entry = Object.entries(headers)

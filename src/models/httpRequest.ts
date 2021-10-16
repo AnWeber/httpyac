@@ -1,13 +1,13 @@
 import { ContentType } from './contentType';
 import { HttpMethod } from './httpMethod';
 import { OptionsOfUnknownResponseBody } from 'got';
-
+import { ClientOptions } from 'ws';
 export interface HeadersContainer {
   headers: Record<string, unknown>
 }
 
 
-export type Request = GrpcRequest | HttpRequest;
+export type Request = GrpcRequest | HttpRequest | WebsocketRequest;
 
 export interface GrpcRequest {
   url?: string;
@@ -15,6 +15,15 @@ export interface GrpcRequest {
   headers?: Record<string, unknown>;
   body?: unknown;
   contentType?: undefined;
+}
+
+export interface WebsocketRequest {
+  url?: string;
+  method?: 'WSS';
+  headers?: Record<string, string>;
+  body?: unknown;
+  contentType?: undefined;
+  options?: ClientOptions;
 }
 
 export interface HttpRequest extends Omit<OptionsOfUnknownResponseBody, 'body'>{

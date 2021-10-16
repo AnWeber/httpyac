@@ -16,3 +16,4 @@ export * from './responseAsVariableAction';
 export * from './refMetaAction';
 export * from './testMethod';
 export * from './variableReplacerAction';
+export * from './webSocketClientAction';

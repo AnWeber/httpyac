@@ -26,4 +26,5 @@ export enum ActionType{
   response = 'response',
   variable = 'variable',
   variableReplacer = 'variableReplacer',
+  websocketClient = 'websocketClient',
 }

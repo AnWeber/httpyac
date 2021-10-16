@@ -12,6 +12,7 @@ import { parseResponseRef } from './responseRefHttpRegionParser';
 import { parseVariable } from './variableHttpRegionParser';
 import { parseProtoImport } from './protoHttpRegionParser';
 import { parseGrpcLine } from './grpcHttpRegionParser';
+import { parseWebsocketLine } from './websocketHttpRegionParser';
 
 import { injectOnEveryRequestJavascript } from './javascriptHttpRegionParser';
 import { injectNote } from './noteMetaHttpRegionParser';
@@ -30,7 +31,8 @@ export enum ParserId {
   response = 'response',
   requestBody = 'requestBody',
   proto = 'proto',
-  grpc = 'grpc'
+  grpc = 'grpc',
+  websocket = 'websocket',
 }
 
 export function initParseHook(): models.ParseHook {
@@ -44,6 +46,7 @@ export function initParseHook(): models.ParseHook {
   hook.addHook(ParserId.gql, parseGraphql);
   hook.addHook(ParserId.proto, parseProtoImport);
   hook.addHook(ParserId.grpc, parseGrpcLine);
+  hook.addHook(ParserId.websocket, parseWebsocketLine);
   hook.addHook(ParserId.request, parseRequestLine);
   hook.addHook(ParserId.responseRef, parseResponseRef);
   hook.addHook(ParserId.response, parseResponse);
