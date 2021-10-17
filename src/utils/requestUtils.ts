@@ -20,24 +20,21 @@ export function isHttpRequest(request: models.Request | undefined): request is m
   return isHttpRequestMethod(request?.method);
 }
 
-export function isGrpcRequest(request: models.Request | undefined): request is models.GrpcRequest {
-  return request?.method === 'GRPC';
-}
 
-export function isWebsocketRequest(request: models.Request | undefined): request is models.WebsocketRequest {
-  return request?.method === 'WSS';
-}
-export function isEventSourceRequest(request: models.Request | undefined): request is models.EventSourceRequest {
-  return request?.method === 'SSE';
-}
-
-export function getHeader(headers: Record<string, unknown>, headerName: string): unknown {
+export function getHeader<T>(headers: Record<string, T> | undefined, headerName: string): T | null {
   if (headers) {
     const entry = Object.entries(headers)
       .find(([key]) => key.toLowerCase() === headerName.toLowerCase());
     if (entry && entry.length > 1) {
       return entry[1];
     }
+  }
+  return null;
+}
+export function getHeaderArray(headers: Record<string, string | string[] | undefined> | undefined, headerName: string): string[] | null {
+  const value = getHeader(headers, headerName);
+  if (value) {
+    return isString(value) ? [value] : value;
   }
   return null;
 }

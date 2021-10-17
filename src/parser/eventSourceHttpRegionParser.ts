@@ -74,7 +74,7 @@ export async function parseEventSource(
 
 
 function getEventSourceLine(textLine: string, line: number): { request: models.EventSourceRequest, symbol: models.HttpSymbol } | undefined {
-  const lineMatch = ParserRegex.eventSource.line.exec(textLine);
+  const lineMatch = ParserRegex.stream.eventSourceLine.exec(textLine);
   if (lineMatch && lineMatch.length > 1 && lineMatch.groups) {
     return {
       request: {
@@ -101,7 +101,7 @@ function isValidEventSource(textLine: string) {
     return false;
   }
 
-  if (ParserRegex.eventSource.line.exec(textLine)?.groups?.url) {
+  if (ParserRegex.stream.eventSourceLine.exec(textLine)?.groups?.url) {
     return true;
   }
   return false;

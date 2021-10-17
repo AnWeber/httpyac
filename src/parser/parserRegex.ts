@@ -25,12 +25,10 @@ export const ParserRegex = {
     grpcUrl: /^\s*(grpc:\/\/)?(?<server>.+?)\/(?<service>[^/]+?)\/(?<method>[^/]+?)$/u,
     sslAuthorization: /^\s*(ssl)\s+(?<root>[^\s]*)\s+(?<cert>[^\s]*)\s+(?<key>[^\s]*)\s*$/iu,
   },
-  websocket: {
+  stream: {
     websocketLine: /^\s*(ws|wss|websocket)\s*(?<url>.+?)\s*$/ui,
     websocketProtocol: /^\s*ws(s)?:\/\/(?<url>.+?)\s*$/u,
-  },
-  eventSource: {
-    line: /^\s*(sse|eventsource)\s*(?<url>.+?)\s*$/ui,
+    eventSourceLine: /^\s*(sse|eventsource)\s*(?<url>.+?)\s*$/ui,
   },
   intellij: {
     import: /^\s*>\s+(?<fileName>[^\s{%}]+\s*)$/u,

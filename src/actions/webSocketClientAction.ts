@@ -12,7 +12,7 @@ export class WebSocketClientAction implements models.HttpRegionAction {
 
   async process(context: models.ProcessorContext): Promise<boolean> {
     const { request } = context;
-    if (utils.isWebsocketRequest(request)) {
+    if (this.isWebsocketRequest(request)) {
       return await utils.triggerRequestResponseHooks(async () => {
         if (request.url) {
           return await this.requestWebsocket(request, context);
@@ -67,6 +67,7 @@ export class WebSocketClientAction implements models.HttpRegionAction {
       }
 
       client.on('open', () => {
+        io.log.debug('WebSocket open');
         if (request.body) {
           client.send(request.body, err => io.log.error(err));
         }
@@ -79,7 +80,7 @@ export class WebSocketClientAction implements models.HttpRegionAction {
           });
       });
       client.on('upgrade', message => {
-        io.log.debug('upgrade', message);
+        io.log.debug('WebSocket upgrade', message);
         responseTemplate.headers = message.headers;
         responseTemplate.statusCode = message.statusCode;
         responseTemplate.statusMessage = message.statusMessage;
@@ -88,7 +89,7 @@ export class WebSocketClientAction implements models.HttpRegionAction {
 
       const handleResponseFactory = (type: string) => (data: Buffer | WebSocket.RawData) => {
         const body = this.toStringBody(data);
-        io.log.debug(`received: ${type}`, body);
+        io.log.debug(`WebSocket ${type}`, body);
         mergedData.push({ type, body });
         if (!context.httpRegion.metaData.noStreamingLog) {
           loadingPromises.push(utils.logResponse(this.toHttpResponse(body, getResponseTemplate()), context));
@@ -98,9 +99,13 @@ export class WebSocketClientAction implements models.HttpRegionAction {
       client.on('ping', handleResponseFactory('ping'));
       client.on('pong', handleResponseFactory('pong'));
       client.on('message', handleResponseFactory('message'));
-      client.on('error', err => mergedData.push(err));
+      client.on('error', err => {
+        io.log.debug('WebSocket error', err);
+        mergedData.push(err);
+      });
 
       client.on('close', async (code, reason) => {
+        io.log.debug('WebSocket close', code, reason);
         if (disposeCancellation) {
           disposeCancellation();
         }
@@ -163,5 +168,7 @@ export class WebSocketClientAction implements models.HttpRegionAction {
   private isWebsocketError(data: unknown): data is Error & {code: string} {
     return data instanceof Error;
   }
-
+  private isWebsocketRequest(request: models.Request | undefined): request is models.WebsocketRequest {
+    return request?.method === 'WS';
+  }
 }

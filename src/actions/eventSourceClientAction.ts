@@ -7,10 +7,9 @@ import * as io from '../io';
 export class EventSourceClientAction implements models.HttpRegionAction {
   id = models.ActionType.eventSourceClient;
 
-
   async process(context: models.ProcessorContext): Promise<boolean> {
     const { request } = context;
-    if (utils.isEventSourceRequest(request)) {
+    if (this.isEventSourceRequest(request)) {
       return await utils.triggerRequestResponseHooks(async () => {
         if (request.url) {
           return await this.requestEventSource(request, context);
@@ -60,17 +59,17 @@ export class EventSourceClientAction implements models.HttpRegionAction {
         });
       }
       client.addEventListener('open', evt => {
-        io.log.debug('received open', evt);
+        io.log.debug('SSE open', evt);
       });
       client.addEventListener('data', evt => {
-        io.log.debug('received open', evt);
+        io.log.debug('SSE data', evt);
         mergedData.push(evt);
         if (!context.httpRegion.metaData.noStreamingLog) {
           loadingPromises.push(utils.logResponse(this.toHttpResponse(evt, getResponseTemplate()), context));
         }
       });
       client.addEventListener('error', evt => {
-        io.log.debug('received error', evt);
+        io.log.debug('SSE error', evt);
         mergedData.push(evt);
       });
       await context.httpRegion.hooks.onStreaming.trigger(context);
@@ -122,5 +121,8 @@ export class EventSourceClientAction implements models.HttpRegionAction {
       response.statusCode = -1;
     }
     return response;
+  }
+  private isEventSourceRequest(request: models.Request | undefined): request is models.EventSourceRequest {
+    return request?.method === 'SSE';
   }
 }

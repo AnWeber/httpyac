@@ -6,16 +6,26 @@ import * as grpc from '@grpc/grpc-js';
 import get from 'lodash/get';
 import { Readable, Writable, Duplex } from 'stream';
 
-grpc.setLogger(log);
+
+interface GrpcError {
+  details?: string;
+  code?: number;
+  message?: string;
+}
+
+type GrpcStream = Readable | Writable | Duplex;
+
+type GrpcStreamAction = (stream: GrpcStream) => void;
 
 export class GrpcClientAction implements models.HttpRegionAction {
   id = models.ActionType.grpcClient;
 
 
   async process(context: ProtoProcessorContext): Promise<boolean> {
+    grpc.setLogger(log);
     const { request } = context;
     const protoDefinitions = context.options.protoDefinitions;
-    if (utils.isGrpcRequest(request) && request?.url && protoDefinitions) {
+    if (this.isGrpcRequest(request) && request?.url && protoDefinitions) {
       return await utils.triggerRequestResponseHooks(async () => {
         if (request.url) {
           const serviceData = this.getService(request.url, protoDefinitions);
@@ -131,7 +141,7 @@ export class GrpcClientAction implements models.HttpRegionAction {
     const mergedData: Array<unknown> = [];
     let isResolved = false;
     const resolveStreamFactory = (type: string) => async () => {
-      log.debug(`grpc ${type} received`);
+      log.debug(`GRPC ${type}`);
       if (!isResolved) {
         isResolved = true;
         await Promise.all(loadingPromises);
@@ -141,14 +151,14 @@ export class GrpcClientAction implements models.HttpRegionAction {
     };
     return [
       stream => stream.on('data', chunk => {
-        log.debug('grpc data received', chunk);
+        log.debug('GRPC data', chunk);
         mergedData.push(chunk);
         if (!context.httpRegion.metaData.noStreamingLog) {
           loadingPromises.push(utils.logResponse(this.toHttpResponse(chunk, getResponseTemplate()), context));
         }
       }),
       stream => stream.on('error', err => {
-        log.debug('grpc error received', err);
+        log.debug('GRPC error', err);
         mergedData.push(err);
       }),
       stream => stream.on('end', resolveStreamFactory('end')),
@@ -255,19 +265,7 @@ export class GrpcClientAction implements models.HttpRegionAction {
   private isGrpcError(data: unknown): data is Error & GrpcError {
     return data instanceof Error;
   }
+  private isGrpcRequest(request: models.Request | undefined): request is models.GrpcRequest {
+    return request?.method === 'GRPC';
+  }
 }
-
-
-interface GrpcError {
-  details?: string;
-  code?: number;
-  message?: string;
-}
-
-export type GrpcStream = Readable | Writable | Duplex;
-
-export interface GrpcSession extends models.UserSession {
-  stream: Writable | Duplex;
-}
-
-export type GrpcStreamAction = (stream: GrpcStream) => void;

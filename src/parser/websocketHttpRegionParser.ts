@@ -19,21 +19,20 @@ export async function parseWebsocketLine(
       };
     }
 
-
-    const websocketLine = getWebsocketLine(next.value.textLine, next.value.line);
-    if (!websocketLine) {
+    const requestLine = getWebsocketLine(next.value.textLine, next.value.line);
+    if (!requestLine) {
       return false;
     }
-    context.httpRegion.request = websocketLine.request;
+    context.httpRegion.request = requestLine.request;
     const requestSymbol: models.HttpSymbol = {
       name: next.value.textLine,
-      description: 'websocket request-line',
+      description: 'WebSocket request-line',
       kind: models.HttpSymbolKind.requestLine,
       startLine: next.value.line,
       startOffset: 0,
       endLine: next.value.line,
       endOffset: next.value.textLine.length,
-      children: [websocketLine.symbol],
+      children: [requestLine.symbol],
     };
 
     const result: models.HttpRegionParserResult = {
@@ -43,13 +42,13 @@ export async function parseWebsocketLine(
 
 
     const headers = {};
-    websocketLine.request.headers = headers;
+    requestLine.request.headers = headers;
 
     const headersResult = parserUtils.parseSubsequentLines(lineReader, [
       parserUtils.parseComments,
       parserUtils.parseRequestHeaderFactory(headers),
       parserUtils.parseDefaultHeadersFactory((headers, context) => Object.assign(context.request?.headers, headers)),
-      parserUtils.parseUrlLineFactory(url => (websocketLine.request.url += url)),
+      parserUtils.parseUrlLineFactory(url => (requestLine.request.url += url)),
     ], context);
 
     if (headersResult) {
@@ -74,16 +73,16 @@ export async function parseWebsocketLine(
 
 
 function getWebsocketLine(textLine: string, line: number): { request: models.WebsocketRequest, symbol: models.HttpSymbol } | undefined {
-  const lineMatch = ParserRegex.websocket.websocketLine.exec(textLine);
+  const lineMatch = ParserRegex.stream.websocketLine.exec(textLine);
   if (lineMatch && lineMatch.length > 1 && lineMatch.groups) {
     return {
       request: {
         url: lineMatch.groups.url,
-        method: 'WSS'
+        method: 'WS'
       },
       symbol: {
         name: lineMatch.groups.url,
-        description: 'websocket url',
+        description: 'WebSocket Url',
         kind: models.HttpSymbolKind.url,
         startLine: line,
         startOffset: 0,
@@ -92,12 +91,12 @@ function getWebsocketLine(textLine: string, line: number): { request: models.Web
       }
     };
   }
-  const protocolMatch = ParserRegex.websocket.websocketProtocol.exec(textLine);
+  const protocolMatch = ParserRegex.stream.websocketProtocol.exec(textLine);
   if (protocolMatch && protocolMatch.length > 1 && protocolMatch.groups) {
     return {
       request: {
         url: protocolMatch.groups.url,
-        method: 'WSS'
+        method: 'WS'
       },
       symbol: {
         name: protocolMatch.groups.url,
@@ -119,11 +118,11 @@ function isValidWebsocket(textLine: string, httpRegion: models.HttpRegion) {
     return false;
   }
 
-  if (ParserRegex.websocket.websocketLine.exec(textLine)?.groups?.url) {
+  if (ParserRegex.stream.websocketLine.exec(textLine)?.groups?.url) {
     return true;
   }
   if (!httpRegion.request) {
-    return ParserRegex.websocket.websocketProtocol.exec(textLine)?.groups?.url;
+    return ParserRegex.stream.websocketProtocol.exec(textLine)?.groups?.url;
   }
   return false;
 }
