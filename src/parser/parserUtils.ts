@@ -45,33 +45,45 @@ export function parseRequestHeaderFactory(headers: Record<string, unknown>): Par
   return function parseRequestHeader(httpLine: models.HttpLine) {
     const headerMatch = ParserRegex.request.header.exec(httpLine.textLine);
     if (headerMatch?.groups?.key && headerMatch?.groups?.value) {
-      headers[headerMatch.groups.key] = headerMatch.groups.value;
+      const headerName = headerMatch.groups.key;
+      const headerValue = headerMatch.groups.value;
+
+      const existingHeader = headers[headerName];
+      if (existingHeader) {
+        if (Array.isArray(existingHeader)) {
+          existingHeader.push(headerValue);
+        } else {
+          headers[headerName] = [existingHeader, headerValue];
+        }
+      } else {
+        headers[headerName] = headerValue;
+      }
 
       return {
         symbols: [{
-          name: headerMatch.groups.key,
-          description: headerMatch.groups.value,
+          name: headerName,
+          description: headerValue,
           kind: models.HttpSymbolKind.requestHeader,
           startLine: httpLine.line,
-          startOffset: httpLine.textLine.indexOf(headerMatch.groups.key),
+          startOffset: httpLine.textLine.indexOf(headerName),
           endLine: httpLine.line,
           endOffset: httpLine.textLine.length,
           children: [{
-            name: headerMatch.groups.key,
+            name: headerName,
             description: 'request header key',
             kind: models.HttpSymbolKind.key,
             startLine: httpLine.line,
-            startOffset: httpLine.textLine.indexOf(headerMatch.groups.key),
+            startOffset: httpLine.textLine.indexOf(headerName),
             endLine: httpLine.line,
-            endOffset: httpLine.textLine.indexOf(headerMatch.groups.key) + headerMatch.groups.key.length,
+            endOffset: httpLine.textLine.indexOf(headerName) + headerName.length,
           }, {
-            name: headerMatch.groups.value,
+            name: headerValue,
             description: 'request header value',
             kind: models.HttpSymbolKind.value,
             startLine: httpLine.line,
-            startOffset: httpLine.textLine.indexOf(headerMatch.groups.value),
+            startOffset: httpLine.textLine.indexOf(headerValue),
             endLine: httpLine.line,
-            endOffset: httpLine.textLine.indexOf(headerMatch.groups.value) + headerMatch.groups.value.length,
+            endOffset: httpLine.textLine.indexOf(headerValue) + headerValue.length,
           }
           ]
         }]

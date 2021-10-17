@@ -59,11 +59,23 @@ export class VariableReplacerAction implements models.HttpRegionAction {
   private async replaceVariablesInHeader(request: models.Request, context: models.ProcessorContext) : Promise<boolean> {
     if (request.headers) {
       for (const [headerName, headerValue] of Object.entries(request.headers)) {
-        const value = await utils.replaceVariables(headerValue, headerName, context);
-        if (value === models.HookCancel) {
-          return false;
+        if (Array.isArray(headerValue)) {
+          const result = [];
+          for (const headerVal of headerValue) {
+            const value = await utils.replaceVariables(headerVal, headerName, context);
+            if (value === models.HookCancel) {
+              return false;
+            }
+            result.push(value);
+          }
+          request.headers[headerName] = result;
+        } else {
+          const value = await utils.replaceVariables(headerValue, headerName, context);
+          if (value === models.HookCancel) {
+            return false;
+          }
+          request.headers[headerName] = value;
         }
-        request.headers[headerName] = value;
       }
     }
     return true;
