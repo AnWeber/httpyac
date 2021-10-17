@@ -51,7 +51,7 @@ export function toMarkdownResponse(response: models.HttpResponse, options?: {
   body?: boolean;
 }) : Array<string> {
   const result: Array<string> = [];
-  result.push(`\`${response.protocol} ${response.statusCode} - ${response.statusMessage}\``);
+  result.push(`\`${response.protocol} ${response.statusCode}${response.statusMessage ? ` - ${response.statusMessage}` : ''}\``);
   result.push(...toMarkdownHeader(response.headers));
   if (options?.body && isString(response.body)) {
     result.push('');
@@ -165,11 +165,15 @@ export function toMarkdownTimings(timings: models.HttpTimings) : Array<string> {
   if (timings.request) {
     result.push(`*Reqeust*: ${timings.request} ms`);
   }
-  result.push(`*First Byte*: ${timings.firstByte} ms`);
+  if (timings.firstByte) {
+    result.push(`*First Byte*: ${timings.firstByte} ms`);
+  }
   if (timings.download) {
     result.push(`*Download*: ${timings.download} ms`);
   }
-  result.push(`*Total*: ${timings.total} ms`);
+  if (timings.total) {
+    result.push(`*Total*: ${timings.total} ms`);
+  }
   return result;
 }
 

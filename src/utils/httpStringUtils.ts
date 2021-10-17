@@ -27,7 +27,7 @@ export function toHttpStringResponse(response: HttpResponse, options?: {
   body?: boolean;
 }) : Array<string> {
   const result: Array<string> = [];
-  result.push(`${response.protocol} ${response.statusCode} ${response.statusMessage ? `- ${response.statusMessage}` : ''}`);
+  result.push(`${response.protocol} ${response.statusCode} ${response.statusMessage ? ` - ${response.statusMessage}` : ''}`);
   result.push(...toHttpStringHeader(response.headers));
   if (options?.body && isString(response.body)) {
     result.push('');
