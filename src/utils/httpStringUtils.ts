@@ -59,6 +59,8 @@ export function toHttpStringHeader(headers: Record<string, unknown>): Array<stri
       if (value) {
         if (Array.isArray(value)) {
           val = value.join(', ');
+        } else if (!isString(value)) {
+          val = JSON.stringify(value);
         }
       }
       return `${key}: ${val}`;

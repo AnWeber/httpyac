@@ -90,6 +90,7 @@
 		"https-proxy-agent": "^5.0.0",
 		"inquirer": "^8.2.0",
 		"lodash": "^4.17.21",
+		"mqtt": "^4.2.8",
 		"open": "8.3.0",
 		"tough-cookie": "^4.0.0",
 		"uuid": "^8.3.2",

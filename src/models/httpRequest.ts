@@ -7,7 +7,7 @@ export interface HeadersContainer {
 }
 
 
-export type Request = GrpcRequest | HttpRequest | WebsocketRequest | EventSourceRequest;
+export type Request = GrpcRequest | HttpRequest | WebsocketRequest | EventSourceRequest | MQTTRequest;
 
 export interface GrpcRequest {
   url?: string;
@@ -19,13 +19,20 @@ export interface GrpcRequest {
 
 export interface WebsocketRequest {
   url?: string;
-  method?: 'WSS';
+  method?: 'WS';
   headers?: Record<string, string>;
   body?: unknown;
   options?: ClientOptions;
   contentType?: undefined;
 }
 
+export interface MQTTRequest {
+  url?: string;
+  method?: 'MQTT';
+  headers?: Record<string, string | string[] | undefined>;
+  body?: unknown;
+  contentType?: undefined;
+}
 export interface EventSourceRequest {
   url?: string;
   method?: 'SSE';

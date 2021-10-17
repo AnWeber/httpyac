@@ -104,7 +104,7 @@ export class EventSourceClientAction implements models.HttpRegionAction {
     const rawBody: Buffer = Buffer.from(body);
     const response: models.HttpResponse = {
       headers: {},
-      statusCode: 200,
+      statusCode: 0,
       ...responseTemplate,
       protocol: 'SSE',
       body,

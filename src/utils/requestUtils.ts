@@ -211,7 +211,7 @@ function logRequest(request: models.Request, options: {
 
 function logResponseHeader(response: models.HttpResponse) {
   const result: Array<string> = [];
-  result.push(chalk`{cyan.bold ${response.protocol}} {cyan.bold ${response.statusCode}} {bold ${response.statusMessage}}`);
+  result.push(chalk`{cyan.bold ${response.protocol}} {cyan.bold ${response.statusCode}} {bold ${response.statusMessage ? ` - ${response.statusMessage}` : ''}}`);
   result.push(...Object.entries(response.headers)
     .filter(([key]) => !key.startsWith(':'))
     .map(([key, value]) => chalk`{yellow ${key}}: ${value}`)

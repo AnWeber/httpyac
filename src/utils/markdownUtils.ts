@@ -122,6 +122,8 @@ export function toMarkdownHeader(headers: Record<string, unknown>) : Array<strin
       if (value) {
         if (Array.isArray(value)) {
           val = value.join(', ');
+        } else if (!isString(value)) {
+          val = JSON.stringify(value);
         }
       }
       return `*${key}*: ${val}`;

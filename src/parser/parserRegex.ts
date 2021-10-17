@@ -28,6 +28,8 @@ export const ParserRegex = {
   stream: {
     websocketLine: /^\s*(ws|wss|websocket)\s*(?<url>.+?)\s*$/ui,
     websocketProtocol: /^\s*ws(s)?:\/\/(?<url>.+?)\s*$/u,
+    mqttLine: /^\s*(mqtt|mqtts)\s*(?<url>.+?)\s*$/ui,
+    mqttProtocol: /^\s*mqtt(s)?:\/\/(?<url>.+?)\s*$/u,
     eventSourceLine: /^\s*(sse|eventsource)\s*(?<url>.+?)\s*$/ui,
   },
   intellij: {

@@ -14,6 +14,7 @@ import { parseVariable } from './variableHttpRegionParser';
 import { parseProtoImport } from './protoHttpRegionParser';
 import { parseGrpcLine } from './grpcHttpRegionParser';
 import { parseWebsocketLine } from './websocketHttpRegionParser';
+import { parseMQTTLine } from './mqtttHttpRegionParser';
 
 import { injectOnEveryRequestJavascript } from './javascriptHttpRegionParser';
 import { injectNote } from './noteMetaHttpRegionParser';
@@ -34,6 +35,7 @@ export enum ParserId {
   proto = 'proto',
   grpc = 'grpc',
   eventSource = 'eventSource',
+  mqtt = 'mqtt',
   websocket = 'websocket',
 }
 
@@ -50,6 +52,7 @@ export function initParseHook(): models.ParseHook {
   hook.addHook(ParserId.grpc, parseGrpcLine);
   hook.addHook(ParserId.websocket, parseWebsocketLine);
   hook.addHook(ParserId.eventSource, parseEventSource);
+  hook.addHook(ParserId.mqtt, parseMQTTLine);
   hook.addHook(ParserId.request, parseRequestLine);
   hook.addHook(ParserId.responseRef, parseResponseRef);
   hook.addHook(ParserId.response, parseResponse);
