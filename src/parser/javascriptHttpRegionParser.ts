@@ -158,12 +158,7 @@ async function executeScriptData(scriptData: ScriptData, context: models.Process
     }
   });
   if (result) {
-    Object.assign(context.variables, result);
-    const envKey = utils.toEnvironmentKey(context.httpFile.activeEnvironment);
-    if (!context.httpFile.variablesPerEnv[envKey]) {
-      context.httpFile.variablesPerEnv[envKey] = {};
-    }
-    Object.assign(context.httpFile.variablesPerEnv[envKey], result);
+    utils.setVariableInContext(result, context);
   }
   return !result.$cancel;
 }

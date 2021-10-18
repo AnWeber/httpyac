@@ -120,13 +120,10 @@ export class GrpcClientAction implements models.HttpRegionAction {
       },
       stream => {
         if (stream instanceof Writable || stream instanceof Duplex) {
-          context.variables.grpcStream = stream;
+          utils.setVariableInContext({ grpcStream: stream }, context);
           context.httpRegion.hooks.onStreaming.trigger(context)
             .then(() => stream.end())
-            .catch(err => reject(err))
-            .finally(() => {
-              delete context.variables.grpcStream;
-            });
+            .catch(err => reject(err));
         }
       }
     ];
@@ -144,6 +141,7 @@ export class GrpcClientAction implements models.HttpRegionAction {
       log.debug(`GRPC ${type}`);
       if (!isResolved) {
         isResolved = true;
+        utils.unsetVariableInContext({ grpcStream: true }, context);
         await Promise.all(loadingPromises);
         const response = this.toMergedHttpResponse(mergedData, getResponseTemplate());
         resolve(response);

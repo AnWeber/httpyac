@@ -20,24 +20,14 @@ export class ResponseAsVariableAction implements HttpRegionAction {
   }
 
   private handleNameMetaData(body: unknown, context: ProcessorContext) {
-    const { httpRegion, httpFile, variables } = context;
+    const { httpRegion } = context;
     if (httpRegion.metaData.name) {
       const name = httpRegion.metaData.name
         .trim()
         .replace(/\s/u, '_')
         .replace(/-./gu, value => value[1].toUpperCase());
       if (utils.isValidVariableName(name)) {
-        variables[httpRegion.metaData.name] = body;
-
-
-        const envKey = utils.toEnvironmentKey(httpFile.activeEnvironment);
-        if (httpFile.variablesPerEnv[envKey]) {
-          httpFile.variablesPerEnv[envKey][name] = body;
-        } else {
-          httpFile.variablesPerEnv[envKey] = {
-            [name]: body,
-          };
-        }
+        utils.setVariableInContext({ [name]: body }, context);
       } else {
         const message = `Javascript Keyword ${name} not allowed as name`;
         userInteractionProvider.showWarnMessage?.(message);

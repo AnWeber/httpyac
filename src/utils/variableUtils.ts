@@ -2,6 +2,7 @@ import * as models from '../models';
 import { toAbsoluteFilename } from './fsUtils';
 import { isString } from './stringUtils';
 import * as io from '../io';
+import { toEnvironmentKey } from './environmentUtils';
 
 export function expandVariables(variables: models.Variables) : models.Variables {
   for (const [key, value] of Object.entries(variables)) {
@@ -53,4 +54,24 @@ export async function replaceFilePath<T>(
     io.log.warn(message);
   }
   return undefined;
+}
+
+export function setVariableInContext(variables: models.Variables, context: models.ProcessorContext) {
+  Object.assign(context.variables, variables);
+  const envKey = toEnvironmentKey(context.httpFile.activeEnvironment);
+  if (!context.httpFile.variablesPerEnv[envKey]) {
+    context.httpFile.variablesPerEnv[envKey] = {};
+  }
+  Object.assign(context.httpFile.variablesPerEnv[envKey], variables);
+}
+
+export function unsetVariableInContext(variables: models.Variables, context: models.ProcessorContext) {
+  const envKey = toEnvironmentKey(context.httpFile.activeEnvironment);
+  const envVariables = context.httpFile.variablesPerEnv[envKey];
+  for (const key of Object.keys(variables)) {
+    delete context.variables[key];
+    if (envVariables) {
+      delete envVariables[key];
+    }
+  }
 }

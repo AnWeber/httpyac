@@ -59,6 +59,7 @@ export class WebSocketClientAction implements models.HttpRegionAction {
       };
 
       const client = new WebSocket(request.url, options);
+      const webSocketVariables = { websocketClient: client };
       let disposeCancellation: models.Dispose | undefined;
       if (context.progress) {
         disposeCancellation = context.progress?.register?.(() => {
@@ -71,13 +72,11 @@ export class WebSocketClientAction implements models.HttpRegionAction {
         if (request.body) {
           client.send(request.body, err => io.log.error(err));
         }
+        utils.setVariableInContext(webSocketVariables, context);
         context.variables.websocketClient = client;
         context.httpRegion.hooks.onStreaming.trigger(context)
           .then(() => client.close(WEBSOCKET_CLOSE_NORMAL, 'CLOSE_NORMAL'))
-          .catch(err => reject(err))
-          .finally(() => {
-            delete context.variables.websocketClient;
-          });
+          .catch(err => reject(err));
       });
       client.on('upgrade', message => {
         io.log.debug('WebSocket upgrade', message);
@@ -109,9 +108,9 @@ export class WebSocketClientAction implements models.HttpRegionAction {
         if (disposeCancellation) {
           disposeCancellation();
         }
+        utils.unsetVariableInContext(webSocketVariables, context);
         await Promise.all(loadingPromises);
-        const response = this.toMergedHttpResponse(code, reason, mergedData, getResponseTemplate());
-        resolve(response);
+        resolve(this.toMergedHttpResponse(code, reason, mergedData, getResponseTemplate()));
       });
 
     });

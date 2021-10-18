@@ -41,7 +41,6 @@ export class MQTTClientAction implements models.HttpRegionAction {
       const options: IClientOptions = {
       };
 
-
       if (httpRegion.metaData.noRejectUnauthorized) {
         options.rejectUnauthorized = false;
       }
@@ -61,6 +60,7 @@ export class MQTTClientAction implements models.HttpRegionAction {
       }
 
       const client = connect(request.url, options);
+      const mqttVariables = { mqttClient: client };
       client.on('connect', packet => {
         io.log.info('MQTT connect', packet);
         responseTemplate.protocol = packet.protocolId || 'MQTT';
@@ -97,9 +97,9 @@ export class MQTTClientAction implements models.HttpRegionAction {
         if (disposeCancellation) {
           disposeCancellation();
         }
+        utils.unsetVariableInContext(mqttVariables, context);
         await Promise.all(loadingPromises);
-        const response = this.toMergedHttpResponse(mergedData, responseTemplate);
-        resolve(response);
+        resolve(this.toMergedHttpResponse(mergedData, responseTemplate));
       });
       const topics = utils.getHeaderArray(request.headers, 'topic');
       if (topics) {
@@ -114,13 +114,10 @@ export class MQTTClientAction implements models.HttpRegionAction {
           client.subscribe(request.body, err => io.log.error(err));
         }
       }
-      context.variables.mqttClient = client;
+      utils.setVariableInContext(mqttVariables, context);
       context.httpRegion.hooks.onStreaming.trigger(context)
         .then(() => client.end())
-        .catch(err => reject(err))
-        .finally(() => {
-          delete context.variables.mqttClient;
-        });
+        .catch(err => reject(err));
     });
   }
 

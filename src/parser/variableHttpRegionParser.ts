@@ -64,12 +64,7 @@ class VariableAction {
           if (result === models.HookCancel) {
             return false;
           }
-          context.variables[key] = result;
-          const envKey = utils.toEnvironmentKey(context.httpFile.activeEnvironment);
-          if (!context.httpFile.variablesPerEnv[envKey]) {
-            context.httpFile.variablesPerEnv[envKey] = {};
-          }
-          context.httpFile.variablesPerEnv[envKey][key] = result;
+          utils.setVariableInContext({ [key]: result }, context);
         } else {
           const message = `Javascript Keyword ${key} not allowed as variable`;
           userInteractionProvider.showWarnMessage?.(message);
