@@ -1,8 +1,8 @@
 import * as models from '../models';
-import * as actions from '../actions';
 import * as utils from '../utils';
 import { ParserRegex } from './parserRegex';
 import { log } from '../io';
+import * as metaData from './metaData';
 
 
 export async function parseMetaData(getLineReader: models.getHttpLineGenerator, context: models.ParserContext): Promise<models.HttpRegionParserResult> {
@@ -100,78 +100,19 @@ export function parseComments(httpLine: models.HttpLine, context: models.ParserC
           endOffset: httpLine.textLine.indexOf(match.groups.value) + match.groups.value.length,
         });
       }
-
       const key = match.groups.key.replace(/-./gu, value => value[1].toUpperCase());
-
-      switch (key) {
-        case 'import':
-          if (match.groups.value) {
-            httpRegion.hooks.execute.addObjHook(obj => obj.process, new actions.ImportMetaAction(
-              match.groups.value, context.httpFileStore
-            ));
-          }
+      const metaDataHandlers = [
+        metaData.importMetaDataHandler,
+        metaData.loopMetaDataHandler,
+        metaData.refMetaDataHandler,
+        metaData.responseRefMetaDataHandler,
+        metaData.sleepMetaDataHandler,
+        metaData.defaultMetaDataHandler,
+      ];
+      for (const metaDataHandler of metaDataHandlers) {
+        if (metaDataHandler(key, match.groups.value, context)) {
           break;
-        case 'responseRef':
-          if (match.groups.value) {
-            if (!httpRegion.responseRefs) {
-              httpRegion.responseRefs = [];
-            }
-            httpRegion.responseRefs.push(match.groups.value);
-          }
-          break;
-        case 'loop':
-          if (match.groups.value) {
-            const forOfMatch = ParserRegex.meta.forOf.exec(match.groups.value);
-            if (forOfMatch?.groups?.iterable && forOfMatch?.groups?.variable) {
-              httpRegion.hooks.execute.addInterceptor(new actions.LoopMetaAction({
-                type: actions.LoopMetaType.forOf,
-                variable: forOfMatch.groups.variable,
-                iterable: forOfMatch.groups.iterable,
-              }));
-            } else {
-              const forMatch = ParserRegex.meta.for.exec(match.groups.value);
-              if (forMatch?.groups?.counter) {
-                httpRegion.hooks.execute.addInterceptor(new actions.LoopMetaAction({
-                  type: actions.LoopMetaType.for,
-                  counter: Number.parseInt(forMatch.groups.counter, 10),
-                }));
-              } else {
-                const whileMatch = ParserRegex.meta.while.exec(match.groups.value);
-                if (whileMatch?.groups?.expression) {
-                  httpRegion.hooks.execute.addInterceptor(new actions.LoopMetaAction({
-                    type: actions.LoopMetaType.while,
-                    expression: whileMatch.groups.expression,
-                  }));
-                }
-              }
-            }
-          }
-          break;
-        case 'ref':
-          if (match.groups.value) {
-            addRefHttpRegion(httpRegion, match.groups.value, false);
-          }
-          break;
-        case 'sleep':
-          if (match.groups.value) {
-            const timeout = parseInt(match.groups.value, 10);
-            if (Number.isSafeInteger(timeout)) {
-              httpRegion.hooks.execute.addHook('sleep', async () => await utils.sleep(timeout));
-            } else {
-              log.debug(`meta sleep ${match.groups.value} is no valid Integer`);
-            }
-          }
-          break;
-        case 'forceRef':
-          if (match.groups.value) {
-            addRefHttpRegion(httpRegion, match.groups.value, true);
-          }
-          break;
-        default:
-          httpRegion.metaData = Object.assign(httpRegion.metaData || {}, {
-            [key]: match.groups.value || true,
-          });
-          break;
+        }
       }
     }
     return result;
@@ -179,13 +120,6 @@ export function parseComments(httpLine: models.HttpLine, context: models.ParserC
   return false;
 }
 
-
-function addRefHttpRegion(httpRegion: models.HttpRegion, name: string, force: boolean) {
-  httpRegion.hooks.execute.addObjHook(obj => obj.process, new actions.RefMetaAction({
-    name,
-    force
-  }));
-}
 
 function isMarkdownRequest(context: models.ParserContext) {
   if (context.httpRegion.request?.headers) {
