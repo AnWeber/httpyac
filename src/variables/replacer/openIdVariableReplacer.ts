@@ -1,13 +1,13 @@
-import { ProcessorContext, HttpClient, UserSession, HookCancel } from '../../models';
+import { ProcessorContext, HttpClient, UserSession, HookCancel, VariableType } from '../../models';
 import { userSessionStore } from '../../store';
 import * as oauth from './oauth';
 import { ParserRegex } from '../../parser';
 import { log } from '../../io';
-import { isString } from '../../utils';
+import * as utils from '../../utils';
 
 
 export async function openIdVariableReplacer(text: unknown, type: string, context: ProcessorContext): Promise<unknown> {
-  if (type.toLowerCase() === 'authorization' && isString(text)) {
+  if ((type.toLowerCase() === 'authorization' || type === VariableType.variable) && utils.isString(text)) {
     const match = ParserRegex.auth.oauth2.exec(text);
     if (match && match.groups) {
       const flow = match.groups.flow || 'client_credentials';
@@ -18,7 +18,7 @@ export async function openIdVariableReplacer(text: unknown, type: string, contex
       if (openIdFlow && config) {
         const cacheKey = openIdFlow.getCacheKey(config);
         if (cacheKey) {
-          let openIdInformation = getOpenIdConfiguration(cacheKey, tokenExchangeConfig || config);
+          let openIdInformation = getSessionOpenIdInformation(cacheKey, tokenExchangeConfig || config);
           userSessionStore.removeUserSession(cacheKey);
           if (openIdInformation) {
             log.debug(`openid refresh token flow used: ${cacheKey}`);
@@ -33,6 +33,7 @@ export async function openIdVariableReplacer(text: unknown, type: string, contex
           }
           if (openIdInformation) {
             log.debug(`openid flow ${flow} finished`);
+            context.variables.oauth2Session = openIdInformation;
             userSessionStore.setUserSession(openIdInformation);
             keepAlive(cacheKey, context.httpClient);
             return `Bearer ${openIdInformation.accessToken}`;
@@ -45,7 +46,7 @@ export async function openIdVariableReplacer(text: unknown, type: string, contex
   return text;
 }
 
-function getOpenIdConfiguration(cacheKey: string, config: oauth.OpenIdConfiguration): oauth.OpenIdInformation | false {
+function getSessionOpenIdInformation(cacheKey: string, config: oauth.OpenIdConfiguration): oauth.OpenIdInformation | false {
   const openIdInformation = userSessionStore.userSessions.find(obj => obj.id === cacheKey);
   if (isOpenIdInformation(openIdInformation) && JSON.stringify(openIdInformation.config) === JSON.stringify(config)) {
     return openIdInformation;
