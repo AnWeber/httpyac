@@ -107,6 +107,7 @@ function convertCliOptionsToContext(cliOptions: CliOptions): CliContext {
         }
       }
     },
+    logStream: cliOptions.json ? undefined : getStreamLogger(cliOptions),
     logResponse: cliOptions.json ? undefined : getRequestLogger(cliOptions),
   };
 
@@ -201,6 +202,16 @@ function getHttpRegion(httpFile: models.HttpFile, cliOptions: CliOptions): model
         && obj.symbol.endLine >= cliOptions.httpRegionLine) || false;
   }
   return httpRegion;
+}
+
+function getStreamLogger(options: CliOptions): models.StreamLogger | undefined {
+  if (options.output !== 'none') {
+    return async function logStream(_channel, type, message) {
+      const data = Buffer.isBuffer(message) ? message.toString('utf-8') : message;
+      console.info(`${new Date().toLocaleTimeString()} - ${type}: `, data);
+    };
+  }
+  return undefined;
 }
 
 function getRequestLogger(options: CliOptions): models.RequestLogger | undefined {

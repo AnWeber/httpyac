@@ -91,7 +91,11 @@ export class WebSocketClientAction implements models.HttpRegionAction {
         io.log.debug(`WebSocket ${type}`, body);
         mergedData.push({ type, body });
         if (!context.httpRegion.metaData.noStreamingLog) {
-          loadingPromises.push(utils.logResponse(this.toHttpResponse(body, getResponseTemplate()), context));
+          if (context.logStream) {
+            loadingPromises.push(context.logStream('WebSocket', type, body));
+          } else {
+            loadingPromises.push(utils.logResponse(this.toHttpResponse(body, getResponseTemplate()), context));
+          }
         }
       };
 

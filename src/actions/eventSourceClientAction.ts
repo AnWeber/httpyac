@@ -66,7 +66,11 @@ export class EventSourceClientAction implements models.HttpRegionAction {
             }
             eventStream[evt.type].push(evt.data);
             if (!context.httpRegion.metaData.noStreamingLog) {
-              loadingPromises.push(utils.logResponse(this.toHttpResponse(evt, responseTemplate), context));
+              if (context.logStream) {
+                loadingPromises.push(context.logStream('EventSource', evt.type, evt.data));
+              } else {
+                loadingPromises.push(utils.logResponse(this.toHttpResponse(evt, responseTemplate), context));
+              }
             }
           }
         });

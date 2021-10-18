@@ -62,38 +62,42 @@ export class MQTTClientAction implements models.HttpRegionAction {
       const client = connect(request.url, options);
       const mqttVariables = { mqttClient: client };
       client.on('connect', packet => {
-        io.log.info('MQTT connect', packet);
+        io.log.debug('MQTT connect', packet);
         responseTemplate.protocol = packet.protocolId || 'MQTT';
         responseTemplate.headers = packet.properties;
         if (packet.protocolVersion) {
           responseTemplate.httpVersion = `${packet.protocolVersion}`;
         }
       });
-      client.on('reconnect', () => io.log.info('MQTT reconnect'));
+      client.on('reconnect', () => io.log.debug('MQTT reconnect'));
       client.on('message', (topic, message, packet) => {
-        io.log.info('MQTT message', message, packet);
+        io.log.debug('MQTT message', message, packet);
         mergedData.push({
           topic,
           message: message.toString('utf-8')
         });
         if (!context.httpRegion.metaData.noStreamingLog) {
-          loadingPromises.push(utils.logResponse(this.toHttpResponse(message, {
-            ...packet,
-            topic,
-          }, responseTemplate), context));
+          if (context.logStream) {
+            loadingPromises.push(context.logStream('MQTT', topic, message));
+          } else {
+            loadingPromises.push(utils.logResponse(this.toHttpResponse(message, {
+              ...packet,
+              topic,
+            }, responseTemplate), context));
+          }
         }
       });
-      client.on('packetsend', packet => io.log.info('MQTT packetsend', packet));
-      client.on('packetreceive', packet => io.log.info('MQTT packetreceive', packet));
-      client.on('disconnect', packet => io.log.info('MQTT disconnect', packet));
-      client.on('close', () => io.log.info('MQTT close'));
-      client.on('offline', () => io.log.info('MQTT offline'));
+      client.on('packetsend', packet => io.log.debug('MQTT packetsend', packet));
+      client.on('packetreceive', packet => io.log.debug('MQTT packetreceive', packet));
+      client.on('disconnect', packet => io.log.debug('MQTT disconnect', packet));
+      client.on('close', () => io.log.debug('MQTT close'));
+      client.on('offline', () => io.log.debug('MQTT offline'));
       client.on('error', err => {
-        io.log.info('MQTT error', err);
+        io.log.debug('MQTT error', err);
         mergedData.push(err);
       });
       client.on('end', async () => {
-        io.log.info('MQTT end');
+        io.log.debug('MQTT end');
         if (disposeCancellation) {
           disposeCancellation();
         }

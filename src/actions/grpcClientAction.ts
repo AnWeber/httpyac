@@ -52,7 +52,6 @@ export class GrpcClientAction implements models.HttpRegionAction {
     const metaData = this.getMetaData(request);
 
     const startTime = new Date().getTime();
-
     return await new Promise<models.HttpResponse>((resolve, reject) => {
       const args: Array<unknown> = [
         metaData,
@@ -95,7 +94,7 @@ export class GrpcClientAction implements models.HttpRegionAction {
       }
 
       if (methodDefinition?.responseStream) {
-        grpcActions.push(...this.getResponseStreamActions(streamResolve, getResponseTemplate, context));
+        grpcActions.push(...this.getResponseStreamActions(methodDefinition.path, streamResolve, getResponseTemplate, context));
       } else {
         args.push((err: Error, data: unknown) => {
           streamResolve(this.toHttpResponse(err || data, getResponseTemplate()));
@@ -130,6 +129,7 @@ export class GrpcClientAction implements models.HttpRegionAction {
   }
 
   private getResponseStreamActions(
+    methodName: string,
     resolve: (value: models.HttpResponse) => void,
     getResponseTemplate: () => Partial<models.HttpResponse>,
     context: models.ProcessorContext
@@ -152,7 +152,11 @@ export class GrpcClientAction implements models.HttpRegionAction {
         log.debug('GRPC data', chunk);
         mergedData.push(chunk);
         if (!context.httpRegion.metaData.noStreamingLog) {
-          loadingPromises.push(utils.logResponse(this.toHttpResponse(chunk, getResponseTemplate()), context));
+          if (context.logStream) {
+            loadingPromises.push(context.logStream('gRPC', methodName, chunk));
+          } else {
+            loadingPromises.push(utils.logResponse(this.toHttpResponse(chunk, getResponseTemplate()), context));
+          }
         }
       }),
       stream => stream.on('error', err => {
