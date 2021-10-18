@@ -26,8 +26,6 @@ export class EventSourceClientAction implements models.HttpRegionAction {
   ): Promise<models.HttpResponse> {
     const { httpRegion } = context;
 
-    const startTime = new Date().getTime();
-
     if (!request.url) {
       throw new Error('request url undefined');
     }
@@ -35,20 +33,16 @@ export class EventSourceClientAction implements models.HttpRegionAction {
     if (httpRegion.metaData.noRejectUnauthorized) {
       options.rejectUnauthorized = false;
     }
-    options.headers = request.headers;
+    const events = utils.getHeaderArray(request.headers, 'event') || ['data'];
+    const headers = { ...request.headers };
+    utils.deleteHeader(headers, 'event');
+    options.headers = headers;
 
     const responseTemplate: Partial<models.HttpResponse> = {
       request
     };
-    const mergedData: Array<unknown> = [];
+    const eventStream: { [key: string]: Array<unknown> } = {};
     const loadingPromises: Array<Promise<unknown>> = [];
-
-    const getResponseTemplate: (() => Partial<models.HttpResponse>) = () => {
-      responseTemplate.timings = {
-        total: new Date().getTime() - startTime,
-      };
-      return responseTemplate;
-    };
 
     let disposeCancellation: models.Dispose | undefined;
     try {
@@ -61,21 +55,30 @@ export class EventSourceClientAction implements models.HttpRegionAction {
       client.addEventListener('open', evt => {
         io.log.debug('SSE open', evt);
       });
-      client.addEventListener('data', evt => {
-        io.log.debug('SSE data', evt);
-        mergedData.push(evt);
-        if (!context.httpRegion.metaData.noStreamingLog) {
-          loadingPromises.push(utils.logResponse(this.toHttpResponse(evt, getResponseTemplate()), context));
-        }
-      });
+
+
+      for (const eventType of events) {
+        client.addEventListener(eventType, evt => {
+          io.log.debug(`SSE ${eventType}`, evt);
+          if (this.isMessageEvent(evt)) {
+            if (!eventStream[evt.type]) {
+              eventStream[evt.type] = [];
+            }
+            eventStream[evt.type].push(evt.data);
+            if (!context.httpRegion.metaData.noStreamingLog) {
+              loadingPromises.push(utils.logResponse(this.toHttpResponse(evt, responseTemplate), context));
+            }
+          }
+        });
+      }
       client.addEventListener('error', evt => {
         io.log.debug('SSE error', evt);
-        mergedData.push(evt);
+        eventStream.error = [evt];
       });
       await context.httpRegion.hooks.onStreaming.trigger(context);
       await Promise.all(loadingPromises);
       client.close();
-      const response = this.toMergedHttpResponse(mergedData, getResponseTemplate());
+      const response = this.toMergedHttpResponse(eventStream, responseTemplate);
       return response;
     } finally {
       if (disposeCancellation) {
@@ -89,10 +92,9 @@ export class EventSourceClientAction implements models.HttpRegionAction {
     return !!data?.type;
   }
 
-  private toMergedHttpResponse(data: Array<unknown>, responseTemplate: Partial<models.HttpResponse>): models.HttpResponse {
+  private toMergedHttpResponse(data: Record<string, Array<unknown>>, responseTemplate: Partial<models.HttpResponse>): models.HttpResponse {
     const response = this.toHttpResponse(data, responseTemplate);
-    const error = data.find(obj => this.isEventType(obj) && obj.type === 'error');
-    if (utils.isError(error)) {
+    if (data.error) {
       response.statusCode = -1;
     }
     return response;
@@ -125,4 +127,15 @@ export class EventSourceClientAction implements models.HttpRegionAction {
   private isEventSourceRequest(request: models.Request | undefined): request is models.EventSourceRequest {
     return request?.method === 'SSE';
   }
+
+
+  private isMessageEvent(obj: unknown): obj is EventSourceMessageEvent {
+    const evt = obj as EventSourceMessageEvent;
+    return !!evt.type && utils.isString(evt.type) && !!evt.data;
+  }
+}
+
+interface EventSourceMessageEvent{
+  type: string;
+  data: unknown;
 }

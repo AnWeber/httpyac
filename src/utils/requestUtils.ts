@@ -20,6 +20,17 @@ export function isHttpRequest(request: models.Request | undefined): request is m
   return isHttpRequestMethod(request?.method);
 }
 
+export function deleteHeader(headers: Record<string, unknown> | undefined, ...headerNames: string[]): void {
+  if (headers) {
+    for (const headerName of headerNames) {
+      const entry = Object.entries(headers)
+        .find(([key]) => key.toLowerCase() === headerName.toLowerCase());
+      if (entry && entry.length > 1) {
+        delete headers[entry[0]];
+      }
+    }
+  }
+}
 
 export function getHeader<T>(headers: Record<string, T> | undefined, headerName: string): T | null {
   if (headers) {
