@@ -20,6 +20,22 @@ export function isHttpRequest(request: models.Request | undefined): request is m
   return isHttpRequestMethod(request?.method);
 }
 
+export function isWebsocketRequest(request: models.Request | undefined): request is models.WebsocketRequest {
+  return request?.method === 'WS';
+}
+
+export function isEventSourceRequest(request: models.Request | undefined): request is models.EventSourceRequest {
+  return request?.method === 'SSE';
+}
+
+export function isMQTTRequest(request: models.Request | undefined): request is models.MQTTRequest {
+  return request?.method === 'MQTT';
+}
+
+export function isGrpcRequest(request: models.Request | undefined): request is models.GrpcRequest {
+  return request?.method === 'GRPC';
+}
+
 export function deleteHeader(headers: Record<string, unknown> | undefined, ...headerNames: string[]): void {
   if (headers) {
     for (const headerName of headerNames) {

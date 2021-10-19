@@ -25,7 +25,7 @@ export class GrpcClientAction implements models.HttpRegionAction {
     grpc.setLogger(log);
     const { request } = context;
     const protoDefinitions = context.options.protoDefinitions;
-    if (this.isGrpcRequest(request) && request?.url && protoDefinitions) {
+    if (utils.isGrpcRequest(request) && request?.url && protoDefinitions) {
       return await utils.triggerRequestResponseHooks(async () => {
         if (request.url) {
           const serviceData = this.getService(request.url, protoDefinitions);
@@ -266,8 +266,5 @@ export class GrpcClientAction implements models.HttpRegionAction {
 
   private isGrpcError(data: unknown): data is Error & GrpcError {
     return data instanceof Error;
-  }
-  private isGrpcRequest(request: models.Request | undefined): request is models.GrpcRequest {
-    return request?.method === 'GRPC';
   }
 }

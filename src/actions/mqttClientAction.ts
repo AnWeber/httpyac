@@ -15,7 +15,7 @@ export class MQTTClientAction implements models.HttpRegionAction {
 
   async process(context: models.ProcessorContext): Promise<boolean> {
     const { request } = context;
-    if (this.isMQTTRequest(request)) {
+    if (utils.isMQTTRequest(request)) {
       return await utils.triggerRequestResponseHooks(async () => {
         if (request.url) {
           return await this.requestMQTT(request, context);
@@ -169,8 +169,5 @@ export class MQTTClientAction implements models.HttpRegionAction {
 
   private isMQTTError(data: unknown): data is Error & { code: string, errno: number;} {
     return data instanceof Error;
-  }
-  private isMQTTRequest(request: models.Request | undefined): request is models.MQTTRequest {
-    return request?.method === 'MQTT';
   }
 }

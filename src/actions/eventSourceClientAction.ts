@@ -9,7 +9,7 @@ export class EventSourceClientAction implements models.HttpRegionAction {
 
   async process(context: models.ProcessorContext): Promise<boolean> {
     const { request } = context;
-    if (this.isEventSourceRequest(request)) {
+    if (utils.isEventSourceRequest(request)) {
       return await utils.triggerRequestResponseHooks(async () => {
         if (request.url) {
           return await this.requestEventSource(request, context);
@@ -128,10 +128,6 @@ export class EventSourceClientAction implements models.HttpRegionAction {
     }
     return response;
   }
-  private isEventSourceRequest(request: models.Request | undefined): request is models.EventSourceRequest {
-    return request?.method === 'SSE';
-  }
-
 
   private isMessageEvent(obj: unknown): obj is EventSourceMessageEvent {
     const evt = obj as EventSourceMessageEvent;

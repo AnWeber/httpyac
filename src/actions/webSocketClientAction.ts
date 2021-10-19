@@ -12,7 +12,7 @@ export class WebSocketClientAction implements models.HttpRegionAction {
 
   async process(context: models.ProcessorContext): Promise<boolean> {
     const { request } = context;
-    if (this.isWebsocketRequest(request)) {
+    if (utils.isWebsocketRequest(request)) {
       return await utils.triggerRequestResponseHooks(async () => {
         if (request.url) {
           return await this.requestWebsocket(request, context);
@@ -171,7 +171,5 @@ export class WebSocketClientAction implements models.HttpRegionAction {
   private isWebsocketError(data: unknown): data is Error & {code: string} {
     return data instanceof Error;
   }
-  private isWebsocketRequest(request: models.Request | undefined): request is models.WebsocketRequest {
-    return request?.method === 'WS';
-  }
+
 }
