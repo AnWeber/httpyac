@@ -55,8 +55,6 @@ export async function parseMetaData(getLineReader: models.getHttpLineGenerator, 
 
 
 export function parseComments(httpLine: models.HttpLine, context: models.ParserContext, metaRegex: RegExp): models.SymbolParserResult | false {
-  const { httpRegion } = context;
-
   if (metaRegex.test(httpLine.textLine)) {
     const result: models.SymbolParserResult = {
       symbols: [{
