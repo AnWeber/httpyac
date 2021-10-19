@@ -69,8 +69,9 @@ export function parseComments(httpLine: models.HttpLine, context: models.ParserC
     };
     const match = ParserRegex.meta.data.exec(httpLine.textLine);
     if (match && match.groups && match.groups.key) {
+      const key = match.groups.key.replace(/-./gu, value => value[1].toUpperCase());
       result.symbols[0].children = [{
-        name: match.groups.key,
+        name: key,
         description: match.groups.value || '-',
         kind: models.HttpSymbolKind.metaData,
         startLine: httpLine.line,
@@ -78,8 +79,8 @@ export function parseComments(httpLine: models.HttpLine, context: models.ParserC
         endLine: httpLine.line,
         endOffset: httpLine.textLine.length,
         children: [{
-          name: match.groups.key,
-          description: 'key of meta data',
+          name: key,
+          description: knownMetaData.find(obj => obj.name === key)?.description || 'key of meta data',
           kind: models.HttpSymbolKind.key,
           startLine: httpLine.line,
           startOffset: httpLine.textLine.indexOf(match.groups.key),
@@ -98,7 +99,6 @@ export function parseComments(httpLine: models.HttpLine, context: models.ParserC
           endOffset: httpLine.textLine.indexOf(match.groups.value) + match.groups.value.length,
         });
       }
-      const key = match.groups.key.replace(/-./gu, value => value[1].toUpperCase());
       const metaDataHandlers = [
         metaData.importMetaDataHandler,
         metaData.loopMetaDataHandler,
@@ -129,3 +129,85 @@ function isMarkdownRequest(context: models.ParserContext) {
   }
   return false;
 }
+
+
+export const knownMetaData: Array<{
+  name: string,
+  description: string;
+  completions?: Array<string>
+}> = [
+  {
+    name: 'name',
+    description: 'responses of a requests with a name are automatically added as variables and can be reused by other requests',
+  }, {
+    name: 'debug',
+    description: 'enable debug log level',
+  }, {
+    name: 'description',
+    description: 'additional description of region',
+  }, {
+    name: 'disabled',
+    description: 'requests can be disabled',
+  }, {
+    name: 'extension',
+    description: 'extension of file for save or openWith.',
+  }, {
+    name: 'forceRef',
+    description: 'When the request is called, it is ensured that the referenced request is always called beforehand',
+  }, {
+    name: 'import',
+    description: 'reference Requests from other files.',
+  }, {
+    name: 'injectVariables',
+    description: 'Inject Variables in request body (needed because of compatibility with Intellij).',
+  }, {
+    name: 'jwt',
+    description: 'supports auto decode of jwt token.',
+  }, {
+    name: 'language',
+    description: 'language id of the response view',
+  }, {
+    name: 'loop',
+    description: 'allows multiple Invocations of a Request with different parameters.',
+    completions: ['for ${item} of ${array}', 'for ${number}', 'while ${condition}']
+  }, {
+    name: 'noLog',
+    description: 'prevent logging of request data in output console',
+  }, {
+    name: 'noCookieJar',
+    description: 'cookieJar support is disabled for this request',
+  }, {
+    name: 'noClientCert',
+    description: 'SSL client certificate is not send for this request',
+  }, {
+    name: 'noRejectUnauthorized',
+    description: 'all invalid SSL certificates will be ignored and no error will be thrown.',
+  }, {
+    name: 'noResponseView',
+    description: 'prevent output in editor document.',
+  }, {
+    name: 'noStreamingLog',
+    description: 'prevent logging of streaming request data in output console',
+  }, {
+    name: 'note',
+    description: 'shows a confirmation dialog before sending request',
+  }, {
+    name: 'openWith',
+    description: 'viewType of custom editor to preview files',
+  }, {
+    name: 'ref',
+    description: 'When the request is called, it is ensured that the referenced request is called beforehand',
+  }, {
+    name: 'save',
+    description: 'If specified, the response will not be displayed but saved directly.',
+  }, {
+    name: 'sleep',
+    description: 'wait specified millisecondes, before next step.',
+  }, {
+    name: 'title',
+    description: 'additional title of region',
+  }, {
+    name: 'verbose',
+    description: 'enable trace log level',
+  }
+];
