@@ -26,7 +26,7 @@ export class IntellijHttpResponse implements JetbrainsHttpResponse {
 
 export class IntellijHeaders implements JetbrainsResponseHeaders {
 
-  constructor(private readonly headers: Record<string, unknown>) {}
+  constructor(private readonly headers: Record<string, unknown> | undefined) {}
 
   valueOf(headerName: string): string | null {
     if (this.headers) {

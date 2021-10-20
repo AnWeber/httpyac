@@ -1,12 +1,13 @@
 import * as models from '../models';
 import * as utils from '../utils';
 import * as io from '../io';
-import { connect, IClientOptions } from 'mqtt';
+import { connect, IClientOptions, QoS, MqttClient } from 'mqtt';
 
 
 interface MQTTMessage{
   topic: string;
   message: string;
+  date: Date,
 }
 
 export class MQTTClientAction implements models.HttpRegionAction {
@@ -38,13 +39,19 @@ export class MQTTClientAction implements models.HttpRegionAction {
         reject(new Error('request url undefined'));
         return;
       }
+
       const options: IClientOptions = {
+        clientId: `httpyac_${Math.random().toString(16).slice(2, 8)}`,
+        username: utils.getHeader(request.headers, 'username'),
+        password: utils.getHeader(request.headers, 'password'),
+        keepalive: utils.toNumber(utils.getHeader(request.headers, 'keepalive')),
+        clean: !!utils.getHeader(request.headers, 'clean'),
+        ...request.options,
       };
 
       if (httpRegion.metaData.noRejectUnauthorized) {
         options.rejectUnauthorized = false;
       }
-      // TODO headers
 
       const responseTemplate: Partial<models.HttpResponse> = {
         request
@@ -74,16 +81,12 @@ export class MQTTClientAction implements models.HttpRegionAction {
         io.log.debug('MQTT message', message, packet);
         mergedData.push({
           topic,
-          message: message.toString('utf-8')
+          message: message.toString('utf-8'),
+          date: new Date(),
         });
         if (!context.httpRegion.metaData.noStreamingLog) {
           if (context.logStream) {
             loadingPromises.push(context.logStream('MQTT', topic, message));
-          } else {
-            loadingPromises.push(utils.logResponse(this.toHttpResponse(message, {
-              ...packet,
-              topic,
-            }, responseTemplate), context));
           }
         }
       });
@@ -105,18 +108,20 @@ export class MQTTClientAction implements models.HttpRegionAction {
         await Promise.all(loadingPromises);
         resolve(this.toMergedHttpResponse(mergedData, responseTemplate));
       });
+
+
+      const subscribeArray = utils.getHeaderArray(request.headers, 'subscribe');
+      if (subscribeArray) {
+        this.subscribeToTopics(client, subscribeArray, this.toQoS(utils.getHeader(request.headers, 'qos')));
+      }
+      const publishArray = utils.getHeaderArray(request.headers, 'publish');
+      if (publishArray) {
+        this.publishToTopics(client, publishArray, request);
+      }
       const topics = utils.getHeaderArray(request.headers, 'topic');
       if (topics) {
-        for (const topic of topics) {
-          client.subscribe(topic);
-        }
-
-        if (utils.isString(request.body)) {
-          for (const topic of topics) {
-            client.publish(topic, request.body, {}, err => err && io.log.error('publish error', err));
-          }
-          client.subscribe(request.body, err => io.log.error(err));
-        }
+        this.subscribeToTopics(client, topics, this.toQoS(utils.getHeader(request.headers, 'qos')));
+        this.publishToTopics(client, topics, request);
       }
       utils.setVariableInContext(mqttVariables, context);
       context.httpRegion.hooks.onStreaming.trigger(context)
@@ -125,11 +130,51 @@ export class MQTTClientAction implements models.HttpRegionAction {
     });
   }
 
+  private subscribeToTopics(client: MqttClient, topics: string[], qos: QoS) {
+    for (const topic of topics) {
+      client.subscribe(topic, {
+        qos,
+      });
+    }
+  }
+  private publishToTopics(client: MqttClient, topics: string[], request: models.MQTTRequest) {
+    if (request.body) {
+      for (const topic of topics) {
+        client.publish(topic, request.body, {
+          qos: this.toQoS(utils.getHeader(request.headers, 'qos')),
+          retain: !!utils.getHeader(request.headers, 'retain')
+        }, err => err && io.log.error('publish error', err));
+      }
+    }
+  }
+
+  private toQoS(qos: string |undefined) : QoS {
+    switch (qos) {
+      case '2': return 2;
+      case '1': return 1;
+      default: return 0;
+    }
+  }
+
   private toMergedHttpResponse(
     data: Array< MQTTMessage | Error>,
     responseTemplate: Partial<models.HttpResponse>
   ): models.HttpResponse {
-    const response = this.toHttpResponse(data, {}, responseTemplate);
+    const body = JSON.stringify(data, null, 2);
+    const rawBody: Buffer = Buffer.isBuffer(data) ? data : Buffer.from(body);
+    const response: models.HttpResponse = {
+      statusCode: 0,
+      protocol: 'MQTT',
+      contentType: {
+        mimeType: 'application/json',
+        charset: 'UTF-8',
+        contentType: 'application/json; charset=utf-8'
+      },
+      headers: {},
+      ...responseTemplate,
+      body,
+      rawBody,
+    };
 
     const error = data.find(obj => this.isMQTTError(obj));
     if (error && this.isMQTTError(error)) {
@@ -139,33 +184,6 @@ export class MQTTClientAction implements models.HttpRegionAction {
     return response;
   }
 
-
-  private toHttpResponse(
-    data: Buffer | Array<MQTTMessage | Error>,
-    headers: Record<string, unknown>,
-    responseTemplate: Partial<models.HttpResponse>
-  ): models.HttpResponse {
-    const body = Buffer.isBuffer(data) ? data.toString('utf-8') : JSON.stringify(data, null, 2);
-    const rawBody: Buffer = Buffer.isBuffer(data) ? data : Buffer.from(body);
-    const response: models.HttpResponse = {
-      statusCode: 0,
-      protocol: 'MQTT',
-      contentType: {
-        mimeType: 'text/plain',
-        charset: 'UTF-8',
-        contentType: 'text/plain; charset=utf-8'
-      },
-      ...responseTemplate,
-      headers,
-      body,
-      rawBody,
-    };
-    if (this.isMQTTError(data)) {
-      response.statusCode = data.errno || -1;
-      response.statusMessage = data.code;
-    }
-    return response;
-  }
 
   private isMQTTError(data: unknown): data is Error & { code: string, errno: number;} {
     return data instanceof Error;

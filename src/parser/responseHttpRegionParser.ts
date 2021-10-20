@@ -45,7 +45,8 @@ export async function parseResponse(getLineReader: getHttpLineGenerator, context
         symbol.endOffset = next.value.textLine.length;
         const headerMatch = ParserRegex.request.header.exec(next.value.textLine);
         if (headerMatch?.groups?.key && headerMatch?.groups?.value) {
-          context.httpRegion.response.headers[headerMatch.groups.key] = headerMatch.groups.value;
+
+          context.httpRegion.response.headers = Object.assign(context.httpRegion.response?.headers, { [headerMatch.groups.key]: headerMatch.groups.value });
         } else {
           break;
         }
@@ -74,7 +75,9 @@ export async function closeResponseBody(context: ParserContext): Promise<void> {
       const body = toMultiLineString(context.data.httpResponseSymbol.body);
       response.body = body;
       response.rawBody = Buffer.from(body);
-      response.contentType = parseContentType(response.headers);
+      if (response.headers) {
+        response.contentType = parseContentType(response.headers);
+      }
       setAdditionalResponseBody(response);
     }
 

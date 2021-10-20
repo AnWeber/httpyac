@@ -52,7 +52,9 @@ export function toMarkdownResponse(response: models.HttpResponse, options?: {
 }) : Array<string> {
   const result: Array<string> = [];
   result.push(`\`${response.protocol} ${response.statusCode}${response.statusMessage ? ` - ${response.statusMessage}` : ''}\``);
-  result.push(...toMarkdownHeader(response.headers));
+  if (response.headers) {
+    result.push(...toMarkdownHeader(response.headers));
+  }
   if (options?.body && isString(response.body)) {
     result.push('');
     result.push(`\`\`\`${getMarkdownSyntax(response.contentType)}`);

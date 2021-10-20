@@ -7,7 +7,7 @@ export interface HttpResponse{
   httpVersion?: string;
   statusCode: number;
   statusMessage?: string;
-  headers: Record<string, unknown>;
+  headers?: Record<string, unknown>;
   contentType?: ContentType;
   body?: unknown;
   parsedBody?: unknown;

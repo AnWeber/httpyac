@@ -1,7 +1,8 @@
 import { ContentType } from './contentType';
 import { HttpMethod } from './httpMethod';
 import { OptionsOfUnknownResponseBody } from 'got';
-import { ClientOptions } from 'ws';
+import { ClientOptions as WebsocketOptions } from 'ws';
+import { IClientOptions as MQTTOptions } from 'mqtt';
 export interface HeadersContainer {
   headers: Record<string, unknown>
 }
@@ -22,16 +23,17 @@ export interface WebsocketRequest {
   method?: 'WS';
   headers?: Record<string, string>;
   body?: unknown;
-  options?: ClientOptions;
+  options?: WebsocketOptions;
   contentType?: undefined;
 }
 
 export interface MQTTRequest {
   url?: string;
   method?: 'MQTT';
-  headers?: Record<string, string | string[] | undefined>;
-  body?: unknown;
+  headers?: Record<string, string | undefined>;
+  body?: string;
   contentType?: undefined;
+  options?: MQTTOptions;
 }
 export interface EventSourceRequest {
   url?: string;

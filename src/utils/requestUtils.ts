@@ -48,7 +48,7 @@ export function deleteHeader(headers: Record<string, unknown> | undefined, ...he
   }
 }
 
-export function getHeader<T>(headers: Record<string, T> | undefined, headerName: string): T | null {
+export function getHeader<T>(headers: Record<string, T> | undefined, headerName: string): T | undefined {
   if (headers) {
     const entry = Object.entries(headers)
       .find(([key]) => key.toLowerCase() === headerName.toLowerCase());
@@ -56,14 +56,14 @@ export function getHeader<T>(headers: Record<string, T> | undefined, headerName:
       return entry[1];
     }
   }
-  return null;
+  return undefined;
 }
-export function getHeaderArray(headers: Record<string, string | string[] | undefined> | undefined, headerName: string): string[] | null {
+export function getHeaderArray(headers: Record<string, string | string[] | undefined> | undefined, headerName: string): string[] | undefined {
   const value = getHeader(headers, headerName);
   if (value) {
     return isString(value) ? [value] : value;
   }
-  return null;
+  return undefined;
 }
 
 
@@ -239,10 +239,12 @@ function logRequest(request: models.Request, options: {
 function logResponseHeader(response: models.HttpResponse) {
   const result: Array<string> = [];
   result.push(chalk`{cyan.bold ${response.protocol}} {cyan.bold ${response.statusCode}} {bold ${response.statusMessage ? ` - ${response.statusMessage}` : ''}}`);
-  result.push(...Object.entries(response.headers)
-    .filter(([key]) => !key.startsWith(':'))
-    .map(([key, value]) => chalk`{yellow ${key}}: ${value}`)
-    .sort());
+  if (response.headers) {
+    result.push(...Object.entries(response.headers)
+      .filter(([key]) => !key.startsWith(':'))
+      .map(([key, value]) => chalk`{yellow ${key}}: ${value}`)
+      .sort());
+  }
   return result;
 }
 

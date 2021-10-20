@@ -28,7 +28,9 @@ export function toHttpStringResponse(response: HttpResponse, options?: {
 }) : Array<string> {
   const result: Array<string> = [];
   result.push(`${response.protocol} ${response.statusCode} ${response.statusMessage ? ` - ${response.statusMessage}` : ''}`);
-  result.push(...toHttpStringHeader(response.headers));
+  if (response.headers) {
+    result.push(...toHttpStringHeader(response.headers));
+  }
   if (options?.body && isString(response.body)) {
     result.push('');
     result.push(options?.prettyPrint && response.prettyPrintBody ? response.prettyPrintBody : response.body);
