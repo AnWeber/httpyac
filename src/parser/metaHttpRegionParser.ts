@@ -102,6 +102,7 @@ export function parseComments(httpLine: models.HttpLine, context: models.ParserC
       const metaDataHandlers = [
         metaData.importMetaDataHandler,
         metaData.loopMetaDataHandler,
+        metaData.keepStreamingMetaDataHandler,
         metaData.refMetaDataHandler,
         metaData.responseRefMetaDataHandler,
         metaData.sleepMetaDataHandler,
@@ -176,6 +177,9 @@ export const knownMetaData: Array<{
     name: 'loop',
     description: 'allows multiple Invocations of a Request with different parameters.',
     completions: ['for ${1} of ${2}', 'for ${1}', 'while ${1}']
+  }, {
+    name: 'keepStreaming',
+    description: 'keep streaming until the user session is ended manually',
   }, {
     name: 'noLog',
     description: 'prevent logging of request data in output console',

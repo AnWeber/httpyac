@@ -33,6 +33,16 @@ export class UserSessionStore implements SessionStore {
       this.userSessions.splice(this.userSessions.indexOf(userSession), 1);
     }
   }
+
+  isUserSession(obj: unknown): obj is UserSession {
+    const session = obj as UserSession;
+    return session
+      && !!session.description
+      && !!session.id
+      && !!session.title
+      && !!session.type
+      && !!session.details;
+  }
 }
 
 export const userSessionStore = new UserSessionStore();
