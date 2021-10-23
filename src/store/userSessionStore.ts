@@ -1,9 +1,22 @@
-import { UserSession, SessionStore } from '../models';
+import { UserSession, SessionStore, Dispose } from '../models';
 
 
 export class UserSessionStore implements SessionStore {
 
   readonly userSessions: Array<UserSession> = [];
+
+  private readonly sessionChangedListener: Array<() => void> = [];
+
+  onSessionChanged(listener: () => void) : Dispose {
+    this.sessionChangedListener.push(listener);
+
+    return () => {
+      const index = this.sessionChangedListener.indexOf(listener);
+      if (index >= 0) {
+        this.sessionChangedListener.splice(index, 1);
+      }
+    };
+  }
 
 
   async reset() : Promise<void> {
@@ -13,6 +26,7 @@ export class UserSessionStore implements SessionStore {
       }
     }
     this.userSessions.length = 0;
+    this.notifySessionChanged();
   }
 
   getUserSession(id: string) : UserSession | undefined {
@@ -22,6 +36,13 @@ export class UserSessionStore implements SessionStore {
   setUserSession(userSession: UserSession) : void {
     this.removeUserSession(userSession.id);
     this.userSessions.push(userSession);
+    this.notifySessionChanged();
+  }
+
+  private notifySessionChanged() {
+    for (const listener of this.sessionChangedListener) {
+      listener();
+    }
   }
 
   removeUserSession(id: string) : void {
@@ -31,6 +52,7 @@ export class UserSessionStore implements SessionStore {
         userSession.delete();
       }
       this.userSessions.splice(this.userSessions.indexOf(userSession), 1);
+      this.notifySessionChanged();
     }
   }
 
