@@ -30,5 +30,5 @@ export function keepStreamingMetaDataHandler(type: string, _value: string | unde
 }
 
 export function getStreamSessionId(request: models.Request) {
-  return `${request.method}_${request.url}`;
+  return `${request.method}_${request.url}_${Object.values(request.headers || {}).join('_')}`;
 }
