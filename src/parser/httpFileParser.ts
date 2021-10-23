@@ -90,7 +90,8 @@ function initHttpRegion(start: number): models.HttpRegion {
       onRequest: new models.OnRequestHook(),
       onStreaming: new models.OnStreaming(),
       onResponse: new models.OnResponseHook(),
-    }
+    },
+    variablesPerEnv: {}
   };
 }
 

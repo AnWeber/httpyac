@@ -3,6 +3,7 @@ import { Request } from './httpRequest';
 import { HttpResponse } from './httpResponse';
 import { HttpSymbol } from './httpSymbol';
 import { TestResult } from './testResult';
+import { Variables } from './variables';
 
 export interface ProcessedHttpRegion{
   request?: Request;
@@ -14,9 +15,9 @@ export interface ProcessedHttpRegion{
 }
 
 export interface HttpRegion extends ProcessedHttpRegion{
+  variablesPerEnv: Record<string, Variables>;
   hooks: {
     execute: ExecuteHook;
-
     onRequest: OnRequestHook,
     onStreaming: OnStreaming;
     onResponse: OnResponseHook,

@@ -59,15 +59,15 @@ export async function replaceFilePath<T>(
 export function setVariableInContext(variables: models.Variables, context: models.ProcessorContext) {
   Object.assign(context.variables, variables);
   const envKey = toEnvironmentKey(context.httpFile.activeEnvironment);
-  if (!context.httpFile.variablesPerEnv[envKey]) {
-    context.httpFile.variablesPerEnv[envKey] = {};
+  if (!context.httpRegion.variablesPerEnv[envKey]) {
+    context.httpRegion.variablesPerEnv[envKey] = {};
   }
-  Object.assign(context.httpFile.variablesPerEnv[envKey], variables);
+  Object.assign(context.httpRegion.variablesPerEnv[envKey], variables);
 }
 
 export function unsetVariableInContext(variables: models.Variables, context: models.ProcessorContext) {
   const envKey = toEnvironmentKey(context.httpFile.activeEnvironment);
-  const envVariables = context.httpFile.variablesPerEnv[envKey];
+  const envVariables = context.httpRegion.variablesPerEnv[envKey];
   for (const key of Object.keys(variables)) {
     delete context.variables[key];
     if (envVariables) {

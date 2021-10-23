@@ -62,7 +62,13 @@ export class HttpFileStore {
         .then(httpFile => {
           delete httpFileStoreEntry.promise;
           if (httpFileStoreEntry.httpFile) {
-            httpFile.variablesPerEnv = httpFileStoreEntry.httpFile.variablesPerEnv;
+            for (const httpRegion of httpFile.httpRegions) {
+              const prevHttpRegion = httpFileStoreEntry.httpFile.httpRegions
+                .find(obj => obj.symbol.source === httpRegion.symbol.source);
+              if (prevHttpRegion) {
+                httpRegion.variablesPerEnv = prevHttpRegion.variablesPerEnv;
+              }
+            }
             httpFile.activeEnvironment = httpFileStoreEntry.httpFile.activeEnvironment;
           }
           httpFileStoreEntry.version = version;
@@ -127,7 +133,6 @@ export class HttpFileStore {
         responseLogging: new models.ResponseLoggingHook(),
       },
       httpRegions: [],
-      variablesPerEnv: {},
       activeEnvironment: options.activeEnvironment
     };
 

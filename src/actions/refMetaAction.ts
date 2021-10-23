@@ -1,4 +1,4 @@
-import { processHttpRegionActions } from '../utils';
+import * as utils from '../utils';
 import { ActionType, HttpRegionAction } from '../models';
 import { ImportProcessorContext } from './importMetaAction';
 export interface RefMetaHttpRegionData {
@@ -16,9 +16,11 @@ export class RefMetaAction implements HttpRegionAction {
       if (refHttpRegion.metaData.name === this.data.name
         && !refHttpRegion.metaData.disabled
         && refHttpRegion !== context.httpRegion) {
+        const envkey = utils.toEnvironmentKey(context.httpFile.activeEnvironment);
+        Object.assign(context.variables, refHttpRegion.variablesPerEnv[envkey]);
         if (this.data.force || !context.variables[this.data.name]) {
           const refContext = { ...context, httpRegion: refHttpRegion };
-          await processHttpRegionActions(refContext);
+          await utils.processHttpRegionActions(refContext);
         }
         return true;
       }

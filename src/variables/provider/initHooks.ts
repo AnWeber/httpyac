@@ -1,6 +1,5 @@
 import { provideConfigVariables, provideConfigEnvironments } from './configVariableProvider';
 import { provideDotenvVariables, provideDotenvEnvironments } from './dotenvVariableProvider';
-import { httpFileVariableProvider } from './httpFileVariableProvider';
 import { provideIntellijVariables, provideIntellijEnvironments } from './intellijVariableProvider';
 import { provideIntellijGlobalVariables } from './intellijGlobalVariableProvider';
 import { ProvideVariablesHook, ProvideEnvironmentsHook } from '../../models';
@@ -19,7 +18,6 @@ export function initProvideVariablesHook(): ProvideVariablesHook {
 
   hook.addHook(VariableProviderType.config, provideConfigVariables);
   hook.addHook(VariableProviderType.dotenv, provideDotenvVariables);
-  hook.addHook(VariableProviderType.httpFile, httpFileVariableProvider);
   hook.addHook(VariableProviderType.intellij, provideIntellijVariables);
   hook.addHook(VariableProviderType.intellijGlobal, provideIntellijGlobalVariables);
 
