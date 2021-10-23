@@ -130,3 +130,8 @@ export function isHttpRegionsSendContext(context: models.SendContext): context i
   const guard = context as models.HttpRegionsSendContext;
   return Array.isArray(guard?.httpRegions);
 }
+
+export function isProcessorContext(context: models.SendContext): context is models.ProcessorContext {
+  const guard = context as models.ProcessorContext;
+  return !!guard.httpRegion && !!guard.variables && !!guard.options;
+}
