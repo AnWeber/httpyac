@@ -60,10 +60,7 @@ export async function parseEventSource(
     }
 
     context.httpRegion.hooks.execute.addObjHook(obj => obj.process,
-      new actions.EnvDefaultHeadersAction(),
-      new actions.VariableReplacerAction(),
-      new actions.EventSourceClientAction(),
-      new actions.ResponseAsVariableAction());
+      new actions.EventSourceClientAction());
 
     context.httpRegion.hooks.execute.addInterceptor(new actions.CreateRequestInterceptor());
 

@@ -60,10 +60,7 @@ export async function parseGrpcLine(
     }
 
     context.httpRegion.hooks.execute.addObjHook(obj => obj.process,
-      new actions.EnvDefaultHeadersAction(),
-      new actions.VariableReplacerAction(),
-      new actions.GrpcClientAction(),
-      new actions.ResponseAsVariableAction());
+      new actions.GrpcClientAction());
 
     context.httpRegion.hooks.execute.addInterceptor(new actions.CreateRequestInterceptor());
 

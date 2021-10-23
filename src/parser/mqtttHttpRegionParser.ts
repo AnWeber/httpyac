@@ -59,10 +59,7 @@ export async function parseMQTTLine(
     }
 
     context.httpRegion.hooks.execute.addObjHook(obj => obj.process,
-      new actions.EnvDefaultHeadersAction(),
-      new actions.VariableReplacerAction(),
-      new actions.MQTTClientAction(),
-      new actions.ResponseAsVariableAction());
+      new actions.MQTTClientAction());
 
     context.httpRegion.hooks.execute.addInterceptor(new actions.CreateRequestInterceptor());
 

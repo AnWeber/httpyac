@@ -59,11 +59,8 @@ export async function parseRequestLine(
     }
 
     context.httpRegion.hooks.execute.addObjHook(obj => obj.process,
-      new actions.EnvDefaultHeadersAction(),
-      new actions.VariableReplacerAction(),
       new actions.CookieJarAction(),
-      new actions.HttpClientAction(),
-      new actions.ResponseAsVariableAction());
+      new actions.HttpClientAction());
 
     context.httpRegion.hooks.execute.addInterceptor(new actions.CreateRequestInterceptor());
 
