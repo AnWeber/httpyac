@@ -1,44 +1,33 @@
-import { ProcessorContext } from '../../models';
+import { ProcessorContext, VariableType } from '../../models';
 import { ParserRegex } from '../../parser';
-import { isString, toMultiLineArray, runScript } from '../../utils';
+import * as utils from '../../utils';
+import { log } from '../../io';
 
 
-export async function javascriptVariableReplacer(text: unknown, _type: string, context: ProcessorContext): Promise<unknown> {
-  if (!isString(text)) {
+export async function javascriptVariableReplacer(text: unknown, type: VariableType | string, context: ProcessorContext): Promise<unknown> {
+  if (!utils.isString(text)) {
     return text;
   }
-  const { httpRegion } = context;
   let match: RegExpExecArray | null;
   let result = text;
   while ((match = ParserRegex.javascript.scriptSingleLine.exec(text)) !== null) {
     const [searchValue, jsVariable] = match;
-    const script = `exports.$result = (${jsVariable});`;
 
-    let lineOffset = httpRegion.symbol.startLine - 1;
-    if (httpRegion.symbol.source) {
-      const index = toMultiLineArray(httpRegion.symbol.source).findIndex(line => line.indexOf(searchValue) >= 0);
-      if (index >= 0) {
-        lineOffset += index;
+    try {
+      const value = await utils.evalExpression(jsVariable, context);
+      if (utils.isString(value) || typeof value === 'number') {
+        result = result.replace(searchValue, `${value}`);
+      } else if (value instanceof Date) {
+        result = result.replace(searchValue, `${value.toISOString()}`);
+      } else if (value) {
+        result = result.replace(searchValue, `${value}`);
       }
-    }
-    const value = await runScript(script, {
-      fileName: context.httpFile.fileName,
-      context: {
-        request: context.request,
-        httpFile: context.httpFile,
-        httpRegion: context.httpRegion,
-        console: context.scriptConsole,
-        ...context.variables
-      },
-      lineOffset,
-      require: context.require,
-    });
-    if (isString(value.$result) || typeof value.$result === 'number') {
-      result = result.replace(searchValue, `${value.$result}`);
-    } else if (value.$result instanceof Date) {
-      result = result.replace(searchValue, `${value.$result.toISOString()}`);
-    } else if (value.$result) {
-      result = result.replace(searchValue, `${value.$result}`);
+    } catch (err) {
+      if (type === VariableType.variable) {
+        log.warn(`variable ${jsVariable} not defined`);
+      } else {
+        throw err;
+      }
     }
   }
   return result;
