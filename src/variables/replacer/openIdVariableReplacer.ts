@@ -1,4 +1,4 @@
-import { ProcessorContext, HttpClient, UserSession, HookCancel, VariableType } from '../../models';
+import { ProcessorContext, HttpClient, UserSession, HookCancel } from '../../models';
 import { userSessionStore } from '../../store';
 import * as oauth from './oauth';
 import { ParserRegex } from '../../parser';
@@ -7,7 +7,7 @@ import * as utils from '../../utils';
 
 
 export async function openIdVariableReplacer(text: unknown, type: string, context: ProcessorContext): Promise<unknown> {
-  if ((type.toLowerCase() === 'authorization' || type === VariableType.variable) && utils.isString(text)) {
+  if (type.toLowerCase() === 'authorization' && utils.isString(text)) {
     const match = ParserRegex.auth.oauth2.exec(text);
     if (match && match.groups) {
       const flow = match.groups.flow || 'client_credentials';
