@@ -1,3 +1,19 @@
+## 4.4.0 (2021-10-24)
+
+#### Features
+* add [WebSocket](https://httpyac.github.io/guide/request.html#websocket) support
+* add [MQTT](https://httpyac.github.io/guide/request.html#mqtt) support
+* add [Server-Sent Events](https://httpyac.github.io/guide/request.html#server-sent-events-eventsource) support
+* HTTP header array support added
+* added oauthSession2 Variable to directly access OAuth2 Token
+* add additional Meta Data
+  * `@verbose` to increase log level to `trace`
+  * `@debug` to increase log level to `debug`
+  * `@keepStreaming` of MQTT, Server-Sent-Events or WebSocket until the session is ended manually
+  * `@sleep` supports variables
+  * documentation of meta data added to outline view
+
+
 ## 4.3.0 (2021-10-15)
 
 #### Features
