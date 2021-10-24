@@ -42,6 +42,10 @@ export abstract class Hook<T, TReturn, TTriggerResult, TArg = undefined, TArg2 =
     this.interceptors = [];
   }
 
+  hasHook(id: string) {
+    return this.items.some(obj => obj.id === id);
+  }
+
   addHook(id: string, action: (arg: T, arg1: TArg, arg2: TArg2) => TReturn | typeof HookCancel | Promise<TReturn | typeof HookCancel>, options?: {
     before?: Array<string>;
     after?: Array<string>;

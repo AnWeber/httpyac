@@ -3,9 +3,11 @@ import { ParserRegex } from './parserRegex';
 import * as utils from '../utils';
 import { log, userInteractionProvider } from '../io';
 
-export async function parseVariable(getLineReader: models.getHttpLineGenerator, { httpRegion }: models.ParserContext): Promise<models.HttpRegionParserResult> {
-  const lineReader = getLineReader();
+const VariableHookId = 'variable';
 
+export async function parseVariable(getLineReader: models.getHttpLineGenerator, { httpRegion }: models.ParserContext): Promise<models.HttpRegionParserResult> {
+
+  const lineReader = getLineReader();
   const next = lineReader.next();
   if (!next.done) {
     const textLine = next.value.textLine;
@@ -13,9 +15,25 @@ export async function parseVariable(getLineReader: models.getHttpLineGenerator, 
     const match = ParserRegex.variable.exec(textLine);
 
     if (match && match.groups && match.groups.key && match.groups.value) {
-      httpRegion.hooks.execute.addObjHook(obj => obj.process, new VariableAction({
-        [match.groups.key]: match.groups.value.trim(),
-      }));
+      const key = match.groups.key;
+      const value = match.groups.value;
+      if (!httpRegion.hooks.execute.hasHook(VariableHookId)) {
+        httpRegion.hooks.execute.addInterceptor(new VariableInterceptor());
+      }
+      httpRegion.hooks.execute.addHook(VariableHookId, context => {
+        context.options.replaceVariables = true;
+        if (utils.isValidVariableName(key)) {
+          utils.setVariableInContext({
+            [key]: value
+          }, context);
+        } else {
+          const message = `Javascript Keyword ${key} not allowed as variable`;
+          userInteractionProvider.showWarnMessage?.(message);
+          log.warn(message);
+        }
+        return true;
+      });
+
       return {
         nextParserLine: next.value.line,
         symbols: [{
@@ -51,25 +69,24 @@ export async function parseVariable(getLineReader: models.getHttpLineGenerator, 
 }
 
 
-class VariableAction {
+class VariableInterceptor implements models.HookInterceptor<models.ProcessorContext, boolean> {
   id = models.ActionType.variable;
 
-  constructor(private readonly data: Record<string, string>) { }
+  async beforeTrigger(context: models.HookTriggerContext<models.ProcessorContext, true>) {
+    if (context.hookItem?.id !== VariableHookId) {
+      if (context.arg.options.replaceVariables) {
+        await this.replaceAllVariables(context.arg);
+        delete context.arg.options.replaceVariables;
+      }
+    }
+    return true;
+  }
 
-  async process(context: models.ProcessorContext): Promise<boolean> {
-    if (this.data) {
-      for (const [key, value] of Object.entries(this.data)) {
-        if (utils.isValidVariableName(key)) {
-          const result = await utils.replaceVariables(value, models.VariableType.variable, context);
-          if (result === models.HookCancel) {
-            return false;
-          }
-          utils.setVariableInContext({ [key]: result }, context);
-        } else {
-          const message = `Javascript Keyword ${key} not allowed as variable`;
-          userInteractionProvider.showWarnMessage?.(message);
-          log.warn(message);
-        }
+  private async replaceAllVariables(context: models.ProcessorContext) : Promise<boolean> {
+    for (const [key, value] of Object.entries(context.variables)) {
+      const result: typeof models.HookCancel | unknown = await utils.replaceVariables(value, models.VariableType.variable, context);
+      if (result !== models.HookCancel) {
+        context.variables[key] = result;
       }
     }
     return true;

@@ -103,7 +103,6 @@ export function parseComments(httpLine: models.HttpLine, context: models.ParserC
         });
       }
       const metaDataHandlers = [
-        metaData.defaultMetaDataHandler,
         metaData.importMetaDataHandler,
         metaData.keepStreamingMetaDataHandler,
         metaData.loopMetaDataHandler,
@@ -112,6 +111,7 @@ export function parseComments(httpLine: models.HttpLine, context: models.ParserC
         metaData.sleepMetaDataHandler,
         metaData.verboseMetaDataHandler,
       ];
+      metaDataHandlers.push(metaData.defaultMetaDataHandler);
       for (const metaDataHandler of metaDataHandlers) {
         if (metaDataHandler(key, match.groups.value, context)) {
           break;

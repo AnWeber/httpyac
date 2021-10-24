@@ -28,10 +28,19 @@ export function expandVariable(key: string, value: unknown, variables: models.Va
   return value;
 }
 
-export async function replaceVariables(text: unknown, type: models.VariableType | string, context: models.ProcessorContext): Promise<unknown> {
-  return await context.httpFile.hooks.replaceVariable.trigger(text, type, context);
+export async function replaceVariables(
+  text: unknown,
+  type: models.VariableType | string,
+  context: models.ProcessorContext
+): Promise<typeof models.HookCancel | unknown> {
+  let start;
+  let result = text;
+  while (start !== result) {
+    start = result;
+    result = await context.httpFile.hooks.replaceVariable.trigger(start, type, context);
+  }
+  return result;
 }
-
 
 export async function replaceFilePath<T>(
   fileName: string, context:

@@ -1,4 +1,5 @@
 import * as models from '../models';
+import { toEnvironmentKey } from './environmentUtils';
 import { cloneResponse } from './requestUtils';
 
 
@@ -37,6 +38,7 @@ export async function processHttpRegionActions(context: models.ProcessorContext,
   delete context.httpRegion.response;
   delete context.httpRegion.testResults;
 
+  const variables = context.variables;
   try {
     context.scriptConsole?.collectMessages?.();
 
@@ -47,6 +49,8 @@ export async function processHttpRegionActions(context: models.ProcessorContext,
     if (context.progress?.report) {
       context.progress.report({ message: `${context.httpRegion.symbol.name}` });
     }
+
+    context.variables = initRegionScopedVariables(context);
 
     const result = await context.httpRegion.hooks.execute.trigger(context);
     const processedHttpRegion = toProcessedHttpRegion(context);
@@ -59,8 +63,30 @@ export async function processHttpRegionActions(context: models.ProcessorContext,
   } finally {
     if (!context.httpRegion.metaData.noLog) {
       context.scriptConsole?.flush?.();
+      const newVariables = context.variables;
+      context.variables = variables;
+      autoShareNewVariables(newVariables, context);
     }
 
+  }
+}
+function initRegionScopedVariables(context: models.ProcessorContext) {
+  const env = toEnvironmentKey(context.httpFile.activeEnvironment);
+  const variables = Object.assign(
+    {},
+    context.variables,
+    ...context.httpFile.httpRegions
+      .filter(obj => isGlobalHttpRegion(obj))
+      .map(obj => obj.variablesPerEnv[env])
+  );
+  return variables;
+}
+
+function autoShareNewVariables(variables: models.Variables, context: models.ProcessorContext) {
+  for (const [key, value] of Object.entries(variables)) {
+    if (!context.variables[key]) {
+      context.variables[key] = value;
+    }
   }
 }
 
