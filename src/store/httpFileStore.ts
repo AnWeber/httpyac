@@ -177,7 +177,7 @@ export class HttpFileStore {
       };
       for (const [plugin, hook] of Object.entries(hooks)) {
         try {
-          log.debug(`load ${plugin}`);
+          log.trace(`load ${plugin}`);
           const result = hook(api);
           if (utils.isPromise(result)) {
             await result;

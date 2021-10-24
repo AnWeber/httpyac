@@ -24,7 +24,7 @@ export async function javascriptVariableReplacer(text: unknown, type: VariableTy
       }
     } catch (err) {
       if (type === VariableType.variable) {
-        log.warn(`variable ${jsVariable} not defined`);
+        log.trace(`variable ${jsVariable} not defined`);
       } else {
         throw err;
       }

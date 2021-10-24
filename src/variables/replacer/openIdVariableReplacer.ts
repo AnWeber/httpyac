@@ -21,18 +21,18 @@ export async function openIdVariableReplacer(text: unknown, type: string, contex
           let openIdInformation = getSessionOpenIdInformation(cacheKey, tokenExchangeConfig || config);
           userSessionStore.removeUserSession(cacheKey);
           if (openIdInformation) {
-            log.debug(`openid refresh token flow used: ${cacheKey}`);
+            log.trace(`openid refresh token flow used: ${cacheKey}`);
             openIdInformation = await oauth.refreshTokenFlow.perform(openIdInformation, context);
           }
           if (!openIdInformation) {
-            log.debug(`openid flow ${flow} used: ${cacheKey}`);
+            log.trace(`openid flow ${flow} used: ${cacheKey}`);
             openIdInformation = await openIdFlow.perform(config, context);
             if (openIdInformation && tokenExchangeConfig) {
               openIdInformation = await oauth.TokenExchangeFlow.perform(tokenExchangeConfig, openIdInformation, context);
             }
           }
           if (openIdInformation) {
-            log.debug(`openid flow ${flow} finished`);
+            log.trace(`openid flow ${flow} finished`);
             context.variables.oauth2Session = openIdInformation;
             userSessionStore.setUserSession(openIdInformation);
             keepAlive(cacheKey, context.httpClient);
@@ -75,7 +75,7 @@ function keepAlive(cacheKey: string, httpClient: HttpClient) {
     const timeoutId = setTimeout(async () => {
       const result = await oauth.refreshTokenFlow.perform(openIdInformation, { httpClient });
       if (result) {
-        log.debug(`token ${result.title} refreshed`);
+        log.trace(`token ${result.title} refreshed`);
         userSessionStore.setUserSession(result);
         keepAlive(cacheKey, httpClient);
       }
