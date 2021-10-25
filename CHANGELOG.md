@@ -1,3 +1,8 @@
+## 4.4.1 (2021-10-25)
+
+#### Fix
+* Body for GraphQL requests was replaced only after request 
+
 ## 4.4.0 (2021-10-24)
 
 #### Features
