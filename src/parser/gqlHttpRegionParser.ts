@@ -10,6 +10,7 @@ export async function parseGraphql(
   context: models.ParserContext
 ): Promise<models.HttpRegionParserResult> {
   const lineReader = getLineReader();
+
   if (context.httpRegion.metaData.noGqlParsing) {
     return false;
   }

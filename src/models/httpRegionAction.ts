@@ -11,7 +11,6 @@ export interface HttpRegionAction {
 
 export enum ActionType{
   cookieJar = 'cookieJar',
-  envDefaultHeaders = 'envDefaultHeaders',
   defaultHeaders = 'defaultHeaders',
   eventSourceClient = 'eventSourceClient',
   intellij = 'intellij',
@@ -24,8 +23,6 @@ export enum ActionType{
   httpClient = 'httpClient',
   import = 'import',
   ref = 'ref',
-  response = 'response',
   variable = 'variable',
-  variableReplacer = 'variableReplacer',
   websocketClient = 'websocketClient',
 }
