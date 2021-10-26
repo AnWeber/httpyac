@@ -1,5 +1,3 @@
-# Security Policy
-
 # Reporting Security Issues
 
 If you discover a security issue in httpyac, please report it by sending an
