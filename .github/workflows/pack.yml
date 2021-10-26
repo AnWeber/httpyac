@@ -25,7 +25,7 @@ jobs:
       - name: Pack Remote Build
         uses: dfreilich/pack-action@v2.0.0
         with:
-          args: 'build ${{ env.IMG_NAME }} --builder gcr.io/buildpacks/builder:v1 --buildpack gcr.io/paketo-buildpacks/nodejs --env BP_LAUNCHPOINT="./bin/httpyac.js" -r ghcr.io --publish'
+          args: 'build ${{ env.IMG_NAME }} --builder gcr.io/buildpacks/builder:v1 --buildpack gcr.io/paketo-buildpacks/nodejs --env BP_LAUNCHPOINT="./bin/httpyac.js" --publish'
       - name: Test App
         run: |
           docker run -d -p 8080:8080 --name testapp ${{ env.IMG_NAME }} -v
