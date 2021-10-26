@@ -3,7 +3,7 @@ name: pack
 on:
   workflow_dispatch
 env:
-  IMG_NAME: 'ghcr.io/Anweber/httpyac:LATEST'
+  IMG_NAME: 'ghcr.io/Anweber/httpyac'
 
 jobs:
   pack:
