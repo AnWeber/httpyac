@@ -9,7 +9,7 @@ a question to [vscode-httpyac - Disucssions](https://github.com/AnWeber/vscode-h
 that include an example and/ or the full error message are more likely to receive responses.
 
 **If you have discovered a bug or have a feature suggestion, please [create an issue on GitHub](https://github.com/AnWeber/httpyac/issues/new).**
-**Please note that httpyac provides a [plugin interface.](https://httpyac.github.io/plugins/#getting-started) **
+**Please note that httpyac provides a [plugin interface.](https://httpyac.github.io/plugins/#getting-started)**
 
 ## Submitting Changes
 
