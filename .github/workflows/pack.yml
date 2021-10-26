@@ -1,0 +1,42 @@
+name: pack
+
+on:
+  workflow_dispatch
+env:
+  IMG_NAME: 'ghcr.io/Anweber/httpyac:LATEST'
+
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+      - run: npm install
+      - run: npm run compile
+      - id: login
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pack Remote Build
+        uses: ./
+        with:
+          args: 'build ${{ env.IMG_NAME }} --buildpack gcr.io/paketo-buildpacks/nodejs --env BP_LAUNCHPOINT="./bin/httpyac.js" --publish'
+      - name: Test App
+        run: |
+          docker run -d -p 8080:8080 --name testapp ${{ env.IMG_NAME }} -v
+      - name: Pack Rebase
+        uses: ./
+        with:
+          args: 'rebase ${{ env.IMG_NAME }}'
+      - name: Inspect Image
+        uses: ./
+        with:
+          args: 'inspect-image ${{ env.IMG_NAME }}'
+      - name: Clean Up
+        run: |
+          docker container stop testapp
