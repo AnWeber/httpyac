@@ -23,18 +23,18 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Pack Remote Build
-        uses: ./
+        uses: dfreilich/pack-action@v2
         with:
           args: 'build ${{ env.IMG_NAME }} --buildpack gcr.io/paketo-buildpacks/nodejs --env BP_LAUNCHPOINT="./bin/httpyac.js" --publish'
       - name: Test App
         run: |
           docker run -d -p 8080:8080 --name testapp ${{ env.IMG_NAME }} -v
       - name: Pack Rebase
-        uses: ./
+        uses: dfreilich/pack-action@v2
         with:
           args: 'rebase ${{ env.IMG_NAME }}'
       - name: Inspect Image
-        uses: ./
+        uses: dfreilich/pack-action@v2
         with:
           args: 'inspect-image ${{ env.IMG_NAME }}'
       - name: Clean Up
