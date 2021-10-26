@@ -7,7 +7,7 @@ import { send } from '../httpYacApi';
 import * as utils from '../utils';
 import { default as globby } from 'globby';
 import { fileProvider, Logger } from '../io';
-import { CliOptions, parseCliOptions, renderHelp, getLogLevel, CliFilterOptions } from './cliOptions';
+import { CliOptions, parseCliOptions, getLogLevel, CliFilterOptions } from './cliOptions';
 import { CliContext } from './cliContext';
 import { toCliJsonOutput } from './cliJsonOutput';
 import { default as chalk } from 'chalk';
@@ -23,8 +23,7 @@ export async function execute(rawArgs: string[]): Promise<void> {
     console.info(`httpyac v${packageJson?.version}`);
     return;
   }
-  if (cliOptions.help) {
-    renderHelp();
+  if (cliOptions.help) { 
     return;
   }
 
