@@ -22,11 +22,17 @@ export async function restClientVariableReplacer(text: unknown, _type: VariableT
     if (trimmedVariable === '$guid') {
       replacement = uuidv4();
     } else if (trimmedVariable.startsWith('$randomInt')) {
-      const valMatch = /^\$randomInt\s*(?<min>\d+)?\s*(?<max>\d+)?\s*$/u.exec(trimmedVariable);
+      const valMatch = /^\$randomInt\s*(?<min>-?\d+)?\s*(?<max>-?\d+)?\s*$/u.exec(trimmedVariable);
       if (valMatch && valMatch.groups?.min && valMatch.groups?.max) {
-        const min = Number(valMatch.groups?.min);
-        const max = Number(valMatch.groups?.max);
-        if (min < max) {
+        let min = Number(valMatch.groups?.min);
+        let max = Number(valMatch.groups?.max);
+
+        if (!Number.isNaN(min) && !Number.isNaN(max)) {
+          if (min > max) {
+            const temp = max;
+            max = min;
+            min = temp;
+          }
           replacement = `${(Math.floor(Math.random() * (max - min)) + min)}`;
         }
       }
