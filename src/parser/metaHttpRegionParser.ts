@@ -10,6 +10,9 @@ export async function parseMetaData(getLineReader: models.getHttpLineGenerator, 
   const { httpRegion, data } = context;
   if (data.metaTitle) {
     httpRegion.metaData.title = data.metaTitle.trim();
+    if (!httpRegion.metaData.name) {
+      httpRegion.metaData.name = data.metaTitle.trim();
+    }
     delete data.metaTitle;
   }
 
@@ -100,14 +103,14 @@ export function parseComments(httpLine: models.HttpLine, context: models.ParserC
         });
       }
       const metaDataHandlers = [
+        metaData.defaultMetaDataHandler,
         metaData.importMetaDataHandler,
-        metaData.loopMetaDataHandler,
         metaData.keepStreamingMetaDataHandler,
+        metaData.loopMetaDataHandler,
         metaData.refMetaDataHandler,
         metaData.responseRefMetaDataHandler,
         metaData.sleepMetaDataHandler,
         metaData.verboseMetaDataHandler,
-        metaData.defaultMetaDataHandler,
       ];
       for (const metaDataHandler of metaDataHandlers) {
         if (metaDataHandler(key, match.groups.value, context)) {
