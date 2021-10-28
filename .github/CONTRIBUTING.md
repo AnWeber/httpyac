@@ -36,7 +36,7 @@ npm run watch
 
 1. Open project in VS Code
 2. Open http file, which should be used for Debugging
-3. Start Debug Launch Configuration `httpyac - launch` (`F5`). It uses active File as args for `httpyac`
+3. Start Debug Launch Configuration `launch` (`F5`). It uses active File as args for `httpyac`
 
 ### Alternative
 

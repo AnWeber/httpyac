@@ -4,7 +4,7 @@
     {
       "type": "pwa-node",
       "request": "launch",
-      "name": "httpyac - launch",
+      "name": "launch",
       "skipFiles": [
         "<node_internals>/**"
       ],
