@@ -74,7 +74,7 @@
 		"typescript": "^4.4.4"
 	},
 	"dependencies": {
-		"@grpc/grpc-js": "^1.4.1",
+		"@grpc/grpc-js": "^1.4.2",
 		"@grpc/proto-loader": "^0.6.6",
 		"arg": "^5.0.1",
 		"aws4": "^1.11.0",
@@ -84,7 +84,7 @@
 		"dotenv": "^10.0.0",
 		"encodeurl": "^1.0.2",
 		"eventsource": "^1.1.0",
-		"filesize": "^8.0.3",
+		"filesize": "^8.0.5",
 		"globby": "^11.0.4",
 		"got": "^11.8.2",
 		"http-proxy-agent": "^5.0.0",
