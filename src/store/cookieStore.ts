@@ -1,4 +1,4 @@
-import { Cookie, CookieJar, MemoryCookieStore } from 'tough-cookie';
+import { Cookie, MemoryCookieStore } from 'tough-cookie';
 import { log } from '../io';
 import * as models from '../models';
 import { toEnvironmentKey } from '../utils';
@@ -16,7 +16,7 @@ class CookieStore {
     return `Cookies_${toEnvironmentKey(httpFile.activeEnvironment)}_${httpFile.rootDir?.toString?.() || 'none'}`;
   }
 
-  getCookieStoreEntry(httpFile: models.HttpFile) {
+  getCookieStoreEntry(httpFile: models.HttpFile) : CookieStoreEntry {
     const id = this.getCookieStoreId(httpFile);
     let result = this.storeCache.find(obj => obj.id === id);
     if (!result) {
@@ -41,11 +41,6 @@ class CookieStore {
       });
     }
     return result;
-  }
-
-  getCookieJar(httpFile: models.HttpFile) {
-    const { memoryCookieStore } = this.getCookieStoreEntry(httpFile);
-    return new CookieJar(memoryCookieStore);
   }
 
   async reset(httpFile?: models.HttpFile) {

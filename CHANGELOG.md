@@ -3,7 +3,7 @@
 #### Features
 * $randomInt Variable Substitution allows negative numbers (#93) 
 * text after region delimiter is used as title and name ([Intellij IDEA Compatibility](https://blog.jetbrains.com/idea/2021/10/intellij-idea-2021-3-eap-6-enhanced-http-client-kotlin-support-for-cdi-and-more/))
-
+* support output redirection like [Intellij IDEA Compatibility](https://blog.jetbrains.com/idea/2021/10/intellij-idea-2021-3-eap-6-enhanced-http-client-kotlin-support-for-cdi-and-more/)
 
 
 ## 4.4.1 (2021-10-25)

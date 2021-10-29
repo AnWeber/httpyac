@@ -10,6 +10,7 @@ import { parseRequestBody, closeRequestBody } from './requestBodyHttpRegionParse
 import { parseRequestLine } from './requestHttpRegionParser';
 import { parseResponse, closeResponseBody } from './responseHttpRegionParser';
 import { parseResponseRef } from './responseRefHttpRegionParser';
+import { parseOutputRedirection } from './outputRedirectionHttpRegionParser';
 import { parseVariable } from './variableHttpRegionParser';
 import { parseProtoImport } from './protoHttpRegionParser';
 import { parseGrpcLine } from './grpcHttpRegionParser';
@@ -28,6 +29,7 @@ export enum ParserId {
   note = 'note',
   intellijScript = 'intellijScript',
   gql = 'gql',
+  outputRedirection = 'outputRedirection',
   request = 'request',
   responseRef = 'responseRef',
   response = 'response',
@@ -54,6 +56,7 @@ export function initParseHook(): models.ParseHook {
   hook.addHook(ParserId.eventSource, parseEventSource);
   hook.addHook(ParserId.mqtt, parseMQTTLine);
   hook.addHook(ParserId.request, parseRequestLine);
+  hook.addHook(ParserId.outputRedirection, parseOutputRedirection);
   hook.addHook(ParserId.responseRef, parseResponseRef);
   hook.addHook(ParserId.response, parseResponse);
   hook.addHook(ParserId.requestBody, parseRequestBody);

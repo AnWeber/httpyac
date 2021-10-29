@@ -1,6 +1,7 @@
 import { ActionType, HttpRegionAction, ProcessorContext } from '../models';
 import { cookieStore } from '../store';
 import { getHeader, isHttpRequest, isString } from '../utils';
+import { CookieJar } from 'tough-cookie';
 
 export class CookieJarAction implements HttpRegionAction {
   id = ActionType.cookieJar;
@@ -9,7 +10,7 @@ export class CookieJarAction implements HttpRegionAction {
     if (isHttpRequest(request)
       && !httpRegion.metaData.noCookieJar
       && config?.cookieJarEnabled) {
-      const jar = cookieStore.getCookieJar(httpFile);
+      const jar = new CookieJar(cookieStore.getCookieStoreEntry(httpFile).memoryCookieStore);
       if (request.headers && request.url) {
         const cookieHeader = getHeader(request.headers, 'cookie');
         if (cookieHeader) {

@@ -60,9 +60,11 @@ export class CreateRequestBodyInterceptor implements models.HookInterceptor<mode
         return true;
       }
       if (context.config?.requestBodyInjectVariablesExtensions) {
-        const extname = fileProvider.extname(filename);
-        return context.config.requestBodyInjectVariablesExtensions
-          .indexOf(extname) >= 0;
+        const extname = utils.extensionName(filename);
+        if (extname) {
+          return context.config.requestBodyInjectVariablesExtensions
+            .indexOf(extname) >= 0;
+        }
       }
       return false;
     };
