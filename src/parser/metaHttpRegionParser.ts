@@ -106,6 +106,7 @@ export function parseComments(httpLine: models.HttpLine, context: models.ParserC
         metaData.importMetaDataHandler,
         metaData.keepStreamingMetaDataHandler,
         metaData.loopMetaDataHandler,
+        metaData.rateLimitMetaDataHandler,
         metaData.refMetaDataHandler,
         metaData.responseRefMetaDataHandler,
         metaData.sleepMetaDataHandler,

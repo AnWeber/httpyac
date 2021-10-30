@@ -51,6 +51,7 @@ export const ParserRegex = {
     forOf: /^\s*for\s+(?<variable>.*)\s+of\s+(?<iterable>.*)\s*/u,
     for: /^\s*for\s*(?<counter>\d*)\s*$/u,
     while: /^\s*while\s*(?<expression>.*)\s*$/u,
+    rateLimit: /^\s*(slot(:)?\s*(?<slot>[^\s]+))?\s*(minIdleTime(:)?\s*(?<minIdleTime>\d*))?\s*(max(:)?\s*(?<max>\d*)\s*expire(:)?\s*(?<expire>\d*))?\s*$/iu,
   },
   request: {
     fileImport: /^<(?:(?<injectVariables>@)(?<encoding>\w+)?)?\s+(?<fileName>.+?)\s*$/u,
