@@ -215,6 +215,10 @@ export const knownMetaData: Array<{
     description: 'When the request is called, it is ensured that the referenced request is called beforehand',
     completions: ['${1}']
   }, {
+    name: 'ratelimit',
+    description: 'allows throttling requests',
+    completions: ['minIdleTime ${1}', 'max ${1} expire ${2}', 'minIdleTime ${1} max ${2} expire ${3}']
+  }, {
     name: 'save',
     description: 'If specified, the response will not be displayed but saved directly.',
   }, {
