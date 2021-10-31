@@ -31,6 +31,9 @@ export class IntellijAction implements models.HttpRegionAction {
     } else {
       data = this.scriptData;
     }
+    context.progress?.report?.({
+      message: 'execute javascript',
+    });
     await utils.runScript(data.script, {
       fileName: context.httpFile.fileName,
       context: {

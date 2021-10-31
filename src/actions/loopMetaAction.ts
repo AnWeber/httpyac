@@ -30,6 +30,9 @@ export class LoopMetaAction implements models.HookInterceptor<models.ProcessorCo
   async beforeLoop(context: models.HookTriggerContext<models.ProcessorContext, boolean>) : Promise<boolean> {
     this.iteration = this.iterate(context.arg);
     this.name = context.arg.httpRegion.metaData.name;
+    context.arg.progress?.report?.({
+      message: 'start loop',
+    });
     const next = await this.iteration.next();
     if (!next.done) {
       Object.assign(context.arg.variables, next.value.variables);
@@ -40,8 +43,13 @@ export class LoopMetaAction implements models.HookInterceptor<models.ProcessorCo
 
   async afterTrigger(context: models.HookTriggerContext<models.ProcessorContext, boolean>): Promise<boolean> {
     if (this.iteration && context.index + 1 === context.length) {
+
       const next = await this.iteration.next();
+
       if (!next.done) {
+        context.arg.progress?.report?.({
+          message: `${next.value.index} loop pass`,
+        });
         Object.assign(context.arg.variables, next.value.variables);
         await utils.logResponse(context.arg.httpRegion.response, context.arg);
         context.arg.httpRegion = this.createHttpRegionClone(context.arg.httpRegion, next.value.index);

@@ -12,6 +12,9 @@ export function keepStreamingMetaDataHandler(type: string, _value: string | unde
           description: 'Pending Stream',
           details: context.request.headers || {}
         };
+        context.progress?.report?.({
+          message: 'stream until manual cancellation',
+        });
         await new Promise(resolve => {
           userSessionStore.setUserSession(streamSession);
           streamSession.delete = () => resolve(true);

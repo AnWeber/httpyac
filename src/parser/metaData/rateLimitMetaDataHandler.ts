@@ -13,13 +13,13 @@ export function rateLimitMetaDataHandler(type: string, value: string | undefined
       const max = match.groups.max || '0';
       const expire = match.groups.expire || '0';
 
-      httpRegion.hooks.execute.addHook('rateLimit', async () => {
+      httpRegion.hooks.execute.addHook('rateLimit', async context => {
         const rateLimitSession = getRateLimitSession(slot,
           Number.parseInt(minIdleTime, 10),
           Number.parseInt(max, 10),
           Number.parseInt(expire, 10));
 
-        rateLimitSession.requests.push(await checkRateLimit(rateLimitSession));
+        rateLimitSession.requests.push(await checkRateLimit(rateLimitSession, context));
         return true;
       });
     }
@@ -27,7 +27,7 @@ export function rateLimitMetaDataHandler(type: string, value: string | undefined
   return false;
 }
 
-async function checkRateLimit(rateLimitSession: RateLimitSession) {
+async function checkRateLimit(rateLimitSession: RateLimitSession, context: models.ProcessorContext) {
   while (rateLimitSession.requests.length > 0) {
     const currentRequest = new Date();
     removeExpiredRequests(rateLimitSession.requests, currentRequest, rateLimitSession.expire);
@@ -37,8 +37,12 @@ async function checkRateLimit(rateLimitSession: RateLimitSession) {
       const freeSlotTime = rateLimitSession.expire + first.getTime() - currentRequest.getTime();
 
       if (freeSlotTime > 0) {
+        context.progress?.report?.({
+          message: `rate limit max reached. wait for ${freeSlotTime}`,
+        });
         log.debug(`rate limit max reached. wait for ${freeSlotTime} (slot ${rateLimitSession.slot})`);
         await utils.sleep(freeSlotTime);
+        log.trace('rate limit max waited');
       }
       continue;
     }
@@ -47,8 +51,12 @@ async function checkRateLimit(rateLimitSession: RateLimitSession) {
       if (lastRequest && rateLimitSession.minIdleTime > 0) {
         const minIdleTime = lastRequest.getTime() + rateLimitSession.minIdleTime - currentRequest.getTime();
         if (minIdleTime > 0) {
+          context.progress?.report?.({
+            message: `rate limit minIdleTime, wait for ${minIdleTime}`,
+          });
           log.debug(`rate limit minIdleTime, wait for ${minIdleTime} (slot ${rateLimitSession.slot})`);
           await utils.sleep(minIdleTime);
+          log.trace('rate limit minIdleTime waited');
           continue;
         }
       }

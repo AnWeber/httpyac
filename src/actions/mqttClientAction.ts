@@ -19,6 +19,9 @@ export class MQTTClientAction implements models.HttpRegionAction {
     if (utils.isMQTTRequest(request)) {
       return await utils.triggerRequestResponseHooks(async () => {
         if (request.url) {
+          context.progress?.report?.({
+            message: `request MQTT ${request.url}`,
+          });
           return await this.requestMQTT(request, context);
         }
         return false;

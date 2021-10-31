@@ -3,7 +3,6 @@ export * from './createRequestAction';
 export * from './defaultHeadersAction';
 export * from './envDefaultsHeaderAction';
 export * from './eventSourceClientAction';
-export * from './genericAction';
 export * from './gqlAction';
 export * from './grpcClientAction';
 export * from './httpClientAction';

@@ -25,6 +25,9 @@ export class GqlAction implements HttpRegionAction {
 
   async process(context: ProcessorContext): Promise<boolean> {
     if (context.request?.body && this.gqlData?.query) {
+      context.progress?.report?.({
+        message: 'build GraphQL query',
+      });
       let query: string | undefined;
       if (isString(this.gqlData.query)) {
         query = this.gqlData.query;
