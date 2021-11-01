@@ -1,3 +1,11 @@
+## 4.5.1 (2021-11-01)
+
+#### Features
+* added `--bail` option to fail fast on test error
+
+#### Fix
+* return with exit code 1 if non existing endpoint is called (#95)
+
 ## 4.5.0 (2021-10-31)
 
 #### Features
