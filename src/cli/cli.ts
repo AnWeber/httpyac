@@ -76,12 +76,14 @@ export async function execute(rawArgs: string[]): Promise<void> {
         }
       }
     } else {
-      console.error('httpYac cannot find the specified file.');
+      console.error(`httpYac cannot find the specified file ${cliOptions.fileName}.`);
       return;
     }
   } catch (err) {
     console.error(err);
-    process.exitCode = 1;
+    if (!process.exitCode) {
+      process.exitCode = 1;
+    }
     throw err;
   } finally {
 
@@ -117,6 +119,25 @@ function convertCliOptionsToContext(cliOptions: CliOptions): CliContext {
   return context;
 }
 
+function initCliHooks(httpFiles: Array<models.HttpFile>, cliOptions: CliOptions) {
+  if (httpFiles.length > 0) {
+    if (cliOptions.bail) {
+      const bailOnFailedTest = {
+        afterTrigger: async function bail(context: models.HookTriggerContext<models.ProcessorContext, boolean>) {
+          const failedTest = context.arg.httpRegion.testResults?.find?.(obj => !obj.result);
+          if (failedTest) {
+            throw failedTest.error || new Error('bail on failed test');
+          }
+          return true;
+        }
+      };
+      for (const httpFile of httpFiles) {
+        httpFile.httpRegions.forEach(httpRegion => httpRegion.hooks.execute.addInterceptor(bailOnFailedTest));
+      }
+    }
+  }
+}
+
 async function getHttpFiles(options: CliOptions, config: models.EnvironmentConfig | undefined) {
   const httpFiles: models.HttpFile[] = [];
   const httpFileStore = new HttpFileStore();
@@ -147,6 +168,8 @@ async function getHttpFiles(options: CliOptions, config: models.EnvironmentConfi
       httpFiles.push(httpFile);
     }
   }
+
+  initCliHooks(httpFiles, options);
   return httpFiles;
 }
 

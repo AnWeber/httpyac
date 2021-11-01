@@ -27,6 +27,7 @@ httpyac --version
 
 usage: httpyac [options...] <file or glob pattern>
        --all           execute all http requests in a http file
+       --bail          stops when a test case fails
        --editor        enter a new request and execute it
   -e   --env           list of environemnts
        --filter        filter requests output (only-failed)

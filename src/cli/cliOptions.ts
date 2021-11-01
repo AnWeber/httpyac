@@ -8,6 +8,7 @@ export enum CliFilterOptions{
 export interface CliOptions {
   activeEnvironments?: Array<string>,
   allRegions?: boolean,
+  bail?: boolean;
   editor?: boolean;
   fileName?: string,
   filter?: string;
@@ -46,6 +47,7 @@ export function parseCliOptions(rawArgs: string[]): CliOptions | undefined {
     const args = arg(
       {
         '--all': Boolean,
+        '--bail': Boolean,
         '--editor': Boolean,
         '--env': [String],
         '--filter': String,
@@ -84,6 +86,7 @@ export function parseCliOptions(rawArgs: string[]): CliOptions | undefined {
     return {
       activeEnvironments: args['--env'],
       allRegions: args['--all'],
+      bail: args['--bail'],
       editor: args['--editor'],
       fileName: args._.length > 0 ? args._[args._.length - 1] : undefined,
       filter: args['--filter'],
@@ -121,6 +124,7 @@ export function renderHelp() : void {
 
 usage: httpyac [options...] <file or glob pattern>
        --all           execute all http requests in a http file
+       --bail          stops when a test case fails
        --editor        enter a new request and execute it
   -e   --env           list of environemnts
        --filter        filter requests output (only-failed)
