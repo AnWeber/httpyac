@@ -75,10 +75,23 @@ function initRegionScopedVariables(context: models.ProcessorContext) {
   const variables = Object.assign(
     {},
     context.variables,
-    ...context.httpFile.httpRegions
-      .filter(obj => isGlobalHttpRegion(obj))
+    ...(context.config?.useRegionScopedVariables ? context.httpFile.httpRegions.filter(obj => isGlobalHttpRegion(obj)) : context.httpFile.httpRegions)
       .map(obj => obj.variablesPerEnv[env])
   );
+
+  if (context.config?.useRegionScopedVariables) {
+    Object.assign(
+      variables,
+      ...context.httpFile.httpRegions.filter(obj => isGlobalHttpRegion(obj))
+        .map(obj => obj.variablesPerEnv[env])
+    );
+  } else {
+    Object.assign(
+      variables,
+      ...context.httpFile.httpRegions
+        .map(obj => obj.variablesPerEnv[env])
+    );
+  }
   return variables;
 }
 

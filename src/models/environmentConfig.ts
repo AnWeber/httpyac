@@ -28,6 +28,7 @@ export interface EnvironmentConfig{
   environments?: Record<string, Variables>;
   /** relative or absoulte path to env dir */
   envDirName?: string;
+  useRegionScopedVariables?: boolean;
   /** hookApi for extending httpyac */
   configureHooks?: ConfigureHooks;
   /** configuration for plugins */
