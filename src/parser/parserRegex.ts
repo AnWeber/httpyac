@@ -5,7 +5,7 @@ export const ParserRegex = {
     basicColon: /^\s*(basic)\s+(?<user>.*):(?<password>.*)$/iu,
     clientCert: /^\s*(cert:\s*(?<cert>[^\s]*)\s*)?(key:\s*(?<key>[^\s]*)\s*)?(pfx:\s*(?<pfx>[^\s]*)\s*)?(passphrase:\s*(?<passphrase>[^\s]*)\s*)?\s*$/u,
     digest: /^\s*(digest)\s+(?<user>[^\s]*)\s+(?<password>([^\s]+.*))$/iu,
-    oauth2: /^\s*(?<type>openid|oauth2)(\s+(?<flow>client(_credentials)?|(authorization_)?code|password|implicit|hybrid))?(\s+(?<variablePrefix>[^\s]*))?\s*((token_exchange)\s+(?<tokenExchangePrefix>[^\s]*))?\s*$/iu,
+    oauth2: /^\s*(?<type>openid|oauth2)(\s+(?<flow>client(_credentials)?|(authorization_)?code|device(_code)?|password|implicit|hybrid))?(\s+(?<variablePrefix>[^\s]*))?\s*((token_exchange)\s+(?<tokenExchangePrefix>[^\s]*))?\s*$/iu,
   },
   comment: {
     multilineEnd: /^\s*\*\/\s*$/u,

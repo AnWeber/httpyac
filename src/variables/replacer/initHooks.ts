@@ -7,7 +7,7 @@ import { escapeVariableReplacer } from './escapeVariableReplacer';
 import { hostVariableReplacer } from './hostVariableReplacer';
 import { intellijVariableReplacer } from './intellijVariableReplacer';
 import { javascriptVariableReplacer } from './javascriptVariableReplacer';
-import { openIdVariableReplacer } from './openIdVariableReplacer';
+import { oauth2VariableReplacer } from './oauth2VariableReplacer';
 import { restClientVariableReplacer } from './restClientVariableReplacer';
 import { showInputBoxVariableReplacer } from './showInputBoxVariableReplacer';
 import { showQuickpickVariableReplacer } from './showQuickpickVariableReplacer';
@@ -37,7 +37,7 @@ export function initReplaceVariableHook(): ReplaceVariableHook {
   hook.addHook(VariableReplacerType.intellijDynamic, intellijVariableReplacer);
   hook.addHook(VariableReplacerType.javascript, javascriptVariableReplacer);
   hook.addHook(VariableReplacerType.host, hostVariableReplacer);
-  hook.addHook(VariableReplacerType.oauth2, openIdVariableReplacer);
+  hook.addHook(VariableReplacerType.oauth2, oauth2VariableReplacer);
   hook.addHook(VariableReplacerType.aws, awsAuthVariableReplacer);
   hook.addHook(VariableReplacerType.clientCertificate, clientCertVariableReplacer);
   hook.addHook(VariableReplacerType.basicAuth, basicAuthVariableReplacer);

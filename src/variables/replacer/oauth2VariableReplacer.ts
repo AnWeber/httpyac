@@ -6,7 +6,7 @@ import { log } from '../../io';
 import * as utils from '../../utils';
 
 
-export async function openIdVariableReplacer(text: unknown, type: string, context: ProcessorContext): Promise<unknown> {
+export async function oauth2VariableReplacer(text: unknown, type: string, context: ProcessorContext): Promise<unknown> {
   if (type.toLowerCase() === 'authorization' && utils.isString(text)) {
     const match = ParserRegex.auth.oauth2.exec(text);
     if (match && match.groups) {
@@ -63,6 +63,7 @@ function getOpenIdFlow(flowType: string) {
   const openIdFlows: Array<oauth.OpenIdFlow> = [
     oauth.authorizationCodeFlow,
     oauth.clientCredentialsFlow,
+    oauth.deviceCodeFlow,
     oauth.passwordFlow,
     oauth.implicitFlow
   ];

@@ -6,7 +6,7 @@ export * from './digestAuthVariableReplacer';
 export * from './escapeVariableReplacer';
 export * from './hostVariableReplacer';
 export * from './intellijVariableReplacer';
-export * from './openIdVariableReplacer';
+export * from './oauth2VariableReplacer';
 export * from './javascriptVariableReplacer';
 export * from './restClientVariableReplacer';
 export * from './showInputBoxVariableReplacer';

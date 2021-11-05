@@ -1,32 +1,14 @@
-import inquirer from 'inquirer';
 import { UserInteractonProvider } from '../models';
 
 
 export const userInteractionProvider: UserInteractonProvider = {
-  showNote: async function showNote(note: string) {
-    const answer = await inquirer.prompt([{
-      type: 'confirm',
-      name: 'note',
-      message: note,
-    }]);
-    return answer.note;
+  showNote: async function showNote() {
+    throw new Error('Not Implemented');
   },
-  showInputPrompt: async function showInputPrompt(message: string, defaultValue?: string) {
-    const answer = await inquirer.prompt([{
-      type: 'input',
-      name: 'placeholder',
-      message,
-      default: defaultValue
-    }]);
-    return answer.placeholder;
+  showInputPrompt: async function showInputPrompt() {
+    throw new Error('Not Implemented');
   },
-  showListPrompt: async function showListPrompt(message: string, values: string[]) {
-    const answer = await inquirer.prompt([{
-      type: 'list',
-      name: 'placeholder',
-      message,
-      choices: values
-    }]);
-    return answer.placeholder;
+  showListPrompt: async function showListPrompt() {
+    throw new Error('Not Implemented');
   },
 };

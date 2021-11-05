@@ -1,5 +1,6 @@
 export * from './authorizationCodeFlow';
 export * from './clientCredentialsFlow';
+export * from './deviceCodeFlow';
 export * from './implicitFlow';
 export * from './openIdConfiguration';
 export * from './openIdFlow';

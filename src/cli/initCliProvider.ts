@@ -1,10 +1,17 @@
 import * as models from '../models';
-import { fileProvider } from '../io';
+import { fileProvider, userInteractionProvider } from '../io';
 import { promises as fs, createReadStream } from 'fs';
 import { join, isAbsolute, dirname } from 'path';
+import inquirer from 'inquirer';
+import clipboard from 'clipboardy';
+
+export function initIOProvider(): void {
+  initFileProvider();
+  initUserInteractionProvider();
+}
 
 
-export function initFileProvider(): void {
+function initFileProvider(): void {
   fileProvider.isAbsolute = async (fileName: models.PathLike) => isAbsolute(fileProvider.toString(fileName));
   fileProvider.dirname = (fileName: string) => dirname(fileProvider.toString(fileName));
   fileProvider.joinPath = (fileName: models.PathLike, path: string): models.PathLike => join(fileProvider.toString(fileName), path);
@@ -44,4 +51,41 @@ function toBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
     stream.on('error', error => reject(error));
     stream.resume();
   });
+}
+
+
+function initUserInteractionProvider() {
+
+  userInteractionProvider.showNote = async function showNote(note: string) {
+    const answer = await inquirer.prompt([{
+      type: 'confirm',
+      name: 'note',
+      message: note,
+    }]);
+    return answer.note;
+  };
+  userInteractionProvider.showInputPrompt = async function showInputPrompt(message: string, defaultValue?: string) {
+    const answer = await inquirer.prompt([{
+      type: 'input',
+      name: 'placeholder',
+      message,
+      default: defaultValue
+    }]);
+    return answer.placeholder;
+  };
+  userInteractionProvider.showListPrompt = async function showListPrompt(message: string, values: string[]) {
+    const answer = await inquirer.prompt([{
+      type: 'list',
+      name: 'placeholder',
+      message,
+      choices: values
+    }]);
+    return answer.placeholder;
+  };
+  userInteractionProvider.getClipboard = async function getClipboard() {
+    return await clipboard.read();
+  };
+  userInteractionProvider.setClipboard = async function setClipboard(message: string) {
+    await clipboard.write(message);
+  };
 }

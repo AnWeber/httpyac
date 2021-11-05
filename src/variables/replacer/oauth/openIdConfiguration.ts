@@ -6,6 +6,7 @@ export interface OpenIdConfiguration{
   variablePrefix: string;
   authorizationEndpoint: string;
   tokenEndpoint: string;
+  deviceCodeEndpoint: string;
   clientId: string;
   clientSecret: string;
   responseType: string;
@@ -28,6 +29,7 @@ export function getOpenIdConfiguration(variablePrefix: string, variables: Variab
     const config: OpenIdConfiguration = {
       variablePrefix,
       authorizationEndpoint: getVariable(variables, variablePrefix, 'authorizationEndpoint'),
+      deviceCodeEndpoint: getVariable(variables, variablePrefix, 'deviceCodeEndpoint'),
       tokenEndpoint: getVariable(variables, variablePrefix, 'tokenEndpoint'),
       clientId: getVariable(variables, variablePrefix, 'clientId'),
       clientSecret: getVariable(variables, variablePrefix, 'clientSecret'),

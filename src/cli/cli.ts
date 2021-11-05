@@ -10,12 +10,12 @@ import { fileProvider, Logger } from '../io';
 import { CliOptions, parseCliOptions, renderHelp, getLogLevel, CliFilterOptions } from './cliOptions';
 import { CliContext } from './cliContext';
 import { toCliJsonOutput } from './cliJsonOutput';
-import { initFileProvider } from './cliFileProvider';
+import { initIOProvider } from './initCliProvider';
 import { default as chalk } from 'chalk';
 
 
 export async function execute(rawArgs: string[]): Promise<void> {
-  initFileProvider();
+  initIOProvider();
   const cliOptions = parseCliOptions(rawArgs);
   if (!cliOptions) {
     return;
