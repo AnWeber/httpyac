@@ -5,7 +5,7 @@ export interface UserInteractonProvider{
 
   setClipboard?: (message: string) => Promise<void>;
   getClipboard?: () => Promise<string>;
-  showInformationMessage?: (message: string, ...buttons: Array<string>) => Promise<string>;
-  showWarnMessage?: (message: string, ...buttons: Array<string>) => Promise<void>;
-  showErrorMessage?: (message: string, ...buttons: Array<string>) => Promise<void>;
+  showInformationMessage?: (message: string, ...buttons: Array<string>) => Promise<string | undefined>;
+  showWarnMessage?: (message: string, ...buttons: Array<string>) => Promise<string | undefined>;
+  showErrorMessage?: (message: string, ...buttons: Array<string>) => Promise<string | undefined>;
 }

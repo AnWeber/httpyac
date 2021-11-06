@@ -22,8 +22,9 @@ class DeviceCodeFlow implements OpenIdFlow {
     const id = this.getCacheKey(config);
     if (id) {
 
-      const isLogLevelDebug = io.log.options.level && [models.LogLevel.debug, models.LogLevel.trace].indexOf(io.log.options.level) >= 0;
-
+      context.progress?.report?.({
+        message: 'execute device_code authorization flow',
+      });
 
       const deviceCodeTime = (new Date()).getTime();
       const deviceCodeResponse = await this.requestDeviceAuthorization(context, config);
@@ -31,9 +32,12 @@ class DeviceCodeFlow implements OpenIdFlow {
       if (deviceCodeResponse
         && deviceCodeResponse.statusCode === 200
         && utils.isString(deviceCodeResponse.body)) {
-        if (models.isProcessorContext(context) && isLogLevelDebug) {
+        if (models.isProcessorContext(context)) {
           await utils.logResponse(deviceCodeResponse, context);
         }
+        context.progress?.report?.({
+          message: 'device_code received',
+        });
 
         const deviceCodeBody: DevcieCodeBody = JSON.parse(deviceCodeResponse.body);
 
@@ -47,11 +51,17 @@ class DeviceCodeFlow implements OpenIdFlow {
         while (((new Date()).getTime() - deviceCodeTime) < Number(deviceCodeBody.expires_in) * 1000) {
           try {
             await utils.sleep(interval);
+            if (context.progress?.isCanceled?.()) {
+              return false;
+            }
             const time = new Date().getTime();
             const response = await this.authenticateUser(context, config, deviceCodeBody);
             if (response && utils.isString(response.body)) {
               const parsedBody = JSON.parse(response.body);
               if (response.statusCode === 200) {
+                context.progress?.report?.({
+                  message: 'accessToken received',
+                });
                 await this.logResponse(response, context);
                 return toOpenIdInformation(parsedBody, time, {
                   config,
@@ -65,22 +75,31 @@ class DeviceCodeFlow implements OpenIdFlow {
                   }
                 });
               }
-              if (parsedBody.error && ['access_denied', 'expired_token', 'bad_verification_code'].indexOf(parsedBody.error) >= 0) {
-                io.log.debug(`DeviceCode Flow aborted: ${parsedBody.error_description || ''}`);
-                await this.logResponse(response, context);
-                return false;
-              }
-              if (parsedBody.error === 'slow_down' || response.statusCode === 408) { // on Timeout slow down
-                interval += 5000;
-                io.log.debug(`DeviceCode Flow increase interval: ${interval}`);
+              io.log.debug(`device code ${parsedBody.error}`);
+              context.progress?.report?.({
+                message: `device code ${parsedBody.error}`,
+              });
+              if (['slow_down', 'authorization_pending'].indexOf(parsedBody.error) >= 0) {
+                if (parsedBody.error === 'slow_down' || response.statusCode === 408) { // on Timeout slow down
+                  interval += 5000;
+                  io.log.debug(`DeviceCode Flow increase interval: ${interval}`);
+                }
+              } else {
+                if (parsedBody.error && ['access_denied', 'expired_token', 'bad_verification_code'].indexOf(parsedBody.error) >= 0) {
+                  io.log.debug(`DeviceCode Flow aborted: ${parsedBody.error_description || ''}`);
+                  await this.logResponse(response, context);
+                  return false;
+                }
+                if ((await io.userInteractionProvider.showWarnMessage?.(`Unknown error code ${parsedBody.error}`, 'Continue', 'Cancel')) === 'Cancel') {
+                  await this.logResponse(response, context);
+                  return false;
+                }
               }
             } else {
+              io.log.debug('device code received invalid response');
               return false;
             }
 
-            if (context.progress?.isCanceled?.()) {
-              return false;
-            }
           } catch (err) {
             io.log.debug(err);
             return false;
