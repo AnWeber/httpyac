@@ -35,8 +35,8 @@ export function initReplaceVariableHook(): ReplaceVariableHook {
   hook.addHook(VariableReplacerType.showQuickPick, showQuickpickVariableReplacer);
   hook.addHook(VariableReplacerType.restClientDynamic, restClientVariableReplacer);
   hook.addHook(VariableReplacerType.intellijDynamic, intellijVariableReplacer);
-  hook.addHook(VariableReplacerType.javascript, javascriptVariableReplacer);
   hook.addHook(VariableReplacerType.host, hostVariableReplacer);
+  hook.addHook(VariableReplacerType.javascript, javascriptVariableReplacer);
   hook.addHook(VariableReplacerType.oauth2, oauth2VariableReplacer);
   hook.addHook(VariableReplacerType.aws, awsAuthVariableReplacer);
   hook.addHook(VariableReplacerType.clientCertificate, clientCertVariableReplacer);

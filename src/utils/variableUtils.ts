@@ -38,13 +38,7 @@ export async function replaceVariables(
     log.trace('processs canceled by user');
     return models.HookCancel;
   }
-  let start;
-  let result = text;
-  while (start !== result) {
-    start = result;
-    result = await context.httpFile.hooks.replaceVariable.trigger(start, type, context);
-  }
-  return result;
+  return await context.httpFile.hooks.replaceVariable.trigger(text, type, context);
 }
 
 export async function replaceFilePath<T>(

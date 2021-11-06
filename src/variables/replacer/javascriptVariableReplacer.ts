@@ -9,24 +9,28 @@ export async function javascriptVariableReplacer(text: unknown, type: VariableTy
     return text;
   }
   let match: RegExpExecArray | null;
+  let start;
   let result = text;
-  while ((match = ParserRegex.javascript.scriptSingleLine.exec(text)) !== null) {
-    const [searchValue, jsVariable] = match;
+  while (start !== result) {
+    start = result;
+    while ((match = ParserRegex.javascript.scriptSingleLine.exec(start)) !== null) {
+      const [searchValue, jsVariable] = match;
 
-    try {
-      const value = await utils.evalExpression(jsVariable, context);
-      if (utils.isString(value) || typeof value === 'number') {
-        result = result.replace(searchValue, `${value}`);
-      } else if (value instanceof Date) {
-        result = result.replace(searchValue, `${value.toISOString()}`);
-      } else if (value) {
-        result = result.replace(searchValue, `${value}`);
-      }
-    } catch (err) {
-      if (type === VariableType.variable) {
-        log.trace(`variable ${jsVariable} not defined`);
-      } else {
-        throw err;
+      try {
+        const value = await utils.evalExpression(jsVariable, context);
+        if (utils.isString(value) || typeof value === 'number') {
+          result = result.replace(searchValue, `${value}`);
+        } else if (value instanceof Date) {
+          result = result.replace(searchValue, `${value.toISOString()}`);
+        } else if (value) {
+          result = result.replace(searchValue, `${value}`);
+        }
+      } catch (err) {
+        if (type === VariableType.variable) {
+          log.trace(`variable ${jsVariable} not defined`);
+        } else {
+          throw err;
+        }
       }
     }
   }
