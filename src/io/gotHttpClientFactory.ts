@@ -90,7 +90,7 @@ async function load(url: string, options: OptionsOfUnknownResponseBody, context:
       prevPercent = data.percent;
       if (context.progress?.report) {
         context.progress.report({
-          message: url,
+          message: 'call http request',
           increment: newData * 100,
         });
       }

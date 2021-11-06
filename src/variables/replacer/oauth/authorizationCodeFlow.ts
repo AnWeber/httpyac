@@ -23,6 +23,9 @@ class AuthorizationCodeFlow implements OpenIdFlow {
       return new Promise<OpenIdInformation | false>((resolve, reject) => {
         const state = stateGenerator();
         try {
+          context.progress?.report?.({
+            message: 'execute OAuth2 authorization_code flow',
+          });
           const redirectUri = 'http://localhost:3000/callback';
           const authUrl = `${config.authorizationEndpoint}${config.authorizationEndpoint.indexOf('?') > 0 ? '&' : '?'}${toQueryParams({
             client_id: config.clientId,

@@ -18,6 +18,9 @@ class PasswordFlow implements OpenIdFlow {
   async perform(config: OpenIdConfiguration, context: OpenIdFlowContext): Promise<OpenIdInformation | false> {
     const id = this.getCacheKey(config);
     if (id) {
+      context.progress?.report?.({
+        message: 'execute OAuth2 password flow',
+      });
       return requestOpenIdInformation({
         url: config.tokenEndpoint,
         method: 'POST',

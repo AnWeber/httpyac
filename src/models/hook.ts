@@ -147,8 +147,6 @@ export abstract class Hook<T, TReturn, TTriggerResult, TArg = undefined, TArg2 =
       } catch (err) {
         log.error(`${this.id}: ${context.hookItem.id} failed`);
         throw err;
-      } finally {
-        log.trace(`${this.id}: ${context.hookItem.id} finished`);
       }
     }
     if ((await this.intercept(obj => obj.afterLoop, context)) === false) {

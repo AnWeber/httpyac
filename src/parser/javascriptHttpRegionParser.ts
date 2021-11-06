@@ -39,17 +39,17 @@ export async function parseJavascript(
             switch (match.groups.event) {
               case 'request':
                 httpRegion.hooks.onRequest.addHook(models.ActionType.js, async (_request, context) => {
-                  await executeScriptData(scriptData, context);
+                  await executeScriptData(scriptData, context, 'request');
                 });
                 break;
               case 'streaming':
                 httpRegion.hooks.onStreaming.addHook(models.ActionType.js, async context => {
-                  await executeScriptData(scriptData, context);
+                  await executeScriptData(scriptData, context, 'streaming');
                 });
                 break;
               case 'response':
                 httpRegion.hooks.onResponse.addHook(models.ActionType.js, async (_response, context) => {
-                  await executeScriptData(scriptData, context);
+                  await executeScriptData(scriptData, context, 'response');
                 });
                 break;
               case 'after':
@@ -100,20 +100,23 @@ export async function injectOnEveryRequestJavascript({ data, httpRegion }: model
       switch (everyRequestScript.event) {
         case 'streaming':
           httpRegion.hooks.onStreaming.addHook(models.ActionType.js, async context => {
-            await executeScriptData(scriptData, context);
+            await executeScriptData(scriptData, context, 'streaming');
           });
           break;
         case 'response':
+
           httpRegion.hooks.onResponse.addHook(models.ActionType.js, async (_response, context) => {
-            await executeScriptData(scriptData, context);
+            await executeScriptData(scriptData, context, 'response');
           });
           break;
         case 'after':
-          httpRegion.hooks.execute.addHook(models.ActionType.js, context => executeScriptData(scriptData, context));
+          httpRegion.hooks.execute.addHook(models.ActionType.js, async context => {
+            await executeScriptData(scriptData, context, 'after');
+          });
           break;
         case 'request':
           httpRegion.hooks.onRequest.addHook(models.ActionType.js, async (_request, context) => {
-            await executeScriptData(scriptData, context);
+            await executeScriptData(scriptData, context, 'request');
           });
           break;
         default:
@@ -127,18 +130,18 @@ export async function injectOnEveryRequestJavascript({ data, httpRegion }: model
 export class BeforeJavascriptHookInterceptor implements models.HookInterceptor<models.ProcessorContext, boolean> {
   constructor(private readonly scriptData: ScriptData) { }
   async beforeTrigger(context: models.HookTriggerContext<models.ProcessorContext, boolean | undefined>): Promise<boolean | undefined> {
-    return await executeScriptData(this.scriptData, context.arg);
+    return await executeScriptData(this.scriptData, context.arg, 'before');
   }
 }
 export class AfterJavascriptHookInterceptor implements models.HookInterceptor<models.ProcessorContext, boolean> {
   constructor(private readonly scriptData: ScriptData) { }
   async afterTrigger(context: models.HookTriggerContext<models.ProcessorContext, boolean | undefined>): Promise<boolean | undefined> {
-    return await executeScriptData(this.scriptData, context.arg);
+    return await executeScriptData(this.scriptData, context.arg, 'after');
   }
 }
-async function executeScriptData(scriptData: ScriptData, context: models.ProcessorContext) {
+async function executeScriptData(scriptData: ScriptData, context: models.ProcessorContext, eventName?: string) {
   context.progress?.report?.({
-    message: 'execute javascript',
+    message: eventName ? `execute javascript (@${eventName})` : 'execute javascript',
   });
   const result = await utils.runScript(scriptData.script, {
     fileName: context.httpFile.fileName,

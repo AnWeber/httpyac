@@ -15,7 +15,9 @@ class RefreshTokenFlow {
     if (openIdInformation.refreshToken
       && openIdInformation.refreshExpiresIn
       && !this.isTokenExpired(openIdInformation.time, openIdInformation.refreshExpiresIn, openIdInformation.timeSkew)) {
-
+      context.progress?.report?.({
+        message: 'execute OAuth2 refresh_token flow',
+      });
       return requestOpenIdInformation({
         url: openIdInformation.config.tokenEndpoint,
         method: 'POST',

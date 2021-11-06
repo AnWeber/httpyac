@@ -16,6 +16,9 @@ export class TokenExchangeFlow {
     openIdInformation: OpenIdInformation,
     context: ProcessorContext): Promise<OpenIdInformation | false> {
     if (openIdInformation) {
+      context.progress?.report?.({
+        message: 'execute OAuth2 token exchange flow',
+      });
       const jwtToken = decodeJWT(openIdInformation.accessToken);
 
       return requestOpenIdInformation({

@@ -1,6 +1,7 @@
 import * as utils from '../utils';
 import { ActionType, HttpRegionAction } from '../models';
 import { ImportProcessorContext } from './importMetaAction';
+import { log } from '../io';
 export interface RefMetaHttpRegionData {
   name: string;
   force: boolean;
@@ -12,6 +13,7 @@ export class RefMetaAction implements HttpRegionAction {
   constructor(private readonly data: RefMetaHttpRegionData) { }
 
   async process(context: ImportProcessorContext): Promise<boolean> {
+    log.trace(`load reference ${this.data.name}`);
     context.progress?.report?.({
       message: `load reference ${this.data.name}`,
     });
@@ -20,6 +22,7 @@ export class RefMetaAction implements HttpRegionAction {
         && !refHttpRegion.metaData.disabled
         && refHttpRegion !== context.httpRegion) {
         const envkey = utils.toEnvironmentKey(context.httpFile.activeEnvironment);
+        log.trace('import variables', refHttpRegion.variablesPerEnv[envkey]);
         Object.assign(context.variables, refHttpRegion.variablesPerEnv[envkey]);
         if (this.data.force || !context.variables[this.data.name]) {
           const refContext = { ...context, httpRegion: refHttpRegion };

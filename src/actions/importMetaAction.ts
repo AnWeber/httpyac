@@ -1,7 +1,7 @@
 import { executeGlobalScripts, toAbsoluteFilename } from '../utils';
 import { ActionType, HttpRegionAction, ProcessorContext, HttpFile } from '../models';
 import { HttpFileStore } from '../store';
-import { fileProvider } from '../io';
+import { fileProvider, log } from '../io';
 
 
 export interface ImportProcessorContext extends ProcessorContext{
@@ -21,6 +21,7 @@ export class ImportMetaAction implements HttpRegionAction {
   async process(context: ImportProcessorContext): Promise<boolean> {
     const absoluteFileName = await toAbsoluteFilename(this.fileName, context.httpFile.fileName);
     if (absoluteFileName) {
+      log.trace(`parse imported file ${absoluteFileName}`);
       const text = await fileProvider.readFile(absoluteFileName, 'utf-8');
       const importHttpFile = await this.httpFileStore.getOrCreate(absoluteFileName, () => Promise.resolve(text), 0, {
         workingDir: context.httpFile.rootDir,
@@ -37,6 +38,7 @@ export class ImportMetaAction implements HttpRegionAction {
         ...context,
         httpFile: importHttpFile,
       };
+      log.trace(`execute global scripts for import ${absoluteFileName}`);
       return await executeGlobalScripts(cloneContext);
     }
     return false;
