@@ -3,6 +3,7 @@ import { toAbsoluteFilename } from './fsUtils';
 import { isString } from './stringUtils';
 import * as io from '../io';
 import { toEnvironmentKey } from './environmentUtils';
+import { log } from '../io';
 
 export function expandVariables(variables: models.Variables) : models.Variables {
   for (const [key, value] of Object.entries(variables)) {
@@ -33,6 +34,10 @@ export async function replaceVariables(
   type: models.VariableType | string,
   context: models.ProcessorContext
 ): Promise<typeof models.HookCancel | unknown> {
+  if (context.progress?.isCanceled?.()) {
+    log.trace('processs canceled by user');
+    return models.HookCancel;
+  }
   let start;
   let result = text;
   while (start !== result) {

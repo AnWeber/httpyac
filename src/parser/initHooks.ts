@@ -19,6 +19,7 @@ import { parseMQTTLine } from './mqtttHttpRegionParser';
 
 import { injectOnEveryRequestJavascript } from './javascriptHttpRegionParser';
 import { injectNote } from './noteMetaHttpRegionParser';
+import { registerCancelExecutionIntercepter } from './cancelExecutionInterceptor';
 
 
 export enum ParserId {
@@ -67,8 +68,9 @@ export function initParseHook(): models.ParseHook {
 export function initParseEndHook(): models.ParseEndRegionHook {
   const hook = new models.ParseEndRegionHook();
 
-  hook.addHook(ParserId.javascript, injectOnEveryRequestJavascript);
+  hook.addHook('registerCancelExecutionIntercepter', registerCancelExecutionIntercepter);
   hook.addHook(ParserId.note, injectNote);
+  hook.addHook(ParserId.javascript, injectOnEveryRequestJavascript);
   hook.addHook(ParserId.response, closeResponseBody);
   hook.addHook(ParserId.requestBody, closeRequestBody);
 
