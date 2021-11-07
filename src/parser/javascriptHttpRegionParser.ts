@@ -140,9 +140,7 @@ export class AfterJavascriptHookInterceptor implements models.HookInterceptor<mo
   }
 }
 async function executeScriptData(scriptData: ScriptData, context: models.ProcessorContext, eventName?: string) {
-  context.progress?.report?.({
-    message: eventName ? `execute javascript (@${eventName})` : 'execute javascript',
-  });
+  utils.report(context, eventName ? `execute javascript (@${eventName})` : 'execute javascript');
   const result = await utils.runScript(scriptData.script, {
     fileName: context.httpFile.fileName,
     context: {

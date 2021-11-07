@@ -13,10 +13,7 @@ export class RefMetaAction implements HttpRegionAction {
   constructor(private readonly data: RefMetaHttpRegionData) { }
 
   async process(context: ImportProcessorContext): Promise<boolean> {
-    log.trace(`load reference ${this.data.name}`);
-    context.progress?.report?.({
-      message: `load reference ${this.data.name}`,
-    });
+    utils.report(context, `load reference ${this.data.name}`);
     for (const refHttpRegion of context.httpFile.httpRegions) {
       if (refHttpRegion.metaData.name === this.data.name
         && !refHttpRegion.metaData.disabled

@@ -1,5 +1,6 @@
 import * as models from '../../models';
 import { userSessionStore } from '../../store';
+import * as utils from '../../utils';
 
 export function keepStreamingMetaDataHandler(type: string, _value: string | undefined, context: models.ParserContext) {
   if (type === 'keepStreaming') {
@@ -12,9 +13,7 @@ export function keepStreamingMetaDataHandler(type: string, _value: string | unde
           description: 'Pending Stream',
           details: context.request.headers || {}
         };
-        context.progress?.report?.({
-          message: 'stream until manual cancellation',
-        });
+        utils.report(context, 'stream until manual cancellation');
         await new Promise(resolve => {
           userSessionStore.setUserSession(streamSession);
           streamSession.delete = () => resolve(true);

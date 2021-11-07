@@ -11,9 +11,7 @@ export class DefaultHeadersAction implements HttpRegionAction {
 
   async process(context: ProcessorContext) : Promise<boolean> {
     if (this.data && context.variables) {
-      context.progress?.report?.({
-        message: 'set request headers',
-      });
+      utils.report(context, 'set request headers');
       const headers = await utils.evalExpression(this.data, context);
       if (headers) {
         this.setHeaders(Object.assign({}, headers), context);

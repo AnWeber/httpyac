@@ -22,9 +22,7 @@ class DeviceCodeFlow implements OpenIdFlow {
     const id = this.getCacheKey(config);
     if (id) {
 
-      context.progress?.report?.({
-        message: 'execute device_code authorization flow',
-      });
+      utils.report(context, 'execute device_code authorization flow');
 
       const deviceCodeTime = (new Date()).getTime();
       const deviceCodeResponse = await this.requestDeviceAuthorization(context, config);
@@ -35,9 +33,7 @@ class DeviceCodeFlow implements OpenIdFlow {
         if (models.isProcessorContext(context)) {
           await utils.logResponse(deviceCodeResponse, context);
         }
-        context.progress?.report?.({
-          message: 'device_code received',
-        });
+        utils.report(context, 'device_code received');
 
         const deviceCodeBody: DevcieCodeBody = JSON.parse(deviceCodeResponse.body);
 
@@ -59,9 +55,7 @@ class DeviceCodeFlow implements OpenIdFlow {
             if (response && utils.isString(response.body)) {
               const parsedBody = JSON.parse(response.body);
               if (response.statusCode === 200) {
-                context.progress?.report?.({
-                  message: 'accessToken received',
-                });
+                utils.report(context, 'accessToken received');
                 await this.logResponse(response, context);
                 return toOpenIdInformation(parsedBody, time, {
                   config,
@@ -75,10 +69,7 @@ class DeviceCodeFlow implements OpenIdFlow {
                   }
                 });
               }
-              io.log.debug(`device code ${parsedBody.error}`);
-              context.progress?.report?.({
-                message: `device code ${parsedBody.error}`,
-              });
+              utils.report(context, `device code ${parsedBody.error}`);
               if (['slow_down', 'authorization_pending'].indexOf(parsedBody.error) >= 0) {
                 if (parsedBody.error === 'slow_down' || response.statusCode === 408) { // on Timeout slow down
                   interval += 5000;

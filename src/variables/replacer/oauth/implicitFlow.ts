@@ -1,7 +1,7 @@
 import { OpenIdConfiguration, assertConfiguration } from './openIdConfiguration';
 import { OpenIdInformation, toOpenIdInformation, requestOpenIdInformation } from './openIdInformation';
 import { OpenIdFlow, OpenIdFlowContext } from './openIdFlow';
-import { toQueryParams, stateGenerator } from '../../../utils';
+import * as utils from '../../../utils';
 import open from 'open';
 import { registerListener, unregisterListener } from './openIdHttpserver';
 import { log } from '../../../io';
@@ -22,14 +22,15 @@ class ImplicitFlow implements OpenIdFlow {
     const id = this.getCacheKey(config);
     if (id) {
       return new Promise<OpenIdInformation | false>((resolve, reject) => {
-        const state = stateGenerator();
+        utils.report(context, 'execute OAuth2 implicit flow');
+        const state = utils.stateGenerator();
         try {
           const redirectUri = 'http://localhost:3000/callback';
-          const authUrl = `${config.authorizationEndpoint}${config.authorizationEndpoint.indexOf('?') > 0 ? '&' : '?'}${toQueryParams({
+          const authUrl = `${config.authorizationEndpoint}${config.authorizationEndpoint.indexOf('?') > 0 ? '&' : '?'}${utils.toQueryParams({
             client_id: config.clientId,
             scope: config.scope || 'openid',
             response_type: config.responseType || 'token',
-            nonce: stateGenerator(),
+            nonce: utils.stateGenerator(),
             state,
             response_mode: config.responseMode,
             audience: config.audience,
@@ -54,7 +55,7 @@ class ImplicitFlow implements OpenIdFlow {
                   const openIdInformation = requestOpenIdInformation({
                     url: config.tokenEndpoint,
                     method: 'POST',
-                    body: toQueryParams({
+                    body: utils.toQueryParams({
                       grant_type: 'authorization_code',
                       scope: config.scope,
                       code: params.code,
@@ -118,6 +119,7 @@ class ImplicitFlow implements OpenIdFlow {
             reject,
           });
           log.trace(`open browser: ${authUrl}`);
+          utils.report(context, `implicit browser authentication pending: ${authUrl}`);
           open(authUrl);
         } catch (err) {
           unregisterListener(state);

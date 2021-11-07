@@ -37,9 +37,7 @@ async function checkRateLimit(rateLimitSession: RateLimitSession, context: model
       const freeSlotTime = rateLimitSession.expire + first.getTime() - currentRequest.getTime();
 
       if (freeSlotTime > 0) {
-        context.progress?.report?.({
-          message: `rate limit max reached. wait for ${freeSlotTime}`,
-        });
+        utils.report(context, `rate limit max reached. wait for ${freeSlotTime}`);
         log.debug(`rate limit max reached. wait for ${freeSlotTime} (slot ${rateLimitSession.slot})`);
         await utils.sleep(freeSlotTime);
         log.trace('rate limit max waited');
@@ -51,9 +49,7 @@ async function checkRateLimit(rateLimitSession: RateLimitSession, context: model
       if (lastRequest && rateLimitSession.minIdleTime > 0) {
         const minIdleTime = lastRequest.getTime() + rateLimitSession.minIdleTime - currentRequest.getTime();
         if (minIdleTime > 0) {
-          context.progress?.report?.({
-            message: `rate limit minIdleTime, wait for ${minIdleTime}`,
-          });
+          utils.report(context, `rate limit minIdleTime, wait for ${minIdleTime}`);
           log.debug(`rate limit minIdleTime, wait for ${minIdleTime} (slot ${rateLimitSession.slot})`);
           await utils.sleep(minIdleTime);
           log.trace('rate limit minIdleTime waited');

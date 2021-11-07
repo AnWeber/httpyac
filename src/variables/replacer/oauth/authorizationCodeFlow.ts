@@ -1,7 +1,7 @@
 import { OpenIdConfiguration, assertConfiguration } from './openIdConfiguration';
 import { OpenIdInformation, requestOpenIdInformation } from './openIdInformation';
 import { OpenIdFlow, OpenIdFlowContext } from './openIdFlow';
-import { toQueryParams, stateGenerator } from '../../../utils';
+import * as utils from '../../../utils';
 import open from 'open';
 import { registerListener, unregisterListener } from './openIdHttpserver';
 
@@ -21,13 +21,11 @@ class AuthorizationCodeFlow implements OpenIdFlow {
     const id = this.getCacheKey(config);
     if (id) {
       return new Promise<OpenIdInformation | false>((resolve, reject) => {
-        const state = stateGenerator();
+        const state = utils.stateGenerator();
         try {
-          context.progress?.report?.({
-            message: 'execute OAuth2 authorization_code flow',
-          });
+          utils.report(context, 'execute OAuth2 authorization_code flow');
           const redirectUri = 'http://localhost:3000/callback';
-          const authUrl = `${config.authorizationEndpoint}${config.authorizationEndpoint.indexOf('?') > 0 ? '&' : '?'}${toQueryParams({
+          const authUrl = `${config.authorizationEndpoint}${config.authorizationEndpoint.indexOf('?') > 0 ? '&' : '?'}${utils.toQueryParams({
             client_id: config.clientId,
             scope: config.scope || 'openid',
             response_type: 'code',
@@ -55,7 +53,7 @@ class AuthorizationCodeFlow implements OpenIdFlow {
                 const openIdInformation = requestOpenIdInformation({
                   url: config.tokenEndpoint,
                   method: 'POST',
-                  body: toQueryParams({
+                  body: utils.toQueryParams({
                     grant_type: 'authorization_code',
                     scope: config.scope,
                     code: params.code,
@@ -95,6 +93,7 @@ class AuthorizationCodeFlow implements OpenIdFlow {
             },
             reject,
           });
+          utils.report(context, `autorization_code browser authentication pending: ${authUrl}`);
           open(authUrl);
         } catch (err) {
           unregisterListener(state);

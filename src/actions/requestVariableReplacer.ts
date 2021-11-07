@@ -3,9 +3,7 @@ import * as utils from '../utils';
 
 
 export async function requestVariableReplacer(request: models.Request, context: models.ProcessorContext): Promise<models.Request | typeof models.HookCancel> {
-  context.progress?.report?.({
-    message: 'replace variables in request',
-  });
+  utils.report(context, 'replace variables in request');
   if (request.url) {
     const result = await utils.replaceVariables(request.url, models.VariableType.url, context) || request.url;
     if (result === models.HookCancel) {

@@ -1,6 +1,6 @@
 import { OpenIdConfiguration, assertConfiguration } from './openIdConfiguration';
 import { OpenIdInformation, requestOpenIdInformation } from './openIdInformation';
-import { toQueryParams, decodeJWT } from '../../../utils';
+import * as utils from '../../../utils';
 import { ProcessorContext } from '../../../models';
 import encodeUrl from 'encodeurl';
 
@@ -16,15 +16,13 @@ export class TokenExchangeFlow {
     openIdInformation: OpenIdInformation,
     context: ProcessorContext): Promise<OpenIdInformation | false> {
     if (openIdInformation) {
-      context.progress?.report?.({
-        message: 'execute OAuth2 token exchange flow',
-      });
-      const jwtToken = decodeJWT(openIdInformation.accessToken);
+      utils.report(context, 'execute OAuth2 token exchange flow');
+      const jwtToken = utils.decodeJWT(openIdInformation.accessToken);
 
       return requestOpenIdInformation({
         url: config.tokenEndpoint,
         method: 'POST',
-        body: toQueryParams({
+        body: utils.toQueryParams({
           grant_type: 'urn:ietf:params:oauth:grant-type:token-exchange',
           requested_token_type: 'urn:ietf:params:oauth:token-type:access_token',
           subject_token_type: 'urn:ietf:params:oauth:token-type:access_token',

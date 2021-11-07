@@ -5,6 +5,7 @@ export * from './errorUtils';
 export * from './fsUtils';
 export * from './httpRegionUtils';
 export * from './httpStringUtils';
+export * from './logUtils';
 export * from './markdownUtils';
 export * from './mimeTypeUtils';
 export * from './moduleUtils';

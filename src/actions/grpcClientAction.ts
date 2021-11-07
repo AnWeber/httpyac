@@ -27,9 +27,7 @@ export class GrpcClientAction implements models.HttpRegionAction {
     if (utils.isGrpcRequest(request) && request?.url && protoDefinitions) {
       return await utils.triggerRequestResponseHooks(async () => {
         if (request.url) {
-          context.progress?.report?.({
-            message: `reqeust gRPC ${request.url}`,
-          });
+          utils.report(context, `reqeust gRPC ${request.url}`);
           const serviceData = this.getService(request.url, protoDefinitions);
           if (serviceData.ServiceClass) {
 

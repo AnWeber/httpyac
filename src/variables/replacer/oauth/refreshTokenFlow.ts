@@ -1,5 +1,5 @@
 import { OpenIdInformation, requestOpenIdInformation } from './openIdInformation';
-import { toQueryParams } from '../../../utils';
+import * as utils from '../../../utils';
 import { OpenIdFlowContext } from './openIdFlow';
 
 class RefreshTokenFlow {
@@ -15,13 +15,11 @@ class RefreshTokenFlow {
     if (openIdInformation.refreshToken
       && openIdInformation.refreshExpiresIn
       && !this.isTokenExpired(openIdInformation.time, openIdInformation.refreshExpiresIn, openIdInformation.timeSkew)) {
-      context.progress?.report?.({
-        message: 'execute OAuth2 refresh_token flow',
-      });
+      utils.report(context, 'execute OAuth2 refresh_token flow');
       return requestOpenIdInformation({
         url: openIdInformation.config.tokenEndpoint,
         method: 'POST',
-        body: toQueryParams({
+        body: utils.toQueryParams({
           grant_type: 'refresh_token',
           refresh_token: openIdInformation.refreshToken
         })
