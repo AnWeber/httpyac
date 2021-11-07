@@ -75,6 +75,7 @@ export class ProtoImportAction implements models.HttpRegionAction {
   constructor(private readonly protoDefinition: models.ProtoDefinition) {}
 
   async process(context: ProtoProcessorContext): Promise<boolean> {
+    log.debug(`import proto ${this.protoDefinition.fileName}`);
     context.progress?.report?.({
       message: `import proto ${this.protoDefinition.fileName}`,
     });

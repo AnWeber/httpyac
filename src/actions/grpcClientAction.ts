@@ -210,15 +210,21 @@ export class GrpcClientAction implements models.HttpRegionAction {
     const urlMatch = ParserRegex.grpc.grpcUrl.exec(url);
     if (urlMatch && urlMatch.groups?.service) {
       const { server, service, method } = urlMatch.groups;
-      const protoDefinition = Object.values(protoDefinitions).find(obj => get(obj.grpcObject, service));
-      const ServiceClass = get(protoDefinition?.grpcObject, service);
-      if (typeof ServiceClass === 'function') {
+      const flatServices = this.flattenProtoDefintions(protoDefinitions);
 
+      let ServiceClass = flatServices[service];
+      if (!ServiceClass) {
+        const serviceKey = Object.keys(flatServices).find(key => key.indexOf(service) >= 0);
+        if (serviceKey) {
+          log.warn(`service ${service} not found. Similar service ${serviceKey} is used.`);
+          ServiceClass = flatServices[serviceKey];
+        }
+      }
+      if (typeof ServiceClass === 'function') {
         const methodDefinition = ServiceClass.service[method] || Object.entries(ServiceClass.service)
           .filter(([key]) => key.toLowerCase() === method.toLowerCase())
           .map(([, value]) => value)
           .pop();
-
         return {
           server,
           service,
@@ -227,11 +233,43 @@ export class GrpcClientAction implements models.HttpRegionAction {
           methodDefinition
         };
       }
-      throw new Error(`Service ${service} does not exist`);
+      log.error(`Service ${service} does not exist. Available Services`, ...Object.keys(flatServices));
+      throw new Error(`Service ${service} does not exist. Available Services: ${Object.keys(flatServices).join(', ')}`);
     } else {
       throw new Error(`Url ${url} does not match pattern <server>/<service>/<method>`);
     }
   }
+
+  private flattenProtoDefintions(protoDefinitions: Record<string, models.ProtoDefinition>) {
+    const result: grpc.GrpcObject = {};
+    for (const protoDefinition of Object.values(protoDefinitions)) {
+      if (protoDefinition.grpcObject) {
+        const grpcObject = this.getFlatGrpcObject(protoDefinition.grpcObject);
+        Object.assign(result, grpcObject);
+      }
+    }
+    return result;
+  }
+
+  private getFlatGrpcObject(grpcObject: grpc.GrpcObject) {
+    return Object.entries(grpcObject).reduce((prev, curr) => {
+      if (typeof curr[1] === 'function') {
+        prev[curr[0]] = curr[1];
+      } else if (this.isGrpcObject(curr[1])) {
+        for (const [name, value] of Object.entries(this.getFlatGrpcObject(curr[1]))) {
+          prev[`${curr[0]}.${name}`] = value;
+        }
+      }
+      return prev;
+    }, {} as grpc.GrpcObject);
+  }
+
+  private isGrpcObject(obj: unknown): obj is grpc.GrpcObject {
+    const grpcObject = obj as grpc.GrpcObject;
+    return grpcObject && !grpcObject.format && typeof obj !== 'function';
+  }
+
+
   private toHttpResponse(data: unknown, responseTemplate: Partial<models.HttpResponse>): models.HttpResponse {
     const json = JSON.stringify(data, null, 2);
     const response: models.HttpResponse = {
