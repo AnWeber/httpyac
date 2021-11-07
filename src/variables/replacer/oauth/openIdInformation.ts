@@ -61,7 +61,9 @@ export async function requestOpenIdInformation(
 export function toOpenIdInformation(jwtToken: unknown, time: number, session: OpenIdSesssion): OpenIdInformation | false {
   if (isAuthToken(jwtToken)) {
     const parsedToken = utils.decodeJWT(jwtToken.access_token);
-    log.debug(JSON.stringify(parsedToken, null, 2));
+    if (parsedToken) {
+      log.debug(JSON.stringify(parsedToken, null, 2));
+    }
     return {
       ...session,
       type: 'OAuth2',
