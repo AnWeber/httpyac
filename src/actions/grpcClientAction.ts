@@ -3,7 +3,6 @@ import { log } from '../io';
 import * as utils from '../utils';
 import { ParserRegex, ProtoProcessorContext } from '../parser';
 import * as grpc from '@grpc/grpc-js';
-import get from 'lodash/get';
 import { Readable, Writable, Duplex } from 'stream';
 
 
