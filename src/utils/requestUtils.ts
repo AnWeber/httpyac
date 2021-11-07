@@ -94,23 +94,8 @@ export function decodeJWT(str: string): JWTToken | null {
     if (jwtComponents.length !== 3) {
       return null;
     }
-    let payload = jwtComponents[1];
-    payload = payload.replace(/-/gu, '+');
-    payload = payload.replace(/_/gu, '/');
-    switch (payload.length % 4) {
-      case 0:
-        break;
-      case 2:
-        payload += '==';
-        break;
-      case 3:
-        payload += '=';
-        break;
-      default:
-        return null;
-    }
-
-    const result = decodeURIComponent(escape(Buffer.from(payload, 'base64').toString()));
+    const payload = jwtComponents[1];
+    const result = Buffer.from(payload, 'base64url').toString();
 
     return JSON.parse(result);
   } catch (err) {
