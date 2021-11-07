@@ -1,7 +1,7 @@
 ## 4.6.0 (2021-11-07)
 
 #### Features
-* added [OAuth 2.0 Device Authorization Grant}(https://datatracker.ietf.org/doc/html/rfc8628) (#97)
+* added [OAuth 2.0 Device Authorization Grant](https://datatracker.ietf.org/doc/html/rfc8628) (#97)
 * extend GRPC Not Found Service Error with avaiable services
 
 #### Fix
