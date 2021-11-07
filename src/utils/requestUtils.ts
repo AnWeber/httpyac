@@ -4,6 +4,7 @@ import { isMimeTypeJSON, isMimeTypeXml, parseMimeType } from './mimeTypeUtils';
 import { default as chalk } from 'chalk';
 import { log } from '../io';
 import xmlFormat from 'xml-formatter';
+import { TextDecoder } from 'util';
 
 
 export function isHttpRequestMethod(method: string | undefined): method is models.HttpMethod {
@@ -110,8 +111,7 @@ export function decodeJWT(str: string): JWTToken | null {
         return null;
     }
 
-    const result = decodeURIComponent(escape(Buffer.from(payload, 'base64').toString()));
-
+    const result = (new TextDecoder()).decode(Buffer.from(payload, 'base64'));
     return JSON.parse(result);
   } catch (err) {
     log.warn(err);
