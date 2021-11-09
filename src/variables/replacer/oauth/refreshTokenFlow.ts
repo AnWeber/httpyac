@@ -13,8 +13,11 @@ class RefreshTokenFlow {
       return openIdInformation;
     }
     if (openIdInformation.refreshToken
-      && openIdInformation.refreshExpiresIn
-      && !this.isTokenExpired(openIdInformation.time, openIdInformation.refreshExpiresIn, openIdInformation.timeSkew)) {
+      && (
+        typeof openIdInformation.refreshExpiresIn !== 'undefined'
+          ? !this.isTokenExpired(openIdInformation.time, openIdInformation.refreshExpiresIn, openIdInformation.timeSkew)
+          : true
+      )) {
       utils.report(context, 'execute OAuth2 refresh_token flow');
       return requestOpenIdInformation({
         url: openIdInformation.config.tokenEndpoint,
