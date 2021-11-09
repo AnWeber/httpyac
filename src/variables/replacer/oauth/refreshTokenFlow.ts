@@ -4,20 +4,19 @@ import { OpenIdFlowContext } from './openIdFlow';
 
 class RefreshTokenFlow {
 
-  private isTokenExpired(time: number, expiresIn: number, timeSkew: number) {
-    return time + 1000 * (expiresIn - timeSkew) < (new Date()).getTime();
+  private isTokenExpired(time: number, timeSkew: number, expiresIn?: number) {
+    if (typeof expiresIn !== 'undefined') {
+      return time + 1000 * (expiresIn - timeSkew) < (new Date()).getTime();
+    }
+    return false;
   }
 
   async perform(openIdInformation: OpenIdInformation, context: OpenIdFlowContext): Promise<OpenIdInformation | false> {
-    if (!this.isTokenExpired(openIdInformation.time, openIdInformation.expiresIn, openIdInformation.timeSkew)) {
+    if (!this.isTokenExpired(openIdInformation.time, openIdInformation.timeSkew, openIdInformation.expiresIn)) {
       return openIdInformation;
     }
     if (openIdInformation.refreshToken
-      && (
-        typeof openIdInformation.refreshExpiresIn !== 'undefined'
-          ? !this.isTokenExpired(openIdInformation.time, openIdInformation.refreshExpiresIn, openIdInformation.timeSkew)
-          : true
-      )) {
+      && !this.isTokenExpired(openIdInformation.time, openIdInformation.timeSkew, openIdInformation.refreshExpiresIn)) {
       utils.report(context, 'execute OAuth2 refresh_token flow');
       return requestOpenIdInformation({
         url: openIdInformation.config.tokenEndpoint,
