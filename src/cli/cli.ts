@@ -101,7 +101,6 @@ function convertCliOptionsToContext(cliOptions: CliOptions): CliContext {
       onlyFailedTests: cliOptions.filter === CliFilterOptions.onlyFailed
     }),
     config: {
-      envDirName: 'env',
       log: {
         level: getLogLevel(cliOptions),
       },
