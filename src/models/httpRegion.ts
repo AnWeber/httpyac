@@ -1,4 +1,4 @@
-import { ExecuteHook, OnRequestHook, OnStreaming, OnResponseHook } from './httpFileHooks';
+import { ExecuteHook, OnRequestHook, OnStreaming, OnResponseHook, ResponseLoggingHook } from './httpFileHooks';
 import { Request } from './httpRequest';
 import { HttpResponse } from './httpResponse';
 import { HttpSymbol } from './httpSymbol';
@@ -21,5 +21,6 @@ export interface HttpRegion extends ProcessedHttpRegion{
     onRequest: OnRequestHook,
     onStreaming: OnStreaming;
     onResponse: OnResponseHook,
+    responseLogging: ResponseLoggingHook,
   }
 }

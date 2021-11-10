@@ -48,12 +48,21 @@ export async function parseJavascript(
                 });
                 break;
               case 'response':
-                httpRegion.hooks.onResponse.addHook(models.ActionType.js, async (_response, context) => {
+                httpRegion.hooks.onResponse.addHook(models.ActionType.js, async (response, context) => {
+                  context.variables.response = response;
                   await executeScriptData(scriptData, context, 'response');
                 });
                 break;
               case 'after':
                 httpRegion.hooks.execute.addInterceptor(new AfterJavascriptHookInterceptor(scriptData));
+                break;
+              case 'responseLogging':
+                httpRegion.hooks.responseLogging.addHook(models.ActionType.js, async (response, context) => {
+                  const originalResponse = context.variables.response;
+                  context.variables.response = response;
+                  await executeScriptData(scriptData, context, 'responseLogging');
+                  context.variables.response = originalResponse;
+                });
                 break;
               default:
                 httpRegion.hooks.execute.addHook(models.ActionType.js, context => executeScriptData(scriptData, context));
@@ -104,8 +113,8 @@ export async function injectOnEveryRequestJavascript({ data, httpRegion }: model
           });
           break;
         case 'response':
-
-          httpRegion.hooks.onResponse.addHook(models.ActionType.js, async (_response, context) => {
+          httpRegion.hooks.onResponse.addHook(models.ActionType.js, async (response, context) => {
+            context.variables.response = response;
             await executeScriptData(scriptData, context, 'response');
           });
           break;
@@ -117,6 +126,14 @@ export async function injectOnEveryRequestJavascript({ data, httpRegion }: model
         case 'request':
           httpRegion.hooks.onRequest.addHook(models.ActionType.js, async (_request, context) => {
             await executeScriptData(scriptData, context, 'request');
+          });
+          break;
+        case 'responseLogging':
+          httpRegion.hooks.responseLogging.addHook(models.ActionType.js, async (response, context) => {
+            const originalResponse = context.variables.response;
+            context.variables.response = response;
+            await executeScriptData(scriptData, context, 'responseLogging');
+            context.variables.response = originalResponse;
           });
           break;
         default:

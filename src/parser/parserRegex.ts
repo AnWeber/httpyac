@@ -39,7 +39,7 @@ export const ParserRegex = {
     scriptStart: /^\s*>\s+\{%\s*$/u,
   },
   javascript: {
-    scriptStart: /^\s*\{\{(@js\s+)?(?<modifier>\+|@)?(?<event>(request|streaming|response|after)?)?\s*$/u,
+    scriptStart: /^\s*\{\{(@js\s+)?(?<modifier>\+|@)?(?<event>(request|streaming|response|after|responseLogging)?)?\s*$/u,
     scriptEnd: /^\s*\}\}\s*$/u,
     scriptSingleLine: /\{{2}(.+?)\}{2}/gu,
   },

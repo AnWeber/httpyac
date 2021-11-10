@@ -107,8 +107,12 @@ function autoShareNewVariables(variables: models.Variables, context: models.Proc
 export async function logResponse(response: models.HttpResponse | undefined, context: models.ProcessorContext): Promise<models.HttpResponse | undefined> {
   if (response) {
     const clone = cloneResponse(response);
-    const responseLoggingResult = await context.httpFile.hooks.responseLogging.trigger(clone, context);
-    if (responseLoggingResult === models.HookCancel) {
+    const fileResult = await context.httpFile.hooks.responseLogging.trigger(clone, context);
+    if (fileResult === models.HookCancel) {
+      return undefined;
+    }
+    const regionResult = await context.httpRegion.hooks.responseLogging.trigger(clone, context);
+    if (regionResult === models.HookCancel) {
       return undefined;
     }
     if (!context.httpRegion.metaData.noLog

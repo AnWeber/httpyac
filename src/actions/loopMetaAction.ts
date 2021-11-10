@@ -133,6 +133,7 @@ export class LoopMetaAction implements models.HookInterceptor<models.ProcessorCo
         onRequest: new models.OnRequestHook(),
         onStreaming: new models.OnStreaming(),
         onResponse: new models.OnResponseHook(),
+        responseLogging: new models.ResponseLoggingHook(),
       },
       variablesPerEnv: httpRegion.variablesPerEnv,
     };
