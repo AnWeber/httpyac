@@ -45,6 +45,7 @@ usage: httpyac [options...] <file or glob pattern>
        --repeat-mode   repeat mode: sequential, parallel (default)
   -s   --silent        log only request
        --timeout       maximum time allowed for connections
+       --var           set variables
   -v   --verbose       make the operation more talkative
        --version       version of httpyac
 

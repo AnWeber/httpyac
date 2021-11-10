@@ -24,6 +24,7 @@ export interface CliOptions {
   repeat?: RepeatOptions,
   requestTimeout?: number;
   silent?: boolean;
+  variables?: Array<string>;
   verbose?: boolean;
   version?: boolean;
 }
@@ -66,6 +67,7 @@ export function parseCliOptions(rawArgs: string[]): CliOptions | undefined {
         '--repeat-mode': String,
         '--silent': Boolean,
         '--timeout': Number,
+        '--var': [String],
         '--verbose': Boolean,
         '--version': Boolean,
 
@@ -105,6 +107,7 @@ export function parseCliOptions(rawArgs: string[]): CliOptions | undefined {
       } : undefined,
       requestTimeout: args['--timeout'],
       silent: args['--silent'],
+      variables: args['--var'],
       verbose: args['--verbose'],
       version: args['--version'],
     };
@@ -142,6 +145,7 @@ usage: httpyac [options...] <file or glob pattern>
        --repeat-mode   repeat mode: sequential, parallel (default)
   -s   --silent        log only request
        --timeout       maximum time allowed for connections
+       --var           set variables
   -v   --verbose       make the operation more talkative
        --version       version of httpyac`;
 

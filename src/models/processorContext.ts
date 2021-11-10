@@ -27,6 +27,7 @@ export interface HttpFileSendContext{
   logStream?: StreamLogger;
   logResponse?: RequestLogger;
   repeat?: RepeatOptions;
+  variables?: Variables;
   require?: Record<string, unknown>,
 }
 

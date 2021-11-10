@@ -113,6 +113,7 @@ function convertCliOptionsToContext(cliOptions: CliOptions): CliContext {
     },
     logStream: cliOptions.json ? undefined : getStreamLogger(cliOptions),
     logResponse: cliOptions.json ? undefined : getRequestLogger(cliOptions),
+    variables: cliOptions.variables ? Object.fromEntries(cliOptions.variables.map(obj => obj.split('='))) : undefined,
   };
 
   return context;

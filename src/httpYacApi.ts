@@ -92,7 +92,8 @@ export async function getVariables(context: models.VariableProviderContext): Pro
   }
   const variables = Object.assign(
     {},
-    ...vars
+    ...vars,
+    context.variables
   );
   log.debug(variables);
   return variables;
