@@ -1,3 +1,13 @@
+## 4.7.0 (2021-11-10)
+
+#### Features
+* add new event `@responseLogging` for scripts
+* add `--var` option to cli command
+
+#### Fix
+* refreshTokenFlow does not require refreshExpiresIn
+* envDirName is not overriden in cli command (#103)
+
 ## 4.6.0 (2021-11-07)
 
 #### Features
