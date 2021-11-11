@@ -63,11 +63,10 @@ export async function processHttpRegionActions(context: models.ProcessorContext,
   } finally {
     if (!context.httpRegion.metaData.noLog) {
       context.scriptConsole?.flush?.();
-      const newVariables = context.variables;
-      context.variables = variables;
-      autoShareNewVariables(newVariables, context);
     }
-
+    const newVariables = context.variables;
+    context.variables = variables;
+    autoShareNewVariables(newVariables, context);
   }
 }
 function initRegionScopedVariables(context: models.ProcessorContext) {
