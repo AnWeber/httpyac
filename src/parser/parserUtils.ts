@@ -44,7 +44,7 @@ export function parseSubsequentLines(
 export function parseRequestHeaderFactory(headers: Record<string, unknown>): ParseLineMethod {
   return function parseRequestHeader(httpLine: models.HttpLine) {
     const headerMatch = ParserRegex.request.header.exec(httpLine.textLine);
-    if (headerMatch?.groups?.key && headerMatch?.groups?.value) {
+    if (headerMatch?.groups?.key) {
       const headerName = headerMatch.groups.key;
       const headerValue = headerMatch.groups.value;
 
