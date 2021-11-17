@@ -1,3 +1,11 @@
+## 4.7.1 (2021-11-17)
+
+
+#### Fix
+* .env file in same folder not imported  #112
+* blank header is now supported (#107)
+* using `# @no-log` breaks named variable (#106)
+
 ## 4.7.0 (2021-11-10)
 
 #### Features
