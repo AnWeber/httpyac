@@ -9,7 +9,7 @@
         "<node_internals>/**"
       ],
       "cwd": "${fileDirname}",
-      "program": "${workspaceFolder}\\bin\\httpyac.js",
+      "program": "${workspaceFolder}/bin/httpyac.js",
       "args": ["${fileBasename}", "--all"],
       "outFiles": [
         "${workspaceFolder}/dist/**/*.js"
