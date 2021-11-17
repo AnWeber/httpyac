@@ -129,7 +129,7 @@ usage: httpyac [options...] <file or glob pattern>
        --all           execute all http requests in a http file
        --bail          stops when a test case fails
        --editor        enter a new request and execute it
-  -e   --env           list of environemnts
+  -e   --env           list of environments
        --filter        filter requests output (only-failed)
   -h   --help          help
        --insecure      allow insecure server connections when using ssl
