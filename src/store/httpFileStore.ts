@@ -116,11 +116,14 @@ export class HttpFileStore {
   }
 
   private async initHttpFile(fileName: models.PathLike, options: HttpFileStoreOptions) {
-    const rootDir = await utils.findRootDirOfFile(fileName, options.workingDir,
+
+    const absoluteFileName = await utils.toAbsoluteFilename(fileName, options.workingDir) || fileName;
+
+    const rootDir = await utils.findRootDirOfFile(absoluteFileName, options.workingDir,
       'package.json', ...utils.defaultConfigFiles, options.config?.envDirName || 'env');
 
     const httpFile: models.HttpFile = {
-      fileName,
+      fileName: absoluteFileName,
       rootDir,
       hooks: {
         parse: initParseHook(),

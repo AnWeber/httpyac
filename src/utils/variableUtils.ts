@@ -48,7 +48,7 @@ export async function replaceFilePath<T>(
 ): Promise<T | undefined> {
   const file = await replaceVariables(fileName, models.VariableType.filePath, context);
   if (isString(file)) {
-    const normalizedPath = await toAbsoluteFilename(file, context.httpFile.fileName);
+    const normalizedPath = await toAbsoluteFilename(file, io.fileProvider.dirname(context.httpFile.fileName));
     if (normalizedPath) {
       return await action(normalizedPath);
     }

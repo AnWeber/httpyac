@@ -19,7 +19,7 @@ export class ImportMetaAction implements HttpRegionAction {
   ) { }
 
   async process(context: ImportProcessorContext): Promise<boolean> {
-    const absoluteFileName = await toAbsoluteFilename(this.fileName, context.httpFile.fileName);
+    const absoluteFileName = await toAbsoluteFilename(this.fileName, fileProvider.dirname(context.httpFile.fileName));
     if (absoluteFileName) {
       log.trace(`parse imported file ${absoluteFileName}`);
       const text = await fileProvider.readFile(absoluteFileName, 'utf-8');

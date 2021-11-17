@@ -57,13 +57,13 @@ export async function resolveClientCertficates(config: EnvironmentConfig, rootDi
   if (config.clientCertificates) {
     for (const [, value] of Object.entries(config.clientCertificates)) {
       if (value.cert) {
-        value.cert = await toAbsoluteFilename(value.cert, rootDir, true) || value.cert;
+        value.cert = await toAbsoluteFilename(value.cert, rootDir) || value.cert;
       }
       if (value.key) {
-        value.key = await toAbsoluteFilename(value.key, rootDir, true) || value.key;
+        value.key = await toAbsoluteFilename(value.key, rootDir) || value.key;
       }
       if (value.pfx) {
-        value.pfx = await toAbsoluteFilename(value.pfx, rootDir, true) || value.pfx;
+        value.pfx = await toAbsoluteFilename(value.pfx, rootDir) || value.pfx;
       }
     }
   }

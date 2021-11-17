@@ -3,21 +3,15 @@ import { PathLike } from '../models';
 import { isString } from './stringUtils';
 
 
-export async function toAbsoluteFilename(fileName: PathLike | undefined, baseName: PathLike | undefined, isFolder = false): Promise<PathLike | undefined> {
+export async function toAbsoluteFilename(fileName: PathLike | undefined, baseName: PathLike | undefined): Promise<PathLike | undefined> {
   if (fileName) {
     if (await fileProvider.isAbsolute(fileName) && await fileProvider.exists(fileName)) {
       return fileName;
     }
-    if (baseName) {
-      let dirName: PathLike = baseName;
-      if (!isFolder) {
-        dirName = fileProvider.dirname(baseName) || baseName;
-      }
-      if (isString(fileName)) {
-        const absolute = fileProvider.joinPath(dirName, fileName);
-        if (await fileProvider.exists(absolute)) {
-          return absolute;
-        }
+    if (baseName && isString(fileName)) {
+      const absolute = fileProvider.joinPath(baseName, fileName);
+      if (await fileProvider.exists(absolute)) {
+        return absolute;
       }
     }
   }
@@ -61,7 +55,12 @@ export async function findRootDirOfFile(filename: PathLike, workingDir?: PathLik
   if (!(await fileProvider.isAbsolute(filename)) && workingDir) {
     file = fileProvider.joinPath(workingDir, fileProvider.fsPath(filename));
   }
-  return await findRootDir(fileProvider.dirname(file), ...files);
+  const dirName = fileProvider.dirname(file);
+  const dir = await findRootDir(dirName, ...files);
+  if (dir) {
+    return dir;
+  }
+  return dir || workingDir;
 }
 
 export async function findRootDir(currentDir: PathLike | undefined, ...files: Array<string>): Promise<PathLike | undefined> {

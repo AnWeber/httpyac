@@ -22,12 +22,12 @@ async function getAllEnvironmentVariables(context: VariableProviderContext) {
     environments.push(...await getEnvironmentVariables(context.httpFile.rootDir));
   }
   if (context.config?.envDirName) {
-    const absolute = await toAbsoluteFilename(context.config.envDirName, context.httpFile.rootDir, true);
+    const absolute = await toAbsoluteFilename(context.config.envDirName, context.httpFile.rootDir);
     if (absolute) {
       environments.push(...await getEnvironmentVariables(absolute));
     }
   }
-  const dirOfFile = await toAbsoluteFilename(fileProvider.dirname(context.httpFile.fileName), context.httpFile.rootDir);
+  const dirOfFile = fileProvider.dirname(context.httpFile.fileName);
   if (dirOfFile) {
     environments.push(...await getEnvironmentVariables(dirOfFile));
   }

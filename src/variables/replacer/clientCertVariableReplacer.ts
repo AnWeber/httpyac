@@ -44,19 +44,20 @@ function createUrl(url: string): URL | undefined {
 }
 
 async function setClientCertificateOptions(request: HttpRequest, clientCertifcateOptions: ClientCertificateOptions, httpFile: HttpFile) {
+  const dir = fileProvider.dirname(httpFile.fileName);
   request.https = Object.assign({}, request.https, {
-    certificate: await resolveFile(clientCertifcateOptions.cert, httpFile.fileName),
-    key: await resolveFile(clientCertifcateOptions.key, httpFile.fileName),
-    pfx: await resolveFile(clientCertifcateOptions.pfx, httpFile.fileName),
+    certificate: await resolveFile(clientCertifcateOptions.cert, dir),
+    key: await resolveFile(clientCertifcateOptions.key, dir),
+    pfx: await resolveFile(clientCertifcateOptions.pfx, dir),
     passphrase: clientCertifcateOptions.passphrase
   });
 }
 
 
-async function resolveFile(fileName: PathLike | undefined, currentFilename: PathLike): Promise<Buffer | undefined> {
+async function resolveFile(fileName: PathLike | undefined, dir: PathLike | undefined): Promise<Buffer | undefined> {
   if (fileName) {
     if (isString(fileName)) {
-      const file = await toAbsoluteFilename(fileName, currentFilename);
+      const file = await toAbsoluteFilename(fileName, dir);
       if (file) {
         return await fileProvider.readBuffer(file);
       }
