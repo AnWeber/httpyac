@@ -3,6 +3,7 @@ root: true
 parser: "@typescript-eslint/parser"
 env:
   node: true
+  jest: true
 globals:
   BufferEncoding: false
   NodeJS: false
