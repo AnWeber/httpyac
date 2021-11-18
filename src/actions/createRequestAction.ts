@@ -1,6 +1,5 @@
 import * as models from '../models';
-
-import cloneDeep = require('lodash/cloneDeep');
+import cloneDeep from 'lodash/cloneDeep';
 
 export class CreateRequestInterceptor implements models.HookInterceptor<models.ProcessorContext, boolean | void> {
   async beforeTrigger(
