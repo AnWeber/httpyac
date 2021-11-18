@@ -1,4 +1,5 @@
 import { ProcessorContext } from '../../models';
+import aws4 from 'aws4';
 import { ParserRegex } from '../../parser';
 import * as utils from '../../utils';
 import { URL } from 'url';
