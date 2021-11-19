@@ -2,13 +2,11 @@ import * as models from '../models';
 import * as utils from '../utils';
 import { fileProvider, userInteractionProvider, log } from '../io';
 
-
 import * as intellij from './intellij';
 
 export interface IntellijScriptData{
   fileName: string;
 }
-
 
 export class IntellijAction implements models.HttpRegionAction {
   id = models.ActionType.intellij;
@@ -44,7 +42,6 @@ export class IntellijAction implements models.HttpRegionAction {
     return true;
   }
 
-
   private async loadScript(file: string, context: models.ProcessorContext) {
     try {
       return await utils.replaceFilePath(file, context, path => fileProvider.readFile(path, 'utf-8'));
@@ -60,7 +57,6 @@ export class IntellijAction implements models.HttpRegionAction {
     return !!guard.fileName;
   }
 }
-
 
 function initIntellijVariables(context: models.ProcessorContext) {
   let response: unknown;

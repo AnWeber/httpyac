@@ -2,7 +2,6 @@ import { HttpSymbolKind, getHttpLineGenerator, HttpLineGenerator, HttpRegionPars
 import { toMultiLineString } from '../utils';
 import { ParserRegex } from './parserRegex';
 
-
 export async function parseComment(
   getLineReader: getHttpLineGenerator,
   { httpRegion }: ParserContext
@@ -29,14 +28,12 @@ export async function parseComment(
   return false;
 }
 
-
 export interface CommentParserResult{
   startLine: number,
   endLine: number,
   endOffset: number;
   comment: string;
 }
-
 
 function getCommentContent(lineReader: HttpLineGenerator): CommentParserResult | false {
   let next = lineReader.next();

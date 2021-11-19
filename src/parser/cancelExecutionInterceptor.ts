@@ -15,5 +15,4 @@ export function registerCancelExecutionIntercepter(parserContext: models.ParserC
     }
   });
 
-
 }

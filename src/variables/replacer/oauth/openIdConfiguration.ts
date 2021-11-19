@@ -48,7 +48,6 @@ export function getOpenIdConfiguration(variablePrefix: string, variables: Variab
   return false;
 }
 
-
 export function assertConfiguration(config: OpenIdConfiguration, keys: string[]) : boolean {
   const missingKeys = [];
   for (const key of keys) {

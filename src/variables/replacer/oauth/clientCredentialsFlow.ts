@@ -15,7 +15,6 @@ class ClientCredentialsFlow implements OpenIdFlow {
     return false;
   }
 
-
   async perform(config: OpenIdConfiguration, context: OpenIdFlowContext): Promise<OpenIdInformation | false> {
     const id = this.getCacheKey(config);
     if (id) {

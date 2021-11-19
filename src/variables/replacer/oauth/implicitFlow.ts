@@ -131,5 +131,4 @@ class ImplicitFlow implements OpenIdFlow {
   }
 }
 
-
 export const implicitFlow = new ImplicitFlow();

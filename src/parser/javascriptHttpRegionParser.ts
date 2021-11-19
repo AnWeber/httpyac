@@ -23,7 +23,6 @@ export async function parseJavascript(
     const match = ParserRegex.javascript.scriptStart.exec(next.value.textLine);
     if (match?.groups) {
 
-
       const lineOffset = next.value.line;
       next = lineReader.next();
       const script: Array<string> = [];
@@ -102,7 +101,6 @@ export async function parseJavascript(
   }
   return false;
 }
-
 
 export async function injectOnEveryRequestJavascript({ data, httpRegion }: models.ParserContext): Promise<void> {
   const onEveryRequestArray = data.jsOnEveryRequest;

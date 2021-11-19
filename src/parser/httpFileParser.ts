@@ -40,7 +40,6 @@ export async function parseHttpFile(
     }
   }
 
-
   await closeHttpRegion(parserContext);
   parserContext.httpRegion.symbol.endLine = lines.length - 1;
   parserContext.httpRegion.symbol.endOffset = lines[lines.length - 1].length;

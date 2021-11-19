@@ -3,7 +3,6 @@
  * It doesn't perform any real operation and should be used for documentation purpose.
  */
 
-
 /**
  * HTTP Client session meta data, e.g. list of global variables.
  *

@@ -4,7 +4,6 @@ import { ParserRegex } from './parserRegex';
 import { log } from '../io';
 import * as metaData from './metaData';
 
-
 export async function parseMetaData(
   getLineReader: models.getHttpLineGenerator,
   context: models.ParserContext
@@ -58,7 +57,6 @@ export async function parseMetaData(
   }
   return false;
 }
-
 
 export function parseComments(
   httpLine: models.HttpLine,
@@ -131,7 +129,6 @@ export function parseComments(
   return false;
 }
 
-
 function isMarkdownRequest(context: models.ParserContext) {
   if (context.httpRegion.request?.headers) {
     const contentType = utils.parseContentType(context.httpRegion.request.headers);
@@ -141,7 +138,6 @@ function isMarkdownRequest(context: models.ParserContext) {
   }
   return false;
 }
-
 
 export const knownMetaData: Array<{
   name: string,

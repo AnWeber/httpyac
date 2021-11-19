@@ -43,7 +43,6 @@ export function parseSubsequentLines(
   return result;
 }
 
-
 export function parseRequestHeaderFactory(headers: Record<string, unknown>): ParseLineMethod {
   return function parseRequestHeader(httpLine: models.HttpLine) {
     const headerMatch = ParserRegex.request.header.exec(httpLine.textLine);
@@ -96,7 +95,6 @@ export function parseRequestHeaderFactory(headers: Record<string, unknown>): Par
   };
 }
 
-
 export function parseDefaultHeadersFactory(
   setHeaders: (headers: Record<string, unknown>, context: models.ProcessorContext) => void
 ): ParseLineMethod {
@@ -124,7 +122,6 @@ export function parseDefaultHeadersFactory(
     return false;
   };
 }
-
 
 export function parseUrlLineFactory(attachUrl: ((url: string) => void)) : ParseLineMethod {
   return function parseUrlLine(httpLine: models.HttpLine) {
@@ -167,7 +164,6 @@ export function parseQueryLineFactory(attachUrl: ((url: string) => void)): Parse
     return false;
   };
 }
-
 
 export function parseComments(
   httpLine: models.HttpLine,

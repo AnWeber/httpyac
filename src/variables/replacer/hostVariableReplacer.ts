@@ -1,7 +1,6 @@
 import { ProcessorContext, VariableType } from '../../models';
 import { isString } from '../../utils';
 
-
 export async function hostVariableReplacer(
   text: unknown,
   type: VariableType | string,

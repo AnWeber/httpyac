@@ -67,7 +67,6 @@ export class Logger implements ConsoleLogHandler {
   }
 }
 
-
 export const log: LogHandler = new Logger({
   level: LogLevel.warn,
   noTrace: true,

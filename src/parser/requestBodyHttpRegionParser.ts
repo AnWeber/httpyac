@@ -3,7 +3,6 @@ import * as utils from '../utils';
 import { CreateRequestBodyInterceptor } from '../actions';
 import { ParserRegex } from './parserRegex';
 
-
 export async function parseRequestBody(
   getLineReader: models.getHttpLineGenerator,
   context: models.ParserContext
@@ -15,12 +14,10 @@ export async function parseRequestBody(
     const next = lineReader.next();
     if (!next.done) {
 
-
       if (requestBody.rawBody.length > 0 || !utils.isStringEmpty(next.value.textLine)) {
 
         requestBody.rawBody.push(parseLine(next.value.textLine));
         const symbols: Array<models.HttpSymbol> = [];
-
 
         if (!requestBody.symbol || requestBody.symbol.endLine !== next.value.line - 1) {
           requestBody.symbol = {

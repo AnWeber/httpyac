@@ -3,7 +3,6 @@ import { ActionType, HttpRegionAction, ProcessorContext, HttpFile } from '../mod
 import { HttpFileStore } from '../store';
 import { fileProvider, log } from '../io';
 
-
 export interface ImportProcessorContext extends ProcessorContext{
   options: {
     httpFiles?: Array<HttpFile>

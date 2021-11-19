@@ -1,6 +1,5 @@
 import { UserSession, SessionStore, Dispose } from '../models';
 
-
 export class UserSessionStore implements SessionStore {
 
   readonly userSessions: Array<UserSession> = [];
@@ -17,7 +16,6 @@ export class UserSessionStore implements SessionStore {
       }
     };
   }
-
 
   async reset() : Promise<void> {
     for (const userSession of this.userSessions) {

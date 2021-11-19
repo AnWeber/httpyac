@@ -38,7 +38,6 @@ export function toHttpStringResponse(response: HttpResponse, options?: {
   return result;
 }
 
-
 export function toHttpStringRequest(request: Request, options?: {
   body?: boolean;
 }) : Array<string> {

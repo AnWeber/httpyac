@@ -1,6 +1,5 @@
 import { UserInteractonProvider } from '../models';
 
-
 export const userInteractionProvider: UserInteractonProvider = {
   showNote: async function showNote() {
     throw new Error('Not Implemented');

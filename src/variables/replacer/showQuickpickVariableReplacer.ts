@@ -3,7 +3,6 @@ import { userInteractionProvider } from '../../io';
 import { isString } from '../../utils';
 import { ParserRegex } from '../../parser';
 
-
 export async function showQuickpickVariableReplacer(text: unknown): Promise<unknown> {
   if (!isString(text)) {
     return text;

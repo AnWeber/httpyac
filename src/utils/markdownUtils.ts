@@ -42,7 +42,6 @@ export function toMarkdown(response: models.HttpResponse, options?: {
     result.push(...toMarkdownMeta(response.meta));
   }
 
-
   return joinMarkdown(result);
 }
 
@@ -181,7 +180,6 @@ export function toMarkdownTimings(timings: models.HttpTimings) : Array<string> {
   }
   return result;
 }
-
 
 export function joinMarkdown(lines: string[]) : string {
   return lines.join(`  ${EOL}`);

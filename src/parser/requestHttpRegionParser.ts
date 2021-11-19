@@ -39,7 +39,6 @@ export async function parseRequestLine(
       symbols
     };
 
-
     const headers = {};
     request.headers = headers;
 
@@ -74,7 +73,6 @@ export async function parseRequestLine(
   }
   return false;
 }
-
 
 function getRequestLine(
   textLine: string,
@@ -127,7 +125,6 @@ function getRequestLine(
     requestSymbols
   };
 }
-
 
 function isValidRequestLine(textLine: string, httpRegion: models.HttpRegion) {
   if (utils.isStringEmpty(textLine)) {

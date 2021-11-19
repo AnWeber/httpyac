@@ -17,7 +17,6 @@ export interface OpenIdContext{
   httpClient: models.HttpClient,
 }
 
-
 export interface OpenIdSesssion extends Omit<models.UserSession, 'type'>{
   config: OpenIdConfiguration,
 }
@@ -81,7 +80,6 @@ export function toOpenIdInformation(
   }
   return false;
 }
-
 
 export function isAuthToken(obj: unknown): obj is AuthToken {
   const guard = obj as AuthToken;

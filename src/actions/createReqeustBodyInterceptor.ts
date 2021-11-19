@@ -3,7 +3,6 @@ import * as utils from '../utils';
 import { fileProvider } from '../io';
 import { EOL } from 'os';
 
-
 export class CreateRequestBodyInterceptor implements models.HookInterceptor<models.ProcessorContext, boolean | void> {
 
   constructor(private readonly rawBody: Array<string | models.RequestBodyImport>) {}

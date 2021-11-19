@@ -2,7 +2,6 @@ import { fileProvider } from '../io';
 import { PathLike } from '../models';
 import { isString } from './stringUtils';
 
-
 export async function toAbsoluteFilename(
   fileName: PathLike | undefined,
   baseName: PathLike | undefined
@@ -35,7 +34,6 @@ export function replaceInvalidChars(fileName: string): string {
   return result.split('_').filter(obj => obj.length > 0).join('_');
 }
 
-
 export function shortenFileName(fileName: string, maxChars = 50): string {
   const result: Array<string> = [];
 
@@ -51,7 +49,6 @@ export function shortenFileName(fileName: string, maxChars = 50): string {
   const joinedString = result.reverse().join('_');
   return joinedString.slice(Math.max(joinedString.length - maxChars, 0));
 }
-
 
 export async function findRootDirOfFile(
   filename: PathLike,

@@ -6,7 +6,6 @@ import { URL } from 'url';
 import { ParserRegex } from '../../parser';
 import { isHttpRequest, isString } from '../../utils';
 
-
 export async function digestAuthVariableReplacer(
   text: unknown,
   type: string,
@@ -28,7 +27,6 @@ export async function digestAuthVariableReplacer(
   }
   return text;
 }
-
 
 function digestFactory(username: string, password: string) {
   return function digestAfterResponse(

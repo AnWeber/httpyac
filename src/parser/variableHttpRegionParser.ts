@@ -71,7 +71,6 @@ export async function parseVariable(
   return false;
 }
 
-
 class VariableInterceptor implements models.HookInterceptor<models.ProcessorContext, boolean> {
   id = models.ActionType.variable;
 

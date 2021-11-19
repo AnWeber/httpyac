@@ -1,9 +1,7 @@
 import { VariableProviderContext, Variables } from '../../models';
 import { expandVariables } from '../../utils';
 
-
 const DEFAULT_ENV = '$shared';
-
 
 export async function provideConfigEnvironments(context: VariableProviderContext): Promise<string[]> {
   if (context.config?.environments) {

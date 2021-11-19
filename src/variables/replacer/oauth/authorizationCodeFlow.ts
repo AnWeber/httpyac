@@ -105,5 +105,4 @@ class AuthorizationCodeFlow implements OpenIdFlow {
   }
 }
 
-
 export const authorizationCodeFlow = new AuthorizationCodeFlow();

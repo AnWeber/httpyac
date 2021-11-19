@@ -29,7 +29,6 @@ export interface ConsoleLogHandler extends LogHandler{
   flush() : void;
 }
 
-
 export type RequestLogger = (response: HttpResponse, httpRegion?: HttpRegion) => Promise<void>;
 
 export type StreamLogger = (channel: string, type: string, message: unknown) => Promise<void>;

@@ -5,7 +5,6 @@ import { ParserRegex, ProtoProcessorContext } from '../parser';
 import * as grpc from '@grpc/grpc-js';
 import { Readable, Writable, Duplex } from 'stream';
 
-
 interface GrpcError {
   details?: string;
   code?: number;
@@ -18,7 +17,6 @@ type GrpcStreamAction = (stream: GrpcStream) => void;
 
 export class GrpcClientAction implements models.HttpRegionAction {
   id = models.ActionType.grpcClient;
-
 
   async process(context: ProtoProcessorContext): Promise<boolean> {
     grpc.setLogger(log);
@@ -270,7 +268,6 @@ export class GrpcClientAction implements models.HttpRegionAction {
     const grpcObject = obj as grpc.GrpcObject;
     return grpcObject && !grpcObject.format && typeof obj !== 'function';
   }
-
 
   private toHttpResponse(data: unknown, responseTemplate: Partial<models.HttpResponse>): models.HttpResponse {
     const json = JSON.stringify(data, null, 2);

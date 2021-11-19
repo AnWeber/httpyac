@@ -30,7 +30,6 @@ export function loopMetaDataHandler(type: string, value: string | undefined, con
       return true;
     }
 
-
   }
   return false;
 }

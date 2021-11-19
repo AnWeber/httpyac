@@ -8,7 +8,6 @@ interface BaseHookItem {
 
 export const HookCancel = Symbol('cancel hook run');
 
-
 export interface HookItem<T, TReturn> extends BaseHookItem {
   action(arg: T, arg1?: unknown, arg2?: unknown): TReturn | typeof HookCancel | Promise<TReturn | typeof HookCancel>;
 }
@@ -21,14 +20,12 @@ export interface HookInterceptor<T, TReturn> {
   afterLoop?(context: HookTriggerContext<T, TReturn>): Promise<boolean | undefined>;
 }
 
-
 export interface HookTriggerContext<T, TReturn> {
   index: number;
   length: number;
   arg: T
   hookItem?: HookItem<T, TReturn>
 }
-
 
 export abstract class Hook<T, TReturn, TTriggerResult, TArg = undefined, TArg2 = undefined> {
   protected items: Array<HookItem<T, TReturn>>;
@@ -159,7 +156,6 @@ export abstract class Hook<T, TReturn, TTriggerResult, TArg = undefined, TArg2 =
     return this.getMergedResults(results, arg);
   }
 
-
   private async intercept(
     method: (
       interceptor: HookInterceptor<T, TReturn>
@@ -179,7 +175,6 @@ export abstract class Hook<T, TReturn, TTriggerResult, TArg = undefined, TArg2 =
   }
 
   protected abstract getNextArg(_next: TReturn, current: T): T;
-
 
   protected abstract getMergedResults(results: TReturn[], arg: T): TTriggerResult;
 }
@@ -211,7 +206,6 @@ export class BailSeriesHook<T, TReturn, TBail = void, TArg = undefined, TArg2 = 
     return results.pop();
   }
 }
-
 
 export class WaterfallHook<T, TBail = T, TArg = undefined, TArg2 = undefined>
   extends Hook<T, T | TBail, T | TBail, TArg, TArg2> {

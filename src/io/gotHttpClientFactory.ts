@@ -63,7 +63,6 @@ export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined) 
   }
 }
 
-
 async function loadRepeat(url: string, options: OptionsOfUnknownResponseBody, context: HttpClientContext) {
 
   const loadFunc = async () => toHttpResponse(await got(url, options));
@@ -120,7 +119,6 @@ function initProxy(request: HttpRequest) {
   }
 }
 
-
 function toHttpResponse(response: Response<unknown>): HttpResponse {
   const httpResponse: HttpResponse = {
     statusCode: response.statusCode,
@@ -163,7 +161,6 @@ function getBody(body: unknown) {
   }
   return undefined;
 }
-
 
 export function initHttpClient(content: VariableProviderContext): HttpClient {
   const request = {

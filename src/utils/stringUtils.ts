@@ -22,7 +22,6 @@ export function toNumber<T>(text: string | undefined, defaultVal?: T|undefined):
   return defaultVal;
 }
 
-
 export function isStringEmpty(text: unknown) : boolean {
   return typeof text === 'string' && /^(\s*)?$/u.test(text);
 }

@@ -7,7 +7,6 @@ import { EOL } from 'os';
 import { PathLike, ProcessorContext } from '../models';
 import { toMultiLineArray } from './stringUtils';
 
-
 export function resolveModule(request: string, context: string): string | undefined {
   let resolvedPath: string | undefined;
   try {
@@ -53,7 +52,6 @@ function createModule(filename: string, source?: string | undefined): Module {
   return mod;
 }
 
-
 export function clearModule(request: string, context: string): void {
   const resolvedPath = resolveModule(request, context);
   if (resolvedPath) {
@@ -74,7 +72,6 @@ function clearRequireCache(id: string, map = new Map()) {
     delete require.cache[id];
   }
 }
-
 
 export async function runScript(source: string, options: {
   fileName: PathLike,
@@ -156,9 +153,7 @@ export async function evalExpression(expression: string, context: ProcessorConte
   return value.$result;
 }
 
-
 export const JAVASCRIPT_KEYWORDS = ['await', 'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'else', 'enum', 'export', 'extends', 'false', 'finally', 'for', 'function', 'if', 'implements', 'import', 'in', 'instanceof', 'interface', 'let', 'new', 'null', 'package', 'private', 'protected', 'public', 'return', 'super', 'switch', 'static', 'this', 'throw', 'try', 'true', 'typeof', 'var', 'void', 'while', 'with', 'yield'];
-
 
 export function isValidVariableName(name: string): boolean {
   if (JAVASCRIPT_KEYWORDS.indexOf(name) <= 0) {

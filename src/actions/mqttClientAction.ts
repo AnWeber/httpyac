@@ -3,7 +3,6 @@ import * as utils from '../utils';
 import * as io from '../io';
 import { connect, IClientOptions, QoS, MqttClient } from 'mqtt';
 
-
 interface MQTTMessage{
   topic: string;
   message: string;
@@ -12,7 +11,6 @@ interface MQTTMessage{
 
 export class MQTTClientAction implements models.HttpRegionAction {
   id = models.ActionType.websocketClient;
-
 
   async process(context: models.ProcessorContext): Promise<boolean> {
     const { request } = context;
@@ -34,7 +32,6 @@ export class MQTTClientAction implements models.HttpRegionAction {
     context: models.ProcessorContext
   ): Promise<models.HttpResponse> {
     const { httpRegion } = context;
-
 
     return await new Promise<models.HttpResponse>((resolve, reject) => {
       if (!request.url) {
@@ -111,7 +108,6 @@ export class MQTTClientAction implements models.HttpRegionAction {
         resolve(this.toMergedHttpResponse(mergedData, responseTemplate));
       });
 
-
       const subscribeArray = utils.getHeaderArray(request.headers, 'subscribe');
       if (subscribeArray) {
         this.subscribeToTopics(client, subscribeArray, this.toQoS(utils.getHeader(request.headers, 'qos')));
@@ -185,7 +181,6 @@ export class MQTTClientAction implements models.HttpRegionAction {
     }
     return response;
   }
-
 
   private isMQTTError(data: unknown): data is Error & { code: string, errno: number;} {
     return data instanceof Error;

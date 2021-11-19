@@ -3,7 +3,6 @@ import { log } from '../io';
 import * as models from '../models';
 import { toEnvironmentKey } from '../utils';
 
-
 interface CookieStoreEntry {
   id: string;
   memoryCookieStore: MemoryCookieStore;

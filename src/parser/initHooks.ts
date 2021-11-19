@@ -21,7 +21,6 @@ import { injectOnEveryRequestJavascript } from './javascriptHttpRegionParser';
 import { injectNote } from './noteMetaHttpRegionParser';
 import { registerCancelExecutionIntercepter } from './cancelExecutionInterceptor';
 
-
 export enum ParserId {
   meta = 'meta',
   comment = 'comment',

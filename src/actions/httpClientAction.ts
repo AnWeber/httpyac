@@ -1,7 +1,6 @@
 import * as models from '../models';
 import * as utils from '../utils';
 
-
 export class HttpClientAction implements models.HttpRegionAction {
   id = models.ActionType.httpClient;
 

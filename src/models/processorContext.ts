@@ -7,7 +7,6 @@ import { RepeatOptions } from './repeatOptions';
 import { Variables } from './variables';
 import { EnvironmentConfig } from './environmentConfig';
 
-
 export type Dispose = () => void;
 
 export interface Progress{
@@ -50,6 +49,5 @@ export function isProcessorContext(context: unknown): context is ProcessorContex
   const test = context as ProcessorContext;
   return !!test?.httpClient && !!test?.httpFile && !!test?.variables && !!test?.config;
 }
-
 
 export type SendContext = HttpRegionSendContext | HttpFileSendContext | HttpRegionsSendContext;

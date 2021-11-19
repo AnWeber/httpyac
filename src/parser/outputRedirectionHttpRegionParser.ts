@@ -2,7 +2,6 @@ import * as models from '../models';
 import { ParserRegex } from './parserRegex';
 import { fileProvider, log } from '../io';
 
-
 export async function parseOutputRedirection(
   getLineReader: models.getHttpLineGenerator,
   { httpRegion }: models.ParserContext
@@ -18,7 +17,6 @@ export async function parseOutputRedirection(
 
       const fileName = match.groups.fileName;
       const force = !!match.groups.force;
-
 
       httpRegion.hooks.onResponse.addHook('outputRedirection', async (response, context) => {
         try {

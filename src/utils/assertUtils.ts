@@ -3,7 +3,6 @@ import { strictEqual, ok } from 'assert';
 import { getHeader } from './requestUtils';
 import { isString } from './stringUtils';
 
-
 export function assertStatusEquals(response: HttpResponse, status: number): void {
   strictEqual(response.statusCode, status, `response status equals to ${status}`);
 }

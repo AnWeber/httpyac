@@ -24,14 +24,12 @@ export function initProvideVariablesHook(): ProvideVariablesHook {
   return hook;
 }
 
-
 export function initProvideEnvironmentsHook(): ProvideEnvironmentsHook {
   const hook = new ProvideEnvironmentsHook();
 
   hook.addHook(VariableProviderType.config, provideConfigEnvironments);
   hook.addHook(VariableProviderType.dotenv, provideDotenvEnvironments);
   hook.addHook(VariableProviderType.intellij, provideIntellijEnvironments);
-
 
   return hook;
 }

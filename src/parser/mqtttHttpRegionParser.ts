@@ -19,7 +19,6 @@ export async function parseMQTTLine(
       };
     }
 
-
     const requestLine = getMQTTLine(next.value.textLine, next.value.line);
     if (!requestLine) {
       return false;
@@ -68,7 +67,6 @@ export async function parseMQTTLine(
   return false;
 }
 
-
 function getMQTTLine(
   textLine: string,
   line: number
@@ -111,7 +109,6 @@ function getMQTTLine(
   }
   return undefined;
 }
-
 
 function isValidMQTT(textLine: string, httpRegion: models.HttpRegion) {
   if (utils.isStringEmpty(textLine)) {

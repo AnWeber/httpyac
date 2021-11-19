@@ -19,7 +19,6 @@ export async function parseGrpcLine(
       };
     }
 
-
     const grpcLine = getGrpcLine(next.value.textLine, next.value.line);
     if (!grpcLine) {
       return false;
@@ -40,7 +39,6 @@ export async function parseGrpcLine(
       nextParserLine: next.value.line,
       symbols: [requestSymbol],
     };
-
 
     const headers = {};
     grpcLine.request.headers = headers;
@@ -68,7 +66,6 @@ export async function parseGrpcLine(
   }
   return false;
 }
-
 
 function getGrpcLine(
   textLine: string,
@@ -112,7 +109,6 @@ function getGrpcLine(
   }
   return undefined;
 }
-
 
 function isValidGrpc(textLine: string, httpRegion: models.HttpRegion) {
   if (utils.isStringEmpty(textLine)) {

@@ -2,7 +2,6 @@ import { log, userInteractionProvider } from '../io';
 import * as models from '../models';
 import * as utils from '../utils';
 
-
 export async function responseAsVariable(
   response: models.HttpResponse,
   context: models.ProcessorContext
@@ -56,7 +55,6 @@ function handleJWTMetaData(body: unknown, { httpRegion }: models.ProcessorContex
     }
   }
 }
-
 
 function parseJwtToken(value: unknown) : utils.JWTToken | null {
   if (utils.isString(value)) {

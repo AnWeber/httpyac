@@ -6,7 +6,6 @@ import { log } from '../io';
 import xmlFormat from 'xml-formatter';
 import { TextDecoder } from 'util';
 
-
 export function isHttpRequestMethod(method: string | undefined): method is models.HttpMethod {
   if (method) {
     return ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS', 'CONNECT', 'TRACE',
@@ -70,7 +69,6 @@ export function getHeaderArray(
   return undefined;
 }
 
-
 export function parseContentType(headers: Record<string, unknown>): models.ContentType | undefined {
   const contentType = getHeader(headers, 'content-type');
   if (isString(contentType)) {
@@ -78,7 +76,6 @@ export function parseContentType(headers: Record<string, unknown>): models.Conte
   }
   return undefined;
 }
-
 
 export interface JWTToken {
   iss?: string;
@@ -90,7 +87,6 @@ export interface JWTToken {
   scope?: string;
   name?: string;
 }
-
 
 export function decodeJWT(str: string): JWTToken | null {
   try {
@@ -121,7 +117,6 @@ export function decodeJWT(str: string): JWTToken | null {
     return null;
   }
 }
-
 
 export function toQueryParams(params: Record<string, undefined | string | number | boolean>): string {
   return Object.entries(params)
@@ -251,7 +246,6 @@ function logResponseHeader(response: models.HttpResponse) {
   return result;
 }
 
-
 export function cloneResponse(response: models.HttpResponse): models.HttpResponse {
   const clone: models.HttpResponse = {
     protocol: response.protocol,
@@ -274,7 +268,6 @@ export function cloneResponse(response: models.HttpResponse): models.HttpRespons
   }
   return clone;
 }
-
 
 export function setAdditionalResponseBody(httpResponse: models.HttpResponse, context?: models.ProcessorContext): void {
   if (isString(httpResponse.body)
@@ -305,7 +298,6 @@ export function setAdditionalResponseBody(httpResponse: models.HttpResponse, con
     }
   }
 }
-
 
 export async function triggerRequestResponseHooks(
   method: () => Promise<models.HttpResponse | false>,

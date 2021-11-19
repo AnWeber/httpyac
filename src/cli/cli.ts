@@ -13,7 +13,6 @@ import { toCliJsonOutput } from './cliJsonOutput';
 import { initIOProvider } from './initCliProvider';
 import { default as chalk } from 'chalk';
 
-
 export async function execute(rawArgs: string[]): Promise<void> {
   initIOProvider();
   const cliOptions = parseCliOptions(rawArgs);
@@ -172,7 +171,6 @@ async function getHttpFiles(options: CliOptions, config: models.EnvironmentConfi
   initCliHooks(httpFiles, options);
   return httpFiles;
 }
-
 
 type SelectActionResult = { httpRegion?: models.HttpRegion | undefined, httpFile: models.HttpFile } | false;
 

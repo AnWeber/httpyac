@@ -6,13 +6,11 @@ import * as utils from '../utils';
 import { fileProvider, log, userInteractionProvider } from '../io';
 import { loadPackageDefinition } from '@grpc/grpc-js';
 
-
 export interface ProtoProcessorContext extends models.ProcessorContext{
   options: {
     protoDefinitions?: Record<string, models.ProtoDefinition>
   }
 }
-
 
 export async function parseProtoImport(
   getLineReader: models.getHttpLineGenerator,
@@ -70,7 +68,6 @@ export async function parseProtoImport(
   }
   return false;
 }
-
 
 export class ProtoImportAction implements models.HttpRegionAction {
   id = models.ActionType.protoImport;

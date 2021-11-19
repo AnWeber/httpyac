@@ -1,7 +1,6 @@
 import { HttpRegion, HttpResponse, TestResult } from '../models';
 import { CliFilterOptions, CliOptions } from './cliOptions';
 
-
 export interface CliJsonOutput {
   _meta: {
     version: string,
@@ -32,7 +31,6 @@ export interface CliTestSummary {
   failedTests: number;
   successTests: number;
 }
-
 
 function sum(x: number, y: number) {
   return x + y;
@@ -83,7 +81,6 @@ export function toCliJsonOutput(context: Record<string, Array<HttpRegion>>, opti
     }
   };
 }
-
 
 function convertResponse(response: HttpResponse | undefined, output: string | undefined) {
   if (response) {

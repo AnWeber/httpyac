@@ -3,12 +3,10 @@ import * as utils from '../utils';
 import WebSocket, { ClientOptions } from 'ws';
 import * as io from '../io';
 
-
 const WEBSOCKET_CLOSE_NORMAL = 1000;
 const WEBSOCKET_CLOSE_GOING_AWAY = 1001;
 export class WebSocketClientAction implements models.HttpRegionAction {
   id = models.ActionType.websocketClient;
-
 
   async process(context: models.ProcessorContext): Promise<boolean> {
     const { request } = context;

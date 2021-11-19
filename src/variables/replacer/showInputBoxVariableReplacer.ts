@@ -5,7 +5,6 @@ import { ParserRegex } from '../../parser';
 
 const lastValue: Record<string, string> = {};
 
-
 export async function showInputBoxVariableReplacer(text: unknown): Promise<unknown> {
   if (!isString(text)) {
     return text;

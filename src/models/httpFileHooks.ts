@@ -14,7 +14,6 @@ export interface HttpFileHooks{
   readonly provideEnvironments: ProvideEnvironmentsHook;
   readonly provideVariables: ProvideVariablesHook;
 
-
   readonly onRequest: OnRequestHook;
   readonly onResponse: OnResponseHook,
   readonly responseLogging: ResponseLoggingHook,

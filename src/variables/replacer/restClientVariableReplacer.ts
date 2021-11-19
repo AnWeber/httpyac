@@ -5,7 +5,6 @@ import { ProcessorContext, VariableType } from '../../models';
 import { isString } from '../../utils';
 import { ParserRegex } from '../../parser';
 
-
 dayjs.extend(utc);
 
 export async function restClientVariableReplacer(

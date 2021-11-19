@@ -2,7 +2,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { ParserRegex } from '../../parser';
 import { isString } from '../../utils';
 
-
 export async function intellijVariableReplacer(text: unknown): Promise<unknown> {
   if (!isString(text)) {
     return text;

@@ -16,7 +16,6 @@ export interface GqlPostRequest{
   variables?: Record<string, unknown>
 }
 
-
 export class GqlAction implements HttpRegionAction {
   id = ActionType.gql;
   before = [ActionType.httpClient];

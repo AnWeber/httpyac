@@ -2,7 +2,6 @@ import * as models from '../models';
 import { toEnvironmentKey } from './environmentUtils';
 import { cloneResponse } from './requestUtils';
 
-
 export function getDisplayName(httpRegion?: models.HttpRegion, defaultName = 'global'): string {
   if (httpRegion) {
     if (httpRegion.metaData.title) {
@@ -34,7 +33,6 @@ export function getRegionDescription(httpRegion: models.HttpRegion, defaultName 
   return defaultName;
 }
 
-
 export async function processHttpRegionActions(
   context: models.ProcessorContext,
   showProgressBar?: boolean
@@ -45,7 +43,6 @@ export async function processHttpRegionActions(
   const variables = context.variables;
   try {
     context.scriptConsole?.collectMessages?.();
-
 
     if (context.progress) {
       context.showProgressBar = showProgressBar;
@@ -111,7 +108,6 @@ function autoShareNewVariables(variables: models.Variables, context: models.Proc
   }
 }
 
-
 export async function logResponse(
   response: models.HttpResponse | undefined,
   context: models.ProcessorContext
@@ -169,11 +165,9 @@ export function toProcessedHttpRegion(context: models.ProcessorContext): models.
   };
 }
 
-
 export function isGlobalHttpRegion(httpRegion: models.HttpRegion) : boolean {
   return !(httpRegion.request || httpRegion.metaData.name);
 }
-
 
 export function isHttpRegionSendContext(context: models.SendContext): context is models.HttpRegionSendContext {
   const guard = context as models.HttpRegionSendContext;

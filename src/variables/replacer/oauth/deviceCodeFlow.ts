@@ -176,5 +176,4 @@ interface DevcieCodeBody{
   message?: string
 }
 
-
 export const deviceCodeFlow = new DeviceCodeFlow();

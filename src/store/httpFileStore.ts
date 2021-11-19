@@ -202,7 +202,6 @@ export class HttpFileStore {
   }
 }
 
-
 export async function getEnviromentConfig(
   config?: models.EnvironmentConfig,
   rootDir?: models.PathLike

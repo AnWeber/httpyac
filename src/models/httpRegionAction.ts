@@ -1,6 +1,5 @@
 import { ProcessorContext } from './processorContext';
 
-
 /**
  * @returns false if processing cancelled
  */

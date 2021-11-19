@@ -29,7 +29,6 @@ export function unregisterListener(id: string) : void {
   }
 }
 
-
 function clearServerTimeout() {
   if (serverTimeout) {
     clearTimeout(serverTimeout);
@@ -133,7 +132,6 @@ function initServer(port = 3000) {
   }
 }
 
-
 function parseQueryParams(url: string) {
   return url.slice(url.indexOf('?') + 1).split('&').reduce((prev, current) => {
     const [key, value] = current.split('=');
@@ -141,7 +139,6 @@ function parseQueryParams(url: string) {
     return prev;
   }, {} as Record<string, string>);
 }
-
 
 function getMessageHtml(message: string, valid: boolean) {
   return `
@@ -192,7 +189,6 @@ function toTimeString(seconds: number) {
   }
   return '-';
 }
-
 
 function getHtml(message: string) {
   return `

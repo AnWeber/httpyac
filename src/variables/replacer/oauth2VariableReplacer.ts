@@ -5,7 +5,6 @@ import { ParserRegex } from '../../parser';
 import { log } from '../../io';
 import * as utils from '../../utils';
 
-
 export async function oauth2VariableReplacer(
   text: unknown,
   type: string,

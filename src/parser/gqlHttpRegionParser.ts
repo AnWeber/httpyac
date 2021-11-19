@@ -4,7 +4,6 @@ import { GqlAction, GqlData } from '../actions';
 import { ParserRegex } from './parserRegex';
 import { fileProvider } from '../io';
 
-
 export async function parseGraphql(
   getLineReader: models.getHttpLineGenerator,
   context: models.ParserContext
@@ -58,7 +57,6 @@ function getGqlFragments(context: models.ParserContext) {
   return result;
 }
 
-
 async function getGQLContent(lineReader: models.HttpLineGenerator): Promise<GqlParserResult | false> {
   const next = lineReader.next();
   if (!next.done) {
@@ -93,7 +91,6 @@ async function getGQLContent(lineReader: models.HttpLineGenerator): Promise<GqlP
   }
   return false;
 }
-
 
 function matchGqlContent(
   value: { textLine: string; line: number },

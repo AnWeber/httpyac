@@ -12,7 +12,6 @@ import { restClientVariableReplacer } from './restClientVariableReplacer';
 import { showInputBoxVariableReplacer } from './showInputBoxVariableReplacer';
 import { showQuickpickVariableReplacer } from './showQuickpickVariableReplacer';
 
-
 export enum VariableReplacerType{
   aws = 'aws',
   basicAuth = 'basicAuth',

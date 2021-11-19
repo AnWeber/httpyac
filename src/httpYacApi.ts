@@ -3,7 +3,6 @@ import * as models from './models';
 import * as utils from './utils';
 import { getEnviromentConfig } from './store';
 
-
 /**
    * process one httpRegion of HttpFile
    * @param httpFile httpFile
@@ -69,7 +68,6 @@ async function sendHttpFile(context: models.HttpFileSendContext): Promise<boolea
   return true;
 }
 
-
 async function createEmptyProcessorContext<T extends models.VariableProviderContext>(context: T): Promise<T & {
   variables: models.Variables,
   httpClient: models.HttpClient,
@@ -81,7 +79,6 @@ async function createEmptyProcessorContext<T extends models.VariableProviderCont
     options: {}
   });
 }
-
 
 export async function getVariables(context: models.VariableProviderContext): Promise<Record<string, unknown>> {
   context.config = await getEnviromentConfig(context.config, context.httpFile?.rootDir);
@@ -98,7 +95,6 @@ export async function getVariables(context: models.VariableProviderContext): Pro
   log.debug(variables);
   return variables;
 }
-
 
 export async function getEnvironments(context: models.VariableProviderContext): Promise<Array<string>> {
   context.config = await getEnviromentConfig(context.config, context.httpFile?.rootDir);

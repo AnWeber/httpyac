@@ -42,7 +42,6 @@ export function getLogLevel(cliOptions: CliOptions) : LogLevel | undefined {
   return undefined;
 }
 
-
 export function parseCliOptions(rawArgs: string[]): CliOptions | undefined {
   try {
     const args = arg(
@@ -120,7 +119,6 @@ export function parseCliOptions(rawArgs: string[]): CliOptions | undefined {
   }
   return undefined;
 }
-
 
 export function renderHelp() : void {
   const helpMessage = `send http requests of .http or .rest

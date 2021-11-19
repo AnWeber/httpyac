@@ -3,14 +3,12 @@ import { toMultiLineString } from '../utils';
 import { IntellijScriptData, IntellijAction } from '../actions';
 import { ParserRegex } from './parserRegex';
 
-
 export interface IntelliJParserResult {
   startLine: number,
   endLine: number,
   endOffset: number;
   data: models.ScriptData | IntellijScriptData;
 }
-
 
 export async function parseIntellijScript(
   getLineReader: models.getHttpLineGenerator,
@@ -39,7 +37,6 @@ export async function parseIntellijScript(
   }
   return false;
 }
-
 
 function getIntellijContent(lineReader: models.HttpLineGenerator): IntelliJParserResult | false {
   let next = lineReader.next();

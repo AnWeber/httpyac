@@ -17,7 +17,6 @@ export async function transformRequestBody(request: models.Request): Promise<mod
   return request;
 }
 
-
 async function normalizeBody(body: Array<models.HttpRequestBodyLine>) : Promise<Buffer> {
   const buffers: Array<Buffer> = [];
   for (const obj of body) {

@@ -6,7 +6,6 @@ import {
   ResponseHeaders as JetbrainsResponseHeaders
 } from './http-client';
 
-
 export class IntellijHttpResponse implements JetbrainsHttpResponse {
   body: unknown;
   status: number;

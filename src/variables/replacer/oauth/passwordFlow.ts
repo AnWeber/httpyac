@@ -45,5 +45,4 @@ class PasswordFlow implements OpenIdFlow {
   }
 }
 
-
 export const passwordFlow = new PasswordFlow();

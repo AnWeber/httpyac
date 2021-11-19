@@ -1,7 +1,6 @@
 import * as models from '../models';
 import * as utils from '../utils';
 
-
 export enum LoopMetaType{
   for,
   forOf,
@@ -15,7 +14,6 @@ export interface LoopMetaData {
   counter?: number;
   expression?: string;
 }
-
 
 export class LoopMetaAction implements models.HookInterceptor<models.ProcessorContext, boolean> {
   id = models.ActionType.loop;
@@ -116,7 +114,6 @@ export class LoopMetaAction implements models.HookInterceptor<models.ProcessorCo
         break;
     }
   }
-
 
   private createHttpRegionClone(httpRegion: models.HttpRegion, index: number): models.HttpRegion {
     return {

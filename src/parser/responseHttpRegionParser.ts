@@ -2,7 +2,6 @@ import { getHttpLineGenerator, HttpRegionParserResult, HttpSymbolKind, ParserCon
 import { ParserRegex } from './parserRegex';
 import { toMultiLineString, parseContentType, setAdditionalResponseBody } from '../utils';
 
-
 export async function parseResponse(
   getLineReader: getHttpLineGenerator,
   context: ParserContext

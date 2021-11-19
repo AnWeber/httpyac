@@ -10,7 +10,6 @@ export function initIOProvider(): void {
   initUserInteractionProvider();
 }
 
-
 function initFileProvider(): void {
   fileProvider.isAbsolute = async (fileName: models.PathLike) => isAbsolute(fileProvider.toString(fileName));
   fileProvider.dirname = (fileName: string) => dirname(fileProvider.toString(fileName));
@@ -44,7 +43,6 @@ function initFileProvider(): void {
   ): Promise<string[]> => fs.readdir(fileProvider.toString(dirname));
 }
 
-
 function toBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
   return new Promise<Buffer>((resolve, reject) => {
     const buffers: Buffer[] = [];
@@ -60,7 +58,6 @@ function toBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
     stream.resume();
   });
 }
-
 
 function initUserInteractionProvider() {
 

@@ -40,7 +40,6 @@ export async function parseWebsocketLine(
       symbols: [requestSymbol],
     };
 
-
     const headers = {};
     requestLine.request.headers = headers;
 
@@ -67,7 +66,6 @@ export async function parseWebsocketLine(
   }
   return false;
 }
-
 
 function getWebsocketLine(
   textLine: string,
@@ -111,7 +109,6 @@ function getWebsocketLine(
   }
   return undefined;
 }
-
 
 function isValidWebsocket(textLine: string, httpRegion: models.HttpRegion) {
   if (utils.isStringEmpty(textLine)) {

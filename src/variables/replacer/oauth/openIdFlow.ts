@@ -2,7 +2,6 @@ import { HttpClient, RequestLogger, Progress } from '../../../models';
 import { OpenIdConfiguration } from './openIdConfiguration';
 import { OpenIdInformation } from './openIdInformation';
 
-
 export interface OpenIdFlowContext{
   progress?: Progress | undefined,
   httpClient: HttpClient,

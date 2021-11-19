@@ -3,7 +3,6 @@ import * as utils from '../utils';
 import EventSource from 'eventsource';
 import * as io from '../io';
 
-
 export class EventSourceClientAction implements models.HttpRegionAction {
   id = models.ActionType.eventSourceClient;
 
@@ -57,7 +56,6 @@ export class EventSourceClientAction implements models.HttpRegionAction {
         io.log.debug('SSE open', evt);
       });
 
-
       for (const eventType of events) {
         client.addEventListener(eventType, evt => {
           io.log.debug(`SSE ${eventType}`, evt);
@@ -107,7 +105,6 @@ export class EventSourceClientAction implements models.HttpRegionAction {
     }
     return response;
   }
-
 
   private toHttpResponse(data: unknown, responseTemplate: Partial<models.HttpResponse>): models.HttpResponse {
     const body = JSON.stringify(data, null, 2);

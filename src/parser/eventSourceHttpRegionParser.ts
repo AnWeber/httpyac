@@ -19,7 +19,6 @@ export async function parseEventSource(
       };
     }
 
-
     const eventSourceLine = getEventSourceLine(next.value.textLine, next.value.line);
     if (!eventSourceLine) {
       return false;
@@ -40,7 +39,6 @@ export async function parseEventSource(
       nextParserLine: next.value.line,
       symbols: [requestSymbol],
     };
-
 
     const headers = {};
     eventSourceLine.request.headers = headers;
@@ -69,7 +67,6 @@ export async function parseEventSource(
   return false;
 }
 
-
 function getEventSourceLine(
   textLine: string,
   line: number
@@ -94,7 +91,6 @@ function getEventSourceLine(
   }
   return undefined;
 }
-
 
 function isValidEventSource(textLine: string) {
   if (utils.isStringEmpty(textLine)) {

@@ -7,7 +7,6 @@ export interface HeadersContainer {
   headers: Record<string, unknown>
 }
 
-
 export type Request = GrpcRequest | HttpRequest | WebsocketRequest | EventSourceRequest | MQTTRequest;
 
 export interface GrpcRequest {
@@ -53,9 +52,7 @@ export interface HttpRequest extends Omit<OptionsOfUnknownResponseBody, 'body'>{
   proxy?: string;
 }
 
-
 export type HttpRequestBodyLine = string | (() => Promise<Buffer>);
-
 
 export interface RequestBodyImport {
   fileName: string;

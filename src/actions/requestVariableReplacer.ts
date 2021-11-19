@@ -1,7 +1,6 @@
 import * as models from '../models';
 import * as utils from '../utils';
 
-
 export async function requestVariableReplacer(
   request: models.Request,
   context: models.ProcessorContext

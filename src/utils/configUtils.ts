@@ -43,7 +43,6 @@ async function loadFileConfig(rootDir: PathLike): Promise<EnvironmentConfig | un
   return undefined;
 }
 
-
 export async function parseJson<T>(fileName: PathLike) : Promise<T | undefined> {
   try {
     const text = await fileProvider.readFile(fileName, 'utf-8');
@@ -53,7 +52,6 @@ export async function parseJson<T>(fileName: PathLike) : Promise<T | undefined> 
   }
   return undefined;
 }
-
 
 export async function resolveClientCertficates(config: EnvironmentConfig, rootDir: PathLike) : Promise<void> {
   if (config.clientCertificates) {
@@ -71,12 +69,10 @@ export async function resolveClientCertficates(config: EnvironmentConfig, rootDi
   }
 }
 
-
 interface PackageJson{
   dependencies?: Record<string, unknown>,
   devDependencies?: Record<string, unknown>
 }
-
 
 export async function getPlugins(rootDir: PathLike) : Promise<Record<string, ConfigureHooks>> {
   const packageJson = await getPackageJson(rootDir);

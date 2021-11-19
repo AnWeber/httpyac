@@ -75,7 +75,6 @@ interface RateLimitSession extends models.UserSession{
   requests: Array<Date>;
 }
 
-
 function isRateLimitSession(session: unknown): session is RateLimitSession {
   const rateLimitSession = session as RateLimitSession;
   return !!rateLimitSession?.requests && rateLimitSession.type === 'RateLimit';

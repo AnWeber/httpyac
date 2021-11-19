@@ -57,7 +57,6 @@ async function setClientCertificateOptions(
   });
 }
 
-
 async function resolveFile(
   fileName: models.PathLike | undefined,
   dir: models.PathLike | undefined
