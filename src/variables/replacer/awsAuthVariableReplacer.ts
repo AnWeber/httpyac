@@ -4,7 +4,11 @@ import aws4 = require('aws4');
 import { ParserRegex } from '../../parser';
 import * as utils from '../../utils';
 
-export async function awsAuthVariableReplacer(text: unknown, type: string, { request }: ProcessorContext) : Promise<unknown> {
+export async function awsAuthVariableReplacer(
+  text: unknown,
+  type: string,
+  { request }: ProcessorContext
+): Promise<unknown> {
   if (type.toLowerCase() === 'authorization'
     && utils.isString(text)
     && utils.isHttpRequest(request)

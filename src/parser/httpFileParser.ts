@@ -3,7 +3,11 @@ import * as utils from '../utils';
 import { ParserRegex } from './parserRegex';
 import { HttpFileStore } from '../store';
 
-export async function parseHttpFile(httpFile: models.HttpFile, text: string, httpFileStore: HttpFileStore): Promise<models.HttpFile> {
+export async function parseHttpFile(
+  httpFile: models.HttpFile,
+  text: string,
+  httpFileStore: HttpFileStore
+): Promise<models.HttpFile> {
 
   const lines = utils.toMultiLineArray(text);
 

@@ -97,7 +97,10 @@ export class EventSourceClientAction implements models.HttpRegionAction {
     return !!data?.type;
   }
 
-  private toMergedHttpResponse(data: Record<string, Array<unknown>>, responseTemplate: Partial<models.HttpResponse>): models.HttpResponse {
+  private toMergedHttpResponse(
+    data: Record<string, Array<unknown>>,
+    responseTemplate: Partial<models.HttpResponse>
+  ): models.HttpResponse {
     const response = this.toHttpResponse(data, responseTemplate);
     if (data.error) {
       response.statusCode = -1;

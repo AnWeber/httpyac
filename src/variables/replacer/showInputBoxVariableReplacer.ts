@@ -20,7 +20,10 @@ export async function showInputBoxVariableReplacer(text: unknown): Promise<unkno
 
       const placeholder = matchInput.groups.placeholder;
 
-      const answer = await userInteractionProvider.showInputPrompt(placeholder, lastValue[placeholder] || matchInput.groups.value);
+      const answer = await userInteractionProvider.showInputPrompt(
+        placeholder,
+        lastValue[placeholder] || matchInput.groups.value
+      );
 
       if (answer) {
         lastValue[placeholder] = answer;

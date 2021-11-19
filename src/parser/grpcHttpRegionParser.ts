@@ -70,7 +70,10 @@ export async function parseGrpcLine(
 }
 
 
-function getGrpcLine(textLine: string, line: number): { request: models.GrpcRequest, symbol: models.HttpSymbol } | undefined {
+function getGrpcLine(
+  textLine: string,
+  line: number
+): { request: models.GrpcRequest, symbol: models.HttpSymbol } | undefined {
   const lineMatch = ParserRegex.grpc.grpcLine.exec(textLine);
   if (lineMatch && lineMatch.length > 1 && lineMatch.groups) {
     return {

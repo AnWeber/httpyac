@@ -34,7 +34,10 @@ async function getAllEnvironmentVariables(context: VariableProviderContext) {
   return environments;
 }
 
-export async function provideIntellijVariables(envs: string[] | undefined, context: VariableProviderContext): Promise<Variables> {
+export async function provideIntellijVariables(
+  envs: string[] | undefined,
+  context: VariableProviderContext
+): Promise<Variables> {
   const environments = await getAllEnvironmentVariables(context);
   const variables: Array<Variables> = [];
   if (envs) {

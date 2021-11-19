@@ -48,13 +48,7 @@ rules:
     key-spacing: ["error", { beforeColon: false, afterColon: true }]
     keyword-spacing: "error"
     lines-around-comment: "off"
-    max-len: ["error", 160, {
-        "ignoreComments": true,
-        "ignoreUrls": true,
-        "ignoreStrings": true,
-        "ignoreTemplateLiterals": true,
-        "ignoreRegExpLiterals": true
-    }]
+    max-len: ["error", 120, {"ignoreComments": true,"ignoreUrls": true,"ignoreStrings": true,"ignoreTemplateLiterals": true,"ignoreRegExpLiterals": true}]
     max-statements-per-line: "error"
     new-cap: "error"
     new-parens: "error"
@@ -164,11 +158,7 @@ rules:
     semi-spacing: ["error", {before: false, after: true}]
     semi-style: "error"
     space-before-blocks: "error"
-    space-before-function-paren: ["error", {
-        "anonymous": "never",
-        "named": "never",
-        "asyncArrow": "always"
-    }]
+    space-before-function-paren: ["error", {"anonymous": "never","named": "never","asyncArrow": "always"}]
     space-in-parens: "error"
     space-infix-ops: "error"
     space-unary-ops: ["error", {words: true, nonwords: false}]

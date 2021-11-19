@@ -144,7 +144,10 @@ export class WebSocketClientAction implements models.HttpRegionAction {
     return JSON.stringify(jsonData, null, 2);
   }
 
-  private toHttpResponse(data: string | Array<unknown>, responseTemplate: Partial<models.HttpResponse>): models.HttpResponse {
+  private toHttpResponse(
+    data: string | Array<unknown>,
+    responseTemplate: Partial<models.HttpResponse>
+  ): models.HttpResponse {
     const body = utils.isString(data) ? data : JSON.stringify(data, null, 2);
     const rawBody: Buffer = Buffer.from(body);
     const response: models.HttpResponse = {

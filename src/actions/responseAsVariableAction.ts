@@ -3,7 +3,10 @@ import * as models from '../models';
 import * as utils from '../utils';
 
 
-export async function responseAsVariable(response: models.HttpResponse, context: models.ProcessorContext): Promise<models.HttpResponse> {
+export async function responseAsVariable(
+  response: models.HttpResponse,
+  context: models.ProcessorContext
+): Promise<models.HttpResponse> {
   const body = response.parsedBody || response.body;
   context.variables.response = response;
   if (context.httpRegion.metaData.name || context.httpRegion.metaData.jwt) {
@@ -48,7 +51,8 @@ function handleJWTMetaData(body: unknown, { httpRegion }: models.ProcessorContex
         }
       }
       httpRegion.response.parsedBody = Object.fromEntries(entries);
-      httpRegion.response.prettyPrintBody = httpRegion.response.body = JSON.stringify(httpRegion.response.parsedBody, null, 2);
+      httpRegion.response.prettyPrintBody = JSON.stringify(httpRegion.response.parsedBody, null, 2);
+      httpRegion.response.body = httpRegion.response.prettyPrintBody;
     }
   }
 }

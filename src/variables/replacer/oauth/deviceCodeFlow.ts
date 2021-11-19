@@ -107,7 +107,11 @@ class DeviceCodeFlow implements OpenIdFlow {
     }
   }
 
-  private async authenticateUser(context: OpenIdFlowContext, config: OpenIdConfiguration, deviceCodeBody: DevcieCodeBody) {
+  private async authenticateUser(
+    context: OpenIdFlowContext,
+    config: OpenIdConfiguration,
+    deviceCodeBody: DevcieCodeBody
+  ) {
     return await context?.httpClient({
       url: config.tokenEndpoint,
       method: 'POST',

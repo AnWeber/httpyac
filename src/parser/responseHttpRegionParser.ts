@@ -3,7 +3,10 @@ import { ParserRegex } from './parserRegex';
 import { toMultiLineString, parseContentType, setAdditionalResponseBody } from '../utils';
 
 
-export async function parseResponse(getLineReader: getHttpLineGenerator, context: ParserContext): Promise<HttpRegionParserResult> {
+export async function parseResponse(
+  getLineReader: getHttpLineGenerator,
+  context: ParserContext
+): Promise<HttpRegionParserResult> {
   const lineReader = getLineReader();
 
   let next = lineReader.next();
@@ -46,7 +49,10 @@ export async function parseResponse(getLineReader: getHttpLineGenerator, context
         const headerMatch = ParserRegex.request.header.exec(next.value.textLine);
         if (headerMatch?.groups?.key && headerMatch?.groups?.value) {
 
-          context.httpRegion.response.headers = Object.assign(context.httpRegion.response?.headers, { [headerMatch.groups.key]: headerMatch.groups.value });
+          context.httpRegion.response.headers = Object.assign(
+            context.httpRegion.response?.headers,
+            { [headerMatch.groups.key]: headerMatch.groups.value }
+          );
         } else {
           break;
         }

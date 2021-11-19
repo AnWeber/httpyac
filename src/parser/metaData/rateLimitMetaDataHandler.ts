@@ -4,7 +4,11 @@ import { userSessionStore } from '../../store';
 import * as utils from '../../utils';
 import { log } from '../../io';
 
-export function rateLimitMetaDataHandler(type: string, value: string | undefined, { httpRegion }: models.ParserContext) {
+export function rateLimitMetaDataHandler(
+  type: string,
+  value: string | undefined,
+  { httpRegion }: models.ParserContext
+) {
   if (type === 'ratelimit' && value) {
     const match = ParserRegex.meta.rateLimit.exec(value);
     if (match?.groups) {

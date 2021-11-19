@@ -58,7 +58,11 @@ export async function requestOpenIdInformation(
   return false;
 }
 
-export function toOpenIdInformation(jwtToken: unknown, time: number, session: OpenIdSesssion): OpenIdInformation | false {
+export function toOpenIdInformation(
+  jwtToken: unknown,
+  time: number,
+  session: OpenIdSesssion
+): OpenIdInformation | false {
   if (isAuthToken(jwtToken)) {
     const parsedToken = utils.decodeJWT(jwtToken.access_token);
     if (parsedToken) {

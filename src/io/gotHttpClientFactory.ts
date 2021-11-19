@@ -8,7 +8,10 @@ import { default as filesize } from 'filesize';
 import { log } from './logger';
 
 export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined) : HttpClient {
-  return async function gotHttpClient(request: HttpRequest, context: HttpClientContext) : Promise<HttpResponse | false> {
+  return async function gotHttpClient(
+    request: HttpRequest,
+    context: HttpClientContext
+  ): Promise<HttpResponse | false> {
     try {
       const defaults: OptionsOfUnknownResponseBody = {
         decompress: true,
@@ -138,7 +141,9 @@ function toHttpResponse(response: Response<unknown>): HttpResponse {
     meta: {
       ip: response.ip,
       redirectUrls: response.redirectUrls,
-      size: filesize(response.rawHeaders.map(obj => obj.length).reduce((size, current) => size + current, 0) + response.rawBody.length),
+      size: filesize(response.rawHeaders
+        .map(obj => obj.length)
+        .reduce((size, current) => size + current, 0) + response.rawBody.length),
     }
   };
   delete response.headers[':status'];

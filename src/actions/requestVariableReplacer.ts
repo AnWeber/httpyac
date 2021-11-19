@@ -2,7 +2,10 @@ import * as models from '../models';
 import * as utils from '../utils';
 
 
-export async function requestVariableReplacer(request: models.Request, context: models.ProcessorContext): Promise<models.Request | typeof models.HookCancel> {
+export async function requestVariableReplacer(
+  request: models.Request,
+  context: models.ProcessorContext
+): Promise<models.Request | typeof models.HookCancel> {
   utils.report(context, 'replace variables in request');
   if (request.url) {
     const result = await utils.replaceVariables(request.url, models.VariableType.url, context) || request.url;
@@ -22,7 +25,10 @@ export async function requestVariableReplacer(request: models.Request, context: 
   return request;
 }
 
-async function replaceVariablesInBody(replacedReqeust: models.Request, context: models.ProcessorContext) : Promise<boolean> {
+async function replaceVariablesInBody(
+  replacedReqeust: models.Request,
+  context: models.ProcessorContext
+): Promise<boolean> {
   if (replacedReqeust.body) {
     if (utils.isString(replacedReqeust.body)) {
       const result = await utils.replaceVariables(replacedReqeust.body, models.VariableType.body, context);

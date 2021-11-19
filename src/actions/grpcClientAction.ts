@@ -94,7 +94,12 @@ export class GrpcClientAction implements models.HttpRegionAction {
       }
 
       if (methodDefinition?.responseStream) {
-        grpcActions.push(...this.getResponseStreamActions(methodDefinition.path, streamResolve, getResponseTemplate, context));
+        grpcActions.push(...this.getResponseStreamActions(
+          methodDefinition.path,
+          streamResolve,
+          getResponseTemplate,
+          context
+        ));
       } else {
         args.push((err: Error, data: unknown) => {
           streamResolve(this.toHttpResponse(err || data, getResponseTemplate()));
@@ -292,7 +297,10 @@ export class GrpcClientAction implements models.HttpRegionAction {
     return response;
   }
 
-  private toMergedHttpResponse(data: Array<unknown>, responseTemplate: Partial<models.HttpResponse>): models.HttpResponse {
+  private toMergedHttpResponse(
+    data: Array<unknown>,
+    responseTemplate: Partial<models.HttpResponse>
+  ): models.HttpResponse {
     const response = this.toHttpResponse(data, responseTemplate);
     const error = data.find(obj => this.isGrpcError(obj));
     if (this.isGrpcError(error)) {

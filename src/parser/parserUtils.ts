@@ -3,7 +3,10 @@ import * as models from '../models';
 import { ParserRegex } from './parserRegex';
 import { parseComments as parseMetaComments } from './metaHttpRegionParser';
 
-export type ParseLineMethod = (httpLine: models.HttpLine, context: models.ParserContext) => (models.SymbolParserResult | false);
+export type ParseLineMethod = (
+  httpLine: models.HttpLine,
+  context: models.ParserContext
+) => (models.SymbolParserResult | false);
 
 export interface ParseSubsequentLinesResult{
   nextLine?: number;
@@ -97,10 +100,14 @@ export function parseRequestHeaderFactory(headers: Record<string, unknown>): Par
 export function parseDefaultHeadersFactory(
   setHeaders: (headers: Record<string, unknown>, context: models.ProcessorContext) => void
 ): ParseLineMethod {
-  return function parseDefaultHeaders(httpLine: models.HttpLine, parserContext: models.ParserContext): models.SymbolParserResult | false {
+  return function parseDefaultHeaders(
+    httpLine: models.HttpLine,
+    parserContext: models.ParserContext
+  ): models.SymbolParserResult | false {
     const fileHeaders = ParserRegex.request.headersSpread.exec(httpLine.textLine);
     if (fileHeaders?.groups?.variableName) {
-      parserContext.httpRegion.hooks.execute.addObjHook(obj => obj.process, new actions.DefaultHeadersAction(fileHeaders.groups.variableName, setHeaders));
+      const defaultsHeadersAction = new actions.DefaultHeadersAction(fileHeaders.groups.variableName, setHeaders);
+      parserContext.httpRegion.hooks.execute.addObjHook(obj => obj.process, defaultsHeadersAction);
       const val = httpLine.textLine.trim();
       return {
         symbols: [{
@@ -162,6 +169,9 @@ export function parseQueryLineFactory(attachUrl: ((url: string) => void)): Parse
 }
 
 
-export function parseComments(httpLine: models.HttpLine, context: models.ParserContext): models.SymbolParserResult | false {
+export function parseComments(
+  httpLine: models.HttpLine,
+  context: models.ParserContext
+): models.SymbolParserResult | false {
   return parseMetaComments(httpLine, context, ParserRegex.meta.comment);
 }

@@ -76,7 +76,10 @@ export async function parseRequestLine(
 }
 
 
-function getRequestLine(textLine: string, line: number): { request: models.HttpRequest, requestSymbols: Array<models.HttpSymbol> } {
+function getRequestLine(
+  textLine: string,
+  line: number
+): { request: models.HttpRequest, requestSymbols: Array<models.HttpSymbol> } {
   const requestSymbols: Array<models.HttpSymbol> = [];
   const requestLineMatch = ParserRegex.request.requestLine.exec(textLine);
   if (requestLineMatch && requestLineMatch.length > 1 && requestLineMatch.groups) {

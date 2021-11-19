@@ -95,7 +95,11 @@ async function getGQLContent(lineReader: models.HttpLineGenerator): Promise<GqlP
 }
 
 
-function matchGqlContent(value: { textLine: string; line: number }, lineReader: models.HttpLineGenerator, name: string | undefined): GqlParserResult | false {
+function matchGqlContent(
+  value: { textLine: string; line: number },
+  lineReader: models.HttpLineGenerator,
+  name: string | undefined
+): GqlParserResult | false {
   const startLine = value.line;
   let next = lineReader.next();
   const gqlLines: Array<string> = [value.textLine];

@@ -70,7 +70,10 @@ export async function parseEventSource(
 }
 
 
-function getEventSourceLine(textLine: string, line: number): { request: models.EventSourceRequest, symbol: models.HttpSymbol } | undefined {
+function getEventSourceLine(
+  textLine: string,
+  line: number
+): { request: models.EventSourceRequest, symbol: models.HttpSymbol } | undefined {
   const lineMatch = ParserRegex.stream.eventSourceLine.exec(textLine);
   if (lineMatch && lineMatch.length > 1 && lineMatch.groups) {
     return {

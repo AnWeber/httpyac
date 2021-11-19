@@ -69,7 +69,10 @@ export async function parseMQTTLine(
 }
 
 
-function getMQTTLine(textLine: string, line: number): { request: models.MQTTRequest, symbol: models.HttpSymbol } | undefined {
+function getMQTTLine(
+  textLine: string,
+  line: number
+): { request: models.MQTTRequest, symbol: models.HttpSymbol } | undefined {
   const lineMatch = ParserRegex.stream.mqttLine.exec(textLine);
   if (lineMatch && lineMatch.length > 1 && lineMatch.groups) {
     return {

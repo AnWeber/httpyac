@@ -8,7 +8,9 @@ export class CreateRequestBodyInterceptor implements models.HookInterceptor<mode
 
   constructor(private readonly rawBody: Array<string | models.RequestBodyImport>) {}
 
-  async beforeTrigger(context: models.HookTriggerContext<models.ProcessorContext, boolean | undefined>): Promise<boolean | undefined> {
+  async beforeTrigger(
+    context: models.HookTriggerContext<models.ProcessorContext, boolean | undefined>
+  ): Promise<boolean | undefined> {
     if (context.arg.request && context.index === 0) {
       const contentType = context.arg.request.contentType;
       const requestBodyLines = await this.normalizeBody(this.rawBody, context.arg);

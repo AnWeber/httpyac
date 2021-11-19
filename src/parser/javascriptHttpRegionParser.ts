@@ -65,7 +65,10 @@ export async function parseJavascript(
                 });
                 break;
               default:
-                httpRegion.hooks.execute.addHook(models.ActionType.js, context => executeScriptData(scriptData, context));
+                httpRegion.hooks.execute.addHook(
+                  models.ActionType.js,
+                  context => executeScriptData(scriptData, context)
+                );
                 break;
             }
           } else if (match.groups.modifier === '+') {
@@ -146,13 +149,17 @@ export async function injectOnEveryRequestJavascript({ data, httpRegion }: model
 
 export class BeforeJavascriptHookInterceptor implements models.HookInterceptor<models.ProcessorContext, boolean> {
   constructor(private readonly scriptData: ScriptData) { }
-  async beforeTrigger(context: models.HookTriggerContext<models.ProcessorContext, boolean | undefined>): Promise<boolean | undefined> {
+  async beforeTrigger(
+    context: models.HookTriggerContext<models.ProcessorContext, boolean | undefined>
+  ): Promise<boolean | undefined> {
     return await executeScriptData(this.scriptData, context.arg, 'before');
   }
 }
 export class AfterJavascriptHookInterceptor implements models.HookInterceptor<models.ProcessorContext, boolean> {
   constructor(private readonly scriptData: ScriptData) { }
-  async afterTrigger(context: models.HookTriggerContext<models.ProcessorContext, boolean | undefined>): Promise<boolean | undefined> {
+  async afterTrigger(
+    context: models.HookTriggerContext<models.ProcessorContext, boolean | undefined>
+  ): Promise<boolean | undefined> {
     return await executeScriptData(this.scriptData, context.arg, 'after');
   }
 }

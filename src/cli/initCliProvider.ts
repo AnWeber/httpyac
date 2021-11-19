@@ -14,7 +14,10 @@ export function initIOProvider(): void {
 function initFileProvider(): void {
   fileProvider.isAbsolute = async (fileName: models.PathLike) => isAbsolute(fileProvider.toString(fileName));
   fileProvider.dirname = (fileName: string) => dirname(fileProvider.toString(fileName));
-  fileProvider.joinPath = (fileName: models.PathLike, path: string): models.PathLike => join(fileProvider.toString(fileName), path);
+  fileProvider.joinPath = (
+    fileName: models.PathLike,
+    path: string
+  ): models.PathLike => join(fileProvider.toString(fileName), path);
 
   fileProvider.exists = async (fileName: models.PathLike): Promise<boolean> => {
     try {
@@ -32,8 +35,13 @@ function initFileProvider(): void {
     const stream = createReadStream(file);
     return toBuffer(stream);
   };
-  fileProvider.writeBuffer = (fileName: models.PathLike, buffer: Buffer) => fs.writeFile(fileProvider.toString(fileName), buffer);
-  fileProvider.readdir = async (dirname: models.PathLike): Promise<string[]> => fs.readdir(fileProvider.toString(dirname));
+  fileProvider.writeBuffer = (
+    fileName: models.PathLike,
+    buffer: Buffer
+  ) => fs.writeFile(fileProvider.toString(fileName), buffer);
+  fileProvider.readdir = async (
+    dirname: models.PathLike
+  ): Promise<string[]> => fs.readdir(fileProvider.toString(dirname));
 }
 
 

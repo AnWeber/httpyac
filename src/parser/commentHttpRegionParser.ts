@@ -3,7 +3,10 @@ import { toMultiLineString } from '../utils';
 import { ParserRegex } from './parserRegex';
 
 
-export async function parseComment(getLineReader: getHttpLineGenerator, { httpRegion }: ParserContext): Promise<HttpRegionParserResult> {
+export async function parseComment(
+  getLineReader: getHttpLineGenerator,
+  { httpRegion }: ParserContext
+): Promise<HttpRegionParserResult> {
   const lineReader = getLineReader(true);
   const comment = getCommentContent(lineReader);
   if (comment) {

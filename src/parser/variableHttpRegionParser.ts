@@ -5,7 +5,10 @@ import { log, userInteractionProvider } from '../io';
 
 const VariableHookId = 'variable';
 
-export async function parseVariable(getLineReader: models.getHttpLineGenerator, { httpRegion }: models.ParserContext): Promise<models.HttpRegionParserResult> {
+export async function parseVariable(
+  getLineReader: models.getHttpLineGenerator,
+  { httpRegion }: models.ParserContext
+): Promise<models.HttpRegionParserResult> {
 
   const lineReader = getLineReader();
   const next = lineReader.next();
@@ -84,7 +87,7 @@ class VariableInterceptor implements models.HookInterceptor<models.ProcessorCont
 
   private async replaceAllVariables(context: models.ProcessorContext) : Promise<boolean> {
     for (const [key, value] of Object.entries(context.variables)) {
-      const result: typeof models.HookCancel | unknown = await utils.replaceVariables(value, models.VariableType.variable, context);
+      const result = await utils.replaceVariables(value, models.VariableType.variable, context);
       if (result !== models.HookCancel) {
         context.variables[key] = result;
       }

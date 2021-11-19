@@ -6,7 +6,11 @@ import { log } from '../../io';
 import * as utils from '../../utils';
 
 
-export async function oauth2VariableReplacer(text: unknown, type: string, context: ProcessorContext): Promise<unknown> {
+export async function oauth2VariableReplacer(
+  text: unknown,
+  type: string,
+  context: ProcessorContext
+): Promise<unknown> {
   if (type.toLowerCase() === 'authorization' && utils.isString(text)) {
     const match = ParserRegex.auth.oauth2.exec(text);
     if (match && match.groups) {
@@ -28,7 +32,11 @@ export async function oauth2VariableReplacer(text: unknown, type: string, contex
             log.trace(`openid flow ${flow} used: ${cacheKey}`);
             openIdInformation = await openIdFlow.perform(config, context);
             if (openIdInformation && tokenExchangeConfig) {
-              openIdInformation = await oauth.TokenExchangeFlow.perform(tokenExchangeConfig, openIdInformation, context);
+              openIdInformation = await oauth.TokenExchangeFlow.perform(
+                tokenExchangeConfig,
+                openIdInformation,
+                context
+              );
             }
           }
           if (openIdInformation) {
@@ -46,7 +54,10 @@ export async function oauth2VariableReplacer(text: unknown, type: string, contex
   return text;
 }
 
-function getSessionOpenIdInformation(cacheKey: string, config: oauth.OpenIdConfiguration): oauth.OpenIdInformation | false {
+function getSessionOpenIdInformation(
+  cacheKey: string,
+  config: oauth.OpenIdConfiguration
+): oauth.OpenIdInformation | false {
   const openIdInformation = userSessionStore.userSessions.find(obj => obj.id === cacheKey);
   if (isOpenIdInformation(openIdInformation) && JSON.stringify(openIdInformation.config) === JSON.stringify(config)) {
     return openIdInformation;

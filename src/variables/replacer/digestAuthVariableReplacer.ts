@@ -7,7 +7,11 @@ import { ParserRegex } from '../../parser';
 import { isHttpRequest, isString } from '../../utils';
 
 
-export async function digestAuthVariableReplacer(text: unknown, type: string, { request }: ProcessorContext): Promise<unknown> {
+export async function digestAuthVariableReplacer(
+  text: unknown,
+  type: string,
+  { request }: ProcessorContext
+): Promise<unknown> {
   if (type.toLowerCase() === 'authorization' && isString(text) && isHttpRequest(request)) {
     const match = ParserRegex.auth.digest.exec(text);
 
@@ -27,7 +31,10 @@ export async function digestAuthVariableReplacer(text: unknown, type: string, { 
 
 
 function digestFactory(username: string, password: string) {
-  return function digestAfterResponse(response: Response, retryWithMergedOptions: (options: OptionsOfUnknownResponseBody) => CancelableRequest<Response>) {
+  return function digestAfterResponse(
+    response: Response,
+    retryWithMergedOptions: (options: OptionsOfUnknownResponseBody) => CancelableRequest<Response>
+  ) {
     const wwwAuthenticate = response.headers['www-authenticate'];
     if (response.statusCode === 401
       && wwwAuthenticate
@@ -96,14 +103,20 @@ function md5(value: string | Buffer) {
   return createHash('md5').update(value).digest('hex');
 }
 
-function ha1Compute(algorithm: string | undefined, username: string, password: string, realm: string, nonce: string, cnonce: string | false) {
+function ha1Compute(
+  algorithm: string | undefined,
+  username: string,
+  password: string,
+  realm: string,
+  nonce: string,
+  cnonce: string | false
+) {
   const ha1 = md5(`${username}:${realm}:${password}`);
   if (cnonce && algorithm?.toLowerCase() === 'md5-sess') {
     return md5(`${ha1}:${nonce}:${cnonce}`);
   }
   return ha1;
 }
-
 
 function updateChallenge(challenge: Record<string, string>, wwwAuthenticate: string) {
 

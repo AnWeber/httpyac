@@ -49,7 +49,12 @@ export class HttpFileStore {
     return result;
   }
 
-  getOrCreate(fileName: models.PathLike, getText: () => Promise<string>, version: number, options: HttpFileStoreOptions): Promise<models.HttpFile> {
+  getOrCreate(
+    fileName: models.PathLike,
+    getText: () => Promise<string>,
+    version: number,
+    options: HttpFileStoreOptions
+  ): Promise<models.HttpFile> {
     const httpFileStoreEntry: HttpFileStoreEntry = this.getFromStore(fileName, version);
     if (version > httpFileStoreEntry.version || !httpFileStoreEntry.httpFile) {
       if (httpFileStoreEntry.promise
@@ -164,7 +169,11 @@ export class HttpFileStore {
     return httpFile;
   }
 
-  private async configureHooks(httpFile: models.HttpFile, options: HttpFileStoreOptions, hooks: Record<string, models.ConfigureHooks>) {
+  private async configureHooks(
+    httpFile: models.HttpFile,
+    options: HttpFileStoreOptions,
+    hooks: Record<string, models.ConfigureHooks>
+  ) {
     if (options.config) {
       const api: models.HttpyacHooksApi = {
         version: '1.0.0',
@@ -194,7 +203,10 @@ export class HttpFileStore {
 }
 
 
-export async function getEnviromentConfig(config?: models.EnvironmentConfig, rootDir?: models.PathLike) : Promise<models.EnvironmentConfig> {
+export async function getEnviromentConfig(
+  config?: models.EnvironmentConfig,
+  rootDir?: models.PathLike
+): Promise<models.EnvironmentConfig> {
   const environmentConfigs : Array<models.EnvironmentConfig> = [];
   if (rootDir) {
     const fileConfig = await utils.getHttpacConfig(rootDir);

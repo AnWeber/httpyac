@@ -31,7 +31,9 @@ async function loadFileConfig(rootDir: PathLike): Promise<EnvironmentConfig | un
     }
   }
   if (fileConfigPath) {
-    const fileConfig = loadModule<EnvironmentConfig |(() => EnvironmentConfig)>(fileProvider.fsPath(fileConfigPath), fileProvider.fsPath(rootDir), true);
+    const fsConfigPath = fileProvider.fsPath(fileConfigPath);
+    const fsRoot = fileProvider.fsPath(rootDir);
+    const fileConfig = loadModule<EnvironmentConfig |(() => EnvironmentConfig)>(fsConfigPath, fsRoot, true);
     if (typeof fileConfig === 'function') {
       return fileConfig();
     }

@@ -12,7 +12,10 @@ export async function provideConfigEnvironments(context: VariableProviderContext
   return [];
 }
 
-export async function provideConfigVariables(envs: string[] | undefined, context: VariableProviderContext): Promise<Variables> {
+export async function provideConfigVariables(
+  envs: string[] | undefined,
+  context: VariableProviderContext
+): Promise<Variables> {
 
   const variables: Variables[] = [];
 

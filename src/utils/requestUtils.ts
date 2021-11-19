@@ -59,7 +59,10 @@ export function getHeader<T>(headers: Record<string, T> | undefined, headerName:
   }
   return undefined;
 }
-export function getHeaderArray(headers: Record<string, string | string[] | undefined> | undefined, headerName: string): string[] | undefined {
+export function getHeaderArray(
+  headers: Record<string, string | string[] | undefined> | undefined,
+  headerName: string
+): string[] | undefined {
   const value = getHeader(headers, headerName);
   if (value) {
     return isString(value) ? [value] : value;
@@ -309,10 +312,12 @@ export async function triggerRequestResponseHooks(
   context: models.ProcessorContext
 ): Promise<boolean> {
   try {
-    if (context.request && await context.httpFile.hooks.onRequest.trigger(context.request, context) === models.HookCancel) {
+    if (context.request
+      && await context.httpFile.hooks.onRequest.trigger(context.request, context) === models.HookCancel) {
       return false;
     }
-    if (context.request && await context.httpRegion.hooks.onRequest.trigger(context.request, context) === models.HookCancel) {
+    if (context.request
+      && await context.httpRegion.hooks.onRequest.trigger(context.request, context) === models.HookCancel) {
       return false;
     }
 

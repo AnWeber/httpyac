@@ -42,12 +42,13 @@ export function toCliJsonOutput(context: Record<string, Array<HttpRegion>>, opti
   const requests: Array<CliOutputRequest> = [];
   for (const [fileName, httpRegions] of Object.entries(context)) {
     requests.push(...httpRegions.map(httpRegion => {
+      let output = options.output;
+      if (options.outputFailed && httpRegion.testResults?.some?.(test => !test.result)) {
+        output = options.outputFailed;
+      }
       const result: CliOutputRequest = {
         fileName,
-        response: convertResponse(
-          httpRegion.response,
-          options.outputFailed && httpRegion.testResults?.some?.(test => !test.result) ? options.outputFailed : options.output
-        ),
+        response: convertResponse(httpRegion.response, output),
         name: httpRegion.metaData?.name,
         title: httpRegion.metaData?.title,
         description: httpRegion.metaData?.description,
@@ -63,11 +64,15 @@ export function toCliJsonOutput(context: Record<string, Array<HttpRegion>>, opti
     }));
 
   }
+  let resultRequests = requests;
+  if (options.filter === CliFilterOptions.onlyFailed) {
+    resultRequests = requests.filter(obj => obj.summary.failedTests > 0);
+  }
   return {
     _meta: {
       version: '1.0.0',
     },
-    requests: options.filter === CliFilterOptions.onlyFailed ? requests.filter(obj => obj.summary.failedTests > 0) : requests,
+    requests: resultRequests,
     summary: {
       totalRequests: requests.length,
       failedRequests: requests.filter(obj => obj.summary.failedTests > 0).length,

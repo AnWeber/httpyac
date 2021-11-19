@@ -47,7 +47,10 @@ export async function parseProtoImport(
         parserUtils.parseComments,
         parserUtils.parseRequestHeaderFactory(protoDefinition.loaderOptions),
         parserUtils.parseDefaultHeadersFactory(
-          (headers, context: ProtoProcessorContext) => Object.assign(context.options.protoDefinitions?.[protoDefinition.fileName].loaderOptions, headers)
+          (headers, context: ProtoProcessorContext) => Object.assign(
+            context.options.protoDefinitions?.[protoDefinition.fileName].loaderOptions,
+            headers
+          )
         ),
       ], context);
 
@@ -110,13 +113,16 @@ export class ProtoImportAction implements models.HttpRegionAction {
   }
 }
 
+type ExecuteInterceptor = models.HookInterceptor<models.ProcessorContext, boolean | void>;
 
-export class ProtoDefinitionCreationInterceptor implements models.HookInterceptor<models.ProcessorContext, boolean | void> {
+export class ProtoDefinitionCreationInterceptor implements ExecuteInterceptor {
   id = models.ActionType.protoCreate;
 
   constructor(private readonly protoDefinition: models.ProtoDefinition) { }
 
-  async beforeLoop(context: models.HookTriggerContext<ProtoProcessorContext, boolean | undefined>): Promise<boolean | undefined> {
+  async beforeLoop(
+    context: models.HookTriggerContext<ProtoProcessorContext, boolean | undefined>
+  ): Promise<boolean | undefined> {
     context.arg.options.protoDefinitions = Object.assign({}, context.arg.options.protoDefinitions, {
       [this.protoDefinition.fileName]: {
         fileName: this.protoDefinition.fileName,

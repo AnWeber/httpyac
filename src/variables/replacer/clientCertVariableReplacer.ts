@@ -1,4 +1,4 @@
-import { ClientCertificateOptions, HttpFile, HttpRequest, PathLike, ProcessorContext, VariableType } from '../../models';
+import * as models from '../../models';
 import { toAbsoluteFilename, isString, isHttpRequest } from '../../utils';
 import { URL } from 'url';
 import { ParserRegex } from '../../parser';
@@ -6,12 +6,12 @@ import { fileProvider } from '../../io';
 
 export async function clientCertVariableReplacer(
   text: unknown,
-  type: VariableType | string,
-  context: ProcessorContext
+  type: models.VariableType | string,
+  context: models.ProcessorContext
 ): Promise<unknown> {
   const { request, httpRegion, httpFile } = context;
   if (isString(text) && isHttpRequest(request) && !httpRegion.metaData.noClientCert) {
-    if (type === VariableType.url && context.config?.clientCertificates) {
+    if (type === models.VariableType.url && context.config?.clientCertificates) {
       const url = createUrl(text);
       if (url) {
         const clientCertifcateOptions = context.config?.clientCertificates[url.host];
@@ -43,7 +43,11 @@ function createUrl(url: string): URL | undefined {
   }
 }
 
-async function setClientCertificateOptions(request: HttpRequest, clientCertifcateOptions: ClientCertificateOptions, httpFile: HttpFile) {
+async function setClientCertificateOptions(
+  request: models.HttpRequest,
+  clientCertifcateOptions: models.ClientCertificateOptions,
+  httpFile: models.HttpFile
+) {
   const dir = fileProvider.dirname(httpFile.fileName);
   request.https = Object.assign({}, request.https, {
     certificate: await resolveFile(clientCertifcateOptions.cert, dir),
@@ -54,7 +58,10 @@ async function setClientCertificateOptions(request: HttpRequest, clientCertifcat
 }
 
 
-async function resolveFile(fileName: PathLike | undefined, dir: PathLike | undefined): Promise<Buffer | undefined> {
+async function resolveFile(
+  fileName: models.PathLike | undefined,
+  dir: models.PathLike | undefined
+): Promise<Buffer | undefined> {
   if (fileName) {
     if (isString(fileName)) {
       const file = await toAbsoluteFilename(fileName, dir);

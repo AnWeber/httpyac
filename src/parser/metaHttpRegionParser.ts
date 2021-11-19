@@ -5,7 +5,10 @@ import { log } from '../io';
 import * as metaData from './metaData';
 
 
-export async function parseMetaData(getLineReader: models.getHttpLineGenerator, context: models.ParserContext): Promise<models.HttpRegionParserResult> {
+export async function parseMetaData(
+  getLineReader: models.getHttpLineGenerator,
+  context: models.ParserContext
+): Promise<models.HttpRegionParserResult> {
   const lineReader = getLineReader();
   const { httpRegion, data } = context;
   if (data.metaTitle) {
@@ -57,7 +60,11 @@ export async function parseMetaData(getLineReader: models.getHttpLineGenerator, 
 }
 
 
-export function parseComments(httpLine: models.HttpLine, context: models.ParserContext, metaRegex: RegExp): models.SymbolParserResult | false {
+export function parseComments(
+  httpLine: models.HttpLine,
+  context: models.ParserContext,
+  metaRegex: RegExp
+): models.SymbolParserResult | false {
   if (metaRegex.test(httpLine.textLine)) {
     const result: models.SymbolParserResult = {
       symbols: [{

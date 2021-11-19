@@ -16,7 +16,8 @@ export function getDisplayName(httpRegion?: models.HttpRegion, defaultName = 'gl
       if (indexQuery < 0) {
         indexQuery = httpRegion.request.url.length;
       }
-      const line = httpRegion.symbol.children?.find?.(obj => obj.kind === models.HttpSymbolKind.requestLine)?.startLine || httpRegion.symbol.startLine;
+      const line = httpRegion.symbol.children
+        ?.find?.(obj => obj.kind === models.HttpSymbolKind.requestLine)?.startLine || httpRegion.symbol.startLine;
       return `${httpRegion.request.method} ${httpRegion.request.url.slice(0, indexQuery)} (line: ${line + 1})`;
     }
   }
@@ -34,7 +35,10 @@ export function getRegionDescription(httpRegion: models.HttpRegion, defaultName 
 }
 
 
-export async function processHttpRegionActions(context: models.ProcessorContext, showProgressBar?: boolean): Promise<boolean> {
+export async function processHttpRegionActions(
+  context: models.ProcessorContext,
+  showProgressBar?: boolean
+): Promise<boolean> {
   delete context.httpRegion.response;
   delete context.httpRegion.testResults;
 
@@ -71,11 +75,16 @@ export async function processHttpRegionActions(context: models.ProcessorContext,
 }
 function initRegionScopedVariables(context: models.ProcessorContext) {
   const env = toEnvironmentKey(context.httpFile.activeEnvironment);
+
+  let httpRegions = context.httpFile.httpRegions;
+  if (context.config?.useRegionScopedVariables) {
+    httpRegions = context.httpFile.httpRegions.filter(obj => isGlobalHttpRegion(obj));
+  }
+
   const variables = Object.assign(
     {},
     context.variables,
-    ...(context.config?.useRegionScopedVariables ? context.httpFile.httpRegions.filter(obj => isGlobalHttpRegion(obj)) : context.httpFile.httpRegions)
-      .map(obj => obj.variablesPerEnv[env])
+    ...httpRegions.map(obj => obj.variablesPerEnv[env])
   );
 
   if (context.config?.useRegionScopedVariables) {
@@ -103,7 +112,10 @@ function autoShareNewVariables(variables: models.Variables, context: models.Proc
 }
 
 
-export async function logResponse(response: models.HttpResponse | undefined, context: models.ProcessorContext): Promise<models.HttpResponse | undefined> {
+export async function logResponse(
+  response: models.HttpResponse | undefined,
+  context: models.ProcessorContext
+): Promise<models.HttpResponse | undefined> {
   if (response) {
     const clone = cloneResponse(response);
     const fileResult = await context.httpFile.hooks.responseLogging.trigger(clone, context);

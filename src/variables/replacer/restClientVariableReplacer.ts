@@ -8,7 +8,11 @@ import { ParserRegex } from '../../parser';
 
 dayjs.extend(utc);
 
-export async function restClientVariableReplacer(text: unknown, _type: VariableType | string, { variables }: ProcessorContext): Promise<unknown> {
+export async function restClientVariableReplacer(
+  text: unknown,
+  _type: VariableType | string,
+  { variables }: ProcessorContext
+): Promise<unknown> {
   if (!isString(text)) {
     return text;
   }

@@ -69,7 +69,10 @@ export async function parseWebsocketLine(
 }
 
 
-function getWebsocketLine(textLine: string, line: number): { request: models.WebsocketRequest, symbol: models.HttpSymbol } | undefined {
+function getWebsocketLine(
+  textLine: string,
+  line: number
+): { request: models.WebsocketRequest, symbol: models.HttpSymbol } | undefined {
   const lineMatch = ParserRegex.stream.websocketLine.exec(textLine);
   if (lineMatch && lineMatch.length > 1 && lineMatch.groups) {
     return {

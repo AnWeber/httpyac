@@ -41,7 +41,10 @@ export async function provideDotenvEnvironments(context: VariableProviderContext
     });
 }
 
-export async function provideDotenvVariables(env: string[] | undefined, context: VariableProviderContext): Promise<Variables> {
+export async function provideDotenvVariables(
+  env: string[] | undefined,
+  context: VariableProviderContext
+): Promise<Variables> {
   const searchFiles = getSearchFiles(env);
   const variables: Array<Variables> = [];
 

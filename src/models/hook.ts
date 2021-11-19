@@ -46,10 +46,14 @@ export abstract class Hook<T, TReturn, TTriggerResult, TArg = undefined, TArg2 =
     return this.items.some(obj => obj.id === id);
   }
 
-  addHook(id: string, action: (arg: T, arg1: TArg, arg2: TArg2) => TReturn | typeof HookCancel | Promise<TReturn | typeof HookCancel>, options?: {
-    before?: Array<string>;
-    after?: Array<string>;
-  }): void {
+  addHook(
+    id: string,
+    action: (arg: T, arg1: TArg, arg2: TArg2) => TReturn | typeof HookCancel | Promise<TReturn | typeof HookCancel>,
+    options?: {
+      before?: Array<string>;
+      after?: Array<string>;
+    }
+  ): void {
     const item = {
       id,
       action,
@@ -157,7 +161,9 @@ export abstract class Hook<T, TReturn, TTriggerResult, TArg = undefined, TArg2 =
 
 
   private async intercept(
-    method: (interceptor: HookInterceptor<T, TReturn>) => ((context: HookTriggerContext<T, TReturn>) => Promise<boolean | void>) | undefined,
+    method: (
+      interceptor: HookInterceptor<T, TReturn>
+    ) => ((context: HookTriggerContext<T, TReturn>) => Promise<boolean | void>) | undefined,
     context: HookTriggerContext<T, TReturn>
   ) {
     for (const interceptor of this.interceptors) {
@@ -178,7 +184,8 @@ export abstract class Hook<T, TReturn, TTriggerResult, TArg = undefined, TArg2 =
   protected abstract getMergedResults(results: TReturn[], arg: T): TTriggerResult;
 }
 
-export class SeriesHook<T, TReturn, TBail = void, TArg = undefined, TArg2 = undefined> extends Hook<T, TReturn | TBail, Array<TReturn>, TArg, TArg2> {
+export class SeriesHook<T, TReturn, TBail = void, TArg = undefined, TArg2 = undefined>
+  extends Hook<T, TReturn | TBail, Array<TReturn>, TArg, TArg2> {
   constructor(bailOut?: ((arg: TReturn | TBail) => boolean) | undefined) {
     super(bailOut);
   }
@@ -206,7 +213,8 @@ export class BailSeriesHook<T, TReturn, TBail = void, TArg = undefined, TArg2 = 
 }
 
 
-export class WaterfallHook<T, TBail = T, TArg = undefined, TArg2 = undefined> extends Hook<T, T | TBail, T | TBail, TArg, TArg2> {
+export class WaterfallHook<T, TBail = T, TArg = undefined, TArg2 = undefined>
+  extends Hook<T, T | TBail, T | TBail, TArg, TArg2> {
   constructor(bailOut?: ((arg: T | TBail) => boolean) | undefined) {
     super(bailOut);
   }

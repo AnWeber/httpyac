@@ -12,7 +12,11 @@ export function assertMaxTotalTime(response: HttpResponse, maxTotalTime: number)
   ok(response.timings?.total ? response.timings.total < maxTotalTime : true, `total time exceeded ${maxTotalTime}`);
 }
 
-export function assertHeaderEquals(response: HttpResponse, headerKey: string, val: string | string[] | undefined): void {
+export function assertHeaderEquals(
+  response: HttpResponse,
+  headerKey: string,
+  val: string | string[] | undefined
+): void {
   const headerValue = getHeader(response.headers, headerKey);
   strictEqual(headerValue, val, `response header equals ${val}`);
 }

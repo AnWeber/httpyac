@@ -58,7 +58,8 @@ export function toMarkdownResponse(response: models.HttpResponse, options?: {
   if (options?.body && isString(response.body)) {
     result.push('');
     result.push(`\`\`\`${getMarkdownSyntax(response.contentType)}`);
-    result.push(joinMarkdown(toMultiLineArray(options.prettyPrint && response.prettyPrintBody ? response.prettyPrintBody : response.body)));
+    const body = options.prettyPrint && response.prettyPrintBody ? response.prettyPrintBody : response.body;
+    result.push(joinMarkdown(toMultiLineArray(body)));
     result.push('```');
   }
   return result;
