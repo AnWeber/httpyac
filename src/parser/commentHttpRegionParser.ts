@@ -1,4 +1,10 @@
-import { HttpSymbolKind, getHttpLineGenerator, HttpLineGenerator, HttpRegionParserResult, ParserContext } from '../models';
+import {
+  HttpSymbolKind,
+  getHttpLineGenerator,
+  HttpLineGenerator,
+  HttpRegionParserResult,
+  ParserContext,
+} from '../models';
 import { toMultiLineString } from '../utils';
 import { ParserRegex } from './parserRegex';
 
@@ -9,28 +15,31 @@ export async function parseComment(
   const lineReader = getLineReader(true);
   const comment = getCommentContent(lineReader);
   if (comment) {
-    if (!httpRegion.metaData.description) { // first comment gets description
+    if (!httpRegion.metaData.description) {
+      // first comment gets description
       httpRegion.metaData.description = comment.comment;
     }
     return {
       nextParserLine: comment.endLine,
-      symbols: [{
-        name: 'comment',
-        description: comment.comment,
-        kind: HttpSymbolKind.comment,
-        startLine: comment.startLine,
-        startOffset: 0,
-        endLine: comment.endLine,
-        endOffset: comment.endOffset,
-      }],
+      symbols: [
+        {
+          name: 'comment',
+          description: comment.comment,
+          kind: HttpSymbolKind.comment,
+          startLine: comment.startLine,
+          startOffset: 0,
+          endLine: comment.endLine,
+          endOffset: comment.endOffset,
+        },
+      ],
     };
   }
   return false;
 }
 
-export interface CommentParserResult{
-  startLine: number,
-  endLine: number,
+export interface CommentParserResult {
+  startLine: number;
+  endLine: number;
   endOffset: number;
   comment: string;
 }
@@ -38,7 +47,6 @@ export interface CommentParserResult{
 function getCommentContent(lineReader: HttpLineGenerator): CommentParserResult | false {
   let next = lineReader.next();
   if (!next.done) {
-
     const startLine = next.value.line;
     const singleLineMatch = ParserRegex.comment.singleline.exec(next.value.textLine);
     if (singleLineMatch?.groups?.comment) {
@@ -46,7 +54,7 @@ function getCommentContent(lineReader: HttpLineGenerator): CommentParserResult |
         startLine,
         endLine: startLine,
         endOffset: next.value.textLine.length,
-        comment: singleLineMatch.groups.comment
+        comment: singleLineMatch.groups.comment,
       };
     }
 
@@ -66,7 +74,6 @@ function getCommentContent(lineReader: HttpLineGenerator): CommentParserResult |
         lines.push(next.value.textLine);
         next = lineReader.next();
       }
-
     }
   }
   return false;

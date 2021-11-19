@@ -1,6 +1,6 @@
 import { getHttpLineGenerator, HttpRegionParserResult, HttpSymbolKind, ParserContext } from '../models';
-import { ParserRegex } from './parserRegex';
 import { toMultiLineString, parseContentType, setAdditionalResponseBody } from '../utils';
+import { ParserRegex } from './parserRegex';
 
 export async function parseResponse(
   getLineReader: getHttpLineGenerator,
@@ -23,13 +23,12 @@ export async function parseResponse(
     }
     const match = ParserRegex.responseLine.exec(next.value.textLine);
     if (match && match.groups?.statusCode) {
-
       context.httpRegion.response = {
         protocol: `HTTP/${match.groups.httpVersion || '1.1'}`,
         httpVersion: match.groups.httpVersion,
         statusCode: +match.groups.statusCode,
         statusMessage: match.groups.statusMessage,
-        headers: {}
+        headers: {},
       };
       const symbol = {
         name: 'response',
@@ -47,11 +46,9 @@ export async function parseResponse(
         symbol.endOffset = next.value.textLine.length;
         const headerMatch = ParserRegex.request.header.exec(next.value.textLine);
         if (headerMatch?.groups?.key && headerMatch?.groups?.value) {
-
-          context.httpRegion.response.headers = Object.assign(
-            context.httpRegion.response?.headers,
-            { [headerMatch.groups.key]: headerMatch.groups.value }
-          );
+          context.httpRegion.response.headers = Object.assign(context.httpRegion.response?.headers, {
+            [headerMatch.groups.key]: headerMatch.groups.value,
+          });
         } else {
           break;
         }
@@ -74,8 +71,7 @@ export async function parseResponse(
 
 export async function closeResponseBody(context: ParserContext): Promise<void> {
   if (context.data.httpResponseSymbol) {
-    if (context.httpRegion.response
-        && context.data.httpResponseSymbol.body.length > 0) {
+    if (context.httpRegion.response && context.data.httpResponseSymbol.body.length > 0) {
       const response = context.httpRegion.response;
       const body = toMultiLineString(context.data.httpResponseSymbol.body);
       response.body = body;

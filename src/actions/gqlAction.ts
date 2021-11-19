@@ -4,16 +4,16 @@ import * as utils from '../utils';
 
 export type GqlLoadData = string | ((context: ProcessorContext) => Promise<string | undefined>);
 
-export interface GqlData{
+export interface GqlData {
   operationName?: string;
   query?: GqlLoadData;
-  fragments: Record<string, GqlLoadData>
+  fragments: Record<string, GqlLoadData>;
 }
 
-export interface GqlPostRequest{
+export interface GqlPostRequest {
   query: string;
   operationName?: string;
-  variables?: Record<string, unknown>
+  variables?: Record<string, unknown>;
 }
 
 export class GqlAction implements HttpRegionAction {
@@ -61,7 +61,7 @@ export class GqlAction implements HttpRegionAction {
           }
         }
         const gqlRequestBody: GqlPostRequest = {
-          query
+          query,
         };
         if (this.gqlData.operationName) {
           gqlRequestBody.operationName = this.gqlData.operationName;

@@ -1,6 +1,6 @@
+import { fileProvider, log } from '../io';
 import * as models from '../models';
 import { ParserRegex } from './parserRegex';
-import { fileProvider, log } from '../io';
 
 export async function parseOutputRedirection(
   getLineReader: models.getHttpLineGenerator,
@@ -14,7 +14,6 @@ export async function parseOutputRedirection(
 
     const match = ParserRegex.outputRedirection.exec(textLine);
     if (match && match.groups?.fileName) {
-
       const fileName = match.groups.fileName;
       const force = !!match.groups.force;
 
@@ -35,15 +34,17 @@ export async function parseOutputRedirection(
       });
       return {
         nextParserLine: next.value.line,
-        symbols: [{
-          name: match.groups.key,
-          description: match.groups.value,
-          kind: models.HttpSymbolKind.response,
-          startLine: next.value.line,
-          startOffset: 0,
-          endLine: next.value.line,
-          endOffset: next.value.textLine.length,
-        }],
+        symbols: [
+          {
+            name: match.groups.key,
+            description: match.groups.value,
+            kind: models.HttpSymbolKind.response,
+            startLine: next.value.line,
+            startOffset: 0,
+            endLine: next.value.line,
+            endOffset: next.value.textLine.length,
+          },
+        ],
       };
     }
   }
@@ -71,7 +72,7 @@ async function getOutputRedirectionFileName(fileName: string, force: boolean, ba
   return file;
 }
 async function toAbsoluteFileName(fileName: string, baseName: models.PathLike) {
-  if (!await fileProvider.isAbsolute(fileName)) {
+  if (!(await fileProvider.isAbsolute(fileName))) {
     const dirName = fileProvider.dirname(baseName);
     if (dirName) {
       return fileProvider.joinPath(dirName, fileName);

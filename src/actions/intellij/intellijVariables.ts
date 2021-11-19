@@ -1,14 +1,10 @@
 import { Variables } from '../../models';
+import { toEnvironmentKey } from '../../utils';
+import { intellijVariableCache } from '../../variables/provider';
 import { Variables as JetbrainsVariables } from './http-client';
 
-import { intellijVariableCache } from '../../variables/provider';
-import { toEnvironmentKey } from '../../utils';
-
 export class IntellijVariables implements JetbrainsVariables {
-  constructor(
-    private readonly variables: Variables,
-    private readonly env: string[] | undefined
-  ) { }
+  constructor(private readonly variables: Variables, private readonly env: string[] | undefined) {}
 
   private get globalCache() {
     return intellijVariableCache[toEnvironmentKey(this.env)];

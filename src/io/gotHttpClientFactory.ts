@@ -1,26 +1,30 @@
-import { HttpClient, HttpClientContext, HttpRequest, HttpResponse, RepeatOrder, VariableProviderContext } from '../models';
+import {
+  HttpClient,
+  HttpClientContext,
+  HttpRequest,
+  HttpResponse,
+  RepeatOrder,
+  VariableProviderContext,
+} from '../models';
 import * as utils from '../utils';
+import { log } from './logger';
+import { default as filesize } from 'filesize';
 import { default as got, OptionsOfUnknownResponseBody, CancelError, Response } from 'got';
-import merge from 'lodash/merge';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import { default as filesize } from 'filesize';
-import { log } from './logger';
+import merge from 'lodash/merge';
 
-export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined) : HttpClient {
-  return async function gotHttpClient(
-    request: HttpRequest,
-    context: HttpClientContext
-  ): Promise<HttpResponse | false> {
+export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined): HttpClient {
+  return async function gotHttpClient(request: HttpRequest, context: HttpClientContext): Promise<HttpResponse | false> {
     try {
       const defaults: OptionsOfUnknownResponseBody = {
         decompress: true,
         retry: 0,
         throwHttpErrors: false,
         headers: {
-          'accept': '*/*',
+          accept: '*/*',
           'user-agent': 'httpyac',
-        }
+        },
       };
 
       const url = request.url;
@@ -28,9 +32,7 @@ export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined) 
       if (!url) {
         throw new Error('empty url');
       }
-      const mergedRequest: HttpRequest = merge({}, defaults,
-        defaultsOverride,
-        request);
+      const mergedRequest: HttpRequest = merge({}, defaults, defaultsOverride, request);
       delete mergedRequest.url;
       initProxy(mergedRequest);
 
@@ -47,7 +49,6 @@ export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined) 
         return response;
       }
       throw new Error('no response');
-
     } catch (err) {
       if (err instanceof CancelError) {
         return false;
@@ -64,7 +65,6 @@ export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined) 
 }
 
 async function loadRepeat(url: string, options: OptionsOfUnknownResponseBody, context: HttpClientContext) {
-
   const loadFunc = async () => toHttpResponse(await got(url, options));
   const loader: Array<() => Promise<HttpResponse>> = [];
   for (let index = 0; index < (context.repeat?.count || 1); index++) {
@@ -86,7 +86,6 @@ async function load(url: string, options: OptionsOfUnknownResponseBody, context:
 
   let prevPercent = 0;
   if (context.showProgressBar) {
-
     responsePromise.on('downloadProgress', data => {
       const newData = data.percent - prevPercent;
       prevPercent = data.percent;
@@ -98,9 +97,11 @@ async function load(url: string, options: OptionsOfUnknownResponseBody, context:
       }
     });
   }
-  const dispose = context.progress && context.progress.register(() => {
-    responsePromise.cancel();
-  });
+  const dispose =
+    context.progress &&
+    context.progress.register(() => {
+      responsePromise.cancel();
+    });
 
   const response = await responsePromise;
   if (dispose) {
@@ -113,7 +114,7 @@ function initProxy(request: HttpRequest) {
   if (request.proxy) {
     request.agent = {
       http: new HttpProxyAgent(request.proxy),
-      https: new HttpsProxyAgent(request.proxy)
+      https: new HttpsProxyAgent(request.proxy),
     };
     delete request.proxy;
   }
@@ -139,10 +140,11 @@ function toHttpResponse(response: Response<unknown>): HttpResponse {
     meta: {
       ip: response.ip,
       redirectUrls: response.redirectUrls,
-      size: filesize(response.rawHeaders
-        .map(obj => obj.length)
-        .reduce((size, current) => size + current, 0) + response.rawBody.length),
-    }
+      size: filesize(
+        response.rawHeaders.map(obj => obj.length).reduce((size, current) => size + current, 0) +
+          response.rawBody.length
+      ),
+    },
   };
   delete response.headers[':status'];
   if (httpResponse.httpVersion && httpResponse.httpVersion.startsWith('HTTP/')) {
@@ -164,8 +166,8 @@ function getBody(body: unknown) {
 
 export function initHttpClient(content: VariableProviderContext): HttpClient {
   const request = {
-    ...content.config?.request || {},
-    proxy: content.config?.proxy
+    ...(content.config?.request || {}),
+    proxy: content.config?.proxy,
   };
   return gotHttpClientFactory(request);
 }

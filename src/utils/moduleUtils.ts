@@ -1,11 +1,11 @@
-import path from 'path';
-import Module from 'module';
-import vm from 'vm';
 import { log, fileProvider } from '../io';
-import { isPromise } from './promiseUtils';
-import { EOL } from 'os';
 import { PathLike, ProcessorContext } from '../models';
+import { isPromise } from './promiseUtils';
 import { toMultiLineArray } from './stringUtils';
+import Module from 'module';
+import { EOL } from 'os';
+import path from 'path';
+import vm from 'vm';
 
 export function resolveModule(request: string, context: string): string | undefined {
   let resolvedPath: string | undefined;
@@ -73,13 +73,15 @@ function clearRequireCache(id: string, map = new Map()) {
   }
 }
 
-export async function runScript(source: string, options: {
-  fileName: PathLike,
-  lineOffset: number,
-  context: Record<string, unknown>,
-  require?: Record<string, unknown>,
-}): Promise<Record<string, unknown>> {
-
+export async function runScript(
+  source: string,
+  options: {
+    fileName: PathLike;
+    lineOffset: number;
+    context: Record<string, unknown>;
+    require?: Record<string, unknown>;
+  }
+): Promise<Record<string, unknown>> {
   const filename = fileProvider.fsPath(options.fileName);
 
   const mod = createModule(filename);
@@ -110,13 +112,7 @@ export async function runScript(source: string, options: {
     lineOffset: options.lineOffset,
     displayErrors: true,
   });
-  compiledWrapper.apply(context, [
-    mod.exports,
-    extendedRequire,
-    mod,
-    filename,
-    path.dirname(filename),
-  ]);
+  compiledWrapper.apply(context, [mod.exports, extendedRequire, mod, filename, path.dirname(filename)]);
 
   let result = mod.exports;
   if (isPromise(result)) {
@@ -131,7 +127,7 @@ export async function runScript(source: string, options: {
   return result;
 }
 
-export async function evalExpression(expression: string, context: ProcessorContext) : Promise<unknown> {
+export async function evalExpression(expression: string, context: ProcessorContext): Promise<unknown> {
   const script = `exports.$result = (${expression});`;
   let lineOffset = context.httpRegion.symbol.startLine;
   if (context.httpRegion.symbol.source) {
@@ -153,7 +149,54 @@ export async function evalExpression(expression: string, context: ProcessorConte
   return value.$result;
 }
 
-export const JAVASCRIPT_KEYWORDS = ['await', 'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'else', 'enum', 'export', 'extends', 'false', 'finally', 'for', 'function', 'if', 'implements', 'import', 'in', 'instanceof', 'interface', 'let', 'new', 'null', 'package', 'private', 'protected', 'public', 'return', 'super', 'switch', 'static', 'this', 'throw', 'try', 'true', 'typeof', 'var', 'void', 'while', 'with', 'yield'];
+export const JAVASCRIPT_KEYWORDS = [
+  'await',
+  'break',
+  'case',
+  'catch',
+  'class',
+  'const',
+  'continue',
+  'debugger',
+  'default',
+  'delete',
+  'do',
+  'else',
+  'enum',
+  'export',
+  'extends',
+  'false',
+  'finally',
+  'for',
+  'function',
+  'if',
+  'implements',
+  'import',
+  'in',
+  'instanceof',
+  'interface',
+  'let',
+  'new',
+  'null',
+  'package',
+  'private',
+  'protected',
+  'public',
+  'return',
+  'super',
+  'switch',
+  'static',
+  'this',
+  'throw',
+  'try',
+  'true',
+  'typeof',
+  'var',
+  'void',
+  'while',
+  'with',
+  'yield',
+];
 
 export function isValidVariableName(name: string): boolean {
   if (JAVASCRIPT_KEYWORDS.indexOf(name) <= 0) {

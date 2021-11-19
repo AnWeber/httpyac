@@ -1,11 +1,11 @@
+import * as httpyac from '..';
 import { testFactory } from '../actions';
 import * as models from '../models';
 import * as utils from '../utils';
 import { ParserRegex } from './parserRegex';
-import * as httpyac from '..';
 import * as grpc from '@grpc/grpc-js';
-import { default as got } from 'got';
 import { default as chalk } from 'chalk';
+import { default as got } from 'got';
 
 export interface ScriptData {
   script: string;
@@ -22,12 +22,10 @@ export async function parseJavascript(
   if (!next.done) {
     const match = ParserRegex.javascript.scriptStart.exec(next.value.textLine);
     if (match?.groups) {
-
       const lineOffset = next.value.line;
       next = lineReader.next();
       const script: Array<string> = [];
       while (!next.done) {
-
         if (ParserRegex.javascript.scriptEnd.test(next.value.textLine)) {
           const scriptData: ScriptData = {
             script: utils.toMultiLineString(script),
@@ -64,9 +62,8 @@ export async function parseJavascript(
                 });
                 break;
               default:
-                httpRegion.hooks.execute.addHook(
-                  models.ActionType.js,
-                  context => executeScriptData(scriptData, context)
+                httpRegion.hooks.execute.addHook(models.ActionType.js, context =>
+                  executeScriptData(scriptData, context)
                 );
                 break;
             }
@@ -77,21 +74,23 @@ export async function parseJavascript(
             }
             onEveryRequestArray.push({
               scriptData,
-              event: match.groups.event
+              event: match.groups.event,
             });
           }
 
           return {
             nextParserLine: next.value.line,
-            symbols: [{
-              name: 'script',
-              description: 'nodejs script',
-              kind: models.HttpSymbolKind.script,
-              startLine: lineOffset,
-              startOffset: 0,
-              endLine: next.value.line,
-              endOffset: next.value.textLine.length,
-            }]
+            symbols: [
+              {
+                name: 'script',
+                description: 'nodejs script',
+                kind: models.HttpSymbolKind.script,
+                startLine: lineOffset,
+                startOffset: 0,
+                endLine: next.value.line,
+                endOffset: next.value.textLine.length,
+              },
+            ],
           };
         }
         script.push(next.value.textLine);
@@ -146,7 +145,7 @@ export async function injectOnEveryRequestJavascript({ data, httpRegion }: model
 }
 
 export class BeforeJavascriptHookInterceptor implements models.HookInterceptor<models.ProcessorContext, boolean> {
-  constructor(private readonly scriptData: ScriptData) { }
+  constructor(private readonly scriptData: ScriptData) {}
   async beforeTrigger(
     context: models.HookTriggerContext<models.ProcessorContext, boolean | undefined>
   ): Promise<boolean | undefined> {
@@ -154,7 +153,7 @@ export class BeforeJavascriptHookInterceptor implements models.HookInterceptor<m
   }
 }
 export class AfterJavascriptHookInterceptor implements models.HookInterceptor<models.ProcessorContext, boolean> {
-  constructor(private readonly scriptData: ScriptData) { }
+  constructor(private readonly scriptData: ScriptData) {}
   async afterTrigger(
     context: models.HookTriggerContext<models.ProcessorContext, boolean | undefined>
   ): Promise<boolean | undefined> {
@@ -181,7 +180,7 @@ async function executeScriptData(scriptData: ScriptData, context: models.Process
       got,
       '@grpc/grpc-js': grpc,
       ...context.require,
-    }
+    },
   });
   if (result) {
     utils.setVariableInContext(result, context);

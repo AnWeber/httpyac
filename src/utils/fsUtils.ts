@@ -7,7 +7,7 @@ export async function toAbsoluteFilename(
   baseName: PathLike | undefined
 ): Promise<PathLike | undefined> {
   if (fileName) {
-    if (await fileProvider.isAbsolute(fileName) && await fileProvider.exists(fileName)) {
+    if ((await fileProvider.isAbsolute(fileName)) && (await fileProvider.exists(fileName))) {
       return fileName;
     }
     if (baseName && isString(fileName)) {
@@ -31,7 +31,10 @@ export function extensionName(fileName: PathLike) {
 
 export function replaceInvalidChars(fileName: string): string {
   const result = fileName.replace(/[/\\?%*:|"<>]/gu, '_');
-  return result.split('_').filter(obj => obj.length > 0).join('_');
+  return result
+    .split('_')
+    .filter(obj => obj.length > 0)
+    .join('_');
 }
 
 export function shortenFileName(fileName: string, maxChars = 50): string {
@@ -41,7 +44,7 @@ export function shortenFileName(fileName: string, maxChars = 50): string {
   for (const item of fileName.split('_').reverse()) {
     if (item.length + charLength < maxChars) {
       result.push(item);
-      charLength += (item.length + 1);
+      charLength += item.length + 1;
     } else if (result.length === 0) {
       result.push(item);
     }

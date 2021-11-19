@@ -1,9 +1,9 @@
-import { OpenIdConfiguration, assertConfiguration } from './openIdConfiguration';
-import { OpenIdInformation, requestOpenIdInformation } from './openIdInformation';
-import { OpenIdFlow, OpenIdFlowContext } from './openIdFlow';
 import * as utils from '../../../utils';
-import open from 'open';
+import { OpenIdConfiguration, assertConfiguration } from './openIdConfiguration';
+import { OpenIdFlow, OpenIdFlowContext } from './openIdFlow';
 import { registerListener, unregisterListener } from './openIdHttpserver';
+import { OpenIdInformation, requestOpenIdInformation } from './openIdInformation';
+import open from 'open';
 
 class AuthorizationCodeFlow implements OpenIdFlow {
   supportsFlow(flow: string): boolean {
@@ -25,13 +25,15 @@ class AuthorizationCodeFlow implements OpenIdFlow {
         try {
           utils.report(context, 'execute OAuth2 authorization_code flow');
           const redirectUri = 'http://localhost:3000/callback';
-          const authUrl = `${config.authorizationEndpoint}${config.authorizationEndpoint.indexOf('?') > 0 ? '&' : '?'}${utils.toQueryParams({
+          const authUrl = `${config.authorizationEndpoint}${
+            config.authorizationEndpoint.indexOf('?') > 0 ? '&' : '?'
+          }${utils.toQueryParams({
             client_id: config.clientId,
             scope: config.scope || 'openid',
             response_type: 'code',
             state,
             audience: config.audience,
-            redirect_uri: redirectUri
+            redirect_uri: redirectUri,
           })}`;
 
           let unregisterProgress: (() => void) | undefined;
@@ -50,31 +52,35 @@ class AuthorizationCodeFlow implements OpenIdFlow {
                 if (unregisterProgress) {
                   unregisterProgress();
                 }
-                const openIdInformation = requestOpenIdInformation({
-                  url: config.tokenEndpoint,
-                  method: 'POST',
-                  body: utils.toQueryParams({
-                    grant_type: 'authorization_code',
-                    scope: config.scope,
-                    code: params.code,
-                    redirect_uri: redirectUri,
-                  })
-                }, {
-                  config,
-                  id,
-                  title: `authorization_code: ${config.clientId}`,
-                  description: `${config.variablePrefix} - ${config.tokenEndpoint}`,
-                  details: {
-                    clientId: config.clientId,
-                    tokenEndpoint: config.tokenEndpoint,
-                    grantType: 'authorization_code',
-                  }
-                }, context);
+                const openIdInformation = requestOpenIdInformation(
+                  {
+                    url: config.tokenEndpoint,
+                    method: 'POST',
+                    body: utils.toQueryParams({
+                      grant_type: 'authorization_code',
+                      scope: config.scope,
+                      code: params.code,
+                      redirect_uri: redirectUri,
+                    }),
+                  },
+                  {
+                    config,
+                    id,
+                    title: `authorization_code: ${config.clientId}`,
+                    description: `${config.variablePrefix} - ${config.tokenEndpoint}`,
+                    details: {
+                      clientId: config.clientId,
+                      tokenEndpoint: config.tokenEndpoint,
+                      grantType: 'authorization_code',
+                    },
+                  },
+                  context
+                );
                 resolve(openIdInformation);
                 return {
                   valid: true,
                   message: 'code received.',
-                  statusMessage: 'code and state valid. starting code exchange'
+                  statusMessage: 'code and state valid. starting code exchange',
                 };
               }
 
@@ -82,13 +88,13 @@ class AuthorizationCodeFlow implements OpenIdFlow {
                 return {
                   valid: false,
                   message: decodeURIComponent(params.error_description),
-                  statusMessage: 'no access_token received'
+                  statusMessage: 'no access_token received',
                 };
               }
               return {
                 valid: false,
                 message: 'no code received',
-                statusMessage: 'no code received'
+                statusMessage: 'no code received',
               };
             },
             reject,

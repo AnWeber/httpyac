@@ -3,6 +3,6 @@ export interface UserSession {
   title: string;
   description: string;
   type: string;
-  details: Record<string, unknown>,
+  details: Record<string, unknown>;
   delete?: () => void;
 }

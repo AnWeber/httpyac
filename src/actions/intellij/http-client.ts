@@ -10,7 +10,6 @@
  * values are not preserved after IDE restart.
  */
 export interface HttpClient {
-
   /**
    * Global variables defined in response handler scripts,
    * can be used as variables in HTTP Requests,
@@ -31,7 +30,7 @@ export interface HttpClient {
    * Creates test with name 'testName' and body 'func'.
    * All tests will be executed right after response handler script.
    */
-  test (testName: string, func: typeof Function): void;
+  test(testName: string, func: typeof Function): void;
 
   /**
    * Checks that condition is true and throw an exception otherwise.
@@ -50,7 +49,6 @@ export interface HttpClient {
  * Variables storage, can be used to define, undefine or retrieve variables.
  */
 export interface Variables {
-
   /**
    * Saves variable with name 'varName' and sets its value to 'varValue'.
    */
@@ -82,11 +80,10 @@ export interface Variables {
  * HTTP Response data object, contains information about response content, headers, status, etc.
  */
 export interface HttpResponse {
-
   /**
    * Response content, it is a string or JSON object if response content-type is json.
    */
-  body: string| unknown;
+  body: string | unknown;
 
   /**
    * Response headers storage.
@@ -108,7 +105,6 @@ export interface HttpResponse {
  * Headers storage, can be use to retrieve data about header value.
  */
 export interface ResponseHeaders {
-
   /**
    * Retrieves the first value of 'headerName' response header or null otherwise.
    */
@@ -124,7 +120,6 @@ export interface ResponseHeaders {
  * Content type data object, contains information from 'Content-Type' response header.
  */
 export interface ContentType {
-
   /**
    * MIME type of the response,
    * e.g. 'text/plain', 'text/xml', 'application/json'.

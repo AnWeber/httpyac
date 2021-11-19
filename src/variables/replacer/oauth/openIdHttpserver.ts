@@ -1,10 +1,10 @@
-import { createServer, Server } from 'http';
 import { log } from '../../../io';
+import { createServer, Server } from 'http';
 
-interface RequestListener{
+interface RequestListener {
   id: string;
   name: string;
-  resolve: (params: Record<string, string>) => { valid: boolean; message: string; statusMessage: string;};
+  resolve: (params: Record<string, string>) => { valid: boolean; message: string; statusMessage: string };
   reject: () => void;
 }
 
@@ -14,12 +14,12 @@ let server: Server | false;
 let serverTimeout: NodeJS.Timeout | false;
 let serverTimeoutTime = 0;
 
-export function registerListener(listener: RequestListener) : void {
+export function registerListener(listener: RequestListener): void {
   listeners.push(listener);
   initServer();
 }
 
-export function unregisterListener(id: string) : void {
+export function unregisterListener(id: string): void {
   const listenerIndex = listeners.findIndex(obj => obj.id === id);
   if (listenerIndex >= 0) {
     listeners.splice(listenerIndex, 1);
@@ -40,7 +40,7 @@ function clearServerTimeout() {
 function resetServer(seconds: number) {
   clearServerTimeout();
   const timeout = seconds * 1000;
-  serverTimeoutTime = (new Date().getTime()) + timeout;
+  serverTimeoutTime = new Date().getTime() + timeout;
   serverTimeout = setTimeout(() => closeServer(), timeout);
 }
 
@@ -95,11 +95,13 @@ function initServer(port = 3000) {
                   }
                 </script>
                 <noscript>
-                  ${getMessageHtml('Please enable javascript for redirect or replace fragment (#) with query (?)', false)}
+                  ${getMessageHtml(
+                    'Please enable javascript for redirect or replace fragment (#) with query (?)',
+                    false
+                  )}
                 </noscript>
               `);
               statusMessage = 'invalid state received';
-
             }
           } else if (req.url.startsWith('/reject')) {
             const listener = listeners.find(obj => obj.id === queryParams.id);
@@ -133,11 +135,14 @@ function initServer(port = 3000) {
 }
 
 function parseQueryParams(url: string) {
-  return url.slice(url.indexOf('?') + 1).split('&').reduce((prev, current) => {
-    const [key, value] = current.split('=');
-    prev[key] = value;
-    return prev;
-  }, {} as Record<string, string>);
+  return url
+    .slice(url.indexOf('?') + 1)
+    .split('&')
+    .reduce((prev, current) => {
+      const [key, value] = current.split('=');
+      prev[key] = value;
+      return prev;
+    }, {} as Record<string, string>);
 }
 
 function getMessageHtml(message: string, valid: boolean) {
@@ -146,26 +151,31 @@ function getMessageHtml(message: string, valid: boolean) {
   <h3 class="card__title">${valid ? 'success' : 'error'}</h3>
   <div class="card__message">${message}</div>
 </div>`;
-
 }
 
 function getServerStatus() {
   const lines = [];
   if (listeners.length > 0) {
-    lines.push(...listeners.map(obj => `
+    lines.push(
+      ...listeners.map(
+        obj => `
       <div class="card">
         <h3 class="card__title">open requests</h3>
         <div class="card__message">${obj.name}</div>
         <div class="card__actions">
           <a href="/reject?id=${obj.id}">remove</a>
         </div>
-      </div>`));
+      </div>`
+      )
+    );
   }
   if (serverTimeoutTime > 0) {
     lines.push(`
     <div class="card">
       <h3 class="card__title">Server Status</h3>
-      <div class="card__message">automatic shutdown in ${toTimeString(Math.floor((serverTimeoutTime - (new Date()).getTime()) / 1000))}</div>
+      <div class="card__message">automatic shutdown in ${toTimeString(
+        Math.floor((serverTimeoutTime - new Date().getTime()) / 1000)
+      )}</div>
       <div class="card__actions">
         <a href="/shutdown">shutdown</a>
       </div>

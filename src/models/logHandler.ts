@@ -1,7 +1,7 @@
 import { HttpRegion } from './httpRegion';
 import { HttpResponse } from './httpResponse';
 
-export enum LogLevel{
+export enum LogLevel {
   trace = 1,
   debug = 2,
   warn = 5,
@@ -12,9 +12,9 @@ export enum LogLevel{
 
 export interface LogHandler {
   readonly options: {
-    level?: LogLevel,
-    logMethod?: (level: LogLevel, ...params: unknown[]) => void,
-  }
+    level?: LogLevel;
+    logMethod?: (level: LogLevel, ...params: unknown[]) => void;
+  };
   info(...params: unknown[]): void;
   log(...params: unknown[]): void;
   trace(...params: unknown[]): void;
@@ -23,10 +23,10 @@ export interface LogHandler {
   warn(...params: unknown[]): void;
 }
 
-export interface ConsoleLogHandler extends LogHandler{
+export interface ConsoleLogHandler extends LogHandler {
   logTest(result: boolean, message: string): void;
   collectMessages(): void;
-  flush() : void;
+  flush(): void;
 }
 
 export type RequestLogger = (response: HttpResponse, httpRegion?: HttpRegion) => Promise<void>;

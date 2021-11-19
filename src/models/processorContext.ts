@@ -1,23 +1,23 @@
-import { ConsoleLogHandler, RequestLogger, StreamLogger } from './logHandler';
+import { EnvironmentConfig } from './environmentConfig';
 import { HttpClient } from './httpClient';
 import { HttpFile } from './httpFile';
 import { HttpRegion, ProcessedHttpRegion } from './httpRegion';
 import { Request } from './httpRequest';
+import { ConsoleLogHandler, RequestLogger, StreamLogger } from './logHandler';
 import { RepeatOptions } from './repeatOptions';
 import { Variables } from './variables';
-import { EnvironmentConfig } from './environmentConfig';
 
 export type Dispose = () => void;
 
-export interface Progress{
+export interface Progress {
   isCanceled: () => boolean;
-  register: (event: (() => void)) => Dispose;
-  report?: (value: { message?: string, increment?: number }) => void;
+  register: (event: () => void) => Dispose;
+  report?: (value: { message?: string; increment?: number }) => void;
 }
 
-export interface HttpFileSendContext{
+export interface HttpFileSendContext {
   httpFile: HttpFile;
-  config?: EnvironmentConfig,
+  config?: EnvironmentConfig;
   progress?: Progress;
   httpClient?: HttpClient;
   httpRegionPredicate?: (obj: HttpRegion) => boolean;
@@ -27,22 +27,22 @@ export interface HttpFileSendContext{
   logResponse?: RequestLogger;
   repeat?: RepeatOptions;
   variables?: Variables;
-  require?: Record<string, unknown>,
+  require?: Record<string, unknown>;
 }
 
-export interface HttpRegionsSendContext extends HttpFileSendContext{
+export interface HttpRegionsSendContext extends HttpFileSendContext {
   httpRegions: HttpRegion[];
 }
 
-export interface HttpRegionSendContext extends HttpFileSendContext{
+export interface HttpRegionSendContext extends HttpFileSendContext {
   httpRegion: HttpRegion;
 }
-export interface ProcessorContext extends HttpRegionSendContext{
+export interface ProcessorContext extends HttpRegionSendContext {
   httpClient: HttpClient;
   variables: Variables;
   request?: Request;
   showProgressBar?: boolean;
-  options: Record<string, unknown>
+  options: Record<string, unknown>;
 }
 
 export function isProcessorContext(context: unknown): context is ProcessorContext {

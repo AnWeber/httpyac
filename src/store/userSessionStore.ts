@@ -1,12 +1,11 @@
 import { UserSession, SessionStore, Dispose } from '../models';
 
 export class UserSessionStore implements SessionStore {
-
   readonly userSessions: Array<UserSession> = [];
 
   private readonly sessionChangedListener: Array<() => void> = [];
 
-  onSessionChanged(listener: () => void) : Dispose {
+  onSessionChanged(listener: () => void): Dispose {
     this.sessionChangedListener.push(listener);
 
     return () => {
@@ -17,7 +16,7 @@ export class UserSessionStore implements SessionStore {
     };
   }
 
-  async reset() : Promise<void> {
+  async reset(): Promise<void> {
     for (const userSession of this.userSessions) {
       if (userSession.delete) {
         userSession.delete();
@@ -27,11 +26,11 @@ export class UserSessionStore implements SessionStore {
     this.notifySessionChanged();
   }
 
-  getUserSession(id: string) : UserSession | undefined {
+  getUserSession(id: string): UserSession | undefined {
     return this.userSessions.find(obj => obj.id === id);
   }
 
-  setUserSession(userSession: UserSession) : void {
+  setUserSession(userSession: UserSession): void {
     this.removeUserSession(userSession.id);
     this.userSessions.push(userSession);
     this.notifySessionChanged();
@@ -43,7 +42,7 @@ export class UserSessionStore implements SessionStore {
     }
   }
 
-  removeUserSession(id: string) : void {
+  removeUserSession(id: string): void {
     const userSession = this.userSessions.find(obj => obj.id === id);
     if (userSession) {
       if (userSession.delete) {
@@ -56,12 +55,7 @@ export class UserSessionStore implements SessionStore {
 
   isUserSession(obj: unknown): obj is UserSession {
     const session = obj as UserSession;
-    return session
-      && !!session.description
-      && !!session.id
-      && !!session.title
-      && !!session.type
-      && !!session.details;
+    return session && !!session.description && !!session.id && !!session.title && !!session.type && !!session.details;
   }
 }
 

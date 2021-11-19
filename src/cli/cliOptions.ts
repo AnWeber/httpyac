@@ -1,27 +1,27 @@
-import arg from 'arg';
 import { RepeatOptions, RepeatOrder, LogLevel } from '../models';
+import arg from 'arg';
 
-export enum CliFilterOptions{
+export enum CliFilterOptions {
   onlyFailed = 'only-failed',
 }
 
 export interface CliOptions {
-  activeEnvironments?: Array<string>,
-  allRegions?: boolean,
+  activeEnvironments?: Array<string>;
+  allRegions?: boolean;
   bail?: boolean;
   editor?: boolean;
-  fileName?: string,
+  fileName?: string;
   filter?: string;
-  help?: boolean,
-  httpRegionLine?: number,
-  httpRegionName?: string,
-  interactive?: boolean,
+  help?: boolean;
+  httpRegionLine?: number;
+  httpRegionName?: string;
+  interactive?: boolean;
   json?: boolean;
-  output?: string,
-  outputFailed?: string,
-  raw?: boolean,
+  output?: string;
+  outputFailed?: string;
+  raw?: boolean;
   rejectUnauthorized?: boolean;
-  repeat?: RepeatOptions,
+  repeat?: RepeatOptions;
   requestTimeout?: number;
   silent?: boolean;
   variables?: Array<string>;
@@ -29,7 +29,7 @@ export interface CliOptions {
   version?: boolean;
 }
 
-export function getLogLevel(cliOptions: CliOptions) : LogLevel | undefined {
+export function getLogLevel(cliOptions: CliOptions): LogLevel | undefined {
   if (cliOptions.json) {
     return LogLevel.none;
   }
@@ -77,7 +77,7 @@ export function parseCliOptions(rawArgs: string[]): CliOptions | undefined {
         '-n': '--name',
         '-o': '--output',
         '-s': '--silent',
-        '-v': '--verbose'
+        '-v': '--verbose',
       },
       {
         argv: rawArgs.slice(2),
@@ -100,10 +100,12 @@ export function parseCliOptions(rawArgs: string[]): CliOptions | undefined {
       outputFailed: args['--output-failed'],
       raw: args['--raw'],
       rejectUnauthorized: args['--insecure'] !== undefined ? !args['--insecure'] : undefined,
-      repeat: args['--repeat'] ? {
-        count: args['--repeat'],
-        type: args['--repeat-mode'] === 'sequential' ? RepeatOrder.sequential : RepeatOrder.parallel,
-      } : undefined,
+      repeat: args['--repeat']
+        ? {
+            count: args['--repeat'],
+            type: args['--repeat-mode'] === 'sequential' ? RepeatOrder.sequential : RepeatOrder.parallel,
+          }
+        : undefined,
       requestTimeout: args['--timeout'],
       silent: args['--silent'],
       variables: args['--var'],
@@ -120,7 +122,7 @@ export function parseCliOptions(rawArgs: string[]): CliOptions | undefined {
   return undefined;
 }
 
-export function renderHelp() : void {
+export function renderHelp(): void {
   const helpMessage = `send http requests of .http or .rest
 
 usage: httpyac [options...] <file or glob pattern>

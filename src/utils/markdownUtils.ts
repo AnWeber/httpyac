@@ -1,28 +1,35 @@
-import { EOL } from 'os';
 import * as models from '../models';
-import { isString, toMultiLineArray } from './stringUtils';
 import * as mimeTypeUtils from './mimeTypeUtils';
+import { isString, toMultiLineArray } from './stringUtils';
+import { EOL } from 'os';
 
-export function toMarkdown(response: models.HttpResponse, options?: {
-  responseBody?: boolean,
-  requestBody?: boolean,
-  timings?: boolean,
-  meta?: boolean,
-  prettyPrint?: boolean;
-  testResults?: Array<models.TestResult>,
-}) : string {
+export function toMarkdown(
+  response: models.HttpResponse,
+  options?: {
+    responseBody?: boolean;
+    requestBody?: boolean;
+    timings?: boolean;
+    meta?: boolean;
+    prettyPrint?: boolean;
+    testResults?: Array<models.TestResult>;
+  }
+): string {
   const result: Array<string> = [];
 
   if (response.request) {
-    result.push(...toMarkdownRequest(response.request, {
-      body: !!options?.requestBody
-    }));
+    result.push(
+      ...toMarkdownRequest(response.request, {
+        body: !!options?.requestBody,
+      })
+    );
     result.push('');
   }
-  result.push(...toMarkdownResponse(response, {
-    prettyPrint: !!options?.prettyPrint,
-    body: !!options?.responseBody
-  }));
+  result.push(
+    ...toMarkdownResponse(response, {
+      prettyPrint: !!options?.prettyPrint,
+      body: !!options?.responseBody,
+    })
+  );
 
   if (options?.testResults) {
     result.push('');
@@ -45,12 +52,17 @@ export function toMarkdown(response: models.HttpResponse, options?: {
   return joinMarkdown(result);
 }
 
-export function toMarkdownResponse(response: models.HttpResponse, options?: {
-  prettyPrint?: boolean;
-  body?: boolean;
-}) : Array<string> {
+export function toMarkdownResponse(
+  response: models.HttpResponse,
+  options?: {
+    prettyPrint?: boolean;
+    body?: boolean;
+  }
+): Array<string> {
   const result: Array<string> = [];
-  result.push(`\`${response.protocol} ${response.statusCode}${response.statusMessage ? ` - ${response.statusMessage}` : ''}\``);
+  result.push(
+    `\`${response.protocol} ${response.statusCode}${response.statusMessage ? ` - ${response.statusMessage}` : ''}\``
+  );
   if (response.headers) {
     result.push(...toMarkdownHeader(response.headers));
   }
@@ -64,7 +76,7 @@ export function toMarkdownResponse(response: models.HttpResponse, options?: {
   return result;
 }
 
-export function getMarkdownSyntax(contentType: models.ContentType | undefined) : string {
+export function getMarkdownSyntax(contentType: models.ContentType | undefined): string {
   if (mimeTypeUtils.isMimeTypeJSON(contentType)) {
     return 'json';
   }
@@ -86,9 +98,12 @@ export function getMarkdownSyntax(contentType: models.ContentType | undefined) :
   return '';
 }
 
-export function toMarkdownRequest(request: models.Request, options?: {
-  body?: boolean;
-}) : Array<string> {
+export function toMarkdownRequest(
+  request: models.Request,
+  options?: {
+    body?: boolean;
+  }
+): Array<string> {
   const result: Array<string> = [];
   result.push(`\`${request.method} ${request.url}\``);
   if (request.headers) {
@@ -103,7 +118,7 @@ export function toMarkdownRequest(request: models.Request, options?: {
   return result;
 }
 
-export function toMarkdownTestResults(testResults: Array<models.TestResult>) : Array<string> {
+export function toMarkdownTestResults(testResults: Array<models.TestResult>): Array<string> {
   const result: Array<string> = [];
   result.push('`TestResults`');
   result.push('');
@@ -117,7 +132,7 @@ export function toMarkdownTestResults(testResults: Array<models.TestResult>) : A
   return result;
 }
 
-export function toMarkdownHeader(headers: Record<string, unknown>) : Array<string> {
+export function toMarkdownHeader(headers: Record<string, unknown>): Array<string> {
   return Object.entries(headers)
     .map(([key, value]) => {
       let val = value || '';
@@ -133,7 +148,7 @@ export function toMarkdownHeader(headers: Record<string, unknown>) : Array<strin
     .sort();
 }
 
-export function toMarkdownMeta(meta: Record<string, unknown>) : Array<string> {
+export function toMarkdownMeta(meta: Record<string, unknown>): Array<string> {
   const result: Array<string> = [];
   result.push('`Meta`');
   result.push('');
@@ -149,7 +164,7 @@ export function toMarkdownMeta(meta: Record<string, unknown>) : Array<string> {
   return result;
 }
 
-export function toMarkdownTimings(timings: models.HttpTimings) : Array<string> {
+export function toMarkdownTimings(timings: models.HttpTimings): Array<string> {
   const result: Array<string> = [];
 
   result.push('`Timings`');
@@ -181,6 +196,6 @@ export function toMarkdownTimings(timings: models.HttpTimings) : Array<string> {
   return result;
 }
 
-export function joinMarkdown(lines: string[]) : string {
+export function joinMarkdown(lines: string[]): string {
   return lines.join(`  ${EOL}`);
 }

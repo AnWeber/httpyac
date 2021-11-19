@@ -1,8 +1,8 @@
+import { log } from '../io';
 import * as models from '../models';
 import * as utils from '../utils';
-import { ParserRegex } from './parserRegex';
-import { log } from '../io';
 import * as metaData from './metaData';
+import { ParserRegex } from './parserRegex';
 
 export async function parseMetaData(
   getLineReader: models.getHttpLineGenerator,
@@ -43,7 +43,7 @@ export async function parseMetaData(
           startLine: next.value.line,
           startOffset: 0,
           endLine: next.value.line,
-          endOffset: textLine.length
+          endOffset: textLine.length,
         });
         data.metaTitle = delimiterMatch.groups?.title;
       } else {
@@ -65,37 +65,43 @@ export function parseComments(
 ): models.SymbolParserResult | false {
   if (metaRegex.test(httpLine.textLine)) {
     const result: models.SymbolParserResult = {
-      symbols: [{
-        name: 'comment',
-        description: httpLine.textLine,
-        kind: models.HttpSymbolKind.metaData,
-        startLine: httpLine.line,
-        startOffset: 0,
-        endLine: httpLine.line,
-        endOffset: httpLine.textLine.length
-      }]
+      symbols: [
+        {
+          name: 'comment',
+          description: httpLine.textLine,
+          kind: models.HttpSymbolKind.metaData,
+          startLine: httpLine.line,
+          startOffset: 0,
+          endLine: httpLine.line,
+          endOffset: httpLine.textLine.length,
+        },
+      ],
     };
     const match = ParserRegex.meta.data.exec(httpLine.textLine);
     if (match && match.groups && match.groups.key) {
       const key = match.groups.key.replace(/-./gu, value => value[1].toUpperCase());
-      result.symbols[0].children = [{
-        name: key,
-        description: match.groups.value || '-',
-        kind: models.HttpSymbolKind.metaData,
-        startLine: httpLine.line,
-        startOffset: 0,
-        endLine: httpLine.line,
-        endOffset: httpLine.textLine.length,
-        children: [{
+      result.symbols[0].children = [
+        {
           name: key,
-          description: knownMetaData.find(obj => obj.name === key)?.description || 'key of meta data',
-          kind: models.HttpSymbolKind.key,
+          description: match.groups.value || '-',
+          kind: models.HttpSymbolKind.metaData,
           startLine: httpLine.line,
-          startOffset: httpLine.textLine.indexOf(match.groups.key),
+          startOffset: 0,
           endLine: httpLine.line,
-          endOffset: httpLine.textLine.indexOf(match.groups.key) + match.groups.key.length,
-        }]
-      }];
+          endOffset: httpLine.textLine.length,
+          children: [
+            {
+              name: key,
+              description: knownMetaData.find(obj => obj.name === key)?.description || 'key of meta data',
+              kind: models.HttpSymbolKind.key,
+              startLine: httpLine.line,
+              startOffset: httpLine.textLine.indexOf(match.groups.key),
+              endLine: httpLine.line,
+              endOffset: httpLine.textLine.indexOf(match.groups.key) + match.groups.key.length,
+            },
+          ],
+        },
+      ];
       if (match.groups.value) {
         result.symbols[0].children.push({
           name: match.groups.value,
@@ -140,100 +146,126 @@ function isMarkdownRequest(context: models.ParserContext) {
 }
 
 export const knownMetaData: Array<{
-  name: string,
+  name: string;
   description: string;
-  completions?: Array<string>
+  completions?: Array<string>;
 }> = [
   {
     name: 'name',
-    description: 'responses of a requests with a name are automatically added as variables and can be reused by other requests',
-    completions: ['${1}']
-  }, {
+    description:
+      'responses of a requests with a name are automatically added as variables and can be reused by other requests',
+    completions: ['${1}'],
+  },
+  {
     name: 'debug',
     description: 'enable debug log level',
-  }, {
+  },
+  {
     name: 'description',
     description: 'additional description of region',
-    completions: ['${1}']
-  }, {
+    completions: ['${1}'],
+  },
+  {
     name: 'disabled',
     description: 'requests can be disabled',
-  }, {
+  },
+  {
     name: 'extension',
     description: 'extension of file for save or openWith.',
-    completions: ['${1}']
-  }, {
+    completions: ['${1}'],
+  },
+  {
     name: 'forceRef',
     description: 'When the request is called, it is ensured that the referenced request is always called beforehand',
-    completions: ['${1}']
-  }, {
+    completions: ['${1}'],
+  },
+  {
     name: 'import',
     description: 'reference Requests from other files.',
-    completions: ['${1}']
-  }, {
+    completions: ['${1}'],
+  },
+  {
     name: 'injectVariables',
     description: 'Inject Variables in request body (needed because of compatibility with Intellij).',
-  }, {
+  },
+  {
     name: 'jwt',
     description: 'supports auto decode of jwt token.',
-  }, {
+  },
+  {
     name: 'language',
     description: 'language id of the response view',
-    completions: ['${1}']
-  }, {
+    completions: ['${1}'],
+  },
+  {
     name: 'loop',
     description: 'allows multiple Invocations of a Request with different parameters.',
-    completions: ['for ${1} of ${2}', 'for ${1}', 'while ${1}']
-  }, {
+    completions: ['for ${1} of ${2}', 'for ${1}', 'while ${1}'],
+  },
+  {
     name: 'keepStreaming',
     description: 'keep streaming until the user session is ended manually',
-  }, {
+  },
+  {
     name: 'noLog',
     description: 'prevent logging of request data in output console',
-  }, {
+  },
+  {
     name: 'noCookieJar',
     description: 'cookieJar support is disabled for this request',
-  }, {
+  },
+  {
     name: 'noClientCert',
     description: 'SSL client certificate is not send for this request',
-  }, {
+  },
+  {
     name: 'noRejectUnauthorized',
     description: 'all invalid SSL certificates will be ignored and no error will be thrown.',
-  }, {
+  },
+  {
     name: 'noResponseView',
     description: 'prevent output in editor document.',
-  }, {
+  },
+  {
     name: 'noStreamingLog',
     description: 'prevent logging of streaming request data in output console',
-  }, {
+  },
+  {
     name: 'note',
     description: 'shows a confirmation dialog before sending request',
-    completions: ['${1}']
-  }, {
+    completions: ['${1}'],
+  },
+  {
     name: 'openWith',
     description: 'viewType of custom editor to preview files',
-    completions: ['${1}']
-  }, {
+    completions: ['${1}'],
+  },
+  {
     name: 'ref',
     description: 'When the request is called, it is ensured that the referenced request is called beforehand',
-    completions: ['${1}']
-  }, {
+    completions: ['${1}'],
+  },
+  {
     name: 'ratelimit',
     description: 'allows throttling requests',
-    completions: ['minIdleTime ${1}', 'max ${1} expire ${2}', 'minIdleTime ${1} max ${2} expire ${3}']
-  }, {
+    completions: ['minIdleTime ${1}', 'max ${1} expire ${2}', 'minIdleTime ${1} max ${2} expire ${3}'],
+  },
+  {
     name: 'save',
     description: 'If specified, the response will not be displayed but saved directly.',
-  }, {
+  },
+  {
     name: 'sleep',
     description: 'wait specified millisecondes, before next step.',
-    completions: ['${1}']
-  }, {
+    completions: ['${1}'],
+  },
+  {
     name: 'title',
     description: 'additional title of region',
-    completions: ['${1}']
-  }, {
+    completions: ['${1}'],
+  },
+  {
     name: 'verbose',
     description: 'enable trace log level',
-  }
+  },
 ];

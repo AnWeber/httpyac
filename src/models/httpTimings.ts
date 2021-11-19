@@ -1,4 +1,4 @@
-export interface HttpTimings{
+export interface HttpTimings {
   wait?: number;
   dns?: number;
   tcp?: number;

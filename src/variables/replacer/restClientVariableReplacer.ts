@@ -1,9 +1,9 @@
-import { v4 as uuidv4 } from 'uuid';
+import { ProcessorContext, VariableType } from '../../models';
+import { ParserRegex } from '../../parser';
+import { isString } from '../../utils';
 import dayjs, { OpUnitType } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { ProcessorContext, VariableType } from '../../models';
-import { isString } from '../../utils';
-import { ParserRegex } from '../../parser';
+import { v4 as uuidv4 } from 'uuid';
 
 dayjs.extend(utc);
 
@@ -36,7 +36,7 @@ export async function restClientVariableReplacer(
             max = min;
             min = temp;
           }
-          replacement = `${(Math.floor(Math.random() * (max - min)) + min)}`;
+          replacement = `${Math.floor(Math.random() * (max - min)) + min}`;
         }
       }
     } else if (trimmedVariable.startsWith('$timestamp')) {
@@ -50,9 +50,11 @@ export async function restClientVariableReplacer(
         }
         replacement = `${date.unix()}`;
       }
-
     } else if (trimmedVariable.startsWith('$datetime')) {
-      const valMatch = /^\$datetime\s(?<type>rfc1123|iso8601|'.+'|".+")(?:\s(?<offset>-?\d+)\s(?<option>y|Q|M|w|d|h|m|s|ms))?/u.exec(trimmedVariable);
+      const valMatch =
+        /^\$datetime\s(?<type>rfc1123|iso8601|'.+'|".+")(?:\s(?<offset>-?\d+)\s(?<option>y|Q|M|w|d|h|m|s|ms))?/u.exec(
+          trimmedVariable
+        );
       if (valMatch?.groups?.type) {
         let date = dayjs.utc();
         if (valMatch.groups?.offset && valMatch.groups?.option) {
@@ -68,7 +70,10 @@ export async function restClientVariableReplacer(
         }
       }
     } else if (trimmedVariable.startsWith('$localDatetime')) {
-      const valMatch = /^\$localDatetime\s(?<type>rfc1123|iso8601|'.+'|".+")(?:\s(?<offset>-?\d+)\s(?<option>y|Q|M|w|d|h|m|s|ms))?/u.exec(trimmedVariable);
+      const valMatch =
+        /^\$localDatetime\s(?<type>rfc1123|iso8601|'.+'|".+")(?:\s(?<offset>-?\d+)\s(?<option>y|Q|M|w|d|h|m|s|ms))?/u.exec(
+          trimmedVariable
+        );
       if (valMatch?.groups?.type) {
         let date = dayjs.utc().local();
         if (valMatch.groups?.offset && valMatch.groups?.option) {
@@ -94,5 +99,4 @@ export async function restClientVariableReplacer(
     }
   }
   return result;
-
 }

@@ -10,7 +10,7 @@ export async function attachDefaultHeaders(
     const defaultHeaders = context.config.defaultHeaders;
     if (!request.headers) {
       request.headers = {
-        ...defaultHeaders
+        ...defaultHeaders,
       };
     } else {
       for (const [key, value] of Object.entries(defaultHeaders)) {

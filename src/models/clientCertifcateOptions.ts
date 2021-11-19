@@ -1,6 +1,6 @@
 import { PathLike } from './pathLike';
 
-export interface ClientCertificateOptions{
+export interface ClientCertificateOptions {
   cert?: PathLike;
   key?: PathLike;
   pfx?: PathLike;

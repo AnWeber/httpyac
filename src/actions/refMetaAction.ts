@@ -1,7 +1,8 @@
-import * as utils from '../utils';
-import { ActionType, HttpRegionAction } from '../models';
-import { ImportProcessorContext } from './importMetaAction';
 import { log } from '../io';
+import { ActionType, HttpRegionAction } from '../models';
+import * as utils from '../utils';
+import { ImportProcessorContext } from './importMetaAction';
+
 export interface RefMetaHttpRegionData {
   name: string;
   force: boolean;
@@ -10,14 +11,16 @@ export interface RefMetaHttpRegionData {
 export class RefMetaAction implements HttpRegionAction {
   id = ActionType.ref;
 
-  constructor(private readonly data: RefMetaHttpRegionData) { }
+  constructor(private readonly data: RefMetaHttpRegionData) {}
 
   async process(context: ImportProcessorContext): Promise<boolean> {
     utils.report(context, `load reference ${this.data.name}`);
     for (const refHttpRegion of context.httpFile.httpRegions) {
-      if (refHttpRegion.metaData.name === this.data.name
-        && !refHttpRegion.metaData.disabled
-        && refHttpRegion !== context.httpRegion) {
+      if (
+        refHttpRegion.metaData.name === this.data.name &&
+        !refHttpRegion.metaData.disabled &&
+        refHttpRegion !== context.httpRegion
+      ) {
         const envkey = utils.toEnvironmentKey(context.httpFile.activeEnvironment);
         log.trace('import variables', refHttpRegion.variablesPerEnv[envkey]);
         Object.assign(context.variables, refHttpRegion.variablesPerEnv[envkey]);
@@ -35,7 +38,7 @@ export class RefMetaAction implements HttpRegionAction {
           options: {
             ...context.options,
           },
-          httpFile: refHttpFile
+          httpFile: refHttpFile,
         };
         delete cloneContext.options.httpFiles;
         await this.process(cloneContext);

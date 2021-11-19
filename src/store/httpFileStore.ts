@@ -1,22 +1,22 @@
-import * as models from '../models';
-import { initParseEndHook, initParseHook, parseHttpFile } from '../parser';
-import { fileProvider, log, userInteractionProvider } from '../io';
 import { initOnRequestHook, initOnResponseHook } from '../actions';
-import { userSessionStore as sessionStore } from '../store';
-import { replacer, provider } from '../variables';
-import * as utils from '../utils';
-import merge from 'lodash/merge';
-import { default as chalk } from 'chalk';
+import { fileProvider, log, userInteractionProvider } from '../io';
+import * as models from '../models';
 import { HookCancel } from '../models';
+import { initParseEndHook, initParseHook, parseHttpFile } from '../parser';
+import { userSessionStore as sessionStore } from '../store';
+import * as utils from '../utils';
+import { replacer, provider } from '../variables';
+import { default as chalk } from 'chalk';
+import merge from 'lodash/merge';
 
-interface HttpFileStoreEntry{
+interface HttpFileStoreEntry {
   version: number;
   cacheKey: string;
   httpFile?: models.HttpFile;
-  promise?: Promise<models.HttpFile>
+  promise?: Promise<models.HttpFile>;
 }
 
-export type HttpFileStoreOptions = Omit<models.ParseOptions, 'httpFileStore'>
+export type HttpFileStoreOptions = Omit<models.ParseOptions, 'httpFileStore'>;
 
 export class HttpFileStore {
   private readonly storeCache: Array<HttpFileStoreEntry> = [];
@@ -57,8 +57,7 @@ export class HttpFileStore {
   ): Promise<models.HttpFile> {
     const httpFileStoreEntry: HttpFileStoreEntry = this.getFromStore(fileName, version);
     if (version > httpFileStoreEntry.version || !httpFileStoreEntry.httpFile) {
-      if (httpFileStoreEntry.promise
-        && version <= httpFileStoreEntry.version) {
+      if (httpFileStoreEntry.promise && version <= httpFileStoreEntry.version) {
         return httpFileStoreEntry.promise;
       }
 
@@ -68,8 +67,9 @@ export class HttpFileStore {
           delete httpFileStoreEntry.promise;
           if (httpFileStoreEntry.httpFile) {
             for (const httpRegion of httpFile.httpRegions) {
-              const prevHttpRegion = httpFileStoreEntry.httpFile.httpRegions
-                .find(obj => obj.symbol.source === httpRegion.symbol.source);
+              const prevHttpRegion = httpFileStoreEntry.httpFile.httpRegions.find(
+                obj => obj.symbol.source === httpRegion.symbol.source
+              );
               if (prevHttpRegion) {
                 httpRegion.variablesPerEnv = prevHttpRegion.variablesPerEnv;
               }
@@ -105,7 +105,7 @@ export class HttpFileStore {
     }
   }
 
-  rename(oldFileName: models.PathLike, newFileName: models.PathLike) : void {
+  rename(oldFileName: models.PathLike, newFileName: models.PathLike): void {
     const oldCacheKey = fileProvider.toString(oldFileName);
     const httpFileStoreEntry = this.storeCache.find(obj => obj.cacheKey === oldCacheKey);
     if (httpFileStoreEntry) {
@@ -116,16 +116,20 @@ export class HttpFileStore {
     }
   }
 
-  clear() : void {
+  clear(): void {
     this.storeCache.length = 0;
   }
 
   private async initHttpFile(fileName: models.PathLike, options: HttpFileStoreOptions) {
+    const absoluteFileName = (await utils.toAbsoluteFilename(fileName, options.workingDir)) || fileName;
 
-    const absoluteFileName = await utils.toAbsoluteFilename(fileName, options.workingDir) || fileName;
-
-    const rootDir = await utils.findRootDirOfFile(absoluteFileName, options.workingDir,
-      'package.json', ...utils.defaultConfigFiles, options.config?.envDirName || 'env');
+    const rootDir = await utils.findRootDirOfFile(
+      absoluteFileName,
+      options.workingDir,
+      'package.json',
+      ...utils.defaultConfigFiles,
+      options.config?.envDirName || 'env'
+    );
 
     const httpFile: models.HttpFile = {
       fileName: absoluteFileName,
@@ -141,7 +145,7 @@ export class HttpFileStore {
         responseLogging: new models.ResponseLoggingHook(),
       },
       httpRegions: [],
-      activeEnvironment: options.activeEnvironment
+      activeEnvironment: options.activeEnvironment,
     };
 
     options.config = await getEnviromentConfig(options.config, httpFile.rootDir);
@@ -206,7 +210,7 @@ export async function getEnviromentConfig(
   config?: models.EnvironmentConfig,
   rootDir?: models.PathLike
 ): Promise<models.EnvironmentConfig> {
-  const environmentConfigs : Array<models.EnvironmentConfig> = [];
+  const environmentConfigs: Array<models.EnvironmentConfig> = [];
   if (rootDir) {
     const fileConfig = await utils.getHttpacConfig(rootDir);
     if (fileConfig) {
@@ -217,14 +221,17 @@ export async function getEnviromentConfig(
     environmentConfigs.push(config);
   }
 
-  const result = merge({
-    log: {
-      level: models.LogLevel.warn,
-      supportAnsiColors: true,
+  const result = merge(
+    {
+      log: {
+        level: models.LogLevel.warn,
+        supportAnsiColors: true,
+      },
+      cookieJarEnabled: true,
+      envDirName: 'env',
     },
-    cookieJarEnabled: true,
-    envDirName: 'env',
-  }, ...environmentConfigs);
+    ...environmentConfigs
+  );
 
   refreshStaticConfig(result);
   return result;

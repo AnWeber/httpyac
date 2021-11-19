@@ -1,21 +1,18 @@
-import { executeGlobalScripts, toAbsoluteFilename } from '../utils';
+import { fileProvider, log } from '../io';
 import { ActionType, HttpRegionAction, ProcessorContext, HttpFile } from '../models';
 import { HttpFileStore } from '../store';
-import { fileProvider, log } from '../io';
+import { executeGlobalScripts, toAbsoluteFilename } from '../utils';
 
-export interface ImportProcessorContext extends ProcessorContext{
+export interface ImportProcessorContext extends ProcessorContext {
   options: {
-    httpFiles?: Array<HttpFile>
-  }
+    httpFiles?: Array<HttpFile>;
+  };
 }
 
 export class ImportMetaAction implements HttpRegionAction {
   id = ActionType.import;
 
-  constructor(
-    private readonly fileName: string,
-    private readonly httpFileStore: HttpFileStore
-  ) { }
+  constructor(private readonly fileName: string, private readonly httpFileStore: HttpFileStore) {}
 
   async process(context: ImportProcessorContext): Promise<boolean> {
     const absoluteFileName = await toAbsoluteFilename(this.fileName, fileProvider.dirname(context.httpFile.fileName));

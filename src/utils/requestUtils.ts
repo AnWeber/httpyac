@@ -1,17 +1,39 @@
-import * as models from '../models';
-import { isString, toMultiLineString } from './stringUtils';
-import { isMimeTypeJSON, isMimeTypeXml, parseMimeType } from './mimeTypeUtils';
-import { default as chalk } from 'chalk';
 import { log } from '../io';
-import xmlFormat from 'xml-formatter';
+import * as models from '../models';
+import { isMimeTypeJSON, isMimeTypeXml, parseMimeType } from './mimeTypeUtils';
+import { isString, toMultiLineString } from './stringUtils';
+import { default as chalk } from 'chalk';
 import { TextDecoder } from 'util';
+import xmlFormat from 'xml-formatter';
 
 export function isHttpRequestMethod(method: string | undefined): method is models.HttpMethod {
   if (method) {
-    return ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS', 'CONNECT', 'TRACE',
-      'PROPFIND', 'PROPPATCH', 'MKCOL', 'COPY', 'MOVE', 'LOCK', 'UNLOCK', 'CHECKOUT', 'CHECKIN', 'REPORT', 'MERGE', 'MKACTIVITY', 'MKWORKSPACE', 'VERSION-CONTROL', 'BASELINE-CONTROL' // cal-dav
-    ]
-      .includes(method.toUpperCase());
+    return [
+      'GET',
+      'POST',
+      'PUT',
+      'DELETE',
+      'PATCH',
+      'HEAD',
+      'OPTIONS',
+      'CONNECT',
+      'TRACE',
+      'PROPFIND',
+      'PROPPATCH',
+      'MKCOL',
+      'COPY',
+      'MOVE',
+      'LOCK',
+      'UNLOCK',
+      'CHECKOUT',
+      'CHECKIN',
+      'REPORT',
+      'MERGE',
+      'MKACTIVITY',
+      'MKWORKSPACE',
+      'VERSION-CONTROL',
+      'BASELINE-CONTROL', // cal-dav
+    ].includes(method.toUpperCase());
   }
   return false;
 }
@@ -39,8 +61,7 @@ export function isGrpcRequest(request: models.Request | undefined): request is m
 export function deleteHeader(headers: Record<string, unknown> | undefined, ...headerNames: string[]): void {
   if (headers) {
     for (const headerName of headerNames) {
-      const entry = Object.entries(headers)
-        .find(([key]) => key.toLowerCase() === headerName.toLowerCase());
+      const entry = Object.entries(headers).find(([key]) => key.toLowerCase() === headerName.toLowerCase());
       if (entry && entry.length > 1) {
         delete headers[entry[0]];
       }
@@ -50,8 +71,7 @@ export function deleteHeader(headers: Record<string, unknown> | undefined, ...he
 
 export function getHeader<T>(headers: Record<string, T> | undefined, headerName: string): T | undefined {
   if (headers) {
-    const entry = Object.entries(headers)
-      .find(([key]) => key.toLowerCase() === headerName.toLowerCase());
+    const entry = Object.entries(headers).find(([key]) => key.toLowerCase() === headerName.toLowerCase());
     if (entry && entry.length > 1) {
       return entry[1];
     }
@@ -110,7 +130,7 @@ export function decodeJWT(str: string): JWTToken | null {
         return null;
     }
 
-    const result = (new TextDecoder()).decode(Buffer.from(payload, 'base64'));
+    const result = new TextDecoder().decode(Buffer.from(payload, 'base64'));
     return JSON.parse(result);
   } catch (err) {
     log.warn(err);
@@ -131,7 +151,7 @@ export interface RequestLoggerFactoryOptions {
   requestHeaders?: boolean;
   requestBodyLength?: number;
   responseHeaders?: boolean;
-  responseBodyPrettyPrint?: boolean,
+  responseBodyPrettyPrint?: boolean;
   responseBodyLength?: number;
   onlyFailed?: boolean;
 }
@@ -141,16 +161,13 @@ export function requestLoggerFactory(
   options: RequestLoggerFactoryOptions,
   optionsFailed?: RequestLoggerFactoryOptions
 ): models.RequestLogger {
-
   return async function logResponse(response: models.HttpResponse, httpRegion?: models.HttpRegion): Promise<void> {
-
     let opt = options;
     if (optionsFailed && httpRegion?.testResults && httpRegion.testResults.some(obj => !obj.result)) {
       opt = optionsFailed;
     }
 
-    if (opt.onlyFailed
-      && (!httpRegion?.testResults || httpRegion.testResults.every(obj => obj.result))) {
+    if (opt.onlyFailed && (!httpRegion?.testResults || httpRegion.testResults.every(obj => obj.result))) {
       return;
     }
 
@@ -168,15 +185,20 @@ export function requestLoggerFactory(
     }
     if (opt.useShort) {
       log(chalk`{yellow ${response.request?.method || 'GET'}} {gray ${response.request?.url || '?'}}`);
-      log(chalk`{gray =>} {cyan.bold ${response.statusCode}} ({yellow ${response.timings?.total || '?'} ms}, {yellow ${response.meta?.size || '?'}})`);
+      log(
+        chalk`{gray =>} {cyan.bold ${response.statusCode}} ({yellow ${response.timings?.total || '?'} ms}, {yellow ${
+          response.meta?.size || '?'
+        }})`
+      );
     } else {
-
       const result: Array<string> = [];
       if (response.request && opt.requestOutput) {
-        result.push(...logRequest(response.request, {
-          headers: opt.requestHeaders,
-          bodyLength: opt.requestBodyLength,
-        }));
+        result.push(
+          ...logRequest(response.request, {
+            headers: opt.requestHeaders,
+            bodyLength: opt.requestBodyLength,
+          })
+        );
       }
 
       if (opt.responseHeaders) {
@@ -213,16 +235,21 @@ function getPartOfBody(body: string, length: number) {
   return result;
 }
 
-function logRequest(request: models.Request, options: {
-  headers?: boolean,
-  bodyLength?: number,
-}) {
+function logRequest(
+  request: models.Request,
+  options: {
+    headers?: boolean;
+    bodyLength?: number;
+  }
+) {
   const result: Array<string> = [];
   result.push(chalk`{cyan.bold ${request.method} ${request.url}}`);
   if (request.headers && options.headers) {
-    result.push(...Object.entries(request.headers)
-      .map(([key, value]) => chalk`{yellow ${key}}: ${value}`)
-      .sort());
+    result.push(
+      ...Object.entries(request.headers)
+        .map(([key, value]) => chalk`{yellow ${key}}: ${value}`)
+        .sort()
+    );
   }
   if (isHttpRequest(request) && (request.https?.certificate || request.https?.pfx)) {
     result.push(chalk`{yellow client-cert}: true`);
@@ -236,12 +263,18 @@ function logRequest(request: models.Request, options: {
 
 function logResponseHeader(response: models.HttpResponse) {
   const result: Array<string> = [];
-  result.push(chalk`{cyan.bold ${response.protocol}} {cyan.bold ${response.statusCode}} {bold ${response.statusMessage ? ` - ${response.statusMessage}` : ''}}`);
+  result.push(
+    chalk`{cyan.bold ${response.protocol}} {cyan.bold ${response.statusCode}} {bold ${
+      response.statusMessage ? ` - ${response.statusMessage}` : ''
+    }}`
+  );
   if (response.headers) {
-    result.push(...Object.entries(response.headers)
-      .filter(([key]) => !key.startsWith(':'))
-      .map(([key, value]) => chalk`{yellow ${key}}: ${value}`)
-      .sort());
+    result.push(
+      ...Object.entries(response.headers)
+        .filter(([key]) => !key.startsWith(':'))
+        .map(([key, value]) => chalk`{yellow ${key}}: ${value}`)
+        .sort()
+    );
   }
   return result;
 }
@@ -270,8 +303,7 @@ export function cloneResponse(response: models.HttpResponse): models.HttpRespons
 }
 
 export function setAdditionalResponseBody(httpResponse: models.HttpResponse, context?: models.ProcessorContext): void {
-  if (isString(httpResponse.body)
-    && httpResponse.body.length > 0) {
+  if (isString(httpResponse.body) && httpResponse.body.length > 0) {
     const requestPrettyPrintBodyMaxSize = context?.config?.requestPrettyPrintBodyMaxSize || 1000000;
     if (isMimeTypeJSON(httpResponse.contentType)) {
       try {
@@ -284,9 +316,11 @@ export function setAdditionalResponseBody(httpResponse: models.HttpResponse, con
       } catch (err) {
         log.warn('json parse error', httpResponse.body, err);
       }
-    } else if (isMimeTypeXml(httpResponse.contentType)
-      && !httpResponse.prettyPrintBody
-      && httpResponse.body.length < requestPrettyPrintBodyMaxSize) {
+    } else if (
+      isMimeTypeXml(httpResponse.contentType) &&
+      !httpResponse.prettyPrintBody &&
+      httpResponse.body.length < requestPrettyPrintBodyMaxSize
+    ) {
       try {
         httpResponse.prettyPrintBody = xmlFormat(httpResponse.body, {
           collapseContent: true,
@@ -304,22 +338,25 @@ export async function triggerRequestResponseHooks(
   context: models.ProcessorContext
 ): Promise<boolean> {
   try {
-    if (context.request
-      && await context.httpFile.hooks.onRequest.trigger(context.request, context) === models.HookCancel) {
+    if (
+      context.request &&
+      (await context.httpFile.hooks.onRequest.trigger(context.request, context)) === models.HookCancel
+    ) {
       return false;
     }
-    if (context.request
-      && await context.httpRegion.hooks.onRequest.trigger(context.request, context) === models.HookCancel) {
+    if (
+      context.request &&
+      (await context.httpRegion.hooks.onRequest.trigger(context.request, context)) === models.HookCancel
+    ) {
       return false;
     }
 
     const response = await method();
     if (response) {
-
-      if (await context.httpRegion.hooks.onResponse.trigger(response, context) === models.HookCancel) {
+      if ((await context.httpRegion.hooks.onResponse.trigger(response, context)) === models.HookCancel) {
         return false;
       }
-      if (await context.httpFile.hooks.onResponse.trigger(response, context) === models.HookCancel) {
+      if ((await context.httpFile.hooks.onResponse.trigger(response, context)) === models.HookCancel) {
         return false;
       }
 
@@ -330,5 +367,4 @@ export async function triggerRequestResponseHooks(
     log.error(context.request?.url, context.request, err);
     throw err;
   }
-
 }

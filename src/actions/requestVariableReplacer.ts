@@ -7,7 +7,7 @@ export async function requestVariableReplacer(
 ): Promise<models.Request | typeof models.HookCancel> {
   utils.report(context, 'replace variables in request');
   if (request.url) {
-    const result = await utils.replaceVariables(request.url, models.VariableType.url, context) || request.url;
+    const result = (await utils.replaceVariables(request.url, models.VariableType.url, context)) || request.url;
     if (result === models.HookCancel) {
       return models.HookCancel;
     }
@@ -15,10 +15,10 @@ export async function requestVariableReplacer(
       request.url = result;
     }
   }
-  if (await replaceVariablesInBody(request, context) === false) {
+  if ((await replaceVariablesInBody(request, context)) === false) {
     return models.HookCancel;
   }
-  if (await replaceVariablesInHeader(request, context) === false) {
+  if ((await replaceVariablesInHeader(request, context)) === false) {
     return models.HookCancel;
   }
   return request;
@@ -58,7 +58,7 @@ async function replaceVariablesInBody(
   return true;
 }
 
-async function replaceVariablesInHeader(request: models.Request, context: models.ProcessorContext) : Promise<boolean> {
+async function replaceVariablesInHeader(request: models.Request, context: models.ProcessorContext): Promise<boolean> {
   if (request.headers) {
     for (const [headerName, headerValue] of Object.entries(request.headers)) {
       if (Array.isArray(headerValue)) {

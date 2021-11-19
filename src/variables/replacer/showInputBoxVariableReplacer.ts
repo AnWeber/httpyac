@@ -1,7 +1,7 @@
-import { HookCancel } from '../../models';
 import { userInteractionProvider } from '../../io';
-import { isString } from '../../utils';
+import { HookCancel } from '../../models';
 import { ParserRegex } from '../../parser';
+import { isString } from '../../utils';
 
 const lastValue: Record<string, string> = {};
 
@@ -16,7 +16,6 @@ export async function showInputBoxVariableReplacer(text: unknown): Promise<unkno
 
     const matchInput = /^\$input\s*(?<placeholder>[^$]*)(\$value:\s*(?<value>.*))?\s*$/u.exec(variable);
     if (matchInput?.groups?.placeholder) {
-
       const placeholder = matchInput.groups.placeholder;
 
       const answer = await userInteractionProvider.showInputPrompt(

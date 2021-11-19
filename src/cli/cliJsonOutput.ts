@@ -3,10 +3,10 @@ import { CliFilterOptions, CliOptions } from './cliOptions';
 
 export interface CliJsonOutput {
   _meta: {
-    version: string,
-  },
-  summary: CliRequestSummary & CliTestSummary,
-  requests: Array<CliOutputRequest>,
+    version: string;
+  };
+  summary: CliRequestSummary & CliTestSummary;
+  requests: Array<CliOutputRequest>;
 }
 
 export interface CliOutputRequest {
@@ -15,9 +15,9 @@ export interface CliOutputRequest {
   title?: string;
   description?: string;
   line?: number;
-  summary: CliTestSummary,
-  response: HttpResponse | undefined,
-  testResults?: Array<TestResult>
+  summary: CliTestSummary;
+  response: HttpResponse | undefined;
+  testResults?: Array<TestResult>;
 }
 
 export interface CliRequestSummary {
@@ -39,28 +39,29 @@ function sum(x: number, y: number) {
 export function toCliJsonOutput(context: Record<string, Array<HttpRegion>>, options: CliOptions): CliJsonOutput {
   const requests: Array<CliOutputRequest> = [];
   for (const [fileName, httpRegions] of Object.entries(context)) {
-    requests.push(...httpRegions.map(httpRegion => {
-      let output = options.output;
-      if (options.outputFailed && httpRegion.testResults?.some?.(test => !test.result)) {
-        output = options.outputFailed;
-      }
-      const result: CliOutputRequest = {
-        fileName,
-        response: convertResponse(httpRegion.response, output),
-        name: httpRegion.metaData?.name,
-        title: httpRegion.metaData?.title,
-        description: httpRegion.metaData?.description,
-        line: httpRegion.symbol.startLine,
-        testResults: httpRegion.testResults,
-        summary: {
-          totalTests: httpRegion.testResults?.length || 0,
-          failedTests: httpRegion.testResults?.filter?.(obj => !obj.result).length || 0,
-          successTests: httpRegion.testResults?.filter?.(obj => !!obj.result).length || 0,
+    requests.push(
+      ...httpRegions.map(httpRegion => {
+        let output = options.output;
+        if (options.outputFailed && httpRegion.testResults?.some?.(test => !test.result)) {
+          output = options.outputFailed;
         }
-      };
-      return result;
-    }));
-
+        const result: CliOutputRequest = {
+          fileName,
+          response: convertResponse(httpRegion.response, output),
+          name: httpRegion.metaData?.name,
+          title: httpRegion.metaData?.title,
+          description: httpRegion.metaData?.description,
+          line: httpRegion.symbol.startLine,
+          testResults: httpRegion.testResults,
+          summary: {
+            totalTests: httpRegion.testResults?.length || 0,
+            failedTests: httpRegion.testResults?.filter?.(obj => !obj.result).length || 0,
+            successTests: httpRegion.testResults?.filter?.(obj => !!obj.result).length || 0,
+          },
+        };
+        return result;
+      })
+    );
   }
   let resultRequests = requests;
   if (options.filter === CliFilterOptions.onlyFailed) {
@@ -78,7 +79,7 @@ export function toCliJsonOutput(context: Record<string, Array<HttpRegion>>, opti
       totalTests: requests.map(obj => obj.summary.totalTests).reduce(sum, 0),
       failedTests: requests.map(obj => obj.summary.failedTests).reduce(sum, 0),
       successTests: requests.map(obj => obj.summary.successTests).reduce(sum, 0),
-    }
+    },
   };
 }
 

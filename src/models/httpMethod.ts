@@ -1,4 +1,5 @@
-export type HttpMethod = 'GET'
+export type HttpMethod =
+  | 'GET'
   | 'POST'
   | 'PUT'
   | 'PATCH'

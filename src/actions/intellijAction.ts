@@ -1,17 +1,16 @@
+import { fileProvider, userInteractionProvider, log } from '../io';
 import * as models from '../models';
 import * as utils from '../utils';
-import { fileProvider, userInteractionProvider, log } from '../io';
-
 import * as intellij from './intellij';
 
-export interface IntellijScriptData{
+export interface IntellijScriptData {
   fileName: string;
 }
 
 export class IntellijAction implements models.HttpRegionAction {
   id = models.ActionType.intellij;
 
-  constructor(private readonly scriptData: models.ScriptData | IntellijScriptData) { }
+  constructor(private readonly scriptData: models.ScriptData | IntellijScriptData) {}
 
   async process(context: models.ProcessorContext): Promise<boolean> {
     const intellijVars = initIntellijVariables(context);
@@ -24,7 +23,7 @@ export class IntellijAction implements models.HttpRegionAction {
       }
       data = {
         script,
-        lineOffset: 0
+        lineOffset: 0,
       };
     } else {
       data = this.scriptData;
@@ -37,7 +36,7 @@ export class IntellijAction implements models.HttpRegionAction {
         console: context.scriptConsole,
         ...intellijVars,
       },
-      lineOffset: data.lineOffset
+      lineOffset: data.lineOffset,
     });
     return true;
   }

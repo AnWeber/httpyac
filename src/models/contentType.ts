@@ -1,4 +1,4 @@
-export interface ContentType{
+export interface ContentType {
   mimeType: string;
   contentType: string;
   charset?: string | undefined;

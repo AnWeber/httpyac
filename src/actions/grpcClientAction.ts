@@ -1,7 +1,7 @@
-import * as models from '../models';
 import { log } from '../io';
-import * as utils from '../utils';
+import * as models from '../models';
 import { ParserRegex, ProtoProcessorContext } from '../parser';
+import * as utils from '../utils';
 import * as grpc from '@grpc/grpc-js';
 import { Readable, Writable, Duplex } from 'stream';
 
@@ -28,8 +28,7 @@ export class GrpcClientAction implements models.HttpRegionAction {
           utils.report(context, `reqeust gRPC ${request.url}`);
           const serviceData = this.getService(request.url, protoDefinitions);
           if (serviceData.ServiceClass) {
-
-            const client = (new serviceData.ServiceClass(serviceData.server, this.getChannelCredentials(request)));
+            const client = new serviceData.ServiceClass(serviceData.server, this.getChannelCredentials(request));
             const method = client[serviceData.method]?.bind?.(client);
             if (method) {
               return await this.requestGrpc(method, serviceData.methodDefinition, request, context);
@@ -42,25 +41,26 @@ export class GrpcClientAction implements models.HttpRegionAction {
     return false;
   }
 
-  private async requestGrpc(method: (...args: unknown[]) => (Readable | Writable | Duplex),
+  private async requestGrpc(
+    method: (...args: unknown[]) => Readable | Writable | Duplex,
     methodDefinition: grpc.MethodDefinition<unknown, unknown>,
     request: models.GrpcRequest,
-    context: models.ProcessorContext): Promise<models.HttpResponse> {
+    context: models.ProcessorContext
+  ): Promise<models.HttpResponse> {
     const data = this.getData(request);
     const metaData = this.getMetaData(request);
 
     const startTime = new Date().getTime();
     return await new Promise<models.HttpResponse>((resolve, reject) => {
-      const args: Array<unknown> = [
-        metaData,
-      ];
+      const args: Array<unknown> = [metaData];
 
       let disposeCancellation: models.Dispose | undefined;
       let responseMetaData: Record<string, unknown> = {};
       const grpcActions: Array<(stream: GrpcStream) => void> = [
-        stream => stream.on('metadata', (metaData: grpc.Metadata) => {
-          responseMetaData = metaData.getMap();
-        }),
+        stream =>
+          stream.on('metadata', (metaData: grpc.Metadata) => {
+            responseMetaData = metaData.getMap();
+          }),
         stream => {
           if (context.progress) {
             disposeCancellation = context.progress.register(() => {
@@ -70,12 +70,12 @@ export class GrpcClientAction implements models.HttpRegionAction {
         },
       ];
 
-      const getResponseTemplate: (() => Partial<models.HttpResponse>) = () => ({
+      const getResponseTemplate: () => Partial<models.HttpResponse> = () => ({
         headers: responseMetaData,
         request,
         timings: {
           total: new Date().getTime() - startTime,
-        }
+        },
       });
 
       const streamResolve = (response: models.HttpResponse) => {
@@ -92,12 +92,9 @@ export class GrpcClientAction implements models.HttpRegionAction {
       }
 
       if (methodDefinition?.responseStream) {
-        grpcActions.push(...this.getResponseStreamActions(
-          methodDefinition.path,
-          streamResolve,
-          getResponseTemplate,
-          context
-        ));
+        grpcActions.push(
+          ...this.getResponseStreamActions(methodDefinition.path, streamResolve, getResponseTemplate, context)
+        );
       } else {
         args.push((err: Error, data: unknown) => {
           streamResolve(this.toHttpResponse(err || data, getResponseTemplate()));
@@ -116,18 +113,19 @@ export class GrpcClientAction implements models.HttpRegionAction {
   ): Array<GrpcStreamAction> {
     return [
       stream => {
-        if (data && stream instanceof Writable || stream instanceof Duplex) {
+        if ((data && stream instanceof Writable) || stream instanceof Duplex) {
           stream.write(data);
         }
       },
       stream => {
         if (stream instanceof Writable || stream instanceof Duplex) {
           utils.setVariableInContext({ grpcStream: stream }, context);
-          context.httpRegion.hooks.onStreaming.trigger(context)
+          context.httpRegion.hooks.onStreaming
+            .trigger(context)
             .then(() => stream.end())
             .catch(err => reject(err));
         }
-      }
+      },
     ];
   }
 
@@ -151,21 +149,23 @@ export class GrpcClientAction implements models.HttpRegionAction {
       }
     };
     return [
-      stream => stream.on('data', chunk => {
-        log.debug('GRPC data', chunk);
-        mergedData.push(chunk);
-        if (!context.httpRegion.metaData.noStreamingLog) {
-          if (context.logStream) {
-            loadingPromises.push(context.logStream('gRPC', methodName, chunk));
-          } else {
-            loadingPromises.push(utils.logResponse(this.toHttpResponse(chunk, getResponseTemplate()), context));
+      stream =>
+        stream.on('data', chunk => {
+          log.debug('GRPC data', chunk);
+          mergedData.push(chunk);
+          if (!context.httpRegion.metaData.noStreamingLog) {
+            if (context.logStream) {
+              loadingPromises.push(context.logStream('gRPC', methodName, chunk));
+            } else {
+              loadingPromises.push(utils.logResponse(this.toHttpResponse(chunk, getResponseTemplate()), context));
+            }
           }
-        }
-      }),
-      stream => stream.on('error', err => {
-        log.debug('GRPC error', err);
-        mergedData.push(err);
-      }),
+        }),
+      stream =>
+        stream.on('error', err => {
+          log.debug('GRPC error', err);
+          mergedData.push(err);
+        }),
       stream => stream.on('end', resolveStreamFactory('end')),
       stream => stream.on('close', resolveStreamFactory('close')),
     ];
@@ -183,7 +183,8 @@ export class GrpcClientAction implements models.HttpRegionAction {
 
   private getChannelCredentials(request: models.GrpcRequest): grpc.ChannelCredentials {
     if (request.headers) {
-      const channelCredentials = utils.getHeader(request.headers, 'channelcredentials') || utils.getHeader(request.headers, 'authorization');
+      const channelCredentials =
+        utils.getHeader(request.headers, 'channelcredentials') || utils.getHeader(request.headers, 'authorization');
       if (channelCredentials instanceof grpc.ChannelCredentials) {
         return channelCredentials;
       }
@@ -221,16 +222,18 @@ export class GrpcClientAction implements models.HttpRegionAction {
         }
       }
       if (typeof ServiceClass === 'function') {
-        const methodDefinition = ServiceClass.service[method] || Object.entries(ServiceClass.service)
-          .filter(([key]) => key.toLowerCase() === method.toLowerCase())
-          .map(([, value]) => value)
-          .pop();
+        const methodDefinition =
+          ServiceClass.service[method] ||
+          Object.entries(ServiceClass.service)
+            .filter(([key]) => key.toLowerCase() === method.toLowerCase())
+            .map(([, value]) => value)
+            .pop();
         return {
           server,
           service,
           method,
           ServiceClass,
-          methodDefinition
+          methodDefinition,
         };
       }
       log.error(`Service ${service} does not exist. Available Services`, ...Object.keys(flatServices));
@@ -284,7 +287,7 @@ export class GrpcClientAction implements models.HttpRegionAction {
       contentType: {
         mimeType: 'application/grpc+json',
         charset: 'UTF-8',
-        contentType: 'application/grpc+json; charset=utf-8'
+        contentType: 'application/grpc+json; charset=utf-8',
       },
     };
     if (this.isGrpcError(data)) {

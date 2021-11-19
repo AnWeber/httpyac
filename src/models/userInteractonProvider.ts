@@ -1,7 +1,7 @@
-export interface UserInteractonProvider{
+export interface UserInteractonProvider {
   showNote: (note: string) => Promise<boolean>;
-  showInputPrompt: (message: string, defaultValue?: string) => Promise<string | undefined>,
-  showListPrompt: (message: string, values: string[]) => Promise<string | undefined>,
+  showInputPrompt: (message: string, defaultValue?: string) => Promise<string | undefined>;
+  showListPrompt: (message: string, values: string[]) => Promise<string | undefined>;
 
   setClipboard?: (message: string) => Promise<void>;
   getClipboard?: () => Promise<string>;

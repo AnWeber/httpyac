@@ -1,12 +1,12 @@
 import { initHttpClient, log } from './io';
 import * as models from './models';
-import * as utils from './utils';
 import { getEnviromentConfig } from './store';
+import * as utils from './utils';
 
 /**
-   * process one httpRegion of HttpFile
-   * @param httpFile httpFile
-   */
+ * process one httpRegion of HttpFile
+ * @param httpFile httpFile
+ */
 export async function send(context: models.SendContext): Promise<boolean> {
   let result = false;
   if (utils.isHttpRegionSendContext(context)) {
@@ -38,7 +38,7 @@ async function sendHttpRegions(context: models.HttpRegionsSendContext): Promise<
           ...processorContext,
           httpRegion,
         };
-        if (!await utils.processHttpRegionActions(regionProcessorContext, false)) {
+        if (!(await utils.processHttpRegionActions(regionProcessorContext, false))) {
           return false;
         }
       }
@@ -68,30 +68,30 @@ async function sendHttpFile(context: models.HttpFileSendContext): Promise<boolea
   return true;
 }
 
-async function createEmptyProcessorContext<T extends models.VariableProviderContext>(context: T): Promise<T & {
-  variables: models.Variables,
-  httpClient: models.HttpClient,
-  options: Record<string, unknown>
-}> {
+async function createEmptyProcessorContext<T extends models.VariableProviderContext>(
+  context: T
+): Promise<
+  T & {
+    variables: models.Variables;
+    httpClient: models.HttpClient;
+    options: Record<string, unknown>;
+  }
+> {
   return Object.assign(context, {
     variables: await getVariables(context),
     httpClient: initHttpClient(context),
-    options: {}
+    options: {},
   });
 }
 
 export async function getVariables(context: models.VariableProviderContext): Promise<Record<string, unknown>> {
   context.config = await getEnviromentConfig(context.config, context.httpFile?.rootDir);
 
-  const vars = (await context.httpFile.hooks.provideVariables.trigger(context.httpFile.activeEnvironment, context));
+  const vars = await context.httpFile.hooks.provideVariables.trigger(context.httpFile.activeEnvironment, context);
   if (vars === models.HookCancel) {
     return {};
   }
-  const variables = Object.assign(
-    {},
-    ...vars,
-    context.variables
-  );
+  const variables = Object.assign({}, ...vars, context.variables);
   log.debug(variables);
   return variables;
 }
@@ -99,16 +99,18 @@ export async function getVariables(context: models.VariableProviderContext): Pro
 export async function getEnvironments(context: models.VariableProviderContext): Promise<Array<string>> {
   context.config = await getEnviromentConfig(context.config, context.httpFile?.rootDir);
 
-  const result = (await context.httpFile.hooks.provideEnvironments.trigger(context));
+  const result = await context.httpFile.hooks.provideEnvironments.trigger(context);
   if (result !== models.HookCancel && result.length > 0) {
-    return result.reduce((prev, current) => {
-      for (const cur of current) {
-        if (prev.indexOf(cur) < 0) {
-          prev.push(cur);
+    return result
+      .reduce((prev, current) => {
+        for (const cur of current) {
+          if (prev.indexOf(cur) < 0) {
+            prev.push(cur);
+          }
         }
-      }
-      return prev;
-    }, [] as Array<string>).sort();
+        return prev;
+      }, [] as Array<string>)
+      .sort();
   }
   return [];
 }

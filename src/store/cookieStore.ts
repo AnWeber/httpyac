@@ -1,7 +1,7 @@
-import { Cookie, MemoryCookieStore } from 'tough-cookie';
 import { log } from '../io';
 import * as models from '../models';
 import { toEnvironmentKey } from '../utils';
+import { Cookie, MemoryCookieStore } from 'tough-cookie';
 
 interface CookieStoreEntry {
   id: string;
@@ -15,7 +15,7 @@ class CookieStore {
     return `Cookies_${toEnvironmentKey(httpFile.activeEnvironment)}_${httpFile.rootDir?.toString?.() || 'none'}`;
   }
 
-  getCookieStoreEntry(httpFile: models.HttpFile) : CookieStoreEntry {
+  getCookieStoreEntry(httpFile: models.HttpFile): CookieStoreEntry {
     const id = this.getCookieStoreId(httpFile);
     let result = this.storeCache.find(obj => obj.id === id);
     if (!result) {
@@ -62,7 +62,6 @@ class CookieStore {
         });
       }
     }
-
   }
 }
 

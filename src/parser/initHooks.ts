@@ -1,25 +1,23 @@
 import * as models from '../models';
-
+import { registerCancelExecutionIntercepter } from './cancelExecutionInterceptor';
 import { parseComment } from './commentHttpRegionParser';
 import { parseEventSource } from './eventSourceHttpRegionParser';
 import { parseGraphql } from './gqlHttpRegionParser';
+import { parseGrpcLine } from './grpcHttpRegionParser';
 import { parseIntellijScript } from './intellijHttpRegionParser';
 import { parseJavascript } from './javascriptHttpRegionParser';
+import { injectOnEveryRequestJavascript } from './javascriptHttpRegionParser';
 import { parseMetaData } from './metaHttpRegionParser';
+import { parseMQTTLine } from './mqtttHttpRegionParser';
+import { injectNote } from './noteMetaHttpRegionParser';
+import { parseOutputRedirection } from './outputRedirectionHttpRegionParser';
+import { parseProtoImport } from './protoHttpRegionParser';
 import { parseRequestBody, closeRequestBody } from './requestBodyHttpRegionParser';
 import { parseRequestLine } from './requestHttpRegionParser';
 import { parseResponse, closeResponseBody } from './responseHttpRegionParser';
 import { parseResponseRef } from './responseRefHttpRegionParser';
-import { parseOutputRedirection } from './outputRedirectionHttpRegionParser';
 import { parseVariable } from './variableHttpRegionParser';
-import { parseProtoImport } from './protoHttpRegionParser';
-import { parseGrpcLine } from './grpcHttpRegionParser';
 import { parseWebsocketLine } from './websocketHttpRegionParser';
-import { parseMQTTLine } from './mqtttHttpRegionParser';
-
-import { injectOnEveryRequestJavascript } from './javascriptHttpRegionParser';
-import { injectNote } from './noteMetaHttpRegionParser';
-import { registerCancelExecutionIntercepter } from './cancelExecutionInterceptor';
 
 export enum ParserId {
   meta = 'meta',

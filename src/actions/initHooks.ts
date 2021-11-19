@@ -1,9 +1,9 @@
-import { setAdditionalResponseBody } from '../utils';
 import * as models from '../models';
+import { setAdditionalResponseBody } from '../utils';
 import { attachDefaultHeaders } from './envDefaultsHeaderAction';
 import { requestVariableReplacer } from './requestVariableReplacer';
-import { transformRequestBody } from './transformRequestBodyAction';
 import { responseAsVariable } from './responseAsVariableAction';
+import { transformRequestBody } from './transformRequestBodyAction';
 
 export function initOnRequestHook(): models.OnRequestHook {
   const hook = new models.OnRequestHook();

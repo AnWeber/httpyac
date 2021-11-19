@@ -1,10 +1,10 @@
-import { OpenIdConfiguration, assertConfiguration } from './openIdConfiguration';
-import { OpenIdInformation, toOpenIdInformation, requestOpenIdInformation } from './openIdInformation';
-import { OpenIdFlow, OpenIdFlowContext } from './openIdFlow';
-import * as utils from '../../../utils';
-import open from 'open';
-import { registerListener, unregisterListener } from './openIdHttpserver';
 import { log } from '../../../io';
+import * as utils from '../../../utils';
+import { OpenIdConfiguration, assertConfiguration } from './openIdConfiguration';
+import { OpenIdFlow, OpenIdFlowContext } from './openIdFlow';
+import { registerListener, unregisterListener } from './openIdHttpserver';
+import { OpenIdInformation, toOpenIdInformation, requestOpenIdInformation } from './openIdInformation';
+import open from 'open';
 
 class ImplicitFlow implements OpenIdFlow {
   supportsFlow(flow: string): boolean {
@@ -26,7 +26,9 @@ class ImplicitFlow implements OpenIdFlow {
         const state = utils.stateGenerator();
         try {
           const redirectUri = 'http://localhost:3000/callback';
-          const authUrl = `${config.authorizationEndpoint}${config.authorizationEndpoint.indexOf('?') > 0 ? '&' : '?'}${utils.toQueryParams({
+          const authUrl = `${config.authorizationEndpoint}${
+            config.authorizationEndpoint.indexOf('?') > 0 ? '&' : '?'
+          }${utils.toQueryParams({
             client_id: config.clientId,
             scope: config.scope || 'openid',
             response_type: config.responseType || 'token',
@@ -34,7 +36,7 @@ class ImplicitFlow implements OpenIdFlow {
             state,
             response_mode: config.responseMode,
             audience: config.audience,
-            redirect_uri: redirectUri
+            redirect_uri: redirectUri,
           })}`;
 
           let unregisterProgress: (() => void) | undefined;
@@ -50,40 +52,43 @@ class ImplicitFlow implements OpenIdFlow {
             name: `authorization for ${config.clientId}: ${config.authorizationEndpoint}`,
             resolve: params => {
               if (params.state === state) {
-
                 if (params.code) {
-                  const openIdInformation = requestOpenIdInformation({
-                    url: config.tokenEndpoint,
-                    method: 'POST',
-                    body: utils.toQueryParams({
-                      grant_type: 'authorization_code',
-                      scope: config.scope,
-                      code: params.code,
-                      redirect_uri: redirectUri
-                    })
-                  }, {
-                    config,
-                    id,
-                    title: `implicit: ${config.clientId}`,
-                    description: `${config.variablePrefix} - ${config.tokenEndpoint}`,
-                    details: {
-                      clientId: config.clientId,
-                      tokenEndpoint: config.tokenEndpoint,
-                      grantType: 'implicit',
-                    }
-                  }, context);
+                  const openIdInformation = requestOpenIdInformation(
+                    {
+                      url: config.tokenEndpoint,
+                      method: 'POST',
+                      body: utils.toQueryParams({
+                        grant_type: 'authorization_code',
+                        scope: config.scope,
+                        code: params.code,
+                        redirect_uri: redirectUri,
+                      }),
+                    },
+                    {
+                      config,
+                      id,
+                      title: `implicit: ${config.clientId}`,
+                      description: `${config.variablePrefix} - ${config.tokenEndpoint}`,
+                      details: {
+                        clientId: config.clientId,
+                        tokenEndpoint: config.tokenEndpoint,
+                        grantType: 'implicit',
+                      },
+                    },
+                    context
+                  );
                   resolve(openIdInformation);
                   return {
                     valid: true,
                     message: 'code received.',
-                    statusMessage: 'code valid. starting code exchange'
+                    statusMessage: 'code valid. starting code exchange',
                   };
                 }
                 if (params.access_token) {
                   if (unregisterProgress) {
                     unregisterProgress();
                   }
-                  const openIdInformation = toOpenIdInformation(params, (new Date()).getTime(), {
+                  const openIdInformation = toOpenIdInformation(params, new Date().getTime(), {
                     config,
                     id,
                     title: `implicit: ${config.clientId}`,
@@ -92,13 +97,13 @@ class ImplicitFlow implements OpenIdFlow {
                       clientId: config.clientId,
                       tokenEndpoint: config.tokenEndpoint,
                       grantType: 'implicit',
-                    }
+                    },
                   });
                   resolve(openIdInformation);
                   return {
                     valid: true,
                     message: 'access_token received.',
-                    statusMessage: 'access_token and state valid.'
+                    statusMessage: 'access_token and state valid.',
                   };
                 }
               }
@@ -107,13 +112,13 @@ class ImplicitFlow implements OpenIdFlow {
                 return {
                   valid: false,
                   message: decodeURIComponent(params.error_description),
-                  statusMessage: 'no access_token received'
+                  statusMessage: 'no access_token received',
                 };
               }
               return {
                 valid: false,
                 message: 'no access_token received',
-                statusMessage: 'no access_token received'
+                statusMessage: 'no access_token received',
               };
             },
             reject,

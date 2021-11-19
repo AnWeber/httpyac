@@ -3,7 +3,7 @@ export const testSymbols = {
   error: '✖',
 };
 
-export interface TestFunction{
+export interface TestFunction {
   (message: string, testMethod: () => void): void;
   status(status: number): void;
   header(headerKey: string, val: string | string[] | undefined): void;

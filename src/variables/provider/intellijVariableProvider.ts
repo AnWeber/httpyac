@@ -6,30 +6,29 @@ const defaultFiles: Array<string> = ['http-client.env.json', 'http-client.privat
 
 export async function provideIntellijEnvironments(context: VariableProviderContext): Promise<string[]> {
   const environments = await getAllEnvironmentVariables(context);
-  return environments
-    .reduce((prev, current) => {
-      for (const [env] of Object.entries(current)) {
-        prev.push(env);
-      }
-      return prev;
-    }, [] as Array<string>);
+  return environments.reduce((prev, current) => {
+    for (const [env] of Object.entries(current)) {
+      prev.push(env);
+    }
+    return prev;
+  }, [] as Array<string>);
 }
 
 async function getAllEnvironmentVariables(context: VariableProviderContext) {
   const environments: Array<Record<string, Variables>> = [];
 
   if (context.httpFile.rootDir) {
-    environments.push(...await getEnvironmentVariables(context.httpFile.rootDir));
+    environments.push(...(await getEnvironmentVariables(context.httpFile.rootDir)));
   }
   if (context.config?.envDirName) {
     const absolute = await toAbsoluteFilename(context.config.envDirName, context.httpFile.rootDir);
     if (absolute) {
-      environments.push(...await getEnvironmentVariables(absolute));
+      environments.push(...(await getEnvironmentVariables(absolute)));
     }
   }
   const dirOfFile = fileProvider.dirname(context.httpFile.fileName);
   if (dirOfFile) {
-    environments.push(...await getEnvironmentVariables(dirOfFile));
+    environments.push(...(await getEnvironmentVariables(dirOfFile)));
   }
   return environments;
 }
@@ -42,9 +41,7 @@ export async function provideIntellijVariables(
   const variables: Array<Variables> = [];
   if (envs) {
     for (const env of envs) {
-      variables.push(...environments
-        .filter(obj => !!obj[env])
-        .map(obj => obj[env]));
+      variables.push(...environments.filter(obj => !!obj[env]).map(obj => obj[env]));
     }
   }
   return expandVariables(Object.assign({}, ...variables));

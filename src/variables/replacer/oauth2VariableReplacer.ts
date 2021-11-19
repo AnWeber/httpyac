@@ -1,15 +1,11 @@
-import { ProcessorContext, HttpClient, UserSession, HookCancel } from '../../models';
-import { userSessionStore } from '../../store';
-import * as oauth from './oauth';
-import { ParserRegex } from '../../parser';
 import { log } from '../../io';
+import { ProcessorContext, HttpClient, UserSession, HookCancel } from '../../models';
+import { ParserRegex } from '../../parser';
+import { userSessionStore } from '../../store';
 import * as utils from '../../utils';
+import * as oauth from './oauth';
 
-export async function oauth2VariableReplacer(
-  text: unknown,
-  type: string,
-  context: ProcessorContext
-): Promise<unknown> {
+export async function oauth2VariableReplacer(text: unknown, type: string, context: ProcessorContext): Promise<unknown> {
   if (type.toLowerCase() === 'authorization' && utils.isString(text)) {
     const match = ParserRegex.auth.oauth2.exec(text);
     if (match && match.groups) {
@@ -75,7 +71,7 @@ function getOpenIdFlow(flowType: string) {
     oauth.clientCredentialsFlow,
     oauth.deviceCodeFlow,
     oauth.passwordFlow,
-    oauth.implicitFlow
+    oauth.implicitFlow,
   ];
   return openIdFlows.find(flow => flow.supportsFlow(flowType));
 }

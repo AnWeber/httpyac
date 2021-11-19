@@ -3,7 +3,7 @@ import { isString } from '../../utils';
 import {
   HttpResponse as JetbrainsHttpResponse,
   ContentType as JetbrainsContentType,
-  ResponseHeaders as JetbrainsResponseHeaders
+  ResponseHeaders as JetbrainsResponseHeaders,
 } from './http-client';
 
 export class IntellijHttpResponse implements JetbrainsHttpResponse {
@@ -17,14 +17,13 @@ export class IntellijHttpResponse implements JetbrainsHttpResponse {
     this.status = response.statusCode;
     this.contentType = {
       mimeType: response.contentType?.mimeType || 'application/octet-stream',
-      charset: response.contentType?.charset || 'utf-8'
+      charset: response.contentType?.charset || 'utf-8',
     };
     this.headers = new IntellijHeaders(response.headers);
   }
 }
 
 export class IntellijHeaders implements JetbrainsResponseHeaders {
-
   constructor(private readonly headers: Record<string, unknown> | undefined) {}
 
   valueOf(headerName: string): string | null {
@@ -45,5 +44,4 @@ export class IntellijHeaders implements JetbrainsResponseHeaders {
     }
     return [];
   }
-
 }

@@ -11,14 +11,13 @@ export function keepStreamingMetaDataHandler(type: string, _value: string | unde
           type: 'Stream',
           title: `${context.request.method} ${context.request.url}`,
           description: 'Pending Stream',
-          details: context.request.headers || {}
+          details: context.request.headers || {},
         };
         utils.report(context, 'stream until manual cancellation');
         await new Promise(resolve => {
           userSessionStore.setUserSession(streamSession);
           streamSession.delete = () => resolve(true);
         });
-
       }
     });
     context.httpRegion.hooks.onResponse.addHook('keepStreaming', (_response, context) => {

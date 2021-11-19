@@ -23,8 +23,8 @@ export interface HookInterceptor<T, TReturn> {
 export interface HookTriggerContext<T, TReturn> {
   index: number;
   length: number;
-  arg: T
-  hookItem?: HookItem<T, TReturn>
+  arg: T;
+  hookItem?: HookItem<T, TReturn>;
 }
 
 export abstract class Hook<T, TReturn, TTriggerResult, TArg = undefined, TArg2 = undefined> {
@@ -54,7 +54,7 @@ export abstract class Hook<T, TReturn, TTriggerResult, TArg = undefined, TArg2 =
     const item = {
       id,
       action,
-      ...options
+      ...options,
     };
     if (item.before) {
       const index = Math.min(...this.getIndeces(item.before));
@@ -74,13 +74,11 @@ export abstract class Hook<T, TReturn, TTriggerResult, TArg = undefined, TArg2 =
   }
 
   private getIndeces(ids: Array<string>) {
-    return ids
-      .map(before => this.items.findIndex(obj => obj.id === before))
-      .filter(obj => obj >= 0);
+    return ids.map(before => this.items.findIndex(obj => obj.id === before)).filter(obj => obj >= 0);
   }
 
   addObjHook<TObj extends BaseHookItem>(
-    getAction: (obj: TObj) => ((arg: T, arg1?: TArg, arg2?: TArg2) => Promise<TReturn | typeof HookCancel>),
+    getAction: (obj: TObj) => (arg: T, arg1?: TArg, arg2?: TArg2) => Promise<TReturn | typeof HookCancel>,
     ...objs: TObj[]
   ): void {
     for (const obj of objs) {
@@ -114,7 +112,7 @@ export abstract class Hook<T, TReturn, TTriggerResult, TArg = undefined, TArg2 =
     const context: HookTriggerContext<T, TReturn> = {
       index: 0,
       length: this.items.length,
-      arg
+      arg,
     };
 
     if ((await this.intercept(obj => obj.beforeLoop, context)) === false) {
@@ -125,7 +123,6 @@ export abstract class Hook<T, TReturn, TTriggerResult, TArg = undefined, TArg2 =
       context.hookItem = this.items[context.index];
       log.trace(`${this.id}: ${context.hookItem.id} started`);
       try {
-
         if ((await this.intercept(obj => obj.beforeTrigger, context)) === false) {
           return HookCancel;
         }
@@ -179,8 +176,13 @@ export abstract class Hook<T, TReturn, TTriggerResult, TArg = undefined, TArg2 =
   protected abstract getMergedResults(results: TReturn[], arg: T): TTriggerResult;
 }
 
-export class SeriesHook<T, TReturn, TBail = void, TArg = undefined, TArg2 = undefined>
-  extends Hook<T, TReturn | TBail, Array<TReturn>, TArg, TArg2> {
+export class SeriesHook<T, TReturn, TBail = void, TArg = undefined, TArg2 = undefined> extends Hook<
+  T,
+  TReturn | TBail,
+  Array<TReturn>,
+  TArg,
+  TArg2
+> {
   constructor(bailOut?: ((arg: TReturn | TBail) => boolean) | undefined) {
     super(bailOut);
   }
@@ -193,8 +195,13 @@ export class SeriesHook<T, TReturn, TBail = void, TArg = undefined, TArg2 = unde
   }
 }
 
-export class BailSeriesHook<T, TReturn, TBail = void, TArg = undefined, TArg2 = undefined>
-  extends Hook<T, TReturn | TBail, TReturn | undefined, TArg, TArg2> {
+export class BailSeriesHook<T, TReturn, TBail = void, TArg = undefined, TArg2 = undefined> extends Hook<
+  T,
+  TReturn | TBail,
+  TReturn | undefined,
+  TArg,
+  TArg2
+> {
   constructor(bailOut?: ((arg: TReturn | TBail | undefined) => boolean) | undefined) {
     super(bailOut);
   }
@@ -207,8 +214,13 @@ export class BailSeriesHook<T, TReturn, TBail = void, TArg = undefined, TArg2 = 
   }
 }
 
-export class WaterfallHook<T, TBail = T, TArg = undefined, TArg2 = undefined>
-  extends Hook<T, T | TBail, T | TBail, TArg, TArg2> {
+export class WaterfallHook<T, TBail = T, TArg = undefined, TArg2 = undefined> extends Hook<
+  T,
+  T | TBail,
+  T | TBail,
+  TArg,
+  TArg2
+> {
   constructor(bailOut?: ((arg: T | TBail) => boolean) | undefined) {
     super(bailOut);
   }

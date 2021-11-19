@@ -5,7 +5,7 @@ import { HttpSymbol } from './httpSymbol';
 import { TestResult } from './testResult';
 import { Variables } from './variables';
 
-export interface ProcessedHttpRegion{
+export interface ProcessedHttpRegion {
   request?: Request;
   response?: HttpResponse;
   symbol: HttpSymbol;
@@ -14,13 +14,13 @@ export interface ProcessedHttpRegion{
   responseRefs?: Array<string>;
 }
 
-export interface HttpRegion extends ProcessedHttpRegion{
+export interface HttpRegion extends ProcessedHttpRegion {
   variablesPerEnv: Record<string, Variables>;
   hooks: {
     execute: ExecuteHook;
-    onRequest: OnRequestHook,
+    onRequest: OnRequestHook;
     onStreaming: OnStreaming;
-    onResponse: OnResponseHook,
-    responseLogging: ResponseLoggingHook,
-  }
+    onResponse: OnResponseHook;
+    responseLogging: ResponseLoggingHook;
+  };
 }

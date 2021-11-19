@@ -15,8 +15,9 @@ export function getDisplayName(httpRegion?: models.HttpRegion, defaultName = 'gl
       if (indexQuery < 0) {
         indexQuery = httpRegion.request.url.length;
       }
-      const line = httpRegion.symbol.children
-        ?.find?.(obj => obj.kind === models.HttpSymbolKind.requestLine)?.startLine || httpRegion.symbol.startLine;
+      const line =
+        httpRegion.symbol.children?.find?.(obj => obj.kind === models.HttpSymbolKind.requestLine)?.startLine ||
+        httpRegion.symbol.startLine;
       return `${httpRegion.request.method} ${httpRegion.request.url.slice(0, indexQuery)} (line: ${line + 1})`;
     }
   }
@@ -78,24 +79,15 @@ function initRegionScopedVariables(context: models.ProcessorContext) {
     httpRegions = context.httpFile.httpRegions.filter(obj => isGlobalHttpRegion(obj));
   }
 
-  const variables = Object.assign(
-    {},
-    context.variables,
-    ...httpRegions.map(obj => obj.variablesPerEnv[env])
-  );
+  const variables = Object.assign({}, context.variables, ...httpRegions.map(obj => obj.variablesPerEnv[env]));
 
   if (context.config?.useRegionScopedVariables) {
     Object.assign(
       variables,
-      ...context.httpFile.httpRegions.filter(obj => isGlobalHttpRegion(obj))
-        .map(obj => obj.variablesPerEnv[env])
+      ...context.httpFile.httpRegions.filter(obj => isGlobalHttpRegion(obj)).map(obj => obj.variablesPerEnv[env])
     );
   } else {
-    Object.assign(
-      variables,
-      ...context.httpFile.httpRegions
-        .map(obj => obj.variablesPerEnv[env])
-    );
+    Object.assign(variables, ...context.httpFile.httpRegions.map(obj => obj.variablesPerEnv[env]));
   }
   return variables;
 }
@@ -122,9 +114,7 @@ export async function logResponse(
     if (regionResult === models.HookCancel) {
       return undefined;
     }
-    if (!context.httpRegion.metaData.noLog
-      && clone
-      && context.logResponse) {
+    if (!context.httpRegion.metaData.noLog && clone && context.logResponse) {
       await context.logResponse(clone, context.httpRegion);
     }
     return clone;
@@ -133,17 +123,19 @@ export async function logResponse(
 }
 
 export async function executeGlobalScripts(context: {
-  variables: models.Variables,
-  httpClient: models.HttpClient,
-  httpFile: models.HttpFile,
-  options: Record<string, unknown>
+  variables: models.Variables;
+  httpClient: models.HttpClient;
+  httpFile: models.HttpFile;
+  options: Record<string, unknown>;
 }): Promise<boolean> {
   for (const httpRegion of context.httpFile.httpRegions) {
     if (isGlobalHttpRegion(httpRegion) && !httpRegion.metaData.disabled) {
-      if (!await processHttpRegionActions({
-        ...context,
-        httpRegion,
-      })) {
+      if (
+        !(await processHttpRegionActions({
+          ...context,
+          httpRegion,
+        }))
+      ) {
         return false;
       }
     }
@@ -165,7 +157,7 @@ export function toProcessedHttpRegion(context: models.ProcessorContext): models.
   };
 }
 
-export function isGlobalHttpRegion(httpRegion: models.HttpRegion) : boolean {
+export function isGlobalHttpRegion(httpRegion: models.HttpRegion): boolean {
   return !(httpRegion.request || httpRegion.metaData.name);
 }
 

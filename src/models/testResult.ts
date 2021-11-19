@@ -1,4 +1,4 @@
-export interface ErrorDescription{
+export interface ErrorDescription {
   error: Error;
   displayMessage: string;
   errorType?: string;
@@ -8,7 +8,7 @@ export interface ErrorDescription{
   offset?: string;
 }
 
-export interface TestResult{
+export interface TestResult {
   message: string;
   result: boolean;
   error?: ErrorDescription;

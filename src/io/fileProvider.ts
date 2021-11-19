@@ -26,7 +26,7 @@ export const fileProvider: FileProvider = {
     throw new Error('Not Implemented');
   },
   fsPath: toString,
-  toString
+  toString,
 };
 
 function toString(fileName: PathLike): string {

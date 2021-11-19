@@ -6,7 +6,7 @@ export function testFactory({ httpRegion, scriptConsole }: ProcessorContext): Te
   const testFunction = function test(message: string, testMethod: () => void): void {
     const testResult: TestResult = {
       message,
-      result: true
+      result: true,
     };
     if (!httpRegion.testResults) {
       httpRegion.testResults = [];
@@ -22,7 +22,7 @@ export function testFactory({ httpRegion, scriptConsole }: ProcessorContext): Te
         } else {
           testResult.error = {
             displayMessage: `${err}`,
-            error: new Error(`${err}`)
+            error: new Error(`${err}`),
           };
         }
       }
@@ -31,7 +31,9 @@ export function testFactory({ httpRegion, scriptConsole }: ProcessorContext): Te
 
     scriptConsole?.logTest?.(
       testResult.result,
-      testResult.result ? chalk`{green ${testSymbols.ok} ${testResult.message || 'Test passed'}}` : chalk`{red ${testSymbols.error} ${testResult.message || 'Test failed'} (${testResult.error?.displayMessage})}`
+      testResult.result
+        ? chalk`{green ${testSymbols.ok} ${testResult.message || 'Test passed'}}`
+        : chalk`{red ${testSymbols.error} ${testResult.message || 'Test failed'} (${testResult.error?.displayMessage})}`
     );
   };
 

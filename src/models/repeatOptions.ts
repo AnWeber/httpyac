@@ -1,9 +1,9 @@
-export enum RepeatOrder{
+export enum RepeatOrder {
   sequential,
   parallel,
 }
 
-export interface RepeatOptions{
+export interface RepeatOptions {
   type: RepeatOrder;
   count: number;
 }

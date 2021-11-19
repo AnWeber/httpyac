@@ -1,8 +1,8 @@
+import { fileProvider } from '../../io';
 import * as models from '../../models';
+import { ParserRegex } from '../../parser';
 import { toAbsoluteFilename, isString, isHttpRequest } from '../../utils';
 import { URL } from 'url';
-import { ParserRegex } from '../../parser';
-import { fileProvider } from '../../io';
 
 export async function clientCertVariableReplacer(
   text: unknown,
@@ -22,12 +22,16 @@ export async function clientCertVariableReplacer(
     } else if (type.toLowerCase().endsWith('clientcert')) {
       const match = ParserRegex.auth.clientCert.exec(text);
       if (match?.groups?.cert || match?.groups?.pfx) {
-        await setClientCertificateOptions(request, {
-          cert: match.groups.cert,
-          key: match.groups.key,
-          pfx: match.groups.pfx,
-          passphrase: match.groups.passphrase,
-        }, httpFile);
+        await setClientCertificateOptions(
+          request,
+          {
+            cert: match.groups.cert,
+            key: match.groups.key,
+            pfx: match.groups.pfx,
+            passphrase: match.groups.passphrase,
+          },
+          httpFile
+        );
         return undefined;
       }
     }
@@ -53,7 +57,7 @@ async function setClientCertificateOptions(
     certificate: await resolveFile(clientCertifcateOptions.cert, dir),
     key: await resolveFile(clientCertifcateOptions.key, dir),
     pfx: await resolveFile(clientCertifcateOptions.pfx, dir),
-    passphrase: clientCertifcateOptions.passphrase
+    passphrase: clientCertifcateOptions.passphrase,
   });
 }
 

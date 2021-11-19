@@ -7,23 +7,19 @@ import { ProcessorContext } from './processorContext';
 import { VariableProviderContext } from './variableProviderContext';
 import { Variables } from './variables';
 
-export interface HttpFileHooks{
-  readonly parse: ParseHook,
-  readonly parseEndRegion: ParseEndRegionHook,
+export interface HttpFileHooks {
+  readonly parse: ParseHook;
+  readonly parseEndRegion: ParseEndRegionHook;
   readonly replaceVariable: ReplaceVariableHook;
   readonly provideEnvironments: ProvideEnvironmentsHook;
   readonly provideVariables: ProvideVariablesHook;
 
   readonly onRequest: OnRequestHook;
-  readonly onResponse: OnResponseHook,
-  readonly responseLogging: ResponseLoggingHook,
+  readonly onResponse: OnResponseHook;
+  readonly responseLogging: ResponseLoggingHook;
 }
 
-export class ParseHook extends BailSeriesHook<getHttpLineGenerator,
-  HttpRegionParserResult,
-  false,
-  ParserContext
-> {
+export class ParseHook extends BailSeriesHook<getHttpLineGenerator, HttpRegionParserResult, false, ParserContext> {
   constructor() {
     super(obj => !!obj);
     this.id = 'ParseHook';

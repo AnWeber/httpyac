@@ -1,8 +1,8 @@
 import * as models from '../models';
+
 import cloneDeep = require('lodash/cloneDeep');
 
 export class CreateRequestInterceptor implements models.HookInterceptor<models.ProcessorContext, boolean | void> {
-
   async beforeTrigger(
     context: models.HookTriggerContext<models.ProcessorContext, boolean | undefined>
   ): Promise<boolean | undefined> {

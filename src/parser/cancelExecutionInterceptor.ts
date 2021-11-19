@@ -2,7 +2,6 @@ import { log } from '../io';
 import * as models from '../models';
 
 export function registerCancelExecutionIntercepter(parserContext: models.ParserContext) {
-
   parserContext.httpRegion.hooks.execute.addInterceptor({
     beforeLoop: async function checkUserCancelation(
       context: models.HookTriggerContext<models.ProcessorContext, boolean>
@@ -12,7 +11,6 @@ export function registerCancelExecutionIntercepter(parserContext: models.ParserC
         return false;
       }
       return true;
-    }
+    },
   });
-
 }

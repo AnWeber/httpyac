@@ -1,8 +1,8 @@
-import { ok } from 'assert';
 import { ProcessorContext } from '../../models';
 import { testFactory } from '../testMethod';
 import { HttpClient as JetbrainsHttpClient, Variables as JetbrainsVariables } from './http-client';
 import { IntellijVariables } from './intellijVariables';
+import { ok } from 'assert';
 
 export class IntellijHttpClient implements JetbrainsHttpClient {
   global: JetbrainsVariables;
@@ -12,7 +12,7 @@ export class IntellijHttpClient implements JetbrainsHttpClient {
   test(testName: string, func: () => void): void {
     testFactory(this.context)(testName, func);
   }
-  assert(condition: boolean, message?: string) : void {
+  assert(condition: boolean, message?: string): void {
     ok(condition, message);
   }
   log(text: string): void {

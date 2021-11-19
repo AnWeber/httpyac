@@ -8,16 +8,18 @@ export async function transformRequestBody(request: models.Request): Promise<mod
       if (utils.isMimeTypeFormUrlEncoded(request.contentType)) {
         request.body = encodeUrl(request.body);
       }
-    } else if (Array.isArray(request.body)
-      && request.body.some(obj => typeof obj === 'function')
-      && request.body.every(obj => ['function', 'string'].indexOf(typeof obj) >= 0)) {
+    } else if (
+      Array.isArray(request.body) &&
+      request.body.some(obj => typeof obj === 'function') &&
+      request.body.every(obj => ['function', 'string'].indexOf(typeof obj) >= 0)
+    ) {
       request.body = await normalizeBody(request.body);
     }
   }
   return request;
 }
 
-async function normalizeBody(body: Array<models.HttpRequestBodyLine>) : Promise<Buffer> {
+async function normalizeBody(body: Array<models.HttpRequestBodyLine>): Promise<Buffer> {
   const buffers: Array<Buffer> = [];
   for (const obj of body) {
     if (utils.isString(obj)) {

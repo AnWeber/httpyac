@@ -37,6 +37,7 @@
 		"httpyac": "./bin/httpyac.js"
 	},
 	"scripts": {
+		"format": "prettier --write --parser typescript \"src/**/*.ts?(x)\"",
 		"prepack": "npm run compile",
 		"esbuild": "node ./buildSrc/esbuild.js",
 		"tsc": "tsc --declaration --emitDeclarationOnly",
@@ -46,13 +47,20 @@
 		"packageJson-lint": "node ./buildSrc/lintPackageJson.js",
 		"lockfile-lint": "lockfile-lint --path package-lock.json --validate-https --allowed-hosts npm --validate-checksum --validate-integrity",
 		"eslint": "eslint src --ext ts",
-		"lint": "npm run eslint && npm run lockfile-lint && npm run packageJson-lint",
+		"lint": "npm run format && npm run eslint && npm run lockfile-lint && npm run packageJson-lint",
 		"prepare": "husky install"
 	},
 	"lint-staged": {
-		"*.ts": "eslint --cache --fix"
+		"*.js": [
+			"prettier --write"
+		],
+		"*.ts?(x)": [
+			"eslint --cache --fix",
+			"prettier --parser=typescript --write"
+		]
 	},
 	"devDependencies": {
+		"@trivago/prettier-plugin-sort-imports": "^3.1.1",
 		"@types/aws4": "^1.11.0",
 		"@types/encodeurl": "^1.0.0",
 		"@types/eventsource": "^1.1.7",
@@ -67,10 +75,12 @@
 		"concurrently": "^6.4.0",
 		"esbuild": "^0.13.14",
 		"eslint": "^8.2.0",
+		"eslint-config-prettier": "^8.3.0",
 		"eslint-plugin-node": "^11.1.0",
 		"husky": "^7.0.4",
 		"lint-staged": "^12.0.3",
 		"lockfile-lint": "^4.6.2",
+		"prettier": "^2.4.1",
 		"typescript": "^4.5.2"
 	},
 	"dependencies": {

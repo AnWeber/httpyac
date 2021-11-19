@@ -1,8 +1,8 @@
-import get from 'lodash/get';
-import { Variables } from '../../../models';
 import { log, userInteractionProvider } from '../../../io';
+import { Variables } from '../../../models';
+import get from 'lodash/get';
 
-export interface OpenIdConfiguration{
+export interface OpenIdConfiguration {
   variablePrefix: string;
   authorizationEndpoint: string;
   tokenEndpoint: string;
@@ -24,7 +24,7 @@ function getVariable(variables: Variables, variablePrefix: string, name: string)
   return (variables[`${variablePrefix}_${name}`] || get(variables, `${variablePrefix}.${name}`)) as string;
 }
 
-export function getOpenIdConfiguration(variablePrefix: string, variables: Variables) : OpenIdConfiguration | false {
+export function getOpenIdConfiguration(variablePrefix: string, variables: Variables): OpenIdConfiguration | false {
   if (variablePrefix) {
     const config: OpenIdConfiguration = {
       variablePrefix,
@@ -41,14 +41,15 @@ export function getOpenIdConfiguration(variablePrefix: string, variables: Variab
       password: getVariable(variables, variablePrefix, 'password'),
       subjectIssuer: getVariable(variables, variablePrefix, 'subjectIssuer'),
       keepAlive: ['true', '1', true].indexOf(getVariable(variables, variablePrefix, 'keepAlive')) < 0,
-      useAuthorizationHeader: ['false', '0', false].indexOf(getVariable(variables, variablePrefix, 'useAuthorizationHeader')) < 0,
+      useAuthorizationHeader:
+        ['false', '0', false].indexOf(getVariable(variables, variablePrefix, 'useAuthorizationHeader')) < 0,
     };
     return config;
   }
   return false;
 }
 
-export function assertConfiguration(config: OpenIdConfiguration, keys: string[]) : boolean {
+export function assertConfiguration(config: OpenIdConfiguration, keys: string[]): boolean {
   const missingKeys = [];
   for (const key of keys) {
     if (!Object.entries(config).some(([obj, value]) => obj === key && !!value)) {

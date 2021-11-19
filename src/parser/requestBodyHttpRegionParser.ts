@@ -1,6 +1,6 @@
+import { CreateRequestBodyInterceptor } from '../actions';
 import * as models from '../models';
 import * as utils from '../utils';
-import { CreateRequestBodyInterceptor } from '../actions';
 import { ParserRegex } from './parserRegex';
 
 export async function parseRequestBody(
@@ -13,9 +13,7 @@ export async function parseRequestBody(
     const requestBody = getRequestBody(context);
     const next = lineReader.next();
     if (!next.done) {
-
       if (requestBody.rawBody.length > 0 || !utils.isStringEmpty(next.value.textLine)) {
-
         requestBody.rawBody.push(parseLine(next.value.textLine));
         const symbols: Array<models.HttpSymbol> = [];
 
@@ -76,13 +74,12 @@ function parseLine(textLine: string) {
 }
 
 function isBufferEncoding(encoding: string): encoding is BufferEncoding {
-  return ['ascii', 'utf8', 'utf-8',
-    'utf16le', 'ucs2', 'ucs-2',
-    'base64', 'latin1', 'binary', 'hex']
-    .indexOf(encoding) >= 0;
+  return (
+    ['ascii', 'utf8', 'utf-8', 'utf16le', 'ucs2', 'ucs-2', 'base64', 'latin1', 'binary', 'hex'].indexOf(encoding) >= 0
+  );
 }
 
-function getBufferEncoding(encoding: string) : BufferEncoding {
+function getBufferEncoding(encoding: string): BufferEncoding {
   if (encoding && isBufferEncoding(encoding)) {
     return encoding;
   }
@@ -97,7 +94,7 @@ export async function closeRequestBody(context: models.ParserContext): Promise<v
   }
 }
 
-function removeTrailingEmptyLines(obj: Array<unknown>) : void {
+function removeTrailingEmptyLines(obj: Array<unknown>): void {
   while (obj.length > 0 && utils.isStringEmpty(obj[obj.length - 1])) {
     obj.pop();
   }

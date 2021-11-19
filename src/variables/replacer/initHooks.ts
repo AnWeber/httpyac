@@ -12,7 +12,7 @@ import { restClientVariableReplacer } from './restClientVariableReplacer';
 import { showInputBoxVariableReplacer } from './showInputBoxVariableReplacer';
 import { showQuickpickVariableReplacer } from './showQuickpickVariableReplacer';
 
-export enum VariableReplacerType{
+export enum VariableReplacerType {
   aws = 'aws',
   basicAuth = 'basicAuth',
   clientCertificate = 'clientCertificate',
@@ -24,7 +24,7 @@ export enum VariableReplacerType{
   restClientDynamic = 'restClientDynamic',
   javascript = 'javascript',
   showInputBox = 'showInputBox',
-  showQuickPick = 'showQuickPick'
+  showQuickPick = 'showQuickPick',
 }
 
 export function initReplaceVariableHook(): ReplaceVariableHook {

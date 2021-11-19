@@ -20,15 +20,17 @@ export async function parseResponseRef(
       httpRegion.responseRefs.push(match.groups.fileName);
       return {
         nextParserLine: next.value.line,
-        symbols: [{
-          name: match.groups.key,
-          description: match.groups.value,
-          kind: HttpSymbolKind.response,
-          startLine: next.value.line,
-          startOffset: 0,
-          endLine: next.value.line,
-          endOffset: next.value.textLine.length,
-        }],
+        symbols: [
+          {
+            name: match.groups.key,
+            description: match.groups.value,
+            kind: HttpSymbolKind.response,
+            startLine: next.value.line,
+            startOffset: 0,
+            endLine: next.value.line,
+            endOffset: next.value.textLine.length,
+          },
+        ],
       };
     }
   }

@@ -1,7 +1,7 @@
+import { log } from '../../io';
 import { ProcessorContext, VariableType } from '../../models';
 import { ParserRegex } from '../../parser';
 import * as utils from '../../utils';
-import { log } from '../../io';
 
 export async function javascriptVariableReplacer(
   text: unknown,

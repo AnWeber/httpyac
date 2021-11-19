@@ -2,7 +2,7 @@ import { ContentType } from './contentType';
 import { Request } from './httpRequest';
 import { HttpTimings } from './httpTimings';
 
-export interface HttpResponse{
+export interface HttpResponse {
   protocol: string;
   httpVersion?: string;
   statusCode: number;
@@ -15,6 +15,6 @@ export interface HttpResponse{
   rawBody?: Buffer;
   request?: Request;
 
-  timings?: HttpTimings,
-  meta?: Record<string, unknown>
+  timings?: HttpTimings;
+  meta?: Record<string, unknown>;
 }

@@ -1,14 +1,13 @@
 import * as models from '../models';
+import { HttpFileStore } from '../store';
 import * as utils from '../utils';
 import { ParserRegex } from './parserRegex';
-import { HttpFileStore } from '../store';
 
 export async function parseHttpFile(
   httpFile: models.HttpFile,
   text: string,
   httpFileStore: HttpFileStore
 ): Promise<models.HttpFile> {
-
   const lines = utils.toMultiLineArray(text);
 
   const parserContext: models.ParserContext = {
@@ -20,7 +19,6 @@ export async function parseHttpFile(
   };
 
   for (let line = 0; line < lines.length; line++) {
-
     const httpRegionParserResult = await httpFile.hooks.parse.trigger(createReaderFactory(line, lines), parserContext);
     if (httpRegionParserResult && httpRegionParserResult !== models.HookCancel) {
       if (httpRegionParserResult.endRegionLine !== undefined && httpRegionParserResult.endRegionLine >= 0) {
@@ -47,7 +45,7 @@ export async function parseHttpFile(
   return httpFile;
 }
 
-async function closeHttpRegion(parserContext: models.ParserContext) : Promise<void> {
+async function closeHttpRegion(parserContext: models.ParserContext): Promise<void> {
   await parserContext.httpFile.hooks.parseEndRegion.trigger(parserContext);
 
   const { httpRegion } = parserContext;
@@ -95,17 +93,17 @@ function initHttpRegion(start: number): models.HttpRegion {
       onResponse: new models.OnResponseHook(),
       responseLogging: new models.ResponseLoggingHook(),
     },
-    variablesPerEnv: {}
+    variablesPerEnv: {},
   };
 }
 
 function createReaderFactory(startLine: number, lines: Array<string>) {
-  return function *createReader(noStopOnMetaTag?: boolean) {
+  return function* createReader(noStopOnMetaTag?: boolean) {
     for (let line = startLine; line < lines.length; line++) {
       const textLine = lines[line];
       yield {
         textLine,
-        line
+        line,
       };
       if (!noStopOnMetaTag) {
         // if parser region is not closed stop at delimiter
