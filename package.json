@@ -10,6 +10,7 @@
 		"type": "git",
 		"url": "https://github.com/AnWeber/httpyac"
 	},
+  "type": "module",
 	"bugs": {
 		"url": "https://github.com/AnWeber/httpyac/issues"
 	},
@@ -115,12 +116,16 @@
 		"xml-formatter": "^2.5.1"
 	},
 	"ava": {
-		"extensions": [
-			"ts"
+		"extensions": {
+			"ts": "module"
+		},
+		"nodeArguments": [
+			"--loader=ts-node/esm",
+			"--experimental-specifier-resolution=node"
 		],
-		"require": [
-			"ts-node/register"
-		],
-    		"timeout": "30s"
+		"nonSemVerExperiments": {
+			"configurableModuleFormat": true
+		},
+    "timeout": "30s"
 	}
 }

@@ -10,8 +10,8 @@ import * as utils from '../utils';
 import { log } from './logger';
 import { default as filesize } from 'filesize';
 import { default as got, OptionsOfUnknownResponseBody, CancelError, Response } from 'got';
-import { HttpProxyAgent } from 'http-proxy-agent';
-import { HttpsProxyAgent } from 'https-proxy-agent';
+import createHttpProxyAgent from 'http-proxy-agent';
+import createHttpsProxyAgent from 'https-proxy-agent';
 import merge from 'lodash/merge';
 
 export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined): HttpClient {
@@ -113,8 +113,8 @@ async function load(url: string, options: OptionsOfUnknownResponseBody, context:
 function initProxy(request: HttpRequest) {
   if (request.proxy) {
     request.agent = {
-      http: new HttpProxyAgent(request.proxy),
-      https: new HttpsProxyAgent(request.proxy),
+      http: createHttpProxyAgent(request.proxy),
+      https: createHttpsProxyAgent(request.proxy),
     };
     delete request.proxy;
   }
