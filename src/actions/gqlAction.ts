@@ -23,7 +23,7 @@ export class GqlAction implements HttpRegionAction {
   constructor(private readonly gqlData: GqlData) {}
 
   async process(context: ProcessorContext): Promise<boolean> {
-    if (context.request?.body && this.gqlData?.query) {
+    if (context.request && this.gqlData?.query) {
       utils.report(context, 'build GraphQL query');
       let query: string | undefined;
       if (utils.isString(this.gqlData.query)) {

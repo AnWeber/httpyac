@@ -92,24 +92,36 @@ function matchGqlContent(
   value: { textLine: string; line: number },
   lineReader: models.HttpLineGenerator,
   name: string | undefined
-): GqlParserResult | false {
-  const startLine = value.line;
+): GqlParserResult {
   let next = lineReader.next();
+  let prevReader = {
+    endLine: value.line,
+    endOffset: value.textLine.length,
+  };
   const gqlLines: Array<string> = [value.textLine];
   while (!next.done) {
+    prevReader = {
+      endLine: next.value.line,
+      endOffset: next.value.textLine.length,
+    };
     if (ParserRegex.emptyLine.test(next.value.textLine)) {
       return {
         name,
-        startLine,
-        endLine: next.value.line,
-        endOffset: next.value.textLine.length,
+        startLine: value.line,
+        ...prevReader,
         gql: utils.toMultiLineString(gqlLines),
       };
     }
     gqlLines.push(next.value.textLine);
+
     next = lineReader.next();
   }
-  return false;
+  return {
+    name,
+    startLine: value.line,
+    ...prevReader,
+    gql: utils.toMultiLineString(gqlLines),
+  };
 }
 
 export interface GqlParserResult {
