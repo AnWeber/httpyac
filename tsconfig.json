@@ -9,7 +9,7 @@
 		"sourceMap": true,
 		"rootDir": "src",
 		"strict": true,
-	  "noImplicitReturns": true,
+		"noImplicitReturns": true,
 		"noFallthroughCasesInSwitch": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
@@ -20,8 +20,13 @@
 		"esModuleInterop": true,
 		"allowSyntheticDefaultImports": true
 	},
-	"include": ["**/*.ts"],
+	"include": [
+		"**/*.ts"
+	],
 	"exclude": [
-		"node_modules", "dist", "buildSrc"
+		"test",
+		"node_modules",
+		"dist",
+		"buildSrc"
 	]
 }
