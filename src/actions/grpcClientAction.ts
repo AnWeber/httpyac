@@ -183,8 +183,7 @@ export class GrpcClientAction implements models.HttpRegionAction {
 
   private getChannelCredentials(request: models.GrpcRequest): grpc.ChannelCredentials {
     if (request.headers) {
-      const channelCredentials =
-        utils.getHeader(request.headers, 'channelcredentials') || utils.getHeader(request.headers, 'authorization');
+      const channelCredentials = utils.getHeader(request.headers, 'channelcredentials');
       if (channelCredentials instanceof grpc.ChannelCredentials) {
         return channelCredentials;
       }
@@ -194,7 +193,7 @@ export class GrpcClientAction implements models.HttpRegionAction {
 
   private getMetaData(request: models.GrpcRequest): grpc.Metadata {
     const metaData = new grpc.Metadata();
-    const specialKeys = ['authorization', 'channelcredentials'];
+    const specialKeys = ['channelcredentials'];
     if (request.headers) {
       for (const [key, value] of Object.entries(request.headers)) {
         if (specialKeys.indexOf(key.toLowerCase()) < 0) {
