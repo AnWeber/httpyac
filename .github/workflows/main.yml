@@ -29,7 +29,7 @@ jobs:
         node-version: 16
     - run: npm install
     - run: npm run lint
-    - run: npm run test
+    - run: npm test
     - run: npm run compile
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
