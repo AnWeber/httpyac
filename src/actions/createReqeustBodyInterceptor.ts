@@ -32,7 +32,7 @@ export class CreateRequestBodyInterceptor implements models.HookInterceptor<mode
               strings.push(line);
             } else {
               if (strings.length > 0) {
-                strings.push(lineEnding);
+                strings.push('');
                 body.push(strings.join(lineEnding));
                 strings.length = 0;
               }
