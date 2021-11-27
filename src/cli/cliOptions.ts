@@ -27,6 +27,7 @@ export interface CliOptions {
   variables?: Array<string>;
   verbose?: boolean;
   version?: boolean;
+  authCallback?: string;
 }
 
 export function getLogLevel(cliOptions: CliOptions): LogLevel | undefined {
@@ -47,6 +48,7 @@ export function parseCliOptions(rawArgs: string[]): CliOptions | undefined {
     const args = arg(
       {
         '--all': Boolean,
+        '--auth-callback': String,
         '--bail': Boolean,
         '--editor': Boolean,
         '--env': [String],
@@ -87,6 +89,7 @@ export function parseCliOptions(rawArgs: string[]): CliOptions | undefined {
     return {
       activeEnvironments: args['--env'],
       allRegions: args['--all'],
+      authCallback: args['--auth-callback'],
       bail: args['--bail'],
       editor: args['--editor'],
       fileName: args._.length > 0 ? args._[args._.length - 1] : undefined,
@@ -127,6 +130,7 @@ export function renderHelp(): void {
 
 usage: httpyac [options...] <file or glob pattern>
        --all           execute all http requests in a http file
+       --auth-callback auth callback url (default: http://localhost:3000/callback)
        --bail          stops when a test case fails
        --editor        enter a new request and execute it
   -e   --env           list of environments
