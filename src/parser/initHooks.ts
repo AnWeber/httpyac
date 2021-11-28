@@ -8,7 +8,7 @@ import { parseIntellijScript } from './intellijHttpRegionParser';
 import { parseJavascript } from './javascriptHttpRegionParser';
 import { injectOnEveryRequestJavascript } from './javascriptHttpRegionParser';
 import { parseMetaData } from './metaHttpRegionParser';
-import { parseMQTTLine } from './mqtttHttpRegionParser';
+import { parseMQTTLine } from './mqttHttpRegionParser';
 import { injectNote } from './noteMetaHttpRegionParser';
 import { parseOutputRedirection } from './outputRedirectionHttpRegionParser';
 import { parseProtoImport } from './protoHttpRegionParser';
