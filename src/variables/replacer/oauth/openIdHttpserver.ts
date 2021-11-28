@@ -1,7 +1,9 @@
 import { log } from '../../../io';
 import { createServer, Server } from 'http';
+import { URL } from 'url';
 
 interface RequestListener {
+  url: URL;
   id: string;
   name: string;
   resolve: (params: Record<string, string>) => { valid: boolean; message: string; statusMessage: string };
@@ -16,7 +18,7 @@ let serverTimeoutTime = 0;
 
 export function registerListener(listener: RequestListener): void {
   listeners.push(listener);
-  initServer();
+  initServer(Number(listener.url.port), listener.url.pathname);
 }
 
 export function unregisterListener(id: string): void {
@@ -62,7 +64,7 @@ function closeServer() {
   }
 }
 
-function initServer(port = 3000) {
+function initServer(port: number, callbackPath: string) {
   resetServer(600);
   if (!server) {
     log.debug(`open http server on port ${port}`);
@@ -75,7 +77,8 @@ function initServer(port = 3000) {
 
         if (req.url) {
           const queryParams = parseQueryParams(req.url);
-          if (req.url.startsWith('/callback')) {
+          const path = req.url.split('?')[0];
+          if (path === callbackPath) {
             const listener = listeners.find(obj => obj.id === queryParams.state);
             if (listener) {
               const result = listener.resolve(queryParams);
@@ -103,7 +106,7 @@ function initServer(port = 3000) {
               `);
               statusMessage = 'invalid state received';
             }
-          } else if (req.url.startsWith('/reject')) {
+          } else if (path.startsWith('/reject')) {
             const listener = listeners.find(obj => obj.id === queryParams.id);
             if (listener) {
               listener.reject();
@@ -114,7 +117,7 @@ function initServer(port = 3000) {
             } else {
               statusMessage = 'listener not found';
             }
-          } else if (req.url.startsWith('/shutdown')) {
+          } else if (path.startsWith('/shutdown')) {
             closeServer();
             responseContent.push(getMessageHtml('server closed', true));
             statusCode = 200;

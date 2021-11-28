@@ -4,6 +4,7 @@ import { OpenIdFlow, OpenIdFlowContext } from './openIdFlow';
 import { registerListener, unregisterListener } from './openIdHttpserver';
 import { OpenIdInformation, requestOpenIdInformation } from './openIdInformation';
 import open from 'open';
+import { URL } from 'url';
 
 class AuthorizationCodeFlow implements OpenIdFlow {
   supportsFlow(flow: string): boolean {
@@ -24,7 +25,7 @@ class AuthorizationCodeFlow implements OpenIdFlow {
         const state = utils.stateGenerator();
         try {
           utils.report(context, 'execute OAuth2 authorization_code flow');
-          const redirectUri = 'http://localhost:3000/callback';
+          const redirectUri = new URL(config.redirectUri);
           const authUrl = `${config.authorizationEndpoint}${
             config.authorizationEndpoint.indexOf('?') > 0 ? '&' : '?'
           }${utils.toQueryParams({
@@ -33,7 +34,7 @@ class AuthorizationCodeFlow implements OpenIdFlow {
             response_type: 'code',
             state,
             audience: config.audience,
-            redirect_uri: redirectUri,
+            redirect_uri: redirectUri.toString(),
           })}`;
 
           let unregisterProgress: (() => void) | undefined;
@@ -46,6 +47,7 @@ class AuthorizationCodeFlow implements OpenIdFlow {
 
           registerListener({
             id: state,
+            url: redirectUri,
             name: `authorization for ${config.clientId}: ${config.authorizationEndpoint}`,
             resolve: params => {
               if (params.code && params.state === state) {
@@ -60,7 +62,7 @@ class AuthorizationCodeFlow implements OpenIdFlow {
                       grant_type: 'authorization_code',
                       scope: config.scope,
                       code: params.code,
-                      redirect_uri: redirectUri,
+                      redirect_uri: redirectUri.toString(),
                     }),
                   },
                   {

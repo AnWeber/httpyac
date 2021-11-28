@@ -5,6 +5,7 @@ import { OpenIdFlow, OpenIdFlowContext } from './openIdFlow';
 import { registerListener, unregisterListener } from './openIdHttpserver';
 import { OpenIdInformation, toOpenIdInformation, requestOpenIdInformation } from './openIdInformation';
 import open from 'open';
+import { URL } from 'url';
 
 class ImplicitFlow implements OpenIdFlow {
   supportsFlow(flow: string): boolean {
@@ -25,7 +26,6 @@ class ImplicitFlow implements OpenIdFlow {
         utils.report(context, 'execute OAuth2 implicit flow');
         const state = utils.stateGenerator();
         try {
-          const redirectUri = 'http://localhost:3000/callback';
           const authUrl = `${config.authorizationEndpoint}${
             config.authorizationEndpoint.indexOf('?') > 0 ? '&' : '?'
           }${utils.toQueryParams({
@@ -36,7 +36,7 @@ class ImplicitFlow implements OpenIdFlow {
             state,
             response_mode: config.responseMode,
             audience: config.audience,
-            redirect_uri: redirectUri,
+            redirect_uri: config.redirectUri,
           })}`;
 
           let unregisterProgress: (() => void) | undefined;
@@ -47,8 +47,11 @@ class ImplicitFlow implements OpenIdFlow {
             });
           }
 
+          const redirectUri = new URL(config.redirectUri);
+
           registerListener({
             id: state,
+            url: redirectUri,
             name: `authorization for ${config.clientId}: ${config.authorizationEndpoint}`,
             resolve: params => {
               if (params.state === state) {
@@ -61,7 +64,7 @@ class ImplicitFlow implements OpenIdFlow {
                         grant_type: 'authorization_code',
                         scope: config.scope,
                         code: params.code,
-                        redirect_uri: redirectUri,
+                        redirect_uri: redirectUri.toString(),
                       }),
                     },
                     {
