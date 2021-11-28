@@ -6,7 +6,7 @@ export * from './intellijHttpRegionParser';
 export * from './initHooks';
 export * from './javascriptHttpRegionParser';
 export * from './metaHttpRegionParser';
-export * from './mqtttHttpRegionParser';
+export * from './mqttHttpRegionParser';
 export * from './noteMetaHttpRegionParser';
 export * from './outputRedirectionHttpRegionParser';
 export * from './parserRegex';
