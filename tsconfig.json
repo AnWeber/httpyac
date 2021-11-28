@@ -6,8 +6,13 @@
 		"lib": [
 			"es2019"
 		],
+		"baseUrl": ".",
+		"paths": {
+			"@/*": [
+				"./src/*"
+			]
+		},
 		"sourceMap": true,
-		"rootDir": "src",
 		"strict": true,
 		"noImplicitReturns": true,
 		"noFallthroughCasesInSwitch": true,
@@ -16,15 +21,14 @@
 		"noImplicitAny": true,
 		"noImplicitThis": true,
 		"experimentalDecorators": true,
-		"declaration": true,
 		"esModuleInterop": true,
 		"allowSyntheticDefaultImports": true
 	},
 	"include": [
-		"**/*.ts"
+		"**/*.ts",
+		"tsconfig.build.json"
 	],
 	"exclude": [
-		"test",
 		"node_modules",
 		"dist",
 		"buildSrc"
