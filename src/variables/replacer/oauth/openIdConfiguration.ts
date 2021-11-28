@@ -2,6 +2,7 @@ import { log, userInteractionProvider } from '../../../io';
 import { Variables } from '../../../models';
 import get from 'lodash/get';
 
+const DEFAULT_CALLBACK_URI = 'http://localhost:3000/callback';
 export interface OpenIdConfiguration {
   variablePrefix: string;
   authorizationEndpoint: string;
@@ -18,6 +19,7 @@ export interface OpenIdConfiguration {
   password?: string;
   subjectIssuer?: string;
   useAuthorizationHeader: boolean;
+  redirectUri: string;
 }
 
 function getVariable(variables: Variables, variablePrefix: string, name: string): string {
@@ -40,6 +42,7 @@ export function getOpenIdConfiguration(variablePrefix: string, variables: Variab
       username: getVariable(variables, variablePrefix, 'username'),
       password: getVariable(variables, variablePrefix, 'password'),
       subjectIssuer: getVariable(variables, variablePrefix, 'subjectIssuer'),
+      redirectUri: getVariable(variables, variablePrefix, 'redirectUri') || DEFAULT_CALLBACK_URI,
       keepAlive: ['true', '1', true].indexOf(getVariable(variables, variablePrefix, 'keepAlive')) < 0,
       useAuthorizationHeader:
         ['false', '0', false].indexOf(getVariable(variables, variablePrefix, 'useAuthorizationHeader')) < 0,
