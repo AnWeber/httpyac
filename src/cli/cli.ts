@@ -95,7 +95,7 @@ export async function execute(rawArgs: string[]): Promise<void> {
   }
 }
 
-function convertCliOptionsToContext(cliOptions: CliOptions): CliContext {
+export function convertCliOptionsToContext(cliOptions: CliOptions): CliContext {
   const context: CliContext = {
     repeat: cliOptions.repeat,
     scriptConsole: new Logger({
@@ -115,7 +115,14 @@ function convertCliOptionsToContext(cliOptions: CliOptions): CliContext {
     },
     logStream: cliOptions.json ? undefined : getStreamLogger(cliOptions),
     logResponse: cliOptions.json ? undefined : getRequestLogger(cliOptions),
-    variables: cliOptions.variables ? Object.fromEntries(cliOptions.variables.map(obj => obj.split('='))) : undefined,
+    variables: cliOptions.variables
+      ? Object.fromEntries(
+          cliOptions.variables.map(obj => {
+            const split = obj.split('=');
+            return [split[0], split.slice(1).join('=')];
+          })
+        )
+      : undefined,
   };
 
   return context;
