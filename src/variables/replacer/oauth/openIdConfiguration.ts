@@ -1,8 +1,9 @@
 import { log, userInteractionProvider } from '../../../io';
 import { Variables } from '../../../models';
 import get from 'lodash/get';
+import { URL } from 'url';
 
-const DEFAULT_CALLBACK_URI = 'http://localhost:3000/callback';
+export const DEFAULT_CALLBACK_URI = 'http://localhost:3000/callback';
 export interface OpenIdConfiguration {
   variablePrefix: string;
   authorizationEndpoint: string;
@@ -19,11 +20,20 @@ export interface OpenIdConfiguration {
   password?: string;
   subjectIssuer?: string;
   useAuthorizationHeader: boolean;
-  redirectUri: string;
+  redirectUri: URL;
 }
 
 function getVariable(variables: Variables, variablePrefix: string, name: string): string {
   return (variables[`${variablePrefix}_${name}`] || get(variables, `${variablePrefix}.${name}`)) as string;
+}
+
+function getUrl(variables: Variables, variablePrefix: string, name: string, defaultUrl: string): URL {
+  const url = getVariable(variables, variablePrefix, name);
+  try {
+    return new URL(url || defaultUrl);
+  } catch {
+    throw new Error(`Expected a valid URL, but received ${url}`);
+  }
 }
 
 export function getOpenIdConfiguration(variablePrefix: string, variables: Variables): OpenIdConfiguration | false {
@@ -42,7 +52,7 @@ export function getOpenIdConfiguration(variablePrefix: string, variables: Variab
       username: getVariable(variables, variablePrefix, 'username'),
       password: getVariable(variables, variablePrefix, 'password'),
       subjectIssuer: getVariable(variables, variablePrefix, 'subjectIssuer'),
-      redirectUri: getVariable(variables, variablePrefix, 'redirectUri') || DEFAULT_CALLBACK_URI,
+      redirectUri: getUrl(variables, variablePrefix, 'redirectUri', DEFAULT_CALLBACK_URI),
       keepAlive: ['true', '1', true].indexOf(getVariable(variables, variablePrefix, 'keepAlive')) < 0,
       useAuthorizationHeader:
         ['false', '0', false].indexOf(getVariable(variables, variablePrefix, 'useAuthorizationHeader')) < 0,

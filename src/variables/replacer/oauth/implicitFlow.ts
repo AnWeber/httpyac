@@ -5,7 +5,6 @@ import { OpenIdFlow, OpenIdFlowContext } from './openIdFlow';
 import { registerListener, unregisterListener } from './openIdHttpserver';
 import { OpenIdInformation, toOpenIdInformation, requestOpenIdInformation } from './openIdInformation';
 import open from 'open';
-import { URL } from 'url';
 
 class ImplicitFlow implements OpenIdFlow {
   supportsFlow(flow: string): boolean {
@@ -36,7 +35,7 @@ class ImplicitFlow implements OpenIdFlow {
             state,
             response_mode: config.responseMode,
             audience: config.audience,
-            redirect_uri: config.redirectUri,
+            redirect_uri: config.redirectUri.toString(),
           })}`;
 
           let unregisterProgress: (() => void) | undefined;
@@ -47,11 +46,9 @@ class ImplicitFlow implements OpenIdFlow {
             });
           }
 
-          const redirectUri = new URL(config.redirectUri);
-
           registerListener({
             id: state,
-            url: redirectUri,
+            url: config.redirectUri,
             name: `authorization for ${config.clientId}: ${config.authorizationEndpoint}`,
             resolve: params => {
               if (params.state === state) {
@@ -64,7 +61,7 @@ class ImplicitFlow implements OpenIdFlow {
                         grant_type: 'authorization_code',
                         scope: config.scope,
                         code: params.code,
-                        redirect_uri: redirectUri.toString(),
+                        redirect_uri: config.redirectUri.toString(),
                       }),
                     },
                     {
