@@ -14,14 +14,25 @@ export async function showInputBoxVariableReplacer(text: unknown): Promise<unkno
   while ((match = ParserRegex.javascript.scriptSingleLine.exec(text)) !== null) {
     const [searchValue, variable] = match;
 
-    const matchInput = /^\$input\s*(?<placeholder>[^$]*)(\$value:\s*(?<value>.*))?\s*$/u.exec(variable);
+    const inputRegex = /^\$(?<type>(input|password))\s*(?<placeholder>[^$]*)(\$value:\s*(?<value>.*))?\s*$/u;
+    const matchInput = inputRegex.exec(variable);
     if (matchInput?.groups?.placeholder) {
       const placeholder = matchInput.groups.placeholder;
+      const inputType = matchInput.groups.type;
 
-      const answer = await userInteractionProvider.showInputPrompt(
-        placeholder,
-        lastValue[placeholder] || matchInput.groups.value
-      );
+      let answer;
+      if (inputType === 'password') {
+        answer = await userInteractionProvider.showInputPrompt(
+          placeholder,
+          lastValue[placeholder] || matchInput.groups.value,
+          true
+        );
+      } else {
+        answer = await userInteractionProvider.showInputPrompt(
+          placeholder,
+          lastValue[placeholder] || matchInput.groups.value
+        );
+      }
 
       if (answer) {
         lastValue[placeholder] = answer;
