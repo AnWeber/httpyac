@@ -51,7 +51,7 @@ export async function requestOpenIdInformation(
       if (models.isProcessorContext(context)) {
         await utils.logResponse(response, context);
       }
-      if (response.statusCode === 200 && utils.isString(response.body)) {
+      if (response.statusCode < 400 && utils.isString(response.body)) {
         return toOpenIdInformation(JSON.parse(response.body), time, options);
       }
     }
