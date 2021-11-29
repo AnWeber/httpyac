@@ -65,7 +65,24 @@ function initUserInteractionProvider() {
     ]);
     return answer.note;
   };
-  userInteractionProvider.showInputPrompt = async function showInputPrompt(message: string, defaultValue?: string) {
+  userInteractionProvider.showInputPrompt = async function showInputPrompt(
+    message: string,
+    defaultValue?: string,
+    maskedInput?: boolean
+  ) {
+    if (maskedInput) {
+      const answer = await inquirer.prompt([
+        {
+          type: 'password',
+          name: 'placeholder',
+          message,
+          mask: '*',
+          default: defaultValue,
+        },
+      ]);
+      return answer.placeholder;
+    }
+
     const answer = await inquirer.prompt([
       {
         type: 'input',
