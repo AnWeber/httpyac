@@ -21,6 +21,7 @@ export interface OpenIdConfiguration {
   subjectIssuer?: string;
   useAuthorizationHeader: boolean;
   redirectUri: URL;
+  shutdownOnTokenReceived: boolean;
 }
 
 function getVariable(variables: Variables, variablePrefix: string, name: string): string {
@@ -54,6 +55,8 @@ export function getOpenIdConfiguration(variablePrefix: string, variables: Variab
       subjectIssuer: getVariable(variables, variablePrefix, 'subjectIssuer'),
       redirectUri: getUrl(variables, variablePrefix, 'redirectUri', DEFAULT_CALLBACK_URI),
       keepAlive: ['true', '1', true].indexOf(getVariable(variables, variablePrefix, 'keepAlive')) < 0,
+      shutdownOnTokenReceived:
+        ['false', '0', false].indexOf(getVariable(variables, variablePrefix, 'shutdownOnTokenReceived')) < 0,
       useAuthorizationHeader:
         ['false', '0', false].indexOf(getVariable(variables, variablePrefix, 'useAuthorizationHeader')) < 0,
     };

@@ -6,6 +6,7 @@ interface RequestListener {
   url: URL;
   id: string;
   name: string;
+  shutdownOnTokenReceived?: boolean;
   resolve: (params: Record<string, string>) => { valid: boolean; message: string; statusMessage: string };
   reject: () => void;
 }
@@ -18,7 +19,7 @@ let serverTimeoutTime = 0;
 
 export function registerListener(listener: RequestListener): void {
   listeners.push(listener);
-  initServer(Number(listener.url.port), listener.url.pathname);
+  initServer(Number(listener.url.port), listener.url.pathname, listener.shutdownOnTokenReceived || false);
 }
 
 export function unregisterListener(id: string): void {
@@ -64,7 +65,7 @@ function closeServer() {
   }
 }
 
-function initServer(port: number, callbackPath: string) {
+function initServer(port: number, callbackPath: string, closeOnTokenReceived: boolean) {
   resetServer(600);
   if (!server) {
     log.debug(`open http server on port ${port}`);
@@ -86,6 +87,9 @@ function initServer(port: number, callbackPath: string) {
               if (result.valid) {
                 statusCode = 200;
                 unregisterListener(listener.id);
+                if (closeOnTokenReceived) {
+                  closeServer();
+                }
               }
               statusMessage = result.statusMessage;
             } else {

@@ -48,6 +48,7 @@ class ImplicitFlow implements OpenIdFlow {
 
           registerListener({
             id: state,
+            shutdownOnTokenReceived: config.shutdownOnTokenReceived,
             url: config.redirectUri,
             name: `authorization for ${config.clientId}: ${config.authorizationEndpoint}`,
             resolve: params => {
