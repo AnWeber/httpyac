@@ -20,19 +20,11 @@ export async function showInputBoxVariableReplacer(text: unknown): Promise<unkno
       const placeholder = matchInput.groups.placeholder;
       const inputType = matchInput.groups.type;
 
-      let answer;
-      if (inputType === 'password') {
-        answer = await userInteractionProvider.showInputPrompt(
-          placeholder,
-          lastValue[placeholder] || matchInput.groups.value,
-          true
-        );
-      } else {
-        answer = await userInteractionProvider.showInputPrompt(
-          placeholder,
-          lastValue[placeholder] || matchInput.groups.value
-        );
-      }
+      const answer = await userInteractionProvider.showInputPrompt(
+        placeholder,
+        lastValue[placeholder] || matchInput.groups.value,
+        inputType === 'password'
+      );
 
       if (answer) {
         lastValue[placeholder] = answer;
