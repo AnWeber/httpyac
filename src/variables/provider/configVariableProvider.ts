@@ -1,5 +1,4 @@
 import { VariableProviderContext, Variables } from '../../models';
-import { expandVariables } from '../../utils';
 
 const DEFAULT_ENV = '$shared';
 
@@ -24,5 +23,5 @@ export async function provideConfigVariables(
       variables.push(...envs.map(env => environments[env]));
     }
   }
-  return expandVariables(Object.assign({}, ...variables));
+  return Object.assign({}, ...variables);
 }

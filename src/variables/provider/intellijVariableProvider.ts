@@ -1,6 +1,6 @@
 import { fileProvider, log } from '../../io';
 import { PathLike, VariableProviderContext, Variables } from '../../models';
-import { expandVariables, toAbsoluteFilename } from '../../utils';
+import { toAbsoluteFilename } from '../../utils';
 
 const defaultFiles: Array<string> = ['http-client.env.json', 'http-client.private.env.json'];
 
@@ -44,7 +44,7 @@ export async function provideIntellijVariables(
       variables.push(...environments.filter(obj => !!obj[env]).map(obj => obj[env]));
     }
   }
-  return expandVariables(Object.assign({}, ...variables));
+  return Object.assign({}, ...variables);
 }
 
 async function getEnvironmentVariables(workingDir: PathLike) {

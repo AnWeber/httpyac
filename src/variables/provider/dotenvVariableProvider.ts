@@ -68,8 +68,7 @@ export async function provideDotenvVariables(
   if (dirOfFile) {
     variables.push(...(await getVariablesOfFolder(searchFiles, dirOfFile)));
   }
-  const result = Object.assign({}, ...variables);
-  return utils.expandVariables(result);
+  return Object.assign({}, ...variables);
 }
 
 function getSearchFiles(env: string[] | undefined) {
