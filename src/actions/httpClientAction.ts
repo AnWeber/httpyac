@@ -12,7 +12,8 @@ export class HttpClientAction implements models.HttpRegionAction {
         request.followRedirect = !httpRegion.metaData.noRedirect;
       }
       if (httpRegion.metaData.noRejectUnauthorized) {
-        request.rejectUnauthorized = false;
+        request.https = request.https || {}
+        request.https.rejectUnauthorized = false;
       }
       return utils.triggerRequestResponseHooks(async () => await httpClient(request, context), context);
     }
