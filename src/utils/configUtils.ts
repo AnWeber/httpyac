@@ -15,7 +15,13 @@ export async function getHttpacConfig(rootDir: PathLike): Promise<EnvironmentCon
   return result;
 }
 
-export const defaultConfigFiles = ['.httpyac.js', '.httpyac.config.js', '.httpyac.json', 'httpyac.config.json'];
+export const defaultConfigFiles = [
+  '.httpyac.js',
+  '.httpyac.config.js',
+  'httpyac.config.js',
+  '.httpyac.json',
+  'httpyac.config.json',
+];
 
 async function loadFileConfig(rootDir: PathLike): Promise<EnvironmentConfig | undefined> {
   let fileConfigPath: PathLike | undefined;
