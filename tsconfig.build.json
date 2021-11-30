@@ -3,7 +3,13 @@
 	"compilerOptions": {
 		"declaration": true
 	},
+	"include": [
+		"src/**/*.ts"
+	],
 	"exclude": [
+		"node_modules",
+		"dist",
+		"buildSrc",
 		"test"
 	]
 }

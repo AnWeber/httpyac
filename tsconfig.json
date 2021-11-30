@@ -25,7 +25,8 @@
 		"allowSyntheticDefaultImports": true
 	},
 	"include": [
-		"**/*.ts",
+		"src/**/*.ts",
+		"test/**/*.ts",
 		"tsconfig.build.json"
 	],
 	"exclude": [
