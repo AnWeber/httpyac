@@ -98,6 +98,7 @@ export async function runScript(
     Buffer,
     process,
     requireUncached: (id: string) => {
+      log.warn(`requireUncached is deprecated. It can no longer be supported due to esm conversion.`);
       const dirName = fileProvider.dirname(filename);
       if (dirName) {
         clearModule(id, fileProvider.fsPath(dirName));
