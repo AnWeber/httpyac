@@ -1,10 +1,11 @@
 import { VariableProviderContext, Variables } from '../../models';
 
-const DEFAULT_ENV = '$shared';
+const DEFAULT_ENV = '$default';
+const SHARED_ENV = '$shared';
 
 export async function provideConfigEnvironments(context: VariableProviderContext): Promise<string[]> {
   if (context.config?.environments) {
-    return Object.keys(context.config.environments).filter(obj => obj !== DEFAULT_ENV);
+    return Object.keys(context.config.environments).filter(obj => [DEFAULT_ENV, SHARED_ENV].indexOf(obj) < 0);
   }
   return [];
 }
@@ -18,9 +19,11 @@ export async function provideConfigVariables(
   if (context.config?.environments) {
     const environments = context.config.environments;
 
-    variables.push(environments[DEFAULT_ENV]);
-    if (envs) {
+    variables.push(environments[SHARED_ENV]);
+    if (envs && envs.length > 0) {
       variables.push(...envs.map(env => environments[env]));
+    } else {
+      variables.push(environments[DEFAULT_ENV]);
     }
   }
   return Object.assign({}, ...variables);
