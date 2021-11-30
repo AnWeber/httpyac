@@ -122,8 +122,9 @@ export class MQTTClientAction implements models.HttpRegionAction {
         this.publishToTopics(client, topics, request);
       }
       utils.setVariableInContext(mqttVariables, context);
-      context.httpRegion.hooks.onStreaming
+      context.httpFile.hooks.onStreaming
         .trigger(context)
+        .then(() => context.httpRegion.hooks.onStreaming.trigger(context))
         .then(() => client.end())
         .catch(err => reject(err));
     });

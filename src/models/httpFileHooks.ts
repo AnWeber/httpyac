@@ -14,8 +14,11 @@ export interface HttpFileHooks {
   readonly provideEnvironments: ProvideEnvironmentsHook;
   readonly provideVariables: ProvideVariablesHook;
 
+  readonly beforeHttpRegion: BeforeHttpRegion;
+  readonly onStreaming: OnStreaming;
   readonly onRequest: OnRequestHook;
   readonly onResponse: OnResponseHook;
+  readonly afterHttpRegion: AfterHttpRegion;
   readonly responseLogging: ResponseLoggingHook;
 }
 
@@ -60,6 +63,19 @@ export class OnResponseHook extends SeriesHook<HttpResponse, void, HttpResponse,
   constructor() {
     super();
     this.id = 'AfterRequestHook';
+  }
+}
+
+export class BeforeHttpRegion extends SeriesHook<ProcessorContext, boolean> {
+  constructor() {
+    super();
+    this.id = 'BeforeHttpRegion';
+  }
+}
+export class AfterHttpRegion extends SeriesHook<ProcessorContext, boolean> {
+  constructor() {
+    super();
+    this.id = 'AfterHttpRegion';
   }
 }
 

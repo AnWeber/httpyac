@@ -14,7 +14,7 @@ export interface ScriptData {
 
 export async function parseJavascript(
   getLineReader: models.getHttpLineGenerator,
-  { httpRegion, data }: models.ParserContext
+  { httpRegion, httpFile }: models.ParserContext
 ): Promise<models.HttpRegionParserResult> {
   const lineReader = getLineReader();
   let next = lineReader.next();
@@ -31,51 +31,41 @@ export async function parseJavascript(
             script: utils.toMultiLineString(script),
             lineOffset,
           };
+          const isOnEveryRequest = match.groups?.modifier === '+';
 
-          if (!match.groups.modifier || match.groups.modifier === '@') {
-            switch (match.groups.event) {
-              case 'request':
-                httpRegion.hooks.onRequest.addHook(models.ActionType.js, async (_request, context) => {
-                  await executeScriptData(scriptData, context, 'request');
-                });
-                break;
-              case 'streaming':
-                httpRegion.hooks.onStreaming.addHook(models.ActionType.js, async context => {
-                  await executeScriptData(scriptData, context, 'streaming');
-                });
-                break;
-              case 'response':
-                httpRegion.hooks.onResponse.addHook(models.ActionType.js, async (response, context) => {
-                  context.variables.response = response;
-                  await executeScriptData(scriptData, context, 'response');
-                });
-                break;
-              case 'after':
+          switch (match.groups.event) {
+            case 'request':
+              addRequestHook(isOnEveryRequest ? httpFile.hooks : httpRegion.hooks, scriptData);
+              break;
+            case 'streaming':
+              addStreamingHook(isOnEveryRequest ? httpFile.hooks : httpRegion.hooks, scriptData);
+              break;
+            case 'response':
+              addResponseHook(isOnEveryRequest ? httpFile.hooks : httpRegion.hooks, scriptData);
+              break;
+            case 'after':
+              if (isOnEveryRequest) {
+                httpFile.hooks.afterHttpRegion.addHook(models.ActionType.js, async context =>
+                  executeScriptData(scriptData, context)
+                );
+              } else {
                 httpRegion.hooks.execute.addInterceptor(new AfterJavascriptHookInterceptor(scriptData));
-                break;
-              case 'responseLogging':
-                httpRegion.hooks.responseLogging.addHook(models.ActionType.js, async (response, context) => {
-                  const originalResponse = context.variables.response;
-                  context.variables.response = response;
-                  await executeScriptData(scriptData, context, 'responseLogging');
-                  context.variables.response = originalResponse;
-                });
-                break;
-              default:
+              }
+              break;
+            case 'responseLogging':
+              addResponseLoggingHook(isOnEveryRequest ? httpFile.hooks : httpRegion.hooks, scriptData);
+              break;
+            default:
+              if (isOnEveryRequest) {
+                httpFile.hooks.beforeHttpRegion.addHook(models.ActionType.js, async context =>
+                  executeScriptData(scriptData, context)
+                );
+              } else {
                 httpRegion.hooks.execute.addHook(models.ActionType.js, context =>
                   executeScriptData(scriptData, context)
                 );
-                break;
-            }
-          } else if (match.groups.modifier === '+') {
-            let onEveryRequestArray = data.jsOnEveryRequest;
-            if (!onEveryRequestArray) {
-              data.jsOnEveryRequest = onEveryRequestArray = [];
-            }
-            onEveryRequestArray.push({
-              scriptData,
-              event: match.groups.event,
-            });
+              }
+              break;
           }
 
           return {
@@ -101,57 +91,33 @@ export async function parseJavascript(
   return false;
 }
 
-export async function injectOnEveryRequestJavascript({ data, httpRegion }: models.ParserContext): Promise<void> {
-  const onEveryRequestArray = data.jsOnEveryRequest;
-  if (onEveryRequestArray && httpRegion.request) {
-    for (const everyRequestScript of onEveryRequestArray) {
-      const scriptData = everyRequestScript.scriptData;
-      switch (everyRequestScript.event) {
-        case 'streaming':
-          httpRegion.hooks.onStreaming.addHook(models.ActionType.js, async context => {
-            await executeScriptData(scriptData, context, 'streaming');
-          });
-          break;
-        case 'response':
-          httpRegion.hooks.onResponse.addHook(models.ActionType.js, async (response, context) => {
-            context.variables.response = response;
-            await executeScriptData(scriptData, context, 'response');
-          });
-          break;
-        case 'after':
-          httpRegion.hooks.execute.addHook(models.ActionType.js, async context => {
-            await executeScriptData(scriptData, context, 'after');
-          });
-          break;
-        case 'request':
-          httpRegion.hooks.onRequest.addHook(models.ActionType.js, async (_request, context) => {
-            await executeScriptData(scriptData, context, 'request');
-          });
-          break;
-        case 'responseLogging':
-          httpRegion.hooks.responseLogging.addHook(models.ActionType.js, async (response, context) => {
-            const originalResponse = context.variables.response;
-            context.variables.response = response;
-            await executeScriptData(scriptData, context, 'responseLogging');
-            context.variables.response = originalResponse;
-          });
-          break;
-        default:
-          httpRegion.hooks.execute.addInterceptor(new BeforeJavascriptHookInterceptor(everyRequestScript.scriptData));
-          break;
-      }
-    }
-  }
+function addStreamingHook(hooks: { onStreaming: models.OnStreaming }, scriptData: ScriptData) {
+  hooks.onStreaming.addHook(models.ActionType.js, async context => {
+    await executeScriptData(scriptData, context, 'streaming');
+  });
 }
 
-export class BeforeJavascriptHookInterceptor implements models.HookInterceptor<models.ProcessorContext, boolean> {
-  constructor(private readonly scriptData: ScriptData) {}
-  async beforeTrigger(
-    context: models.HookTriggerContext<models.ProcessorContext, boolean | undefined>
-  ): Promise<boolean | undefined> {
-    return await executeScriptData(this.scriptData, context.arg, 'before');
-  }
+function addRequestHook(hooks: { onRequest: models.OnRequestHook }, scriptData: ScriptData) {
+  hooks.onRequest.addHook(models.ActionType.js, async (_request, context) => {
+    await executeScriptData(scriptData, context, 'request');
+  });
 }
+
+function addResponseHook(hooks: { onResponse: models.OnResponseHook }, scriptData: ScriptData) {
+  hooks.onResponse.addHook(models.ActionType.js, async (response, context) => {
+    context.variables.response = response;
+    await executeScriptData(scriptData, context, 'response');
+  });
+}
+function addResponseLoggingHook(hooks: { responseLogging: models.ResponseLoggingHook }, scriptData: ScriptData) {
+  hooks.responseLogging.addHook(models.ActionType.js, async (response, context) => {
+    const originalResponse = context.variables.response;
+    context.variables.response = response;
+    await executeScriptData(scriptData, context, 'responseLogging');
+    context.variables.response = originalResponse;
+  });
+}
+
 export class AfterJavascriptHookInterceptor implements models.HookInterceptor<models.ProcessorContext, boolean> {
   constructor(private readonly scriptData: ScriptData) {}
   async afterTrigger(

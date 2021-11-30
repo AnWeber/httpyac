@@ -120,8 +120,9 @@ export class GrpcClientAction implements models.HttpRegionAction {
       stream => {
         if (stream instanceof Writable || stream instanceof Duplex) {
           utils.setVariableInContext({ grpcStream: stream }, context);
-          context.httpRegion.hooks.onStreaming
+          context.httpFile.hooks.onStreaming
             .trigger(context)
+            .then(() => context.httpRegion.hooks.onStreaming.trigger(context))
             .then(() => stream.end())
             .catch(err => reject(err));
         }

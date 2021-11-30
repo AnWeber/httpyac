@@ -54,14 +54,28 @@ export async function processHttpRegionActions(
 
     context.variables = initRegionScopedVariables(context);
 
+    if (
+      !isGlobalHttpRegion(context.httpRegion) &&
+      (await context.httpFile.hooks.beforeHttpRegion.trigger(context)) === models.HookCancel
+    ) {
+      return false;
+    }
     const result = await context.httpRegion.hooks.execute.trigger(context);
+    const validResult = result !== models.HookCancel && result.every(obj => !!obj);
+    if (
+      validResult &&
+      !isGlobalHttpRegion(context.httpRegion) &&
+      (await context.httpFile.hooks.afterHttpRegion.trigger(context)) === models.HookCancel
+    ) {
+      return false;
+    }
     const processedHttpRegion = toProcessedHttpRegion(context);
     processedHttpRegion.response = await logResponse(processedHttpRegion?.response, context);
     if (context.processedHttpRegions && !isGlobalHttpRegion(context.httpRegion)) {
       context.processedHttpRegions.push(processedHttpRegion);
     }
     delete context.httpRegion.response;
-    return result !== models.HookCancel && result.every(obj => !!obj);
+    return validResult;
   } finally {
     if (!context.httpRegion.metaData.noLog) {
       context.scriptConsole?.flush?.();

@@ -6,7 +6,6 @@ import { parseGraphql } from './gqlHttpRegionParser';
 import { parseGrpcLine } from './grpcHttpRegionParser';
 import { parseIntellijScript } from './intellijHttpRegionParser';
 import { parseJavascript } from './javascriptHttpRegionParser';
-import { injectOnEveryRequestJavascript } from './javascriptHttpRegionParser';
 import { parseMetaData } from './metaHttpRegionParser';
 import { parseMQTTLine } from './mqttHttpRegionParser';
 import { injectNote } from './noteMetaHttpRegionParser';
@@ -67,7 +66,6 @@ export function initParseEndHook(): models.ParseEndRegionHook {
 
   hook.addHook('registerCancelExecutionIntercepter', registerCancelExecutionIntercepter);
   hook.addHook(ParserId.note, injectNote);
-  hook.addHook(ParserId.javascript, injectOnEveryRequestJavascript);
   hook.addHook(ParserId.response, closeResponseBody);
   hook.addHook(ParserId.requestBody, closeRequestBody);
 
