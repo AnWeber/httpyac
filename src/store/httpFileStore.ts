@@ -1,3 +1,4 @@
+import * as httpyac from '..';
 import { initOnRequestHook, initOnResponseHook } from '../actions';
 import { fileProvider, log, userInteractionProvider } from '../io';
 import * as models from '../models';
@@ -184,6 +185,7 @@ export class HttpFileStore {
     if (options.config) {
       const api: models.HttpyacHooksApi = {
         version: '1.0.0',
+        httpyac,
         rootDir: httpFile.rootDir,
         config: options.config,
         httpFile,
