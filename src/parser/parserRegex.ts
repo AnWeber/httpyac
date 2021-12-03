@@ -25,7 +25,6 @@ export const ParserRegex = {
     grpcLine: /^\s*(GRPC|grpc)\s*(?<url>.+?)\s*$/u,
     grpcProtocol: /^\s*grpc:\/\/(?<url>.+?)\s*$/u,
     grpcUrl: /^\s*(grpc:\/\/)?(?<server>.+?)\/(?<service>[^/]+?)\/(?<method>[^/]+?)$/u,
-    sslAuthorization: /^\s*(ssl)\s+(?<root>[^\s]*)\s+(?<cert>[^\s]*)\s+(?<key>[^\s]*)\s*$/iu,
   },
   stream: {
     websocketLine: /^\s*(ws|wss|websocket)\s*(?<url>.+?)\s*$/iu,
@@ -55,7 +54,7 @@ export const ParserRegex = {
     for: /^\s*for\s*(?<counter>\d*)\s*$/u,
     while: /^\s*while\s*(?<expression>.*)\s*$/u,
     rateLimit:
-      /^\s*(slot(:)?\s*(?<slot>[^\s]+))?\s*(minIdleTime(:)?\s*(?<minIdleTime>\d*))?\s*(max(:)?\s*(?<max>\d*)\s*expire(:)?\s*(?<expire>\d*))?\s*$/iu,
+      /^\s*(slot(:)?\s*(?<slot>[^\s]+))?\s*(minIdleTime(:)?\s*(?<minIdleTime>\d*))?\s*(max(:)?\s*(?<max>\d*))\s*(expire(:)?\s*(?<expire>\d*))?\s*$/iu,
   },
   request: {
     fileImport: /^<(?:(?<injectVariables>@)(?<encoding>\w+)?)?\s+(?<fileName>.+?)\s*$/u,
