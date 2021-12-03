@@ -23,7 +23,7 @@ export async function parseGraphql(
     if (context.httpRegion.request) {
       gqlData.query = gqlContent.gql;
       if (gqlContent.name) {
-        gqlData.operationName = gqlContent.name;
+        gqlData.operationName = removeDirectives(gqlContent.name);
         if (!context.httpRegion.metaData.name) {
           context.httpRegion.metaData.name = gqlContent.name;
         }
@@ -48,6 +48,17 @@ export async function parseGraphql(
     };
   }
   return false;
+}
+
+function removeDirectives(operationName: string) {
+  if (operationName) {
+    return operationName
+      .trim()
+      .split(' ')
+      .filter(name => !!name && !name.startsWith('@'))
+      .pop();
+  }
+  return operationName;
 }
 
 function getGqlFragments(context: models.ParserContext) {
