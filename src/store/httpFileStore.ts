@@ -1,4 +1,3 @@
-import * as httpyac from '..';
 import { initOnRequestHook, initOnResponseHook } from '../actions';
 import { fileProvider, log, userInteractionProvider } from '../io';
 import * as models from '../models';
@@ -185,7 +184,6 @@ export class HttpFileStore {
     if (options.config) {
       const api: models.HttpyacHooksApi = {
         version: '1.0.0',
-        httpyac,
         rootDir: httpFile.rootDir,
         config: options.config,
         httpFile,
@@ -194,6 +192,7 @@ export class HttpFileStore {
         fileProvider,
         sessionStore,
         userInteractionProvider,
+        utils,
         getHookCancel: () => HookCancel,
       };
       for (const [plugin, hook] of Object.entries(hooks)) {
