@@ -1,4 +1,4 @@
-import * as httpyac from '..';
+import * as utils from '../utils';
 import { EnvironmentConfig } from './environmentConfig';
 import { FileProvider } from './fileProvider';
 import { HookCancel } from './hook';
@@ -11,7 +11,6 @@ import { UserInteractonProvider } from './userInteractonProvider';
 
 export interface HttpyacHooksApi {
   readonly version: string;
-  readonly httpyac: typeof httpyac;
   readonly rootDir?: PathLike;
   readonly httpFile: Readonly<HttpFile>;
   readonly config: EnvironmentConfig;
@@ -20,5 +19,6 @@ export interface HttpyacHooksApi {
   readonly fileProvider: FileProvider;
   readonly sessionStore: SessionStore;
   readonly userInteractionProvider: UserInteractonProvider;
+  readonly utils: typeof utils;
   getHookCancel(): typeof HookCancel;
 }
