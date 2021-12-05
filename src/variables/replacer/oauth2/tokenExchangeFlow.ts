@@ -1,6 +1,6 @@
-import { ProcessorContext } from '../../../models';
 import * as utils from '../../../utils';
 import { OpenIdConfiguration, assertConfiguration } from './openIdConfiguration';
+import { OpenIdFlowContext } from './openIdFlow';
 import { OpenIdInformation, requestOpenIdInformation } from './openIdInformation';
 import encodeUrl from 'encodeurl';
 
@@ -15,7 +15,7 @@ export class TokenExchangeFlow {
   static async perform(
     config: OpenIdConfiguration,
     openIdInformation: OpenIdInformation,
-    context: ProcessorContext
+    context: OpenIdFlowContext
   ): Promise<OpenIdInformation | false> {
     if (openIdInformation) {
       utils.report(context, 'execute OAuth2 token exchange flow');

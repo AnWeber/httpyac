@@ -1,11 +1,11 @@
 import * as utils from '../utils';
 import { initIOProvider } from './initCliProvider';
+import { oauth2Command } from './oauth2';
 import { sendCommand } from './send';
-import { SendOptions } from './send/options';
 import { Command } from 'commander';
 import { join } from 'path';
 
-export async function execute(rawArgs: string[]): Promise<SendOptions | undefined> {
+export async function execute(rawArgs: string[]): Promise<void> {
   try {
     initIOProvider();
     const program = new Command();
@@ -13,12 +13,18 @@ export async function execute(rawArgs: string[]): Promise<SendOptions | undefine
     program
       .version(packageJson?.version || '0.0.1')
       .description('httpYac - Quickly and easily send REST, SOAP, GraphQL and gRPC requests')
+      .addCommand(oauth2Command())
       .addCommand(sendCommand(), { isDefault: true });
     await program.parseAsync(rawArgs);
-
-    return program.opts<SendOptions>();
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
+    if (!process.exitCode) {
+      process.exitCode = 1;
+    }
+    throw err;
+  } finally {
+    // needed because of async
+    // eslint-disable-next-line node/no-process-exit
+    process.exit();
   }
-  return undefined;
 }

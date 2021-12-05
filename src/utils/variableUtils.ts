@@ -39,6 +39,22 @@ export async function replaceFilePath<T>(
   return undefined;
 }
 
+export function expandVariable(value: unknown, variables: models.Variables): unknown {
+  if (value && isString(value)) {
+    let result = value;
+    let match: RegExpExecArray | null;
+    const variableRegex = /\{{2}([a-zA-Z0-9_]+)\}{2}/gu;
+    while ((match = variableRegex.exec(result)) !== null) {
+      const [searchValue, variableName] = match;
+      const val = expandVariable(variables[variableName], variables);
+      variables[variableName] = val;
+      result = result.replace(searchValue, `${val}`);
+    }
+    return result;
+  }
+  return value;
+}
+
 export function setVariableInContext(variables: models.Variables, context: models.ProcessorContext) {
   Object.assign(context.variables, variables);
   const envKey = toEnvironmentKey(context.httpFile.activeEnvironment);

@@ -120,7 +120,7 @@ export class HttpFileStore {
     this.storeCache.length = 0;
   }
 
-  private async initHttpFile(fileName: models.PathLike, options: HttpFileStoreOptions) {
+  async initHttpFile(fileName: models.PathLike, options: HttpFileStoreOptions) {
     const absoluteFileName = (await utils.toAbsoluteFilename(fileName, options.workingDir)) || fileName;
 
     const rootDir = await utils.findRootDirOfFile(

@@ -47,7 +47,7 @@ export interface ProcessorContext extends HttpRegionSendContext {
 
 export function isProcessorContext(context: unknown): context is ProcessorContext {
   const test = context as ProcessorContext;
-  return !!test?.httpClient && !!test?.httpFile && !!test?.variables && !!test?.config;
+  return !!test?.httpClient && !!test?.httpRegion && !!test?.httpFile && !!test?.variables && !!test?.config;
 }
 
 export type SendContext = HttpRegionSendContext | HttpFileSendContext | HttpRegionsSendContext;

@@ -1,5 +1,6 @@
 import { log, userInteractionProvider } from '../../../io';
 import { Variables } from '../../../models';
+import * as utils from '../../../utils';
 import get from 'lodash/get';
 import { URL } from 'url';
 
@@ -24,7 +25,12 @@ export interface OpenIdConfiguration {
 }
 
 function getVariable(variables: Variables, variablePrefix: string, name: string): string {
-  return (variables[`${variablePrefix}_${name}`] || get(variables, `${variablePrefix}.${name}`)) as string;
+  const value = variables[`${variablePrefix}_${name}`] || get(variables, `${variablePrefix}.${name}`);
+  const expandedValue = utils.expandVariable(value, variables);
+  if (utils.isString(expandedValue)) {
+    return expandedValue;
+  }
+  return '';
 }
 
 function getUrl(variables: Variables, variablePrefix: string, name: string, defaultUrl: string): URL {
@@ -36,7 +42,10 @@ function getUrl(variables: Variables, variablePrefix: string, name: string, defa
   }
 }
 
-export function getOpenIdConfiguration(variablePrefix: string, variables: Variables): OpenIdConfiguration | false {
+export function getOpenIdConfiguration(
+  variablePrefix: string | undefined,
+  variables: Variables
+): OpenIdConfiguration | false {
   if (variablePrefix) {
     const config: OpenIdConfiguration = {
       variablePrefix,

@@ -68,7 +68,7 @@ async function sendHttpFile(context: models.HttpFileSendContext): Promise<boolea
   return true;
 }
 
-async function createEmptyProcessorContext<T extends models.VariableProviderContext>(
+export async function createEmptyProcessorContext<T extends models.VariableProviderContext>(
   context: T
 ): Promise<
   T & {

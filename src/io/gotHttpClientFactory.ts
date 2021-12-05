@@ -1,11 +1,4 @@
-import {
-  HttpClient,
-  HttpClientContext,
-  HttpRequest,
-  HttpResponse,
-  RepeatOrder,
-  VariableProviderContext,
-} from '../models';
+import { HttpClient, HttpClientContext, HttpRequest, HttpResponse, RepeatOrder, EnvironmentConfig } from '../models';
 import * as utils from '../utils';
 import { log } from './logger';
 import { default as filesize } from 'filesize';
@@ -164,7 +157,7 @@ function getBody(body: unknown) {
   return undefined;
 }
 
-export function initHttpClient(content: VariableProviderContext): HttpClient {
+export function initHttpClient(content: { config?: EnvironmentConfig }): HttpClient {
   const request = {
     ...(content.config?.request || {}),
     proxy: content.config?.proxy,
