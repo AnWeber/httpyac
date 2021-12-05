@@ -1,32 +1,32 @@
-import { HttpRegion, HttpResponse, TestResult } from '../models';
-import { CliFilterOptions, CliOptions } from './cliOptions';
+import { HttpRegion, HttpResponse, TestResult } from '../../models';
+import { SendFilterOptions, SendOptions } from './options';
 
-export interface CliJsonOutput {
+export interface SendJsonOutput {
   _meta: {
     version: string;
   };
-  summary: CliRequestSummary & CliTestSummary;
-  requests: Array<CliOutputRequest>;
+  summary: SendRequestSummary & SendTestSummary;
+  requests: Array<SendOutputRequest>;
 }
 
-export interface CliOutputRequest {
+export interface SendOutputRequest {
   fileName: string;
   name?: string;
   title?: string;
   description?: string;
   line?: number;
-  summary: CliTestSummary;
+  summary: SendTestSummary;
   response: HttpResponse | undefined;
   testResults?: Array<TestResult>;
 }
 
-export interface CliRequestSummary {
+export interface SendRequestSummary {
   totalRequests: number;
   failedRequests: number;
   successRequests: number;
 }
 
-export interface CliTestSummary {
+export interface SendTestSummary {
   totalTests: number;
   failedTests: number;
   successTests: number;
@@ -36,16 +36,16 @@ function sum(x: number, y: number) {
   return x + y;
 }
 
-export function toCliJsonOutput(context: Record<string, Array<HttpRegion>>, options: CliOptions): CliJsonOutput {
-  const requests: Array<CliOutputRequest> = [];
+export function toSendJsonOutput(context: Record<string, Array<HttpRegion>>, options: SendOptions): SendJsonOutput {
+  const requests: Array<SendOutputRequest> = [];
   for (const [fileName, httpRegions] of Object.entries(context)) {
     requests.push(
       ...httpRegions.map(httpRegion => {
         let output = options.output;
-        if (options.outputFailed && httpRegion.testResults?.some?.(test => !test.result)) {
-          output = options.outputFailed;
+        if (options['output-failed'] && httpRegion.testResults?.some?.(test => !test.result)) {
+          output = options['output-failed'];
         }
-        const result: CliOutputRequest = {
+        const result: SendOutputRequest = {
           fileName,
           response: convertResponse(httpRegion.response, output),
           name: httpRegion.metaData?.name,
@@ -64,7 +64,7 @@ export function toCliJsonOutput(context: Record<string, Array<HttpRegion>>, opti
     );
   }
   let resultRequests = requests;
-  if (options.filter === CliFilterOptions.onlyFailed) {
+  if (options.filter === SendFilterOptions.onlyFailed) {
     resultRequests = requests.filter(obj => obj.summary.failedTests > 0);
   }
   return {

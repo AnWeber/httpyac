@@ -8,6 +8,15 @@ import { join, isAbsolute, dirname } from 'path';
 export function initIOProvider(): void {
   initFileProvider();
   initUserInteractionProvider();
+  initFixTestSymbols();
+}
+
+function initFixTestSymbols() {
+  if (process.platform === 'win32') {
+    // https://github.com/nodejs/node-v0.x-archive/issues/7940
+    models.testSymbols.ok = '[x]';
+    models.testSymbols.error = '[-]';
+  }
 }
 
 function initFileProvider(): void {
