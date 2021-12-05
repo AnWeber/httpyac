@@ -242,7 +242,11 @@ export async function getEnviromentConfig(
 }
 
 function refreshStaticConfig(config: models.EnvironmentConfig) {
-  log.options.level = config?.log?.level ?? models.LogLevel.warn;
+  if (typeof config?.log?.level === 'undefined') {
+    log.options.level = models.LogLevel.warn;
+  } else {
+    log.options.level = config?.log?.level;
+  }
   if (config?.log?.supportAnsiColors === false) {
     chalk.level = 0;
   }
