@@ -1,3 +1,14 @@
+## 4.7.4 (2021-12-05)
+
+#### Feature
+
+- add new Command `httpyac oauth2` to support output of OAuth2 JWT Token (#138)
+
+#### Fix
+
+- remove `??` to support NodeJS v12 (#123)
+- oauth2 variables are expanded
+
 ## 4.7.3 (2021-11-30)
 
 #### Feature

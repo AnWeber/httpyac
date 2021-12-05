@@ -4,7 +4,7 @@
 
 # httpYac - Yet another Rest Client
 
-> httpyac CLI provides a command line interface to execute *.http and *.rest files. This can be used to quickly execute a single *.http file, but also to execute all files in a folder. httpyac supports HTTP, Rest, GraphQL, WebSocket und gRPC Requests
+> httpyac CLI provides a command line interface to execute _.http and _.rest files. This can be used to quickly execute a single \*.http file, but also to execute all files in a folder. httpyac supports HTTP, Rest, GraphQL, WebSocket und gRPC Requests
 
 <p align="center">
 <a href="https://httpyac.github.io/">
@@ -25,10 +25,9 @@ httpyac --version
 ```shell
 > httpyac --help
 
-usage: httpyac [options...] <file or glob pattern>
+usage: httpyac <file or glob pattern> [options]
        --all           execute all http requests in a http file
        --bail          stops when a test case fails
-       --editor        enter a new request and execute it
   -e   --env           list of environments
        --filter        filter requests output (only-failed)
   -h   --help          help
@@ -47,12 +46,8 @@ usage: httpyac [options...] <file or glob pattern>
        --timeout       maximum time allowed for connections
        --var           set variables
   -v   --verbose       make the operation more talkative
-       --version       version of httpyac
 
 ```
-
-> --editor option only works on linux and mac ([see](https://github.com/nodejs/node/issues/21771))
-
 
 ## Example
 
@@ -67,9 +62,10 @@ Authorization: Basic {{user}} {{password}}
 
 more [examples](https://httpyac.github.io/guide/examples) and [guide](https://httpyac.github.io/guide/)
 
-
 ## License
+
 [MIT License](LICENSE)
 
 ## Change Log
+
 [CHANGELOG](CHANGELOG.md)
