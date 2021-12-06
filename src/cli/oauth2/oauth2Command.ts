@@ -8,7 +8,7 @@ export function oauth2Command() {
     .description('generate oauth2 token')
     .option('-f, --flow <flow>', 'flow used for oauth2 token generation', 'client_credentials')
     .option('--prefix <prefix>', 'variable prefix used for variables')
-    .option('-e, --env  <env...>', 'list of environemnts')
+    .option('-e, --env  <env...>', 'list of environments')
     .option(
       '-o, --output <output>',
       'output format of response (access_token, refresh_token, response)',

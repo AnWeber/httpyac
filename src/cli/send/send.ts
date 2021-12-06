@@ -16,7 +16,7 @@ export function sendCommand() {
     .description('send/ execute http files')
     .argument('<fileName>', 'path to file or glob pattern')
     .option('-a, --all', 'execute all http requests in a http file')
-    .option('-e, --env  <env...>', 'list of environemnts')
+    .option('-e, --env  <env...>', 'list of environments')
     .option('--filter <filter>', ' filter requests output (only-failed)')
     .option('--insecure', 'allow insecure server connections when using ssl')
     .option('-i --interactive', 'do not exit the program after request, go back to selection')
