@@ -1,5 +1,6 @@
 import * as utils from '../src/utils/configUtils';
 import { createProgram } from '@/cli';
+import { Command } from 'commander';
 
 describe('version', () => {
   it('should print version', async () => {
@@ -12,6 +13,7 @@ describe('version', () => {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     const mockStdout = jest.spyOn(process.stdout, 'write').mockImplementation(() => {});
     jest.spyOn(utils, 'parseJson').mockResolvedValue({ version: '1.2.3' });
+    jest.spyOn(Command.prototype, 'addCommand').mockImplementation(cmd => cmd);
 
     const program = await createProgram();
 
