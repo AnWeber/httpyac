@@ -99,7 +99,7 @@ function toNumber(value: string) {
   return undefined;
 }
 
-function convertCliOptionsToContext(cliOptions: SendOptions) {
+export function convertCliOptionsToContext(cliOptions: SendOptions) {
   const context: Omit<models.HttpFileSendContext, 'httpFile'> = {
     repeat: cliOptions.repeat
       ? {
