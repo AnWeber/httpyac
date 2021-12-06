@@ -30,7 +30,7 @@ jobs:
     - run: npm install
     - run: npm run lint
     - run: |
-        npm test
+        npm run test
         $LASTEXITCODE
     - run: npm run compile
     - name: Perform CodeQL Analysis
