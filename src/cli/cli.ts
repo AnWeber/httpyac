@@ -5,16 +5,21 @@ import { sendCommand } from './send';
 import { Command } from 'commander';
 import { join } from 'path';
 
+export async function createProgram() {
+  const program = new Command();
+  const packageJson = await utils.parseJson<Record<string, string>>(join(__dirname, '../package.json'));
+  program
+    .version(packageJson?.version || '0.0.1')
+    .description('httpYac - Quickly and easily send REST, SOAP, GraphQL and gRPC requests')
+    .addCommand(oauth2Command())
+    .addCommand(sendCommand(), { isDefault: true });
+  return program;
+}
+
 export async function execute(rawArgs: string[]): Promise<void> {
   try {
     initIOProvider();
-    const program = new Command();
-    const packageJson = await utils.parseJson<Record<string, string>>(join(__dirname, '../package.json'));
-    program
-      .version(packageJson?.version || '0.0.1')
-      .description('httpYac - Quickly and easily send REST, SOAP, GraphQL and gRPC requests')
-      .addCommand(oauth2Command())
-      .addCommand(sendCommand(), { isDefault: true });
+    const program = await createProgram();
     await program.parseAsync(rawArgs);
   } catch (err) {
     console.error(err);
