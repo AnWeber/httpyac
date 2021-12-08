@@ -120,12 +120,12 @@ export async function logResponse(
 ): Promise<models.HttpResponse | undefined> {
   if (response) {
     const clone = cloneResponse(response);
-    const fileResult = await context.httpFile.hooks.responseLogging.trigger(clone, context);
-    if (fileResult === models.HookCancel) {
-      return undefined;
-    }
     const regionResult = await context.httpRegion.hooks.responseLogging.trigger(clone, context);
     if (regionResult === models.HookCancel) {
+      return undefined;
+    }
+    const fileResult = await context.httpFile.hooks.responseLogging.trigger(clone, context);
+    if (fileResult === models.HookCancel) {
       return undefined;
     }
     if (!context.httpRegion.metaData.noLog && clone && context.logResponse) {
