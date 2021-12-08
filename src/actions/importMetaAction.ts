@@ -1,41 +1,43 @@
 import { fileProvider, log } from '../io';
-import { ActionType, HttpRegionAction, ProcessorContext, HttpFile } from '../models';
+import * as models from '../models';
 import { HttpFileStore } from '../store';
-import { executeGlobalScripts, toAbsoluteFilename } from '../utils';
+import * as utils from '../utils';
 
-export interface ImportProcessorContext extends ProcessorContext {
+export interface ImportProcessorContext extends models.ProcessorContext {
   options: {
-    httpFiles?: Array<HttpFile>;
+    httpFiles?: Array<models.HttpFile>;
   };
 }
 
-export class ImportMetaAction implements HttpRegionAction {
-  id = ActionType.import;
+export class ImportMetaAction implements models.HttpRegionAction {
+  id = models.ActionType.import;
 
   constructor(private readonly fileName: string, private readonly httpFileStore: HttpFileStore) {}
 
   async process(context: ImportProcessorContext): Promise<boolean> {
-    const absoluteFileName = await toAbsoluteFilename(this.fileName, fileProvider.dirname(context.httpFile.fileName));
-    if (absoluteFileName) {
+    const httpFile = await utils.replaceFilePath(this.fileName, context, async (absoluteFileName: models.PathLike) => {
       log.trace(`parse imported file ${absoluteFileName}`);
       const text = await fileProvider.readFile(absoluteFileName, 'utf-8');
-      const importHttpFile = await this.httpFileStore.getOrCreate(absoluteFileName, () => Promise.resolve(text), 0, {
+      const httpFile = await this.httpFileStore.getOrCreate(absoluteFileName, () => Promise.resolve(text), 0, {
         workingDir: context.httpFile.rootDir,
         config: context.config,
         activeEnvironment: context.httpFile.activeEnvironment,
       });
       if (!context.options.httpFiles) {
-        context.options.httpFiles = [importHttpFile];
+        context.options.httpFiles = [httpFile];
       } else {
-        context.options.httpFiles.push(importHttpFile);
+        context.options.httpFiles.push(httpFile);
       }
+      return httpFile;
+    });
 
+    if (httpFile) {
       const cloneContext: ImportProcessorContext = {
         ...context,
-        httpFile: importHttpFile,
+        httpFile,
       };
-      log.trace(`execute global scripts for import ${absoluteFileName}`);
-      return await executeGlobalScripts(cloneContext);
+      log.trace(`execute global scripts for import ${httpFile.fileName}`);
+      return await utils.executeGlobalScripts(cloneContext);
     }
     return false;
   }
