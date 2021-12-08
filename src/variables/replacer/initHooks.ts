@@ -6,7 +6,7 @@ import { digestAuthVariableReplacer } from './digestAuthVariableReplacer';
 import { escapeVariableReplacer } from './escapeVariableReplacer';
 import { hostVariableReplacer } from './hostVariableReplacer';
 import { intellijVariableReplacer } from './intellijVariableReplacer';
-import { javascriptVariableReplacer } from './javascriptVariableReplacer';
+import { replaceJavascriptExpressions } from './javascriptVariableReplacer';
 import { oauth2VariableReplacer } from './oauth2VariableReplacer';
 import { restClientVariableReplacer } from './restClientVariableReplacer';
 import { showInputBoxVariableReplacer } from './showInputBoxVariableReplacer';
@@ -35,7 +35,7 @@ export function initReplaceVariableHook(): ReplaceVariableHook {
   hook.addHook(VariableReplacerType.restClientDynamic, restClientVariableReplacer);
   hook.addHook(VariableReplacerType.intellijDynamic, intellijVariableReplacer);
   hook.addHook(VariableReplacerType.host, hostVariableReplacer);
-  hook.addHook(VariableReplacerType.javascript, javascriptVariableReplacer);
+  hook.addHook(VariableReplacerType.javascript, replaceJavascriptExpressions);
   hook.addHook(VariableReplacerType.oauth2, oauth2VariableReplacer);
   hook.addHook(VariableReplacerType.aws, awsAuthVariableReplacer);
   hook.addHook(VariableReplacerType.clientCertificate, clientCertVariableReplacer);

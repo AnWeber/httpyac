@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import * as models from '@/models';
 import { provideConfigEnvironments, provideConfigVariables } from '@/variables/provider/configVariableProvider';
 
 describe('configVariableProvider', () => {
@@ -8,7 +8,7 @@ describe('configVariableProvider', () => {
         config: {
           environments: { $shared: {}, $default: {}, test: {} },
         },
-      } as any);
+      } as unknown as models.VariableProviderContext);
       expect(result).toEqual(['test']);
     });
   });
@@ -18,7 +18,7 @@ describe('configVariableProvider', () => {
         config: {
           environments: { $shared: { isShared: true }, $default: { isDefault: true }, test: { isTest: true } },
         },
-      } as any);
+      } as unknown as models.VariableProviderContext);
       expect(result).toEqual({ isShared: true, isTest: true });
     });
     it('undefined should return shared and default', async () => {
@@ -26,7 +26,7 @@ describe('configVariableProvider', () => {
         config: {
           environments: { $shared: { isShared: true }, $default: { isDefault: true }, test: { isTest: true } },
         },
-      } as any);
+      } as unknown as models.VariableProviderContext);
       expect(result).toEqual({ isShared: true, isDefault: true });
     });
     it('empty should return shared and default', async () => {
@@ -34,7 +34,7 @@ describe('configVariableProvider', () => {
         config: {
           environments: { $shared: { isShared: true }, $default: { isDefault: true }, test: { isTest: true } },
         },
-      } as any);
+      } as unknown as models.VariableProviderContext);
       expect(result).toEqual({ isShared: true, isDefault: true });
     });
   });

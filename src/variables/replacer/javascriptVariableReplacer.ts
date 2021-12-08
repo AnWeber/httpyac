@@ -3,7 +3,7 @@ import { ProcessorContext, VariableType } from '../../models';
 import { ParserRegex } from '../../parser';
 import * as utils from '../../utils';
 
-export async function javascriptVariableReplacer(
+export async function replaceJavascriptExpressions(
   text: unknown,
   type: VariableType | string,
   context: ProcessorContext
@@ -26,7 +26,7 @@ export async function javascriptVariableReplacer(
         } else if (value instanceof Date) {
           result = result.replace(searchValue, `${value.toISOString()}`);
         } else if (value) {
-          result = result.replace(searchValue, `${value}`);
+          result = result.replace(searchValue, `${JSON.stringify(value)}`);
         }
       } catch (err) {
         if (type === VariableType.variable) {
