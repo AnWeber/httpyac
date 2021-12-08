@@ -7,7 +7,7 @@ import { ok } from 'assert';
 export class IntellijHttpClient implements JetbrainsHttpClient {
   global: JetbrainsVariables;
   constructor(private readonly context: ProcessorContext) {
-    this.global = new IntellijVariables(context.variables, context.httpFile.activeEnvironment);
+    this.global = new IntellijVariables(context);
   }
   test(testName: string, func: () => void): void {
     testFactory(this.context)(testName, func);
