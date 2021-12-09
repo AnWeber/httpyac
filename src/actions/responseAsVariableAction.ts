@@ -10,12 +10,12 @@ export async function responseAsVariable(
   context.variables.response = response;
   if (context.httpRegion.metaData.name || context.httpRegion.metaData.jwt) {
     handleJWTMetaData(body, context);
-    handleNameMetaData(body, context);
+    handleNameMetaData(response, body, context);
   }
   return response;
 }
 
-function handleNameMetaData(body: unknown, context: models.ProcessorContext) {
+function handleNameMetaData(response: models.HttpResponse, body: unknown, context: models.ProcessorContext) {
   const { httpRegion } = context;
   if (httpRegion.metaData.name) {
     const name = httpRegion.metaData.name
@@ -23,7 +23,7 @@ function handleNameMetaData(body: unknown, context: models.ProcessorContext) {
       .replace(/\s/u, '_')
       .replace(/-./gu, value => value[1].toUpperCase());
     if (utils.isValidVariableName(name)) {
-      utils.setVariableInContext({ [name]: body }, context);
+      utils.setVariableInContext({ [name]: body, [`${name}Response`]: response }, context);
     } else {
       const message = `Javascript Keyword ${name} not allowed as name`;
       userInteractionProvider.showWarnMessage?.(message);
