@@ -1,3 +1,16 @@
+## 4.8.0 (2021-12-09)
+
+#### Feature
+
+- `@import` supports variable substitution (#151)
+- render objects as JSON while replacing variables (#146)
+- add httpResponse as named variable with `${name}Response` (#152)
+
+#### Fix
+
+- read all `*.env.json` as Intellij Environment Files (AnWeber/vscode-httpyac#94)
+- Intellij `client.global.set` really changes variables for this run (#150)
+
 ## 4.7.4 (2021-12-05)
 
 #### Feature
