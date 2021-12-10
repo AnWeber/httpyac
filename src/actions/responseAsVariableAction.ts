@@ -20,7 +20,7 @@ function handleNameMetaData(response: models.HttpResponse, body: unknown, contex
   if (httpRegion.metaData.name) {
     const name = httpRegion.metaData.name
       .trim()
-      .replace(/\s/u, '_')
+      .replace(/\s/gu, '-')
       .replace(/-./gu, value => value[1].toUpperCase());
     if (utils.isValidVariableName(name)) {
       utils.setVariableInContext({ [name]: body, [`${name}Response`]: response }, context);
