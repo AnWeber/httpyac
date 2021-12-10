@@ -1,3 +1,9 @@
+## 4.8.1 (2021-12-10)
+
+#### Fix
+
+- really read all `*.env.json` as Intellij Environment Files (AnWeber/vscode-httpyac#94)
+
 ## 4.8.0 (2021-12-09)
 
 #### Feature

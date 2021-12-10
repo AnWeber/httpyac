@@ -7,36 +7,37 @@ export async function provideIntellijEnvironments(context: VariableProviderConte
 }
 
 async function getAllEnvironmentVariables(context: VariableProviderContext) {
-  const files: Array<string> = [];
+  const envJsonFiles: Array<PathLike> = [];
+
+  const envJsonFilter = (file: string) => file.endsWith('.env.json');
 
   const globalEnv = process.env.HTTPYAC_ENV;
   if (globalEnv && utils.isString(globalEnv)) {
     const globalEnvAbsolute = await utils.toAbsoluteFilename(globalEnv, context.httpFile.rootDir);
     if (globalEnvAbsolute) {
-      files.push(...(await fileProvider.readdir(globalEnvAbsolute)));
+      envJsonFiles.push(...(await readAbsoulteDirs(globalEnvAbsolute, envJsonFilter)));
     }
   }
   if (context.httpFile.rootDir) {
-    files.push(...(await fileProvider.readdir(context.httpFile.rootDir)));
+    envJsonFiles.push(...(await readAbsoulteDirs(context.httpFile.rootDir, envJsonFilter)));
   }
   if (context.config?.envDirName) {
     const absolute = await utils.toAbsoluteFilename(context.config.envDirName, context.httpFile.rootDir);
     if (absolute) {
-      files.push(...(await fileProvider.readdir(absolute)));
+      envJsonFiles.push(...(await readAbsoulteDirs(absolute, envJsonFilter)));
     }
     const dirOfFile = fileProvider.dirname(context.httpFile.fileName);
     if (dirOfFile) {
-      files.push(...(await fileProvider.readdir(dirOfFile)));
+      envJsonFiles.push(...(await readAbsoulteDirs(dirOfFile, envJsonFilter)));
     }
   }
-  const envJsonFiles = files.filter(file => file.endsWith('.env.json'));
   const environments: Record<string, Variables> = {};
   for (const file of envJsonFiles) {
     const envs = await getEnvironmentVariables(file);
     if (envs) {
       for (const [key, value] of Object.entries(envs)) {
         if (environments[key]) {
-          if (!file.endsWith('private.env.json')) {
+          if (!fileProvider.toString(file).endsWith('private.env.json')) {
             log.warn(`Multiple files with environment ${key} were found.`);
           }
           Object.assign(environments[key], value);
@@ -47,6 +48,11 @@ async function getAllEnvironmentVariables(context: VariableProviderContext) {
     }
   }
   return environments;
+}
+
+async function readAbsoulteDirs(dir: PathLike, filter: (file: string) => boolean) {
+  const files = await fileProvider.readdir(dir);
+  return files.filter(filter).map(file => fileProvider.joinPath(dir, file));
 }
 
 export async function provideIntellijVariables(
