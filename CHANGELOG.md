@@ -3,6 +3,7 @@
 #### Fix
 
 - replace all whitespace in meta data name and use camelCase instead of underscore (#154)
+- support nested `envDirName` (AnWeber/vscode-httpyac#93)
 
 ## 4.8.1 (2021-12-10)
 
