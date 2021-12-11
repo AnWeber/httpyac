@@ -84,7 +84,7 @@ export async function findRootDir(
       if (dirFiles.some(obj => file.startsWith(obj))) {
         const dir = fileProvider.joinPath(currentDir, file);
         if (await fileProvider.exists(dir)) {
-          return fileProvider.dirname(dir);
+          return currentDir;
         }
       }
     }
