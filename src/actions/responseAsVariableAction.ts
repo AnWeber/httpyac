@@ -1,4 +1,4 @@
-import { log, userInteractionProvider } from '../io';
+import { log } from '../io';
 import * as models from '../models';
 import * as utils from '../utils';
 
@@ -22,13 +22,7 @@ function handleNameMetaData(response: models.HttpResponse, body: unknown, contex
       .trim()
       .replace(/\s/gu, '-')
       .replace(/-./gu, value => value[1].toUpperCase());
-    if (utils.isValidVariableName(name)) {
-      utils.setVariableInContext({ [name]: body, [`${name}Response`]: response }, context);
-    } else {
-      const message = `Javascript Keyword ${name} not allowed as name`;
-      userInteractionProvider.showWarnMessage?.(message);
-      log.warn(message);
-    }
+    utils.setVariableInContext({ [name]: body, [`${name}Response`]: response }, context);
   }
 }
 

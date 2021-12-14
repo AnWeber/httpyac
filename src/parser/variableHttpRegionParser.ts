@@ -1,4 +1,3 @@
-import { log, userInteractionProvider } from '../io';
 import * as models from '../models';
 import * as utils from '../utils';
 import { ParserRegex } from './parserRegex';
@@ -24,18 +23,12 @@ export async function parseVariable(
       }
       httpRegion.hooks.execute.addHook(VariableHookId, context => {
         context.options.replaceVariables = true;
-        if (utils.isValidVariableName(key)) {
-          utils.setVariableInContext(
-            {
-              [key]: value,
-            },
-            context
-          );
-        } else {
-          const message = `Javascript Keyword ${key} not allowed as variable`;
-          userInteractionProvider.showWarnMessage?.(message);
-          log.warn(message);
-        }
+        utils.setVariableInContext(
+          {
+            [key]: value,
+          },
+          context
+        );
         return true;
       });
 

@@ -105,7 +105,7 @@ export async function runScript(
       }
       return mod.require(id);
     },
-    ...options.context,
+    ...checkVariableNames(options.context),
   });
 
   const compiledWrapper = vm.runInContext(Module.wrap(`${EOL}${source}`), context, {
@@ -148,6 +148,21 @@ export async function evalExpression(expression: string, context: ProcessorConte
     lineOffset,
   });
   return value.$result;
+}
+
+function checkVariableNames(context: Record<string, unknown>) {
+  const result: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(context)) {
+    if (JAVASCRIPT_KEYWORDS.indexOf(key) < 0) {
+      const name = key
+        .trim()
+        .replace(/\s/gu, '-')
+        .replace(/-./gu, val => val[1].toUpperCase());
+      result[name] = value;
+    }
+  }
+  return result;
 }
 
 export const JAVASCRIPT_KEYWORDS = [
@@ -198,16 +213,3 @@ export const JAVASCRIPT_KEYWORDS = [
   'with',
   'yield',
 ];
-
-export function isValidVariableName(name: string): boolean {
-  if (JAVASCRIPT_KEYWORDS.indexOf(name) <= 0) {
-    try {
-      // eslint-disable-next-line no-new-func
-      Function(`var ${name}`);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  return false;
-}

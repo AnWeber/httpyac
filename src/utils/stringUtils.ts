@@ -34,3 +34,16 @@ export function stateGenerator(length = 30): string {
   }
   return result.join('');
 }
+
+export function toString(value: unknown): string | undefined {
+  if (isString(value) || typeof value === 'number') {
+    return `${value}`;
+  }
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+  if (value) {
+    return JSON.stringify(value);
+  }
+  return undefined;
+}

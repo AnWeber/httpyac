@@ -20,19 +20,18 @@ export async function replaceJavascriptExpressions(
       const [searchValue, jsVariable] = match;
 
       try {
-        const value = await utils.evalExpression(jsVariable, context);
-        if (utils.isString(value) || typeof value === 'number') {
-          result = result.replace(searchValue, `${value}`);
-        } else if (value instanceof Date) {
-          result = result.replace(searchValue, `${value.toISOString()}`);
-        } else if (value) {
-          result = result.replace(searchValue, `${JSON.stringify(value)}`);
+        const value = utils.toString(await utils.evalExpression(jsVariable, context));
+
+        if (value) {
+          result = result.replace(searchValue, value);
         }
       } catch (err) {
         if (type === VariableType.variable) {
           log.trace(`variable ${jsVariable} not defined`);
+          log.trace(err);
         } else {
-          throw err;
+          log.warn(`expression ${jsVariable} throws error`);
+          log.warn(err);
         }
       }
     }

@@ -7,6 +7,7 @@ import { escapeVariableReplacer } from './escapeVariableReplacer';
 import { hostVariableReplacer } from './hostVariableReplacer';
 import { intellijVariableReplacer } from './intellijVariableReplacer';
 import { replaceJavascriptExpressions } from './javascriptVariableReplacer';
+import { replaceVariableNames } from './nameVariableReplacer';
 import { oauth2VariableReplacer } from './oauth2VariableReplacer';
 import { restClientVariableReplacer } from './restClientVariableReplacer';
 import { showInputBoxVariableReplacer } from './showInputBoxVariableReplacer';
@@ -22,6 +23,7 @@ export enum VariableReplacerType {
   host = 'host',
   intellijDynamic = 'intellijDynamic',
   restClientDynamic = 'restClientDynamic',
+  name = 'name',
   javascript = 'javascript',
   showInputBox = 'showInputBox',
   showQuickPick = 'showQuickPick',
@@ -35,6 +37,7 @@ export function initReplaceVariableHook(): ReplaceVariableHook {
   hook.addHook(VariableReplacerType.restClientDynamic, restClientVariableReplacer);
   hook.addHook(VariableReplacerType.intellijDynamic, intellijVariableReplacer);
   hook.addHook(VariableReplacerType.host, hostVariableReplacer);
+  hook.addHook(VariableReplacerType.name, replaceVariableNames);
   hook.addHook(VariableReplacerType.javascript, replaceJavascriptExpressions);
   hook.addHook(VariableReplacerType.oauth2, oauth2VariableReplacer);
   hook.addHook(VariableReplacerType.aws, awsAuthVariableReplacer);
