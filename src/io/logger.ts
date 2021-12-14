@@ -69,6 +69,7 @@ export class Logger implements ConsoleLogHandler {
 }
 
 export const log: LogHandler = new Logger({
-  level: LogLevel.warn,
+  // TODO remove after jest transformer fix
+  level: 5, // LogLevel.warn,
   noTrace: true,
 });
