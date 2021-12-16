@@ -1,6 +1,5 @@
 import { fileProvider, log } from '../io';
 import * as models from '../models';
-import { HttpFileStore } from '../store';
 import * as utils from '../utils';
 
 export interface ImportProcessorContext extends models.ProcessorContext {
@@ -12,7 +11,7 @@ export interface ImportProcessorContext extends models.ProcessorContext {
 export class ImportMetaAction implements models.HttpRegionAction {
   id = models.ActionType.import;
 
-  constructor(private readonly fileName: string, private readonly httpFileStore: HttpFileStore) {}
+  constructor(private readonly fileName: string, private readonly httpFileStore: models.HttpFileStore) {}
 
   async process(context: ImportProcessorContext): Promise<boolean> {
     const httpFile = await utils.replaceFilePath(this.fileName, context, async (absoluteFileName: models.PathLike) => {

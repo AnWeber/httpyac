@@ -7,7 +7,7 @@ import { HttpFileHooks } from './httpFileHooks';
 import { LogHandler } from './logHandler';
 import { PathLike } from './pathLike';
 import { SessionStore } from './sessionStore';
-import { UserInteractonProvider } from './userInteractonProvider';
+import { UserInteractionProvider } from './userInteractionProvider';
 
 export interface HttpyacHooksApi {
   readonly version: string;
@@ -18,7 +18,7 @@ export interface HttpyacHooksApi {
   readonly log: LogHandler;
   readonly fileProvider: FileProvider;
   readonly sessionStore: SessionStore;
-  readonly userInteractionProvider: UserInteractonProvider;
+  readonly userInteractionProvider: UserInteractionProvider;
   readonly utils: typeof utils;
   getHookCancel(): typeof HookCancel;
 }

@@ -1,4 +1,4 @@
-export interface UserInteractonProvider {
+export interface UserInteractionProvider {
   showNote: (note: string) => Promise<boolean>;
   showInputPrompt: (message: string, defaultValue?: string, maskedInput?: boolean) => Promise<string | undefined>;
   showListPrompt: (message: string, values: string[]) => Promise<string | undefined>;

@@ -1,5 +1,4 @@
 import * as io from '../io';
-import { log } from '../io';
 import * as models from '../models';
 import { toEnvironmentKey } from './environmentUtils';
 import { toAbsoluteFilename } from './fsUtils';
@@ -11,7 +10,7 @@ export async function replaceVariables(
   context: models.ProcessorContext
 ): Promise<typeof models.HookCancel | unknown> {
   if (context.progress?.isCanceled?.()) {
-    log.trace('processs canceled by user');
+    io.log.trace('process canceled by user');
     return models.HookCancel;
   }
   return await context.httpFile.hooks.replaceVariable.trigger(text, type, context);

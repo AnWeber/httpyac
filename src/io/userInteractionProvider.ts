@@ -1,6 +1,6 @@
-import { UserInteractonProvider } from '../models';
+import { UserInteractionProvider } from '../models';
 
-export const userInteractionProvider: UserInteractonProvider = {
+export const userInteractionProvider: UserInteractionProvider = {
   showNote: async function showNote() {
     throw new Error('Not Implemented');
   },

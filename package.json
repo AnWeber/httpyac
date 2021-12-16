@@ -61,9 +61,6 @@
     ]
   },
   "devDependencies": {
-    "@babel/core": "^7.16.0",
-    "@babel/preset-env": "^7.16.4",
-    "@babel/preset-typescript": "^7.16.0",
     "@trivago/prettier-plugin-sort-imports": "^3.1.1",
     "@types/aws4": "^1.11.0",
     "@types/encodeurl": "^1.0.0",
@@ -77,9 +74,9 @@
     "@types/ws": "^8.2.2",
     "@typescript-eslint/eslint-plugin": "^5.6.0",
     "@typescript-eslint/parser": "^5.6.0",
-    "babel-jest": "^27.4.2",
     "concurrently": "^6.4.0",
     "esbuild": "^0.14.2",
+    "esbuild-jest": "^0.5.0",
     "eslint": "^8.4.1",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-node": "^11.1.0",
@@ -87,6 +84,7 @@
     "jest": "^27.4.3",
     "lint-staged": "^12.1.2",
     "lockfile-lint": "^4.6.2",
+    "mockttp": "^2.4.0",
     "prettier": "^2.5.1",
     "typescript": "^4.5.2"
   },
@@ -94,7 +92,6 @@
     "@grpc/grpc-js": "^1.4.4",
     "@grpc/proto-loader": "^0.6.7",
     "aws4": "^1.11.0",
-    "babel-plugin-module-resolver": "^4.1.0",
     "chalk": "^4.1.2",
     "clipboardy": "^2.3.0",
     "commander": "^8.3.0",

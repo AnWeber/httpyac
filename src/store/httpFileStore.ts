@@ -1,7 +1,6 @@
-import { initOnRequestHook, initOnResponseHook } from '../actions';
+import { initOnRequestHook, initOnResponseHook } from '../actions/initHooks';
 import { fileProvider, log, userInteractionProvider } from '../io';
 import * as models from '../models';
-import { HookCancel } from '../models';
 import { initParseEndHook, initParseHook, parseHttpFile } from '../parser';
 import { userSessionStore as sessionStore } from '../store';
 import * as utils from '../utils';
@@ -16,9 +15,7 @@ interface HttpFileStoreEntry {
   promise?: Promise<models.HttpFile>;
 }
 
-export type HttpFileStoreOptions = Omit<models.ParseOptions, 'httpFileStore'>;
-
-export class HttpFileStore {
+export class HttpFileStore implements models.HttpFileStore {
   private readonly storeCache: Array<HttpFileStoreEntry> = [];
 
   private getFromStore(fileName: models.PathLike, version: number) {
@@ -53,7 +50,7 @@ export class HttpFileStore {
     fileName: models.PathLike,
     getText: () => Promise<string>,
     version: number,
-    options: HttpFileStoreOptions
+    options: models.HttpFileStoreOptions
   ): Promise<models.HttpFile> {
     const httpFileStoreEntry: HttpFileStoreEntry = this.getFromStore(fileName, version);
     if (version > httpFileStoreEntry.version || !httpFileStoreEntry.httpFile) {
@@ -92,7 +89,7 @@ export class HttpFileStore {
     return httpFileStoreEntry.promise || Promise.resolve(httpFileStoreEntry.httpFile);
   }
 
-  async parse(fileName: models.PathLike, text: string, options: HttpFileStoreOptions): Promise<models.HttpFile> {
+  async parse(fileName: models.PathLike, text: string, options: models.HttpFileStoreOptions): Promise<models.HttpFile> {
     const httpFile = await this.initHttpFile(fileName, options);
     return await parseHttpFile(httpFile, text, this);
   }
@@ -120,7 +117,7 @@ export class HttpFileStore {
     this.storeCache.length = 0;
   }
 
-  async initHttpFile(fileName: models.PathLike, options: HttpFileStoreOptions) {
+  async initHttpFile(fileName: models.PathLike, options: models.HttpFileStoreOptions) {
     const absoluteFileName = (await utils.toAbsoluteFilename(fileName, options.workingDir)) || fileName;
 
     const rootDir = await utils.findRootDirOfFile(
@@ -151,7 +148,7 @@ export class HttpFileStore {
       activeEnvironment: options.activeEnvironment,
     };
 
-    options.config = await getEnviromentConfig(options.config, httpFile.rootDir);
+    options.config = await getEnvironmentConfig(options.config, httpFile.rootDir);
 
     const hooks: Record<string, models.ConfigureHooks> = {};
     if (rootDir) {
@@ -178,7 +175,7 @@ export class HttpFileStore {
 
   private async configureHooks(
     httpFile: models.HttpFile,
-    options: HttpFileStoreOptions,
+    options: models.HttpFileStoreOptions,
     hooks: Record<string, models.ConfigureHooks>
   ) {
     if (options.config) {
@@ -193,7 +190,7 @@ export class HttpFileStore {
         sessionStore,
         userInteractionProvider,
         utils,
-        getHookCancel: () => HookCancel,
+        getHookCancel: () => models.HookCancel,
       };
       for (const [plugin, hook] of Object.entries(hooks)) {
         try {
@@ -210,7 +207,7 @@ export class HttpFileStore {
   }
 }
 
-export async function getEnviromentConfig(
+export async function getEnvironmentConfig(
   config?: models.EnvironmentConfig,
   rootDir?: models.PathLike
 ): Promise<models.EnvironmentConfig> {

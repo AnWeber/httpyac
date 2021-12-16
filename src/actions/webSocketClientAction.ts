@@ -13,7 +13,7 @@ export class WebSocketClientAction implements models.HttpRegionAction {
     if (utils.isWebsocketRequest(request)) {
       return await utils.triggerRequestResponseHooks(async () => {
         if (request.url) {
-          utils.report(context, `reqeust websocket ${request.url}`);
+          utils.report(context, `request websocket ${request.url}`);
           return await this.requestWebsocket(request, context);
         }
         return false;

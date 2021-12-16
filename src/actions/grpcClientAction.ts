@@ -1,9 +1,10 @@
 import { log } from '../io';
 import * as models from '../models';
-import { ParserRegex, ProtoProcessorContext } from '../parser';
 import * as utils from '../utils';
 import * as grpc from '@grpc/grpc-js';
 import { Readable, Writable, Duplex } from 'stream';
+
+const GrpcUrlRegex = /^\s*(grpc:\/\/)?(?<server>.+?)\/(?<service>[^/]+?)\/(?<method>[^/]+?)$/u;
 
 interface GrpcError {
   details?: string;
@@ -18,14 +19,14 @@ type GrpcStreamAction = (stream: GrpcStream) => void;
 export class GrpcClientAction implements models.HttpRegionAction {
   id = models.ActionType.grpcClient;
 
-  async process(context: ProtoProcessorContext): Promise<boolean> {
+  async process(context: models.ProtoProcessorContext): Promise<boolean> {
     grpc.setLogger(log);
     const { request } = context;
     const protoDefinitions = context.options.protoDefinitions;
     if (utils.isGrpcRequest(request) && request?.url && protoDefinitions) {
       return await utils.triggerRequestResponseHooks(async () => {
         if (request.url) {
-          utils.report(context, `reqeust gRPC ${request.url}`);
+          utils.report(context, `request gRPC ${request.url}`);
           const serviceData = this.getService(request.url, protoDefinitions);
           if (serviceData.ServiceClass) {
             const client = new serviceData.ServiceClass(serviceData.server, this.getChannelCredentials(request));
@@ -208,7 +209,7 @@ export class GrpcClientAction implements models.HttpRegionAction {
   }
 
   private getService(url: string, protoDefinitions: Record<string, models.ProtoDefinition>) {
-    const urlMatch = ParserRegex.grpc.grpcUrl.exec(url);
+    const urlMatch = GrpcUrlRegex.exec(url);
     if (urlMatch && urlMatch.groups?.service) {
       const { server, service, method } = urlMatch.groups;
       const flatServices = this.flattenProtoDefintions(protoDefinitions);

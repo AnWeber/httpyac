@@ -24,7 +24,6 @@ export const ParserRegex = {
     proto: /^\s*proto\s+<\s+(?<fileName>.+)\s*$/u,
     grpcLine: /^\s*(GRPC|grpc)\s*(?<url>.+?)\s*$/u,
     grpcProtocol: /^\s*grpc:\/\/(?<url>.+?)\s*$/u,
-    grpcUrl: /^\s*(grpc:\/\/)?(?<server>.+?)\/(?<service>[^/]+?)\/(?<method>[^/]+?)$/u,
   },
   stream: {
     websocketLine: /^\s*(ws|wss|websocket)\s*(?<url>.+?)\s*$/iu,

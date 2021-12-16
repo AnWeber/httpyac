@@ -1,5 +1,8 @@
+import {
+  provideConfigEnvironments,
+  provideConfigVariables,
+} from '../../../src/variables/provider/configVariableProvider';
 import * as models from '@/models';
-import { provideConfigEnvironments, provideConfigVariables } from '@/variables/provider/configVariableProvider';
 
 describe('configVariableProvider', () => {
   describe('provideConfigEnvironments', () => {

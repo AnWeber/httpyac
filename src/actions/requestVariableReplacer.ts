@@ -25,21 +25,21 @@ export async function requestVariableReplacer(
 }
 
 async function replaceVariablesInBody(
-  replacedReqeust: models.Request,
+  replacedRequest: models.Request,
   context: models.ProcessorContext
 ): Promise<boolean> {
-  if (replacedReqeust.body) {
-    if (utils.isString(replacedReqeust.body)) {
-      const result = await utils.replaceVariables(replacedReqeust.body, models.VariableType.body, context);
+  if (replacedRequest.body) {
+    if (utils.isString(replacedRequest.body)) {
+      const result = await utils.replaceVariables(replacedRequest.body, models.VariableType.body, context);
       if (result === models.HookCancel) {
         return false;
       }
       if (utils.isString(result) || Buffer.isBuffer(result)) {
-        replacedReqeust.body = result;
+        replacedRequest.body = result;
       }
-    } else if (Array.isArray(replacedReqeust.body)) {
+    } else if (Array.isArray(replacedRequest.body)) {
       const replacedBody: Array<models.HttpRequestBodyLine> = [];
-      for (const obj of replacedReqeust.body) {
+      for (const obj of replacedRequest.body) {
         if (utils.isString(obj)) {
           const result = await utils.replaceVariables(obj, models.VariableType.body, context);
           if (result === models.HookCancel) {
@@ -52,7 +52,7 @@ async function replaceVariablesInBody(
           replacedBody.push(obj);
         }
       }
-      replacedReqeust.body = replacedBody;
+      replacedRequest.body = replacedBody;
     }
   }
   return true;

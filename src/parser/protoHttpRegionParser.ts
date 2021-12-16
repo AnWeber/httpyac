@@ -6,12 +6,6 @@ import * as parserUtils from './parserUtils';
 import { loadPackageDefinition } from '@grpc/grpc-js';
 import { load } from '@grpc/proto-loader';
 
-export interface ProtoProcessorContext extends models.ProcessorContext {
-  options: {
-    protoDefinitions?: Record<string, models.ProtoDefinition>;
-  };
-}
-
 export async function parseProtoImport(
   getLineReader: models.getHttpLineGenerator,
   context: models.ParserContext
@@ -45,7 +39,7 @@ export async function parseProtoImport(
         [
           parserUtils.parseComments,
           parserUtils.parseRequestHeaderFactory(protoDefinition.loaderOptions),
-          parserUtils.parseDefaultHeadersFactory((headers, context: ProtoProcessorContext) =>
+          parserUtils.parseDefaultHeadersFactory((headers, context: models.ProtoProcessorContext) =>
             Object.assign(context.options.protoDefinitions?.[protoDefinition.fileName].loaderOptions, headers)
           ),
         ],
@@ -73,7 +67,7 @@ export class ProtoImportAction implements models.HttpRegionAction {
 
   constructor(private readonly protoDefinition: models.ProtoDefinition) {}
 
-  async process(context: ProtoProcessorContext): Promise<boolean> {
+  async process(context: models.ProtoProcessorContext): Promise<boolean> {
     utils.report(context, `import proto ${this.protoDefinition.fileName}`);
     const definition = context.options.protoDefinitions?.[this.protoDefinition.fileName];
     if (definition) {
@@ -117,7 +111,7 @@ export class ProtoDefinitionCreationInterceptor implements ExecuteInterceptor {
   constructor(private readonly protoDefinition: models.ProtoDefinition) {}
 
   async beforeLoop(
-    context: models.HookTriggerContext<ProtoProcessorContext, boolean | undefined>
+    context: models.HookTriggerContext<models.ProtoProcessorContext, boolean | undefined>
   ): Promise<boolean | undefined> {
     context.arg.options.protoDefinitions = Object.assign({}, context.arg.options.protoDefinitions, {
       [this.protoDefinition.fileName]: {

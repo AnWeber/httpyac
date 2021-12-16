@@ -1,5 +1,5 @@
-import * as models from '@/models';
-import { replaceVariableNames } from '@/variables/replacer/nameVariableReplacer';
+import * as models from '../../../src/models';
+import { replaceVariableNames } from '../../../src/variables/replacer/nameVariableReplacer';
 
 describe('nameVariableReplacer', () => {
   describe('replaceVariableNames', () => {

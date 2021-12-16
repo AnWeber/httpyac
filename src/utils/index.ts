@@ -3,6 +3,7 @@ export * from './configUtils';
 export * from './environmentUtils';
 export * from './errorUtils';
 export * from './fsUtils';
+export * from './gotUtils';
 export * from './httpRegionUtils';
 export * from './httpStringUtils';
 export * from './logUtils';

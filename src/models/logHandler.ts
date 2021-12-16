@@ -1,7 +1,7 @@
 import { HttpRegion } from './httpRegion';
 import { HttpResponse } from './httpResponse';
 
-export enum LogLevel {
+export const enum LogLevel {
   trace = 1,
   debug = 2,
   warn = 5,

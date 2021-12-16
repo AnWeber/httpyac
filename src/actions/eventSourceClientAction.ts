@@ -11,7 +11,7 @@ export class EventSourceClientAction implements models.HttpRegionAction {
     if (utils.isEventSourceRequest(request)) {
       return await utils.triggerRequestResponseHooks(async () => {
         if (request.url) {
-          utils.report(context, `reqeust Server-Sent Events ${request.url}`);
+          utils.report(context, `request Server-Sent Events ${request.url}`);
           return await this.requestEventSource(request, context);
         }
         return false;

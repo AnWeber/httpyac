@@ -1,4 +1,4 @@
-import { ParserRegex } from '@/parser/parserRegex';
+import { ParserRegex } from '../../src/parser/parserRegex';
 
 describe('http header test', () => {
   it('is valid header', async () => {

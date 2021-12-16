@@ -1,6 +1,6 @@
+import { log } from '../io';
 import { HttpClient, HttpClientContext, HttpRequest, HttpResponse, RepeatOrder, EnvironmentConfig } from '../models';
-import * as utils from '../utils';
-import { log } from './logger';
+import { parseContentType } from './requestUtils';
 import { default as filesize } from 'filesize';
 import { default as got, OptionsOfUnknownResponseBody, CancelError, Response } from 'got';
 import { HttpProxyAgent } from 'http-proxy-agent';
@@ -129,7 +129,7 @@ function toHttpResponse(response: Response<unknown>): HttpResponse {
       headers: response.request.options.headers,
       body: getBody(response.request.options.body),
     },
-    contentType: utils.parseContentType(response.headers),
+    contentType: parseContentType(response.headers),
     meta: {
       ip: response.ip,
       redirectUrls: response.redirectUrls,
@@ -148,7 +148,7 @@ function toHttpResponse(response: Response<unknown>): HttpResponse {
 }
 
 function getBody(body: unknown) {
-  if (utils.isString(body)) {
+  if (typeof body === 'string') {
     return body;
   }
   if (Buffer.isBuffer(body)) {

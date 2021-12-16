@@ -1,5 +1,5 @@
-import { HttpFileStore } from '../store';
 import { HttpFile } from './httpFile';
+import { HttpFileStore } from './httpFileStore';
 import { HttpRegion } from './httpRegion';
 import { ParserContextData } from './parserContextData';
 

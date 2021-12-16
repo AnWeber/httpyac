@@ -182,7 +182,7 @@ export function toMarkdownTimings(timings: models.HttpTimings): Array<string> {
     result.push(`*TLS*: ${timings.tls} ms`);
   }
   if (timings.request) {
-    result.push(`*Reqeust*: ${timings.request} ms`);
+    result.push(`*Request*: ${timings.request} ms`);
   }
   if (timings.firstByte) {
     result.push(`*First Byte*: ${timings.firstByte} ms`);

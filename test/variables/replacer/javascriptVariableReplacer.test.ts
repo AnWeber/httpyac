@@ -1,5 +1,6 @@
-import * as models from '@/models';
-import { replaceJavascriptExpressions } from '@/variables/replacer/javascriptVariableReplacer';
+import { log } from '../../../src/io';
+import * as models from '../../../src/models';
+import { replaceJavascriptExpressions } from '../../../src/variables/replacer/javascriptVariableReplacer';
 
 describe('javascriptVariableReplacer', () => {
   describe('replaceJavascriptExpressions', () => {
@@ -94,6 +95,7 @@ describe('javascriptVariableReplacer', () => {
       expect(result).toEqual(`foo=3`);
     });
     it('should return non replaced value', async () => {
+      jest.spyOn(log, 'warn').mockImplementation();
       const result = await replaceJavascriptExpressions(`foo={{bar}}`, 'unittest', {
         variables: {},
         httpFile: {

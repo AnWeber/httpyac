@@ -1,5 +1,3 @@
-import { log } from '../io';
-
 interface BaseHookItem {
   id: string;
   before?: Array<string>;
@@ -121,31 +119,24 @@ export abstract class Hook<T, TReturn, TTriggerResult, TArg = undefined, TArg2 =
 
     while (context.index < context.length) {
       context.hookItem = this.items[context.index];
-      log.trace(`${this.id}: ${context.hookItem.id} started`);
-      try {
-        if ((await this.intercept(obj => obj.beforeTrigger, context)) === false) {
-          return HookCancel;
-        }
-
-        const result = await context.hookItem.action(context.arg, arg1, arg2);
-        if (result === HookCancel) {
-          return HookCancel;
-        }
-        if (this.bailOut && this.bailOut(result)) {
-          results.push(result);
-          return this.getMergedResults(results, arg);
-        }
-        results.push(result);
-        context.arg = this.getNextArg(result, arg);
-
-        if ((await this.intercept(obj => obj.afterTrigger, context)) === false) {
-          return HookCancel;
-        }
-        context.index++;
-      } catch (err) {
-        log.error(`${this.id}: ${context.hookItem.id} failed`);
-        throw err;
+      if ((await this.intercept(obj => obj.beforeTrigger, context)) === false) {
+        return HookCancel;
       }
+      const result = await context.hookItem.action(context.arg, arg1, arg2);
+      if (result === HookCancel) {
+        return HookCancel;
+      }
+      if (this.bailOut && this.bailOut(result)) {
+        results.push(result);
+        return this.getMergedResults(results, arg);
+      }
+      results.push(result);
+      context.arg = this.getNextArg(result, arg);
+
+      if ((await this.intercept(obj => obj.afterTrigger, context)) === false) {
+        return HookCancel;
+      }
+      context.index++;
     }
     if ((await this.intercept(obj => obj.afterLoop, context)) === false) {
       return HookCancel;
