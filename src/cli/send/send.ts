@@ -1,7 +1,7 @@
 import { send } from '../../httpYacApi';
 import { fileProvider, Logger } from '../../io';
 import * as models from '../../models';
-import { HttpFileStore, HttpFileStoreOptions } from '../../store';
+import { HttpFileStore } from '../../store';
 import * as utils from '../../utils';
 import { toSendJsonOutput } from './jsonOutput';
 import { SendOptions, getLogLevel, SendFilterOptions } from './options';
@@ -159,7 +159,7 @@ async function getHttpFiles(fileName: string, options: SendOptions, config: mode
   const httpFiles: models.HttpFile[] = [];
   const httpFileStore = new HttpFileStore();
 
-  const parseOptions: HttpFileStoreOptions = {
+  const parseOptions: models.HttpFileStoreOptions = {
     workingDir: process.cwd(),
     activeEnvironment: options.env,
     config,
