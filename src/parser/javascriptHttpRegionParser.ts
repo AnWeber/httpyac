@@ -44,27 +44,13 @@ export async function parseJavascript(
               addResponseHook(isOnEveryRequest ? httpFile.hooks : httpRegion.hooks, scriptData);
               break;
             case 'after':
-              if (isOnEveryRequest) {
-                httpFile.hooks.afterHttpRegion.addHook(models.ActionType.js, async context =>
-                  executeScriptData(scriptData, context)
-                );
-              } else {
-                httpRegion.hooks.execute.addInterceptor(new AfterJavascriptHookInterceptor(scriptData));
-              }
+              addExecuteAfterInterceptor(isOnEveryRequest ? httpFile.hooks : httpRegion.hooks, scriptData);
               break;
             case 'responseLogging':
               addResponseLoggingHook(isOnEveryRequest ? httpFile.hooks : httpRegion.hooks, scriptData);
               break;
             default:
-              if (isOnEveryRequest) {
-                httpFile.hooks.beforeHttpRegion.addHook(models.ActionType.js, async context =>
-                  executeScriptData(scriptData, context)
-                );
-              } else {
-                httpRegion.hooks.execute.addHook(models.ActionType.js, context =>
-                  executeScriptData(scriptData, context)
-                );
-              }
+              addExecuteHook(isOnEveryRequest ? httpFile.hooks : httpRegion.hooks, scriptData);
               break;
           }
 
@@ -97,6 +83,9 @@ function addStreamingHook(hooks: { onStreaming: models.OnStreaming }, scriptData
   });
 }
 
+function addExecuteHook(hooks: { execute: models.ExecuteHook }, scriptData: ScriptData) {
+  hooks.execute.addHook(models.ActionType.js, context => executeScriptData(scriptData, context));
+}
 function addRequestHook(hooks: { onRequest: models.OnRequestHook }, scriptData: ScriptData) {
   hooks.onRequest.addHook(models.ActionType.js, async (_request, context) => {
     await executeScriptData(scriptData, context, 'request');
@@ -118,9 +107,13 @@ function addResponseLoggingHook(hooks: { responseLogging: models.ResponseLogging
   });
 }
 
+function addExecuteAfterInterceptor(hooks: { execute: models.ExecuteHook }, scriptData: ScriptData) {
+  hooks.execute.addInterceptor(new AfterJavascriptHookInterceptor(scriptData));
+}
+
 export class AfterJavascriptHookInterceptor implements models.HookInterceptor<models.ProcessorContext, boolean> {
   constructor(private readonly scriptData: ScriptData) {}
-  async afterTrigger(
+  async afterLoop(
     context: models.HookTriggerContext<models.ProcessorContext, boolean | undefined>
   ): Promise<boolean | undefined> {
     return await executeScriptData(this.scriptData, context.arg, 'after');

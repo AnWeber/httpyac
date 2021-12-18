@@ -78,8 +78,8 @@ export class EventSourceClientAction implements models.HttpRegionAction {
         io.log.debug('SSE error', evt);
         eventStream.error = [evt];
       });
-      await context.httpFile.hooks.onStreaming.trigger(context);
-      await context.httpRegion.hooks.onStreaming.trigger(context);
+      const onStreaming = context.httpFile.hooks.onStreaming.merge(context.httpRegion.hooks.onStreaming);
+      await onStreaming.trigger(context);
       await Promise.all(loadingPromises);
       client.close();
       const response = this.toMergedHttpResponse(eventStream, responseTemplate);

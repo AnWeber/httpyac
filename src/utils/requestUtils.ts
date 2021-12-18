@@ -338,28 +338,17 @@ export async function triggerRequestResponseHooks(
   context: models.ProcessorContext
 ): Promise<boolean> {
   try {
-    if (
-      context.request &&
-      (await context.httpFile.hooks.onRequest.trigger(context.request, context)) === models.HookCancel
-    ) {
-      return false;
-    }
-    if (
-      context.request &&
-      (await context.httpRegion.hooks.onRequest.trigger(context.request, context)) === models.HookCancel
-    ) {
+    const onRequest = context.httpFile.hooks.onRequest.merge(context.httpRegion.hooks.onRequest);
+    if (context.request && (await onRequest.trigger(context.request, context)) === models.HookCancel) {
       return false;
     }
 
     const response = await method();
     if (response) {
-      if ((await context.httpRegion.hooks.onResponse.trigger(response, context)) === models.HookCancel) {
+      const onResponse = context.httpRegion.hooks.onResponse.merge(context.httpFile.hooks.onResponse);
+      if ((await onResponse.trigger(response, context)) === models.HookCancel) {
         return false;
       }
-      if ((await context.httpFile.hooks.onResponse.trigger(response, context)) === models.HookCancel) {
-        return false;
-      }
-
       context.httpRegion.response = response;
     }
     return true;

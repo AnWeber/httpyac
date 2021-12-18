@@ -54,28 +54,20 @@ export async function processHttpRegionActions(
 
     context.variables = initRegionScopedVariables(context);
 
-    if (
-      !isGlobalHttpRegion(context.httpRegion) &&
-      (await context.httpFile.hooks.beforeHttpRegion.trigger(context)) === models.HookCancel
-    ) {
-      return false;
+    let executeHook: models.Hook<models.ProcessorContext, boolean, boolean[], undefined, undefined> =
+      context.httpRegion.hooks.execute;
+    if (!isGlobalHttpRegion(context.httpRegion)) {
+      executeHook = context.httpFile.hooks.execute.merge(executeHook);
     }
-    const result = await context.httpRegion.hooks.execute.trigger(context);
-    const validResult = result !== models.HookCancel && result.every(obj => !!obj);
-    if (
-      validResult &&
-      !isGlobalHttpRegion(context.httpRegion) &&
-      (await context.httpFile.hooks.afterHttpRegion.trigger(context)) === models.HookCancel
-    ) {
-      return false;
-    }
+
+    const result = await executeHook.trigger(context);
     const processedHttpRegion = toProcessedHttpRegion(context);
     processedHttpRegion.response = await logResponse(processedHttpRegion?.response, context);
     if (context.processedHttpRegions && !isGlobalHttpRegion(context.httpRegion)) {
       context.processedHttpRegions.push(processedHttpRegion);
     }
     delete context.httpRegion.response;
-    return validResult;
+    return result !== models.HookCancel && result.every(obj => !!obj);
   } finally {
     if (!context.httpRegion.metaData.noLog) {
       context.scriptConsole?.flush?.();
@@ -120,12 +112,9 @@ export async function logResponse(
 ): Promise<models.HttpResponse | undefined> {
   if (response) {
     const clone = cloneResponse(response);
-    const regionResult = await context.httpRegion.hooks.responseLogging.trigger(clone, context);
+    const onResponseLogging = context.httpRegion.hooks.responseLogging.merge(context.httpFile.hooks.responseLogging);
+    const regionResult = await onResponseLogging.trigger(clone, context);
     if (regionResult === models.HookCancel) {
-      return undefined;
-    }
-    const fileResult = await context.httpFile.hooks.responseLogging.trigger(clone, context);
-    if (fileResult === models.HookCancel) {
       return undefined;
     }
     if (!context.httpRegion.metaData.noLog && clone && context.logResponse) {

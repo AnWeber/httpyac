@@ -73,9 +73,9 @@ export class WebSocketClientAction implements models.HttpRegionAction {
         }
         utils.setVariableInContext(webSocketVariables, context);
         context.variables.websocketClient = client;
-        context.httpFile.hooks.onStreaming
+        const onStreaming = context.httpFile.hooks.onStreaming.merge(context.httpRegion.hooks.onStreaming);
+        onStreaming
           .trigger(context)
-          .then(() => context.httpRegion.hooks.onStreaming.trigger(context))
           .then(() => client.close(WEBSOCKET_CLOSE_NORMAL, 'CLOSE_NORMAL'))
           .catch(err => reject(err));
       });

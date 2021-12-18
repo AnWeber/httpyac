@@ -31,7 +31,7 @@ export abstract class Hook<T, TReturn, TTriggerResult, TArg = undefined, TArg2 =
 
   id: string;
 
-  constructor(private readonly bailOut?: ((arg: TReturn) => boolean) | undefined) {
+  constructor(protected readonly bailOut?: ((arg: TReturn) => boolean) | undefined) {
     this.id = this.constructor.name;
     this.items = [];
     this.interceptors = [];
@@ -55,14 +55,14 @@ export abstract class Hook<T, TReturn, TTriggerResult, TArg = undefined, TArg2 =
       ...options,
     };
     if (item.before) {
-      const index = Math.min(...this.getIndeces(item.before));
+      const index = Math.min(...this.getIndices(item.before));
       if (index >= 0) {
         this.items.splice(index, 0, item);
         return;
       }
     }
     if (item.after) {
-      const index = Math.max(...this.getIndeces(item.after));
+      const index = Math.max(...this.getIndices(item.after));
       if (index >= 0) {
         this.items.splice(index + 1, 0, item);
         return;
@@ -71,7 +71,7 @@ export abstract class Hook<T, TReturn, TTriggerResult, TArg = undefined, TArg2 =
     this.items.push(item);
   }
 
-  private getIndeces(ids: Array<string>) {
+  private getIndices(ids: Array<string>) {
     return ids.map(before => this.items.findIndex(obj => obj.id === before)).filter(obj => obj >= 0);
   }
 
@@ -162,9 +162,20 @@ export abstract class Hook<T, TReturn, TTriggerResult, TArg = undefined, TArg2 =
     return true;
   }
 
+  merge(hook: Hook<T, TReturn, TTriggerResult, TArg, TArg2>) {
+    const result = this.initNew();
+    result.items.push(...this.items);
+    result.items.push(...hook.items);
+    result.interceptors.push(...this.interceptors);
+    result.interceptors.push(...hook.interceptors);
+    return result;
+  }
+
   protected abstract getNextArg(_next: TReturn, current: T): T;
 
   protected abstract getMergedResults(results: TReturn[], arg: T): TTriggerResult;
+
+  protected abstract initNew(): Hook<T, TReturn, TTriggerResult, TArg, TArg2>;
 }
 
 export class SeriesHook<T, TReturn, TBail = void, TArg = undefined, TArg2 = undefined> extends Hook<
@@ -184,6 +195,10 @@ export class SeriesHook<T, TReturn, TBail = void, TArg = undefined, TArg2 = unde
   protected getMergedResults(results: TReturn[]): TReturn[] {
     return results;
   }
+
+  protected initNew() {
+    return new SeriesHook<T, TReturn, TBail, TArg, TArg2>(this.bailOut);
+  }
 }
 
 export class BailSeriesHook<T, TReturn, TBail = void, TArg = undefined, TArg2 = undefined> extends Hook<
@@ -193,7 +208,7 @@ export class BailSeriesHook<T, TReturn, TBail = void, TArg = undefined, TArg2 = 
   TArg,
   TArg2
 > {
-  constructor(bailOut?: ((arg: TReturn | TBail | undefined) => boolean) | undefined) {
+  constructor(bailOut?: ((arg: TReturn | TBail) => boolean) | undefined) {
     super(bailOut);
   }
   protected getNextArg(_next: TReturn, current: T): T {
@@ -202,6 +217,9 @@ export class BailSeriesHook<T, TReturn, TBail = void, TArg = undefined, TArg2 = 
 
   protected getMergedResults(results: TReturn[]): TReturn | undefined {
     return results.pop();
+  }
+  protected initNew() {
+    return new BailSeriesHook<T, TReturn, TBail, TArg, TArg2>(this.bailOut);
   }
 }
 
@@ -221,5 +239,8 @@ export class WaterfallHook<T, TBail = T, TArg = undefined, TArg2 = undefined> ex
 
   protected getMergedResults(results: T[], arg: T): T {
     return results.pop() || arg;
+  }
+  protected initNew() {
+    return new WaterfallHook<T, TBail, TArg, TArg2>(this.bailOut);
   }
 }
