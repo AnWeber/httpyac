@@ -8,7 +8,7 @@ export class CookieJarAction implements HttpRegionAction {
 
   async process(context: ProcessorContext): Promise<boolean> {
     const { request, httpRegion, httpFile, config } = context;
-    if (utils.isHttpRequest(request) && !httpRegion.metaData.noCookieJar && config?.cookieJarEnabled) {
+    if (utils.isHttpRequest(request) && !httpRegion.metaData.noCookieJar && config?.cookieJarEnabled && cookieStore) {
       utils.report(context, `set cookie jar`);
       const jar = new CookieJar(cookieStore.getCookieStoreEntry(httpFile).memoryCookieStore);
       if (request.headers && request.url) {
