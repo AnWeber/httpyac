@@ -1,6 +1,6 @@
 import { ParserRegex } from '../../parser';
 import { isString } from '../../utils';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 } from 'uuid';
 
 export async function intellijVariableReplacer(text: unknown): Promise<unknown> {
   if (!isString(text)) {
@@ -14,7 +14,7 @@ export async function intellijVariableReplacer(text: unknown): Promise<unknown> 
     let replacement: unknown = null;
     switch (variable.trim()) {
       case '$uuid':
-        replacement = uuidv4();
+        replacement = v4();
         break;
       case '$timestamp':
         replacement = Date.now();

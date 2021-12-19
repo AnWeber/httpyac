@@ -7,12 +7,14 @@ import { URL } from 'url';
 export async function awsAuthVariableReplacer(
   text: unknown,
   type: string,
-  { request }: ProcessorContext
+  context: ProcessorContext
 ): Promise<unknown> {
+  const { request } = context;
   if (type.toLowerCase() === 'authorization' && utils.isString(text) && utils.isHttpRequest(request) && request?.url) {
     const match = ParserRegex.auth.aws.exec(text);
 
     if (match && match.groups && match.groups.accessKeyId && match.groups.secretAccessKey) {
+      utils.report(context, `get AWS Authorization`);
       const credentials = {
         accessKeyId: match.groups.accessKeyId,
         secretAccessKey: match.groups.secretAccessKey,

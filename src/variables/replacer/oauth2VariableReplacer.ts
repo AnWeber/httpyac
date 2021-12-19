@@ -10,6 +10,7 @@ export async function oauth2VariableReplacer(text: unknown, type: string, contex
     const match = ParserRegex.auth.oauth2.exec(text);
     if (match && match.groups) {
       const flow = match.groups.flow || 'client_credentials';
+      utils.report(context, `get OAuth2 Authorization (${flow})`);
 
       const openIdInformation = await getOAuth2Response(
         flow,

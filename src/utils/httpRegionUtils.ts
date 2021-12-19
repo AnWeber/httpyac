@@ -48,9 +48,7 @@ export async function processHttpRegionActions(
     if (context.progress) {
       context.showProgressBar = showProgressBar;
     }
-    if (context.progress?.report) {
-      context.progress.report({ message: `${context.httpRegion.symbol.name}` });
-    }
+    context.progress?.report?.({ message: `${context.httpRegion.symbol.name}` });
 
     context.variables = initRegionScopedVariables(context);
 

@@ -12,9 +12,10 @@ export class HttpClientAction implements models.HttpRegionAction {
         request.followRedirect = !httpRegion.metaData.noRedirect;
       }
       if (httpRegion.metaData.noRejectUnauthorized) {
-        request.https = request.https || {}
+        request.https = request.https || {};
         request.https.rejectUnauthorized = false;
       }
+      utils.report(context, `send ${request.method || 'GET'} ${request.url}`);
       return utils.triggerRequestResponseHooks(async () => await httpClient(request, context), context);
     }
     return false;
