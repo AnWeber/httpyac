@@ -5,14 +5,13 @@ import * as utils from '../utils';
 export async function responseAsVariable(
   response: models.HttpResponse,
   context: models.ProcessorContext
-): Promise<models.HttpResponse> {
+): Promise<void> {
   const body = response.parsedBody || response.body;
   context.variables.response = response;
   if (context.httpRegion.metaData.name || context.httpRegion.metaData.jwt) {
     handleJWTMetaData(body, context);
     handleNameMetaData(response, body, context);
   }
-  return response;
 }
 
 function handleNameMetaData(response: models.HttpResponse, body: unknown, context: models.ProcessorContext) {

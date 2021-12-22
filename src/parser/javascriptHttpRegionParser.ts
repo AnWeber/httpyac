@@ -111,12 +111,12 @@ function addExecuteAfterInterceptor(hooks: { execute: models.ExecuteHook }, scri
   hooks.execute.addInterceptor(new AfterJavascriptHookInterceptor(scriptData));
 }
 
-export class AfterJavascriptHookInterceptor implements models.HookInterceptor<models.ProcessorContext, boolean> {
+export class AfterJavascriptHookInterceptor implements models.HookInterceptor<[models.ProcessorContext], boolean> {
   constructor(private readonly scriptData: ScriptData) {}
   async afterLoop(
-    context: models.HookTriggerContext<models.ProcessorContext, boolean | undefined>
+    context: models.HookTriggerContext<[models.ProcessorContext], boolean | undefined>
   ): Promise<boolean | undefined> {
-    return await executeScriptData(this.scriptData, context.arg, 'after');
+    return await executeScriptData(this.scriptData, context.args[0], 'after');
   }
 }
 async function executeScriptData(scriptData: ScriptData, context: models.ProcessorContext, eventName?: string) {

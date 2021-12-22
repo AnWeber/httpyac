@@ -28,9 +28,8 @@ export async function parseOutputRedirection(
             }
           }
         } catch (err) {
-          log.error(`outputredirection failed for ${fileName}`, err);
+          log.error(`output redirection failed for ${fileName}`, err);
         }
-        return response;
       });
       return {
         nextParserLine: next.value.line,

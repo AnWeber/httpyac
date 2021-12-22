@@ -52,8 +52,7 @@ export async function processHttpRegionActions(
 
     context.variables = initRegionScopedVariables(context);
 
-    let executeHook: models.Hook<models.ProcessorContext, boolean, boolean[], undefined, undefined> =
-      context.httpRegion.hooks.execute;
+    let executeHook: models.Hook<[models.ProcessorContext], boolean, boolean[]> = context.httpRegion.hooks.execute;
     if (!isGlobalHttpRegion(context.httpRegion)) {
       executeHook = context.httpFile.hooks.execute.merge(executeHook);
     }

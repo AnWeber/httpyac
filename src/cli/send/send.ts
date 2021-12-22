@@ -140,8 +140,9 @@ function initCliHooks(httpFiles: Array<models.HttpFile>, cliOptions: SendOptions
   if (httpFiles.length > 0) {
     if (cliOptions.bail) {
       const bailOnFailedTest = {
-        afterTrigger: async function bail(context: models.HookTriggerContext<models.ProcessorContext, boolean>) {
-          const failedTest = context.arg.httpRegion.testResults?.find?.(obj => !obj.result);
+        afterTrigger: async function bail(hookContext: models.HookTriggerContext<[models.ProcessorContext], boolean>) {
+          const context = hookContext.args[0];
+          const failedTest = context.httpRegion.testResults?.find?.(obj => !obj.result);
           if (failedTest) {
             throw failedTest.error || new Error('bail on failed test');
           }

@@ -103,7 +103,7 @@ export class ProtoImportAction implements models.HttpRegionAction {
   }
 }
 
-type ExecuteInterceptor = models.HookInterceptor<models.ProcessorContext, boolean | void>;
+type ExecuteInterceptor = models.HookInterceptor<[models.ProtoProcessorContext], boolean | void>;
 
 export class ProtoDefinitionCreationInterceptor implements ExecuteInterceptor {
   id = models.ActionType.protoCreate;
@@ -111,9 +111,10 @@ export class ProtoDefinitionCreationInterceptor implements ExecuteInterceptor {
   constructor(private readonly protoDefinition: models.ProtoDefinition) {}
 
   async beforeLoop(
-    context: models.HookTriggerContext<models.ProtoProcessorContext, boolean | undefined>
+    hookContext: models.HookTriggerContext<[models.ProtoProcessorContext], boolean | undefined>
   ): Promise<boolean | undefined> {
-    context.arg.options.protoDefinitions = Object.assign({}, context.arg.options.protoDefinitions, {
+    const context = hookContext.args[0];
+    context.options.protoDefinitions = Object.assign({}, context.options.protoDefinitions, {
       [this.protoDefinition.fileName]: {
         fileName: this.protoDefinition.fileName,
         loaderOptions: {

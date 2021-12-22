@@ -1,10 +1,7 @@
 import * as models from '../models';
 import * as utils from '../utils';
 
-export async function attachDefaultHeaders(
-  request: models.Request,
-  context: models.ProcessorContext
-): Promise<models.Request> {
+export async function attachDefaultHeaders(request: models.Request, context: models.ProcessorContext): Promise<void> {
   if (request && context.config?.defaultHeaders) {
     utils.report(context, 'set default request headers');
     const defaultHeaders = context.config.defaultHeaders;
@@ -20,5 +17,4 @@ export async function attachDefaultHeaders(
       }
     }
   }
-  return request;
 }

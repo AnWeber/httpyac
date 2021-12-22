@@ -71,14 +71,15 @@ export async function parseVariable(
   return false;
 }
 
-class VariableInterceptor implements models.HookInterceptor<models.ProcessorContext, boolean> {
+class VariableInterceptor implements models.HookInterceptor<[models.ProcessorContext], boolean> {
   id = models.ActionType.variable;
 
-  async beforeTrigger(context: models.HookTriggerContext<models.ProcessorContext, true>) {
-    if (context.hookItem?.id !== VariableHookId) {
-      if (context.arg.options.replaceVariables) {
-        await this.replaceAllVariables(context.arg);
-        delete context.arg.options.replaceVariables;
+  async beforeTrigger(hookContext: models.HookTriggerContext<[models.ProcessorContext], true>) {
+    const context = hookContext.args[0];
+    if (hookContext.hookItem?.id !== VariableHookId) {
+      if (context.options.replaceVariables) {
+        await this.replaceAllVariables(context);
+        delete context.options.replaceVariables;
       }
     }
     return true;

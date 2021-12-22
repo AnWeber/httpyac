@@ -4,7 +4,7 @@ import * as utils from '../utils';
 export async function requestVariableReplacer(
   request: models.Request,
   context: models.ProcessorContext
-): Promise<models.Request | typeof models.HookCancel> {
+): Promise<void | typeof models.HookCancel> {
   utils.report(context, 'replace variables in request');
   if (request.url) {
     const result = (await utils.replaceVariables(request.url, models.VariableType.url, context)) || request.url;
@@ -21,7 +21,7 @@ export async function requestVariableReplacer(
   if ((await replaceVariablesInHeader(request, context)) === false) {
     return models.HookCancel;
   }
-  return request;
+  return undefined;
 }
 
 async function replaceVariablesInBody(

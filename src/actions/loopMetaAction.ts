@@ -15,7 +15,7 @@ export interface LoopMetaData {
   expression?: string;
 }
 
-export class LoopMetaAction implements models.HookInterceptor<models.ProcessorContext, boolean> {
+export class LoopMetaAction implements models.HookInterceptor<[models.ProcessorContext], boolean> {
   id = models.ActionType.loop;
   private iteration:
     | AsyncGenerator<{
@@ -27,35 +27,37 @@ export class LoopMetaAction implements models.HookInterceptor<models.ProcessorCo
   name: string | undefined;
   constructor(private readonly data: LoopMetaData) {}
 
-  async beforeLoop(context: models.HookTriggerContext<models.ProcessorContext, boolean>): Promise<boolean> {
-    this.iteration = this.iterate(context.arg);
-    this.name = context.arg.httpRegion.metaData.name;
-    context.arg.progress?.report?.({
+  async beforeLoop(hookContext: models.HookTriggerContext<[models.ProcessorContext], boolean>): Promise<boolean> {
+    const context = hookContext.args[0];
+    this.iteration = this.iterate(context);
+    this.name = context.httpRegion.metaData.name;
+    context.progress?.report?.({
       message: 'start loop',
     });
     const next = await this.iteration.next();
     if (!next.done) {
-      Object.assign(context.arg.variables, next.value.variables);
+      Object.assign(context.variables, next.value.variables);
       return true;
     }
     return false;
   }
 
-  async afterTrigger(context: models.HookTriggerContext<models.ProcessorContext, boolean>): Promise<boolean> {
-    if (this.iteration && context.index + 1 === context.length) {
+  async afterTrigger(hookContext: models.HookTriggerContext<[models.ProcessorContext], boolean>): Promise<boolean> {
+    const context = hookContext.args[0];
+    if (this.iteration && hookContext.index + 1 === hookContext.length) {
       const next = await this.iteration.next();
 
       if (!next.done) {
-        context.arg.progress?.report?.({
+        context.progress?.report?.({
           message: `${next.value.index} loop pass`,
         });
-        Object.assign(context.arg.variables, next.value.variables);
-        await utils.logResponse(context.arg.httpRegion.response, context.arg);
-        context.arg.httpRegion = this.createHttpRegionClone(context.arg.httpRegion, next.value.index);
-        context.index = -1;
+        Object.assign(context.variables, next.value.variables);
+        await utils.logResponse(context.httpRegion.response, context);
+        context.httpRegion = this.createHttpRegionClone(context.httpRegion, next.value.index);
+        hookContext.index = -1;
       }
-    } else if (this.name && context.arg.variables[this.name]) {
-      context.arg.variables[`${this.name}0`] = context.arg.variables[this.name];
+    } else if (this.name && context.variables[this.name]) {
+      context.variables[`${this.name}0`] = context.variables[this.name];
     }
     return true;
   }

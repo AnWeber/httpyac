@@ -1,5 +1,5 @@
 import * as models from '../models';
-import { registerCancelExecutionIntercepter } from './cancelExecutionInterceptor';
+import { registerCancelExecutionInterceptor } from './cancelExecutionInterceptor';
 import { parseComment } from './commentHttpRegionParser';
 import { parseEventSource } from './eventSourceHttpRegionParser';
 import { parseGraphql } from './gqlHttpRegionParser';
@@ -64,7 +64,7 @@ export function initParseHook(): models.ParseHook {
 export function initParseEndHook(): models.ParseEndRegionHook {
   const hook = new models.ParseEndRegionHook();
 
-  hook.addHook('registerCancelExecutionIntercepter', registerCancelExecutionIntercepter);
+  hook.addHook('registerCancelExecutionInterceptor', registerCancelExecutionInterceptor);
   hook.addHook(ParserId.note, injectNote);
   hook.addHook(ParserId.response, closeResponseBody);
   hook.addHook(ParserId.requestBody, closeRequestBody);

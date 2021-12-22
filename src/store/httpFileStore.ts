@@ -212,7 +212,7 @@ export async function getEnvironmentConfig(
 ): Promise<models.EnvironmentConfig> {
   const environmentConfigs: Array<models.EnvironmentConfig> = [];
   if (rootDir) {
-    const fileConfig = await utils.getHttpacConfig(rootDir);
+    const fileConfig = await utils.getHttpyacConfig(rootDir);
     if (fileConfig) {
       environmentConfigs.push(fileConfig);
     }

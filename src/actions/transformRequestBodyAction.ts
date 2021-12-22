@@ -2,7 +2,7 @@ import * as models from '../models';
 import * as utils from '../utils';
 import encodeUrl from 'encodeurl';
 
-export async function transformRequestBody(request: models.Request): Promise<models.Request> {
+export async function transformRequestBody(request: models.Request): Promise<void> {
   if (request.body) {
     if (utils.isString(request.body)) {
       if (utils.isMimeTypeFormUrlEncoded(request.contentType)) {
@@ -16,7 +16,6 @@ export async function transformRequestBody(request: models.Request): Promise<mod
       request.body = await normalizeBody(request.body);
     }
   }
-  return request;
 }
 
 async function normalizeBody(body: Array<models.HttpRequestBodyLine>): Promise<Buffer> {

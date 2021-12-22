@@ -3,21 +3,22 @@ import * as models from '../models';
 import * as utils from '../utils';
 import { EOL } from 'os';
 
-export class CreateRequestBodyInterceptor implements models.HookInterceptor<models.ProcessorContext, boolean | void> {
+export class CreateRequestBodyInterceptor implements models.HookInterceptor<[models.ProcessorContext], boolean | void> {
   constructor(private readonly rawBody: Array<string | models.RequestBodyImport>) {}
 
   async beforeTrigger(
-    context: models.HookTriggerContext<models.ProcessorContext, boolean | undefined>
+    hookContext: models.HookTriggerContext<[models.ProcessorContext], boolean | undefined>
   ): Promise<boolean | undefined> {
-    if (context.arg.request && context.index === 0) {
-      const contentType = context.arg.request.contentType;
-      const requestBodyLines = await this.normalizeBody(this.rawBody, context.arg);
+    const context = hookContext.args[0];
+    if (context.request && hookContext.index === 0) {
+      const contentType = context.request.contentType;
+      const requestBodyLines = await this.normalizeBody(this.rawBody, context);
       if (requestBodyLines.length > 0) {
-        context.arg.progress?.report?.({
+        context.progress?.report?.({
           message: 'init request body',
         });
         if (utils.isMimeTypeFormUrlEncoded(contentType)) {
-          context.arg.request.body = this.formUrlEncodedJoin(requestBodyLines);
+          context.request.body = this.formUrlEncodedJoin(requestBodyLines);
         } else {
           if (requestBodyLines.every(obj => utils.isString(obj)) && utils.isMimeTypeNewlineDelimitedJSON(contentType)) {
             requestBodyLines.push('');
@@ -42,12 +43,12 @@ export class CreateRequestBodyInterceptor implements models.HookInterceptor<mode
           }
 
           if (strings.length > 0 && body.length === 0) {
-            context.arg.request.body = strings.join(lineEnding);
+            context.request.body = strings.join(lineEnding);
           } else {
             if (strings.length > 0) {
               body.push(strings.join(lineEnding));
             }
-            context.arg.request.body = body;
+            context.request.body = body;
           }
         }
       }

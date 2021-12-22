@@ -3,14 +3,14 @@ import { ConfigureHooks, EnvironmentConfig, PathLike } from '../models';
 import { toAbsoluteFilename, findRootDir } from './fsUtils';
 import { loadModule } from './moduleUtils';
 
-export async function getHttpacConfig(rootDir: PathLike): Promise<EnvironmentConfig | undefined> {
+export async function getHttpyacConfig(rootDir: PathLike): Promise<EnvironmentConfig | undefined> {
   let result = await loadFileConfig(rootDir);
   if (!result) {
     result = (await parseJson<Record<string, EnvironmentConfig>>(fileProvider.joinPath(rootDir, 'package.json')))
       ?.httpyac;
   }
   if (result) {
-    await resolveClientCertficates(result, rootDir);
+    await resolveClientCertificates(result, rootDir);
   }
   return result;
 }
@@ -54,7 +54,7 @@ export async function parseJson<T>(fileName: PathLike): Promise<T | undefined> {
   return undefined;
 }
 
-export async function resolveClientCertficates(config: EnvironmentConfig, rootDir: PathLike): Promise<void> {
+export async function resolveClientCertificates(config: EnvironmentConfig, rootDir: PathLike): Promise<void> {
   if (config.clientCertificates) {
     for (const [, value] of Object.entries(config.clientCertificates)) {
       if (value.cert) {
