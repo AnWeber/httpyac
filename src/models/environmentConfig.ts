@@ -1,4 +1,4 @@
-import { ClientCertificateOptions } from './clientCertifcateOptions';
+import { ClientCertificateOptions } from './clientCertificateOptions';
 import { HttpyacHooksApi } from './httpHooksApi';
 import { HttpRequest } from './httpRequest';
 import { LogLevel } from './logHandler';
