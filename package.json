@@ -103,6 +103,7 @@
     "filesize": "^8.0.6",
     "globby": "^11.0.4",
     "got": "^11.8.3",
+    "hookpoint": "^1.0.1",
     "http-proxy-agent": "^5.0.0",
     "https-proxy-agent": "^5.0.0",
     "inquirer": "^8.2.0",
