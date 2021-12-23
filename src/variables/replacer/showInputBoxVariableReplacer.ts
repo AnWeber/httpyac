@@ -1,7 +1,7 @@
 import { userInteractionProvider } from '../../io';
-import { HookCancel } from '../../models';
 import { ParserRegex } from '../../parser';
 import { isString } from '../../utils';
+import { HookCancel } from 'hookpoint';
 
 const lastValue: Record<string, string> = {};
 

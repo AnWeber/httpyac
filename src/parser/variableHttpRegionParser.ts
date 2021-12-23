@@ -1,6 +1,7 @@
 import * as models from '../models';
 import * as utils from '../utils';
 import { ParserRegex } from './parserRegex';
+import { HookCancel, HookInterceptor, HookTriggerContext } from 'hookpoint';
 
 const VariableHookId = 'variable';
 
@@ -71,10 +72,10 @@ export async function parseVariable(
   return false;
 }
 
-class VariableInterceptor implements models.HookInterceptor<[models.ProcessorContext], boolean> {
+class VariableInterceptor implements HookInterceptor<[models.ProcessorContext], boolean> {
   id = models.ActionType.variable;
 
-  async beforeTrigger(hookContext: models.HookTriggerContext<[models.ProcessorContext], true>) {
+  async beforeTrigger(hookContext: HookTriggerContext<[models.ProcessorContext], true>) {
     const context = hookContext.args[0];
     if (hookContext.hookItem?.id !== VariableHookId) {
       if (context.options.replaceVariables) {
@@ -88,7 +89,7 @@ class VariableInterceptor implements models.HookInterceptor<[models.ProcessorCon
   private async replaceAllVariables(context: models.ProcessorContext): Promise<boolean> {
     for (const [key, value] of Object.entries(context.variables)) {
       const result = await utils.replaceVariables(value, models.VariableType.variable, context);
-      if (result !== models.HookCancel) {
+      if (result !== HookCancel) {
         context.variables[key] = result;
       }
     }

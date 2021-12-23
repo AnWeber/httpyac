@@ -6,6 +6,7 @@ import { userSessionStore as sessionStore } from '../store';
 import * as utils from '../utils';
 import { replacer, provider } from '../variables';
 import { default as chalk } from 'chalk';
+import { HookCancel } from 'hookpoint';
 import merge from 'lodash/merge';
 
 interface HttpFileStoreEntry {
@@ -189,7 +190,7 @@ export class HttpFileStore implements models.HttpFileStore {
         sessionStore,
         userInteractionProvider,
         utils,
-        getHookCancel: () => models.HookCancel,
+        getHookCancel: () => HookCancel,
       };
       for (const [plugin, hook] of Object.entries(hooks)) {
         try {

@@ -2,6 +2,7 @@ import * as models from '../models';
 import { HttpFileStore } from '../store';
 import * as utils from '../utils';
 import { ParserRegex } from './parserRegex';
+import { HookCancel } from 'hookpoint';
 
 export async function parseHttpFile(
   httpFile: models.HttpFile,
@@ -20,7 +21,7 @@ export async function parseHttpFile(
 
   for (let line = 0; line < lines.length; line++) {
     const httpRegionParserResult = await httpFile.hooks.parse.trigger(createReaderFactory(line, lines), parserContext);
-    if (httpRegionParserResult && httpRegionParserResult !== models.HookCancel) {
+    if (httpRegionParserResult && httpRegionParserResult !== HookCancel) {
       if (httpRegionParserResult.endRegionLine !== undefined && httpRegionParserResult.endRegionLine >= 0) {
         parserContext.httpRegion.symbol.endLine = httpRegionParserResult.endRegionLine;
         parserContext.httpRegion.symbol.endOffset = lines[httpRegionParserResult.endRegionLine].length;

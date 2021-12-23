@@ -1,9 +1,10 @@
 import * as models from '../models';
+import { HookInterceptor, HookTriggerContext } from 'hookpoint';
 import cloneDeep from 'lodash/cloneDeep';
 
-export class CreateRequestInterceptor implements models.HookInterceptor<[models.ProcessorContext], boolean | void> {
+export class CreateRequestInterceptor implements HookInterceptor<[models.ProcessorContext], boolean | void> {
   async beforeTrigger(
-    hookContext: models.HookTriggerContext<[models.ProcessorContext], boolean | undefined>
+    hookContext: HookTriggerContext<[models.ProcessorContext], boolean | undefined>
   ): Promise<boolean | undefined> {
     const context = hookContext.args[0];
     if (context.httpRegion.request && hookContext.index === 0) {

@@ -9,6 +9,7 @@ import { default as chalk } from 'chalk';
 import { Command } from 'commander';
 import { promises as fs } from 'fs';
 import { default as globby } from 'globby';
+import { HookTriggerContext } from 'hookpoint';
 import inquirer from 'inquirer';
 
 export function sendCommand() {
@@ -140,7 +141,7 @@ function initCliHooks(httpFiles: Array<models.HttpFile>, cliOptions: SendOptions
   if (httpFiles.length > 0) {
     if (cliOptions.bail) {
       const bailOnFailedTest = {
-        afterTrigger: async function bail(hookContext: models.HookTriggerContext<[models.ProcessorContext], boolean>) {
+        afterTrigger: async function bail(hookContext: HookTriggerContext<[models.ProcessorContext], boolean>) {
           const context = hookContext.args[0];
           const failedTest = context.httpRegion.testResults?.find?.(obj => !obj.result);
           if (failedTest) {

@@ -1,7 +1,7 @@
 import { userInteractionProvider } from '../../io';
-import { HookCancel } from '../../models';
 import { ParserRegex } from '../../parser';
 import { isString } from '../../utils';
+import { HookCancel } from 'hookpoint';
 
 export async function showQuickpickVariableReplacer(text: unknown): Promise<unknown> {
   if (!isString(text)) {

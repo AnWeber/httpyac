@@ -3,6 +3,7 @@ import * as models from '../models';
 import { isMimeTypeJSON, isMimeTypeXml, parseMimeType } from './mimeTypeUtils';
 import { isString, toMultiLineString } from './stringUtils';
 import { default as chalk } from 'chalk';
+import { HookCancel } from 'hookpoint';
 import { TextDecoder } from 'util';
 import xmlFormat from 'xml-formatter';
 
@@ -339,14 +340,14 @@ export async function triggerRequestResponseHooks(
 ): Promise<boolean> {
   try {
     const onRequest = context.httpFile.hooks.onRequest.merge(context.httpRegion.hooks.onRequest);
-    if (context.request && (await onRequest.trigger(context.request, context)) === models.HookCancel) {
+    if (context.request && (await onRequest.trigger(context.request, context)) === HookCancel) {
       return false;
     }
 
     const response = await method();
     if (response) {
       const onResponse = context.httpRegion.hooks.onResponse.merge(context.httpFile.hooks.onResponse);
-      if ((await onResponse.trigger(response, context)) === models.HookCancel) {
+      if ((await onResponse.trigger(response, context)) === HookCancel) {
         return false;
       }
       context.httpRegion.response = response;

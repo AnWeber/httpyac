@@ -1,13 +1,14 @@
 import { fileProvider } from '../io';
 import * as models from '../models';
 import * as utils from '../utils';
+import { HookInterceptor, HookTriggerContext } from 'hookpoint';
 import { EOL } from 'os';
 
-export class CreateRequestBodyInterceptor implements models.HookInterceptor<[models.ProcessorContext], boolean | void> {
+export class CreateRequestBodyInterceptor implements HookInterceptor<[models.ProcessorContext], boolean | void> {
   constructor(private readonly rawBody: Array<string | models.RequestBodyImport>) {}
 
   async beforeTrigger(
-    hookContext: models.HookTriggerContext<[models.ProcessorContext], boolean | undefined>
+    hookContext: HookTriggerContext<[models.ProcessorContext], boolean | undefined>
   ): Promise<boolean | undefined> {
     const context = hookContext.args[0];
     if (context.request && hookContext.index === 0) {

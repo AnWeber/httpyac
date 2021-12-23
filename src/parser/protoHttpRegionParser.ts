@@ -5,6 +5,7 @@ import { ParserRegex } from './parserRegex';
 import * as parserUtils from './parserUtils';
 import { loadPackageDefinition } from '@grpc/grpc-js';
 import { load } from '@grpc/proto-loader';
+import { HookTriggerContext, HookInterceptor } from 'hookpoint';
 
 export async function parseProtoImport(
   getLineReader: models.getHttpLineGenerator,
@@ -103,7 +104,7 @@ export class ProtoImportAction implements models.HttpRegionAction {
   }
 }
 
-type ExecuteInterceptor = models.HookInterceptor<[models.ProtoProcessorContext], boolean | void>;
+type ExecuteInterceptor = HookInterceptor<[models.ProtoProcessorContext], boolean | void>;
 
 export class ProtoDefinitionCreationInterceptor implements ExecuteInterceptor {
   id = models.ActionType.protoCreate;
@@ -111,7 +112,7 @@ export class ProtoDefinitionCreationInterceptor implements ExecuteInterceptor {
   constructor(private readonly protoDefinition: models.ProtoDefinition) {}
 
   async beforeLoop(
-    hookContext: models.HookTriggerContext<[models.ProtoProcessorContext], boolean | undefined>
+    hookContext: HookTriggerContext<[models.ProtoProcessorContext], boolean | undefined>
   ): Promise<boolean | undefined> {
     const context = hookContext.args[0];
     context.options.protoDefinitions = Object.assign({}, context.options.protoDefinitions, {

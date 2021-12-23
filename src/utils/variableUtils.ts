@@ -3,15 +3,16 @@ import * as models from '../models';
 import { toEnvironmentKey } from './environmentUtils';
 import { toAbsoluteFilename } from './fsUtils';
 import { isString } from './stringUtils';
+import { HookCancel } from 'hookpoint';
 
 export async function replaceVariables(
   text: unknown,
   type: models.VariableType | string,
   context: models.ProcessorContext
-): Promise<typeof models.HookCancel | unknown> {
+): Promise<typeof HookCancel | unknown> {
   if (context.progress?.isCanceled?.()) {
     io.log.trace('process canceled by user');
-    return models.HookCancel;
+    return HookCancel;
   }
   return await context.httpFile.hooks.replaceVariable.trigger(text, type, context);
 }

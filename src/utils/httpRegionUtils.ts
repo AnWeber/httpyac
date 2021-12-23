@@ -1,6 +1,7 @@
 import * as models from '../models';
 import { toEnvironmentKey } from './environmentUtils';
 import { cloneResponse } from './requestUtils';
+import { HookCancel, Hook } from 'hookpoint';
 
 export function getDisplayName(httpRegion?: models.HttpRegion, defaultName = 'global'): string {
   if (httpRegion) {
@@ -52,7 +53,7 @@ export async function processHttpRegionActions(
 
     context.variables = initRegionScopedVariables(context);
 
-    let executeHook: models.Hook<[models.ProcessorContext], boolean, boolean[]> = context.httpRegion.hooks.execute;
+    let executeHook: Hook<[models.ProcessorContext], boolean, boolean[]> = context.httpRegion.hooks.execute;
     if (!isGlobalHttpRegion(context.httpRegion)) {
       executeHook = context.httpFile.hooks.execute.merge(executeHook);
     }
@@ -64,7 +65,7 @@ export async function processHttpRegionActions(
       context.processedHttpRegions.push(processedHttpRegion);
     }
     delete context.httpRegion.response;
-    return result !== models.HookCancel && result.every(obj => !!obj);
+    return result !== HookCancel && result.every(obj => !!obj);
   } finally {
     if (!context.httpRegion.metaData.noLog) {
       context.scriptConsole?.flush?.();
@@ -111,7 +112,7 @@ export async function logResponse(
     const clone = cloneResponse(response);
     const onResponseLogging = context.httpRegion.hooks.responseLogging.merge(context.httpFile.hooks.responseLogging);
     const regionResult = await onResponseLogging.trigger(clone, context);
-    if (regionResult === models.HookCancel) {
+    if (regionResult === HookCancel) {
       return undefined;
     }
     if (!context.httpRegion.metaData.noLog && clone && context.logResponse) {

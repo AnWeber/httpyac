@@ -1,5 +1,6 @@
 import * as models from '../models';
 import * as utils from '../utils';
+import { HookInterceptor, HookTriggerContext } from 'hookpoint';
 
 export enum LoopMetaType {
   for,
@@ -15,7 +16,7 @@ export interface LoopMetaData {
   expression?: string;
 }
 
-export class LoopMetaAction implements models.HookInterceptor<[models.ProcessorContext], boolean> {
+export class LoopMetaAction implements HookInterceptor<[models.ProcessorContext], boolean> {
   id = models.ActionType.loop;
   private iteration:
     | AsyncGenerator<{
@@ -27,7 +28,7 @@ export class LoopMetaAction implements models.HookInterceptor<[models.ProcessorC
   name: string | undefined;
   constructor(private readonly data: LoopMetaData) {}
 
-  async beforeLoop(hookContext: models.HookTriggerContext<[models.ProcessorContext], boolean>): Promise<boolean> {
+  async beforeLoop(hookContext: HookTriggerContext<[models.ProcessorContext], boolean>): Promise<boolean> {
     const context = hookContext.args[0];
     this.iteration = this.iterate(context);
     this.name = context.httpRegion.metaData.name;
@@ -42,7 +43,7 @@ export class LoopMetaAction implements models.HookInterceptor<[models.ProcessorC
     return false;
   }
 
-  async afterTrigger(hookContext: models.HookTriggerContext<[models.ProcessorContext], boolean>): Promise<boolean> {
+  async afterTrigger(hookContext: HookTriggerContext<[models.ProcessorContext], boolean>): Promise<boolean> {
     const context = hookContext.args[0];
     if (this.iteration && hookContext.index + 1 === hookContext.length) {
       const next = await this.iteration.next();

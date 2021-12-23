@@ -1,9 +1,10 @@
 import { log } from '../../io';
-import { ProcessorContext, HttpClient, UserSession, HookCancel, Variables } from '../../models';
+import { ProcessorContext, HttpClient, UserSession, Variables } from '../../models';
 import { ParserRegex } from '../../parser';
 import { userSessionStore } from '../../store';
 import * as utils from '../../utils';
 import * as oauth from './oauth2';
+import { HookCancel } from 'hookpoint';
 
 export async function oauth2VariableReplacer(text: unknown, type: string, context: ProcessorContext): Promise<unknown> {
   if (type.toLowerCase() === 'authorization' && utils.isString(text)) {

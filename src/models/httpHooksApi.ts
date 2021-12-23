@@ -1,13 +1,13 @@
 import * as utils from '../utils';
 import { EnvironmentConfig } from './environmentConfig';
 import { FileProvider } from './fileProvider';
-import { HookCancel } from './hook';
 import { HttpFile } from './httpFile';
 import { HttpFileHooks } from './httpFileHooks';
 import { LogHandler } from './logHandler';
 import { PathLike } from './pathLike';
 import { SessionStore } from './sessionStore';
 import { UserInteractionProvider } from './userInteractionProvider';
+import { HookCancel } from 'hookpoint';
 
 export interface HttpyacHooksApi {
   readonly version: string;

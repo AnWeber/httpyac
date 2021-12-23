@@ -2,6 +2,7 @@ import { log } from './io';
 import * as models from './models';
 import { getEnvironmentConfig } from './store';
 import * as utils from './utils';
+import { HookCancel } from 'hookpoint';
 
 /**
  * process one httpRegion of HttpFile
@@ -88,7 +89,7 @@ export async function getVariables(context: models.VariableProviderContext): Pro
   context.config = await getEnvironmentConfig(context.config, context.httpFile?.rootDir);
 
   const vars = await context.httpFile.hooks.provideVariables.trigger(context.httpFile.activeEnvironment, context);
-  if (vars === models.HookCancel) {
+  if (vars === HookCancel) {
     return {};
   }
   const variables = Object.assign({}, ...vars, context.variables);
@@ -100,7 +101,7 @@ export async function getEnvironments(context: models.VariableProviderContext): 
   context.config = await getEnvironmentConfig(context.config, context.httpFile?.rootDir);
 
   const result = await context.httpFile.hooks.provideEnvironments.trigger(context);
-  if (result !== models.HookCancel && result.length > 0) {
+  if (result !== HookCancel && result.length > 0) {
     return result
       .reduce((prev, current) => {
         for (const cur of current) {

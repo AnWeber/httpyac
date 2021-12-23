@@ -69,11 +69,8 @@ export class MQTTClientAction implements models.HttpRegionAction {
       const mqttVariables = { mqttClient: client };
       client.on('connect', packet => {
         io.log.debug('MQTT connect', packet);
-        responseTemplate.protocol = packet.protocolId || 'MQTT';
+        responseTemplate.protocol = 'MQTT';
         responseTemplate.headers = packet.properties;
-        if (packet.protocolVersion) {
-          responseTemplate.httpVersion = `${packet.protocolVersion}`;
-        }
       });
       client.on('reconnect', () => io.log.debug('MQTT reconnect'));
       client.on('message', (topic, message, packet) => {

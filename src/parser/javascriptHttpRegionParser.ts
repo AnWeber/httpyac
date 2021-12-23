@@ -6,6 +6,7 @@ import { ParserRegex } from './parserRegex';
 import * as grpc from '@grpc/grpc-js';
 import { default as chalk } from 'chalk';
 import { default as got } from 'got';
+import { HookInterceptor, HookTriggerContext } from 'hookpoint';
 
 export interface ScriptData {
   script: string;
@@ -111,10 +112,10 @@ function addExecuteAfterInterceptor(hooks: { execute: models.ExecuteHook }, scri
   hooks.execute.addInterceptor(new AfterJavascriptHookInterceptor(scriptData));
 }
 
-export class AfterJavascriptHookInterceptor implements models.HookInterceptor<[models.ProcessorContext], boolean> {
+export class AfterJavascriptHookInterceptor implements HookInterceptor<[models.ProcessorContext], boolean> {
   constructor(private readonly scriptData: ScriptData) {}
   async afterLoop(
-    context: models.HookTriggerContext<[models.ProcessorContext], boolean | undefined>
+    context: HookTriggerContext<[models.ProcessorContext], boolean | undefined>
   ): Promise<boolean | undefined> {
     return await executeScriptData(this.scriptData, context.args[0], 'after');
   }
