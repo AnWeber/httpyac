@@ -32,7 +32,7 @@ function initFileProvider(): void {
       return false;
     }
   };
-  fileProvider.readFile = async (fileName: models.PathLike, encoding: models.FileEnconding): Promise<string> => {
+  fileProvider.readFile = async (fileName: models.PathLike, encoding: models.FileEncoding): Promise<string> => {
     const file = fileProvider.fsPath(fileName);
     return fs.readFile(file, encoding);
   };
