@@ -14,9 +14,9 @@ export async function clientCertVariableReplacer(
     if (type === models.VariableType.url && context.config?.clientCertificates) {
       const url = createUrl(text);
       if (url) {
-        const clientCertifcateOptions = context.config?.clientCertificates[url.host];
-        if (clientCertifcateOptions) {
-          await setClientCertificateOptions(request, clientCertifcateOptions, httpFile);
+        const clientCertificateOptions = context.config?.clientCertificates[url.host];
+        if (clientCertificateOptions) {
+          await setClientCertificateOptions(request, clientCertificateOptions, httpFile);
         }
       }
     } else if (type.toLowerCase().endsWith('clientcert')) {
