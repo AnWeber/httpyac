@@ -9,6 +9,7 @@ export interface ParserRequestBody {
 export interface ParserContextData {
   metaTitle?: string;
   request_body?: ParserRequestBody;
+  markdownHttpBlocks?: Array<{ startLine: number; endLine: number }>;
   httpResponseSymbol?: {
     symbol: HttpSymbol;
     body: Array<string>;

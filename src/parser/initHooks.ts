@@ -6,6 +6,7 @@ import { parseGraphql } from './gqlHttpRegionParser';
 import { parseGrpcLine } from './grpcHttpRegionParser';
 import { parseIntellijScript } from './intellijHttpRegionParser';
 import { parseJavascript } from './javascriptHttpRegionParser';
+import { MarkdownInterceptor } from './markdownInterceptor';
 import { parseMetaData } from './metaHttpRegionParser';
 import { parseMQTTLine } from './mqttHttpRegionParser';
 import { injectNote } from './noteMetaHttpRegionParser';
@@ -40,6 +41,7 @@ export enum ParserId {
 
 export function initParseHook(): models.ParseHook {
   const hook = new models.ParseHook();
+  hook.addInterceptor(new MarkdownInterceptor());
 
   hook.addHook(ParserId.meta, parseMetaData);
   hook.addHook(ParserId.comment, parseComment);

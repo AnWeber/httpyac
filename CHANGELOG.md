@@ -1,3 +1,9 @@
+## Unreleased
+
+#### Features
+
+- support http codeblocks in markdown files (#164)
+
 ## 4.8.2 (2021-12-19)
 
 #### Fix

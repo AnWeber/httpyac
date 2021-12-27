@@ -3,7 +3,7 @@ import * as models from '../models';
 import clipboard from 'clipboardy';
 import { promises as fs, createReadStream } from 'fs';
 import inquirer from 'inquirer';
-import { join, isAbsolute, dirname } from 'path';
+import { join, isAbsolute, dirname, extname } from 'path';
 
 export function initIOProvider(): void {
   initFileProvider();
@@ -22,6 +22,8 @@ function initFixTestSymbols() {
 function initFileProvider(): void {
   fileProvider.isAbsolute = async (fileName: models.PathLike) => isAbsolute(fileProvider.toString(fileName));
   fileProvider.dirname = (fileName: string) => dirname(fileProvider.toString(fileName));
+  fileProvider.hasExtension = (fileName: models.PathLike, extension: string) =>
+    extname(fileProvider.toString(fileName)) === extension;
   fileProvider.joinPath = (fileName: models.PathLike, path: string): models.PathLike =>
     join(fileProvider.toString(fileName), path);
 
