@@ -12,6 +12,7 @@ export interface HttpResponse {
   body?: unknown;
   parsedBody?: unknown;
   prettyPrintBody?: string;
+  rawHeaders?: string[];
   rawBody?: Buffer;
   request?: Request;
 
