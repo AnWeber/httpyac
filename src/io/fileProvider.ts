@@ -7,6 +7,9 @@ export const fileProvider: FileProvider = {
   dirname: () => {
     throw new Error('Not Implemented');
   },
+  hasExtension: () => {
+    throw new Error('Not Implemented');
+  },
   isAbsolute: () => {
     throw new Error('Not Implemented');
   },
