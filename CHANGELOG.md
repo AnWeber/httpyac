@@ -3,6 +3,7 @@
 #### Features
 
 - support http codeblocks in markdown files (#164)
+- add special env setting `request_rejectUnauthorized` to ignore SSL Verification (#159)
 
 ## 4.8.2 (2021-12-19)
 
