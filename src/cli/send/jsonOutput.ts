@@ -85,6 +85,7 @@ export function toSendJsonOutput(context: Record<string, Array<HttpRegion>>, opt
 
 function convertResponse(response: HttpResponse | undefined, output: string | undefined) {
   if (response) {
+    delete response.rawHeaders;
     delete response.rawBody;
     delete response.prettyPrintBody;
     delete response.parsedBody;
