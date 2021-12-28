@@ -287,6 +287,7 @@ export function cloneResponse(response: models.HttpResponse): models.HttpRespons
     httpVersion: response.httpVersion,
     headers: response.headers,
     body: response.body,
+    rawHeaders: response.rawHeaders,
     rawBody: response.rawBody,
     parsedBody: response.parsedBody,
     prettyPrintBody: response.prettyPrintBody,
