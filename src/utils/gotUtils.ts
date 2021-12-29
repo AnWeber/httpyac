@@ -5,6 +5,7 @@ import { default as filesize } from 'filesize';
 import { default as got, OptionsOfUnknownResponseBody, CancelError, Response } from 'got';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
+import { SocksProxyAgent } from 'socks-proxy-agent';
 import merge from 'lodash/merge';
 
 export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined): HttpClient {
@@ -105,10 +106,18 @@ async function load(url: string, options: OptionsOfUnknownResponseBody, context:
 
 function initProxy(request: HttpRequest) {
   if (request.proxy) {
-    request.agent = {
-      http: new HttpProxyAgent(request.proxy),
-      https: new HttpsProxyAgent(request.proxy),
-    };
+    if (request.proxy.startsWith('socks://')) {
+      const socksProxy = new SocksProxyAgent(request.proxy);
+      request.agent = {
+        http: socksProxy,
+        https: socksProxy,
+      };
+    } else {
+      request.agent = {
+        http: new HttpProxyAgent(request.proxy),
+        https: new HttpsProxyAgent(request.proxy),
+      };
+    }
     delete request.proxy;
   }
 }
