@@ -1,9 +1,12 @@
-## Unreleased
+## 4.9.0 (2021-12-29)
 
 #### Features
 
 - support http codeblocks in markdown files (#164)
+- add raw headers to httpResponse (#165)
 - add special env setting `request_rejectUnauthorized` to ignore SSL Verification (#159)
+- add special env setting `request_proxy` to set proxy (#159)
+- proxy support of `socks://` proxy (AnWeber/vscode-httpyac#91)
 
 ## 4.8.2 (2021-12-19)
 
