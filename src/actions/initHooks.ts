@@ -3,13 +3,13 @@ import { setAdditionalResponseBody } from '../utils';
 import { attachDefaultHeaders } from './envDefaultsHeaderAction';
 import { requestVariableReplacer } from './requestVariableReplacer';
 import { responseAsVariable } from './responseAsVariableAction';
-import { setEnvRejectUnauthorized } from './setEnvRequestOptions';
+import { setEnvRequestOptions } from './setEnvRequestOptions';
 import { transformRequestBody } from './transformRequestBodyAction';
 
 export function initOnRequestHook(): models.OnRequestHook {
   const hook = new models.OnRequestHook();
   hook.addHook('attachDefaultHeaders', attachDefaultHeaders);
-  hook.addHook('setEnvRejectUnauthorized', setEnvRejectUnauthorized);
+  hook.addHook('setEnvRequestOptions', setEnvRequestOptions);
   hook.addHook('requestVariableReplacer', requestVariableReplacer);
   hook.addHook('transformRequestBody', transformRequestBody);
   return hook;
