@@ -80,6 +80,7 @@ export async function runScript(
     lineOffset: number;
     context: Record<string, unknown>;
     require?: Record<string, unknown>;
+    deleteVariable?: (key: string) => void;
   }
 ): Promise<Record<string, unknown>> {
   const filename = fileProvider.fsPath(options.fileName);
@@ -108,12 +109,15 @@ export async function runScript(
     ...checkVariableNames(options.context),
   });
 
+  const contextKeys = Object.keys(context);
   const compiledWrapper = vm.runInContext(Module.wrap(`${EOL}${source}`), context, {
     filename,
     lineOffset: options.lineOffset,
     displayErrors: true,
   });
   compiledWrapper.apply(context, [mod.exports, extendedRequire, mod, filename, path.dirname(filename)]);
+
+  deleteVariables(contextKeys, context, options.deleteVariable);
 
   let result = mod.exports;
   if (isPromise(result)) {
@@ -126,6 +130,16 @@ export async function runScript(
     }
   }
   return result;
+}
+
+function deleteVariables(contextKeys: string[], context: vm.Context, deleteVariable?: (key: string) => void) {
+  if (deleteVariable) {
+    for (const key of contextKeys) {
+      if (typeof context[key] === 'undefined') {
+        deleteVariable(key);
+      }
+    }
+  }
 }
 
 export async function evalExpression(expression: string, context: ProcessorContext): Promise<unknown> {
@@ -154,7 +168,7 @@ function checkVariableNames(context: Record<string, unknown>) {
   const result: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(context)) {
-    if (JAVASCRIPT_KEYWORDS.indexOf(key) < 0) {
+    if (JAVASCRIPT_KEYWORDS.indexOf(key) < 0 && typeof value !== 'undefined') {
       const name = key
         .trim()
         .replace(/\s/gu, '-')

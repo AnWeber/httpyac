@@ -141,6 +141,7 @@ async function executeScriptData(scriptData: ScriptData, context: models.Process
       '@grpc/grpc-js': grpc,
       ...context.require,
     },
+    deleteVariable: (key: string) => utils.deleteVariableInContext(key, context),
   });
   if (result) {
     utils.setVariableInContext(result, context);
