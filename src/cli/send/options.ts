@@ -4,6 +4,8 @@ export enum SendFilterOptions {
   onlyFailed = 'only-failed',
 }
 
+export type OutputType = 'body' | 'headers' | 'response' | 'none' | 'short' | 'exchange';
+
 export interface SendOptions {
   env?: Array<string>;
   all?: boolean;
@@ -15,8 +17,8 @@ export interface SendOptions {
   interactive?: boolean;
   insecure?: boolean;
   json?: boolean;
-  output?: string;
-  'output-failed'?: string;
+  output?: OutputType;
+  'output-failed'?: OutputType;
   raw?: boolean;
   'repeat-mode'?: 'sequential' | 'parallel';
   repeat?: number;

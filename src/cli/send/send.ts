@@ -4,7 +4,7 @@ import * as models from '../../models';
 import { HttpFileStore } from '../../store';
 import * as utils from '../../utils';
 import { toSendJsonOutput } from './jsonOutput';
-import { SendOptions, getLogLevel, SendFilterOptions } from './options';
+import { SendOptions, getLogLevel, SendFilterOptions, OutputType } from './options';
 import { default as chalk } from 'chalk';
 import { Command } from 'commander';
 import { promises as fs } from 'fs';
@@ -278,7 +278,7 @@ function getRequestLogger(options: SendOptions): models.RequestLogger | undefine
   return undefined;
 }
 function getRequestLoggerOptions(
-  output: string | undefined,
+  output: OutputType | undefined,
   onlyFailed: boolean,
   responseBodyPrettyPrint: boolean
 ): utils.RequestLoggerFactoryOptions | undefined {

@@ -12,7 +12,9 @@ export class Logger implements ConsoleLogHandler {
   ) {}
 
   collectMessages(): void {
-    this.collectCache = [];
+    if (this.options.onlyFailedTests) {
+      this.collectCache = [];
+    }
   }
 
   flush(): void {
