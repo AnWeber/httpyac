@@ -1,5 +1,6 @@
 import { ContentType } from './contentType';
 import { HttpMethod } from './httpMethod';
+import { ChannelOptions } from '@grpc/grpc-js';
 import { OptionsOfUnknownResponseBody } from 'got';
 import { IClientOptions as MQTTOptions } from 'mqtt';
 import { ClientOptions as WebsocketOptions } from 'ws';
@@ -15,6 +16,7 @@ export interface GrpcRequest {
   method?: 'GRPC';
   headers?: Record<string, unknown>;
   body?: unknown;
+  options?: ChannelOptions;
   contentType?: undefined;
 }
 

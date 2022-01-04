@@ -4,7 +4,8 @@ import * as utils from '../utils';
 import * as grpc from '@grpc/grpc-js';
 import { Readable, Writable, Duplex } from 'stream';
 
-const GrpcUrlRegex = /^\s*(grpc:\/\/)?(?<server>.+?)\/(?<service>[^/]+?)\/(?<method>[^/]+?)$/u;
+const GrpcUrlRegex =
+  /^\s*(?<protocol>grpc|https?)?(:\/\/)?(?<server>[^/]+?)(\/(?<path>.+))?\/(?<service>[^/]+?)\/(?<method>[^/]+?)$/iu;
 
 interface GrpcError {
   details?: string;
@@ -29,7 +30,11 @@ export class GrpcClientAction implements models.HttpRegionAction {
           utils.report(context, `request gRPC ${request.url}`);
           const serviceData = this.getService(request.url, protoDefinitions);
           if (serviceData.ServiceClass) {
-            const client = new serviceData.ServiceClass(serviceData.server, this.getChannelCredentials(request));
+            const client = new serviceData.ServiceClass(
+              serviceData.server,
+              this.getChannelCredentials(request),
+              this.getChannelOptions(request, serviceData)
+            );
             const method = client[serviceData.method]?.bind?.(client);
             if (method) {
               return await this.requestGrpc(method, serviceData.methodDefinition, request, context);
@@ -40,6 +45,38 @@ export class GrpcClientAction implements models.HttpRegionAction {
       }, context);
     }
     return false;
+  }
+
+  private getChannelCredentials(request: models.GrpcRequest): grpc.ChannelCredentials {
+    if (request.headers) {
+      const channelCredentials = utils.getHeader(request.headers, 'channelcredentials');
+      if (channelCredentials instanceof grpc.ChannelCredentials) {
+        return channelCredentials;
+      }
+    }
+    return grpc.credentials.createInsecure();
+  }
+
+  private getChannelOptions(request: models.GrpcRequest, serviceData: ServiceData) {
+    const options: grpc.ChannelOptions = {};
+    if (serviceData.path) {
+      options.channelFactoryOverride = (
+        address: string,
+        credentials: grpc.ChannelCredentials,
+        options: grpc.ChannelOptions
+      ) => {
+        try {
+          const nextOptions = Object.assign({}, options);
+          delete nextOptions.channelFactoryOverride;
+          nextOptions['grpc.default_authority'] = serviceData.server;
+          return new PathAwareChannel(address, credentials, nextOptions, serviceData.path);
+        } catch (err) {
+          log.debug(err);
+        }
+        return new grpc.Channel(address, credentials, options);
+      };
+    }
+    return Object.assign(options, request.options);
   }
 
   private async requestGrpc(
@@ -183,16 +220,6 @@ export class GrpcClientAction implements models.HttpRegionAction {
     return request.body;
   }
 
-  private getChannelCredentials(request: models.GrpcRequest): grpc.ChannelCredentials {
-    if (request.headers) {
-      const channelCredentials = utils.getHeader(request.headers, 'channelcredentials');
-      if (channelCredentials instanceof grpc.ChannelCredentials) {
-        return channelCredentials;
-      }
-    }
-    return grpc.credentials.createInsecure();
-  }
-
   private getMetaData(request: models.GrpcRequest): grpc.Metadata {
     const metaData = new grpc.Metadata();
     const specialKeys = ['channelcredentials'];
@@ -208,10 +235,10 @@ export class GrpcClientAction implements models.HttpRegionAction {
     return metaData;
   }
 
-  private getService(url: string, protoDefinitions: Record<string, models.ProtoDefinition>) {
+  private getService(url: string, protoDefinitions: Record<string, models.ProtoDefinition>): ServiceData {
     const urlMatch = GrpcUrlRegex.exec(url);
     if (urlMatch && urlMatch.groups?.service) {
-      const { server, service, method } = urlMatch.groups;
+      const { server, path, service, method, protocol } = urlMatch.groups;
       const flatServices = this.flattenProtoDefintions(protoDefinitions);
 
       let ServiceClass = flatServices[service];
@@ -232,6 +259,8 @@ export class GrpcClientAction implements models.HttpRegionAction {
         return {
           server,
           service,
+          path,
+          protocol,
           method,
           ServiceClass,
           methodDefinition,
@@ -313,5 +342,46 @@ export class GrpcClientAction implements models.HttpRegionAction {
 
   private isGrpcError(data: unknown): data is Error & GrpcError {
     return data instanceof Error;
+  }
+}
+
+interface ServiceData {
+  server: string;
+  path: string;
+  service: string;
+  method: string;
+  protocol: string;
+  ServiceClass: {
+    new (address: string, credentials: grpc.ChannelCredentials, options?: Partial<grpc.ChannelOptions>): Record<
+      string,
+      // eslint-disable-next-line @typescript-eslint/ban-types
+      Function
+    >;
+  };
+  methodDefinition: grpc.MethodDefinition<unknown, unknown>;
+}
+
+// Rewire Google's channel implementation to support URL path prefix.
+class PathAwareChannel extends grpc.Channel {
+  constructor(
+    address: string,
+    credentials: grpc.ChannelCredentials,
+    options: grpc.ChannelOptions,
+    readonly path: string
+  ) {
+    super(address, credentials, options);
+  }
+
+  createCall(
+    method: string,
+    deadline: grpc.Deadline,
+    host: string | null | undefined,
+    parentCall: null,
+    propagateFlags: number | null | undefined
+  ) {
+    if (this.path) {
+      return super.createCall(`/${this.path}${method}`, deadline, host, parentCall, propagateFlags);
+    }
+    return super.createCall(method, deadline, host, parentCall, propagateFlags);
   }
 }
