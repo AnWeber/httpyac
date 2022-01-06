@@ -5,8 +5,8 @@ import { default as filesize } from 'filesize';
 import { default as got, OptionsOfUnknownResponseBody, CancelError, Response } from 'got';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import { SocksProxyAgent } from 'socks-proxy-agent';
 import merge from 'lodash/merge';
+import { SocksProxyAgent } from 'socks-proxy-agent';
 
 export function gotHttpClientFactory(defaultsOverride: HttpRequest | undefined): HttpClient {
   return async function gotHttpClient(request: HttpRequest, context: HttpClientContext): Promise<HttpResponse | false> {
