@@ -32,6 +32,6 @@ jobs:
     - run: |
         npm run test
         $LASTEXITCODE
-    - run: npm run compile
+    - run: npm run compile -- --no-minify
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
