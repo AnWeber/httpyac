@@ -1,5 +1,6 @@
 import { log } from '../io';
 import * as models from '../models';
+import { userSessionStore } from '../store';
 import * as utils from '../utils';
 
 export async function responseAsVariable(
@@ -7,11 +8,27 @@ export async function responseAsVariable(
   context: models.ProcessorContext
 ): Promise<void> {
   const body = response.parsedBody || response.body;
-  context.variables.response = response;
   if (context.httpRegion.metaData.name || context.httpRegion.metaData.jwt) {
     handleJWTMetaData(body, context);
     handleNameMetaData(response, body, context);
   }
+  setLastResponseInVariables(context, response);
+}
+
+function setLastResponseInVariables(context: models.ProcessorContext, response: models.HttpResponse) {
+  const cloneResponse = utils.cloneResponse(response);
+  delete cloneResponse.rawBody;
+  delete cloneResponse.prettyPrintBody;
+  delete cloneResponse.request;
+  userSessionStore.setUserSession({
+    id: 'last_response',
+    title: 'last response',
+    description: `response of ${context.httpRegion.symbol.name}`,
+    details: {},
+    type: 'LAST_RESPONSE',
+    response: cloneResponse,
+  });
+  context.variables.response = response;
 }
 
 function handleNameMetaData(response: models.HttpResponse, body: unknown, context: models.ProcessorContext) {

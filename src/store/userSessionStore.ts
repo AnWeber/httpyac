@@ -30,7 +30,7 @@ export class UserSessionStore implements SessionStore {
     return this.userSessions.find(obj => obj.id === id);
   }
 
-  setUserSession(userSession: UserSession): void {
+  setUserSession<T extends UserSession>(userSession: T): void {
     this.removeUserSession(userSession.id);
     this.userSessions.push(userSession);
     this.notifySessionChanged();

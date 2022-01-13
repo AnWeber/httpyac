@@ -3,6 +3,7 @@ import { provideConfigVariables, provideConfigEnvironments } from './configVaria
 import { provideDotenvVariables, provideDotenvEnvironments } from './dotenvVariableProvider';
 import { provideIntellijGlobalVariables } from './intellijGlobalVariableProvider';
 import { provideIntellijVariables, provideIntellijEnvironments } from './intellijVariableProvider';
+import { provideLastResponseVariables } from './lastResponseVariableProvider';
 
 export enum VariableProviderType {
   config = 'config',
@@ -11,6 +12,7 @@ export enum VariableProviderType {
   httpFile = 'httpFile',
   intellij = 'intellij',
   intellijGlobal = 'intellijGlobal',
+  lastResponse = 'last_response',
 }
 
 export function initProvideVariablesHook(): ProvideVariablesHook {
@@ -20,6 +22,7 @@ export function initProvideVariablesHook(): ProvideVariablesHook {
   hook.addHook(VariableProviderType.dotenv, provideDotenvVariables);
   hook.addHook(VariableProviderType.intellij, provideIntellijVariables);
   hook.addHook(VariableProviderType.intellijGlobal, provideIntellijGlobalVariables);
+  hook.addHook(VariableProviderType.lastResponse, provideLastResponseVariables);
 
   return hook;
 }
