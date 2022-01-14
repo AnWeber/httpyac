@@ -3,6 +3,7 @@ import { PathLike, VariableProviderContext, Variables } from '../../models';
 import * as utils from '../../utils';
 import { parse } from 'dotenv';
 
+const maxDirsAboveFolder = 50;
 const defaultFiles: Array<string> = ['.env'];
 
 export async function provideDotenvEnvironments(context: VariableProviderContext): Promise<string[]> {
@@ -23,9 +24,28 @@ export async function provideDotenvEnvironments(context: VariableProviderContext
     if (absolute) {
       files.push(...(await fileProvider.readdir(absolute)));
     }
-    const dirOfFile = fileProvider.dirname(context.httpFile.fileName);
-    if (dirOfFile) {
-      files.push(...(await fileProvider.readdir(dirOfFile)));
+  }
+
+  const dirOfFile = fileProvider.dirname(context.httpFile.fileName);
+  if (dirOfFile) {
+    files.push(...(await fileProvider.readdir(dirOfFile)));
+
+    let prevDirAboveFile = dirOfFile;
+    for (let i = 0; i < maxDirsAboveFolder; i++) {
+      const currentDirAboveFile = fileProvider.joinPath(prevDirAboveFile, '..');
+      if (!currentDirAboveFile) {
+        break;
+      }
+      const fsPathDirAboveFile = fileProvider.fsPath(currentDirAboveFile);
+      if (fsPathDirAboveFile === fileProvider.fsPath(prevDirAboveFile)) {
+        break;
+      }
+      if (context.httpFile.rootDir && fsPathDirAboveFile === fileProvider.fsPath(context.httpFile.rootDir)) {
+        break;
+      }
+      files.push(...(await fileProvider.readdir(currentDirAboveFile)));
+
+      prevDirAboveFile = fsPathDirAboveFile;
     }
   }
 
@@ -66,6 +86,25 @@ export async function provideDotenvVariables(
   }
   const dirOfFile = fileProvider.dirname(context.httpFile.fileName);
   if (dirOfFile) {
+    const variablesAboveFolder: Array<Variables> = [];
+    let prevDirAboveFile = dirOfFile;
+    for (let i = 0; i < maxDirsAboveFolder; i++) {
+      const currentDirAboveFile = fileProvider.joinPath(prevDirAboveFile, '..');
+      if (!currentDirAboveFile) {
+        break;
+      }
+      const fsPathDirAboveFile = fileProvider.fsPath(currentDirAboveFile);
+      if (fsPathDirAboveFile === fileProvider.fsPath(prevDirAboveFile)) {
+        break;
+      }
+      if (context.httpFile.rootDir && fsPathDirAboveFile === fileProvider.fsPath(context.httpFile.rootDir)) {
+        break;
+      }
+      variablesAboveFolder.unshift(...(await getVariablesOfFolder(searchFiles, fsPathDirAboveFile)));
+
+      prevDirAboveFile = currentDirAboveFile;
+    }
+    variables.push(...variablesAboveFolder);
     variables.push(...(await getVariablesOfFolder(searchFiles, dirOfFile)));
   }
   return Object.assign({}, ...variables);
