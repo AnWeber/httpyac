@@ -101,7 +101,7 @@
     "encodeurl": "^1.0.2",
     "eventsource": "^1.1.0",
     "filesize": "^8.0.6",
-    "globby": "^11.0.4",
+    "globby": "^11.1.0",
     "got": "^11.8.3",
     "hookpoint": "^1.0.3",
     "http-proxy-agent": "^5.0.0",
