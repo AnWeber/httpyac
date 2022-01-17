@@ -74,22 +74,34 @@ export async function findRootDir(
   currentDir: PathLike | undefined,
   ...files: Array<string>
 ): Promise<PathLike | undefined> {
-  if (currentDir) {
-    const dirFiles = await fileProvider.readdir(currentDir);
+  return iterateDirectoryTree(currentDir, async (dir: PathLike) => {
+    const dirFiles = await fileProvider.readdir(dir);
 
     if (dirFiles.some(file => files.indexOf(file) >= 0)) {
-      return currentDir;
+      return true;
     }
     for (const file of files) {
       if (dirFiles.some(obj => file.startsWith(obj))) {
-        const dir = fileProvider.joinPath(currentDir, file);
-        if (await fileProvider.exists(dir)) {
-          return currentDir;
+        if (await fileProvider.exists(fileProvider.joinPath(dir, file))) {
+          return true;
         }
       }
     }
+    return false;
+  });
+}
+
+export async function iterateDirectoryTree(
+  currentDir: PathLike | undefined,
+  predicate: (dir: PathLike) => Promise<boolean>
+): Promise<PathLike | undefined> {
+  if (currentDir) {
+    if (await predicate(currentDir)) {
+      return currentDir;
+    }
+
     if (fileProvider.dirname(currentDir) !== currentDir) {
-      return findRootDir(fileProvider.dirname(currentDir), ...files);
+      return iterateDirectoryTree(fileProvider.dirname(currentDir), predicate);
     }
   }
   return undefined;
