@@ -167,12 +167,7 @@ async function getHttpFiles(fileName: string, options: SendOptions, config: mode
     config,
   };
 
-  const paths = await globby(fileName, {
-    expandDirectories: {
-      files: ['*.rest', '*.http'],
-      extensions: ['http', 'rest'],
-    },
-  });
+  const paths = await queryGlobbyPattern(fileName);
 
   for (const path of paths) {
     const httpFile = await httpFileStore.getOrCreate(
@@ -186,6 +181,20 @@ async function getHttpFiles(fileName: string, options: SendOptions, config: mode
 
   initCliHooks(httpFiles, options);
   return httpFiles;
+}
+
+async function queryGlobbyPattern(fileName: string) {
+  const globOptions = {
+    expandDirectories: {
+      files: ['*.rest', '*.http'],
+      extensions: ['http', 'rest'],
+    },
+  };
+  const paths = await globby(fileName, globOptions);
+  if (paths && paths.length > 0) {
+    return paths;
+  }
+  return await globby(fileName.replace(/\\/gu, '/'), globOptions);
 }
 
 type SelectActionResult = { httpRegion?: models.HttpRegion | undefined; httpFile: models.HttpFile } | false;
