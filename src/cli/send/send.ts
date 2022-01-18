@@ -11,6 +11,7 @@ import { promises as fs } from 'fs';
 import { default as globby } from 'globby';
 import { HookTriggerContext } from 'hookpoint';
 import inquirer from 'inquirer';
+import { sep } from 'path';
 
 export function sendCommand() {
   const program = new Command('send')
@@ -191,7 +192,7 @@ async function queryGlobbyPattern(fileName: string) {
     },
   };
   const paths = await globby(fileName, globOptions);
-  if (paths && paths.length > 0) {
+  if ((paths && paths.length > 0) || sep === '/') {
     return paths;
   }
   return await globby(fileName.replace(/\\/gu, '/'), globOptions);
