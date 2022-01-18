@@ -67,8 +67,6 @@ export async function parseRequestLine(
       new actions.HttpClientAction()
     );
 
-    context.httpRegion.hooks.execute.addInterceptor(new actions.CreateRequestInterceptor());
-
     if (context.httpRegion.request.headers) {
       const contentType = utils.getHeader(context.httpRegion.request.headers, 'content-type');
       if (utils.isString(contentType)) {

@@ -63,8 +63,6 @@ export async function parseGrpcLine(
 
     context.httpRegion.hooks.execute.addObjHook(obj => obj.process, new actions.GrpcClientAction());
 
-    context.httpRegion.hooks.execute.addInterceptor(new actions.CreateRequestInterceptor());
-
     return result;
   }
   return false;

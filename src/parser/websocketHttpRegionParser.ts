@@ -63,8 +63,6 @@ export async function parseWebsocketLine(
 
     context.httpRegion.hooks.execute.addObjHook(obj => obj.process, new actions.WebSocketClientAction());
 
-    context.httpRegion.hooks.execute.addInterceptor(new actions.CreateRequestInterceptor());
-
     return result;
   }
   return false;

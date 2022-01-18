@@ -1,11 +1,9 @@
 import { log } from './io';
 import * as models from './models';
-import { registerPlugins } from './plugins';
-import { getEnvironmentConfig, plugins } from './store';
+import './registerPlugins';
+import { getEnvironmentConfig } from './store';
 import * as utils from './utils';
 import { HookCancel } from 'hookpoint';
-
-plugins.core = registerPlugins;
 
 /**
  * process one httpRegion of HttpFile

@@ -1,3 +1,3 @@
 import { ConfigureHooks } from '../models';
 
-export const plugins: Record<string, ConfigureHooks> = {};
+export const pluginStore: Record<string, ConfigureHooks> = {};

@@ -7,7 +7,6 @@ export * from './intellijHttpRegionParser';
 export * from './javascriptHttpRegionParser';
 export * from './markdownInterceptor';
 export * from './metaHttpRegionParser';
-export * from './mqttHttpRegionParser';
 export * from './noteMetaHttpRegionParser';
 export * from './outputRedirectionHttpRegionParser';
 export * from './parserRegex';

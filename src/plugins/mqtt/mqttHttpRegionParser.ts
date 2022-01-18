@@ -1,8 +1,10 @@
-import * as actions from '../actions';
-import * as models from '../models';
-import * as utils from '../utils';
-import { ParserRegex } from './parserRegex';
-import * as parserUtils from './parserUtils';
+import * as models from '../../models';
+import * as parserUtils from '../../parser/parserUtils';
+import * as utils from '../../utils';
+import { MQTTClientAction } from './mqttClientAction';
+
+const RegexMqttLine = /^\s*(mqtt|mqtts)\s*(?<url>.+?)\s*$/iu;
+const RegexMqttProtocol = /^\s*mqtt(s)?:\/\/(?<url>.+?)\s*$/iu;
 
 export async function parseMQTTLine(
   getLineReader: models.getHttpLineGenerator,
@@ -61,9 +63,7 @@ export async function parseMQTTLine(
       }
     }
 
-    context.httpRegion.hooks.execute.addObjHook(obj => obj.process, new actions.MQTTClientAction());
-
-    context.httpRegion.hooks.execute.addInterceptor(new actions.CreateRequestInterceptor());
+    context.httpRegion.hooks.execute.addObjHook(obj => obj.process, new MQTTClientAction());
 
     return result;
   }
@@ -74,7 +74,7 @@ function getMQTTLine(
   textLine: string,
   line: number
 ): { request: models.MQTTRequest; symbol: models.HttpSymbol } | undefined {
-  const lineMatch = ParserRegex.stream.mqttLine.exec(textLine);
+  const lineMatch = RegexMqttLine.exec(textLine);
   if (lineMatch && lineMatch.length > 1 && lineMatch.groups) {
     return {
       request: {
@@ -92,7 +92,7 @@ function getMQTTLine(
       },
     };
   }
-  const protocolMatch = ParserRegex.stream.mqttProtocol.exec(textLine);
+  const protocolMatch = RegexMqttProtocol.exec(textLine);
   if (protocolMatch && protocolMatch.length > 1 && protocolMatch.groups) {
     return {
       request: {
@@ -118,11 +118,11 @@ function isValidMQTT(textLine: string, httpRegion: models.HttpRegion) {
     return false;
   }
 
-  if (ParserRegex.stream.mqttLine.exec(textLine)?.groups?.url) {
+  if (RegexMqttLine.exec(textLine)?.groups?.url) {
     return true;
   }
   if (!httpRegion.request) {
-    return ParserRegex.stream.mqttProtocol.exec(textLine)?.groups?.url;
+    return RegexMqttProtocol.exec(textLine)?.groups?.url;
   }
   return false;
 }

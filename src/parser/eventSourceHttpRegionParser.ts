@@ -63,8 +63,6 @@ export async function parseEventSource(
 
     context.httpRegion.hooks.execute.addObjHook(obj => obj.process, new actions.EventSourceClientAction());
 
-    context.httpRegion.hooks.execute.addInterceptor(new actions.CreateRequestInterceptor());
-
     return result;
   }
   return false;

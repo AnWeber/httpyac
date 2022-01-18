@@ -2,7 +2,7 @@ import { fileProvider, log, userInteractionProvider } from '../io';
 import * as models from '../models';
 import { userSessionStore as sessionStore } from '../store';
 import * as utils from '../utils';
-import { plugins } from './pluginStore';
+import { pluginStore } from './pluginStore';
 import { default as chalk } from 'chalk';
 import { HookCancel } from 'hookpoint';
 import merge from 'lodash/merge';
@@ -148,7 +148,7 @@ export class HttpFileStore implements models.HttpFileStore {
 
     options.config = await getEnvironmentConfig(options.config, httpFile.rootDir);
 
-    const hooks: Record<string, models.ConfigureHooks> = { ...plugins };
+    const hooks: Record<string, models.ConfigureHooks> = { ...pluginStore };
     if (rootDir) {
       Object.assign(hooks, await utils.getPlugins(rootDir));
       if (options.config?.configureHooks) {

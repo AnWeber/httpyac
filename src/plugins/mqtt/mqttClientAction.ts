@@ -1,6 +1,6 @@
-import * as io from '../io';
-import * as models from '../models';
-import * as utils from '../utils';
+import * as io from '../../io';
+import * as models from '../../models';
+import * as utils from '../../utils';
 import { connect, IClientOptions, QoS, MqttClient } from 'mqtt';
 
 interface MQTTMessage {
