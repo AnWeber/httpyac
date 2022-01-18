@@ -91,6 +91,17 @@ export async function findRootDir(
   });
 }
 
+export async function iterateUntilRoot(
+  currentDir: PathLike,
+  rootDir: PathLike | undefined,
+  action: (dir: PathLike) => Promise<void>
+) {
+  return iterateDirectoryTree(currentDir, async dir => {
+    await action(dir);
+    return !!rootDir && equalsPath(rootDir, dir);
+  });
+}
+
 export async function iterateDirectoryTree(
   currentDir: PathLike | undefined,
   predicate: (dir: PathLike) => Promise<boolean>
@@ -100,9 +111,13 @@ export async function iterateDirectoryTree(
       return currentDir;
     }
 
-    if (fileProvider.dirname(currentDir) !== currentDir) {
+    if (!equalsPath(fileProvider.dirname(currentDir), currentDir)) {
       return iterateDirectoryTree(fileProvider.dirname(currentDir), predicate);
     }
   }
   return undefined;
+}
+
+export function equalsPath(path: PathLike | undefined, path2: PathLike | undefined): boolean {
+  return !!path && !!path2 && fileProvider.toString(path) === fileProvider.toString(path2);
 }
