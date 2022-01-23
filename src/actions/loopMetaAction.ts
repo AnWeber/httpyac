@@ -76,6 +76,7 @@ export class LoopMetaAction implements HookInterceptor<[models.ProcessorContext]
       utils.setVariableInContext(
         {
           [`${this.name}0`]: context.variables[this.name],
+          [`${this.name}0Response`]: context.variables.response,
         },
         context
       );
