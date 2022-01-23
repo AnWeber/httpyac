@@ -16,10 +16,7 @@ export async function responseAsVariable(
 }
 
 function setLastResponseInVariables(context: models.ProcessorContext, response: models.HttpResponse) {
-  const cloneResponse = utils.cloneResponse(response);
-  delete cloneResponse.rawBody;
-  delete cloneResponse.prettyPrintBody;
-  delete cloneResponse.request;
+  const cloneResponse = utils.shrinkCloneResponse(response);
   userSessionStore.setUserSession({
     id: 'last_response',
     title: 'last response',

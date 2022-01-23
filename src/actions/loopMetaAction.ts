@@ -1,6 +1,8 @@
 import * as models from '../models';
 import * as utils from '../utils';
 import { HookInterceptor, HookTriggerContext } from 'hookpoint';
+import cloneDeep from 'lodash/cloneDeep';
+import { v4 as uuid } from 'uuid';
 
 export enum LoopMetaType {
   for,
@@ -17,7 +19,7 @@ export interface LoopMetaData {
 }
 
 export class LoopMetaAction implements HookInterceptor<[models.ProcessorContext], boolean> {
-  id = models.ActionType.loop;
+  id;
   private iteration:
     | AsyncGenerator<{
         index: number;
@@ -26,10 +28,20 @@ export class LoopMetaAction implements HookInterceptor<[models.ProcessorContext]
     | undefined;
 
   name: string | undefined;
-  constructor(private readonly data: LoopMetaData) {}
+  index = 0;
+  request: models.Request | undefined;
+  constructor(private readonly data: LoopMetaData) {
+    this.id = `loop_${uuid()}`;
+  }
 
-  async beforeLoop(hookContext: HookTriggerContext<[models.ProcessorContext], boolean>): Promise<boolean> {
-    const context = hookContext.args[0];
+  async beforeTrigger(hookContext: HookTriggerContext<[models.ProcessorContext], boolean>): Promise<boolean> {
+    if (hookContext.hookItem?.id === this.id) {
+      this.index = hookContext.index;
+    }
+    return true;
+  }
+
+  async process(context: models.ProcessorContext): Promise<boolean> {
     this.iteration = this.iterate(context);
     this.name = context.httpRegion.metaData.name;
     context.progress?.report?.({
@@ -37,6 +49,9 @@ export class LoopMetaAction implements HookInterceptor<[models.ProcessorContext]
     });
     const next = await this.iteration.next();
     if (!next.done) {
+      if (context.request) {
+        this.request = cloneDeep(context.request);
+      }
       Object.assign(context.variables, next.value.variables);
       return true;
     }
@@ -46,6 +61,7 @@ export class LoopMetaAction implements HookInterceptor<[models.ProcessorContext]
   async afterTrigger(hookContext: HookTriggerContext<[models.ProcessorContext], boolean>): Promise<boolean> {
     const context = hookContext.args[0];
     if (this.iteration && hookContext.index + 1 === hookContext.length) {
+      this.setResponsesList(context);
       const next = await this.iteration.next();
 
       if (!next.done) {
@@ -55,12 +71,38 @@ export class LoopMetaAction implements HookInterceptor<[models.ProcessorContext]
         Object.assign(context.variables, next.value.variables);
         await utils.logResponse(context.httpRegion.response, context);
         context.httpRegion = this.createHttpRegionClone(context.httpRegion, next.value.index);
-        hookContext.index = -1;
+        if (this.request) {
+          context.request = cloneDeep(this.request);
+        }
+        hookContext.index = this.index;
       }
     } else if (this.name && context.variables[this.name]) {
-      context.variables[`${this.name}0`] = context.variables[this.name];
+      utils.setVariableInContext(
+        {
+          [`${this.name}0`]: context.variables[this.name],
+        },
+        context
+      );
     }
+
     return true;
+  }
+
+  private setResponsesList(context: models.ProcessorContext) {
+    const listName = `${this.name}List`;
+    let responses: unknown = context.variables[listName];
+    if (!responses) {
+      responses = [];
+      utils.setVariableInContext(
+        {
+          [listName]: responses,
+        },
+        context
+      );
+    }
+    if (Array.isArray(responses) && utils.isHttpResponse(context.variables.response)) {
+      responses.push(utils.shrinkCloneResponse(context.variables.response));
+    }
   }
 
   private async *iterate(context: models.ProcessorContext) {

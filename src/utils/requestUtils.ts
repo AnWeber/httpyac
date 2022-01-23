@@ -280,6 +280,19 @@ function logResponseHeader(response: models.HttpResponse) {
   return result;
 }
 
+export function isHttpResponse(val: unknown): val is models.HttpResponse {
+  const obj = val as models.HttpResponse;
+  return !!obj?.statusCode;
+}
+
+export function shrinkCloneResponse(response: models.HttpResponse): models.HttpResponse {
+  const clone = cloneResponse(response);
+  delete clone.rawBody;
+  delete clone.prettyPrintBody;
+  delete clone.request;
+  return clone;
+}
+
 export function cloneResponse(response: models.HttpResponse): models.HttpResponse {
   const clone: models.HttpResponse = {
     protocol: response.protocol,
