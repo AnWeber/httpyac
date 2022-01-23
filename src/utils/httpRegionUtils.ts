@@ -1,5 +1,6 @@
 import * as models from '../models';
 import { toEnvironmentKey } from './environmentUtils';
+import { report } from './logUtils';
 import { cloneResponse } from './requestUtils';
 import { HookCancel, Hook } from 'hookpoint';
 
@@ -49,7 +50,7 @@ export async function processHttpRegionActions(
     if (context.progress) {
       context.showProgressBar = showProgressBar;
     }
-    context.progress?.report?.({ message: `${context.httpRegion.symbol.name}` });
+    report(context, `${context.httpRegion.symbol.name}`);
 
     context.variables = initRegionScopedVariables(context);
 

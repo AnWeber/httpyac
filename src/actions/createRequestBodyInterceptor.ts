@@ -15,9 +15,7 @@ export class CreateRequestBodyInterceptor implements HookInterceptor<[models.Pro
       const contentType = context.request.contentType;
       const requestBodyLines = await this.normalizeBody(this.rawBody, context);
       if (requestBodyLines.length > 0) {
-        context.progress?.report?.({
-          message: 'init request body',
-        });
+        utils.report(hookContext.arg, 'init request body');
         if (utils.isMimeTypeFormUrlEncoded(contentType)) {
           context.request.body = this.formUrlEncodedJoin(requestBodyLines);
         } else {

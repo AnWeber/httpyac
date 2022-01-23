@@ -45,6 +45,7 @@ class DeviceCodeFlow implements OpenIdFlow {
           try {
             await utils.sleep(interval);
             if (context.progress?.isCanceled?.()) {
+              io.log.trace('process canceled by user');
               return false;
             }
             const time = new Date().getTime();

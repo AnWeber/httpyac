@@ -44,9 +44,7 @@ export class LoopMetaAction implements HookInterceptor<[models.ProcessorContext]
   async process(context: models.ProcessorContext): Promise<boolean> {
     this.iteration = this.iterate(context);
     this.name = context.httpRegion.metaData.name;
-    context.progress?.report?.({
-      message: 'start loop',
-    });
+    utils.report(context, 'start loop');
     const next = await this.iteration.next();
     if (!next.done) {
       if (context.request) {
@@ -65,9 +63,7 @@ export class LoopMetaAction implements HookInterceptor<[models.ProcessorContext]
       const next = await this.iteration.next();
 
       if (!next.done) {
-        context.progress?.report?.({
-          message: `${next.value.index} loop pass`,
-        });
+        utils.report(context, `${next.value.index} loop pass`);
         Object.assign(context.variables, next.value.variables);
         await utils.logResponse(context.httpRegion.response, context);
         context.httpRegion = this.createHttpRegionClone(context.httpRegion, next.value.index);
