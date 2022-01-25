@@ -1,14 +1,3 @@
-## 4.9.2 (2022-01-23)
-
-#### Features
-
-- provide all dotenv files between httpFile dir and root
-
-#### Fix
-
-- handle Windows Separator in CLI (#175)
-- support using `@ref`in httpRegion with `@loop`
-
 ## 4.9.1 (2022-01-04)
 
 #### Fix
