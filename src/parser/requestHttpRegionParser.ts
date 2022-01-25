@@ -61,11 +61,7 @@ export async function parseRequestLine(
       }
     }
 
-    context.httpRegion.hooks.execute.addObjHook(
-      obj => obj.process,
-      new actions.CookieJarAction(),
-      new actions.HttpClientAction()
-    );
+    context.httpRegion.hooks.execute.addObjHook(obj => obj.process, new actions.HttpClientAction());
 
     if (context.httpRegion.request.headers) {
       const contentType = utils.getHeader(context.httpRegion.request.headers, 'content-type');

@@ -16,6 +16,7 @@ export function registerPlugins(api: models.HttpyacHooksApi) {
   initReplaceVariableHook(api.hooks.replaceVariable);
 
   api.hooks.execute.addInterceptor(new actions.CreateRequestInterceptor());
+  api.hooks.execute.addInterceptor(new actions.CookieJarInterceptor());
 }
 
 function initOnRequestHook(hook: models.OnRequestHook) {
