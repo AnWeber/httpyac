@@ -64,11 +64,7 @@ function handleJWTMetaData(body: unknown, { httpRegion }: models.ProcessorContex
 
 function parseJwtToken(value: unknown): utils.JWTToken | null {
   if (utils.isString(value)) {
-    try {
-      return utils.decodeJWT(value);
-    } catch (err) {
-      log.error(err);
-    }
+    return utils.decodeJWT(value);
   }
   return null;
 }

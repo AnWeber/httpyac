@@ -77,7 +77,7 @@ function getSessionOpenIdInformation(
   return false;
 }
 
-function isOpenIdInformation(userSession: UserSession | undefined): userSession is oauth.OpenIdInformation {
+export function isOpenIdInformation(userSession: UserSession | undefined): userSession is oauth.OpenIdInformation {
   const guard = userSession as oauth.OpenIdInformation;
   return !!guard?.accessToken;
 }
