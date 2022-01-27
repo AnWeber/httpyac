@@ -1,3 +1,16 @@
+## 4.10.0 (2022-01-27)
+
+#### Features
+
+- use Host Header as Url Prefix (#189)
+- add cookie to userSessionStore instead cookieStore
+- `# @loop` allows actions before execution of the loop (e.g. ' # @ref ...`)
+- use all dotenv files between httpfile directory and rootDir (#174)
+
+#### Fix
+
+- handle Windows directory separators in glob pattern (#175)
+
 ## 4.9.1 (2022-01-04)
 
 #### Fix
