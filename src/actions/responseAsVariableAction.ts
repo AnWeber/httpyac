@@ -1,4 +1,3 @@
-import { log } from '../io';
 import * as models from '../models';
 import { userSessionStore } from '../store';
 import * as utils from '../utils';
