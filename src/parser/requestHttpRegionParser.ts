@@ -69,14 +69,6 @@ export async function parseRequestLine(
         context.httpRegion.request.contentType = utils.parseMimeType(contentType);
       }
     }
-
-    const host = utils.getHeader(request.headers, 'Host');
-    if (utils.isString(host) && request.url?.startsWith('/')) {
-        const [, port] = host.toString().split(':');
-        const scheme = port === '443' || port === '8443' ? 'https' : 'http';
-        request.url = `${scheme}://${host}${request.url}`;
-    }
-  
     return result;
   }
   return false;
