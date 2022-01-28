@@ -23,7 +23,7 @@ jobs:
         uses: github/codeql-action/init@v1
         with:
           languages: ${{ matrix.language }}
-          source-root: src
+          config-file: ./.github/codeql-config.yml
       - name: Install Node.js
         uses: actions/setup-node@v2
         with:
