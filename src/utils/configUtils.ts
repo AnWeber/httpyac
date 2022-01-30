@@ -85,9 +85,12 @@ export async function getPlugins(rootDir: PathLike): Promise<Record<string, Conf
       ...Object.keys(packageJson.json.devDependencies || {}),
     ].filter(isPlugin);
     for (const dep of plugins) {
-      const hook = loadModule<ConfigureHooks>(dep, fileProvider.fsPath(packageJson.dir));
-      if (hook) {
-        hooks[dep] = hook;
+      const fsPath = fileProvider.fsPath(packageJson.dir);
+      if (fsPath) {
+        const hook = loadModule<ConfigureHooks>(dep, fsPath);
+        if (hook) {
+          hooks[dep] = hook;
+        }
       }
     }
   }
