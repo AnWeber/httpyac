@@ -36,12 +36,18 @@ function initFileProvider(): void {
   };
   fileProvider.readFile = async (fileName: models.PathLike, encoding: models.FileEncoding): Promise<string> => {
     const file = fileProvider.fsPath(fileName);
-    return fs.readFile(file, encoding);
+    if (file) {
+      return fs.readFile(file, encoding);
+    }
+    throw new Error('No valid path for cli');
   };
   fileProvider.readBuffer = async (fileName: models.PathLike) => {
     const file = fileProvider.fsPath(fileName);
-    const stream = createReadStream(file);
-    return toBuffer(stream);
+    if (file) {
+      const stream = createReadStream(file);
+      return toBuffer(stream);
+    }
+    throw new Error('No valid path for cli');
   };
   fileProvider.writeBuffer = (fileName: models.PathLike, buffer: Buffer) =>
     fs.writeFile(fileProvider.toString(fileName), buffer);

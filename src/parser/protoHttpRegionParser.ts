@@ -1,4 +1,4 @@
-import { fileProvider, log, userInteractionProvider } from '../io';
+import * as io from '../io';
 import * as models from '../models';
 import * as utils from '../utils';
 import { ParserRegex } from './parserRegex';
@@ -76,7 +76,17 @@ export class ProtoImportAction implements models.HttpRegionAction {
       definition.packageDefinition = await utils.replaceFilePath(
         this.protoDefinition.fileName,
         context,
-        (path: models.PathLike) => load(fileProvider.fsPath(path), options)
+        async (path: models.PathLike) => {
+          const fsPath = io.fileProvider.fsPath(path);
+          if (fsPath) {
+            return await load(fsPath, options);
+          }
+          const message = `file ${path} has not scheme file`;
+          io.userInteractionProvider.showWarnMessage?.(message);
+          io.log.warn(message);
+
+          return undefined;
+        }
       );
       if (definition.packageDefinition) {
         definition.grpcObject = loadPackageDefinition(definition.packageDefinition);
@@ -97,8 +107,8 @@ export class ProtoImportAction implements models.HttpRegionAction {
       Object.assign(options, await utils.evalExpression(`{${optionsScript}}`, context));
     } catch (err) {
       const message = `proto-loader options convert failed: ${optionsScript}`;
-      userInteractionProvider.showWarnMessage?.(message);
-      log.warn(message, err);
+      io.userInteractionProvider.showWarnMessage?.(message);
+      io.log.warn(message, err);
     }
     return options;
   }

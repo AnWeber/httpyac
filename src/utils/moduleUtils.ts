@@ -83,7 +83,7 @@ export async function runScript(
     deleteVariable?: (key: string) => void;
   }
 ): Promise<Record<string, unknown>> {
-  const filename = fileProvider.fsPath(options.fileName);
+  const filename = toModuleFilename(options.fileName);
 
   const mod = createModule(filename);
 
@@ -102,7 +102,7 @@ export async function runScript(
       log.warn(`requireUncached is deprecated. It can no longer be supported due to esm conversion.`);
       const dirName = fileProvider.dirname(filename);
       if (dirName) {
-        clearModule(id, fileProvider.fsPath(dirName));
+        clearModule(id, toModuleFilename(dirName));
       }
       return mod.require(id);
     },
@@ -130,6 +130,9 @@ export async function runScript(
     }
   }
   return result;
+}
+function toModuleFilename(fileName: PathLike) {
+  return fileProvider.fsPath(fileName) || fileProvider.toString(fileName);
 }
 
 function deleteVariables(contextKeys: string[], context: vm.Context, deleteVariable?: (key: string) => void) {

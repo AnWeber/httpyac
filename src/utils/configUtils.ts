@@ -24,22 +24,23 @@ export const defaultConfigFiles = [
 ];
 
 async function loadFileConfig(rootDir: PathLike): Promise<EnvironmentConfig | undefined> {
-  let fileConfigPath: PathLike | undefined;
+  let fileConfigPath: string | undefined;
   for (const fileName of defaultConfigFiles) {
     const resolvedPath = fileName && fileProvider.joinPath(rootDir, fileName);
     if (resolvedPath && (await fileProvider.exists(resolvedPath))) {
-      fileConfigPath = resolvedPath;
+      fileConfigPath = fileProvider.fsPath(resolvedPath);
       break;
     }
   }
   if (fileConfigPath) {
-    const fsConfigPath = fileProvider.fsPath(fileConfigPath);
     const fsRoot = fileProvider.fsPath(rootDir);
-    const fileConfig = loadModule<EnvironmentConfig | (() => EnvironmentConfig)>(fsConfigPath, fsRoot, true);
-    if (typeof fileConfig === 'function') {
-      return fileConfig();
+    if (fsRoot) {
+      const fileConfig = loadModule<EnvironmentConfig | (() => EnvironmentConfig)>(fileConfigPath, fsRoot, true);
+      if (typeof fileConfig === 'function') {
+        return fileConfig();
+      }
+      return fileConfig;
     }
-    return fileConfig;
   }
   return undefined;
 }

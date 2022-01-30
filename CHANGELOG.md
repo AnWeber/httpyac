@@ -1,12 +1,9 @@
-## 4.10.0 (2022-01-27)
+## Unreleased
 
-#### Features
+#### Fix
 
-- use Host Header as Url Prefix (#189)
-- add cookie to userSessionStore instead cookieStore
-- `# @loop` allows actions before execution of the loop (e.g. ' # @ref ...`)
-- use all dotenv files between httpfile directory and rootDir (#174)
-
+- add fallback, if fsPath results in undefined/ error (AnWeber/httpbook#43)
+- Error parsing grpc URL starting with grpc fixed (mistaken for protocol)
 
 ## 4.10.0 (2022-01-27)
 

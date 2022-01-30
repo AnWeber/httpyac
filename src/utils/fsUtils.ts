@@ -59,8 +59,9 @@ export async function findRootDirOfFile(
   ...files: Array<string>
 ): Promise<PathLike | undefined> {
   let file = filename;
-  if (!(await fileProvider.isAbsolute(filename)) && workingDir) {
-    file = fileProvider.joinPath(workingDir, fileProvider.fsPath(filename));
+  const fsPath = fileProvider.fsPath(filename);
+  if (!(await fileProvider.isAbsolute(filename)) && workingDir && fsPath) {
+    file = fileProvider.joinPath(workingDir, fsPath);
   }
   const dirName = fileProvider.dirname(file);
   const dir = await findRootDir(dirName, ...files);
