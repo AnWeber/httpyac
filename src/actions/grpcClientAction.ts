@@ -5,7 +5,7 @@ import * as grpc from '@grpc/grpc-js';
 import { Readable, Writable, Duplex } from 'stream';
 
 const GrpcUrlRegex =
-  /^\s*(?<protocol>grpc|https?)?(:\/\/)?(?<server>[^/]+?)(\/(?<path>.+))?\/(?<service>[^/]+?)\/(?<method>[^/]+?)$/iu;
+  /^\s*((?<protocol>grpc|https?):\/\/)?(?<server>[^/]+?)(\/(?<path>.+))?\/(?<service>[^/]+?)\/(?<method>[^/]+?)$/iu;
 
 interface GrpcError {
   details?: string;
