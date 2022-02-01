@@ -1,5 +1,4 @@
 import * as httpyac from '..';
-import { testFactory } from '../actions';
 import * as models from '../models';
 import * as utils from '../utils';
 import { ParserRegex } from './parserRegex';
@@ -127,7 +126,7 @@ async function executeScriptData(scriptData: ScriptData, context: models.Process
     context: {
       request: context.request,
       sleep: utils.sleep,
-      test: testFactory(context),
+      test: utils.testFactory(context),
       httpFile: context.httpFile,
       httpRegion: context.httpRegion,
       console: context.scriptConsole,

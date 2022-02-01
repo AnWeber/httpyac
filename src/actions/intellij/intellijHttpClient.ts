@@ -1,5 +1,5 @@
 import { ProcessorContext } from '../../models';
-import { testFactory } from '../testMethod';
+import { testFactory } from '../../utils';
 import { HttpClient as JetbrainsHttpClient, Variables as JetbrainsVariables } from './http-client';
 import { IntellijVariables } from './intellijVariables';
 import { ok } from 'assert';

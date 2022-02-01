@@ -13,7 +13,6 @@ export * from './httpClientAction';
 export * from './createRequestBodyInterceptor';
 export * from './responseAsVariableAction';
 export * from './refMetaAction';
-export * from './testMethod';
 export * from './setEnvRequestOptions';
 export * from './requestVariableReplacer';
 export * from './transformRequestBodyAction';

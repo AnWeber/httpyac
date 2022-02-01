@@ -1,5 +1,5 @@
+import * as utils from '.';
 import { ProcessorContext, TestFunction, TestResult, testSymbols } from '../models';
-import * as utils from '../utils';
 import { default as chalk } from 'chalk';
 
 export function testFactory({ httpRegion, scriptConsole }: ProcessorContext): TestFunction {

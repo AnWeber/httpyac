@@ -13,4 +13,5 @@ export * from './moduleUtils';
 export * from './stringUtils';
 export * from './requestUtils';
 export * from './promiseUtils';
+export * from './testUtils';
 export * from './variableUtils';
