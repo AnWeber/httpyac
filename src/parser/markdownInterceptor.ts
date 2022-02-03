@@ -15,7 +15,19 @@ export class MarkdownInterceptor
     const getLineReader = hookContext.args[0];
     const context = hookContext.args[1];
 
-    if (fileProvider.hasExtension(context.httpFile.fileName, 'md')) {
+    if (
+      fileProvider.hasExtension(
+        context.httpFile.fileName,
+        'md',
+        'markdown',
+        'mdown',
+        'mkdn',
+        'mdtxt',
+        'mdtext',
+        'text',
+        'rmd'
+      )
+    ) {
       const httpBlockLines = this.getHttpBlockLines(context.lines, context.data);
       hookContext.args[0] = function* createReader(noStopOnMetaTag?: boolean) {
         if (httpBlockLines.length > 0) {

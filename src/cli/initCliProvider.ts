@@ -22,8 +22,8 @@ function initFixTestSymbols() {
 function initFileProvider(): void {
   fileProvider.isAbsolute = async (fileName: models.PathLike) => isAbsolute(fileProvider.toString(fileName));
   fileProvider.dirname = (fileName: string) => dirname(fileProvider.toString(fileName));
-  fileProvider.hasExtension = (fileName: models.PathLike, extension: string) =>
-    extname(fileProvider.toString(fileName)) === extension;
+  fileProvider.hasExtension = (fileName: models.PathLike, ...extensions: Array<string>) =>
+    extensions.indexOf(extname(fileProvider.toString(fileName))) >= 0;
   fileProvider.joinPath = (fileName: models.PathLike, path: string): models.PathLike =>
     join(fileProvider.toString(fileName), path);
 

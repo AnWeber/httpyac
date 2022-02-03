@@ -22,7 +22,7 @@ export interface FileProvider {
   readBuffer(fileName: PathLike): Promise<Buffer>;
   writeBuffer(fileName: PathLike, buffer: Buffer): Promise<void>;
   readdir: (dirname: PathLike) => Promise<string[]>;
-  hasExtension(fileName: PathLike, extension: string): boolean;
+  hasExtension(fileName: PathLike, ...extensions: Array<string>): boolean;
   fsPath(fileName: PathLike): string | undefined;
   toString(fileName: PathLike): string;
 }
