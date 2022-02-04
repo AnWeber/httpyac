@@ -266,8 +266,15 @@ export class GrpcClientAction implements models.HttpRegionAction {
           methodDefinition,
         };
       }
-      log.error(`Service ${service} does not exist. Available Services`, ...Object.keys(flatServices));
-      throw new Error(`Service ${service} does not exist. Available Services: ${Object.keys(flatServices).join(', ')}`);
+
+      const flatServicKeys = Object.keys(flatServices);
+      if (flatServicKeys) {
+        log.error(`Service ${service} does not exist. Available Services`, ...flatServicKeys);
+        throw new Error(`Service ${service} does not exist. Available Services: ${flatServicKeys.join(', ')}`);
+      } else {
+        log.error(`Service ${service} does not exist. No Service imported`);
+        throw new Error(`Service ${service} does not exist. No Service imported`);
+      }
     } else {
       throw new Error(`Url ${url} does not match pattern <server>/<service>/<method>`);
     }
