@@ -1,4 +1,6 @@
+export * from './asciidocInterceptor';
 export * from './cancelExecutionInterceptor';
+export * from './codeBlocksInterceptor';
 export * from './commentHttpRegionParser';
 export * from './eventSourceHttpRegionParser';
 export * from './grpcHttpRegionParser';

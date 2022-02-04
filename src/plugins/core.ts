@@ -52,6 +52,7 @@ export enum ParserId {
 
 function initParseHook(hook: models.ParseHook) {
   hook.addInterceptor(new parser.MarkdownInterceptor());
+  hook.addInterceptor(new parser.AsciidocInterceptor());
 
   hook.addHook(ParserId.meta, parser.parseMetaData);
   hook.addHook(ParserId.comment, parser.parseComment);
