@@ -8,7 +8,6 @@ import { SendOptions, getLogLevel, SendFilterOptions, OutputType } from './optio
 import { default as chalk } from 'chalk';
 import { Command } from 'commander';
 import { promises as fs } from 'fs';
-import { default as globby } from 'globby';
 import { HookTriggerContext } from 'hookpoint';
 import inquirer from 'inquirer';
 import { sep } from 'path';
@@ -191,6 +190,7 @@ async function queryGlobbyPattern(fileName: string) {
       extensions: ['http', 'rest'],
     },
   };
+  const { globby } = await import('globby');
   const paths = await globby(fileName, globOptions);
   if ((paths && paths.length > 0) || sep === '/') {
     return paths;
