@@ -1,6 +1,5 @@
 import { fileProvider, userInteractionProvider } from '../io';
 import * as models from '../models';
-import clipboard from 'clipboardy';
 import { promises as fs, createReadStream } from 'fs';
 import inquirer from 'inquirer';
 import { join, isAbsolute, dirname, extname } from 'path';
@@ -122,9 +121,11 @@ function initUserInteractionProvider() {
     return answer.placeholder;
   };
   userInteractionProvider.getClipboard = async function getClipboard() {
-    return await clipboard.read();
+    const clipboard = await import('clipboardy');
+    return await clipboard.default.read();
   };
   userInteractionProvider.setClipboard = async function setClipboard(message: string) {
-    await clipboard.write(message);
+    const clipboard = await import('clipboardy');
+    await clipboard.default.write(message);
   };
 }
