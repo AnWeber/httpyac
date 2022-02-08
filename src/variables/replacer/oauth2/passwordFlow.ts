@@ -33,7 +33,7 @@ class PasswordFlow implements OpenIdFlow {
         {
           config,
           id,
-          title: `PasswordFlow: ${config.username} (${config.clientId})`,
+          title: `password flow: ${config.username} (${config.clientId})`,
           description: `${config.variablePrefix} - ${config.tokenEndpoint}`,
           details: {
             clientId: config.clientId,
