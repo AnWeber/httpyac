@@ -31,7 +31,7 @@ class DeviceCodeFlow implements OpenIdFlow {
       if (deviceCodeResponse && deviceCodeResponse.statusCode === 200 && utils.isString(deviceCodeResponse.body)) {
         utils.report(context, 'device_code received');
 
-        const deviceCodeBody: DevcieCodeBody = JSON.parse(deviceCodeResponse.body);
+        const deviceCodeBody: DeviceCodeBody = JSON.parse(deviceCodeResponse.body);
 
         let interval = deviceCodeBody.interval ? Number(deviceCodeBody.interval) * 1000 : 5000;
         if (Number.isNaN(interval)) {
@@ -116,7 +116,7 @@ class DeviceCodeFlow implements OpenIdFlow {
   private async authenticateUser(
     context: OpenIdFlowContext,
     config: OpenIdConfiguration,
-    deviceCodeBody: DevcieCodeBody
+    deviceCodeBody: DeviceCodeBody
   ) {
     return await context?.httpClient(
       {
@@ -152,12 +152,12 @@ class DeviceCodeFlow implements OpenIdFlow {
     );
   }
 
-  private showUserCode(deviceCodeBody: DevcieCodeBody) {
+  private showUserCode(deviceCodeBody: DeviceCodeBody) {
     const message =
       deviceCodeBody.message ||
       `To sign in, use a web browser to open the page ${deviceCodeBody.verification_uri_complete} and enter the code ${deviceCodeBody.user_code} to authenticate.`;
     io.log.info(message);
-    io.log.info(`Verfication_Uri: ${deviceCodeBody.verification_uri_complete || deviceCodeBody.verification_uri}`);
+    io.log.info(`Verification_Uri: ${deviceCodeBody.verification_uri_complete || deviceCodeBody.verification_uri}`);
     io.log.info(`User_Code: ${deviceCodeBody.user_code}`);
 
     const openVerificationUri = async () => {
@@ -177,7 +177,7 @@ class DeviceCodeFlow implements OpenIdFlow {
   }
 }
 
-interface DevcieCodeBody {
+interface DeviceCodeBody {
   user_code: string;
   device_code: string;
   verification_uri: string;
