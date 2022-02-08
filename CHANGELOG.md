@@ -1,3 +1,16 @@
+## 4.10.2 (2022-02-08)
+
+#### Features
+
+- add Asciidoc Injection
+- add testFactory to utils (#194)
+- update to globby and clipboardy ESM Packages
+
+#### Fix
+
+- use device_code instead of code in OAuth2 Device Code Flow
+- add more file extensions for Markdown Injection (Anweber/vscode-httpyac#102)
+
 ## 4.10.1 (2022-01-30)
 
 #### Fix
