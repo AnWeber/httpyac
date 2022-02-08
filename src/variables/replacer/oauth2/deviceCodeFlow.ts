@@ -25,11 +25,10 @@ class DeviceCodeFlow implements OpenIdFlow {
 
       const deviceCodeTime = new Date().getTime();
       const deviceCodeResponse = await this.requestDeviceAuthorization(context, config);
-
+      if (deviceCodeResponse && models.isProcessorContext(context)) {
+        await utils.logResponse(deviceCodeResponse, context);
+      }
       if (deviceCodeResponse && deviceCodeResponse.statusCode === 200 && utils.isString(deviceCodeResponse.body)) {
-        if (models.isProcessorContext(context)) {
-          await utils.logResponse(deviceCodeResponse, context);
-        }
         utils.report(context, 'device_code received');
 
         const deviceCodeBody: DevcieCodeBody = JSON.parse(deviceCodeResponse.body);
