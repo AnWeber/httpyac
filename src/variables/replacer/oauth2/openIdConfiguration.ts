@@ -21,6 +21,7 @@ export interface OpenIdConfiguration {
   password?: string;
   subjectIssuer?: string;
   useAuthorizationHeader: boolean;
+  useDeviceCodeClientSecret?: boolean;
   redirectUri: URL;
 }
 
@@ -65,6 +66,8 @@ export function getOpenIdConfiguration(
       keepAlive: ['true', '1', true].indexOf(getVariable(variables, variablePrefix, 'keepAlive')) < 0,
       useAuthorizationHeader:
         ['false', '0', false].indexOf(getVariable(variables, variablePrefix, 'useAuthorizationHeader')) < 0,
+      useDeviceCodeClientSecret:
+        ['true', '1', true].indexOf(getVariable(variables, variablePrefix, 'useDeviceCodeClientSecret')) >= 0,
     };
     return config;
   }

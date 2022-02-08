@@ -128,7 +128,7 @@ class DeviceCodeFlow implements OpenIdFlow {
         body: utils.toQueryParams({
           client_id: config.clientId,
           grant_type: 'urn:ietf:params:oauth:grant-type:device_code',
-          code: deviceCodeBody.device_code,
+          device_code: deviceCodeBody.device_code,
         }),
       },
       { showProgressBar: false }
@@ -145,6 +145,7 @@ class DeviceCodeFlow implements OpenIdFlow {
         },
         body: utils.toQueryParams({
           client_id: config.clientId,
+          client_secret: config.useDeviceCodeClientSecret ? config.clientSecret : undefined,
           scope: config.scope || 'openid',
         }),
       },
