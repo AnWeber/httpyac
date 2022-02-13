@@ -1,6 +1,5 @@
 import * as models from '../models';
 import * as utils from '../utils';
-import { ParserRegex } from './parserRegex';
 import { HookCancel, HookInterceptor, HookTriggerContext } from 'hookpoint';
 
 const VariableHookId = 'variable';
@@ -14,7 +13,7 @@ export async function parseVariable(
   if (!next.done) {
     const textLine = next.value.textLine;
 
-    const match = ParserRegex.variable.exec(textLine);
+    const match = /^\s*@(?<key>[^\s=]*)\s*(?<operator>=\s*)"?(?<value>.*)"?\s*$/u.exec(textLine);
 
     if (match && match.groups && match.groups.key && match.groups.value) {
       const key = match.groups.key;

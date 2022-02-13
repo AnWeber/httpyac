@@ -6,7 +6,6 @@ import {
   ParserContext,
 } from '../models';
 import { toMultiLineString } from '../utils';
-import { ParserRegex } from './parserRegex';
 
 export async function parseComment(
   getLineReader: getHttpLineGenerator,
@@ -48,7 +47,7 @@ function getCommentContent(lineReader: HttpLineGenerator): CommentParserResult |
   let next = lineReader.next();
   if (!next.done) {
     const startLine = next.value.line;
-    const singleLineMatch = ParserRegex.comment.singleline.exec(next.value.textLine);
+    const singleLineMatch = /^\s*\/\/\s*(?<comment>.*)\s*$/u.exec(next.value.textLine);
     if (singleLineMatch?.groups?.comment) {
       return {
         startLine,
@@ -58,12 +57,12 @@ function getCommentContent(lineReader: HttpLineGenerator): CommentParserResult |
       };
     }
 
-    const multiLineMatch = ParserRegex.comment.multilineStart.exec(next.value.textLine);
+    const multiLineMatch = /^\s*\/\*$/u.exec(next.value.textLine);
     if (multiLineMatch) {
       next = lineReader.next();
       const lines: Array<string> = [];
       while (!next.done) {
-        if (ParserRegex.comment.multilineEnd.test(next.value.textLine)) {
+        if (/^\s*\*\/\s*$/u.test(next.value.textLine)) {
           return {
             startLine,
             endLine: next.value.line,

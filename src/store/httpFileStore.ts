@@ -352,7 +352,7 @@ function createReaderFactory(startLine: number, lines: Array<string>) {
       };
       if (!noStopOnMetaTag) {
         // if parser region is not closed stop at delimiter
-        if (/^\s*#{3,}(?<title>.*)$/u.test(textLine)) {
+        if (utils.RegionSeparator.test(textLine)) {
           break;
         }
       }

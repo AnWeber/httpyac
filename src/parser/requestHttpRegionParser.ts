@@ -1,7 +1,9 @@
 import * as actions from '../actions';
 import * as models from '../models';
 import * as utils from '../utils';
-import { ParserRegex } from './parserRegex';
+
+const RequestLineRegex =
+  /^\s*(?<method>GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE|PROPFIND|PROPPATCH|MKCOL|COPY|MOVE|LOCK|UNLOCK|CHECKOUT|CHECKIN|REPORT|MERGE|MKACTIVITY|MKWORKSPACE|VERSION-CONTROL|BASELINE-CONTROL)\s*(?<url>.+?)(\s+HTTP\/(?<version>(\S+)))?$/u;
 
 export async function parseRequestLine(
   getLineReader: models.getHttpLineGenerator,
@@ -78,7 +80,7 @@ function getRequestLine(
   line: number
 ): { request: models.HttpRequest; requestSymbols: Array<models.HttpSymbol> } {
   const requestSymbols: Array<models.HttpSymbol> = [];
-  const requestLineMatch = ParserRegex.request.requestLine.exec(textLine);
+  const requestLineMatch = RequestLineRegex.exec(textLine);
   if (requestLineMatch && requestLineMatch.length > 1 && requestLineMatch.groups) {
     requestSymbols.push(
       {
@@ -138,7 +140,7 @@ function isValidRequestLine(textLine: string, httpRegion: models.HttpRegion) {
     return false;
   }
   if (httpRegion.request) {
-    if (ParserRegex.request.requestLine.exec(textLine)?.groups?.method) {
+    if (RequestLineRegex.exec(textLine)?.groups?.method) {
       return true;
     }
     return false;

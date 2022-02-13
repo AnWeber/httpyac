@@ -2,7 +2,6 @@ import { GqlAction, GqlData } from '../actions';
 import { fileProvider } from '../io';
 import * as models from '../models';
 import * as utils from '../utils';
-import { ParserRegex } from './parserRegex';
 
 const EmptyLine = /^\s*$/u;
 
@@ -77,7 +76,7 @@ async function getGQLContent(lineReader: models.HttpLineGenerator): Promise<GqlP
   if (!next.done) {
     const startLine = next.value.line;
 
-    const fileMatches = ParserRegex.gql.fileImport.exec(next.value.textLine);
+    const fileMatches = /^\s*gql(\s+(?<name>[^\s(]+))?\s+<\s+(?<fileName>.+)\s*$/u.exec(next.value.textLine);
     if (fileMatches && fileMatches.groups?.fileName) {
       const parserPath = fileMatches.groups.fileName;
       return {
@@ -89,11 +88,11 @@ async function getGQLContent(lineReader: models.HttpLineGenerator): Promise<GqlP
           utils.replaceFilePath(parserPath, context, (path: models.PathLike) => fileProvider.readFile(path, 'utf-8')),
       };
     }
-    const queryMatch = ParserRegex.gql.query.exec(next.value.textLine);
+    const queryMatch = /^\s*(query|mutation)(\s+(?<name>[^\s(]+))?/u.exec(next.value.textLine);
     if (queryMatch) {
       return matchGqlContent(next.value, lineReader, queryMatch.groups?.name);
     }
-    const fragmentMatch = ParserRegex.gql.fragment.exec(next.value.textLine);
+    const fragmentMatch = /^\s*(fragment)\s+(?<name>[^\s(]+)\s+on\s+/u.exec(next.value.textLine);
     if (fragmentMatch) {
       return matchGqlContent(next.value, lineReader, fragmentMatch.groups?.name);
     }

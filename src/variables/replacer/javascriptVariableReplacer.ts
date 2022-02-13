@@ -1,6 +1,5 @@
 import { log } from '../../io';
 import { ProcessorContext, VariableType } from '../../models';
-import { ParserRegex } from '../../parser';
 import * as utils from '../../utils';
 
 export async function replaceJavascriptExpressions(
@@ -16,7 +15,7 @@ export async function replaceJavascriptExpressions(
   let result = text;
   while (start !== result) {
     start = result;
-    while ((match = ParserRegex.javascript.scriptSingleLine.exec(start)) !== null) {
+    while ((match = utils.HandlebarsSingleLine.exec(start)) !== null) {
       const [searchValue, jsVariable] = match;
 
       try {

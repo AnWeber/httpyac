@@ -1,6 +1,5 @@
 import { ProcessorContext, VariableType } from '../../models';
-import { ParserRegex } from '../../parser';
-import { isString } from '../../utils';
+import * as utils from '../../utils';
 import dayjs, { OpUnitType } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { v4 as uuidv4 } from 'uuid';
@@ -12,12 +11,12 @@ export async function restClientVariableReplacer(
   _type: VariableType | string,
   { variables }: ProcessorContext
 ): Promise<unknown> {
-  if (!isString(text)) {
+  if (!utils.isString(text)) {
     return text;
   }
   let match: RegExpExecArray | null;
   let result = text;
-  while ((match = ParserRegex.javascript.scriptSingleLine.exec(text)) !== null) {
+  while ((match = utils.HandlebarsSingleLine.exec(text)) !== null) {
     const [searchValue, variable] = match;
 
     const trimmedVariable = variable.trim();

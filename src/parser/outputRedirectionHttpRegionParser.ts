@@ -1,6 +1,5 @@
 import { fileProvider, log } from '../io';
 import * as models from '../models';
-import { ParserRegex } from './parserRegex';
 
 export async function parseOutputRedirection(
   getLineReader: models.getHttpLineGenerator,
@@ -12,7 +11,7 @@ export async function parseOutputRedirection(
   if (!next.done) {
     const textLine = next.value.textLine;
 
-    const match = ParserRegex.outputRedirection.exec(textLine);
+    const match = /^\s*>>(?<force>!)?\s+(?<fileName>[^\s{%}]+\s*)$/u.exec(textLine);
     if (match && match.groups?.fileName) {
       const fileName = match.groups.fileName;
       const force = !!match.groups.force;

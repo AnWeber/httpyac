@@ -2,6 +2,9 @@ import * as models from '../models';
 import { report } from './logUtils';
 import { evalExpression } from './moduleUtils';
 
+export const HandlebarsSingleLine = /\{{2}(.+?)\}{2}/gu;
+export const RegionSeparator = /^\s*#{3,}(?<title>.*)$/u;
+
 export type ParseLineMethod = (
   httpLine: models.HttpLine,
   context: models.ParserContext

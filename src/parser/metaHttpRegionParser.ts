@@ -1,7 +1,8 @@
 import { log } from '../io';
 import * as models from '../models';
 import * as utils from '../utils';
-import { ParserRegex } from './parserRegex';
+
+const MetaDataRegex = /^\s*(#+|\/{2})/u;
 
 export async function parseMetaData(
   getLineReader: models.getHttpLineGenerator,
@@ -20,7 +21,7 @@ export async function parseMetaData(
   const next = lineReader.next();
   if (!next.done) {
     const textLine = next.value.textLine;
-    if (ParserRegex.meta.all.test(textLine)) {
+    if (MetaDataRegex.test(textLine)) {
       if (isMarkdownRequest(context)) {
         if (textLine.trim() !== '###') {
           log.debug('request with markdown only supports delimiter after request line');
@@ -32,7 +33,7 @@ export async function parseMetaData(
         nextParserLine: next.value.line,
         symbols: [],
       };
-      const delimiterMatch = ParserRegex.meta.delimiter.exec(textLine);
+      const delimiterMatch = utils.RegionSeparator.exec(textLine);
       if (delimiterMatch) {
         result.endRegionLine = next.value.line - 1;
         result.symbols.push({
@@ -46,7 +47,7 @@ export async function parseMetaData(
         });
         data.metaTitle = delimiterMatch.groups?.title;
       } else {
-        const commentResult = utils.parseComments(next.value, context, ParserRegex.meta.all);
+        const commentResult = utils.parseComments(next.value, context, MetaDataRegex);
         if (commentResult) {
           result.symbols = commentResult.symbols;
         }

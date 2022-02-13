@@ -1,11 +1,14 @@
 import * as httpyac from '..';
 import * as models from '../models';
 import * as utils from '../utils';
-import { ParserRegex } from './parserRegex';
 import * as grpc from '@grpc/grpc-js';
 import { default as chalk } from 'chalk';
 import { default as got } from 'got';
 import { HookInterceptor, HookTriggerContext } from 'hookpoint';
+
+const JavaScriptStart =
+  /^\s*\{\{(@js\s+)?(?<modifier>\+|@)?(?<event>(request|streaming|response|after|responseLogging)?)?\s*$/iu;
+const JavaScriptEnd = /^\s*\}\}\s*$/u;
 
 export interface ScriptData {
   script: string;
@@ -20,13 +23,13 @@ export async function parseJavascript(
   let next = lineReader.next();
 
   if (!next.done) {
-    const match = ParserRegex.javascript.scriptStart.exec(next.value.textLine);
+    const match = JavaScriptStart.exec(next.value.textLine);
     if (match?.groups) {
       const lineOffset = next.value.line;
       next = lineReader.next();
       const script: Array<string> = [];
       while (!next.done) {
-        if (ParserRegex.javascript.scriptEnd.test(next.value.textLine)) {
+        if (JavaScriptEnd.test(next.value.textLine)) {
           const scriptData: ScriptData = {
             script: utils.toMultiLineString(script),
             lineOffset,

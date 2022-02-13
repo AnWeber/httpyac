@@ -1,14 +1,13 @@
-import { ParserRegex } from '../../parser';
-import { isString } from '../../utils';
+import * as utils from '../../utils';
 import { v4 } from 'uuid';
 
 export async function replaceDynamicIntellijVariables(text: unknown): Promise<unknown> {
-  if (!isString(text)) {
+  if (!utils.isString(text)) {
     return text;
   }
   let match: RegExpExecArray | null;
   let result = text;
-  while ((match = ParserRegex.javascript.scriptSingleLine.exec(text)) !== null) {
+  while ((match = utils.HandlebarsSingleLine.exec(text)) !== null) {
     const [searchValue, variable] = match;
 
     let replacement: unknown = null;

@@ -1,6 +1,5 @@
 import * as models from '../models';
 import * as utils from '../utils';
-import { ParserRegex } from './parserRegex';
 
 export async function parseResponse(
   getLineReader: models.getHttpLineGenerator,
@@ -21,7 +20,9 @@ export async function parseResponse(
         symbols: [],
       };
     }
-    const match = ParserRegex.responseLine.exec(next.value.textLine);
+    const match = /^\s*HTTP\/(?<httpVersion>\S+)\s*(?<statusCode>[1-5][0-9][0-9])\s*(-)?\s*(?<statusMessage>.*)$/u.exec(
+      next.value.textLine
+    );
     if (match && match.groups?.statusCode) {
       const headers: Record<string, unknown> = {};
       context.httpRegion.response = {

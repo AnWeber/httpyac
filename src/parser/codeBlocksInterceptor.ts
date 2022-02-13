@@ -1,6 +1,6 @@
 import { fileProvider } from '../io';
 import * as models from '../models';
-import { ParserRegex } from './parserRegex';
+import * as utils from '../utils';
 import { HookInterceptor, HookTriggerContext } from 'hookpoint';
 
 export abstract class CodeBlockInterceptor
@@ -32,7 +32,7 @@ export abstract class CodeBlockInterceptor
                   textLine: '###',
                 };
               } else {
-                if (!noStopOnMetaTag && ParserRegex.meta.delimiter.test(line.textLine)) {
+                if (!noStopOnMetaTag && utils.RegionSeparator.test(line.textLine)) {
                   // if parser region is not closed stop at delimiter
                   break;
                 }

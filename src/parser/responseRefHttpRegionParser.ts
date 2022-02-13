@@ -1,5 +1,4 @@
 import { HttpSymbolKind, getHttpLineGenerator, HttpRegionParserResult, ParserContext } from '../models';
-import { ParserRegex } from './parserRegex';
 
 export async function parseResponseRef(
   getLineReader: getHttpLineGenerator,
@@ -11,7 +10,7 @@ export async function parseResponseRef(
   if (!next.done) {
     const textLine = next.value.textLine;
 
-    const match = ParserRegex.responseRef.exec(textLine);
+    const match = /^\s*<>\s*(?<fileName>.+?)\s*$/u.exec(textLine);
     if (match && match.groups?.fileName) {
       if (!httpRegion.responseRefs) {
         httpRegion.responseRefs = [];

@@ -8,7 +8,6 @@ export * from './markdownInterceptor';
 export * from './metaHttpRegionParser';
 export * from './noteMetaHttpRegionParser';
 export * from './outputRedirectionHttpRegionParser';
-export * from './parserRegex';
 export * from './requestBodyHttpRegionParser';
 export * from './requestHttpRegionParser';
 export * from './responseRefHttpRegionParser';

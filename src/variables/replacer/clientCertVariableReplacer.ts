@@ -1,6 +1,5 @@
 import { fileProvider } from '../../io';
 import * as models from '../../models';
-import { ParserRegex } from '../../parser';
 import { toAbsoluteFilename, isString, isHttpRequest } from '../../utils';
 import { URL } from 'url';
 
@@ -20,7 +19,10 @@ export async function clientCertVariableReplacer(
         }
       }
     } else if (type.toLowerCase().endsWith('clientcert')) {
-      const match = ParserRegex.auth.clientCert.exec(text);
+      const match =
+        /^\s*(cert:\s*(?<cert>[^\s]*)\s*)?(key:\s*(?<key>[^\s]*)\s*)?(pfx:\s*(?<pfx>[^\s]*)\s*)?(passphrase:\s*(?<passphrase>[^\s]*)\s*)?\s*$/u.exec(
+          text
+        );
       if (match?.groups?.cert || match?.groups?.pfx) {
         await setClientCertificateOptions(
           request,
