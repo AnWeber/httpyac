@@ -1,5 +1,5 @@
-import * as models from '../models';
-import * as utils from '../utils';
+import * as models from '../../../models';
+import * as utils from '../../../utils';
 
 export async function attachDefaultHeaders(request: models.Request, context: models.ProcessorContext): Promise<void> {
   if (request && context.config?.defaultHeaders) {

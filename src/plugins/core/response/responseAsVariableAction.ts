@@ -1,6 +1,6 @@
-import * as models from '../models';
-import { userSessionStore } from '../store';
-import * as utils from '../utils';
+import * as models from '../../../models';
+import { userSessionStore } from '../../../store';
+import * as utils from '../../../utils';
 
 export async function responseAsVariable(
   response: models.HttpResponse,

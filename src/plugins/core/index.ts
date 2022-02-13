@@ -1,36 +1,21 @@
-import * as actions from '../../actions';
 import * as models from '../../models';
 import * as parser from '../../parser';
-import { setAdditionalResponseBody } from '../../utils';
 import { replacer } from '../../variables';
 import { initProvideEnvironmentsHook } from './environments';
 import { initParseMetData } from './metaData';
+import { initOnRequestHook } from './request';
+import { initOnResponseHook } from './response';
 
 export function registerCorePlugins(api: models.HttpyacHooksApi) {
-  initOnRequestHook(api.hooks.onRequest);
-  initOnResponseHook(api.hooks.onResponse);
+  initOnRequestHook(api);
+  initOnResponseHook(api);
   initParseHook(api.hooks.parse);
-  initParseMetData(api.hooks.parseMetaData);
+  initParseMetData(api);
   initParseEndHook(api.hooks.parseEndRegion);
 
   initProvideEnvironmentsHook(api);
 
   initReplaceVariableHook(api.hooks.replaceVariable);
-
-  api.hooks.execute.addInterceptor(new actions.CreateRequestInterceptor());
-  api.hooks.execute.addInterceptor(new actions.CookieJarInterceptor());
-}
-
-function initOnRequestHook(hook: models.OnRequestHook) {
-  hook.addHook('attachDefaultHeaders', actions.attachDefaultHeaders);
-  hook.addHook('setEnvRequestOptions', actions.setEnvRequestOptions);
-  hook.addHook('requestVariableReplacer', actions.requestVariableReplacer);
-  hook.addHook('transformRequestBody', actions.transformRequestBody);
-}
-
-function initOnResponseHook(hook: models.OnResponseHook) {
-  hook.addHook('addAdditionalBody', setAdditionalResponseBody);
-  hook.addHook('responseAsVariable', actions.responseAsVariable);
 }
 
 function initParseHook(hook: models.ParseHook) {

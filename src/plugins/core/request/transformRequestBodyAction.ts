@@ -1,5 +1,5 @@
-import * as models from '../models';
-import * as utils from '../utils';
+import * as models from '../../../models';
+import * as utils from '../../../utils';
 import encodeUrl from 'encodeurl';
 
 export async function transformRequestBody(request: models.Request): Promise<void> {

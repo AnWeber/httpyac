@@ -1,5 +1,5 @@
-import * as models from '../models';
-import * as utils from '../utils';
+import * as models from '../../../models';
+import * as utils from '../../../utils';
 
 export async function setEnvRequestOptions(
   request: models.Request,

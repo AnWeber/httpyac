@@ -1,6 +1,6 @@
-import { CreateRequestBodyInterceptor } from '../actions';
 import * as models from '../models';
 import * as utils from '../utils';
+import { CreateRequestBodyInterceptor } from './createRequestBodyInterceptor';
 
 export async function parseRequestBody(
   getLineReader: models.getHttpLineGenerator,

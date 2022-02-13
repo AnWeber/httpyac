@@ -1,7 +1,7 @@
-import { log } from '../io';
-import * as models from '../models';
-import { userSessionStore } from '../store';
-import * as utils from '../utils';
+import { log } from '../../../io';
+import * as models from '../../../models';
+import { userSessionStore } from '../../../store';
+import * as utils from '../../../utils';
 import { HookInterceptor, HookTriggerContext } from 'hookpoint';
 import { Cookie, CookieJar, MemoryCookieStore } from 'tough-cookie';
 

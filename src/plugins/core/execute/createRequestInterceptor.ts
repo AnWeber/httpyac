@@ -1,5 +1,5 @@
-import * as models from '../models';
-import * as utils from '../utils';
+import * as models from '../../../models';
+import * as utils from '../../../utils';
 import { HookInterceptor, HookTriggerContext } from 'hookpoint';
 import cloneDeep from 'lodash/cloneDeep';
 
