@@ -2,7 +2,7 @@ import { ParserRegex } from '../../parser';
 import { isString } from '../../utils';
 import { v4 } from 'uuid';
 
-export async function intellijVariableReplacer(text: unknown): Promise<unknown> {
+export async function replaceDynamicIntellijVariables(text: unknown): Promise<unknown> {
   if (!isString(text)) {
     return text;
   }

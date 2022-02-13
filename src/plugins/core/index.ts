@@ -56,32 +56,16 @@ function initParseEndHook(hook: models.ParseEndRegionHook) {
   hook.addHook('requestBody', parser.closeRequestBody);
 }
 
-export enum VariableReplacerType {
-  aws = 'aws',
-  basicAuth = 'basicAuth',
-  clientCertificate = 'clientCertificate',
-  digestAuth = 'digestAuth',
-  escape = 'escape',
-  host = 'host',
-  intellijDynamic = 'intellijDynamic',
-  restClientDynamic = 'restClientDynamic',
-  name = 'name',
-  javascript = 'javascript',
-  showInputBox = 'showInputBox',
-  showQuickPick = 'showQuickPick',
-}
-
 export function initReplaceVariableHook(hook: models.ReplaceVariableHook) {
-  hook.addHook(VariableReplacerType.showInputBox, replacer.showInputBoxVariableReplacer);
-  hook.addHook(VariableReplacerType.showQuickPick, replacer.showQuickpickVariableReplacer);
-  hook.addHook(VariableReplacerType.restClientDynamic, replacer.restClientVariableReplacer);
-  hook.addHook(VariableReplacerType.intellijDynamic, replacer.intellijVariableReplacer);
-  hook.addHook(VariableReplacerType.host, replacer.hostVariableReplacer);
-  hook.addHook(VariableReplacerType.name, replacer.replaceVariableNames);
-  hook.addHook(VariableReplacerType.javascript, replacer.replaceJavascriptExpressions);
-  hook.addHook(VariableReplacerType.aws, replacer.awsAuthVariableReplacer);
-  hook.addHook(VariableReplacerType.clientCertificate, replacer.clientCertVariableReplacer);
-  hook.addHook(VariableReplacerType.basicAuth, replacer.basicAuthVariableReplacer);
-  hook.addHook(VariableReplacerType.digestAuth, replacer.digestAuthVariableReplacer);
-  hook.addHook(VariableReplacerType.escape, replacer.escapeVariableReplacer);
+  hook.addHook('showInputBox', replacer.showInputBoxVariableReplacer);
+  hook.addHook('showQuickPick', replacer.showQuickpickVariableReplacer);
+  hook.addHook('restClientDynamic', replacer.restClientVariableReplacer);
+  hook.addHook('host', replacer.hostVariableReplacer);
+  hook.addHook('name', replacer.replaceVariableNames);
+  hook.addHook('javascript', replacer.replaceJavascriptExpressions);
+  hook.addHook('aws', replacer.awsAuthVariableReplacer);
+  hook.addHook('clientCertificate', replacer.clientCertVariableReplacer);
+  hook.addHook('basicAuth', replacer.basicAuthVariableReplacer);
+  hook.addHook('digestAuth', replacer.digestAuthVariableReplacer);
+  hook.addHook('escape', replacer.escapeVariableReplacer);
 }
