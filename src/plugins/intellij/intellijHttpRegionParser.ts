@@ -1,7 +1,6 @@
-import { IntellijScriptData, IntellijAction } from '../actions';
-import * as models from '../models';
-import { toMultiLineString } from '../utils';
-import { ParserRegex } from './parserRegex';
+import * as models from '../../models';
+import { toMultiLineString } from '../../utils';
+import { IntellijAction, IntellijScriptData } from './intellijAction';
 
 export interface IntelliJParserResult {
   startLine: number;
@@ -44,7 +43,7 @@ function getIntellijContent(lineReader: models.HttpLineGenerator): IntelliJParse
   if (!next.done) {
     const startLine = next.value.line;
 
-    const fileMatches = ParserRegex.intellij.import.exec(next.value.textLine);
+    const fileMatches = /^\s*>\s+(?<fileName>[^\s{%}]+\s*)$/u.exec(next.value.textLine);
     if (fileMatches?.groups?.fileName) {
       return {
         startLine,
@@ -56,7 +55,7 @@ function getIntellijContent(lineReader: models.HttpLineGenerator): IntelliJParse
       };
     }
 
-    const singleLineMatch = ParserRegex.intellij.scriptSingleLine.exec(next.value.textLine);
+    const singleLineMatch = /^\s*>\s+\{%\s*(?<script>.*)\s*%\}\s*$/u.exec(next.value.textLine);
     if (singleLineMatch?.groups?.script) {
       return {
         startLine,
@@ -69,12 +68,12 @@ function getIntellijContent(lineReader: models.HttpLineGenerator): IntelliJParse
       };
     }
 
-    const multiLineMatch = ParserRegex.intellij.scriptStart.exec(next.value.textLine);
+    const multiLineMatch = /^\s*>\s+\{%\s*$/u.exec(next.value.textLine);
     if (multiLineMatch) {
       next = lineReader.next();
       const scriptLines: Array<string> = [];
       while (!next.done) {
-        if (ParserRegex.intellij.scriptEnd.test(next.value.textLine)) {
+        if (/^\s*%\}\s*$/u.test(next.value.textLine)) {
           return {
             startLine,
             endLine: next.value.line,

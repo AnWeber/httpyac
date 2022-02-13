@@ -3,7 +3,6 @@ export * from './cancelExecutionInterceptor';
 export * from './codeBlocksInterceptor';
 export * from './commentHttpRegionParser';
 export * from './gqlHttpRegionParser';
-export * from './intellijHttpRegionParser';
 export * from './javascriptHttpRegionParser';
 export * from './markdownInterceptor';
 export * from './metaHttpRegionParser';

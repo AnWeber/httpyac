@@ -15,20 +15,20 @@ async function getAllEnvironmentVariables(context: VariableProviderContext) {
   if (globalEnv && utils.isString(globalEnv)) {
     const globalEnvAbsolute = await utils.toAbsoluteFilename(globalEnv, context.httpFile.rootDir);
     if (globalEnvAbsolute) {
-      envJsonFiles.push(...(await readAbsoulteDirs(globalEnvAbsolute, envJsonFilter)));
+      envJsonFiles.push(...(await readAbsoluteDirs(globalEnvAbsolute, envJsonFilter)));
     }
   }
   if (context.httpFile.rootDir) {
-    envJsonFiles.push(...(await readAbsoulteDirs(context.httpFile.rootDir, envJsonFilter)));
+    envJsonFiles.push(...(await readAbsoluteDirs(context.httpFile.rootDir, envJsonFilter)));
   }
   if (context.config?.envDirName) {
     const absolute = await utils.toAbsoluteFilename(context.config.envDirName, context.httpFile.rootDir);
     if (absolute) {
-      envJsonFiles.push(...(await readAbsoulteDirs(absolute, envJsonFilter)));
+      envJsonFiles.push(...(await readAbsoluteDirs(absolute, envJsonFilter)));
     }
     const dirOfFile = fileProvider.dirname(context.httpFile.fileName);
     if (dirOfFile) {
-      envJsonFiles.push(...(await readAbsoulteDirs(dirOfFile, envJsonFilter)));
+      envJsonFiles.push(...(await readAbsoluteDirs(dirOfFile, envJsonFilter)));
     }
   }
   const environments: Record<string, Variables> = {};
@@ -50,7 +50,7 @@ async function getAllEnvironmentVariables(context: VariableProviderContext) {
   return environments;
 }
 
-async function readAbsoulteDirs(dir: PathLike, filter: (file: string) => boolean) {
+async function readAbsoluteDirs(dir: PathLike, filter: (file: string) => boolean) {
   const files = await fileProvider.readdir(dir);
   return files.filter(filter).map(file => fileProvider.joinPath(dir, file));
 }

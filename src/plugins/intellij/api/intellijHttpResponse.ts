@@ -1,16 +1,16 @@
-import { HttpResponse } from '../../models';
-import { isString } from '../../utils';
+import { HttpResponse } from '../../../models';
+import { isString } from '../../../utils';
 import {
-  HttpResponse as JetbrainsHttpResponse,
-  ContentType as JetbrainsContentType,
-  ResponseHeaders as JetbrainsResponseHeaders,
+  HttpResponse as JetBrainsHttpResponse,
+  ContentType as JetBrainsContentType,
+  ResponseHeaders as JetBrainsResponseHeaders,
 } from './http-client';
 
-export class IntellijHttpResponse implements JetbrainsHttpResponse {
+export class IntellijHttpResponse implements JetBrainsHttpResponse {
   body: unknown;
   status: number;
-  contentType: JetbrainsContentType;
-  headers: JetbrainsResponseHeaders;
+  contentType: JetBrainsContentType;
+  headers: JetBrainsResponseHeaders;
 
   constructor(response: HttpResponse) {
     this.body = response.parsedBody || response.body;
@@ -23,7 +23,7 @@ export class IntellijHttpResponse implements JetbrainsHttpResponse {
   }
 }
 
-export class IntellijHeaders implements JetbrainsResponseHeaders {
+export class IntellijHeaders implements JetBrainsResponseHeaders {
   constructor(private readonly headers: Record<string, unknown> | undefined) {}
 
   valueOf(headerName: string): string | null {

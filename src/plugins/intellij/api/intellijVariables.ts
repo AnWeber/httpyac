@@ -1,13 +1,11 @@
-import * as models from '../../models';
-import { userSessionStore } from '../../store';
-import * as utils from '../../utils';
-import { Variables as JetbrainsVariables } from './http-client';
+import * as models from '../../../models';
+import { userSessionStore } from '../../../store';
+import * as utils from '../../../utils';
+import { Variables as JetBrainsVariables } from './http-client';
 
-interface IntellijGlobalCacheSession extends models.UserSession {
-  variables: models.Variables;
-}
+type IntellijGlobalCacheSession = models.UserSession;
 
-export class IntellijVariables implements JetbrainsVariables {
+export class IntellijVariables implements JetBrainsVariables {
   private userSession: IntellijGlobalCacheSession;
   constructor(private readonly context: models.ProcessorContext) {
     this.userSession = this.getIntellijSession(context);
@@ -23,10 +21,9 @@ export class IntellijVariables implements JetbrainsVariables {
     const intellijSession: IntellijGlobalCacheSession = {
       id,
       title: `Intellij Cache for ${envKey}`,
-      description: `Intellij Cache for ${envKey}`,
+      description: `Global Cache for all Intellij Variables`,
       details: {},
       type: 'intellij_global_cache',
-      variables: {},
     };
     userSessionStore.setUserSession(intellijSession);
     return intellijSession;
@@ -37,7 +34,7 @@ export class IntellijVariables implements JetbrainsVariables {
   }
 
   set(varName: string, varValue: string): void {
-    this.userSession.variables[varName] = varValue;
+    this.userSession.details[varName] = varValue;
     utils.setVariableInContext(
       {
         [varName]: varValue,
@@ -49,14 +46,14 @@ export class IntellijVariables implements JetbrainsVariables {
     return this.context.variables[varName];
   }
   isEmpty(): boolean {
-    return Object.entries(this.userSession.variables).length === 0;
+    return Object.entries(this.userSession.details).length === 0;
   }
   clear(varName: string): void {
-    delete this.userSession.variables[varName];
+    delete this.userSession.details[varName];
     utils.deleteVariableInContext(varName, this.context);
   }
   clearAll(): void {
-    for (const [key] of Object.entries(this.userSession.variables)) {
+    for (const [key] of Object.entries(this.userSession.details)) {
       this.clear(key);
     }
   }

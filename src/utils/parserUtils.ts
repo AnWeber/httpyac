@@ -1,5 +1,6 @@
-import * as actions from '../actions';
 import * as models from '../models';
+import { report } from './logUtils';
+import { evalExpression } from './moduleUtils';
 
 export type ParseLineMethod = (
   httpLine: models.HttpLine,
@@ -106,7 +107,7 @@ export function parseDefaultHeadersFactory(
   ): models.SymbolParserResult | false {
     const fileHeaders = /^\s*\.{3}(?<variableName>[^\s]+),?\s*$/u.exec(httpLine.textLine);
     if (fileHeaders?.groups?.variableName) {
-      const defaultsHeadersAction = new actions.DefaultHeadersAction(fileHeaders.groups.variableName, setHeaders);
+      const defaultsHeadersAction = new DefaultHeadersAction(fileHeaders.groups.variableName, setHeaders);
       parserContext.httpRegion.hooks.execute.addObjHook(obj => obj.process, defaultsHeadersAction);
       const val = httpLine.textLine.trim();
       return {
@@ -125,6 +126,26 @@ export function parseDefaultHeadersFactory(
     }
     return false;
   };
+}
+
+class DefaultHeadersAction {
+  id = 'defaultHeaders';
+
+  constructor(
+    private readonly data: string,
+    private readonly setHeaders: (headers: Record<string, unknown>, context: models.ProcessorContext) => void
+  ) {}
+
+  async process(context: models.ProcessorContext): Promise<boolean> {
+    if (this.data && context.variables) {
+      report(context, 'set request headers');
+      const headers = await evalExpression(this.data, context);
+      if (headers) {
+        this.setHeaders(Object.assign({}, headers), context);
+      }
+    }
+    return true;
+  }
 }
 
 export function parseUrlLineFactory(attachUrl: (url: string) => void): ParseLineMethod {

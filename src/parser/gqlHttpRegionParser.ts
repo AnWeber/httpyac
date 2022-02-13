@@ -4,6 +4,8 @@ import * as models from '../models';
 import * as utils from '../utils';
 import { ParserRegex } from './parserRegex';
 
+const EmptyLine = /^\s*$/u;
+
 export async function parseGraphql(
   getLineReader: models.getHttpLineGenerator,
   context: models.ParserContext
@@ -115,7 +117,7 @@ function matchGqlContent(
       endLine: next.value.line,
       endOffset: next.value.textLine.length,
     };
-    if (ParserRegex.emptyLine.test(next.value.textLine)) {
+    if (EmptyLine.test(next.value.textLine)) {
       return {
         name,
         startLine: value.line,

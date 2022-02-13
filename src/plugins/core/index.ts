@@ -2,7 +2,8 @@ import * as actions from '../../actions';
 import * as models from '../../models';
 import * as parser from '../../parser';
 import { setAdditionalResponseBody } from '../../utils';
-import { provider, replacer } from '../../variables';
+import { replacer } from '../../variables';
+import { initProvideEnvironmentsHook } from './environments';
 import { initParseMetData } from './metaData';
 
 export function registerCorePlugins(api: models.HttpyacHooksApi) {
@@ -12,8 +13,7 @@ export function registerCorePlugins(api: models.HttpyacHooksApi) {
   initParseMetData(api.hooks.parseMetaData);
   initParseEndHook(api.hooks.parseEndRegion);
 
-  initProvideVariablesHook(api.hooks.provideVariables);
-  initProvideEnvironmentsHook(api.hooks.provideEnvironments);
+  initProvideEnvironmentsHook(api);
 
   initReplaceVariableHook(api.hooks.replaceVariable);
 
@@ -33,67 +33,27 @@ function initOnResponseHook(hook: models.OnResponseHook) {
   hook.addHook('responseAsVariable', actions.responseAsVariable);
 }
 
-export enum ParserId {
-  meta = 'meta',
-  comment = 'comment',
-  variable = 'variable',
-  javascript = 'javascript',
-  note = 'note',
-  intellijScript = 'intellijScript',
-  gql = 'gql',
-  outputRedirection = 'outputRedirection',
-  request = 'request',
-  responseRef = 'responseRef',
-  response = 'response',
-  requestBody = 'requestBody',
-}
-
 function initParseHook(hook: models.ParseHook) {
   hook.addInterceptor(new parser.MarkdownInterceptor());
   hook.addInterceptor(new parser.AsciidocInterceptor());
 
-  hook.addHook(ParserId.meta, parser.parseMetaData);
-  hook.addHook(ParserId.comment, parser.parseComment);
-  hook.addHook(ParserId.variable, parser.parseVariable);
-  hook.addHook(ParserId.javascript, parser.parseJavascript);
-  hook.addHook(ParserId.intellijScript, parser.parseIntellijScript);
-  hook.addHook(ParserId.gql, parser.parseGraphql);
-  hook.addHook(ParserId.request, parser.parseRequestLine);
-  hook.addHook(ParserId.outputRedirection, parser.parseOutputRedirection);
-  hook.addHook(ParserId.responseRef, parser.parseResponseRef);
-  hook.addHook(ParserId.response, parser.parseResponse);
-  hook.addHook(ParserId.requestBody, parser.parseRequestBody);
+  hook.addHook('meta', parser.parseMetaData);
+  hook.addHook('comment', parser.parseComment);
+  hook.addHook('variable', parser.parseVariable);
+  hook.addHook('javascript', parser.parseJavascript);
+  hook.addHook('gql', parser.parseGraphql);
+  hook.addHook('request', parser.parseRequestLine);
+  hook.addHook('outputRedirection', parser.parseOutputRedirection);
+  hook.addHook('responseRef', parser.parseResponseRef);
+  hook.addHook('response', parser.parseResponse);
+  hook.addHook('requestBody', parser.parseRequestBody);
 }
 
 function initParseEndHook(hook: models.ParseEndRegionHook) {
   hook.addHook('registerCancelExecutionInterceptor', parser.registerCancelExecutionInterceptor);
-  hook.addHook(ParserId.note, parser.injectNote);
-  hook.addHook(ParserId.response, parser.closeResponseBody);
-  hook.addHook(ParserId.requestBody, parser.closeRequestBody);
-}
-
-export enum VariableProviderType {
-  config = 'config',
-  dotenv = 'dotenv',
-  httpFileImports = 'httpFileImports',
-  httpFile = 'httpFile',
-  intellij = 'intellij',
-  intellijGlobal = 'intellijGlobal',
-  lastResponse = 'last_response',
-}
-
-function initProvideVariablesHook(hook: models.ProvideVariablesHook) {
-  hook.addHook(VariableProviderType.config, provider.provideConfigVariables);
-  hook.addHook(VariableProviderType.dotenv, provider.provideDotenvVariables);
-  hook.addHook(VariableProviderType.intellij, provider.provideIntellijVariables);
-  hook.addHook(VariableProviderType.intellijGlobal, provider.provideIntellijGlobalVariables);
-  hook.addHook(VariableProviderType.lastResponse, provider.provideLastResponseVariables);
-}
-
-function initProvideEnvironmentsHook(hook: models.ProvideEnvironmentsHook) {
-  hook.addHook(VariableProviderType.config, provider.provideConfigEnvironments);
-  hook.addHook(VariableProviderType.dotenv, provider.provideDotenvEnvironments);
-  hook.addHook(VariableProviderType.intellij, provider.provideIntellijEnvironments);
+  hook.addHook('note', parser.injectNote);
+  hook.addHook('response', parser.closeResponseBody);
+  hook.addHook('requestBody', parser.closeRequestBody);
 }
 
 export enum VariableReplacerType {

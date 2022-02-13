@@ -11,17 +11,10 @@ export const ParserRegex = {
     multilineStart: /^\s*\/\*$/u,
     singleline: /^\s*\/\/\s*(?<comment>.*)\s*$/u,
   },
-  emptyLine: /^\s*$/u,
   gql: {
     fileImport: /^\s*gql(\s+(?<name>[^\s(]+))?\s+<\s+(?<fileName>.+)\s*$/u,
     fragment: /^\s*(fragment)\s+(?<name>[^\s(]+)\s+on\s+/u,
     query: /^\s*(query|mutation)(\s+(?<name>[^\s(]+))?/u,
-  },
-  intellij: {
-    import: /^\s*>\s+(?<fileName>[^\s{%}]+\s*)$/u,
-    scriptEnd: /^\s*%\}\s*$/u,
-    scriptSingleLine: /^\s*>\s+\{%\s*(?<script>.*)\s*%\}\s*$/u,
-    scriptStart: /^\s*>\s+\{%\s*$/u,
   },
   javascript: {
     scriptStart:

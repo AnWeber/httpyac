@@ -1,4 +1,4 @@
-import { VariableProviderContext, Variables } from '../../models';
+import { VariableProviderContext, Variables } from '../../../models';
 
 const DEFAULT_ENV = '$default';
 const SHARED_ENV = '$shared';

@@ -1,7 +1,7 @@
-import { fileProvider, userInteractionProvider, log } from '../io';
-import * as models from '../models';
-import * as utils from '../utils';
-import * as intellij from './intellij';
+import { fileProvider, userInteractionProvider, log } from '../../io';
+import * as models from '../../models';
+import * as utils from '../../utils';
+import * as intellij from './api';
 
 export interface IntellijScriptData {
   fileName: string;
