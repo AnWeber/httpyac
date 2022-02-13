@@ -1,6 +1,6 @@
 import * as httpyac from '..';
-import * as models from '../models';
-import * as utils from '../utils';
+import * as models from '../../models';
+import * as utils from '../../utils';
 import * as grpc from '@grpc/grpc-js';
 import { default as chalk } from 'chalk';
 import { default as got } from 'got';

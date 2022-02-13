@@ -4,7 +4,6 @@ export * from './clientCertVariableReplacer';
 export * from './digestAuthVariableReplacer';
 export * from './escapeVariableReplacer';
 export * from './hostVariableReplacer';
-export * from './javascriptVariableReplacer';
 export * from './nameVariableReplacer';
 export * from './restClientVariableReplacer';
 export * from './showInputBoxVariableReplacer';

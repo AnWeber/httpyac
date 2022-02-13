@@ -1,7 +1,6 @@
 export * from './cancelExecutionInterceptor';
 export * from './commentHttpRegionParser';
 export * from './gqlHttpRegionParser';
-export * from './javascriptHttpRegionParser';
 export * from './metaHttpRegionParser';
 export * from './noteMetaHttpRegionParser';
 export * from './outputRedirectionHttpRegionParser';

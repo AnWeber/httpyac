@@ -37,7 +37,6 @@ function initParseHook(hook: models.ParseHook) {
   hook.addHook('meta', parser.parseMetaData);
   hook.addHook('comment', parser.parseComment);
   hook.addHook('variable', parser.parseVariable);
-  hook.addHook('javascript', parser.parseJavascript);
   hook.addHook('gql', parser.parseGraphql);
   hook.addHook('request', parser.parseRequestLine);
   hook.addHook('outputRedirection', parser.parseOutputRedirection);
@@ -59,7 +58,6 @@ export function initReplaceVariableHook(hook: models.ReplaceVariableHook) {
   hook.addHook('restClientDynamic', replacer.restClientVariableReplacer);
   hook.addHook('host', replacer.hostVariableReplacer);
   hook.addHook('name', replacer.replaceVariableNames);
-  hook.addHook('javascript', replacer.replaceJavascriptExpressions);
   hook.addHook('aws', replacer.awsAuthVariableReplacer);
   hook.addHook('clientCertificate', replacer.clientCertVariableReplacer);
   hook.addHook('basicAuth', replacer.basicAuthVariableReplacer);
