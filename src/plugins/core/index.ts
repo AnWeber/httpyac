@@ -47,7 +47,6 @@ function initParseHook(hook: models.ParseHook) {
 
 function initParseEndHook(hook: models.ParseEndRegionHook) {
   hook.addHook('registerCancelExecutionInterceptor', parser.registerCancelExecutionInterceptor);
-  hook.addHook('note', parser.injectNote);
   hook.addHook('response', parser.closeResponseBody);
   hook.addHook('requestBody', parser.closeRequestBody);
 }
