@@ -1,8 +1,9 @@
+import { OpenIdInformation } from '../../../models';
 import * as utils from '../../../utils';
-import { OpenIdConfiguration, assertConfiguration } from './openIdConfiguration';
+import { OpenIdConfiguration, assertConfiguration } from '../openIdConfiguration';
 import { OpenIdFlow, OpenIdFlowContext } from './openIdFlow';
-import { registerListener, unregisterListener } from './openIdHttpserver';
-import { OpenIdInformation, requestOpenIdInformation } from './openIdInformation';
+import { registerListener, unregisterListener } from './openIdHttpServer';
+import { requestOpenIdInformation } from './requestOpenIdInformation';
 import open from 'open';
 
 class AuthorizationCodeFlow implements OpenIdFlow {

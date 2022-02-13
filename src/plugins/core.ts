@@ -100,7 +100,6 @@ export enum VariableReplacerType {
   clientCertificate = 'clientCertificate',
   digestAuth = 'digestAuth',
   escape = 'escape',
-  oauth2 = 'oauth2',
   host = 'host',
   intellijDynamic = 'intellijDynamic',
   restClientDynamic = 'restClientDynamic',
@@ -118,7 +117,6 @@ export function initReplaceVariableHook(hook: models.ReplaceVariableHook) {
   hook.addHook(VariableReplacerType.host, replacer.hostVariableReplacer);
   hook.addHook(VariableReplacerType.name, replacer.replaceVariableNames);
   hook.addHook(VariableReplacerType.javascript, replacer.replaceJavascriptExpressions);
-  hook.addHook(VariableReplacerType.oauth2, replacer.oauth2VariableReplacer);
   hook.addHook(VariableReplacerType.aws, replacer.awsAuthVariableReplacer);
   hook.addHook(VariableReplacerType.clientCertificate, replacer.clientCertVariableReplacer);
   hook.addHook(VariableReplacerType.basicAuth, replacer.basicAuthVariableReplacer);

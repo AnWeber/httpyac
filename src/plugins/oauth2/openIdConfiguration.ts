@@ -1,6 +1,6 @@
-import { log, userInteractionProvider } from '../../../io';
-import { Variables } from '../../../models';
-import * as utils from '../../../utils';
+import { log, userInteractionProvider } from '../../io';
+import { Variables } from '../../models';
+import * as utils from '../../utils';
 import get from 'lodash/get';
 import { URL } from 'url';
 

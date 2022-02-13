@@ -1,6 +1,6 @@
 import { createEmptyProcessorContext } from '../../httpYacApi';
+import { getOAuth2Response } from '../../plugins/oauth2/oauth2VariableReplacer';
 import { HttpFileStore } from '../../store';
-import { getOAuth2Response } from '../../variables/replacer';
 import { Command } from 'commander';
 
 export function oauth2Command() {

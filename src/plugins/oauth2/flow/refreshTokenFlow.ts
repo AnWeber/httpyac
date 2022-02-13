@@ -1,6 +1,7 @@
+import { OpenIdInformation } from '../../../models';
 import * as utils from '../../../utils';
 import { OpenIdFlowContext } from './openIdFlow';
-import { OpenIdInformation, requestOpenIdInformation } from './openIdInformation';
+import { requestOpenIdInformation } from './requestOpenIdInformation';
 
 class RefreshTokenFlow {
   private isTokenExpired(time: number, timeSkew: number, expiresIn?: number) {

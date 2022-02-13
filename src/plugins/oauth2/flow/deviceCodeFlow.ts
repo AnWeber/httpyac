@@ -1,9 +1,9 @@
 import * as io from '../../../io';
 import * as models from '../../../models';
 import * as utils from '../../../utils';
-import { OpenIdConfiguration, assertConfiguration } from './openIdConfiguration';
+import { OpenIdConfiguration, assertConfiguration } from '../openIdConfiguration';
 import { OpenIdFlow, OpenIdFlowContext } from './openIdFlow';
-import { OpenIdInformation, toOpenIdInformation } from './openIdInformation';
+import { toOpenIdInformation } from './requestOpenIdInformation';
 import open from 'open';
 
 class DeviceCodeFlow implements OpenIdFlow {
@@ -18,7 +18,7 @@ class DeviceCodeFlow implements OpenIdFlow {
     return false;
   }
 
-  async perform(config: OpenIdConfiguration, context: OpenIdFlowContext): Promise<OpenIdInformation | false> {
+  async perform(config: OpenIdConfiguration, context: OpenIdFlowContext): Promise<models.OpenIdInformation | false> {
     const id = this.getCacheKey(config);
     if (id) {
       utils.report(context, 'execute device_code authorization flow');

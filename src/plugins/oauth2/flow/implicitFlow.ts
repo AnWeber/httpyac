@@ -1,9 +1,10 @@
 import { log } from '../../../io';
+import { OpenIdInformation } from '../../../models';
 import * as utils from '../../../utils';
-import { OpenIdConfiguration, assertConfiguration } from './openIdConfiguration';
+import { OpenIdConfiguration, assertConfiguration } from '../openIdConfiguration';
 import { OpenIdFlow, OpenIdFlowContext } from './openIdFlow';
-import { registerListener, unregisterListener } from './openIdHttpserver';
-import { OpenIdInformation, toOpenIdInformation, requestOpenIdInformation } from './openIdInformation';
+import { registerListener, unregisterListener } from './openIdHttpServer';
+import { requestOpenIdInformation, toOpenIdInformation } from './requestOpenIdInformation';
 import open from 'open';
 
 class ImplicitFlow implements OpenIdFlow {

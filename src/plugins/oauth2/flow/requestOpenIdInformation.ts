@@ -1,31 +1,12 @@
 import { log } from '../../../io';
 import * as models from '../../../models';
 import * as utils from '../../../utils';
-import { OpenIdConfiguration } from './openIdConfiguration';
-
-export interface OpenIdInformation extends models.UserSession {
-  time: number;
-  config: OpenIdConfiguration;
-  accessToken: string;
-  expiresIn: number;
-  timeSkew: number;
-  refreshToken?: string;
-  refreshExpiresIn?: number;
-}
-
-export interface OpenIdContext {
-  httpClient: models.HttpClient;
-}
-
-export interface OpenIdSesssion extends Omit<models.UserSession, 'type'> {
-  config: OpenIdConfiguration;
-}
 
 export async function requestOpenIdInformation(
   request: models.HttpClientRequest | false,
-  options: OpenIdSesssion,
-  context: OpenIdContext
-): Promise<OpenIdInformation | false> {
+  options: models.OpenIdSession,
+  context: models.OpenIdContext
+): Promise<models.OpenIdInformation | false> {
   if (request) {
     const time = new Date().getTime();
 
@@ -68,8 +49,8 @@ export async function requestOpenIdInformation(
 export function toOpenIdInformation(
   jwtToken: unknown,
   time: number,
-  session: OpenIdSesssion
-): OpenIdInformation | false {
+  session: models.OpenIdSession
+): models.OpenIdInformation | false {
   if (isAuthToken(jwtToken)) {
     const parsedToken = utils.decodeJWT(jwtToken.access_token);
     if (parsedToken) {

@@ -1,7 +1,8 @@
+import { OpenIdInformation } from '../../../models';
 import * as utils from '../../../utils';
-import { OpenIdConfiguration, assertConfiguration } from './openIdConfiguration';
+import { OpenIdConfiguration, assertConfiguration } from '../openIdConfiguration';
 import { OpenIdFlowContext } from './openIdFlow';
-import { OpenIdInformation, requestOpenIdInformation } from './openIdInformation';
+import { requestOpenIdInformation } from './requestOpenIdInformation';
 import encodeUrl from 'encodeurl';
 
 export class TokenExchangeFlow {

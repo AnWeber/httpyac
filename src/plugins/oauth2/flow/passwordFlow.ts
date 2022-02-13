@@ -1,16 +1,17 @@
+import { OpenIdInformation } from '../../../models';
 import * as utils from '../../../utils';
-import { OpenIdConfiguration, assertConfiguration } from './openIdConfiguration';
+import { OpenIdConfiguration, assertConfiguration } from '../openIdConfiguration';
 import { OpenIdFlow, OpenIdFlowContext } from './openIdFlow';
-import { OpenIdInformation, requestOpenIdInformation } from './openIdInformation';
+import { requestOpenIdInformation } from './requestOpenIdInformation';
 
-class ClientCredentialsFlow implements OpenIdFlow {
+class PasswordFlow implements OpenIdFlow {
   supportsFlow(flow: string): boolean {
-    return ['client_credentials', 'client'].indexOf(flow) >= 0;
+    return ['password'].indexOf(flow) >= 0;
   }
 
   getCacheKey(config: OpenIdConfiguration) {
-    if (assertConfiguration(config, ['tokenEndpoint', 'clientId', 'clientSecret'])) {
-      return `client_credentials_${config.clientId}_${config.tokenEndpoint}`;
+    if (assertConfiguration(config, ['tokenEndpoint', 'clientId', 'clientSecret', 'username', 'password'])) {
+      return `password_${config.clientId}_${config.username}_${config.tokenEndpoint}`;
     }
     return false;
   }
@@ -18,25 +19,28 @@ class ClientCredentialsFlow implements OpenIdFlow {
   async perform(config: OpenIdConfiguration, context: OpenIdFlowContext): Promise<OpenIdInformation | false> {
     const id = this.getCacheKey(config);
     if (id) {
-      utils.report(context, 'execute OAuth2 client_credentials flow');
+      utils.report(context, 'execute OAuth2 password flow');
       return requestOpenIdInformation(
         {
           url: config.tokenEndpoint,
           method: 'POST',
           body: utils.toQueryParams({
-            grant_type: 'client_credentials',
+            grant_type: 'password',
             scope: config.scope,
+            username: config.username,
+            password: config.password,
           }),
         },
         {
           config,
           id,
-          title: `clientCredentials: ${config.clientId}`,
+          title: `password flow: ${config.username} (${config.clientId})`,
           description: `${config.variablePrefix} - ${config.tokenEndpoint}`,
           details: {
             clientId: config.clientId,
             tokenEndpoint: config.tokenEndpoint,
-            grantType: 'client_credentials',
+            grantType: 'password',
+            username: config.username,
           },
         },
         context
@@ -46,4 +50,4 @@ class ClientCredentialsFlow implements OpenIdFlow {
   }
 }
 
-export const clientCredentialsFlow = new ClientCredentialsFlow();
+export const passwordFlow = new PasswordFlow();
