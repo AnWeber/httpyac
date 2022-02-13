@@ -1,5 +1,6 @@
 export * from './core';
 export * from './eventsource';
+export * from './graphql';
 export * from './grpc';
 export * from './intellij';
 export * from './injection';

@@ -3,6 +3,7 @@ import { pluginStore } from './store';
 
 pluginStore.core = plugins.registerCorePlugins;
 pluginStore.eventSource = plugins.registerEventSourcePlugin;
+pluginStore.graphql = plugins.registerGraphQL;
 pluginStore.grpc = plugins.registerGrpcPlugin;
 pluginStore.intellij = plugins.registerIntellijPlugin;
 pluginStore.injection = plugins.registerInjectionPlugin;

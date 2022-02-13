@@ -1,6 +1,6 @@
-import { log, userInteractionProvider } from '../io';
-import { ProcessorContext } from '../models';
-import * as utils from '../utils';
+import { log, userInteractionProvider } from '../../io';
+import { ProcessorContext } from '../../models';
+import * as utils from '../../utils';
 
 export type GqlLoadData = string | ((context: ProcessorContext) => Promise<string | undefined>);
 

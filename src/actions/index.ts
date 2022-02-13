@@ -1,7 +1,6 @@
 export * from './cookieJarInterceptor';
 export * from './createRequestInterceptor';
 export * from './attachDefaultHeaders';
-export * from './gqlAction';
 export * from './createRequestBodyInterceptor';
 export * from './responseAsVariableAction';
 export * from './setEnvRequestOptions';

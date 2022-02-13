@@ -37,7 +37,6 @@ function initParseHook(hook: models.ParseHook) {
   hook.addHook('meta', parser.parseMetaData);
   hook.addHook('comment', parser.parseComment);
   hook.addHook('variable', parser.parseVariable);
-  hook.addHook('gql', parser.parseGraphql);
   hook.addHook('request', parser.parseRequestLine);
   hook.addHook('outputRedirection', parser.parseOutputRedirection);
   hook.addHook('responseRef', parser.parseResponseRef);
