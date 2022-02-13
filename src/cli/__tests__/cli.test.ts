@@ -1,4 +1,4 @@
-import { convertCliOptionsToContext } from '../../src/cli/send';
+import { convertCliOptionsToContext } from '../send';
 
 describe('cli', () => {
   describe('convertCliOptionsToContext', () => {

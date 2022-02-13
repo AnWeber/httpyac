@@ -1,8 +1,4 @@
-import {
-  getOpenIdConfiguration,
-  DEFAULT_CALLBACK_URI,
-  OpenIdConfiguration,
-} from '../../../../src/variables/replacer/oauth2/openIdConfiguration';
+import { getOpenIdConfiguration, DEFAULT_CALLBACK_URI, OpenIdConfiguration } from '../openIdConfiguration';
 
 describe('getOpenIdConfiguration', () => {
   describe('redirectUri', () => {

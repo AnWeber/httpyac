@@ -6,3 +6,4 @@ assets
 buildSrc
 icon.png
 .github
+__tests__

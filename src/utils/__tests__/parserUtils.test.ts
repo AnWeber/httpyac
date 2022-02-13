@@ -1,4 +1,5 @@
-import { ParserRegex } from '../../src/parser/parserRegex';
+import { parseRequestHeaderFactory } from '../parserUtils';
+import { ParserContext } from '@/models';
 
 describe('http header test', () => {
   it('is valid header', async () => {
@@ -30,11 +31,18 @@ describe('http header test', () => {
     ];
 
     for (const test of tests) {
-      const match = ParserRegex.request.header.exec(test.value);
+      const parseHeaders = parseRequestHeaderFactory({});
+      const match = parseHeaders(
+        {
+          line: 0,
+          textLine: test.value,
+        },
+        {} as ParserContext
+      );
       if (test.valid) {
         expect(match).toBeDefined();
       } else {
-        expect(match).toBeNull();
+        expect(match).toBeFalsy();
       }
     }
   });

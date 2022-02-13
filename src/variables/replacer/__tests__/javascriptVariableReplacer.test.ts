@@ -1,6 +1,6 @@
-import { log } from '../../../src/io';
-import * as models from '../../../src/models';
-import { replaceJavascriptExpressions } from '../../../src/variables/replacer/javascriptVariableReplacer';
+import { log } from '../../../io';
+import * as models from '../../../models';
+import { replaceJavascriptExpressions } from '../javascriptVariableReplacer';
 
 describe('javascriptVariableReplacer', () => {
   describe('replaceJavascriptExpressions', () => {

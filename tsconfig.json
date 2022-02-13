@@ -26,10 +26,10 @@
 	},
 	"include": [
 		"src/**/*.ts",
-		"test/**/*.ts",
 		"tsconfig.build.json"
 	],
 	"exclude": [
+		"src/**/__tests__/*.ts",
 		"node_modules",
 		"dist",
 		"buildSrc"
