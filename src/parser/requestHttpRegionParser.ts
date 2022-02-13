@@ -1,4 +1,3 @@
-import * as actions from '../actions';
 import * as models from '../models';
 import * as utils from '../utils';
 
@@ -62,7 +61,7 @@ export async function parseRequestLine(
       }
     }
 
-    context.httpRegion.hooks.execute.addObjHook(obj => obj.process, new actions.HttpClientAction());
+    context.httpRegion.hooks.execute.addObjHook(obj => obj.process, new HttpClientAction());
 
     if (context.httpRegion.request.headers) {
       const contentType = utils.getHeader(context.httpRegion.request.headers, 'content-type');
@@ -146,4 +145,25 @@ function isValidRequestLine(textLine: string, httpRegion: models.HttpRegion) {
     return false;
   }
   return true;
+}
+
+export class HttpClientAction {
+  id = 'httpClient';
+
+  async process(context: models.ProcessorContext): Promise<boolean> {
+    const { httpRegion, httpClient, request } = context;
+    if (utils.isHttpRequest(request)) {
+      request.proxy = httpRegion.metaData.proxy;
+      if (httpRegion.metaData.noRedirect) {
+        request.options.followRedirect = !httpRegion.metaData.noRedirect;
+      }
+      if (httpRegion.metaData.noRejectUnauthorized) {
+        request.options.https = request.options.https || {};
+        request.options.https.rejectUnauthorized = false;
+      }
+      utils.report(context, `send ${request.method || 'GET'} ${request.url}`);
+      return utils.triggerRequestResponseHooks(async () => await httpClient(request, context), context);
+    }
+    return false;
+  }
 }

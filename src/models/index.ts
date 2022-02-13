@@ -10,7 +10,6 @@ export * from './httpFileStore';
 export * from './httpHooksApi';
 export * from './httpMethod';
 export * from './httpRegion';
-export * from './httpRegionAction';
 export * from './httpRegionParserResult';
 export * from './httpRequest';
 export * from './httpResponse';

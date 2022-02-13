@@ -1,5 +1,5 @@
 import { log, userInteractionProvider } from '../io';
-import { ActionType, HttpRegionAction, ProcessorContext } from '../models';
+import { ProcessorContext } from '../models';
 import * as utils from '../utils';
 
 export type GqlLoadData = string | ((context: ProcessorContext) => Promise<string | undefined>);
@@ -16,9 +16,9 @@ export interface GqlPostRequest {
   variables?: Record<string, unknown>;
 }
 
-export class GqlAction implements HttpRegionAction {
-  id = ActionType.gql;
-  before = [ActionType.httpClient];
+export class GqlAction {
+  id = 'gql';
+  before = ['httpClient'];
 
   constructor(private readonly gqlData: GqlData) {}
 

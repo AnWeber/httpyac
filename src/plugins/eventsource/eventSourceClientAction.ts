@@ -4,8 +4,8 @@ import * as utils from '../../utils';
 import { EventSourceRequest, isEventSourceRequest } from './eventSourceRequest';
 import EventSource from 'eventsource';
 
-export class EventSourceClientAction implements models.HttpRegionAction {
-  id = models.ActionType.eventSourceClient;
+export class EventSourceClientAction {
+  id = 'sse';
 
   async process(context: models.ProcessorContext): Promise<boolean> {
     const { request } = context;

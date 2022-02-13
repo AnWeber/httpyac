@@ -6,8 +6,8 @@ import WebSocket, { ClientOptions } from 'ws';
 
 const WEBSOCKET_CLOSE_NORMAL = 1000;
 const WEBSOCKET_CLOSE_GOING_AWAY = 1001;
-export class WebSocketClientAction implements models.HttpRegionAction {
-  id = models.ActionType.websocketClient;
+export class WebSocketClientAction {
+  id = 'websocket';
 
   async process(context: models.ProcessorContext): Promise<boolean> {
     const { request } = context;

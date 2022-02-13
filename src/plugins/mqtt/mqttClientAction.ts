@@ -10,8 +10,8 @@ interface MQTTMessage {
   date: Date;
 }
 
-export class MQTTClientAction implements models.HttpRegionAction {
-  id = models.ActionType.websocketClient;
+export class MQTTClientAction {
+  id = 'mqtt';
 
   async process(context: models.ProcessorContext): Promise<boolean> {
     const { request } = context;

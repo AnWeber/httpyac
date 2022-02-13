@@ -72,7 +72,7 @@ export async function parseVariable(
 }
 
 class VariableInterceptor implements HookInterceptor<[models.ProcessorContext], boolean> {
-  id = models.ActionType.variable;
+  id = 'variable';
 
   async beforeTrigger(hookContext: HookTriggerContext<[models.ProcessorContext], true>) {
     const context = hookContext.args[0];

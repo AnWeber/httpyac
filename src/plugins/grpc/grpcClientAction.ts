@@ -18,8 +18,8 @@ type GrpcStream = Readable | Writable | Duplex;
 
 type GrpcStreamAction = (stream: GrpcStream) => void;
 
-export class GrpcClientAction implements models.HttpRegionAction {
-  id = models.ActionType.grpcClient;
+export class GrpcClientAction {
+  id = 'grpc';
 
   async process(context: models.ProtoProcessorContext): Promise<boolean> {
     grpc.setLogger(log);

@@ -16,8 +16,8 @@ export interface ImportProcessorContext extends models.ProcessorContext {
   };
 }
 
-class ImportMetaAction implements models.HttpRegionAction {
-  id = models.ActionType.import;
+class ImportMetaAction {
+  id = 'import';
 
   constructor(private readonly fileName: string, private readonly httpFileStore: models.HttpFileStore) {}
 

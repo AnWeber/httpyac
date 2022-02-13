@@ -81,28 +81,28 @@ export async function parseJavascript(
 }
 
 function addStreamingHook(hooks: { onStreaming: models.OnStreaming }, scriptData: ScriptData) {
-  hooks.onStreaming.addHook(models.ActionType.js, async context => {
+  hooks.onStreaming.addHook('js', async context => {
     await executeScriptData(scriptData, context, 'streaming');
   });
 }
 
 function addExecuteHook(hooks: { execute: models.ExecuteHook }, scriptData: ScriptData) {
-  hooks.execute.addHook(models.ActionType.js, context => executeScriptData(scriptData, context));
+  hooks.execute.addHook('js', context => executeScriptData(scriptData, context));
 }
 function addRequestHook(hooks: { onRequest: models.OnRequestHook }, scriptData: ScriptData) {
-  hooks.onRequest.addHook(models.ActionType.js, async (_request, context) => {
+  hooks.onRequest.addHook('js', async (_request, context) => {
     await executeScriptData(scriptData, context, 'request');
   });
 }
 
 function addResponseHook(hooks: { onResponse: models.OnResponseHook }, scriptData: ScriptData) {
-  hooks.onResponse.addHook(models.ActionType.js, async (response, context) => {
+  hooks.onResponse.addHook('js', async (response, context) => {
     context.variables.response = response;
     await executeScriptData(scriptData, context, 'response');
   });
 }
 function addResponseLoggingHook(hooks: { responseLogging: models.ResponseLoggingHook }, scriptData: ScriptData) {
-  hooks.responseLogging.addHook(models.ActionType.js, async (response, context) => {
+  hooks.responseLogging.addHook('js', async (response, context) => {
     const originalResponse = context.variables.response;
     context.variables.response = response;
     await executeScriptData(scriptData, context, 'responseLogging');

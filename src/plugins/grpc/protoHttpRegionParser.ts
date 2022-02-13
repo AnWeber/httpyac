@@ -63,8 +63,8 @@ export async function parseProtoImport(
   return false;
 }
 
-export class ProtoImportAction implements models.HttpRegionAction {
-  id = models.ActionType.protoImport;
+export class ProtoImportAction {
+  id = 'proto';
 
   constructor(private readonly protoDefinition: models.ProtoDefinition) {}
 
@@ -117,7 +117,7 @@ export class ProtoImportAction implements models.HttpRegionAction {
 type ExecuteInterceptor = HookInterceptor<[models.ProtoProcessorContext], boolean | void>;
 
 export class ProtoDefinitionCreationInterceptor implements ExecuteInterceptor {
-  id = models.ActionType.protoCreate;
+  id = 'proto';
 
   constructor(private readonly protoDefinition: models.ProtoDefinition) {}
 

@@ -7,8 +7,8 @@ export interface IntellijScriptData {
   fileName: string;
 }
 
-export class IntellijAction implements models.HttpRegionAction {
-  id = models.ActionType.intellij;
+export class IntellijAction {
+  id = 'intellij';
 
   constructor(private readonly scriptData: models.ScriptData | IntellijScriptData) {}
 
