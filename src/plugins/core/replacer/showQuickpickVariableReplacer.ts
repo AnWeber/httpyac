@@ -1,5 +1,5 @@
-import { userInteractionProvider } from '../../io';
-import * as utils from '../../utils';
+import { userInteractionProvider } from '../../../io';
+import * as utils from '../../../utils';
 import { HookCancel } from 'hookpoint';
 
 export async function showQuickpickVariableReplacer(text: unknown): Promise<unknown> {

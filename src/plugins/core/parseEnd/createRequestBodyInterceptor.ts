@@ -1,6 +1,6 @@
-import { fileProvider } from '../io';
-import * as models from '../models';
-import * as utils from '../utils';
+import { fileProvider } from '../../../io';
+import * as models from '../../../models';
+import * as utils from '../../../utils';
 import { HookInterceptor, HookTriggerContext } from 'hookpoint';
 import { EOL } from 'os';
 

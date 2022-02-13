@@ -4,8 +4,8 @@ import {
   HttpLineGenerator,
   HttpRegionParserResult,
   ParserContext,
-} from '../models';
-import { toMultiLineString } from '../utils';
+} from '../../../models';
+import { toMultiLineString } from '../../../utils';
 
 export async function parseComment(
   getLineReader: getHttpLineGenerator,

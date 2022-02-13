@@ -1,5 +1,5 @@
-import { userInteractionProvider } from '../../io';
-import * as utils from '../../utils';
+import { userInteractionProvider } from '../../../io';
+import * as utils from '../../../utils';
 import { HookCancel } from 'hookpoint';
 
 const lastValue: Record<string, string> = {};

@@ -1,4 +1,4 @@
-import { isString } from '../../utils';
+import { isString } from '../../../utils';
 
 const BasicAuth = /^\s*(basic)\s+(?<user>[^\s]*)\s+(?<password>([^\s]+.*))$/iu;
 const BasicAuthColon = /^\s*(basic)\s+(?<user>.*):(?<password>.*)$/iu;

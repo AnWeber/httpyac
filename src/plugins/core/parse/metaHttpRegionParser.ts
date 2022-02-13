@@ -1,6 +1,6 @@
-import { log } from '../io';
-import * as models from '../models';
-import * as utils from '../utils';
+import { log } from '../../../io';
+import * as models from '../../../models';
+import * as utils from '../../../utils';
 
 const MetaDataRegex = /^\s*(#+|\/{2})/u;
 

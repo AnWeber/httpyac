@@ -1,5 +1,5 @@
-import { ProcessorContext, VariableType } from '../../models';
-import * as utils from '../../utils';
+import { ProcessorContext, VariableType } from '../../../models';
+import * as utils from '../../../utils';
 
 export async function replaceVariableNames(
   text: unknown,

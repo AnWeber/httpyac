@@ -1,5 +1,5 @@
-import { ProcessorContext } from '../../models';
-import * as utils from '../../utils';
+import { ProcessorContext } from '../../../models';
+import * as utils from '../../../utils';
 import aws4 from 'aws4';
 import { URL } from 'url';
 

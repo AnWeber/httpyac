@@ -1,4 +1,4 @@
-import { HttpSymbolKind, getHttpLineGenerator, HttpRegionParserResult, ParserContext } from '../models';
+import { HttpSymbolKind, getHttpLineGenerator, HttpRegionParserResult, ParserContext } from '../../../models';
 
 export async function parseResponseRef(
   getLineReader: getHttpLineGenerator,

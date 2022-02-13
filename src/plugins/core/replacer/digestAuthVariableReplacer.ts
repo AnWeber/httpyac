@@ -1,5 +1,5 @@
-import { ProcessorContext } from '../../models';
-import { isHttpRequest, isString } from '../../utils';
+import { ProcessorContext } from '../../../models';
+import { isHttpRequest, isString } from '../../../utils';
 import { createHash } from 'crypto';
 import type { CancelableRequest, OptionsOfUnknownResponseBody, Response } from 'got';
 import { URL } from 'url';

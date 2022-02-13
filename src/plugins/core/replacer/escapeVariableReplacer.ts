@@ -1,4 +1,4 @@
-import { isString } from '../../utils';
+import { isString } from '../../../utils';
 
 export async function escapeVariableReplacer(text: unknown): Promise<unknown> {
   if (isString(text)) {

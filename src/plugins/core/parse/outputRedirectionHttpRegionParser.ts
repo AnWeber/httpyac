@@ -1,5 +1,5 @@
-import { fileProvider, log } from '../io';
-import * as models from '../models';
+import { fileProvider, log } from '../../../io';
+import * as models from '../../../models';
 
 export async function parseOutputRedirection(
   getLineReader: models.getHttpLineGenerator,
