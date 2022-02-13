@@ -5,9 +5,6 @@ export const ParserRegex = {
     basicColon: /^\s*(basic)\s+(?<user>.*):(?<password>.*)$/iu,
     clientCert:
       /^\s*(cert:\s*(?<cert>[^\s]*)\s*)?(key:\s*(?<key>[^\s]*)\s*)?(pfx:\s*(?<pfx>[^\s]*)\s*)?(passphrase:\s*(?<passphrase>[^\s]*)\s*)?\s*$/u,
-    digest: /^\s*(digest)\s+(?<user>[^\s]*)\s+(?<password>([^\s]+.*))$/iu,
-    oauth2:
-      /^\s*(?<type>openid|oauth2)(\s+(?<flow>client(_credentials)?|(authorization_)?code|device(_code)?|password|implicit|hybrid))?(\s+(?<variablePrefix>[^\s]*))?\s*((token_exchange)\s+(?<tokenExchangePrefix>[^\s]*))?\s*$/iu,
   },
   comment: {
     multilineEnd: /^\s*\*\/\s*$/u,
@@ -34,23 +31,11 @@ export const ParserRegex = {
   },
   meta: {
     all: /^\s*(#+|\/{2})/u,
-    comment: /^\s*((#\s+)|(\/{2}))/u,
     delimiter: /^\s*#{3,}(?<title>.*)$/u,
-    data: /^\s*(#+|\/{2,})\s+@(?<key>[^\s]*)(\s+)?"?(?<value>.*)?"?$/u,
-    forOf: /^\s*for\s+(?<variable>.*)\s+of\s+(?<iterable>.*)\s*/u,
-    for: /^\s*for\s*(?<counter>\d*)\s*$/u,
-    while: /^\s*while\s*(?<expression>.*)\s*$/u,
-    rateLimit:
-      /^\s*(slot(:)?\s*(?<slot>[^\s]+))?\s*(minIdleTime(:)?\s*(?<minIdleTime>\d*))?\s*(max(:)?\s*(?<max>\d*))\s*(expire(:)?\s*(?<expire>\d*))?\s*$/iu,
   },
   request: {
-    fileImport: /^<(?:(?<injectVariables>@)(?<encoding>\w+)?)?\s+(?<fileName>.+?)\s*$/u,
-    header: /^\s*(?<key>[!#$%&'*+\-.^_`|~0-9A-Za-z]+)\s*:\s*(?<value>.*?),?\s*$/u,
-    headersSpread: /^\s*\.{3}(?<variableName>[^\s]+),?\s*$/u,
-    queryLine: /^\s*(\?|&)([^=\s]+)=(.*)$/u,
     requestLine:
       /^\s*(?<method>GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE|PROPFIND|PROPPATCH|MKCOL|COPY|MOVE|LOCK|UNLOCK|CHECKOUT|CHECKIN|REPORT|MERGE|MKACTIVITY|MKWORKSPACE|VERSION-CONTROL|BASELINE-CONTROL)\s*(?<url>.+?)(\s+HTTP\/(?<version>(\S+)))?$/u,
-    urlLine: /^\s*(\/).*$/u,
   },
   outputRedirection: /^\s*>>(?<force>!)?\s+(?<fileName>[^\s{%}]+\s*)$/u,
   responseLine: /^\s*HTTP\/(?<httpVersion>\S+)\s*(?<statusCode>[1-5][0-9][0-9])\s*(-)?\s*(?<statusMessage>.*)$/u,

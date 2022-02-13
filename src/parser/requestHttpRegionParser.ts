@@ -2,7 +2,6 @@ import * as actions from '../actions';
 import * as models from '../models';
 import * as utils from '../utils';
 import { ParserRegex } from './parserRegex';
-import * as parserUtils from './parserUtils';
 
 export async function parseRequestLine(
   getLineReader: models.getHttpLineGenerator,
@@ -42,14 +41,14 @@ export async function parseRequestLine(
     const headers = {};
     request.headers = headers;
 
-    const headersResult = parserUtils.parseSubsequentLines(
+    const headersResult = utils.parseSubsequentLines(
       lineReader,
       [
-        parserUtils.parseComments,
-        parserUtils.parseRequestHeaderFactory(headers),
-        parserUtils.parseDefaultHeadersFactory((headers, context) => Object.assign(context.request?.headers, headers)),
-        parserUtils.parseQueryLineFactory(url => (request.url += url)),
-        parserUtils.parseUrlLineFactory(url => (request.url += url)),
+        utils.parseComments,
+        utils.parseRequestHeaderFactory(headers),
+        utils.parseDefaultHeadersFactory((headers, context) => Object.assign(context.request?.headers, headers)),
+        utils.parseQueryLineFactory(url => (request.url += url)),
+        utils.parseUrlLineFactory(url => (request.url += url)),
       ],
       context
     );

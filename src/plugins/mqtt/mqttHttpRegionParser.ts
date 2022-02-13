@@ -1,10 +1,9 @@
 import * as models from '../../models';
-import * as parserUtils from '../../parser/parserUtils';
 import * as utils from '../../utils';
 import { MQTTClientAction } from './mqttClientAction';
 import { MQTTRequest } from './mqttRequest';
 
-const RegexMqttLine = /^\s*(mqtt|mqtts)\s*(?<url>.+?)\s*$/iu;
+const RegexMqttLine = /^\s*(mqtt(s)?)\s*(?<url>.+?)\s*$/iu;
 const RegexMqttProtocol = /^\s*mqtt(s)?:\/\/(?<url>.+?)\s*$/iu;
 
 export async function parseMQTTLine(
@@ -46,13 +45,13 @@ export async function parseMQTTLine(
     const headers = {};
     requestLine.request.headers = headers;
 
-    const headersResult = parserUtils.parseSubsequentLines(
+    const headersResult = utils.parseSubsequentLines(
       lineReader,
       [
-        parserUtils.parseComments,
-        parserUtils.parseRequestHeaderFactory(headers),
-        parserUtils.parseDefaultHeadersFactory((headers, context) => Object.assign(context.request?.headers, headers)),
-        parserUtils.parseUrlLineFactory(url => (requestLine.request.url += url)),
+        utils.parseComments,
+        utils.parseRequestHeaderFactory(headers),
+        utils.parseDefaultHeadersFactory((headers, context) => Object.assign(context.request?.headers, headers)),
+        utils.parseUrlLineFactory(url => (requestLine.request.url += url)),
       ],
       context
     );

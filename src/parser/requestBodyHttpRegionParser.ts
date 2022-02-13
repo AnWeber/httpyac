@@ -1,7 +1,6 @@
 import { CreateRequestBodyInterceptor } from '../actions';
 import * as models from '../models';
 import * as utils from '../utils';
-import { ParserRegex } from './parserRegex';
 
 export async function parseRequestBody(
   getLineReader: models.getHttpLineGenerator,
@@ -62,7 +61,7 @@ function getAndRemoveRequestBody(context: models.ParserContext) {
 }
 
 function parseLine(textLine: string) {
-  const fileImport = ParserRegex.request.fileImport.exec(textLine);
+  const fileImport = /^<(?:(?<injectVariables>@)(?<encoding>\w+)?)?\s+(?<fileName>.+?)\s*$/u.exec(textLine);
   if (fileImport && fileImport.length === 4 && fileImport.groups) {
     return {
       fileName: fileImport.groups.fileName,

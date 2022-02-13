@@ -1,5 +1,5 @@
-import { RefMetaAction } from '../../actions';
-import * as models from '../../models';
+import { RefMetaAction } from '../../../actions';
+import * as models from '../../../models';
 
 export function refMetaDataHandler(type: string, name: string | undefined, context: models.ParserContext): boolean {
   if (['ref', 'forceRef'].indexOf(type) >= 0 && name) {

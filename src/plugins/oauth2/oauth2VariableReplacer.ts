@@ -1,6 +1,5 @@
 import { log } from '../../io';
 import * as models from '../../models';
-import { ParserRegex } from '../../parser';
 import { userSessionStore } from '../../store';
 import * as utils from '../../utils';
 import * as flows from './flow';
@@ -13,7 +12,10 @@ export async function oauth2VariableReplacer(
   context: models.ProcessorContext
 ): Promise<unknown> {
   if (type.toLowerCase() === 'authorization' && utils.isString(text)) {
-    const match = ParserRegex.auth.oauth2.exec(text);
+    const match =
+      /^\s*(?<type>openid|oauth2)(\s+(?<flow>client(_credentials)?|(authorization_)?code|device(_code)?|password|implicit|hybrid))?(\s+(?<variablePrefix>[^\s]*))?\s*((token_exchange)\s+(?<tokenExchangePrefix>[^\s]*))?\s*$/iu.exec(
+        text
+      );
     if (match && match.groups) {
       const flow = match.groups.flow || 'client_credentials';
       utils.report(context, `get OAuth2 Authorization (${flow})`);

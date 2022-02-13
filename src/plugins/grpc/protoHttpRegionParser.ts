@@ -1,6 +1,5 @@
 import * as io from '../../io';
 import * as models from '../../models';
-import * as parserUtils from '../../parser/parserUtils';
 import * as utils from '../../utils';
 import { loadPackageDefinition } from '@grpc/grpc-js';
 import { load } from '@grpc/proto-loader';
@@ -36,12 +35,12 @@ export async function parseProtoImport(
         symbols,
       };
 
-      const headersResult = parserUtils.parseSubsequentLines(
+      const headersResult = utils.parseSubsequentLines(
         lineReader,
         [
-          parserUtils.parseComments,
-          parserUtils.parseRequestHeaderFactory(protoDefinition.loaderOptions),
-          parserUtils.parseDefaultHeadersFactory((headers, context: models.ProtoProcessorContext) =>
+          utils.parseComments,
+          utils.parseRequestHeaderFactory(protoDefinition.loaderOptions),
+          utils.parseDefaultHeadersFactory((headers, context: models.ProtoProcessorContext) =>
             Object.assign(context.options.protoDefinitions?.[protoDefinition.fileName].loaderOptions, headers)
           ),
         ],

@@ -1,5 +1,5 @@
-import { log } from '../../io';
-import * as models from '../../models';
+import { log } from '../../../io';
+import * as models from '../../../models';
 
 export function verboseMetaDataHandler(type: string, _value: string | undefined, context: models.ParserContext) {
   if (type === 'verbose' || type === 'debug') {

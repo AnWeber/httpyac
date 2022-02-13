@@ -1,5 +1,5 @@
-import * as models from '../../models';
-import { sleep, evalExpression } from '../../utils';
+import * as models from '../../../models';
+import { sleep, evalExpression } from '../../../utils';
 
 export function sleepMetaDataHandler(type: string, value: string | undefined, context: models.ParserContext) {
   if (type === 'sleep' && value) {

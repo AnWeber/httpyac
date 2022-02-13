@@ -1,5 +1,4 @@
 import { ProcessorContext } from '../../models';
-import { ParserRegex } from '../../parser';
 import { isHttpRequest, isString } from '../../utils';
 import { createHash } from 'crypto';
 import type { CancelableRequest, OptionsOfUnknownResponseBody, Response } from 'got';
@@ -12,7 +11,7 @@ export async function digestAuthVariableReplacer(
   { request }: ProcessorContext
 ): Promise<unknown> {
   if (type.toLowerCase() === 'authorization' && isString(text) && isHttpRequest(request)) {
-    const match = ParserRegex.auth.digest.exec(text);
+    const match = /^\s*(digest)\s+(?<user>[^\s]*)\s+(?<password>([^\s]+.*))$/iu.exec(text);
 
     if (match && match.groups && match.groups.user && match.groups.password) {
       if (!request.options.hooks) {

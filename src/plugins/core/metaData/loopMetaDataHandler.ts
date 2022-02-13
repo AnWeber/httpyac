@@ -1,10 +1,9 @@
-import { LoopMetaAction, LoopMetaType, LoopMetaData } from '../../actions';
-import * as models from '../../models';
-import { ParserRegex } from '../parserRegex';
+import { LoopMetaAction, LoopMetaType, LoopMetaData } from '../../../actions';
+import * as models from '../../../models';
 
 export function loopMetaDataHandler(type: string, value: string | undefined, context: models.ParserContext): boolean {
   if (type === 'loop' && value) {
-    const forOfMatch = ParserRegex.meta.forOf.exec(value);
+    const forOfMatch = /^\s*for\s+(?<variable>.*)\s+of\s+(?<iterable>.*)\s*/u.exec(value);
     if (forOfMatch?.groups?.iterable && forOfMatch?.groups?.variable) {
       addHook(context, {
         type: LoopMetaType.forOf,
@@ -13,7 +12,7 @@ export function loopMetaDataHandler(type: string, value: string | undefined, con
       });
       return true;
     }
-    const forMatch = ParserRegex.meta.for.exec(value);
+    const forMatch = /^\s*for\s*(?<counter>\d*)\s*$/u.exec(value);
     if (forMatch?.groups?.counter) {
       addHook(context, {
         type: LoopMetaType.for,
@@ -21,7 +20,7 @@ export function loopMetaDataHandler(type: string, value: string | undefined, con
       });
       return true;
     }
-    const whileMatch = ParserRegex.meta.while.exec(value);
+    const whileMatch = /^\s*while\s*(?<expression>.*)\s*$/u.exec(value);
     if (whileMatch?.groups?.expression) {
       addHook(context, {
         type: LoopMetaType.while,

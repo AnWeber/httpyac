@@ -9,6 +9,7 @@ import { LastOutHook, WaterfallHook, SeriesHook } from 'hookpoint';
 
 export interface HttpFileHooks {
   readonly parse: ParseHook;
+  readonly parseMetaData: ParseMetaDataHook;
   readonly parseEndRegion: ParseEndRegionHook;
   readonly replaceVariable: ReplaceVariableHook;
   readonly provideEnvironments: ProvideEnvironmentsHook;
@@ -25,6 +26,13 @@ export class ParseHook extends LastOutHook<[getHttpLineGenerator, ParserContext]
   constructor() {
     super(obj => !!obj);
     this.id = 'ParseHook';
+  }
+}
+
+export class ParseMetaDataHook extends LastOutHook<[string, string, ParserContext], boolean> {
+  constructor() {
+    super(obj => !!obj);
+    this.id = 'ParseMetaDataHook';
   }
 }
 

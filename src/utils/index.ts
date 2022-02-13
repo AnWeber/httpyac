@@ -12,6 +12,7 @@ export * from './mimeTypeUtils';
 export * from './moduleUtils';
 export * from './stringUtils';
 export * from './requestUtils';
+export * from './parserUtils';
 export * from './promiseUtils';
 export * from './testUtils';
 export * from './variableUtils';

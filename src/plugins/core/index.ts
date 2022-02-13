@@ -1,13 +1,15 @@
-import * as actions from '../actions';
-import * as models from '../models';
-import * as parser from '../parser';
-import { setAdditionalResponseBody } from '../utils';
-import { provider, replacer } from '../variables';
+import * as actions from '../../actions';
+import * as models from '../../models';
+import * as parser from '../../parser';
+import { setAdditionalResponseBody } from '../../utils';
+import { provider, replacer } from '../../variables';
+import { initParseMetData } from './metaData';
 
-export function registerPlugins(api: models.HttpyacHooksApi) {
+export function registerCorePlugins(api: models.HttpyacHooksApi) {
   initOnRequestHook(api.hooks.onRequest);
   initOnResponseHook(api.hooks.onResponse);
   initParseHook(api.hooks.parse);
+  initParseMetData(api.hooks.parseMetaData);
   initParseEndHook(api.hooks.parseEndRegion);
 
   initProvideVariablesHook(api.hooks.provideVariables);

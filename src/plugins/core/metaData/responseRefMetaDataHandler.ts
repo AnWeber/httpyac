@@ -1,4 +1,4 @@
-import * as models from '../../models';
+import * as models from '../../../models';
 
 export function responseRefMetaDataHandler(type: string, value: string | undefined, context: models.ParserContext) {
   if (type === 'responseRef' && value) {

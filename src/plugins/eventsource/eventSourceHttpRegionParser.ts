@@ -1,5 +1,4 @@
 import * as models from '../../models';
-import * as parserUtils from '../../parser/parserUtils';
 import * as utils from '../../utils';
 import { EventSourceClientAction } from './eventSourceClientAction';
 import { EventSourceRequest } from './eventSourceRequest';
@@ -45,13 +44,13 @@ export async function parseEventSource(
     const headers = {};
     eventSourceLine.request.headers = headers;
 
-    const headersResult = parserUtils.parseSubsequentLines(
+    const headersResult = utils.parseSubsequentLines(
       lineReader,
       [
-        parserUtils.parseComments,
-        parserUtils.parseRequestHeaderFactory(headers),
-        parserUtils.parseDefaultHeadersFactory((headers, context) => Object.assign(context.request?.headers, headers)),
-        parserUtils.parseUrlLineFactory(url => (eventSourceLine.request.url += url)),
+        utils.parseComments,
+        utils.parseRequestHeaderFactory(headers),
+        utils.parseDefaultHeadersFactory((headers, context) => Object.assign(context.request?.headers, headers)),
+        utils.parseUrlLineFactory(url => (eventSourceLine.request.url += url)),
       ],
       context
     );

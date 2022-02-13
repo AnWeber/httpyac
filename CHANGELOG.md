@@ -1,3 +1,10 @@
+## Unreleased
+
+#### Breaking Changes
+
+- The internal project structure was revised and a better separation of the plugin components was achieved. These are preparations to possibly provide an ESM build in the future.
+- Setting Got Options directly on the request will be removed in one of the next versions. Got checks better in Got v12 whether only valid options are set. But since options and custom properties are mixed at the request object, such a separation would be difficult. Please change `request[...]` to `request.options[...]`.
+
 ## 4.10.2 (2022-02-08)
 
 #### Features

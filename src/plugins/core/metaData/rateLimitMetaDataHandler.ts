@@ -1,8 +1,7 @@
-import { log } from '../../io';
-import * as models from '../../models';
-import { userSessionStore } from '../../store';
-import * as utils from '../../utils';
-import { ParserRegex } from '../parserRegex';
+import { log } from '../../../io';
+import * as models from '../../../models';
+import { userSessionStore } from '../../../store';
+import * as utils from '../../../utils';
 
 export function rateLimitMetaDataHandler(
   type: string,
@@ -10,7 +9,10 @@ export function rateLimitMetaDataHandler(
   { httpRegion }: models.ParserContext
 ) {
   if (type === 'ratelimit' && value) {
-    const match = ParserRegex.meta.rateLimit.exec(value);
+    const match =
+      /^\s*(slot(:)?\s*(?<slot>[^\s]+))?\s*(minIdleTime(:)?\s*(?<minIdleTime>\d*))?\s*(max(:)?\s*(?<max>\d*))\s*(expire(:)?\s*(?<expire>\d*))?\s*$/iu.exec(
+        value
+      );
     if (match?.groups) {
       const slot = match.groups.slot || 'rateLimit';
       const minIdleTime = match.groups.minIdleTime || '0';

@@ -1,5 +1,5 @@
-import { ImportMetaAction } from '../../actions';
-import * as models from '../../models';
+import { ImportMetaAction } from '../../../actions';
+import * as models from '../../../models';
 
 export function importMetaDataHandler(type: string, value: string | undefined, context: models.ParserContext) {
   if (type === 'import' && value) {

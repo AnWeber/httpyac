@@ -132,6 +132,7 @@ export class HttpFileStore implements models.HttpFileStore {
       rootDir,
       hooks: {
         parse: new models.ParseHook(),
+        parseMetaData: new models.ParseMetaDataHook(),
         parseEndRegion: new models.ParseEndRegionHook(),
         replaceVariable: new models.ReplaceVariableHook(),
         provideEnvironments: new models.ProvideEnvironmentsHook(),

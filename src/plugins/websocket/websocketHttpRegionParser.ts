@@ -1,6 +1,6 @@
 import * as models from '../../models';
-import * as parserUtils from '../../parser/parserUtils';
 import * as utils from '../../utils';
+import * as parserUtils from '../../utils/parserUtils';
 import { WebSocketClientAction } from './webSocketClientAction';
 import { WebsocketRequest } from './websocketRequest';
 

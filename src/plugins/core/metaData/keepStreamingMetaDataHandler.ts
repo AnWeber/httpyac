@@ -1,6 +1,6 @@
-import * as models from '../../models';
-import { userSessionStore } from '../../store';
-import * as utils from '../../utils';
+import * as models from '../../../models';
+import { userSessionStore } from '../../../store';
+import * as utils from '../../../utils';
 
 export function keepStreamingMetaDataHandler(type: string, _value: string | undefined, context: models.ParserContext) {
   if (type === 'keepStreaming') {
