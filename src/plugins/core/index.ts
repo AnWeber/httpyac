@@ -34,9 +34,6 @@ function initOnResponseHook(hook: models.OnResponseHook) {
 }
 
 function initParseHook(hook: models.ParseHook) {
-  hook.addInterceptor(new parser.MarkdownInterceptor());
-  hook.addInterceptor(new parser.AsciidocInterceptor());
-
   hook.addHook('meta', parser.parseMetaData);
   hook.addHook('comment', parser.parseComment);
   hook.addHook('variable', parser.parseVariable);
