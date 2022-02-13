@@ -2,4 +2,6 @@ import { HttpClientContext } from './httpClientContext';
 import { HttpRequest } from './httpRequest';
 import { HttpResponse } from './httpResponse';
 
-export type HttpClient = (request: HttpRequest, context: HttpClientContext) => Promise<HttpResponse | false>;
+export type HttpClientRequest = Partial<HttpRequest> & Omit<HttpRequest, 'options'>;
+
+export type HttpClient = (request: HttpClientRequest, context: HttpClientContext) => Promise<HttpResponse | false>;

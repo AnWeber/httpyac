@@ -7,7 +7,9 @@ import { LogHandler } from './logHandler';
 import { PathLike } from './pathLike';
 import { SessionStore } from './sessionStore';
 import { UserInteractionProvider } from './userInteractionProvider';
-import { HookCancel } from 'hookpoint';
+import { HookCancel as hookPointHookCancel } from 'hookpoint';
+
+export const HookCancel: typeof hookPointHookCancel = hookPointHookCancel;
 
 export interface HttpyacHooksApi {
   readonly version: string;

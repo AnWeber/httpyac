@@ -1,6 +1,7 @@
-import { log } from '../io';
-import * as models from '../models';
-import * as utils from '../utils';
+import { log } from '../../io';
+import * as models from '../../models';
+import * as utils from '../../utils';
+import { GrpcRequest, isGrpcRequest } from './grpcRequest';
 import * as grpc from '@grpc/grpc-js';
 import { Readable, Writable, Duplex } from 'stream';
 
@@ -24,7 +25,7 @@ export class GrpcClientAction implements models.HttpRegionAction {
     grpc.setLogger(log);
     const { request } = context;
     const protoDefinitions = context.options.protoDefinitions;
-    if (utils.isGrpcRequest(request) && request?.url && protoDefinitions) {
+    if (isGrpcRequest(request) && request?.url && protoDefinitions) {
       return await utils.triggerRequestResponseHooks(async () => {
         if (request.url) {
           utils.report(context, `request gRPC ${request.url}`);
@@ -47,17 +48,15 @@ export class GrpcClientAction implements models.HttpRegionAction {
     return false;
   }
 
-  private getChannelCredentials(request: models.GrpcRequest): grpc.ChannelCredentials {
-    if (request.headers) {
-      const channelCredentials = utils.getHeader(request.headers, 'channelcredentials');
-      if (channelCredentials instanceof grpc.ChannelCredentials) {
-        return channelCredentials;
-      }
+  private getChannelCredentials(request: GrpcRequest): grpc.ChannelCredentials {
+    const channelCredentials = utils.getHeader(request.headers, 'channelcredentials');
+    if (channelCredentials instanceof grpc.ChannelCredentials) {
+      return channelCredentials;
     }
     return grpc.credentials.createInsecure();
   }
 
-  private getChannelOptions(request: models.GrpcRequest, serviceData: ServiceData) {
+  private getChannelOptions(request: GrpcRequest, serviceData: ServiceData) {
     const options: grpc.ChannelOptions = {};
     if (serviceData.path) {
       options.channelFactoryOverride = (
@@ -82,7 +81,7 @@ export class GrpcClientAction implements models.HttpRegionAction {
   private async requestGrpc(
     method: (...args: unknown[]) => Readable | Writable | Duplex,
     methodDefinition: grpc.MethodDefinition<unknown, unknown>,
-    request: models.GrpcRequest,
+    request: GrpcRequest,
     context: models.ProcessorContext
   ): Promise<models.HttpResponse> {
     const data = this.getData(request);
@@ -210,7 +209,7 @@ export class GrpcClientAction implements models.HttpRegionAction {
     ];
   }
 
-  private getData(request: models.GrpcRequest): unknown {
+  private getData(request: GrpcRequest): unknown {
     if (utils.isString(request.body)) {
       return JSON.parse(request.body);
     }
@@ -220,7 +219,7 @@ export class GrpcClientAction implements models.HttpRegionAction {
     return request.body;
   }
 
-  private getMetaData(request: models.GrpcRequest): grpc.Metadata {
+  private getMetaData(request: GrpcRequest): grpc.Metadata {
     const metaData = new grpc.Metadata();
     const specialKeys = ['channelcredentials'];
     if (request.headers) {

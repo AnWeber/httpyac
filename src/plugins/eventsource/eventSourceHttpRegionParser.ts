@@ -1,16 +1,18 @@
-import * as actions from '../actions';
-import * as models from '../models';
-import * as utils from '../utils';
-import { ParserRegex } from './parserRegex';
-import * as parserUtils from './parserUtils';
+import * as models from '../../models';
+import * as parserUtils from '../../parser/parserUtils';
+import * as utils from '../../utils';
+import { EventSourceClientAction } from './eventSourceClientAction';
+import { EventSourceRequest } from './eventSourceRequest';
 
-export async function parseWebsocketLine(
+const EventSourceLine = /^\s*(sse|eventsource)\s*(?<url>.+?)\s*$/iu;
+
+export async function parseEventSource(
   getLineReader: models.getHttpLineGenerator,
   context: models.ParserContext
 ): Promise<models.HttpRegionParserResult> {
   const lineReader = getLineReader();
   const next = lineReader.next();
-  if (!next.done && isValidWebsocket(next.value.textLine, context.httpRegion)) {
+  if (!next.done && isValidEventSource(next.value.textLine)) {
     if (context.httpRegion.request) {
       return {
         endRegionLine: next.value.line - 1,
@@ -19,20 +21,20 @@ export async function parseWebsocketLine(
       };
     }
 
-    const requestLine = getWebsocketLine(next.value.textLine, next.value.line);
-    if (!requestLine) {
+    const eventSourceLine = getEventSourceLine(next.value.textLine, next.value.line);
+    if (!eventSourceLine) {
       return false;
     }
-    context.httpRegion.request = requestLine.request;
+    context.httpRegion.request = eventSourceLine.request;
     const requestSymbol: models.HttpSymbol = {
       name: next.value.textLine,
-      description: 'WebSocket request-line',
+      description: 'websocket request-line',
       kind: models.HttpSymbolKind.requestLine,
       startLine: next.value.line,
       startOffset: 0,
       endLine: next.value.line,
       endOffset: next.value.textLine.length,
-      children: [requestLine.symbol],
+      children: [eventSourceLine.symbol],
     };
 
     const result: models.HttpRegionParserResult = {
@@ -41,7 +43,7 @@ export async function parseWebsocketLine(
     };
 
     const headers = {};
-    requestLine.request.headers = headers;
+    eventSourceLine.request.headers = headers;
 
     const headersResult = parserUtils.parseSubsequentLines(
       lineReader,
@@ -49,7 +51,7 @@ export async function parseWebsocketLine(
         parserUtils.parseComments,
         parserUtils.parseRequestHeaderFactory(headers),
         parserUtils.parseDefaultHeadersFactory((headers, context) => Object.assign(context.request?.headers, headers)),
-        parserUtils.parseUrlLineFactory(url => (requestLine.request.url += url)),
+        parserUtils.parseUrlLineFactory(url => (eventSourceLine.request.url += url)),
       ],
       context
     );
@@ -61,45 +63,27 @@ export async function parseWebsocketLine(
       }
     }
 
-    context.httpRegion.hooks.execute.addObjHook(obj => obj.process, new actions.WebSocketClientAction());
+    context.httpRegion.hooks.execute.addObjHook(obj => obj.process, new EventSourceClientAction());
 
     return result;
   }
   return false;
 }
 
-function getWebsocketLine(
+function getEventSourceLine(
   textLine: string,
   line: number
-): { request: models.WebsocketRequest; symbol: models.HttpSymbol } | undefined {
-  const lineMatch = ParserRegex.stream.websocketLine.exec(textLine);
+): { request: EventSourceRequest; symbol: models.HttpSymbol } | undefined {
+  const lineMatch = EventSourceLine.exec(textLine);
   if (lineMatch && lineMatch.length > 1 && lineMatch.groups) {
     return {
       request: {
         url: lineMatch.groups.url,
-        method: 'WS',
+        method: 'SSE',
       },
       symbol: {
         name: lineMatch.groups.url,
-        description: 'WebSocket Url',
-        kind: models.HttpSymbolKind.url,
-        startLine: line,
-        startOffset: 0,
-        endLine: line,
-        endOffset: textLine.length,
-      },
-    };
-  }
-  const protocolMatch = ParserRegex.stream.websocketProtocol.exec(textLine);
-  if (protocolMatch && protocolMatch.length > 1 && protocolMatch.groups) {
-    return {
-      request: {
-        url: protocolMatch.groups.url,
-        method: 'WS',
-      },
-      symbol: {
-        name: protocolMatch.groups.url,
-        description: 'WebSocket Url',
+        description: 'EventSource url',
         kind: models.HttpSymbolKind.url,
         startLine: line,
         startOffset: 0,
@@ -111,16 +95,13 @@ function getWebsocketLine(
   return undefined;
 }
 
-function isValidWebsocket(textLine: string, httpRegion: models.HttpRegion) {
+function isValidEventSource(textLine: string) {
   if (utils.isStringEmpty(textLine)) {
     return false;
   }
 
-  if (ParserRegex.stream.websocketLine.exec(textLine)?.groups?.url) {
+  if (EventSourceLine.exec(textLine)?.groups?.url) {
     return true;
-  }
-  if (!httpRegion.request) {
-    return ParserRegex.stream.websocketProtocol.exec(textLine)?.groups?.url;
   }
   return false;
 }

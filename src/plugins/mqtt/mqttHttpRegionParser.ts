@@ -2,6 +2,7 @@ import * as models from '../../models';
 import * as parserUtils from '../../parser/parserUtils';
 import * as utils from '../../utils';
 import { MQTTClientAction } from './mqttClientAction';
+import { MQTTRequest } from './mqttRequest';
 
 const RegexMqttLine = /^\s*(mqtt|mqtts)\s*(?<url>.+?)\s*$/iu;
 const RegexMqttProtocol = /^\s*mqtt(s)?:\/\/(?<url>.+?)\s*$/iu;
@@ -70,10 +71,7 @@ export async function parseMQTTLine(
   return false;
 }
 
-function getMQTTLine(
-  textLine: string,
-  line: number
-): { request: models.MQTTRequest; symbol: models.HttpSymbol } | undefined {
+function getMQTTLine(textLine: string, line: number): { request: MQTTRequest; symbol: models.HttpSymbol } | undefined {
   const lineMatch = RegexMqttLine.exec(textLine);
   if (lineMatch && lineMatch.length > 1 && lineMatch.groups) {
     return {

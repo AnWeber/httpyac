@@ -1,16 +1,19 @@
-import * as actions from '../actions';
-import * as models from '../models';
-import * as utils from '../utils';
-import { ParserRegex } from './parserRegex';
-import * as parserUtils from './parserUtils';
+import * as models from '../../models';
+import * as parserUtils from '../../parser/parserUtils';
+import * as utils from '../../utils';
+import { GrpcClientAction } from './grpcClientAction';
+import { GrpcRequest } from './grpcRequest';
 
-export async function parseEventSource(
+const GrpcLine = /^\s*(GRPC|grpc)\s*(?<url>.+?)\s*$/u;
+const GrpcProtocol = /^\s*grpc:\/\/(?<url>.+?)\s*$/u;
+
+export async function parseGrpcLine(
   getLineReader: models.getHttpLineGenerator,
   context: models.ParserContext
 ): Promise<models.HttpRegionParserResult> {
   const lineReader = getLineReader();
   const next = lineReader.next();
-  if (!next.done && isValidEventSource(next.value.textLine)) {
+  if (!next.done && isValidGrpc(next.value.textLine, context.httpRegion)) {
     if (context.httpRegion.request) {
       return {
         endRegionLine: next.value.line - 1,
@@ -19,20 +22,20 @@ export async function parseEventSource(
       };
     }
 
-    const eventSourceLine = getEventSourceLine(next.value.textLine, next.value.line);
-    if (!eventSourceLine) {
+    const grpcLine = getGrpcLine(next.value.textLine, next.value.line);
+    if (!grpcLine) {
       return false;
     }
-    context.httpRegion.request = eventSourceLine.request;
+    context.httpRegion.request = grpcLine.request;
     const requestSymbol: models.HttpSymbol = {
       name: next.value.textLine,
-      description: 'websocket request-line',
+      description: 'grpc request-line',
       kind: models.HttpSymbolKind.requestLine,
       startLine: next.value.line,
       startOffset: 0,
       endLine: next.value.line,
       endOffset: next.value.textLine.length,
-      children: [eventSourceLine.symbol],
+      children: [grpcLine.symbol],
     };
 
     const result: models.HttpRegionParserResult = {
@@ -41,7 +44,7 @@ export async function parseEventSource(
     };
 
     const headers = {};
-    eventSourceLine.request.headers = headers;
+    grpcLine.request.headers = headers;
 
     const headersResult = parserUtils.parseSubsequentLines(
       lineReader,
@@ -49,7 +52,7 @@ export async function parseEventSource(
         parserUtils.parseComments,
         parserUtils.parseRequestHeaderFactory(headers),
         parserUtils.parseDefaultHeadersFactory((headers, context) => Object.assign(context.request?.headers, headers)),
-        parserUtils.parseUrlLineFactory(url => (eventSourceLine.request.url += url)),
+        parserUtils.parseUrlLineFactory(url => (grpcLine.request.url += url)),
       ],
       context
     );
@@ -61,27 +64,42 @@ export async function parseEventSource(
       }
     }
 
-    context.httpRegion.hooks.execute.addObjHook(obj => obj.process, new actions.EventSourceClientAction());
+    context.httpRegion.hooks.execute.addObjHook(obj => obj.process, new GrpcClientAction());
 
     return result;
   }
   return false;
 }
 
-function getEventSourceLine(
-  textLine: string,
-  line: number
-): { request: models.EventSourceRequest; symbol: models.HttpSymbol } | undefined {
-  const lineMatch = ParserRegex.stream.eventSourceLine.exec(textLine);
+function getGrpcLine(textLine: string, line: number): { request: GrpcRequest; symbol: models.HttpSymbol } | undefined {
+  const lineMatch = GrpcLine.exec(textLine);
   if (lineMatch && lineMatch.length > 1 && lineMatch.groups) {
     return {
       request: {
         url: lineMatch.groups.url,
-        method: 'SSE',
+        method: 'GRPC',
       },
       symbol: {
         name: lineMatch.groups.url,
-        description: 'EventSource url',
+        description: 'grpc url',
+        kind: models.HttpSymbolKind.url,
+        startLine: line,
+        startOffset: 0,
+        endLine: line,
+        endOffset: textLine.length,
+      },
+    };
+  }
+  const protocolMatch = GrpcProtocol.exec(textLine);
+  if (protocolMatch && protocolMatch.length > 1 && protocolMatch.groups) {
+    return {
+      request: {
+        url: protocolMatch.groups.url,
+        method: 'GRPC',
+      },
+      symbol: {
+        name: protocolMatch.groups.url,
+        description: 'grpc url',
         kind: models.HttpSymbolKind.url,
         startLine: line,
         startOffset: 0,
@@ -93,13 +111,16 @@ function getEventSourceLine(
   return undefined;
 }
 
-function isValidEventSource(textLine: string) {
+function isValidGrpc(textLine: string, httpRegion: models.HttpRegion) {
   if (utils.isStringEmpty(textLine)) {
     return false;
   }
 
-  if (ParserRegex.stream.eventSourceLine.exec(textLine)?.groups?.url) {
+  if (GrpcLine.exec(textLine)?.groups?.url) {
     return true;
+  }
+  if (!httpRegion.request) {
+    return GrpcProtocol.exec(textLine)?.groups?.url;
   }
   return false;
 }

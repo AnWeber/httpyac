@@ -45,7 +45,7 @@ export class CookieJarInterceptor implements HookInterceptor<[models.ProcessorCo
           }
         }
       }
-      request.cookieJar = jar;
+      request.options.cookieJar = jar;
     }
     return true;
   }

@@ -1,6 +1,7 @@
-import * as io from '../io';
-import * as models from '../models';
-import * as utils from '../utils';
+import * as io from '../../io';
+import * as models from '../../models';
+import * as utils from '../../utils';
+import { EventSourceRequest, isEventSourceRequest } from './eventSourceRequest';
 import EventSource from 'eventsource';
 
 export class EventSourceClientAction implements models.HttpRegionAction {
@@ -8,7 +9,7 @@ export class EventSourceClientAction implements models.HttpRegionAction {
 
   async process(context: models.ProcessorContext): Promise<boolean> {
     const { request } = context;
-    if (utils.isEventSourceRequest(request)) {
+    if (isEventSourceRequest(request)) {
       return await utils.triggerRequestResponseHooks(async () => {
         if (request.url) {
           utils.report(context, `request Server-Sent Events ${request.url}`);
@@ -21,7 +22,7 @@ export class EventSourceClientAction implements models.HttpRegionAction {
   }
 
   private async requestEventSource(
-    request: models.EventSourceRequest,
+    request: EventSourceRequest,
     context: models.ProcessorContext
   ): Promise<models.HttpResponse> {
     const { httpRegion } = context;

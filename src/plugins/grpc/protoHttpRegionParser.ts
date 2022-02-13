@@ -1,11 +1,12 @@
-import * as io from '../io';
-import * as models from '../models';
-import * as utils from '../utils';
-import { ParserRegex } from './parserRegex';
-import * as parserUtils from './parserUtils';
+import * as io from '../../io';
+import * as models from '../../models';
+import * as parserUtils from '../../parser/parserUtils';
+import * as utils from '../../utils';
 import { loadPackageDefinition } from '@grpc/grpc-js';
 import { load } from '@grpc/proto-loader';
 import { HookTriggerContext, HookInterceptor } from 'hookpoint';
+
+const ProtoImport = /^\s*proto\s+<\s+(?<fileName>.+)\s*$/u;
 
 export async function parseProtoImport(
   getLineReader: models.getHttpLineGenerator,
@@ -14,7 +15,7 @@ export async function parseProtoImport(
   const lineReader = getLineReader();
   const next = lineReader.next();
   if (!next.done) {
-    const matchProto = ParserRegex.grpc.proto.exec(next.value.textLine);
+    const matchProto = ProtoImport.exec(next.value.textLine);
 
     if (matchProto?.groups?.fileName) {
       const protoDefinition = new models.ProtoDefinition(matchProto.groups.fileName);

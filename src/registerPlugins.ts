@@ -2,4 +2,7 @@ import * as plugins from './plugins';
 import { pluginStore } from './store';
 
 pluginStore.core = plugins.registerPlugins;
+pluginStore.eventSource = plugins.registerEventSourcePlugin;
+pluginStore.grpc = plugins.registerGrpcPlugin;
 pluginStore.mqtt = plugins.registerMqttPlugin;
+pluginStore.websocket = plugins.registerWebsocketPlugin;

@@ -20,16 +20,6 @@ export const ParserRegex = {
     fragment: /^\s*(fragment)\s+(?<name>[^\s(]+)\s+on\s+/u,
     query: /^\s*(query|mutation)(\s+(?<name>[^\s(]+))?/u,
   },
-  grpc: {
-    proto: /^\s*proto\s+<\s+(?<fileName>.+)\s*$/u,
-    grpcLine: /^\s*(GRPC|grpc)\s*(?<url>.+?)\s*$/u,
-    grpcProtocol: /^\s*grpc:\/\/(?<url>.+?)\s*$/u,
-  },
-  stream: {
-    websocketLine: /^\s*(ws|wss|websocket)\s*(?<url>.+?)\s*$/iu,
-    websocketProtocol: /^\s*ws(s)?:\/\/(?<url>.+?)\s*$/iu,
-    eventSourceLine: /^\s*(sse|eventsource)\s*(?<url>.+?)\s*$/iu,
-  },
   intellij: {
     import: /^\s*>\s+(?<fileName>[^\s{%}]+\s*)$/u,
     scriptEnd: /^\s*%\}\s*$/u,

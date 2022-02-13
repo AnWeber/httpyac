@@ -1,6 +1,7 @@
 import * as io from '../../io';
 import * as models from '../../models';
 import * as utils from '../../utils';
+import { isMQTTRequest, MQTTRequest } from './mqttRequest';
 import { connect, IClientOptions, QoS, MqttClient } from 'mqtt';
 
 interface MQTTMessage {
@@ -14,7 +15,7 @@ export class MQTTClientAction implements models.HttpRegionAction {
 
   async process(context: models.ProcessorContext): Promise<boolean> {
     const { request } = context;
-    if (utils.isMQTTRequest(request)) {
+    if (isMQTTRequest(request)) {
       return await utils.triggerRequestResponseHooks(async () => {
         if (request.url) {
           utils.report(context, `request MQTT ${request.url}`);
@@ -27,10 +28,7 @@ export class MQTTClientAction implements models.HttpRegionAction {
     return false;
   }
 
-  private async requestMQTT(
-    request: models.MQTTRequest,
-    context: models.ProcessorContext
-  ): Promise<models.HttpResponse> {
+  private async requestMQTT(request: MQTTRequest, context: models.ProcessorContext): Promise<models.HttpResponse> {
     const { httpRegion } = context;
 
     return await new Promise<models.HttpResponse>((resolve, reject) => {
@@ -134,7 +132,7 @@ export class MQTTClientAction implements models.HttpRegionAction {
       });
     }
   }
-  private publishToTopics(client: MqttClient, topics: string[], request: models.MQTTRequest) {
+  private publishToTopics(client: MqttClient, topics: string[], request: MQTTRequest) {
     if (request.body) {
       for (const topic of topics) {
         client.publish(

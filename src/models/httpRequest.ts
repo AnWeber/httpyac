@@ -1,58 +1,25 @@
 import { ContentType } from './contentType';
 import { HttpMethod } from './httpMethod';
-import { ChannelOptions } from '@grpc/grpc-js';
-import { OptionsOfUnknownResponseBody } from 'got';
-import { IClientOptions as MQTTOptions } from 'mqtt';
-import { ClientOptions as WebsocketOptions } from 'ws';
+import type { OptionsOfUnknownResponseBody } from 'got';
 
 export interface HeadersContainer {
   headers: Record<string, unknown>;
 }
 
-export type Request = GrpcRequest | HttpRequest | WebsocketRequest | EventSourceRequest | MQTTRequest;
-
-export interface GrpcRequest {
+export interface Request<TMethod extends string = string> {
   url?: string;
-  method?: 'GRPC';
+  method?: TMethod;
+  body?: unknown;
   headers?: Record<string, unknown>;
-  body?: unknown;
-  options?: ChannelOptions;
-  contentType?: undefined;
-}
-
-export interface WebsocketRequest {
-  url?: string;
-  method?: 'WS';
-  headers?: Record<string, string>;
-  body?: unknown;
-  options?: WebsocketOptions;
-  contentType?: undefined;
-}
-
-export interface MQTTRequest {
-  url?: string;
-  method?: 'MQTT';
-  headers?: Record<string, string | undefined>;
-  body?: string;
-  contentType?: undefined;
-  options?: MQTTOptions;
-}
-export interface EventSourceRequest {
-  url?: string;
-  method?: 'SSE';
-  headers?: Record<string, string>;
-  body?: undefined;
-  contentType?: undefined;
-}
-
-export interface HttpRequest extends Omit<OptionsOfUnknownResponseBody, 'body'> {
-  url?: string;
-  method?: HttpMethod;
-  headers?: Record<string, string | string[] | undefined>;
   contentType?: ContentType;
+}
+
+export interface HttpRequest extends Request<HttpMethod> {
   body?: string | Array<HttpRequestBodyLine> | Buffer;
   rawBody?: Array<string | RequestBodyImport>;
+  headers?: Record<string, string | string[] | undefined>;
   proxy?: string;
+  options: OptionsOfUnknownResponseBody;
 }
 
 export type HttpRequestBodyLine = string | (() => Promise<Buffer>);

@@ -13,10 +13,8 @@ async function setEnvRejectUnauthorized(request: models.Request, variables: mode
   if (request && variables) {
     if (typeof variables.request_rejectUnauthorized !== 'undefined') {
       const rejectUnauthorized = toBoolean(variables.request_rejectUnauthorized);
-      if (utils.isWebsocketRequest(request)) {
-        request.options = Object.assign({}, request.options, { rejectUnauthorized });
-      } else if (utils.isHttpRequest(request)) {
-        request.https = Object.assign({}, request.https, { rejectUnauthorized });
+      if (utils.isHttpRequest(request)) {
+        request.options.https = Object.assign({}, request.options.https, { rejectUnauthorized });
       }
     }
   }

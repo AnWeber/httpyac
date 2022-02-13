@@ -106,9 +106,11 @@ function getRequestLine(
       request: {
         url: requestLineMatch.groups.url,
         method: utils.isHttpRequestMethod(requestLineMatch.groups.method) ? requestLineMatch.groups.method : 'GET',
-        http2: requestLineMatch.groups.version
-          ? ['1.1', '1.0'].indexOf(requestLineMatch.groups.version) < 0
-          : undefined,
+        options: {
+          http2: requestLineMatch.groups.version
+            ? ['1.1', '1.0'].indexOf(requestLineMatch.groups.version) < 0
+            : undefined,
+        },
       },
       requestSymbols,
     };
@@ -126,6 +128,7 @@ function getRequestLine(
     request: {
       url: textLine.trim(),
       method: 'GET',
+      options: {},
     },
     requestSymbols,
   };

@@ -1,6 +1,7 @@
-import * as io from '../io';
-import * as models from '../models';
-import * as utils from '../utils';
+import * as io from '../../io';
+import * as models from '../../models';
+import * as utils from '../../utils';
+import { isWebsocketRequest, WebsocketRequest } from './websocketRequest';
 import WebSocket, { ClientOptions } from 'ws';
 
 const WEBSOCKET_CLOSE_NORMAL = 1000;
@@ -10,7 +11,7 @@ export class WebSocketClientAction implements models.HttpRegionAction {
 
   async process(context: models.ProcessorContext): Promise<boolean> {
     const { request } = context;
-    if (utils.isWebsocketRequest(request)) {
+    if (isWebsocketRequest(request)) {
       return await utils.triggerRequestResponseHooks(async () => {
         if (request.url) {
           utils.report(context, `request websocket ${request.url}`);
@@ -23,7 +24,7 @@ export class WebSocketClientAction implements models.HttpRegionAction {
   }
 
   private async requestWebsocket(
-    request: models.WebsocketRequest,
+    request: WebsocketRequest,
     context: models.ProcessorContext
   ): Promise<models.HttpResponse> {
     const { httpRegion } = context;

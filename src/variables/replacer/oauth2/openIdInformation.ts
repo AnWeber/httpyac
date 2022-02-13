@@ -22,7 +22,7 @@ export interface OpenIdSesssion extends Omit<models.UserSession, 'type'> {
 }
 
 export async function requestOpenIdInformation(
-  request: models.HttpRequest | false,
+  request: models.HttpClientRequest | false,
   options: OpenIdSesssion,
   context: OpenIdContext
 ): Promise<OpenIdInformation | false> {
@@ -46,7 +46,13 @@ export async function requestOpenIdInformation(
       })}`;
     }
 
-    const response = await context?.httpClient(request, { showProgressBar: false });
+    const response = await context?.httpClient(
+      {
+        options: {},
+        ...request,
+      },
+      { showProgressBar: false }
+    );
     if (response) {
       if (models.isProcessorContext(context)) {
         await utils.logResponse(response, context);

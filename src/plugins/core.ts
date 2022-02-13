@@ -44,10 +44,6 @@ export enum ParserId {
   responseRef = 'responseRef',
   response = 'response',
   requestBody = 'requestBody',
-  proto = 'proto',
-  grpc = 'grpc',
-  eventSource = 'eventSource',
-  websocket = 'websocket',
 }
 
 function initParseHook(hook: models.ParseHook) {
@@ -60,10 +56,6 @@ function initParseHook(hook: models.ParseHook) {
   hook.addHook(ParserId.javascript, parser.parseJavascript);
   hook.addHook(ParserId.intellijScript, parser.parseIntellijScript);
   hook.addHook(ParserId.gql, parser.parseGraphql);
-  hook.addHook(ParserId.proto, parser.parseProtoImport);
-  hook.addHook(ParserId.grpc, parser.parseGrpcLine);
-  hook.addHook(ParserId.websocket, parser.parseWebsocketLine);
-  hook.addHook(ParserId.eventSource, parser.parseEventSource);
   hook.addHook(ParserId.request, parser.parseRequestLine);
   hook.addHook(ParserId.outputRedirection, parser.parseOutputRedirection);
   hook.addHook(ParserId.responseRef, parser.parseResponseRef);

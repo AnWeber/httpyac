@@ -2,7 +2,7 @@ import { ProcessorContext } from '../../models';
 import { ParserRegex } from '../../parser';
 import { isHttpRequest, isString } from '../../utils';
 import { createHash } from 'crypto';
-import { CancelableRequest, OptionsOfUnknownResponseBody, Response } from 'got';
+import type { CancelableRequest, OptionsOfUnknownResponseBody, Response } from 'got';
 import { URL } from 'url';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -15,13 +15,13 @@ export async function digestAuthVariableReplacer(
     const match = ParserRegex.auth.digest.exec(text);
 
     if (match && match.groups && match.groups.user && match.groups.password) {
-      if (!request.hooks) {
-        request.hooks = {};
+      if (!request.options.hooks) {
+        request.options.hooks = {};
       }
-      if (!request.hooks.afterResponse) {
-        request.hooks.afterResponse = [];
+      if (!request.options.hooks.afterResponse) {
+        request.options.hooks.afterResponse = [];
       }
-      request.hooks.afterResponse.push(digestFactory(match.groups.user, match.groups.password));
+      request.options.hooks.afterResponse.push(digestFactory(match.groups.user, match.groups.password));
       return undefined;
     }
   }

@@ -1,6 +1,5 @@
 import { ClientCertificateOptions } from './clientCertificateOptions';
 import { HttpyacHooksApi } from './httpHooksApi';
-import { HttpRequest } from './httpRequest';
 import { LogLevel } from './logHandler';
 import { Variables } from './variables';
 
@@ -14,7 +13,7 @@ export interface EnvironmentConfig {
     supportAnsiColors?: boolean;
   };
 
-  request?: HttpRequest;
+  request?: Record<string, unknown>;
   proxy?: string;
   /** count auf characters before pretty print is ommited (default: 1000000)*/
   requestPrettyPrintBodyMaxSize?: number;
