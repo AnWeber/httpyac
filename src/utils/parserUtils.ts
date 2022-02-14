@@ -1,6 +1,6 @@
+import { javascriptProvider } from '../io';
 import * as models from '../models';
 import { report } from './logUtils';
-import { evalExpression } from './moduleUtils';
 
 export const HandlebarsSingleLine = /\{{2}(.+?)\}{2}/gu;
 export const RegionSeparator = /^\s*#{3,}(?<title>.*)$/u;
@@ -142,7 +142,7 @@ class DefaultHeadersAction {
   async process(context: models.ProcessorContext): Promise<boolean> {
     if (this.data && context.variables) {
       report(context, 'set request headers');
-      const headers = await evalExpression(this.data, context);
+      const headers = await javascriptProvider.evalExpression(this.data, context);
       if (headers) {
         this.setHeaders(Object.assign({}, headers), context);
       }

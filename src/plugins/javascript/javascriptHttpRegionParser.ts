@@ -1,9 +1,7 @@
-import * as httpyac from '..';
+import { javascriptProvider } from '../../io';
 import * as models from '../../models';
 import * as utils from '../../utils';
-import * as grpc from '@grpc/grpc-js';
-import { default as chalk } from 'chalk';
-import { default as got } from 'got';
+import { runScript } from './moduleUtils';
 import { HookInterceptor, HookTriggerContext } from 'hookpoint';
 
 const JavaScriptStart =
@@ -124,7 +122,7 @@ export class AfterJavascriptHookInterceptor implements HookInterceptor<[models.P
 }
 async function executeScriptData(scriptData: ScriptData, context: models.ProcessorContext, eventName?: string) {
   utils.report(context, eventName ? `execute javascript (@${eventName})` : 'execute javascript');
-  const result = await utils.runScript(scriptData.script, {
+  const result = await runScript(scriptData.script, {
     fileName: context.httpFile.fileName,
     context: {
       request: context.request,
@@ -136,13 +134,7 @@ async function executeScriptData(scriptData: ScriptData, context: models.Process
       ...context.variables,
     },
     lineOffset: scriptData.lineOffset,
-    require: {
-      httpyac,
-      chalk,
-      got,
-      '@grpc/grpc-js': grpc,
-      ...context.require,
-    },
+    require: javascriptProvider.require,
     deleteVariable: (key: string) => utils.deleteVariableInContext(key, context),
   });
   if (result) {

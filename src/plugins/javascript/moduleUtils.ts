@@ -1,7 +1,7 @@
-import { log, fileProvider } from '../io';
-import { PathLike, ProcessorContext } from '../models';
-import { isPromise } from './promiseUtils';
-import { toMultiLineArray } from './stringUtils';
+import { log, fileProvider } from '../../io';
+import { PathLike, ProcessorContext } from '../../models';
+import { isPromise } from '../../utils/promiseUtils';
+import { toMultiLineArray } from '../../utils/stringUtils';
 import Module from 'module';
 import { EOL } from 'os';
 import path from 'path';

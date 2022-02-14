@@ -17,6 +17,7 @@ export * from './httpSymbol';
 export * from './httpSymbolKind';
 export * from './httpTimings';
 export * from './index';
+export * from './javascriptProvider';
 export * from './logHandler';
 export * from './openIdInformation';
 export * from './parserContext';

@@ -1,4 +1,4 @@
-import { fileProvider, userInteractionProvider, log } from '../../io';
+import * as io from '../../io';
 import * as models from '../../models';
 import * as utils from '../../utils';
 import * as intellij from './api';
@@ -30,23 +30,26 @@ export class IntellijAction {
     }
 
     utils.report(context, 'execute intellij javascript');
-    await utils.runScript(data.script, {
-      fileName: context.httpFile.fileName,
-      context: {
-        console: context.scriptConsole,
-        ...intellijVars,
-      },
-      lineOffset: data.lineOffset,
-    });
-    return true;
+    if (io.javascriptProvider.runScript) {
+      await io.javascriptProvider.runScript(data.script, {
+        fileName: context.httpFile.fileName,
+        context: {
+          console: context.scriptConsole,
+          ...intellijVars,
+        },
+        lineOffset: data.lineOffset,
+      });
+      return true;
+    }
+    return false;
   }
 
   private async loadScript(file: string, context: models.ProcessorContext) {
     try {
-      return await utils.replaceFilePath(file, context, path => fileProvider.readFile(path, 'utf-8'));
+      return await utils.replaceFilePath(file, context, path => io.fileProvider.readFile(path, 'utf-8'));
     } catch (err) {
-      userInteractionProvider.showErrorMessage?.(`error loading script ${file}`);
-      log.error(file, err);
+      io.userInteractionProvider.showErrorMessage?.(`error loading script ${file}`);
+      io.log.error(file, err);
       return false;
     }
   }

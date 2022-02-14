@@ -104,7 +104,7 @@ export class ProtoImportAction {
         .map(([key, value]) => `${key}: ${value},`)
     );
     try {
-      Object.assign(options, await utils.evalExpression(`{${optionsScript}}`, context));
+      Object.assign(options, await io.javascriptProvider.evalExpression(`{${optionsScript}}`, context));
     } catch (err) {
       const message = `proto-loader options convert failed: ${optionsScript}`;
       io.userInteractionProvider.showWarnMessage?.(message);

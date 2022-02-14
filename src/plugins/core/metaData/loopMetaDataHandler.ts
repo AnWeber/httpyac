@@ -1,3 +1,4 @@
+import * as io from '../../../io';
 import * as models from '../../../models';
 import * as utils from '../../../utils';
 import { HookInterceptor, HookTriggerContext } from 'hookpoint';
@@ -143,7 +144,7 @@ class LoopMetaAction implements HookInterceptor<[models.ProcessorContext], boole
     switch (this.data.type) {
       case LoopMetaType.forOf:
         if (this.data.variable && this.data.iterable) {
-          const array = await utils.evalExpression(this.data.iterable, context);
+          const array = await io.javascriptProvider.evalExpression(this.data.iterable, context);
           let iterable: Array<unknown> | undefined;
           if (Array.isArray(array)) {
             iterable = array;
@@ -179,7 +180,7 @@ class LoopMetaAction implements HookInterceptor<[models.ProcessorContext], boole
       case LoopMetaType.while:
         if (this.data.expression) {
           let index = 0;
-          while (await utils.evalExpression(this.data.expression, context)) {
+          while (await io.javascriptProvider.evalExpression(this.data.expression, context)) {
             yield {
               index,
               variables: {

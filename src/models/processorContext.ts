@@ -27,7 +27,6 @@ export interface HttpFileSendContext {
   logResponse?: RequestLogger;
   repeat?: RepeatOptions;
   variables?: Variables;
-  require?: Record<string, unknown>;
 }
 
 export interface HttpRegionsSendContext extends HttpFileSendContext {

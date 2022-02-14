@@ -1,6 +1,7 @@
 import { log } from '../../io';
 import { ProcessorContext, VariableType } from '../../models';
 import * as utils from '../../utils';
+import { evalExpression } from './moduleUtils';
 
 export async function replaceJavascriptExpressions(
   text: unknown,
@@ -19,7 +20,7 @@ export async function replaceJavascriptExpressions(
       const [searchValue, jsVariable] = match;
 
       try {
-        const value = utils.toString(await utils.evalExpression(jsVariable, context));
+        const value = utils.toString(await evalExpression(jsVariable, context));
 
         if (value) {
           result = result.replace(searchValue, value);

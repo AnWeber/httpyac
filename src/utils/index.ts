@@ -9,7 +9,6 @@ export * from './httpStringUtils';
 export * from './logUtils';
 export * from './markdownUtils';
 export * from './mimeTypeUtils';
-export * from './moduleUtils';
 export * from './stringUtils';
 export * from './requestUtils';
 export * from './parserUtils';

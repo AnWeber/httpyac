@@ -1,12 +1,11 @@
-import { fileProvider, log } from '../io';
+import * as io from '../io';
 import { ConfigureHooks, EnvironmentConfig, PathLike } from '../models';
 import { toAbsoluteFilename, findRootDir } from './fsUtils';
-import { loadModule } from './moduleUtils';
 
 export async function getHttpyacConfig(rootDir: PathLike): Promise<EnvironmentConfig | undefined> {
   let result = await loadFileConfig(rootDir);
   if (!result) {
-    result = (await parseJson<Record<string, EnvironmentConfig>>(fileProvider.joinPath(rootDir, 'package.json')))
+    result = (await parseJson<Record<string, EnvironmentConfig>>(io.fileProvider.joinPath(rootDir, 'package.json')))
       ?.httpyac;
   }
   if (result) {
@@ -26,16 +25,20 @@ export const defaultConfigFiles = [
 async function loadFileConfig(rootDir: PathLike): Promise<EnvironmentConfig | undefined> {
   let fileConfigPath: string | undefined;
   for (const fileName of defaultConfigFiles) {
-    const resolvedPath = fileName && fileProvider.joinPath(rootDir, fileName);
-    if (resolvedPath && (await fileProvider.exists(resolvedPath))) {
-      fileConfigPath = fileProvider.fsPath(resolvedPath);
+    const resolvedPath = fileName && io.fileProvider.joinPath(rootDir, fileName);
+    if (resolvedPath && (await io.fileProvider.exists(resolvedPath))) {
+      fileConfigPath = io.fileProvider.fsPath(resolvedPath);
       break;
     }
   }
   if (fileConfigPath) {
-    const fsRoot = fileProvider.fsPath(rootDir);
-    if (fsRoot) {
-      const fileConfig = loadModule<EnvironmentConfig | (() => EnvironmentConfig)>(fileConfigPath, fsRoot, true);
+    const fsRoot = io.fileProvider.fsPath(rootDir);
+    if (fsRoot && io.javascriptProvider.loadModule) {
+      const fileConfig = io.javascriptProvider.loadModule<EnvironmentConfig | (() => EnvironmentConfig)>(
+        fileConfigPath,
+        fsRoot,
+        true
+      );
       if (typeof fileConfig === 'function') {
         return fileConfig();
       }
@@ -47,10 +50,10 @@ async function loadFileConfig(rootDir: PathLike): Promise<EnvironmentConfig | un
 
 export async function parseJson<T>(fileName: PathLike): Promise<T | undefined> {
   try {
-    const text = await fileProvider.readFile(fileName, 'utf-8');
+    const text = await io.fileProvider.readFile(fileName, 'utf-8');
     return JSON.parse(text);
   } catch (err) {
-    log.debug(`json parse of ${fileName} failed`);
+    io.log.debug(`json parse of ${fileName} failed`);
   }
   return undefined;
 }
@@ -85,9 +88,9 @@ export async function getPlugins(rootDir: PathLike): Promise<Record<string, Conf
       ...Object.keys(packageJson.json.devDependencies || {}),
     ].filter(isPlugin);
     for (const dep of plugins) {
-      const fsPath = fileProvider.fsPath(packageJson.dir);
-      if (fsPath) {
-        const hook = loadModule<ConfigureHooks>(dep, fsPath);
+      const fsPath = io.fileProvider.fsPath(packageJson.dir);
+      if (fsPath && io.javascriptProvider.loadModule) {
+        const hook = io.javascriptProvider.loadModule<ConfigureHooks>(dep, fsPath);
         if (hook) {
           hooks[dep] = hook;
         }
@@ -102,7 +105,7 @@ async function getPackageJson(rootDir: PathLike) {
   if (packageDir) {
     return {
       dir: packageDir,
-      json: await parseJson<PackageJson>(fileProvider.joinPath(packageDir, 'package.json')),
+      json: await parseJson<PackageJson>(io.fileProvider.joinPath(packageDir, 'package.json')),
     };
   }
   return undefined;
