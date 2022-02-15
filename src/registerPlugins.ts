@@ -2,6 +2,7 @@ import * as plugins from './plugins';
 import { pluginStore } from './store';
 
 pluginStore.core = plugins.registerCorePlugins;
+pluginStore.dotenv = plugins.registerDotenvPlugin;
 pluginStore.eventSource = plugins.registerEventSourcePlugin;
 pluginStore.graphql = plugins.registerGraphQL;
 pluginStore.grpc = plugins.registerGrpcPlugin;

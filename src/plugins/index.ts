@@ -1,4 +1,5 @@
 export * from './core';
+export * from './dotenv';
 export * from './eventsource';
 export * from './graphql';
 export * from './grpc';
