@@ -3,7 +3,6 @@ import { PathLike, ProcessorContext } from '../../models';
 import { isPromise } from '../../utils/promiseUtils';
 import { toMultiLineArray } from '../../utils/stringUtils';
 import Module from 'module';
-import { EOL } from 'os';
 import path from 'path';
 import vm from 'vm';
 
@@ -110,7 +109,7 @@ export async function runScript(
   });
 
   const contextKeys = Object.keys(context);
-  const compiledWrapper = vm.runInContext(Module.wrap(`${EOL}${source}`), context, {
+  const compiledWrapper = vm.runInContext(Module.wrap(`${fileProvider.EOL}${source}`), context, {
     filename,
     lineOffset: options.lineOffset,
     displayErrors: true,

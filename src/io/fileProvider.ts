@@ -1,6 +1,7 @@
 import { FileProvider, PathLike } from '../models';
 
 export const fileProvider: FileProvider = {
+  EOL: '\r\n',
   exists: () => {
     throw new Error('Not Implemented');
   },

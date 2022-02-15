@@ -14,6 +14,7 @@ export type FileEncoding =
   | 'hex';
 
 export interface FileProvider {
+  EOL: string;
   exists(fileName: PathLike): Promise<boolean>;
   joinPath(fileName: PathLike, path: string): PathLike;
   dirname(fileName: PathLike): PathLike | undefined;

@@ -1,8 +1,9 @@
 import { fileProvider, userInteractionProvider } from '../io';
 import * as models from '../models';
-import { promises as fs, createReadStream } from 'fs';
 import inquirer from 'inquirer';
-import { join, isAbsolute, dirname, extname } from 'path';
+import { promises as fs, createReadStream } from 'node:fs';
+import { EOL } from 'node:os';
+import { join, isAbsolute, dirname, extname } from 'node:path';
 
 export function initIOProvider(): void {
   initFileProvider();
@@ -19,6 +20,7 @@ function initFixTestSymbols() {
 }
 
 function initFileProvider(): void {
+  fileProvider.EOL = EOL;
   fileProvider.isAbsolute = async (fileName: models.PathLike) => isAbsolute(fileProvider.toString(fileName));
   fileProvider.dirname = (fileName: string) => dirname(fileProvider.toString(fileName));
   fileProvider.hasExtension = (fileName: models.PathLike, ...extensions: Array<string>) =>

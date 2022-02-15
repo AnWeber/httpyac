@@ -1,7 +1,7 @@
+import * as io from '../io';
 import * as models from '../models';
 import * as mimeTypeUtils from './mimeTypeUtils';
 import { isString, toMultiLineArray } from './stringUtils';
-import { EOL } from 'os';
 
 export function toMarkdown(
   response: models.HttpResponse,
@@ -197,5 +197,5 @@ export function toMarkdownTimings(timings: models.HttpTimings): Array<string> {
 }
 
 export function joinMarkdown(lines: string[]): string {
-  return lines.join(`  ${EOL}`);
+  return lines.join(`  ${io.fileProvider.EOL}`);
 }

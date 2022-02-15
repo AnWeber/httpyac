@@ -2,7 +2,6 @@ import { fileProvider } from '../../../io';
 import * as models from '../../../models';
 import * as utils from '../../../utils';
 import { HookInterceptor, HookTriggerContext } from 'hookpoint';
-import { EOL } from 'os';
 
 export class CreateRequestBodyInterceptor implements HookInterceptor<[models.ProcessorContext], boolean | void> {
   constructor(private readonly rawBody: Array<string | models.RequestBodyImport>) {}
@@ -25,7 +24,7 @@ export class CreateRequestBodyInterceptor implements HookInterceptor<[models.Pro
 
           const body: Array<models.HttpRequestBodyLine> = [];
           const strings: Array<string> = [];
-          const lineEnding = utils.isMimeTypeMultiPartFormData(contentType) ? '\r\n' : EOL;
+          const lineEnding = utils.isMimeTypeMultiPartFormData(contentType) ? '\r\n' : fileProvider.EOL;
 
           for (const line of requestBodyLines) {
             if (utils.isString(line)) {
@@ -93,7 +92,7 @@ export class CreateRequestBodyInterceptor implements HookInterceptor<[models.Pro
     const result = body.reduce((previousValue, currentValue, currentIndex) => {
       let prev = previousValue;
       if (utils.isString(currentValue)) {
-        prev += `${currentIndex === 0 || currentValue.startsWith('&') ? '' : EOL}${currentValue}`;
+        prev += `${currentIndex === 0 || currentValue.startsWith('&') ? '' : fileProvider.EOL}${currentValue}`;
       }
       return prev;
     }, '');

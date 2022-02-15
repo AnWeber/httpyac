@@ -3,7 +3,7 @@ import { initIOProvider } from './initCliProvider';
 import { oauth2Command } from './oauth2';
 import { sendCommand } from './send';
 import { Command } from 'commander';
-import { join } from 'path';
+import { join } from 'node:path';
 
 export async function createProgram() {
   const program = new Command();

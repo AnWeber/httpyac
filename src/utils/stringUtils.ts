@@ -1,7 +1,7 @@
-import { EOL } from 'os';
+import { fileProvider } from '../io';
 
 export function toMultiLineString(lines: Array<string>): string {
-  return lines.join(EOL);
+  return lines.join(fileProvider.EOL);
 }
 
 export function toMultiLineArray(text: string): Array<string> {
