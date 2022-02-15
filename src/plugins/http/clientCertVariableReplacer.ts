@@ -1,6 +1,6 @@
-import { fileProvider } from '../../../io';
-import * as models from '../../../models';
-import { toAbsoluteFilename, isString, isHttpRequest } from '../../../utils';
+import { fileProvider } from '../../io';
+import * as models from '../../models';
+import { toAbsoluteFilename, isString, isHttpRequest } from '../../utils';
 import { URL } from 'url';
 
 export async function clientCertVariableReplacer(
@@ -51,15 +51,15 @@ function createUrl(url: string): URL | undefined {
 
 async function setClientCertificateOptions(
   request: models.HttpRequest,
-  clientCertifcateOptions: models.ClientCertificateOptions,
+  clientCertificateOptions: models.ClientCertificateOptions,
   httpFile: models.HttpFile
 ) {
   const dir = fileProvider.dirname(httpFile.fileName);
   request.options.https = Object.assign({}, request.options.https, {
-    certificate: await resolveFile(clientCertifcateOptions.cert, dir),
-    key: await resolveFile(clientCertifcateOptions.key, dir),
-    pfx: await resolveFile(clientCertifcateOptions.pfx, dir),
-    passphrase: clientCertifcateOptions.passphrase,
+    certificate: await resolveFile(clientCertificateOptions.cert, dir),
+    key: await resolveFile(clientCertificateOptions.key, dir),
+    pfx: await resolveFile(clientCertificateOptions.pfx, dir),
+    passphrase: clientCertificateOptions.passphrase,
   });
 }
 
