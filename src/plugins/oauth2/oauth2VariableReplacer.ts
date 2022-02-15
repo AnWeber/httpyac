@@ -39,7 +39,7 @@ export async function oauth2VariableReplacer(
 export async function getOAuth2Response(
   flow: string,
   prefix: string | undefined,
-  context: flows.OpenIdFlowContext,
+  context: models.OpenIdContext,
   tokenExchangePrefix?: string
 ) {
   const config = getOpenIdConfiguration(prefix || 'oauth2', context.variables);
@@ -65,7 +65,7 @@ export async function getOAuth2Response(
         log.trace(`openid flow ${flow} finished`);
         context.variables.oauth2Session = openIdInformation;
         userSessionStore.setUserSession(openIdInformation);
-        keepAlive(cacheKey, context.httpClient, context.variables);
+        keepAlive(cacheKey, context.variables);
         return openIdInformation;
       }
     }
@@ -95,7 +95,7 @@ function getOpenIdFlow(flowType: string) {
   return openIdFlows.find(flow => flow.supportsFlow(flowType));
 }
 
-function keepAlive(cacheKey: string, httpClient: models.HttpClient, variables: models.Variables) {
+function keepAlive(cacheKey: string, variables: models.Variables) {
   const openIdInformation = userSessionStore.userSessions.find(obj => obj.id === cacheKey);
   if (
     models.isOpenIdInformation(openIdInformation) &&
@@ -103,11 +103,11 @@ function keepAlive(cacheKey: string, httpClient: models.HttpClient, variables: m
     openIdInformation.config.keepAlive
   ) {
     const timeoutId = setTimeout(async () => {
-      const result = await flows.refreshTokenFlow.perform(openIdInformation, { httpClient, variables });
+      const result = await flows.refreshTokenFlow.perform(openIdInformation, { variables });
       if (result) {
         log.trace(`token ${result.title} refreshed`);
         userSessionStore.setUserSession(result);
-        keepAlive(cacheKey, httpClient, variables);
+        keepAlive(cacheKey, variables);
       }
     }, (openIdInformation.expiresIn - openIdInformation.timeSkew) * 1000);
     openIdInformation.delete = () => clearTimeout(timeoutId);

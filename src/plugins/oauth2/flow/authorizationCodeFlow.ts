@@ -1,7 +1,7 @@
-import { OpenIdInformation } from '../../../models';
+import { OpenIdInformation, OpenIdContext } from '../../../models';
 import * as utils from '../../../utils';
 import { OpenIdConfiguration, assertConfiguration } from '../openIdConfiguration';
-import { OpenIdFlow, OpenIdFlowContext } from './openIdFlow';
+import { OpenIdFlow } from './openIdFlow';
 import { registerListener, unregisterListener } from './openIdHttpServer';
 import { requestOpenIdInformation } from './requestOpenIdInformation';
 import open from 'open';
@@ -18,7 +18,7 @@ class AuthorizationCodeFlow implements OpenIdFlow {
     return false;
   }
 
-  async perform(config: OpenIdConfiguration, context: OpenIdFlowContext): Promise<OpenIdInformation | false> {
+  async perform(config: OpenIdConfiguration, context: OpenIdContext): Promise<OpenIdInformation | false> {
     const id = this.getCacheKey(config);
     if (id) {
       return new Promise<OpenIdInformation | false>((resolve, reject) => {

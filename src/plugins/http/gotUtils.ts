@@ -1,6 +1,6 @@
-import { log, userInteractionProvider } from '../io';
-import * as models from '../models';
-import { parseContentType } from './requestUtils';
+import { log, userInteractionProvider } from '../../io';
+import * as models from '../../models';
+import { parseContentType } from '../../utils/requestUtils';
 import { default as filesize } from 'filesize';
 import { default as got, OptionsOfUnknownResponseBody, CancelError, Response } from 'got';
 import { HttpProxyAgent } from 'http-proxy-agent';
@@ -8,59 +8,52 @@ import { HttpsProxyAgent } from 'https-proxy-agent';
 import merge from 'lodash/merge';
 import { SocksProxyAgent } from 'socks-proxy-agent';
 
-interface HttpClientOverrideOptions {
-  options?: OptionsOfUnknownResponseBody;
-  proxy?: string;
-}
+export async function gotHttpClient(
+  request: models.HttpClientRequest,
+  context: models.HttpClientContext
+): Promise<models.HttpResponse | false> {
+  try {
+    const defaults: OptionsOfUnknownResponseBody = {
+      decompress: true,
+      retry: 0,
+      throwHttpErrors: false,
+      headers: {
+        accept: '*/*',
+        'user-agent': 'httpyac',
+      },
+    };
 
-export function gotHttpClientFactory(defaultsOverride: HttpClientOverrideOptions | undefined): models.HttpClient {
-  return async function gotHttpClient(
-    request: models.HttpClientRequest,
-    context: models.HttpClientContext
-  ): Promise<models.HttpResponse | false> {
-    try {
-      const defaults: OptionsOfUnknownResponseBody = {
-        decompress: true,
-        retry: 0,
-        throwHttpErrors: false,
-        headers: {
-          accept: '*/*',
-          'user-agent': 'httpyac',
-        },
-      };
+    const url = request.url;
 
-      const url = request.url;
-
-      if (!url) {
-        throw new Error('empty url');
-      }
-      const options: OptionsOfUnknownResponseBody = merge(
-        {},
-        defaults,
-        defaultsOverride?.options,
-        request.options,
-        requestToOptions(request)
-      );
-      initProxy(options, request.proxy || defaultsOverride?.proxy);
-
-      log.debug('request', options);
-      let response: models.HttpResponse | undefined;
-      if (context.repeat && context.repeat.count > 0) {
-        response = await loadRepeat(url, options, context);
-      } else {
-        response = await load(url, options, context);
-      }
-      if (response) {
-        return response;
-      }
-      throw new Error('no response');
-    } catch (err) {
-      if (err instanceof CancelError) {
-        return false;
-      }
-      throw err;
+    if (!url) {
+      throw new Error('empty url');
     }
-  };
+    const options: OptionsOfUnknownResponseBody = merge(
+      {},
+      defaults,
+      context?.config?.request,
+      request.options,
+      requestToOptions(request)
+    );
+    initProxy(options, request.proxy || context?.config?.proxy);
+
+    log.debug('request', options);
+    let response: models.HttpResponse | undefined;
+    if (context.repeat && context.repeat.count > 0) {
+      response = await loadRepeat(url, options, context);
+    } else {
+      response = await load(url, options, context);
+    }
+    if (response) {
+      return response;
+    }
+    throw new Error('no response');
+  } catch (err) {
+    if (err instanceof CancelError) {
+      return false;
+    }
+    throw err;
+  }
 }
 
 function requestToOptions(request: models.HttpClientRequest): OptionsOfUnknownResponseBody {
@@ -195,14 +188,6 @@ function getBody(body: unknown) {
     return body;
   }
   return undefined;
-}
-
-export function initHttpClient(content: { config?: models.EnvironmentConfig }): models.HttpClient {
-  const request = {
-    options: content.config?.request,
-    proxy: content.config?.proxy,
-  };
-  return gotHttpClientFactory(request);
 }
 
 /**

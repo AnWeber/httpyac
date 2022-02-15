@@ -1,6 +1,8 @@
 import { OpenIdConfiguration } from '../plugins/oauth2/openIdConfiguration';
-import { HttpClient } from './httpClient';
+import { RequestLogger } from './logHandler';
+import { Progress } from './processorContext';
 import { UserSession } from './userSession';
+import { Variables } from './variables';
 
 export interface OpenIdInformation extends UserSession {
   time: number;
@@ -13,7 +15,9 @@ export interface OpenIdInformation extends UserSession {
 }
 
 export interface OpenIdContext {
-  httpClient: HttpClient;
+  progress?: Progress | undefined;
+  logResponse?: RequestLogger;
+  variables: Variables;
 }
 
 export interface OpenIdSession extends Omit<UserSession, 'type'> {

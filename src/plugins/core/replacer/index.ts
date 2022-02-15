@@ -2,7 +2,6 @@ import * as models from '../../../models';
 import { awsAuthVariableReplacer } from './awsAuthVariableReplacer';
 import { basicAuthVariableReplacer } from './basicAuthVariableReplacer';
 import { clientCertVariableReplacer } from './clientCertVariableReplacer';
-import { digestAuthVariableReplacer } from './digestAuthVariableReplacer';
 import { escapeVariableReplacer } from './escapeVariableReplacer';
 import { hostVariableReplacer } from './hostVariableReplacer';
 import { replaceVariableNames } from './nameVariableReplacer';
@@ -19,6 +18,5 @@ export function initReplaceVariableHook(api: models.HttpyacHooksApi) {
   api.hooks.replaceVariable.addHook('aws', awsAuthVariableReplacer);
   api.hooks.replaceVariable.addHook('clientCertificate', clientCertVariableReplacer);
   api.hooks.replaceVariable.addHook('basicAuth', basicAuthVariableReplacer);
-  api.hooks.replaceVariable.addHook('digestAuth', digestAuthVariableReplacer);
   api.hooks.replaceVariable.addHook('escape', escapeVariableReplacer);
 }

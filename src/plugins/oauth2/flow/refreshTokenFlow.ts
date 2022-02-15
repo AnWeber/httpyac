@@ -1,6 +1,5 @@
-import { OpenIdInformation } from '../../../models';
+import * as models from '../../../models';
 import * as utils from '../../../utils';
-import { OpenIdFlowContext } from './openIdFlow';
 import { requestOpenIdInformation } from './requestOpenIdInformation';
 
 class RefreshTokenFlow {
@@ -11,7 +10,10 @@ class RefreshTokenFlow {
     return false;
   }
 
-  async perform(openIdInformation: OpenIdInformation, context: OpenIdFlowContext): Promise<OpenIdInformation | false> {
+  async perform(
+    openIdInformation: models.OpenIdInformation,
+    context: models.OpenIdContext
+  ): Promise<models.OpenIdInformation | false> {
     if (!this.isTokenExpired(openIdInformation.time, openIdInformation.timeSkew, openIdInformation.expiresIn)) {
       return openIdInformation;
     }

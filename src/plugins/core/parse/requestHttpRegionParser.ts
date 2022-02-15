@@ -1,3 +1,4 @@
+import { httpClientProvider } from '../../../io';
 import * as models from '../../../models';
 import * as utils from '../../../utils';
 
@@ -151,7 +152,7 @@ export class HttpClientAction {
   id = 'httpClient';
 
   async process(context: models.ProcessorContext): Promise<boolean> {
-    const { httpRegion, httpClient, request } = context;
+    const { httpRegion, request } = context;
     if (utils.isHttpRequest(request)) {
       request.proxy = httpRegion.metaData.proxy;
       if (httpRegion.metaData.noRedirect) {
@@ -162,7 +163,10 @@ export class HttpClientAction {
         request.options.https.rejectUnauthorized = false;
       }
       utils.report(context, `send ${request.method || 'GET'} ${request.url}`);
-      return utils.triggerRequestResponseHooks(async () => await httpClient(request, context), context);
+      if (httpClientProvider.exchange) {
+        const exchange = httpClientProvider.exchange;
+        return utils.triggerRequestResponseHooks(async () => await exchange(request, context), context);
+      }
     }
     return false;
   }

@@ -75,13 +75,11 @@ export async function createEmptyProcessorContext<T extends models.VariableProvi
 ): Promise<
   T & {
     variables: models.Variables;
-    httpClient: models.HttpClient;
     options: Record<string, unknown>;
   }
 > {
   return Object.assign(context, {
     variables: await getVariables(context),
-    httpClient: utils.initHttpClient(context),
     options: {},
   });
 }

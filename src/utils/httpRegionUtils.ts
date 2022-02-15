@@ -126,7 +126,6 @@ export async function logResponse(
 
 export async function executeGlobalScripts(context: {
   variables: models.Variables;
-  httpClient: models.HttpClient;
   httpFile: models.HttpFile;
   options: Record<string, unknown>;
 }): Promise<boolean> {

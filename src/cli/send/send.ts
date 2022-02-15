@@ -7,10 +7,10 @@ import { toSendJsonOutput } from './jsonOutput';
 import { SendOptions, getLogLevel, SendFilterOptions, OutputType } from './options';
 import { default as chalk } from 'chalk';
 import { Command } from 'commander';
+import { promises as fs } from 'fs';
 import { HookTriggerContext } from 'hookpoint';
 import inquirer from 'inquirer';
-import { promises as fs } from 'node:fs';
-import { sep } from 'node:path';
+import { sep } from 'path';
 
 export function sendCommand() {
   const program = new Command('send')

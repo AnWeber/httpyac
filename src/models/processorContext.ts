@@ -1,5 +1,4 @@
 import { EnvironmentConfig } from './environmentConfig';
-import { HttpClient } from './httpClient';
 import { HttpFile } from './httpFile';
 import { HttpRegion, ProcessedHttpRegion } from './httpRegion';
 import { Request } from './httpRequest';
@@ -19,7 +18,6 @@ export interface HttpFileSendContext {
   httpFile: HttpFile;
   config?: EnvironmentConfig;
   progress?: Progress;
-  httpClient?: HttpClient;
   httpRegionPredicate?: (obj: HttpRegion) => boolean;
   processedHttpRegions?: Array<ProcessedHttpRegion>;
   scriptConsole?: ConsoleLogHandler;
@@ -37,7 +35,6 @@ export interface HttpRegionSendContext extends HttpFileSendContext {
   httpRegion: HttpRegion;
 }
 export interface ProcessorContext extends HttpRegionSendContext {
-  httpClient: HttpClient;
   variables: Variables;
   request?: Request;
   showProgressBar?: boolean;
@@ -46,7 +43,7 @@ export interface ProcessorContext extends HttpRegionSendContext {
 
 export function isProcessorContext(context: unknown): context is ProcessorContext {
   const test = context as ProcessorContext;
-  return !!test?.httpClient && !!test?.httpRegion && !!test?.httpFile && !!test?.variables && !!test?.config;
+  return !!test?.httpRegion && !!test?.httpFile && !!test?.variables && !!test?.config;
 }
 
 export type SendContext = HttpRegionSendContext | HttpFileSendContext | HttpRegionsSendContext;

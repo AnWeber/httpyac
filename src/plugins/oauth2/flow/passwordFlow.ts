@@ -1,7 +1,7 @@
-import { OpenIdInformation } from '../../../models';
+import * as models from '../../../models';
 import * as utils from '../../../utils';
 import { OpenIdConfiguration, assertConfiguration } from '../openIdConfiguration';
-import { OpenIdFlow, OpenIdFlowContext } from './openIdFlow';
+import { OpenIdFlow } from './openIdFlow';
 import { requestOpenIdInformation } from './requestOpenIdInformation';
 
 class PasswordFlow implements OpenIdFlow {
@@ -16,7 +16,7 @@ class PasswordFlow implements OpenIdFlow {
     return false;
   }
 
-  async perform(config: OpenIdConfiguration, context: OpenIdFlowContext): Promise<OpenIdInformation | false> {
+  async perform(config: OpenIdConfiguration, context: models.OpenIdContext): Promise<models.OpenIdInformation | false> {
     const id = this.getCacheKey(config);
     if (id) {
       utils.report(context, 'execute OAuth2 password flow');

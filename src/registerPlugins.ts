@@ -5,6 +5,7 @@ pluginStore.core = plugins.registerCorePlugins;
 pluginStore.eventSource = plugins.registerEventSourcePlugin;
 pluginStore.graphql = plugins.registerGraphQL;
 pluginStore.grpc = plugins.registerGrpcPlugin;
+pluginStore.http = plugins.registerHttpPlugin;
 pluginStore.intellij = plugins.registerIntellijPlugin;
 pluginStore.injection = plugins.registerInjectionPlugin;
 pluginStore.javascript = plugins.registerJavascriptPlugin;

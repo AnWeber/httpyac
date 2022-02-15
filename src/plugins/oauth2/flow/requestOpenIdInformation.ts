@@ -1,4 +1,5 @@
 import { log } from '../../../io';
+import * as io from '../../../io';
 import * as models from '../../../models';
 import * as utils from '../../../utils';
 
@@ -27,7 +28,7 @@ export async function requestOpenIdInformation(
       })}`;
     }
 
-    const response = await context?.httpClient(
+    const response = await io.httpClientProvider.exchange?.(
       {
         options: {},
         ...request,

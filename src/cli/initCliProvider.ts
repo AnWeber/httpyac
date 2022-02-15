@@ -1,9 +1,9 @@
 import { fileProvider, userInteractionProvider } from '../io';
 import * as models from '../models';
+import { promises as fs, createReadStream } from 'fs';
 import inquirer from 'inquirer';
-import { promises as fs, createReadStream } from 'node:fs';
-import { EOL } from 'node:os';
-import { join, isAbsolute, dirname, extname } from 'node:path';
+import { EOL } from 'os';
+import { join, isAbsolute, dirname, extname } from 'path';
 
 export function initIOProvider(): void {
   initFileProvider();

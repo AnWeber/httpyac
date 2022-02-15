@@ -2,6 +2,7 @@ export * from './core';
 export * from './eventsource';
 export * from './graphql';
 export * from './grpc';
+export * from './http';
 export * from './intellij';
 export * from './injection';
 export * from './javascript';
