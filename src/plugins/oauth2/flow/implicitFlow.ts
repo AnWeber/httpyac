@@ -1,7 +1,7 @@
 import { log } from '../../../io';
-import { OpenIdInformation, OpenIdContext } from '../../../models';
+import type * as models from '../../../models';
 import * as utils from '../../../utils';
-import { OpenIdConfiguration, assertConfiguration } from '../openIdConfiguration';
+import { assertConfiguration } from '../openIdConfiguration';
 import { OpenIdFlow } from './openIdFlow';
 import { registerListener, unregisterListener } from './openIdHttpServer';
 import { requestOpenIdInformation, toOpenIdInformation } from './requestOpenIdInformation';
@@ -12,17 +12,20 @@ class ImplicitFlow implements OpenIdFlow {
     return ['implicit', 'hybrid'].indexOf(flow) >= 0;
   }
 
-  getCacheKey(config: OpenIdConfiguration) {
+  getCacheKey(config: models.OpenIdConfiguration) {
     if (assertConfiguration(config, ['tokenEndpoint', 'authorizationEndpoint', 'clientId'])) {
       return `implicit_${config.clientId}_${config.tokenEndpoint}`;
     }
     return false;
   }
 
-  async perform(config: OpenIdConfiguration, context: OpenIdContext): Promise<OpenIdInformation | false> {
+  async perform(
+    config: models.OpenIdConfiguration,
+    context: models.OpenIdContext
+  ): Promise<models.OpenIdInformation | false> {
     const id = this.getCacheKey(config);
     if (id) {
-      return new Promise<OpenIdInformation | false>((resolve, reject) => {
+      return new Promise<models.OpenIdInformation | false>((resolve, reject) => {
         utils.report(context, 'execute OAuth2 implicit flow');
         const state = utils.stateGenerator();
         try {

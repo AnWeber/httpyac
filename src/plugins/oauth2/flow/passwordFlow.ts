@@ -1,6 +1,6 @@
-import * as models from '../../../models';
+import type * as models from '../../../models';
 import * as utils from '../../../utils';
-import { OpenIdConfiguration, assertConfiguration } from '../openIdConfiguration';
+import { assertConfiguration } from '../openIdConfiguration';
 import { OpenIdFlow } from './openIdFlow';
 import { requestOpenIdInformation } from './requestOpenIdInformation';
 
@@ -9,14 +9,17 @@ class PasswordFlow implements OpenIdFlow {
     return ['password'].indexOf(flow) >= 0;
   }
 
-  getCacheKey(config: OpenIdConfiguration) {
+  getCacheKey(config: models.OpenIdConfiguration) {
     if (assertConfiguration(config, ['tokenEndpoint', 'clientId', 'clientSecret', 'username', 'password'])) {
       return `password_${config.clientId}_${config.username}_${config.tokenEndpoint}`;
     }
     return false;
   }
 
-  async perform(config: OpenIdConfiguration, context: models.OpenIdContext): Promise<models.OpenIdInformation | false> {
+  async perform(
+    config: models.OpenIdConfiguration,
+    context: models.OpenIdContext
+  ): Promise<models.OpenIdInformation | false> {
     const id = this.getCacheKey(config);
     if (id) {
       utils.report(context, 'execute OAuth2 password flow');

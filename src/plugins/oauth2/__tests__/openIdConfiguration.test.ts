@@ -1,4 +1,5 @@
-import { getOpenIdConfiguration, DEFAULT_CALLBACK_URI, OpenIdConfiguration } from '../openIdConfiguration';
+import { OpenIdConfiguration } from '../../../models';
+import { getOpenIdConfiguration, DEFAULT_CALLBACK_URI } from '../openIdConfiguration';
 
 describe('getOpenIdConfiguration', () => {
   describe('redirectUri', () => {

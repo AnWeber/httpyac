@@ -1,6 +1,6 @@
 import { log } from '../../../io';
 import * as io from '../../../io';
-import * as models from '../../../models';
+import type * as models from '../../../models';
 import * as utils from '../../../utils';
 
 export async function requestOpenIdInformation(
@@ -36,7 +36,7 @@ export async function requestOpenIdInformation(
       { showProgressBar: false }
     );
     if (response) {
-      if (models.isProcessorContext(context)) {
+      if (utils.isProcessorContext(context)) {
         await utils.logResponse(response, context);
       }
       if (response.statusCode < 400 && utils.isString(response.body)) {

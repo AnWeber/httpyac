@@ -42,8 +42,3 @@ export interface OpenIdContext {
 export interface OpenIdSession extends Omit<UserSession, 'type'> {
   config: OpenIdConfiguration;
 }
-
-export function isOpenIdInformation(userSession: UserSession | undefined): userSession is OpenIdInformation {
-  const guard = userSession as OpenIdInformation;
-  return !!guard?.accessToken;
-}

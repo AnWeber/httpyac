@@ -1,9 +1,9 @@
 import { log } from '../../io';
-import * as models from '../../models';
+import type * as models from '../../models';
 import { userSessionStore } from '../../store';
 import * as utils from '../../utils';
 import * as flows from './flow';
-import { getOpenIdConfiguration, OpenIdConfiguration } from './openIdConfiguration';
+import { getOpenIdConfiguration } from './openIdConfiguration';
 import { HookCancel } from 'hookpoint';
 
 export async function oauth2VariableReplacer(
@@ -73,10 +73,13 @@ export async function getOAuth2Response(
   return undefined;
 }
 
-function getSessionOpenIdInformation(cacheKey: string, config: OpenIdConfiguration): models.OpenIdInformation | false {
+function getSessionOpenIdInformation(
+  cacheKey: string,
+  config: models.OpenIdConfiguration
+): models.OpenIdInformation | false {
   const openIdInformation = userSessionStore.userSessions.find(obj => obj.id === cacheKey);
   if (
-    models.isOpenIdInformation(openIdInformation) &&
+    utils.isOpenIdInformation(openIdInformation) &&
     JSON.stringify(openIdInformation.config) === JSON.stringify(config)
   ) {
     return openIdInformation;
@@ -98,7 +101,7 @@ function getOpenIdFlow(flowType: string) {
 function keepAlive(cacheKey: string, variables: models.Variables) {
   const openIdInformation = userSessionStore.userSessions.find(obj => obj.id === cacheKey);
   if (
-    models.isOpenIdInformation(openIdInformation) &&
+    utils.isOpenIdInformation(openIdInformation) &&
     openIdInformation.refreshToken &&
     openIdInformation.config.keepAlive
   ) {

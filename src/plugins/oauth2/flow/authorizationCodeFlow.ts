@@ -1,6 +1,6 @@
-import { OpenIdInformation, OpenIdContext } from '../../../models';
+import type * as models from '../../../models';
 import * as utils from '../../../utils';
-import { OpenIdConfiguration, assertConfiguration } from '../openIdConfiguration';
+import { assertConfiguration } from '../openIdConfiguration';
 import { OpenIdFlow } from './openIdFlow';
 import { registerListener, unregisterListener } from './openIdHttpServer';
 import { requestOpenIdInformation } from './requestOpenIdInformation';
@@ -11,17 +11,20 @@ class AuthorizationCodeFlow implements OpenIdFlow {
     return ['authorization_code', 'code'].indexOf(flow) >= 0;
   }
 
-  getCacheKey(config: OpenIdConfiguration) {
+  getCacheKey(config: models.OpenIdConfiguration) {
     if (assertConfiguration(config, ['tokenEndpoint', 'authorizationEndpoint', 'clientId', 'clientSecret'])) {
       return `authorization_code_${config.clientId}_${config.tokenEndpoint}`;
     }
     return false;
   }
 
-  async perform(config: OpenIdConfiguration, context: OpenIdContext): Promise<OpenIdInformation | false> {
+  async perform(
+    config: models.OpenIdConfiguration,
+    context: models.OpenIdContext
+  ): Promise<models.OpenIdInformation | false> {
     const id = this.getCacheKey(config);
     if (id) {
-      return new Promise<OpenIdInformation | false>((resolve, reject) => {
+      return new Promise<models.OpenIdInformation | false>((resolve, reject) => {
         const state = utils.stateGenerator();
         try {
           utils.report(context, 'execute OAuth2 authorization_code flow');
@@ -100,7 +103,7 @@ class AuthorizationCodeFlow implements OpenIdFlow {
             },
             reject,
           });
-          utils.report(context, `autorization_code browser authentication pending: ${authUrl}`);
+          utils.report(context, `authorization_code browser authentication pending: ${authUrl}`);
           open(authUrl);
         } catch (err) {
           unregisterListener(state);

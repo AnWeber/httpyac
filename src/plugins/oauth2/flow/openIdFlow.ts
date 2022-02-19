@@ -1,8 +1,7 @@
-import { OpenIdInformation, OpenIdContext } from '../../../models/openIdInformation';
-import { OpenIdConfiguration } from '../openIdConfiguration';
+import type * as models from '../../../models/openIdInformation';
 
 export interface OpenIdFlow {
   supportsFlow(flow: string): boolean;
-  getCacheKey(config: OpenIdConfiguration): string | false;
-  perform(config: OpenIdConfiguration, context: OpenIdContext): Promise<OpenIdInformation | false>;
+  getCacheKey(config: models.OpenIdConfiguration): string | false;
+  perform(config: models.OpenIdConfiguration, context: models.OpenIdContext): Promise<models.OpenIdInformation | false>;
 }

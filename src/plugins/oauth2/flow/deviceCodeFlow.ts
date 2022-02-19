@@ -1,7 +1,7 @@
 import * as io from '../../../io';
-import * as models from '../../../models';
+import type * as models from '../../../models';
 import * as utils from '../../../utils';
-import { OpenIdConfiguration, assertConfiguration } from '../openIdConfiguration';
+import { assertConfiguration } from '../openIdConfiguration';
 import { OpenIdFlow } from './openIdFlow';
 import { toOpenIdInformation } from './requestOpenIdInformation';
 import open from 'open';
@@ -11,21 +11,24 @@ class DeviceCodeFlow implements OpenIdFlow {
     return ['device_code', 'device'].indexOf(flow) >= 0;
   }
 
-  getCacheKey(config: OpenIdConfiguration) {
+  getCacheKey(config: models.OpenIdConfiguration) {
     if (assertConfiguration(config, ['tokenEndpoint', 'deviceCodeEndpoint', 'clientId'])) {
       return `device_code_${config.clientId}_${config.tokenEndpoint}`;
     }
     return false;
   }
 
-  async perform(config: OpenIdConfiguration, context: models.OpenIdContext): Promise<models.OpenIdInformation | false> {
+  async perform(
+    config: models.OpenIdConfiguration,
+    context: models.OpenIdContext
+  ): Promise<models.OpenIdInformation | false> {
     const id = this.getCacheKey(config);
     if (id) {
       utils.report(context, 'execute device_code authorization flow');
 
       const deviceCodeTime = new Date().getTime();
       const deviceCodeResponse = await this.requestDeviceAuthorization(config, context);
-      if (deviceCodeResponse && models.isProcessorContext(context)) {
+      if (deviceCodeResponse && utils.isProcessorContext(context)) {
         await utils.logResponse(deviceCodeResponse, context);
       }
       if (deviceCodeResponse && deviceCodeResponse.statusCode === 200 && utils.isString(deviceCodeResponse.body)) {
@@ -108,13 +111,13 @@ class DeviceCodeFlow implements OpenIdFlow {
   }
 
   private async logResponse(response: models.HttpResponse, context: models.OpenIdContext) {
-    if (models.isProcessorContext(context)) {
+    if (utils.isProcessorContext(context)) {
       await utils.logResponse(response, context);
     }
   }
 
   private async authenticateUser(
-    config: OpenIdConfiguration,
+    config: models.OpenIdConfiguration,
     deviceCodeBody: DeviceCodeBody,
     context: models.OpenIdContext
   ) {
@@ -133,13 +136,13 @@ class DeviceCodeFlow implements OpenIdFlow {
       },
       { showProgressBar: false }
     );
-    if (response && models.isProcessorContext(context)) {
+    if (response && utils.isProcessorContext(context)) {
       await utils.logResponse(response, context);
     }
     return response;
   }
 
-  private async requestDeviceAuthorization(config: OpenIdConfiguration, context: models.OpenIdContext) {
+  private async requestDeviceAuthorization(config: models.OpenIdConfiguration, context: models.OpenIdContext) {
     const response = await io.httpClientProvider.exchange?.(
       {
         url: config.deviceCodeEndpoint,
@@ -156,7 +159,7 @@ class DeviceCodeFlow implements OpenIdFlow {
       { showProgressBar: false }
     );
 
-    if (response && models.isProcessorContext(context)) {
+    if (response && utils.isProcessorContext(context)) {
       await utils.logResponse(response, context);
     }
     return response;

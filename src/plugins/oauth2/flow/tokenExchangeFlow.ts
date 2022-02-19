@@ -1,11 +1,11 @@
-import { OpenIdInformation, OpenIdContext } from '../../../models';
+import type * as models from '../../../models';
 import * as utils from '../../../utils';
-import { OpenIdConfiguration, assertConfiguration } from '../openIdConfiguration';
+import { assertConfiguration } from '../openIdConfiguration';
 import { requestOpenIdInformation } from './requestOpenIdInformation';
 import encodeUrl from 'encodeurl';
 
 export class TokenExchangeFlow {
-  static getCacheKey(config: OpenIdConfiguration): string | false {
+  static getCacheKey(config: models.OpenIdConfiguration): string | false {
     if (assertConfiguration(config, ['tokenEndpoint', 'clientId', 'clientSecret'])) {
       return `${config.tokenEndpoint}_${config.clientId}`;
     }
@@ -13,10 +13,10 @@ export class TokenExchangeFlow {
   }
 
   static async perform(
-    config: OpenIdConfiguration,
-    openIdInformation: OpenIdInformation,
-    context: OpenIdContext
-  ): Promise<OpenIdInformation | false> {
+    config: models.OpenIdConfiguration,
+    openIdInformation: models.OpenIdInformation,
+    context: models.OpenIdContext
+  ): Promise<models.OpenIdInformation | false> {
     if (openIdInformation) {
       utils.report(context, 'execute OAuth2 token exchange flow');
       const jwtToken = utils.decodeJWT(openIdInformation.accessToken);

@@ -6,6 +6,7 @@ export * from './fsUtils';
 export * from './httpRegionUtils';
 export * from './httpStringUtils';
 export * from './logUtils';
+export * from './modelUtils';
 export * from './markdownUtils';
 export * from './mimeTypeUtils';
 export * from './stringUtils';
