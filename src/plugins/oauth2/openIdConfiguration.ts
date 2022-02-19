@@ -1,31 +1,12 @@
 import { log, userInteractionProvider } from '../../io';
-import { Variables } from '../../models';
+import type * as models from '../../models';
 import * as utils from '../../utils';
 import get from 'lodash/get';
 import { URL } from 'url';
 
 export const DEFAULT_CALLBACK_URI = 'http://localhost:3000/callback';
-export interface OpenIdConfiguration {
-  variablePrefix: string;
-  authorizationEndpoint: string;
-  tokenEndpoint: string;
-  deviceCodeEndpoint: string;
-  clientId: string;
-  clientSecret: string;
-  responseType: string;
-  responseMode?: string;
-  audience?: string;
-  scope: string;
-  keepAlive: boolean;
-  username?: string;
-  password?: string;
-  subjectIssuer?: string;
-  useAuthorizationHeader: boolean;
-  useDeviceCodeClientSecret?: boolean;
-  redirectUri: URL;
-}
 
-function getVariable(variables: Variables, variablePrefix: string, name: string): string {
+function getVariable(variables: models.Variables, variablePrefix: string, name: string): string {
   const value = variables[`${variablePrefix}_${name}`] || get(variables, `${variablePrefix}.${name}`);
   const expandedValue = utils.expandVariable(value, variables);
   if (utils.isString(expandedValue)) {
@@ -34,7 +15,7 @@ function getVariable(variables: Variables, variablePrefix: string, name: string)
   return '';
 }
 
-function getUrl(variables: Variables, variablePrefix: string, name: string, defaultUrl: string): URL {
+function getUrl(variables: models.Variables, variablePrefix: string, name: string, defaultUrl: string): URL {
   const url = getVariable(variables, variablePrefix, name);
   try {
     return new URL(url || defaultUrl);
@@ -45,10 +26,10 @@ function getUrl(variables: Variables, variablePrefix: string, name: string, defa
 
 export function getOpenIdConfiguration(
   variablePrefix: string | undefined,
-  variables: Variables
-): OpenIdConfiguration | false {
+  variables: models.Variables
+): models.OpenIdConfiguration | false {
   if (variablePrefix) {
-    const config: OpenIdConfiguration = {
+    const config: models.OpenIdConfiguration = {
       variablePrefix,
       authorizationEndpoint: getVariable(variables, variablePrefix, 'authorizationEndpoint'),
       deviceCodeEndpoint: getVariable(variables, variablePrefix, 'deviceCodeEndpoint'),
@@ -74,7 +55,7 @@ export function getOpenIdConfiguration(
   return false;
 }
 
-export function assertConfiguration(config: OpenIdConfiguration, keys: string[]): boolean {
+export function assertConfiguration(config: models.OpenIdConfiguration, keys: string[]): boolean {
   const missingKeys = [];
   for (const key of keys) {
     if (!Object.entries(config).some(([obj, value]) => obj === key && !!value)) {

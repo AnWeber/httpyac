@@ -1,8 +1,27 @@
-import { OpenIdConfiguration } from '../plugins/oauth2/openIdConfiguration';
 import { RequestLogger } from './logHandler';
 import { Progress } from './processorContext';
 import { UserSession } from './userSession';
 import { Variables } from './variables';
+
+export interface OpenIdConfiguration {
+  variablePrefix: string;
+  authorizationEndpoint: string;
+  tokenEndpoint: string;
+  deviceCodeEndpoint: string;
+  clientId: string;
+  clientSecret: string;
+  responseType: string;
+  responseMode?: string;
+  audience?: string;
+  scope: string;
+  keepAlive: boolean;
+  username?: string;
+  password?: string;
+  subjectIssuer?: string;
+  useAuthorizationHeader: boolean;
+  useDeviceCodeClientSecret?: boolean;
+  redirectUri: URL;
+}
 
 export interface OpenIdInformation extends UserSession {
   time: number;
