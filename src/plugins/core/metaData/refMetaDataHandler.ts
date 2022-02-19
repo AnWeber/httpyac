@@ -29,35 +29,50 @@ class RefMetaAction {
 
   async process(context: ImportProcessorContext): Promise<boolean> {
     utils.report(context, `load reference ${this.data.name}`);
-    for (const refHttpRegion of context.httpFile.httpRegions) {
-      if (
-        refHttpRegion.metaData.name === this.data.name &&
-        !refHttpRegion.metaData.disabled &&
-        refHttpRegion !== context.httpRegion
-      ) {
-        const envKey = utils.toEnvironmentKey(context.httpFile.activeEnvironment);
-        log.trace('import variables', refHttpRegion.variablesPerEnv[envKey]);
-        Object.assign(context.variables, refHttpRegion.variablesPerEnv[envKey]);
-        if (this.data.force || !context.variables[this.data.name]) {
-          const refContext = { ...context, httpRegion: refHttpRegion };
-          await utils.processHttpRegionActions(refContext);
-        }
-        return true;
-      }
+    let reference = this.findHttpRegionInContext(context.httpFile);
+    if (!reference) {
+      reference = this.findHttpRegionInImportedContext(context);
     }
-    if (context.options.httpFiles) {
-      for (const refHttpFile of context.options.httpFiles) {
-        const cloneContext = {
+
+    if (reference) {
+      const envKey = utils.toEnvironmentKey(context.httpFile.activeEnvironment);
+      log.trace('import variables', reference.httpRegion.variablesPerEnv[envKey]);
+      Object.assign(context.variables, reference.httpRegion.variablesPerEnv[envKey]);
+      if (this.data.force || !context.variables[this.data.name]) {
+        const refContext = {
           ...context,
-          options: {
-            ...context.options,
-          },
-          httpFile: refHttpFile,
+          httpFile: reference.httpFile,
+          httpRegion: reference.httpRegion,
         };
-        delete cloneContext.options.httpFiles;
-        await this.process(cloneContext);
+        return await utils.processHttpRegionActions(refContext);
       }
+      return true;
     }
     return true;
+  }
+
+  private findHttpRegionInContext(httpFile: models.HttpFile) {
+    const httpRegion = httpFile.httpRegions.find(
+      refHttpRegion => refHttpRegion.metaData.name === this.data.name && !refHttpRegion.metaData.disabled
+    );
+    if (httpRegion) {
+      return {
+        httpRegion,
+        httpFile,
+      };
+    }
+    return undefined;
+  }
+
+  private findHttpRegionInImportedContext(context: ImportProcessorContext) {
+    if (context.options.httpFiles) {
+      for (const { ref } of context.options.httpFiles.filter(obj => obj.base === context.httpFile)) {
+        const reference = this.findHttpRegionInContext(ref);
+        if (reference) {
+          return reference;
+        }
+      }
+    }
+    return undefined;
   }
 }

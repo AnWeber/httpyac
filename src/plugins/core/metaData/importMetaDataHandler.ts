@@ -12,7 +12,8 @@ export function importMetaDataHandler(type: string, value: string | undefined, c
 
 export interface ImportProcessorContext extends models.ProcessorContext {
   options: {
-    httpFiles?: Array<models.HttpFile>;
+    httpFiles?: Array<{ base: models.HttpFile; ref: models.HttpFile }>;
+    globalScriptsExecuted?: Array<models.HttpFile>;
   };
 }
 
@@ -25,20 +26,26 @@ class ImportMetaAction {
     const httpFile = await utils.replaceFilePath(this.fileName, context, async (absoluteFileName: models.PathLike) => {
       io.log.trace(`parse imported file ${absoluteFileName}`);
       const text = await io.fileProvider.readFile(absoluteFileName, 'utf-8');
-      const httpFile = await this.httpFileStore.getOrCreate(absoluteFileName, () => Promise.resolve(text), 0, {
+      const ref = await this.httpFileStore.getOrCreate(absoluteFileName, () => Promise.resolve(text), 0, {
         workingDir: context.httpFile.rootDir,
         config: context.config,
         activeEnvironment: context.httpFile.activeEnvironment,
       });
       if (!context.options.httpFiles) {
-        context.options.httpFiles = [httpFile];
-      } else {
-        context.options.httpFiles.push(httpFile);
+        context.options.httpFiles = [];
       }
-      return httpFile;
+      context.options.httpFiles.push({ base: context.httpFile, ref });
+      return ref;
     });
 
-    if (httpFile) {
+    if (
+      httpFile &&
+      (!context.options.globalScriptsExecuted || context.options.globalScriptsExecuted.indexOf?.(httpFile) < 0)
+    ) {
+      if (!context.options.globalScriptsExecuted) {
+        context.options.globalScriptsExecuted = [];
+      }
+      context.options.globalScriptsExecuted.push(httpFile);
       const cloneContext: ImportProcessorContext = {
         ...context,
         httpFile,
