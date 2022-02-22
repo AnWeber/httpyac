@@ -44,7 +44,12 @@ class RefMetaAction {
           httpFile: reference.httpFile,
           httpRegion: reference.httpRegion,
         };
-        return await utils.processHttpRegionActions(refContext);
+        const result = await utils.processHttpRegionActions(refContext);
+        if (result) {
+          const env = utils.toEnvironmentKey(context.httpFile.activeEnvironment);
+          Object.assign(context.variables, refContext.httpRegion.variablesPerEnv[env]);
+        }
+        return result;
       }
       return true;
     }

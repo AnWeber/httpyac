@@ -83,18 +83,7 @@ function initRegionScopedVariables(context: models.ProcessorContext) {
   if (context.config?.useRegionScopedVariables) {
     httpRegions = context.httpFile.httpRegions.filter(obj => isGlobalHttpRegion(obj));
   }
-
-  const variables = Object.assign({}, context.variables, ...httpRegions.map(obj => obj.variablesPerEnv[env]));
-
-  if (context.config?.useRegionScopedVariables) {
-    Object.assign(
-      variables,
-      ...context.httpFile.httpRegions.filter(obj => isGlobalHttpRegion(obj)).map(obj => obj.variablesPerEnv[env])
-    );
-  } else {
-    Object.assign(variables, ...context.httpFile.httpRegions.map(obj => obj.variablesPerEnv[env]));
-  }
-  return variables;
+  return Object.assign({}, context.variables, ...httpRegions.map(obj => obj.variablesPerEnv[env]));
 }
 
 function autoShareNewVariables(variables: models.Variables, context: models.ProcessorContext) {
