@@ -5,9 +5,12 @@ import get from 'lodash/get';
 import { URL } from 'url';
 
 export const DEFAULT_CALLBACK_URI = 'http://localhost:3000/callback';
+const DefaultOAuthVariablePrefix = 'oauth2';
 
-function getVariable(variables: models.Variables, variablePrefix: string, name: string): string {
-  const value = variables[`${variablePrefix}_${name}`] || get(variables, `${variablePrefix}.${name}`);
+function getVariable(variables: models.Variables, variablePrefix: string | undefined, name: string): string {
+  const value = [variablePrefix, DefaultOAuthVariablePrefix].find(
+    prefix => (prefix && variables[`${prefix}_${name}`]) || get(variables, `${prefix}.${name}`)
+  );
   const expandedValue = utils.expandVariable(value, variables);
   if (utils.isString(expandedValue)) {
     return expandedValue;
@@ -15,7 +18,12 @@ function getVariable(variables: models.Variables, variablePrefix: string, name: 
   return '';
 }
 
-function getUrl(variables: models.Variables, variablePrefix: string, name: string, defaultUrl: string): URL {
+function getUrl(
+  variables: models.Variables,
+  variablePrefix: string | undefined,
+  name: string,
+  defaultUrl: string
+): URL {
   const url = getVariable(variables, variablePrefix, name);
   try {
     return new URL(url || defaultUrl);
@@ -27,32 +35,29 @@ function getUrl(variables: models.Variables, variablePrefix: string, name: strin
 export function getOpenIdConfiguration(
   variablePrefix: string | undefined,
   variables: models.Variables
-): models.OpenIdConfiguration | false {
-  if (variablePrefix) {
-    const config: models.OpenIdConfiguration = {
-      variablePrefix,
-      authorizationEndpoint: getVariable(variables, variablePrefix, 'authorizationEndpoint'),
-      deviceCodeEndpoint: getVariable(variables, variablePrefix, 'deviceCodeEndpoint'),
-      tokenEndpoint: getVariable(variables, variablePrefix, 'tokenEndpoint'),
-      clientId: getVariable(variables, variablePrefix, 'clientId'),
-      clientSecret: getVariable(variables, variablePrefix, 'clientSecret'),
-      responseType: getVariable(variables, variablePrefix, 'responseType'),
-      responseMode: getVariable(variables, variablePrefix, 'responseMode'),
-      audience: getVariable(variables, variablePrefix, 'audience'),
-      scope: getVariable(variables, variablePrefix, 'scope'),
-      username: getVariable(variables, variablePrefix, 'username'),
-      password: getVariable(variables, variablePrefix, 'password'),
-      subjectIssuer: getVariable(variables, variablePrefix, 'subjectIssuer'),
-      redirectUri: getUrl(variables, variablePrefix, 'redirectUri', DEFAULT_CALLBACK_URI),
-      keepAlive: ['true', '1', true].indexOf(getVariable(variables, variablePrefix, 'keepAlive')) < 0,
-      useAuthorizationHeader:
-        ['false', '0', false].indexOf(getVariable(variables, variablePrefix, 'useAuthorizationHeader')) < 0,
-      useDeviceCodeClientSecret:
-        ['true', '1', true].indexOf(getVariable(variables, variablePrefix, 'useDeviceCodeClientSecret')) >= 0,
-    };
-    return config;
-  }
-  return false;
+): models.OpenIdConfiguration {
+  const config: models.OpenIdConfiguration = {
+    variablePrefix: variablePrefix || DefaultOAuthVariablePrefix,
+    authorizationEndpoint: getVariable(variables, variablePrefix, 'authorizationEndpoint'),
+    deviceCodeEndpoint: getVariable(variables, variablePrefix, 'deviceCodeEndpoint'),
+    tokenEndpoint: getVariable(variables, variablePrefix, 'tokenEndpoint'),
+    clientId: getVariable(variables, variablePrefix, 'clientId'),
+    clientSecret: getVariable(variables, variablePrefix, 'clientSecret'),
+    responseType: getVariable(variables, variablePrefix, 'responseType'),
+    responseMode: getVariable(variables, variablePrefix, 'responseMode'),
+    audience: getVariable(variables, variablePrefix, 'audience'),
+    scope: getVariable(variables, variablePrefix, 'scope'),
+    username: getVariable(variables, variablePrefix, 'username'),
+    password: getVariable(variables, variablePrefix, 'password'),
+    subjectIssuer: getVariable(variables, variablePrefix, 'subjectIssuer'),
+    redirectUri: getUrl(variables, variablePrefix, 'redirectUri', DEFAULT_CALLBACK_URI),
+    keepAlive: ['true', '1', true].indexOf(getVariable(variables, variablePrefix, 'keepAlive')) < 0,
+    useAuthorizationHeader:
+      ['false', '0', false].indexOf(getVariable(variables, variablePrefix, 'useAuthorizationHeader')) < 0,
+    useDeviceCodeClientSecret:
+      ['true', '1', true].indexOf(getVariable(variables, variablePrefix, 'useDeviceCodeClientSecret')) >= 0,
+  };
+  return config;
 }
 
 export function assertConfiguration(config: models.OpenIdConfiguration, keys: string[]): boolean {

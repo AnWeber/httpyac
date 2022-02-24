@@ -42,12 +42,12 @@ export async function getOAuth2Response(
   context: models.OpenIdContext,
   tokenExchangePrefix?: string
 ) {
-  const config = getOpenIdConfiguration(prefix || 'oauth2', context.variables);
-  const tokenExchangeConfig = getOpenIdConfiguration(tokenExchangePrefix, context.variables);
   const openIdFlow = getOpenIdFlow(flow);
-  if (openIdFlow && config) {
+  if (openIdFlow) {
+    const config = getOpenIdConfiguration(prefix, context.variables);
     const cacheKey = openIdFlow.getCacheKey(config);
     if (cacheKey) {
+      const tokenExchangeConfig = getOpenIdConfiguration(tokenExchangePrefix, context.variables);
       let openIdInformation = getSessionOpenIdInformation(cacheKey, tokenExchangeConfig || config);
       userSessionStore.removeUserSession(cacheKey);
       if (openIdInformation) {
