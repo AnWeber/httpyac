@@ -14,7 +14,7 @@ class ImplicitFlow implements OpenIdFlow {
 
   getCacheKey(config: models.OpenIdConfiguration) {
     if (assertConfiguration(config, ['tokenEndpoint', 'authorizationEndpoint', 'clientId'])) {
-      return `implicit_${config.clientId}_${config.tokenEndpoint}`;
+      return `implicit_${config.variablePrefix}_${config.clientId}_${config.tokenEndpoint}`;
     }
     return false;
   }

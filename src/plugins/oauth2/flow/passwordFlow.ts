@@ -11,7 +11,7 @@ class PasswordFlow implements OpenIdFlow {
 
   getCacheKey(config: models.OpenIdConfiguration) {
     if (assertConfiguration(config, ['tokenEndpoint', 'clientId', 'clientSecret', 'username', 'password'])) {
-      return `password_${config.clientId}_${config.username}_${config.tokenEndpoint}`;
+      return `password_${config.variablePrefix}_${config.clientId}_${config.username}_${config.tokenEndpoint}`;
     }
     return false;
   }
