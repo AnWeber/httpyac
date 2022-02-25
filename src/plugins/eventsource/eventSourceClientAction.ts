@@ -34,7 +34,6 @@ export class EventSourceClientAction {
     if (httpRegion.metaData.noRejectUnauthorized) {
       options.rejectUnauthorized = false;
     }
-    const events = utils.getHeaderArray(request.headers, 'event') || ['data'];
     const headers = { ...request.headers };
     utils.deleteHeader(headers, 'event');
     options.headers = headers;
@@ -57,6 +56,7 @@ export class EventSourceClientAction {
         io.log.debug('SSE open', evt);
       });
 
+      const events = utils.getHeaderArray(request.headers, 'event', ['data']);
       for (const eventType of events) {
         client.addEventListener(eventType, evt => {
           io.log.debug(`SSE ${eventType}`, evt);

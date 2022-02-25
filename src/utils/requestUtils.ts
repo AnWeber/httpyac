@@ -54,6 +54,37 @@ export function deleteHeader(headers: Record<string, unknown> | undefined, ...he
   }
 }
 
+export function getHeaderString(
+  headers: Record<string, string | string[] | undefined> | undefined,
+  headerName: string
+): string | undefined {
+  const value = getHeader(headers, headerName);
+
+  if (isString(value)) {
+    return value;
+  }
+  return undefined;
+}
+
+export function getHeaderBoolean(
+  headers: Record<string, string | string[] | boolean | undefined> | undefined,
+  headerName: string,
+  defaultValue = false
+): boolean {
+  const value = getHeader(headers, headerName);
+
+  if (isString(value)) {
+    return ['true', '1', 'TRUE'].indexOf(value) >= 0;
+  }
+  if (value === true) {
+    return true;
+  }
+  if (value === false) {
+    return false;
+  }
+  return defaultValue;
+}
+
 export function getHeader<T>(headers: Record<string, T> | undefined, headerName: string): T | undefined {
   if (headers) {
     const entry = Object.entries(headers).find(([key]) => key.toLowerCase() === headerName.toLowerCase());
@@ -63,15 +94,30 @@ export function getHeader<T>(headers: Record<string, T> | undefined, headerName:
   }
   return undefined;
 }
+
+export function getHeaderNumber<T>(headers: Record<string, T> | undefined, headerName: string): number | undefined {
+  const value = getHeader(headers, headerName);
+  if (isString(value)) {
+    const val = Number(value);
+    if (Number.isSafeInteger(val)) {
+      return val;
+    }
+  } else if (Number.isInteger(value)) {
+    return Number(value);
+  }
+  return undefined;
+}
+
 export function getHeaderArray(
   headers: Record<string, string | string[] | undefined> | undefined,
-  headerName: string
-): string[] | undefined {
+  headerName: string,
+  defaultValue: Array<string> = []
+): Array<string> {
   const value = getHeader(headers, headerName);
   if (value) {
     return isString(value) ? [value] : value;
   }
-  return undefined;
+  return defaultValue;
 }
 
 export function parseContentType(headers: Record<string, unknown>): models.ContentType | undefined {

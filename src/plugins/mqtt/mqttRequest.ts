@@ -2,7 +2,7 @@ import { Request } from '../../models';
 import { IClientOptions as MQTTOptions } from 'mqtt';
 
 export interface MQTTRequest extends Request<'MQTT'> {
-  headers?: Record<string, string>;
+  headers?: Record<string, string | string[] | undefined> | undefined;
   body?: string;
   options?: MQTTOptions;
 }

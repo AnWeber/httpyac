@@ -9,4 +9,5 @@ export * from './injection';
 export * from './javascript';
 export * from './mqtt';
 export * from './oauth2';
+export * from './rabbitmq';
 export * from './websocket';

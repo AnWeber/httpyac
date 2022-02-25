@@ -89,6 +89,7 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
+    "@cloudamqp/amqp-client": "^2.0.0",
     "@grpc/grpc-js": "^1.5.4",
     "@grpc/proto-loader": "^0.6.9",
     "aws4": "^1.11.0",

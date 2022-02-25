@@ -39,9 +39,9 @@ export class MQTTClientAction {
 
       const options: IClientOptions = {
         clientId: `httpyac_${Math.random().toString(16).slice(2, 8)}`,
-        username: utils.getHeader(request.headers, 'username'),
-        password: utils.getHeader(request.headers, 'password'),
-        keepalive: utils.toNumber(utils.getHeader(request.headers, 'keepalive')),
+        username: utils.getHeaderString(request.headers, 'username'),
+        password: utils.getHeaderString(request.headers, 'password'),
+        keepalive: utils.toNumber(utils.getHeaderString(request.headers, 'keepalive')),
         clean: !!utils.getHeader(request.headers, 'clean'),
         ...request.options,
       };
@@ -103,18 +103,14 @@ export class MQTTClientAction {
         resolve(this.toMergedHttpResponse(mergedData, responseTemplate));
       });
 
-      const subscribeArray = utils.getHeaderArray(request.headers, 'subscribe');
-      if (subscribeArray) {
-        this.subscribeToTopics(client, subscribeArray, this.toQoS(utils.getHeader(request.headers, 'qos')));
+      const topics = utils.getHeaderArray(request.headers, 'topic');
+      const subscribeArray = [...topics, ...utils.getHeaderArray(request.headers, 'subscribe')];
+      if (subscribeArray.length > 0) {
+        this.subscribeToTopics(client, subscribeArray, this.toQoS(utils.getHeaderString(request.headers, 'qos')));
       }
-      const publishArray = utils.getHeaderArray(request.headers, 'publish');
+      const publishArray = [...topics, ...utils.getHeaderArray(request.headers, 'publish')];
       if (publishArray) {
         this.publishToTopics(client, publishArray, request);
-      }
-      const topics = utils.getHeaderArray(request.headers, 'topic');
-      if (topics) {
-        this.subscribeToTopics(client, topics, this.toQoS(utils.getHeader(request.headers, 'qos')));
-        this.publishToTopics(client, topics, request);
       }
       utils.setVariableInContext(mqttVariables, context);
       const onStreaming = context.httpFile.hooks.onStreaming.merge(context.httpRegion.hooks.onStreaming);
@@ -139,7 +135,7 @@ export class MQTTClientAction {
           topic,
           request.body,
           {
-            qos: this.toQoS(utils.getHeader(request.headers, 'qos')),
+            qos: this.toQoS(utils.getHeaderString(request.headers, 'qos')),
             retain: !!utils.getHeader(request.headers, 'retain'),
           },
           err => err && io.log.error('publish error', err)

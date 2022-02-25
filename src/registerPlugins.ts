@@ -12,4 +12,5 @@ pluginStore.injection = plugins.registerInjectionPlugin;
 pluginStore.javascript = plugins.registerJavascriptPlugin;
 pluginStore.mqtt = plugins.registerMqttPlugin;
 pluginStore.oauth2 = plugins.registerOAuth2Plugin;
+pluginStore.rabbitMQ = plugins.registerRabbitMQPlugin;
 pluginStore.websocket = plugins.registerWebsocketPlugin;
