@@ -1,5 +1,6 @@
 import * as io from '../../io';
 import * as models from '../../models';
+import * as store from '../../store';
 import * as utils from '../../utils';
 import * as constants from './amqpConstants';
 import { AmqpRequest, isAmqpRequest } from './amqpRequest';
@@ -8,6 +9,7 @@ import { AMQPClient, AMQPChannel, AMQPProperties } from '@cloudamqp/amqp-client'
 interface AmqpResponse {
   exchange?: string;
   queue?: string;
+  channelId: number;
   message: Record<string, unknown>;
 }
 type AmqpMethod = (
@@ -43,10 +45,7 @@ export class AmqpClientAction {
     try {
       let disposeCancellation: models.Dispose | undefined;
 
-      const amqpClient = new AMQPClient(request.url);
-
-      const connection = await amqpClient.connect();
-      const amqpChannel = await connection.channel(utils.getHeaderNumber(request.headers, constants.AmqpChannelId));
+      const { amqpClient, amqpChannel, keepSessionStore } = await this.getAmqpClient(request);
 
       const amqpVariables = {
         amqpClient,
@@ -55,7 +54,11 @@ export class AmqpClientAction {
       if (context.progress) {
         disposeCancellation = context.progress?.register?.(async () => {
           disposeCancellation = undefined;
-          await amqpChannel.close('user cancellation');
+          if (!keepSessionStore) {
+            store.userSessionStore.removeUserSession(this.getStoreKey(request, amqpChannel.id));
+            await amqpChannel.close('user cancellation');
+            await amqpClient.close();
+          }
         });
       }
 
@@ -69,14 +72,67 @@ export class AmqpClientAction {
       utils.unsetVariableInContext(amqpVariables, context);
       if (disposeCancellation) {
         disposeCancellation();
-      } else {
-        await amqpChannel.close();
+      } else if (!amqpClient.closed) {
+        if (!keepSessionStore) {
+          store.userSessionStore.removeUserSession(this.getStoreKey(request, amqpChannel.id));
+          await amqpChannel.close();
+          await amqpClient.close();
+        }
       }
       return this.toMergedHttpResponse(messages, request);
     } catch (err) {
       io.log.info(err);
       return this.errorToHttpResponse(err, request);
     }
+  }
+
+  private getStoreKey(request: AmqpRequest, channelId: number) {
+    return `amqp_${request.url}_${channelId}`;
+  }
+
+  private async getAmqpClient(
+    request: AmqpRequest
+  ): Promise<{ amqpClient: AMQPClient; amqpChannel: AMQPChannel; keepSessionStore: boolean }> {
+    const channelId = utils.getHeaderNumber(request.headers, constants.AmqpChannelId);
+    if (channelId) {
+      const userSession: (models.UserSession & { amqpClient?: AMQPClient; amqpChannel?: AMQPChannel }) | undefined =
+        store.userSessionStore.getUserSession(this.getStoreKey(request, channelId));
+      if (userSession && userSession.amqpClient && userSession.amqpChannel) {
+        return {
+          amqpClient: userSession.amqpClient,
+          amqpChannel: userSession.amqpChannel,
+          keepSessionStore: true,
+        };
+      }
+    }
+
+    const amqpClient = new AMQPClient(request.url || '');
+    await amqpClient.connect();
+    const amqpChannel = await amqpClient.channel();
+
+    store.userSessionStore.setUserSession({
+      id: this.getStoreKey(request, amqpChannel.id),
+      description: `${request.url} and channel ${amqpChannel.id}`,
+      details: {
+        url: request.url,
+      },
+      title: `AMQP Client for ${request.url}`,
+      type: 'AMQP',
+      amqpClient,
+      amqpChannel,
+      delete: async () => {
+        if (!amqpClient.closed) {
+          await amqpChannel.close('user cancellation');
+          await amqpClient.close();
+        }
+      },
+    });
+
+    return {
+      amqpClient,
+      amqpChannel,
+      keepSessionStore: false,
+    };
   }
 
   private getMethod(request: AmqpRequest) {
@@ -190,6 +246,7 @@ export class AmqpClientAction {
         );
         messages.push({
           exchange,
+          channelId: channel.id,
           message: {
             published: true,
             ...properties,
@@ -210,6 +267,7 @@ export class AmqpClientAction {
         );
         messages.push({
           queue,
+          channelId: channel.id,
           message: {
             published: true,
             routingKey,
@@ -243,6 +301,7 @@ export class AmqpClientAction {
     for (const queue of queues) {
       await channel.basicConsume(queue, options, message => {
         const result = {
+          channelId: channel.id,
           exchange: message.exchange,
           routingKey: message.routingKey,
           bodySize: message.bodySize,
@@ -261,6 +320,7 @@ export class AmqpClientAction {
           }
         }
         messages.push({
+          channelId: channel.id,
           queue,
           message: result,
         });
@@ -283,6 +343,7 @@ export class AmqpClientAction {
     for (const exchange of exchanges) {
       const result = await channel.exchangeDelete(exchange, options);
       messages.push({
+        channelId: channel.id,
         exchange,
         message: {
           ...options,
@@ -295,6 +356,7 @@ export class AmqpClientAction {
     for (const queue of queues) {
       const result = await channel.queueDelete(queue, options);
       messages.push({
+        channelId: channel.id,
         queue,
         message: {
           ...options,
@@ -318,6 +380,7 @@ export class AmqpClientAction {
       const type = utils.getHeaderString(request.headers, constants.AmqpType) || 'direct';
       const result = await channel.exchangeDeclare(exchange, type, options);
       messages.push({
+        channelId: channel.id,
         exchange,
         message: {
           ...options,
@@ -331,6 +394,7 @@ export class AmqpClientAction {
     for (const queue of queues) {
       const result = await channel.queueDeclare(queue, options);
       messages.push({
+        channelId: channel.id,
         queue,
         message: {
           ...options,
@@ -351,6 +415,7 @@ export class AmqpClientAction {
       for (const queue of queues) {
         const result = await channel.queueBind(queue, exchange, routingKey, getNonAmqpHeaders(request.headers));
         messages.push({
+          channelId: channel.id,
           queue,
           exchange,
           message: {
@@ -368,6 +433,7 @@ export class AmqpClientAction {
           getNonAmqpHeaders(request.headers)
         );
         messages.push({
+          channelId: channel.id,
           exchange,
           message: {
             destination,
@@ -389,6 +455,7 @@ export class AmqpClientAction {
       for (const queue of queues) {
         const result = await channel.queueUnbind(queue, exchange, routingKey, getNonAmqpHeaders(request.headers));
         messages.push({
+          channelId: channel.id,
           queue,
           exchange,
           message: {
@@ -406,6 +473,7 @@ export class AmqpClientAction {
           getNonAmqpHeaders(request.headers)
         );
         messages.push({
+          channelId: channel.id,
           exchange,
           message: {
             routingKey,
@@ -425,6 +493,7 @@ export class AmqpClientAction {
       const result = await channel.queuePurge(queue);
       messages.push({
         queue,
+        channelId: channel.id,
         message: {
           purge: true,
           result,
@@ -440,6 +509,7 @@ export class AmqpClientAction {
     for (const tag of tags) {
       const result = await channel.basicAck(Number(tag));
       messages.push({
+        channelId: channel.id,
         message: {
           tag,
           ack: true,
@@ -455,6 +525,7 @@ export class AmqpClientAction {
     for (const tag of tags) {
       const result = await channel.basicCancel(tag);
       messages.push({
+        channelId: channel.id,
         message: {
           tag,
           cancel: true,
@@ -470,6 +541,7 @@ export class AmqpClientAction {
     for (const tag of tags) {
       const result = await channel.basicNack(Number(tag));
       messages.push({
+        channelId: channel.id,
         message: {
           tag,
           nack: true,
