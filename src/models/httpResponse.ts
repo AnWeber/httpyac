@@ -4,6 +4,7 @@ import { HttpTimings } from './httpTimings';
 
 export interface HttpResponse {
   protocol: string;
+  name?: string;
   httpVersion?: string;
   statusCode: number;
   statusMessage?: string;

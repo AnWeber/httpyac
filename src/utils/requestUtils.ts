@@ -325,6 +325,7 @@ export function shrinkCloneResponse(response: models.HttpResponse): models.HttpR
 
 export function cloneResponse(response: models.HttpResponse): models.HttpResponse {
   const clone: models.HttpResponse = {
+    name: response.name,
     protocol: response.protocol,
     statusCode: response.statusCode,
     statusMessage: response.statusMessage,

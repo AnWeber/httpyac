@@ -108,6 +108,7 @@ export class GrpcClientAction {
       ];
 
       const getResponseTemplate: () => Partial<models.HttpResponse> = () => ({
+        name: `GRPC ${request.url}`,
         headers: responseMetaData,
         request,
         timings: {
@@ -193,9 +194,9 @@ export class GrpcClientAction {
           mergedData.push(chunk);
           if (!context.httpRegion.metaData.noStreamingLog) {
             if (context.logStream) {
-              loadingPromises.push(context.logStream('gRPC', methodName, chunk));
-            } else {
-              loadingPromises.push(utils.logResponse(this.toHttpResponse(chunk, getResponseTemplate()), context));
+              const response = this.toHttpResponse(chunk, getResponseTemplate());
+              response.name = `${response.name} (${mergedData.length})`;
+              loadingPromises.push(context.logStream(methodName, response));
             }
           }
         }),
@@ -238,7 +239,7 @@ export class GrpcClientAction {
     const urlMatch = GrpcUrlRegex.exec(url);
     if (urlMatch && urlMatch.groups?.service) {
       const { server, path, service, method, protocol } = urlMatch.groups;
-      const flatServices = this.flattenProtoDefintions(protoDefinitions);
+      const flatServices = this.flattenProtoDefinitions(protoDefinitions);
 
       let ServiceClass = flatServices[service];
       if (!ServiceClass) {
@@ -266,10 +267,10 @@ export class GrpcClientAction {
         };
       }
 
-      const flatServicKeys = Object.keys(flatServices);
-      if (flatServicKeys) {
-        log.error(`Service ${service} does not exist. Available Services`, ...flatServicKeys);
-        throw new Error(`Service ${service} does not exist. Available Services: ${flatServicKeys.join(', ')}`);
+      const flatServiceKeys = Object.keys(flatServices);
+      if (flatServiceKeys) {
+        log.error(`Service ${service} does not exist. Available Services`, ...flatServiceKeys);
+        throw new Error(`Service ${service} does not exist. Available Services: ${flatServiceKeys.join(', ')}`);
       } else {
         log.error(`Service ${service} does not exist. No Service imported`);
         throw new Error(`Service ${service} does not exist. No Service imported`);
@@ -279,7 +280,7 @@ export class GrpcClientAction {
     }
   }
 
-  private flattenProtoDefintions(protoDefinitions: Record<string, models.ProtoDefinition>) {
+  private flattenProtoDefinitions(protoDefinitions: Record<string, models.ProtoDefinition>) {
     const result: grpc.GrpcObject = {};
     for (const protoDefinition of Object.values(protoDefinitions)) {
       if (protoDefinition.grpcObject) {
@@ -309,7 +310,7 @@ export class GrpcClientAction {
   }
 
   private toHttpResponse(data: unknown, responseTemplate: Partial<models.HttpResponse>): models.HttpResponse {
-    const json = JSON.stringify(data, null, 2);
+    const json = utils.toString(data);
     const response: models.HttpResponse = {
       headers: {},
       ...responseTemplate,
@@ -317,9 +318,7 @@ export class GrpcClientAction {
       statusMessage: 'OK',
       protocol: 'GRPC',
       body: json,
-      prettyPrintBody: json,
       parsedBody: data,
-      rawBody: Buffer.from(json),
       contentType: {
         mimeType: 'application/grpc+json',
         charset: 'UTF-8',

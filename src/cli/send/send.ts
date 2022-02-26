@@ -258,8 +258,8 @@ function getHttpRegion(httpFile: models.HttpFile, cliOptions: SendOptions): mode
 
 function getStreamLogger(options: SendOptions): models.StreamLogger | undefined {
   if (options.output !== 'none') {
-    return async function logStream(_channel, type, message) {
-      const data = Buffer.isBuffer(message) ? message.toString('utf-8') : message;
+    return async function logStream(type, response) {
+      const data = Buffer.isBuffer(response.body) ? response.body.toString('utf-8') : response.body;
       console.info(`${new Date().toLocaleTimeString()} - ${type}: `, data);
     };
   }

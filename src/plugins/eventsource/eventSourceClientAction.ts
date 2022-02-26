@@ -67,9 +67,23 @@ export class EventSourceClientAction {
             eventStream[evt.type].push(evt.data);
             if (!context.httpRegion.metaData.noStreamingLog) {
               if (context.logStream) {
-                loadingPromises.push(context.logStream('EventSource', evt.type, evt.data));
-              } else {
-                loadingPromises.push(utils.logResponse(this.toHttpResponse(evt, responseTemplate), context));
+                loadingPromises.push(
+                  context.logStream(evt.type, {
+                    ...responseTemplate,
+                    protocol: 'SSE',
+                    name: `SSE ${evt.type} ${evt.lastEventId} (${request.url})`,
+                    statusCode: 0,
+                    body: evt.data,
+                    message: utils.toString(evt.data),
+                    headers: {
+                      type: evt.type,
+                      cancelable: evt.cancelable,
+                      composed: evt.composed,
+                      origin: evt.origin,
+                      lastEventId: evt.lastEventId,
+                    },
+                  })
+                );
               }
             }
           }
@@ -108,7 +122,10 @@ export class EventSourceClientAction {
     return response;
   }
 
-  private toHttpResponse(data: unknown, responseTemplate: Partial<models.HttpResponse>): models.HttpResponse {
+  private toHttpResponse(
+    data: Record<string, Array<unknown>>,
+    responseTemplate: Partial<models.HttpResponse>
+  ): models.HttpResponse {
     const body = JSON.stringify(data, null, 2);
     const rawBody: Buffer = Buffer.from(body);
     const response: models.HttpResponse = {

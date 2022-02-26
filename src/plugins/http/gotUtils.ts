@@ -45,6 +45,7 @@ export async function gotHttpClient(
       response = await load(url, options, context);
     }
     if (response) {
+      response.name = `${response.statusCode} - ${request.method || 'GET'} ${request.url}`;
       return response;
     }
     throw new Error('no response');
@@ -147,6 +148,7 @@ function initProxy(options: OptionsOfUnknownResponseBody, proxy: string | undefi
 
 function toHttpResponse(response: Response<unknown>): models.HttpResponse {
   const httpResponse: models.HttpResponse = {
+    name: `${response.request}`,
     statusCode: response.statusCode,
     protocol: `HTTP/${response.httpVersion}`,
     statusMessage: response.statusMessage,

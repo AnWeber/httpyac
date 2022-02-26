@@ -12,11 +12,21 @@ interface AmqpResponse {
   channelId: number;
   message: Record<string, unknown>;
 }
-type AmqpMethod = (
-  channel: AMQPChannel,
-  request: AmqpRequest,
-  context: models.ProcessorContext
-) => Promise<Array<AmqpResponse>>;
+
+interface AmqpError {
+  isError: true;
+  message: string;
+  name?: string;
+  stack?: unknown;
+}
+
+interface AmqpMethodContext {
+  channel: AMQPChannel;
+  request: AmqpRequest;
+  context: models.ProcessorContext;
+  messages: Array<AmqpResponse | AmqpError>;
+}
+type AmqpMethod = (context: AmqpMethodContext) => Promise<void>;
 
 export class AmqpClientAction {
   id = 'amqp';
@@ -42,6 +52,7 @@ export class AmqpClientAction {
     if (!request.url) {
       throw new Error('request url undefined');
     }
+    const messages: Array<AmqpResponse | AmqpError> = [];
     try {
       let disposeCancellation: models.Dispose | undefined;
 
@@ -64,7 +75,12 @@ export class AmqpClientAction {
 
       const method = this.getMethod(request);
 
-      const messages = await method(amqpChannel, request, context);
+      await method({
+        channel: amqpChannel,
+        request,
+        context,
+        messages,
+      });
       utils.setVariableInContext(amqpVariables, context);
       const onStreaming = context.httpFile.hooks.onStreaming.merge(context.httpRegion.hooks.onStreaming);
       await onStreaming.trigger(context);
@@ -79,11 +95,23 @@ export class AmqpClientAction {
           await amqpClient.close();
         }
       }
-      return this.toMergedHttpResponse(messages, request);
     } catch (err) {
       io.log.info(err);
-      return this.errorToHttpResponse(err, request);
+      if (utils.isError(err)) {
+        messages.push({
+          isError: true,
+          message: err.message,
+          name: err.name,
+          stack: err.stack,
+        });
+      } else {
+        messages.push({
+          isError: true,
+          message: utils.toString(err) || `${err}`,
+        });
+      }
     }
+    return this.toMergedHttpResponse(messages, request);
   }
 
   private getStoreKey(request: AmqpRequest, channelId: number) {
@@ -168,35 +196,9 @@ export class AmqpClientAction {
     );
   }
 
-  private errorToHttpResponse(err: unknown, request: AmqpRequest) {
-    let body: string;
-
-    if (utils.isError(err)) {
-      body = JSON.stringify(
-        {
-          message: err.message,
-          name: err.name,
-          stack: err.stack,
-        },
-        null,
-        2
-      );
-    } else {
-      body = JSON.stringify(err, null, 2);
-    }
-    const response: models.HttpResponse = {
-      statusCode: 500,
-      protocol: 'AMQP',
-      statusMessage: utils.isError(err) ? err.message : `${err}`,
-      body,
-      request,
-    };
-    return response;
-  }
-
-  private toMergedHttpResponse(data: Array<AmqpResponse>, request: AmqpRequest): models.HttpResponse {
-    const body = JSON.stringify(data, null, 2);
-    const rawBody: Buffer = Buffer.isBuffer(data) ? data : Buffer.from(body);
+  private toMergedHttpResponse(messages: Array<AmqpResponse | AmqpError>, request: AmqpRequest): models.HttpResponse {
+    const body = JSON.stringify(messages, null, 2);
+    const rawBody: Buffer = Buffer.isBuffer(messages) ? messages : Buffer.from(body);
     const response: models.HttpResponse = {
       statusCode: 0,
       protocol: 'AMQP',
@@ -210,12 +212,20 @@ export class AmqpClientAction {
       body,
       rawBody,
     };
+    const err = messages.some(obj => this.isAmqpError(obj));
+    if (this.isAmqpError(err)) {
+      response.statusCode = -1;
+      response.statusMessage = err.message;
+    }
 
     return response;
   }
+  private isAmqpError(obj: unknown): obj is AmqpError {
+    const guard = obj as AmqpError;
+    return guard?.isError;
+  }
 
-  private async publish(channel: AMQPChannel, request: AmqpRequest) {
-    const messages: Array<AmqpResponse> = [];
+  private async publish({ channel, request, messages }: AmqpMethodContext) {
     if (request.body) {
       const properties: AMQPProperties = {
         appId: 'httpyac',
@@ -286,11 +296,9 @@ export class AmqpClientAction {
       io.userInteractionProvider.showWarnMessage?.(message);
       io.log.warn(message);
     }
-    return messages;
   }
 
-  private async consume(channel: AMQPChannel, request: AmqpRequest, context: models.ProcessorContext) {
-    const messages: Array<AmqpResponse> = [];
+  private async consume({ channel, request, messages, context }: AmqpMethodContext) {
     const queues = utils.getHeaderArray(request.headers, constants.AmqpQueue);
     const options = {
       tag: utils.getHeaderString(request.headers, constants.AmqpTag),
@@ -316,7 +324,15 @@ export class AmqpClientAction {
         };
         if (!context.httpRegion.metaData.noStreamingLog) {
           if (context.logStream) {
-            context.logStream('AMQP', queue, result);
+            context.logStream(queue, {
+              request,
+              name: `AMQP ${queue}-${result.deliveryTag} (${request.url})`,
+              protocol: 'AMQP',
+              statusCode: 0,
+              message: `${result.body} (deliveryTag: ${result.deliveryTag}, channelId: ${result.channelId})`,
+              body: result.body,
+              headers: result,
+            });
           }
         }
         messages.push({
@@ -331,10 +347,8 @@ export class AmqpClientAction {
       io.userInteractionProvider.showWarnMessage?.(message);
       io.log.warn(message);
     }
-    return messages;
   }
-  private async delete(channel: AMQPChannel, request: AmqpRequest) {
-    const messages: Array<AmqpResponse> = [];
+  private async delete({ channel, request, messages }: AmqpMethodContext) {
     const exchanges = utils.getHeaderArray(request.headers, constants.AmqpExchange);
     const options = {
       ifUnused: utils.getHeaderBoolean(request.headers, constants.AmqpIfUnused, true),
@@ -365,10 +379,8 @@ export class AmqpClientAction {
         },
       });
     }
-    return messages;
   }
-  private async declare(channel: AMQPChannel, request: AmqpRequest) {
-    const messages: Array<AmqpResponse> = [];
+  private async declare({ channel, request, messages }: AmqpMethodContext) {
     const exchanges = utils.getHeaderArray(request.headers, constants.AmqpExchange);
     const options = {
       passive: utils.getHeaderBoolean(request.headers, constants.AmqpPassive, false),
@@ -403,10 +415,8 @@ export class AmqpClientAction {
         },
       });
     }
-    return messages;
   }
-  private async bind(channel: AMQPChannel, request: AmqpRequest) {
-    const messages: Array<AmqpResponse> = [];
+  private async bind({ channel, request, messages }: AmqpMethodContext) {
     const exchanges = utils.getHeaderArray(request.headers, constants.AmqpExchange);
     const queues = utils.getHeaderArray(request.headers, constants.AmqpQueue);
     const destinationExchanges = utils.getHeaderArray(request.headers, constants.AmqpExchangeDestination);
@@ -443,10 +453,8 @@ export class AmqpClientAction {
         });
       }
     }
-    return messages;
   }
-  private async unbind(channel: AMQPChannel, request: AmqpRequest) {
-    const messages: Array<AmqpResponse> = [];
+  private async unbind({ channel, request, messages }: AmqpMethodContext) {
     const exchanges = utils.getHeaderArray(request.headers, constants.AmqpExchange);
     const queues = utils.getHeaderArray(request.headers, constants.AmqpQueue);
     const destinationExchanges = utils.getHeaderArray(request.headers, constants.AmqpExchangeDestination);
@@ -484,10 +492,8 @@ export class AmqpClientAction {
         });
       }
     }
-    return messages;
   }
-  private async purge(channel: AMQPChannel, request: AmqpRequest) {
-    const messages: Array<AmqpResponse> = [];
+  private async purge({ channel, request, messages }: AmqpMethodContext) {
     const queues = utils.getHeaderArray(request.headers, constants.AmqpQueue);
     for (const queue of queues) {
       const result = await channel.queuePurge(queue);
@@ -500,11 +506,8 @@ export class AmqpClientAction {
         },
       });
     }
-
-    return messages;
   }
-  private async ack(channel: AMQPChannel, request: AmqpRequest) {
-    const messages: Array<AmqpResponse> = [];
+  private async ack({ channel, request, messages }: AmqpMethodContext) {
     const tags = utils.getHeaderArray(request.headers, constants.AmqpTag);
     for (const tag of tags) {
       const result = await channel.basicAck(Number(tag));
@@ -517,10 +520,8 @@ export class AmqpClientAction {
         },
       });
     }
-    return messages;
   }
-  private async cancel(channel: AMQPChannel, request: AmqpRequest) {
-    const messages: Array<AmqpResponse> = [];
+  private async cancel({ channel, request, messages }: AmqpMethodContext) {
     const tags = utils.getHeaderArray(request.headers, constants.AmqpTag);
     for (const tag of tags) {
       const result = await channel.basicCancel(tag);
@@ -533,10 +534,8 @@ export class AmqpClientAction {
         },
       });
     }
-    return messages;
   }
-  private async nack(channel: AMQPChannel, request: AmqpRequest) {
-    const messages: Array<AmqpResponse> = [];
+  private async nack({ channel, request, messages }: AmqpMethodContext) {
     const tags = utils.getHeaderArray(request.headers, constants.AmqpTag);
     for (const tag of tags) {
       const result = await channel.basicNack(Number(tag));
@@ -549,7 +548,6 @@ export class AmqpClientAction {
         },
       });
     }
-    return messages;
   }
 }
 function getNonAmqpHeaders(headers: Record<string, string | Array<string> | undefined> | undefined) {

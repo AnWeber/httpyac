@@ -42,6 +42,13 @@ export function toString(value: unknown): string | undefined {
   if (value instanceof Date) {
     return value.toISOString();
   }
+  if (Buffer.isBuffer(value)) {
+    return value.toString('utf-8');
+  }
+  if (Array.isArray(value) && value.every(obj => Buffer.isBuffer(obj))) {
+    const jsonData = value.map(obj => Buffer.isBuffer(obj) && obj.toString('utf8'));
+    return JSON.stringify(jsonData, null, 2);
+  }
   if (value) {
     return JSON.stringify(value);
   }

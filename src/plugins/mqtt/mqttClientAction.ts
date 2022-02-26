@@ -73,14 +73,27 @@ export class MQTTClientAction {
       client.on('reconnect', () => io.log.debug('MQTT reconnect'));
       client.on('message', (topic, message, packet) => {
         io.log.debug('MQTT message', message, packet);
-        mergedData.push({
+        const data = {
           topic,
           message: message.toString('utf-8'),
           date: new Date(),
-        });
+        };
+        mergedData.push(data);
         if (!context.httpRegion.metaData.noStreamingLog) {
           if (context.logStream) {
-            loadingPromises.push(context.logStream('MQTT', topic, message));
+            loadingPromises.push(
+              context.logStream(topic, {
+                ...responseTemplate,
+                protocol: 'MQTT',
+                name: `MQTT ${topic} (${request.url})`,
+                statusCode: 0,
+                body: data.message,
+                headers: {
+                  type: data.topic,
+                  date: data.date,
+                },
+              })
+            );
           }
         }
       });

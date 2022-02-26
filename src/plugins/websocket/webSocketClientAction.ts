@@ -89,14 +89,23 @@ export class WebSocketClientAction {
       });
 
       const handleResponseFactory = (type: string) => (data: Buffer | WebSocket.RawData) => {
-        const body = this.toStringBody(data);
+        const body = utils.toString(data);
         io.log.debug(`WebSocket ${type}`, body);
         mergedData.push({ type, body });
         if (!context.httpRegion.metaData.noStreamingLog) {
           if (context.logStream) {
-            loadingPromises.push(context.logStream('WebSocket', type, body));
-          } else {
-            loadingPromises.push(utils.logResponse(this.toHttpResponse(body, getResponseTemplate()), context));
+            loadingPromises.push(
+              context.logStream(type, {
+                protocol: 'WS',
+                name: `WS ${type} (${request.url})`,
+                statusCode: 0,
+                headers: {
+                  type,
+                },
+                request,
+                body,
+              })
+            );
           }
         }
       };
@@ -133,17 +142,6 @@ export class WebSocketClientAction {
     return response;
   }
 
-  private toStringBody(data: unknown): string {
-    if (Buffer.isBuffer(data)) {
-      return data.toString('utf-8');
-    }
-    let jsonData = data;
-    if (Array.isArray(data) && data.every(obj => Buffer.isBuffer(obj))) {
-      jsonData = data.map(obj => Buffer.isBuffer(obj) && obj.toString('utf8'));
-    }
-    return JSON.stringify(jsonData, null, 2);
-  }
-
   private toHttpResponse(
     data: string | Array<unknown>,
     responseTemplate: Partial<models.HttpResponse>
@@ -152,9 +150,9 @@ export class WebSocketClientAction {
     const rawBody: Buffer = Buffer.from(body);
     const response: models.HttpResponse = {
       headers: {},
-      statusCode: 200,
+      statusCode: 0,
       ...responseTemplate,
-      protocol: 'WebSocket',
+      protocol: 'WS',
       body,
       prettyPrintBody: body,
       parsedBody: data,
