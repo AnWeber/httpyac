@@ -67,8 +67,6 @@ export class AmqpClientAction {
           disposeCancellation = undefined;
           if (!keepSessionStore) {
             store.userSessionStore.removeUserSession(this.getStoreKey(request, amqpChannel.id));
-            await amqpChannel.close('user cancellation');
-            await amqpClient.close();
           }
         });
       }
@@ -91,8 +89,6 @@ export class AmqpClientAction {
       } else if (!amqpClient.closed) {
         if (!keepSessionStore) {
           store.userSessionStore.removeUserSession(this.getStoreKey(request, amqpChannel.id));
-          await amqpChannel.close();
-          await amqpClient.close();
         }
       }
     } catch (err) {
