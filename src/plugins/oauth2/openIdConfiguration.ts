@@ -8,9 +8,14 @@ export const DEFAULT_CALLBACK_URI = 'http://localhost:3000/callback';
 const DefaultOAuthVariablePrefix = 'oauth2';
 
 function getVariable(variables: models.Variables, variablePrefix: string | undefined, name: string): string {
-  const value = [variablePrefix, DefaultOAuthVariablePrefix].find(
-    prefix => (prefix && variables[`${prefix}_${name}`]) || get(variables, `${prefix}.${name}`)
-  );
+  const getter = (prefix: string) => variables[`${prefix}_${name}`] || get(variables, `${prefix}.${name}`);
+  let value: unknown;
+  if (variablePrefix) {
+    value = getter(variablePrefix);
+  }
+  if (!value) {
+    value = getter(DefaultOAuthVariablePrefix);
+  }
   const expandedValue = utils.expandVariable(value, variables);
   if (utils.isString(expandedValue)) {
     return expandedValue;
