@@ -22,6 +22,8 @@
     "Postman",
     "Soap",
     "gRPC",
+    "RabbitMQ",
+    "AMQP",
     "WebSocket",
     "EventSource",
     "MQTT",
