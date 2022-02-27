@@ -1,9 +1,20 @@
-## Unreleased
+## 5.0.0 (2022-02-27)
 
 #### Breaking Changes
 
-- The internal project structure was revised and a better separation of the plugin components was achieved. These are preparations to possibly provide an ESM build in the future.
-- Setting Got Options directly on the request will be removed in one of the next versions. Got checks better in Got v12 whether only valid options are set. But since options and custom properties are mixed at the request object, such a separation would be difficult. Please change `request[...]` to `request.options[...]`.
+- The internal project structure was revised and a better separation of the plugin components was achieved. These are preparations to possibly provide an ESM build or support vscode.dev in the future.
+- Setting Got Options directly on the request will be removed in one of the next versions. Got checks in v12 whether only valid options are set. But since options and custom properties are mixed at the request object, such a separation would be difficult. Please change `request[...]` to `request.options[...]`.
+- function interface of [StreamLogger](https://github.com/AnWeber/httpyac/blob/main/src/models/logHandler.ts#L38) changed
+
+#### Features
+
+- added [RabbitMQ Support](http://localhost:8080/guide/request.html#amqp-rabbitmq)
+- add OAuth2 Variable Prefix to Session to allow cache of different user login (#207)
+
+#### Fixes
+
+- transitive request references (`@import`) not being resolved (#205)
+- import of modified variables works when using `@forceRef` (#205)
 
 ## 4.10.2 (2022-02-08)
 
