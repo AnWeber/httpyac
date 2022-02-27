@@ -15,7 +15,7 @@ import { sep } from 'path';
 export function sendCommand() {
   const program = new Command('send')
     .description('send/ execute http files')
-    .argument('<fileName>', 'path to file or glob pattern')
+    .argument('<fileName...>', 'path to file or glob pattern')
     .option('-a, --all', 'execute all http requests in a http file')
     .option('-e, --env  <env...>', 'list of environments')
     .option('--filter <filter>', ' filter requests output (only-failed)')
@@ -42,9 +42,9 @@ export function sendCommand() {
   return program;
 }
 
-async function execute(fileName: string, options: SendOptions): Promise<void> {
+async function execute(fileNames: Array<string>, options: SendOptions): Promise<void> {
   const context = convertCliOptionsToContext(options);
-  const httpFiles: models.HttpFile[] = await getHttpFiles(fileName, options, context.config);
+  const httpFiles: models.HttpFile[] = await getHttpFiles(fileNames, options, context.config);
 
   if (httpFiles.length > 0) {
     let isFirstRequest = true;
@@ -157,7 +157,11 @@ function initCliHooks(httpFiles: Array<models.HttpFile>, cliOptions: SendOptions
   }
 }
 
-async function getHttpFiles(fileName: string, options: SendOptions, config: models.EnvironmentConfig | undefined) {
+async function getHttpFiles(
+  fileNames: Array<string>,
+  options: SendOptions,
+  config: models.EnvironmentConfig | undefined
+) {
   const httpFiles: models.HttpFile[] = [];
   const httpFileStore = new HttpFileStore();
 
@@ -166,9 +170,11 @@ async function getHttpFiles(fileName: string, options: SendOptions, config: mode
     activeEnvironment: options.env,
     config,
   };
+  const paths: Array<string> = [];
 
-  const paths = await queryGlobbyPattern(fileName);
-
+  for (const fileName of fileNames) {
+    paths.push(...(await queryGlobbyPattern(fileName)));
+  }
   for (const path of paths) {
     const httpFile = await httpFileStore.getOrCreate(
       path,
