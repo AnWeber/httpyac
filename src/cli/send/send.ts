@@ -86,7 +86,7 @@ async function execute(fileNames: Array<string>, options: SendOptions): Promise<
       }
     }
   } else {
-    console.error(`httpYac cannot find the specified file ${fileName}.`);
+    console.error(`httpYac cannot find the specified file ${fileNames.join(', ')}.`);
   }
 }
 
