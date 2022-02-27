@@ -577,7 +577,7 @@ export class AmqpClientAction {
 }
 function getNonAmqpHeaders(headers: Record<string, string | Array<string> | undefined> | undefined) {
   if (headers) {
-    return Object.fromEntries(Object.entries(headers).filter(([key]) => !key.startsWith('amqp')));
+    return Object.fromEntries(Object.entries(headers).filter(([key]) => !key.startsWith('amqp_')));
   }
   return undefined;
 }

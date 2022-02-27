@@ -13,13 +13,13 @@ export const AmqpInternal = 'amqp_internal';
 export const AmqpCorrelationId = 'amqp_correlation_id';
 export const AmqpContentType = 'amqp_content_type';
 export const AmqpContentEncoding = 'amqp_content_encoding';
-export const AmqpDeliveryMode = 'amqp_deliveryMode';
+export const AmqpDeliveryMode = 'amqp_delivery_mode';
 export const AmqpExpiration = 'amqp_expiration';
-export const AmqpMessageId = 'amqp_messageId';
+export const AmqpMessageId = 'amqp_message_id';
 export const AmqpPriority = 'amqp_priority';
 export const AmqpReplyTo = 'amqp_replyTo';
 export const AmqpType = 'amqp_type';
-export const AmqpUserId = 'amqp_userId';
+export const AmqpUserId = 'amqp_user_id';
 
 export const AmqpRequeue = 'amqp_requeue';
 export const AmqpMultiple = 'amqp_multiple';
