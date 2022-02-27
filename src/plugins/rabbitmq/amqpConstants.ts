@@ -21,6 +21,9 @@ export const AmqpReplyTo = 'amqp_replyTo';
 export const AmqpType = 'amqp_type';
 export const AmqpUserId = 'amqp_userId';
 
+export const AmqpRequeue = 'amqp_requeue';
+export const AmqpMultiple = 'amqp_multiple';
+
 export const AmqpIfUnused = 'amqp_if_unused';
 export const AmqpIfEmpty = 'amqp_if_empty';
 
