@@ -10,7 +10,6 @@ export async function transformRequestBody(request: models.Request): Promise<voi
       }
     } else if (
       Array.isArray(request.body) &&
-      request.body.some(obj => typeof obj === 'function') &&
       request.body.every(obj => ['function', 'string'].indexOf(typeof obj) >= 0)
     ) {
       request.body = await normalizeBody(request.body);
