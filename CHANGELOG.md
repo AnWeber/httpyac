@@ -1,3 +1,10 @@
+## 5.0.4 (2022-02-28)
+
+#### Fixes
+
+- multiple import of the same file does not abort processing (#212)
+- setClipboard on device_code OAuth2 flow does not throw exceptions (#211)
+
 ## 5.0.3 (2022-02-28)
 
 #### Fixes
