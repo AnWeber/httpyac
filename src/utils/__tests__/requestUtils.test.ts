@@ -1,4 +1,4 @@
-import { mergeRawHttpHeaders } from '../gotUtils';
+import { mergeRawHttpHeaders } from '../requestUtils';
 
 describe('Raw HTTP Header merge utils', () => {
   it('merges example raw headers to expected record value', () => {
