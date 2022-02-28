@@ -1,3 +1,9 @@
+## 5.0.1 (2022-02-28)
+
+#### Fixes
+
+- add mergeRawHttpHeaders to utils (#209)
+
 ## 5.0.0 (2022-02-27)
 
 #### Breaking Changes
