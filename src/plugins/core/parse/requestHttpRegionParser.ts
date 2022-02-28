@@ -105,7 +105,6 @@ function getRequestLine(
 
     return {
       request: {
-        protocol: 'HTTP',
         url: requestLineMatch.groups.url,
         method: utils.isHttpRequestMethod(requestLineMatch.groups.method) ? requestLineMatch.groups.method : 'GET',
         options: {
@@ -128,7 +127,6 @@ function getRequestLine(
   });
   return {
     request: {
-      protocol: 'HTTP',
       url: textLine.trim(),
       method: 'GET',
       options: {},

@@ -40,7 +40,7 @@ export function isHttpRequestMethod(method: string | undefined): method is model
 }
 
 export function isHttpRequest(request: models.Request | undefined): request is models.HttpRequest {
-  return request?.protocol === 'HTTP' || isHttpRequestMethod(request?.method);
+  return isHttpRequestMethod(request?.method);
 }
 
 export function deleteHeader(headers: Record<string, unknown> | undefined, ...headerNames: string[]): void {
