@@ -53,6 +53,6 @@ class ImportMetaAction {
       io.log.trace(`execute global scripts for import ${httpFile.fileName}`);
       return await utils.executeGlobalScripts(cloneContext);
     }
-    return false;
+    return !!httpFile;
   }
 }
