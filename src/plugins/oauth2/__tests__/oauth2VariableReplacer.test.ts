@@ -95,7 +95,7 @@ describe('oauth2VariableReplacer', () => {
       expect(openIdInformation?.accessToken).toBe(JWTToken);
     });
     it('should ignore non header Authorization', async () => {
-      const result = await oauth2VariableReplacer('oauth2', 'url', null);
+      const result = await oauth2VariableReplacer('oauth2', 'url', {} as unknown as models.ProcessorContext);
       expect(result).toBe('oauth2');
     });
   });
