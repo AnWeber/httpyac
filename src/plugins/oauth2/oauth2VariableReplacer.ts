@@ -48,7 +48,7 @@ export async function getOAuth2Response(
     const cacheKey = openIdFlow.getCacheKey(config);
     if (cacheKey) {
       const tokenExchangeConfig = getOpenIdConfiguration(tokenExchangePrefix, context.variables);
-      let openIdInformation = getSessionOpenIdInformation(cacheKey, tokenExchangeConfig || config);
+      let openIdInformation = getSessionOpenIdInformation(cacheKey, tokenExchangePrefix ? tokenExchangeConfig : config);
       userSessionStore.removeUserSession(cacheKey);
       if (openIdInformation) {
         log.trace(`openid refresh token flow used: ${cacheKey}`);
@@ -57,7 +57,7 @@ export async function getOAuth2Response(
       if (!openIdInformation) {
         log.trace(`openid flow ${flow} used: ${cacheKey}`);
         openIdInformation = await openIdFlow.perform(config, context);
-        if (openIdInformation && tokenExchangeConfig) {
+        if (openIdInformation && tokenExchangePrefix) {
           openIdInformation = await flows.TokenExchangeFlow.perform(tokenExchangeConfig, openIdInformation, context);
         }
       }
