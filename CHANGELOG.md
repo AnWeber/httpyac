@@ -1,3 +1,9 @@
+## 5.0.3 (2022-02-28)
+
+#### Fixes
+
+- OAuth2 does not use token exchange flow
+
 ## 5.0.2 (2022-02-28)
 
 #### Fixes
