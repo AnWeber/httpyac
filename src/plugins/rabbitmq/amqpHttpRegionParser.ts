@@ -76,6 +76,7 @@ function getAmqpLine(textLine: string, line: number): { request: AmqpRequest; sy
     return {
       request: {
         url: lineMatch.groups.url,
+        protocol: 'AMQP',
         method: 'AMQP',
       },
       symbol: {
@@ -94,6 +95,7 @@ function getAmqpLine(textLine: string, line: number): { request: AmqpRequest; sy
     return {
       request: {
         url: protocolMatch.groups.url,
+        protocol: 'AMQP',
         method: 'AMQP',
       },
       symbol: {

@@ -7,5 +7,5 @@ export interface GrpcRequest extends Request<'GRPC'> {
 }
 
 export function isGrpcRequest(request: Request | undefined): request is GrpcRequest {
-  return request?.method === 'GRPC';
+  return request?.protocol === 'GRPC';
 }

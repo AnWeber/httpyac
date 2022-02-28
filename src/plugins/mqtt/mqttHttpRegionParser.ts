@@ -75,6 +75,7 @@ function getMQTTLine(textLine: string, line: number): { request: MQTTRequest; sy
   if (lineMatch && lineMatch.length > 1 && lineMatch.groups) {
     return {
       request: {
+        protocol: 'MQTT',
         url: lineMatch.groups.url,
         method: 'MQTT',
       },
@@ -94,6 +95,7 @@ function getMQTTLine(textLine: string, line: number): { request: MQTTRequest; sy
     return {
       request: {
         url: protocolMatch.groups.url,
+        protocol: 'MQTT',
         method: 'MQTT',
       },
       symbol: {

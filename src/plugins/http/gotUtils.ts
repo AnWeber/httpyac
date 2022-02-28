@@ -159,6 +159,7 @@ function toHttpResponse(response: Response<unknown>): models.HttpResponse {
     timings: response.timings.phases,
     httpVersion: response.httpVersion,
     request: {
+      protocol: 'HTTP',
       method: response.request.options.method,
       url: `${response.request.options.url}`,
       headers: response.request.options.headers,

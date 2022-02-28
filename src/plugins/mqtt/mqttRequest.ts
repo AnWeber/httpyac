@@ -8,5 +8,5 @@ export interface MQTTRequest extends Request<'MQTT'> {
 }
 
 export function isMQTTRequest(request: Request | undefined): request is MQTTRequest {
-  return request?.method === 'MQTT';
+  return request?.protocol === 'MQTT';
 }

@@ -8,5 +8,5 @@ export interface AmqpRequest extends Request<'AMQP'> {
 }
 
 export function isAmqpRequest(request: Request | undefined): request is AmqpRequest {
-  return request?.method === 'AMQP';
+  return request?.protocol === 'AMQP';
 }

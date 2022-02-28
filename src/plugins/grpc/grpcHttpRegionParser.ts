@@ -75,6 +75,7 @@ function getGrpcLine(textLine: string, line: number): { request: GrpcRequest; sy
   if (lineMatch && lineMatch.length > 1 && lineMatch.groups) {
     return {
       request: {
+        protocol: 'GRPC',
         url: lineMatch.groups.url,
         method: 'GRPC',
       },
@@ -93,6 +94,7 @@ function getGrpcLine(textLine: string, line: number): { request: GrpcRequest; sy
   if (protocolMatch && protocolMatch.length > 1 && protocolMatch.groups) {
     return {
       request: {
+        protocol: 'GRPC',
         url: protocolMatch.groups.url,
         method: 'GRPC',
       },

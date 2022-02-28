@@ -5,5 +5,5 @@ export interface EventSourceRequest extends Request<'SSE'> {
 }
 
 export function isEventSourceRequest(request: Request | undefined): request is EventSourceRequest {
-  return request?.method === 'SSE';
+  return request?.protocol === 'SSE';
 }

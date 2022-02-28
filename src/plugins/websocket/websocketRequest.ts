@@ -7,5 +7,5 @@ export interface WebsocketRequest extends Request<'WS'> {
 }
 
 export function isWebsocketRequest(request: Request | undefined): request is WebsocketRequest {
-  return request?.method === 'WS';
+  return request?.protocol === 'WS';
 }

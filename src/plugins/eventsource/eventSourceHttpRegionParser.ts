@@ -77,6 +77,7 @@ function getEventSourceLine(
   if (lineMatch && lineMatch.length > 1 && lineMatch.groups) {
     return {
       request: {
+        protocol: 'SSE',
         url: lineMatch.groups.url,
         method: 'SSE',
       },

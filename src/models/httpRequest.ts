@@ -7,6 +7,7 @@ export interface HeadersContainer {
 }
 
 export interface Request<TMethod extends string = string> {
+  protocol?: string;
   url?: string;
   method?: TMethod;
   body?: unknown;
