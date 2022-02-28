@@ -28,5 +28,12 @@ describe('getOpenIdConfiguration', () => {
       }) as OpenIdConfiguration;
       expect(result.tokenEndpoint).toEqual('http://127.0.0.1/api/token');
     });
+    it('should fallback to oauth2 prefix', () => {
+      const result = getOpenIdConfiguration('prefix', {
+        oauth2_tokenEndpoint: '{{host}}/api/token',
+        host: 'http://127.0.0.1',
+      }) as OpenIdConfiguration;
+      expect(result.tokenEndpoint).toEqual('http://127.0.0.1/api/token');
+    });
   });
 });
