@@ -1,6 +1,7 @@
 import * as models from '../../models';
 import * as utils from '../../utils';
 import { AmqpClientAction } from './amqpClientAction';
+import { getAmqpMethod } from './amqpConstants';
 import { AmqpRequest } from './amqpRequest';
 
 const AmqpLine = /^\s*(amqp)\s*(?<url>.+?)\s*$/iu;
@@ -62,6 +63,8 @@ export async function parseAmqpLine(
         result.symbols?.push?.(...parseResult.symbols);
       }
     }
+
+    requestLine.request.method = getAmqpMethod(requestLine.request);
 
     context.httpRegion.hooks.execute.addObjHook(obj => obj.process, new AmqpClientAction());
 

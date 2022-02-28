@@ -179,14 +179,7 @@ export class AmqpClientAction {
   }
 
   private getMethod(request: AmqpRequest) {
-    let method = utils.getHeaderString(request.headers, constants.AmqpMethod);
-    if (!method) {
-      if (request.body) {
-        method = 'publish';
-      } else {
-        method = 'subscribe';
-      }
-    }
+    const method = constants.getAmqpMethod(request);
     const amqpMethods: Record<string, AmqpMethod> = {
       ack: this.ack,
       bind: this.bind,

@@ -1,3 +1,6 @@
+import { utils } from '../..';
+import { AmqpRequest } from './amqpRequest';
+
 export const AmqpChannelId = 'amqp_channel_id';
 export const AmqpQueue = 'amqp_queue';
 export const AmqpExchange = 'amqp_exchange';
@@ -30,3 +33,15 @@ export const AmqpIfEmpty = 'amqp_if_empty';
 export const AmqpPassive = 'amqp_passive';
 export const AmqpDurable = 'amqp_durable';
 export const AmqpAutoDelete = 'amqp_auto_delete';
+
+export function getAmqpMethod(request: AmqpRequest) {
+  let method = utils.getHeaderString(request.headers, AmqpMethod);
+  if (!method) {
+    if (request.body) {
+      method = 'publish';
+    } else {
+      method = 'consume';
+    }
+  }
+  return method;
+}
