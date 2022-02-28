@@ -1,4 +1,4 @@
-import { fileProvider, userInteractionProvider } from '../io';
+import { fileProvider, userInteractionProvider, log } from '../io';
 import * as models from '../models';
 import { promises as fs, createReadStream } from 'fs';
 import inquirer from 'inquirer';
@@ -123,11 +123,20 @@ function initUserInteractionProvider() {
     return answer.placeholder;
   };
   userInteractionProvider.getClipboard = async function getClipboard() {
-    const clipboard = await import('clipboardy');
-    return await clipboard.default.read();
+    try {
+      const clipboard = await import('clipboardy');
+      return await clipboard.default.read();
+    } catch (err) {
+      log.warn(err);
+      return '';
+    }
   };
   userInteractionProvider.setClipboard = async function setClipboard(message: string) {
-    const clipboard = await import('clipboardy');
-    await clipboard.default.write(message);
+    try {
+      const clipboard = await import('clipboardy');
+      await clipboard.default.write(message);
+    } catch (err) {
+      log.warn(err);
+    }
   };
 }
