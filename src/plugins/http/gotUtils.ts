@@ -192,25 +192,3 @@ function getBody(body: unknown) {
   }
   return undefined;
 }
-
-/**
- * Merges a raw HTTP headers array from a got HTTP Response into a record that
- * groups same-named lower-cased HTTP Headers to arrays of values.
- * I.e. HTTP headers that only appear once will be associated with a single-item string-array,
- * Headers that appear multiple times (e.g. Set-Cookie) are stored in multi-item string-arrays in order of appearence.
- * @param rawHeaders A raw HTTP headers array, even numbered indicies represent HTTP header names, odd numbered indicies represent header values.
- */
-export function mergeRawHttpHeaders(rawHeaders: string[]): Record<string, string[]> {
-  const mergedHeaders: Record<string, string[]> = {};
-  for (let i = 0; i < rawHeaders.length; i += 2) {
-    const headerRawName = rawHeaders[i];
-    const headerRawValue = rawHeaders[i + 1];
-    if (typeof headerRawValue === 'undefined') {
-      continue; // Likely at end of array, continue will make for-condition to evaluate falsy
-    }
-    const headerName = headerRawName.toLowerCase();
-    mergedHeaders[headerName] ||= [];
-    mergedHeaders[headerName].push(headerRawValue);
-  }
-  return mergedHeaders;
-}
