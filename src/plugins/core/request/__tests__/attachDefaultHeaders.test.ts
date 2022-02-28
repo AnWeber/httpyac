@@ -26,5 +26,16 @@ describe('attachDefaultHeaders', () => {
       expect(request.headers?.foo).toEqual('bar');
       expect(request.headers?.bar).toEqual('foo');
     });
+    it('do not override existing headers', async () => {
+      const request: models.Request = { headers: { foo: 'foo' } };
+      await attachDefaultHeaders(request, {
+        config: {
+          defaultHeaders: {
+            foo: 'bar',
+          },
+        },
+      } as unknown as models.ProcessorContext);
+      expect(request.headers?.foo).toEqual('foo');
+    });
   });
 });
