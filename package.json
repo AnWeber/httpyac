@@ -45,7 +45,7 @@
     "tsc": "tsc --declaration --emitDeclarationOnly --project tsconfig.build.json",
     "compile": "npm run esbuild && npm run tsc",
     "tsc-watch": "tsc --watch --project tsconfig.build.json",
-    "watch": "concurrently \"npm run esbuild -- --no-minify --watch\" \"npm run tsc -- --watch\"",
+    "watch": "concurrently \"npm run esbuild -- --no-minify --watch\" \"npm run tsc -- --watch\" \"npm test -- --watch\"",
     "packageJson-lint": "node ./buildSrc/lintPackageJson.js",
     "lockfile-lint": "lockfile-lint --path package-lock.json --validate-https --allowed-hosts npm --validate-checksum --validate-integrity",
     "eslint": "eslint src --ext ts",
