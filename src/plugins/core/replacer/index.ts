@@ -7,10 +7,10 @@ import { showInputBoxVariableReplacer } from './showInputBoxVariableReplacer';
 import { showQuickpickVariableReplacer } from './showQuickpickVariableReplacer';
 
 export function initReplaceVariableHook(api: models.HttpyacHooksApi) {
+  api.hooks.replaceVariable.addHook('host', hostVariableReplacer);
+  api.hooks.replaceVariable.addHook('name', replaceVariableNames);
   api.hooks.replaceVariable.addHook('showInputBox', showInputBoxVariableReplacer);
   api.hooks.replaceVariable.addHook('showQuickPick', showQuickpickVariableReplacer);
   api.hooks.replaceVariable.addHook('restClientDynamic', restClientVariableReplacer);
-  api.hooks.replaceVariable.addHook('host', hostVariableReplacer);
-  api.hooks.replaceVariable.addHook('name', replaceVariableNames);
   api.hooks.replaceVariable.addInterceptor(escapeVariableInterceptor);
 }
