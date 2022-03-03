@@ -1,5 +1,5 @@
 import * as models from '../../../models';
-import { escapeVariableReplacer } from './escapeVariableReplacer';
+import { escapeVariableInterceptor } from './escapeVariableReplacer';
 import { hostVariableReplacer } from './hostVariableReplacer';
 import { replaceVariableNames } from './nameVariableReplacer';
 import { restClientVariableReplacer } from './restClientVariableReplacer';
@@ -12,5 +12,5 @@ export function initReplaceVariableHook(api: models.HttpyacHooksApi) {
   api.hooks.replaceVariable.addHook('restClientDynamic', restClientVariableReplacer);
   api.hooks.replaceVariable.addHook('host', hostVariableReplacer);
   api.hooks.replaceVariable.addHook('name', replaceVariableNames);
-  api.hooks.replaceVariable.addHook('escape', escapeVariableReplacer);
+  api.hooks.replaceVariable.addInterceptor(escapeVariableInterceptor);
 }
