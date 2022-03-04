@@ -1,4 +1,4 @@
-import { log, fileProvider } from '../../io';
+import * as io from '../../io';
 import { PathLike, ProcessorContext } from '../../models';
 import { isPromise } from '../../utils/promiseUtils';
 import { toMultiLineArray } from '../../utils/stringUtils';
@@ -6,7 +6,7 @@ import Module from 'module';
 import path from 'path';
 import vm from 'vm';
 
-export function resolveModule(request: string, context: string): string | undefined {
+function resolveModule(request: string, context: string): string | undefined {
   let resolvedPath: string | undefined;
   try {
     try {
@@ -15,24 +15,26 @@ export function resolveModule(request: string, context: string): string | undefi
       resolvedPath = require.resolve(request, { paths: [context] });
     }
   } catch (e) {
-    log.debug(e);
+    io.log.debug(e);
   }
   return resolvedPath;
 }
 
 export function loadModule<T>(request: string, context: string, force = false): T | undefined {
-  try {
-    if (force) {
-      clearModule(request, context);
-    }
-    return Module.createRequire(path.resolve(context, 'package.json'))(request);
-  } catch (e) {
-    const resolvedPath = resolveModule(request, context);
-    if (resolvedPath) {
+  if (io.userInteractionProvider.isTrusted('loadModule')) {
+    try {
       if (force) {
-        clearRequireCache(resolvedPath);
+        clearModule(request, context);
       }
-      return require(resolvedPath);
+      return Module.createRequire(path.resolve(context, 'package.json'))(request);
+    } catch (e) {
+      const resolvedPath = resolveModule(request, context);
+      if (resolvedPath) {
+        if (force) {
+          clearRequireCache(resolvedPath);
+        }
+        return require(resolvedPath);
+      }
     }
   }
   return undefined;
@@ -51,7 +53,7 @@ function createModule(filename: string, source?: string | undefined): Module {
   return mod;
 }
 
-export function clearModule(request: string, context: string): void {
+function clearModule(request: string, context: string): void {
   const resolvedPath = resolveModule(request, context);
   if (resolvedPath) {
     clearRequireCache(resolvedPath);
@@ -82,6 +84,9 @@ export async function runScript(
     deleteVariable?: (key: string) => void;
   }
 ): Promise<Record<string, unknown>> {
+  if (!io.userInteractionProvider.isTrusted('runScript')) {
+    return {};
+  }
   const filename = toModuleFilename(options.fileName);
 
   const mod = createModule(filename);
@@ -98,8 +103,8 @@ export async function runScript(
     Buffer,
     process,
     requireUncached: (id: string) => {
-      log.warn(`requireUncached is deprecated. It can no longer be supported due to esm conversion.`);
-      const dirName = fileProvider.dirname(filename);
+      io.log.warn(`requireUncached is deprecated. It can no longer be supported due to esm conversion.`);
+      const dirName = io.fileProvider.dirname(filename);
       if (dirName) {
         clearModule(id, toModuleFilename(dirName));
       }
@@ -109,7 +114,7 @@ export async function runScript(
   });
 
   const contextKeys = Object.keys(context);
-  const compiledWrapper = vm.runInContext(Module.wrap(`${fileProvider.EOL}${source}`), context, {
+  const compiledWrapper = vm.runInContext(Module.wrap(`${io.fileProvider.EOL}${source}`), context, {
     filename,
     lineOffset: options.lineOffset,
     displayErrors: true,
@@ -131,7 +136,7 @@ export async function runScript(
   return result;
 }
 function toModuleFilename(fileName: PathLike) {
-  return fileProvider.fsPath(fileName) || fileProvider.toString(fileName);
+  return io.fileProvider.fsPath(fileName) || io.fileProvider.toString(fileName);
 }
 
 function deleteVariables(contextKeys: string[], context: vm.Context, deleteVariable?: (key: string) => void) {
@@ -145,6 +150,9 @@ function deleteVariables(contextKeys: string[], context: vm.Context, deleteVaria
 }
 
 export async function evalExpression(expression: string, context: ProcessorContext): Promise<unknown> {
+  if (!io.userInteractionProvider.isTrusted('evalExpression')) {
+    return undefined;
+  }
   const script = `exports.$result = (${expression});`;
   let lineOffset = context.httpRegion.symbol.startLine;
   if (context.httpRegion.symbol.source) {

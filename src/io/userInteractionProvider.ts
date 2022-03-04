@@ -1,6 +1,7 @@
 import { UserInteractionProvider } from '../models';
 
 export const userInteractionProvider: UserInteractionProvider = {
+  isTrusted: () => true,
   showNote: async function showNote() {
     throw new Error('Not Implemented');
   },

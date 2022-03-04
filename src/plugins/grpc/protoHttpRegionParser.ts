@@ -71,7 +71,7 @@ export class ProtoImportAction {
   async process(context: models.ProtoProcessorContext): Promise<boolean> {
     utils.report(context, `import proto ${this.protoDefinition.fileName}`);
     const definition = context.options.protoDefinitions?.[this.protoDefinition.fileName];
-    if (definition) {
+    if (definition && io.userInteractionProvider.isTrusted('Proto-Loader')) {
       const options = await this.convertLoaderOptions(definition.loaderOptions, context);
       definition.packageDefinition = await utils.replaceFilePath(
         this.protoDefinition.fileName,
