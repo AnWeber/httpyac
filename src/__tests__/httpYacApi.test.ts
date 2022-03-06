@@ -2,6 +2,7 @@ import { send } from '../httpYacApi';
 import * as io from '../io';
 import { HttpFileStore } from '../store';
 import { promises as fs } from 'fs';
+import { getLocal } from 'mockttp';
 import { EOL } from 'os';
 import { isAbsolute, dirname, extname, join } from 'path';
 
@@ -31,85 +32,70 @@ function initFileProvider(files?: Record<string, string> | undefined) {
 }
 
 describe('send', () => {
+  const localServer = getLocal();
+  beforeEach(() => localServer.start(8080));
+  afterEach(() => localServer.stop());
   describe('http', () => {
     it('get http', async () => {
       initFileProvider();
-      let exchangeIsCalled = false;
-      io.httpClientProvider.exchange = request => {
-        exchangeIsCalled = true;
-        expect(request.url).toBe('https://custom.yac');
-        return Promise.resolve({
-          statusCode: 200,
-          protocol: 'https',
-        });
-      };
+      const mockedEndpoints = await localServer.forGet('/get').thenReply(200);
+
       const httpFileStore = new HttpFileStore();
       const httpFile = await httpFileStore.getOrCreate(
         `any.http`,
         async () =>
           Promise.resolve(`
-        GET https://custom.yac
-        `),
+GET http://localhost:8080/get
+`),
         0,
-        {
-          workingDir: __dirname,
-        }
+        {}
       );
 
       const result = await send({
         httpFile,
       });
       expect(result).toBeTruthy();
-      expect(exchangeIsCalled).toBeTruthy();
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests.length).toBe(1);
+      expect(requests[0].headers['user-agent']).toBe('httpyac');
     });
     it('get http with multiline', async () => {
       initFileProvider();
-      io.httpClientProvider.exchange = request => {
-        expect(request.url).toBe('https://custom.yac/bar?test=foo');
-        expect(request.method).toBe('GET');
-        return Promise.resolve({
-          statusCode: 200,
-          protocol: 'https',
-        });
-      };
+      const mockedEndpoints = await localServer.forGet('/bar').thenReply(200);
       const httpFileStore = new HttpFileStore();
       const httpFile = await httpFileStore.getOrCreate(
         `any.http`,
         async () =>
           Promise.resolve(`
-GET https://custom.yac
+GET http://localhost:8080
   /bar
   ?test=foo
         `),
         0,
-        {
-          workingDir: __dirname,
-        }
+        {}
       );
 
       const result = await send({
         httpFile,
       });
+
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests.length).toBe(1);
+      expect(requests[0].path).toBe('/bar?test=foo');
       expect(result).toBeTruthy();
     });
     it('get http with headers', async () => {
       initFileProvider();
-      io.httpClientProvider.exchange = request => {
-        expect(request.url).toBe('https://custom.yac');
-        expect(request.method).toBe('GET');
-        expect(request.headers?.Authorization).toBe('Bearer test');
-        return Promise.resolve({
-          statusCode: 200,
-          protocol: 'https',
-        });
-      };
+
+      const mockedEndpoints = await localServer.forGet('/get').thenReply(200);
       const httpFileStore = new HttpFileStore();
       const httpFile = await httpFileStore.getOrCreate(
         `any.http`,
         async () =>
           Promise.resolve(`
-GET https://custom.yac
+GET http://localhost:8080/get
 Authorization: Bearer test
+Date: 2015-06-01
         `),
         0,
         {
@@ -120,66 +106,53 @@ Authorization: Bearer test
       const result = await send({
         httpFile,
       });
+
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests.length).toBe(1);
+      expect(requests[0].headers.authorization).toBe('Bearer test');
+      expect(requests[0].headers.date).toBe('2015-06-01');
       expect(result).toBeTruthy();
     });
     it('post http', async () => {
       initFileProvider();
-      let exchangeIsCalled = false;
       const body = JSON.stringify({ foo: 'foo', bar: 'bar' }, null, 2);
-      io.httpClientProvider.exchange = request => {
-        exchangeIsCalled = true;
-        expect(request.url).toBe('https://custom.yac');
-        expect(request.method).toBe('POST');
-        expect(request.body).toBe(body);
-        return Promise.resolve({
-          statusCode: 200,
-          protocol: 'https',
-        });
-      };
+      const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
+
       const httpFileStore = new HttpFileStore();
       const httpFile = await httpFileStore.getOrCreate(
         `any.http`,
         async () =>
           Promise.resolve(`
-POST https://custom.yac
+POST http://localhost:8080/post
 Content-Type: application/json
 
 ${body}
         `),
         0,
-        {
-          workingDir: __dirname,
-        }
+        {}
       );
-
       const result = await send({
         httpFile,
       });
       expect(result).toBeTruthy();
-      expect(exchangeIsCalled).toBeTruthy();
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests.length).toBe(1);
+      expect(requests[0].headers['content-type']).toBe('application/json');
+      expect(await requests[0].body.getText()).toBe(body);
     });
     it('imported body', async () => {
       const body = JSON.stringify({ foo: 'foo', bar: 'bar' }, null, 2);
       initFileProvider({
         'body.json': body,
       });
-      let exchangeIsCalled = false;
-      io.httpClientProvider.exchange = request => {
-        exchangeIsCalled = true;
-        expect(request.url).toBe('https://custom.yac');
-        expect(request.method).toBe('POST');
-        expect(request.body).toBe(body);
-        return Promise.resolve({
-          statusCode: 200,
-          protocol: 'https',
-        });
-      };
+
+      const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
       const httpFileStore = new HttpFileStore();
       const httpFile = await httpFileStore.getOrCreate(
         `any.http`,
         async () =>
           Promise.resolve(`
-POST https://custom.yac
+POST http://localhost:8080/post
 Content-Type: application/json
 
 <@ ./body.json
@@ -194,31 +167,24 @@ Content-Type: application/json
         httpFile,
       });
       expect(result).toBeTruthy();
-      expect(exchangeIsCalled).toBeTruthy();
+
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests.length).toBe(1);
+      expect(requests[0].headers['content-type']).toBe('application/json');
+      expect(await requests[0].body.getText()).toBe(body);
     });
     it('imported buffer body', async () => {
       const body = JSON.stringify({ foo: 'foo', bar: 'bar' }, null, 2);
       initFileProvider({
         'body.json': body,
       });
-      let exchangeIsCalled = false;
-      io.httpClientProvider.exchange = request => {
-        exchangeIsCalled = true;
-        expect(request.url).toBe('https://custom.yac');
-        expect(request.method).toBe('POST');
-        expect(Buffer.isBuffer(request.body)).toBeTruthy();
-        expect(request.body.toString('utf-8')).toBe(body);
-        return Promise.resolve({
-          statusCode: 200,
-          protocol: 'https',
-        });
-      };
+      const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
       const httpFileStore = new HttpFileStore();
       const httpFile = await httpFileStore.getOrCreate(
         `any.http`,
         async () =>
           Promise.resolve(`
-POST https://custom.yac
+POST http://localhost:8080/post
 Content-Type: application/json
 
 < ./body.json
@@ -233,30 +199,23 @@ Content-Type: application/json
         httpFile,
       });
       expect(result).toBeTruthy();
-      expect(exchangeIsCalled).toBeTruthy();
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests.length).toBe(1);
+      expect(requests[0].headers['content-type']).toBe('application/json');
+      expect(await requests[0].body.getText()).toBe(body);
     });
   });
   describe('graphql', () => {
     it('query + operation + variables', async () => {
       initFileProvider();
-      let exchangeIsCalled = false;
-      io.httpClientProvider.exchange = request => {
-        exchangeIsCalled = true;
-        expect(request.url).toBe('https://custom.yac/graphql');
-        expect(request.body).toBe(
-          '{"query":"query launchesQuery($limit: Int!){\\n  launchesPast(limit: $limit) {\\n    mission_name\\n    launch_date_local\\n    launch_site {\\n      site_name_long\\n    }\\n    rocket {\\n      rocket_name\\n      rocket_type\\n    }\\n    ships {\\n      name\\n      home_port\\n      image\\n    }\\n  }\\n}","operationName":"launchesQuery","variables":{"limit":10}}'
-        );
-        return Promise.resolve({
-          statusCode: 200,
-          protocol: 'https',
-        });
-      };
+      const mockedEndpoints = await localServer.forPost('/graphql').thenReply(200);
+
       const httpFileStore = new HttpFileStore();
       const httpFile = await httpFileStore.getOrCreate(
         `any.http`,
         async () =>
           Promise.resolve(`
-POST  https://custom.yac/graphql
+POST  http://localhost:8080/graphql
 
 query launchesQuery($limit: Int!){
   launchesPast(limit: $limit) {
@@ -282,31 +241,23 @@ query launchesQuery($limit: Int!){
 }
         `),
         0,
-        {
-          workingDir: __dirname,
-        }
+        {}
       );
 
       const result = await send({
         httpFile,
       });
       expect(result).toBeTruthy();
-      expect(exchangeIsCalled).toBeTruthy();
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests.length).toBe(1);
+      expect(requests[0].url).toBe('http://localhost:8080/graphql');
+      expect(await requests[0].body.getText()).toBe(
+        '{"query":"query launchesQuery($limit: Int!){\\n  launchesPast(limit: $limit) {\\n    mission_name\\n    launch_date_local\\n    launch_site {\\n      site_name_long\\n    }\\n    rocket {\\n      rocket_name\\n      rocket_type\\n    }\\n    ships {\\n      name\\n      home_port\\n      image\\n    }\\n  }\\n}","operationName":"launchesQuery","variables":{"limit":10}}'
+      );
     });
     it('query with fragment', async () => {
       initFileProvider();
-      let exchangeIsCalled = false;
-      io.httpClientProvider.exchange = request => {
-        exchangeIsCalled = true;
-        expect(request.url).toBe('https://api.spacex.land/graphql');
-        expect(request.body).toBe(
-          '{"query":"query launchesQuery($limit: Int!){\\n  launchesPast(limit: $limit) {\\n    mission_name\\n    launch_date_local\\n    launch_site {\\n      site_name_long\\n    }\\n    rocket {\\n      ...RocketParts\\n    }\\n  }\\n}\\nfragment RocketParts on LaunchRocket {\\n  rocket_name\\n  first_stage {\\n    cores {\\n      flight\\n      core {\\n        reuse_count\\n        status\\n      }\\n    }\\n  }\\n}","operationName":"launchesQuery","variables":{"limit":10}}'
-        );
-        return Promise.resolve({
-          statusCode: 200,
-          protocol: 'https',
-        });
-      };
+      const mockedEndpoints = await localServer.forPost('/graphql').thenReply(200);
       const httpFileStore = new HttpFileStore();
       const httpFile = await httpFileStore.getOrCreate(
         `any.http`,
@@ -325,7 +276,7 @@ fragment RocketParts on LaunchRocket {
   }
 }
 
-POST https://api.spacex.land/graphql HTTP/1.1
+POST http://localhost:8080/graphql HTTP/1.1
 Content-Type: application/json
 
 
@@ -347,38 +298,29 @@ query launchesQuery($limit: Int!){
 }
         `),
         0,
-        {
-          workingDir: __dirname,
-        }
+        {}
       );
 
       const result = await send({
         httpFile,
       });
       expect(result).toBeTruthy();
-      expect(exchangeIsCalled).toBeTruthy();
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests.length).toBe(1);
+      expect(requests[0].url).toBe('http://localhost:8080/graphql');
+      expect(await requests[0].body.getText()).toBe(
+        '{"query":"query launchesQuery($limit: Int!){\\n  launchesPast(limit: $limit) {\\n    mission_name\\n    launch_date_local\\n    launch_site {\\n      site_name_long\\n    }\\n    rocket {\\n      ...RocketParts\\n    }\\n  }\\n}\\nfragment RocketParts on LaunchRocket {\\n  rocket_name\\n  first_stage {\\n    cores {\\n      flight\\n      core {\\n        reuse_count\\n        status\\n      }\\n    }\\n  }\\n}","operationName":"launchesQuery","variables":{"limit":10}}'
+      );
     });
     it('only query', async () => {
       initFileProvider();
-      let exchangeIsCalled = false;
-      io.httpClientProvider.exchange = request => {
-        exchangeIsCalled = true;
-        expect(request.url).toBe('https://api.spacex.land/graphql');
-        expect(request.method).toBe('POST');
-        expect(request.body).toBe(
-          '{"query":"query company_query {\\n  company {\\n    coo\\n  }\\n}","operationName":"company_query"}'
-        );
-        return Promise.resolve({
-          statusCode: 200,
-          protocol: 'https',
-        });
-      };
+      const mockedEndpoints = await localServer.forPost('/graphql').thenReply(200);
       const httpFileStore = new HttpFileStore();
       const httpFile = await httpFileStore.getOrCreate(
         `any.http`,
         async () =>
           Promise.resolve(`
-POST https://api.spacex.land/graphql
+POST http://localhost:8080/graphql
 Content-Type: application/json
 
 query company_query {
@@ -397,7 +339,12 @@ query company_query {
         httpFile,
       });
       expect(result).toBeTruthy();
-      expect(exchangeIsCalled).toBeTruthy();
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests.length).toBe(1);
+      expect(requests[0].url).toBe('http://localhost:8080/graphql');
+      expect(await requests[0].body.getText()).toBe(
+        '{"query":"query company_query {\\n  company {\\n    coo\\n  }\\n}","operationName":"company_query"}'
+      );
     });
     it('imported query', async () => {
       initFileProvider({
@@ -422,25 +369,14 @@ query launchesQuery($limit: Int!){
 }
         `,
       });
-      let exchangeIsCalled = false;
-      io.httpClientProvider.exchange = request => {
-        exchangeIsCalled = true;
-        expect(request.url).toBe('https://api.spacex.land/graphql');
-        expect(request.method).toBe('POST');
-        expect(request.body).toBe(
-          '{"query":"\\nquery launchesQuery($limit: Int!){\\n  launchesPast(limit: $limit) {\\n    mission_name\\n    launch_date_local\\n    launch_site {\\n      site_name_long\\n    }\\n    rocket {\\n      rocket_name\\n      rocket_type\\n    }\\n    ships {\\n      name\\n      home_port\\n      image\\n    }\\n  }\\n}\\n        ","operationName":"launchesQuery","variables":{"limit":10}}'
-        );
-        return Promise.resolve({
-          statusCode: 200,
-          protocol: 'https',
-        });
-      };
+      const mockedEndpoints = await localServer.forPost('/graphql').thenReply(200);
+
       const httpFileStore = new HttpFileStore();
       const httpFile = await httpFileStore.getOrCreate(
         `any.http`,
         async () =>
           Promise.resolve(`
-POST https://api.spacex.land/graphql
+POST http://localhost:8080/graphql
 Content-Type: application/json
 
 gql launchesQuery < ./graphql.gql
@@ -459,7 +395,12 @@ gql launchesQuery < ./graphql.gql
         httpFile,
       });
       expect(result).toBeTruthy();
-      expect(exchangeIsCalled).toBeTruthy();
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests.length).toBe(1);
+      expect(requests[0].url).toBe('http://localhost:8080/graphql');
+      expect(await requests[0].body.getText()).toBe(
+        '{"query":"\\nquery launchesQuery($limit: Int!){\\n  launchesPast(limit: $limit) {\\n    mission_name\\n    launch_date_local\\n    launch_site {\\n      site_name_long\\n    }\\n    rocket {\\n      rocket_name\\n      rocket_type\\n    }\\n    ships {\\n      name\\n      home_port\\n      image\\n    }\\n  }\\n}\\n        ","operationName":"launchesQuery","variables":{"limit":10}}'
+      );
     });
   });
 });
