@@ -403,4 +403,280 @@ gql launchesQuery < ./graphql.gql
       );
     });
   });
+  describe('metadata', () => {
+    it('name + ref', async () => {
+      initFileProvider();
+      const refEndpoints = await localServer
+        .forGet('/json')
+        .thenReply(200, JSON.stringify({ foo: 'bar', test: 1 }), { 'content-type': 'application/json' });
+      const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
+
+      const httpFileStore = new HttpFileStore();
+      const httpFile = await httpFileStore.getOrCreate(
+        `any.http`,
+        async () =>
+          Promise.resolve(`
+# @name foo
+GET  http://localhost:8080/json
+
+
+###
+# @ref foo
+POST http://localhost:8080/post?test={{foo.test}}
+
+foo={{foo.foo}}
+
+###
+# @ref foo
+POST http://localhost:8080/post?test={{foo.test}}
+
+foo={{foo.foo}}
+        `),
+        0,
+        {}
+      );
+
+      const [, ...httpRegions] = httpFile.httpRegions;
+      const result = await send({
+        httpFile,
+        httpRegions,
+      });
+      expect(result).toBeTruthy();
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests[0].url).toBe('http://localhost:8080/post?test=1');
+      expect(await requests[0].body.getText()).toBe('foo=bar');
+      const refRequests = await refEndpoints.getSeenRequests();
+      expect(refRequests.length).toBe(1);
+    });
+    it('name + import + ref', async () => {
+      initFileProvider({
+        'import.http': `
+# @name foo
+GET  http://localhost:8080/json
+        `,
+      });
+      await localServer
+        .forGet('/json')
+        .thenReply(200, JSON.stringify({ foo: 'bar', test: 1 }), { 'content-type': 'application/json' });
+      const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
+
+      const httpFileStore = new HttpFileStore();
+      const httpFile = await httpFileStore.getOrCreate(
+        `any.http`,
+        async () =>
+          Promise.resolve(`
+
+# @import ./import.http
+###
+# @ref foo
+POST http://localhost:8080/post?test={{foo.test}}
+
+foo={{foo.foo}}
+        `),
+        0,
+        {}
+      );
+
+      const result = await send({
+        httpFile,
+        httpRegion: httpFile.httpRegions[1],
+      });
+      expect(result).toBeTruthy();
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests[0].url).toBe('http://localhost:8080/post?test=1');
+      expect(await requests[0].body.getText()).toBe('foo=bar');
+    });
+    it('name + forceRef', async () => {
+      initFileProvider();
+      const refEndpoints = await localServer
+        .forGet('/json')
+        .thenReply(200, JSON.stringify({ foo: 'bar', test: 1 }), { 'content-type': 'application/json' });
+      const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
+
+      const httpFileStore = new HttpFileStore();
+      const httpFile = await httpFileStore.getOrCreate(
+        `any.http`,
+        async () =>
+          Promise.resolve(`
+# @name foo
+GET  http://localhost:8080/json
+
+
+###
+# @forceRef foo
+POST http://localhost:8080/post?test={{foo.test}}
+
+foo={{foo.foo}}
+
+
+###
+# @forceRef foo
+POST http://localhost:8080/post?test={{foo.test}}
+
+foo={{foo.foo}}
+        `),
+        0,
+        {}
+      );
+
+      const [, ...httpRegions] = httpFile.httpRegions;
+      const result = await send({
+        httpFile,
+        httpRegions,
+      });
+      expect(result).toBeTruthy();
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests[0].url).toBe('http://localhost:8080/post?test=1');
+      expect(await requests[0].body.getText()).toBe('foo=bar');
+      const refRequests = await refEndpoints.getSeenRequests();
+      expect(refRequests.length).toBe(2);
+    });
+    it('disabled', async () => {
+      initFileProvider();
+      const mockedEndpoints = await localServer
+        .forGet('/json')
+        .thenReply(200, JSON.stringify({ foo: 'bar', test: 1 }), { 'content-type': 'application/json' });
+
+      const httpFileStore = new HttpFileStore();
+      const httpFile = await httpFileStore.getOrCreate(
+        `any.http`,
+        async () =>
+          Promise.resolve(`
+# @disabled
+GET  http://localhost:8080/json
+        `),
+        0,
+        {}
+      );
+
+      const result = await send({
+        httpFile,
+      });
+      expect(result).toBeTruthy();
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests.length).toBe(0);
+    });
+    it('jwt', async () => {
+      initFileProvider();
+      await localServer.forGet('/json').thenReply(
+        200,
+        JSON.stringify({
+          foo: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
+          test: 1,
+        }),
+        { 'content-type': 'application/json' }
+      );
+
+      const httpFileStore = new HttpFileStore();
+      const httpFile = await httpFileStore.getOrCreate(
+        `any.http`,
+        async () =>
+          Promise.resolve(`
+# @jwt foo
+GET  http://localhost:8080/json
+
+        `),
+        0,
+        {}
+      );
+
+      httpFile.hooks.onResponse.addHook('test', response => {
+        expect(response?.parsedBody).toBeDefined();
+        expect((response?.parsedBody as Record<string, unknown>)?.foo_parsed).toBeDefined();
+      });
+
+      const result = await send({
+        httpFile,
+      });
+      expect(result).toBeTruthy();
+    });
+    it('loop for of', async () => {
+      initFileProvider();
+      const mockedEndpoints = await localServer.forGet('/json').thenReply(200);
+
+      const httpFileStore = new HttpFileStore();
+      const httpFile = await httpFileStore.getOrCreate(
+        `any.http`,
+        async () =>
+          Promise.resolve(`
+{{
+  exports.data = ['a', 'b', 'c'];
+}}
+###
+# @loop for item of data
+GET  http://localhost:8080/json?test={{item}}
+        `),
+        0,
+        {}
+      );
+
+      const result = await send({
+        httpFile,
+      });
+      expect(result).toBeTruthy();
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests.length).toBe(3);
+      expect(requests[0].url).toBe('http://localhost:8080/json?test=a');
+      expect(requests[1].url).toBe('http://localhost:8080/json?test=b');
+      expect(requests[2].url).toBe('http://localhost:8080/json?test=c');
+    });
+    it('loop for', async () => {
+      initFileProvider();
+      const mockedEndpoints = await localServer.forGet('/json').thenReply(200);
+
+      const httpFileStore = new HttpFileStore();
+      const httpFile = await httpFileStore.getOrCreate(
+        `any.http`,
+        async () =>
+          Promise.resolve(`
+# @loop for 3
+GET  http://localhost:8080/json?test={{$index}}
+        `),
+        0,
+        {}
+      );
+
+      const result = await send({
+        httpFile,
+      });
+      expect(result).toBeTruthy();
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests.length).toBe(3);
+      expect(requests[0].url).toBe('http://localhost:8080/json?test=0');
+      expect(requests[1].url).toBe('http://localhost:8080/json?test=1');
+      expect(requests[2].url).toBe('http://localhost:8080/json?test=2');
+    });
+    it('loop while', async () => {
+      initFileProvider();
+      const mockedEndpoints = await localServer.forGet('/json').thenReply(200);
+
+      const httpFileStore = new HttpFileStore();
+      const httpFile = await httpFileStore.getOrCreate(
+        `any.http`,
+        async () =>
+          Promise.resolve(`
+{{
+  exports.expression = {
+    index: 0,
+  };
+}}
+###
+# @loop while expression.index < 3
+GET  http://localhost:8080/json?test={{expression.index++}}
+        `),
+        0,
+        {}
+      );
+
+      const result = await send({
+        httpFile,
+      });
+      expect(result).toBeTruthy();
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests.length).toBe(3);
+      expect(requests[0].url).toBe('http://localhost:8080/json?test=0');
+      expect(requests[1].url).toBe('http://localhost:8080/json?test=1');
+      expect(requests[2].url).toBe('http://localhost:8080/json?test=2');
+    });
+  });
 });
