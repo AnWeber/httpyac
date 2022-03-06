@@ -8,7 +8,7 @@ export async function responseAsVariable(
 ): Promise<void> {
   const body = response.parsedBody || response.body;
   if (context.httpRegion.metaData.name || context.httpRegion.metaData.jwt) {
-    handleJWTMetaData(body, context);
+    handleJWTMetaData(response, body, context);
     handleNameMetaData(response, body, context);
   }
   setLastResponseInVariables(context, response);
@@ -38,8 +38,8 @@ function handleNameMetaData(response: models.HttpResponse, body: unknown, contex
   }
 }
 
-function handleJWTMetaData(body: unknown, { httpRegion }: models.ProcessorContext) {
-  if (httpRegion.metaData.jwt && httpRegion.response) {
+function handleJWTMetaData(response: models.HttpResponse, body: unknown, { httpRegion }: models.ProcessorContext) {
+  if (httpRegion.metaData.jwt) {
     if (body && typeof body === 'object') {
       const entries = Object.entries(body);
 
@@ -54,9 +54,9 @@ function handleJWTMetaData(body: unknown, { httpRegion }: models.ProcessorContex
           entries.push([`${key}_parsed`, val]);
         }
       }
-      httpRegion.response.parsedBody = Object.fromEntries(entries);
-      httpRegion.response.prettyPrintBody = JSON.stringify(httpRegion.response.parsedBody, null, 2);
-      httpRegion.response.body = httpRegion.response.prettyPrintBody;
+      response.parsedBody = Object.fromEntries(entries);
+      response.prettyPrintBody = JSON.stringify(response.parsedBody, null, 2);
+      response.body = response.prettyPrintBody;
     }
   }
 }
