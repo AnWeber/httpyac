@@ -1,3 +1,15 @@
+## 5.1.0 (2022-03-06)
+
+#### Features
+
+- add workspace trust support (AnWeber/vscode-httpyac#104)
+- OAuth2 Authorization Code Flow and Password Flow supports public clients (#214)
+
+#### Fixes
+
+- fixed parsing of meta data `# @jwt`
+- fix order of variable replacer (#216)
+
 ## 5.0.4 (2022-02-28)
 
 #### Fixes
