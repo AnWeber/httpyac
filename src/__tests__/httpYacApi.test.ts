@@ -679,4 +679,157 @@ GET  http://localhost:8080/json?test={{expression.index++}}
       expect(requests[2].url).toBe('http://localhost:8080/json?test=2');
     });
   });
+  describe('variables', () => {
+    it('file variables', async () => {
+      initFileProvider();
+      const mockedEndpoints = await localServer
+        .forGet('/json')
+        .thenReply(200, JSON.stringify({ foo: 'bar', test: 1 }), { 'content-type': 'application/json' });
+
+      const httpFileStore = new HttpFileStore();
+      const httpFile = await httpFileStore.getOrCreate(
+        `any.http`,
+        async () =>
+          Promise.resolve(`
+@foo=foo
+@bar={{foo}}bar
+GET  http://localhost:8080/json?bar={{bar}}
+        `),
+        0,
+        {}
+      );
+
+      const result = await send({
+        httpFile,
+      });
+      expect(result).toBeTruthy();
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests[0].url).toBe('http://localhost:8080/json?bar=foobar');
+    });
+    it('host', async () => {
+      initFileProvider();
+      const mockedEndpoints = await localServer
+        .forGet('/json')
+        .thenReply(200, JSON.stringify({ foo: 'bar', test: 1 }), { 'content-type': 'application/json' });
+
+      const httpFileStore = new HttpFileStore();
+      const httpFile = await httpFileStore.getOrCreate(
+        `any.http`,
+        async () =>
+          Promise.resolve(`
+@host=http://localhost:8080
+GET  /json
+        `),
+        0,
+        {}
+      );
+
+      const result = await send({
+        httpFile,
+      });
+      expect(result).toBeTruthy();
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests[0].url).toBe('http://localhost:8080/json');
+    });
+    it('escape handlebar', async () => {
+      initFileProvider();
+      const mockedEndpoints = await localServer
+        .forPost('/post')
+        .thenReply(200, JSON.stringify({ foo: 'bar', test: 1 }), { 'content-type': 'application/json' });
+
+      const httpFileStore = new HttpFileStore();
+
+      const escape = `\\{\\{title\\}\\}`;
+      const httpFile = await httpFileStore.getOrCreate(
+        `any.http`,
+        async () =>
+          Promise.resolve(`
+POST  http://localhost:8080/post
+
+<html>
+<div>${escape}</div>
+</html>
+        `),
+        0,
+        {}
+      );
+
+      const result = await send({
+        httpFile,
+      });
+      expect(result).toBeTruthy();
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(await requests[0].body.getText()).toBe('<html>\n<div>{{title}}</div>\n</html>');
+    });
+    it('basic auth', async () => {
+      initFileProvider();
+      const mockedEndpoints = await localServer
+        .forGet('/json')
+        .thenReply(200, JSON.stringify({ foo: 'bar', test: 1 }), { 'content-type': 'application/json' });
+
+      const httpFileStore = new HttpFileStore();
+      const httpFile = await httpFileStore.getOrCreate(
+        `any.http`,
+        async () =>
+          Promise.resolve(`
+GET  http://localhost:8080/json
+Authorization: Basic john:doe
+
+###
+GET  http://localhost:8080/json
+Authorization: Basic john doe
+
+        `),
+        0,
+        {}
+      );
+
+      const result = await send({
+        httpFile,
+      });
+      expect(result).toBeTruthy();
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests.length).toBe(2);
+      expect(requests[0].headers.authorization).toBe('Basic am9objpkb2U=');
+      expect(requests[1].headers.authorization).toBe('Basic am9objpkb2U=');
+    });
+    it('digest auth', async () => {
+      initFileProvider();
+      const missingAuthEndpoints = await localServer
+        .forGet('/json')
+        .matching(request => !request.headers.authorization)
+        .thenReply(401, null, {
+          'www-authenticate':
+            'Digest realm="json@localhost",qop="auth,auth-int",nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093",opaque="5ccc069c403ebaf9f0171e9517f40e41"',
+        });
+      const mockedEndpoints = await localServer
+        .forGet('/json')
+        .matching(request => !!request.headers.authorization)
+        .thenReply(200);
+
+      const httpFileStore = new HttpFileStore();
+      const httpFile = await httpFileStore.getOrCreate(
+        `any.http`,
+        async () =>
+          Promise.resolve(`
+GET  http://localhost:8080/json
+Authorization: Digest john doe
+        `),
+        0,
+        {}
+      );
+
+      const result = await send({
+        httpFile,
+      });
+      expect(result).toBeTruthy();
+      const authMissingRequests = await missingAuthEndpoints.getSeenRequests();
+      expect(authMissingRequests.length).toBe(1);
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests.length).toBe(1);
+      expect(requests[0].headers.authorization).toBe(
+        'Digest username="john", realm="json@localhost", nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093", uri="/json", response="4d157d692f3e05a1cbe192ddbc427782", opaque="5ccc069c403ebaf9f0171e9517f40e41"'
+      );
+    });
+  });
 });

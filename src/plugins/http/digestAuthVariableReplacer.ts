@@ -3,7 +3,7 @@ import { isHttpRequest, isString } from '../../utils';
 import { createHash } from 'crypto';
 import type { CancelableRequest, OptionsOfUnknownResponseBody, Response } from 'got';
 import { URL } from 'url';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 export async function digestAuthVariableReplacer(
   text: unknown,
@@ -48,7 +48,7 @@ function digestFactory(username: string, password: string) {
 
       const qop = /(^|,)\s*auth\s*($|,)/u.test(challenge.qop) && 'auth';
       const nc = qop && '00000001';
-      const cnonce = qop && uuidv4().replace(/-/gu, '');
+      const cnonce = qop && uuid().replace(/-/gu, '');
       const ha1 = ha1Compute(challenge.algorithm, username, password, challenge.realm, challenge.nonce, cnonce);
       const ha2 = md5(`${response.request.options.method}:${url.pathname}`);
       const digestResponse = qop
