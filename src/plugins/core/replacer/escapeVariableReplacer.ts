@@ -4,9 +4,9 @@ import { HookTriggerContext } from 'hookpoint';
 
 export const escapeVariableInterceptor = {
   afterLoop: async function escapeVariable(
-    hookContext: HookTriggerContext<[unknown, string, models.ProcessorContext], boolean>
+    hookContext: HookTriggerContext<[unknown, string, models.ProcessorContext], unknown>
   ): Promise<boolean> {
-    const [text, ...spread] = hookContext.args;
+    const [text] = hookContext.args;
     if (isString(text)) {
       const escapeRegex = /(?:\\\{){2}([^}{2}]+)(?:\\\}){2}/gu;
       let match: RegExpExecArray | null;
@@ -15,7 +15,9 @@ export const escapeVariableInterceptor = {
         const [searchValue, variable] = match;
         result = result.replace(searchValue, `{{${variable}}}`);
       }
-      hookContext.args = [result, ...spread];
+      if (result !== text) {
+        hookContext.results.push(result);
+      }
     }
     return true;
   },
