@@ -36,6 +36,7 @@ class AuthorizationCodeFlow implements OpenIdFlow {
             response_type: 'code',
             state,
             audience: config.audience,
+            resource: config.resource,
             redirect_uri: config.redirectUri.toString(),
           })}`;
 

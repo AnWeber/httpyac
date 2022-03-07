@@ -52,6 +52,7 @@ export function getOpenIdConfiguration(
     responseMode: getVariable(variables, variablePrefix, 'responseMode'),
     audience: getVariable(variables, variablePrefix, 'audience'),
     scope: getVariable(variables, variablePrefix, 'scope'),
+    resource: getVariable(variables, variablePrefix, 'resource'),
     username: getVariable(variables, variablePrefix, 'username'),
     password: getVariable(variables, variablePrefix, 'password'),
     subjectIssuer: getVariable(variables, variablePrefix, 'subjectIssuer'),

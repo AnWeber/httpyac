@@ -39,6 +39,7 @@ class ImplicitFlow implements OpenIdFlow {
             state,
             response_mode: config.responseMode,
             audience: config.audience,
+            resource: config.resource,
             redirect_uri: config.redirectUri.toString(),
           })}`;
 

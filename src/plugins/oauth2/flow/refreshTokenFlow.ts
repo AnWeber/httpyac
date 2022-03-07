@@ -22,13 +22,19 @@ class RefreshTokenFlow {
       !this.isTokenExpired(openIdInformation.time, openIdInformation.timeSkew, openIdInformation.refreshExpiresIn)
     ) {
       utils.report(context, 'execute OAuth2 refresh_token flow');
+      const { 
+        tokenEndpoint, scope, resource, audience 
+      } = openIdInformation.config;
       return requestOpenIdInformation(
         {
-          url: openIdInformation.config.tokenEndpoint,
+          url: tokenEndpoint,
           method: 'POST',
           body: utils.toQueryParams({
             grant_type: 'refresh_token',
             refresh_token: openIdInformation.refreshToken,
+            scope,
+            audience,
+            resource,
           }),
         },
         {
