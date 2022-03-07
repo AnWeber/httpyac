@@ -13,6 +13,7 @@ export interface OpenIdConfiguration {
   responseType: string;
   responseMode?: string;
   audience?: string;
+  resource?: string;
   scope: string;
   keepAlive: boolean;
   username?: string;

@@ -44,6 +44,8 @@ class PasswordFlow implements OpenIdFlow {
             tokenEndpoint: config.tokenEndpoint,
             grantType: 'password',
             username: config.username,
+            audience: config.audience,
+            resource: config.resource,
           },
         },
         context
