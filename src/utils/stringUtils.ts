@@ -1,4 +1,5 @@
 import { fileProvider } from '../io';
+import { createHash } from 'crypto';
 
 export function toMultiLineString(lines: Array<string>): string {
   return lines.join(fileProvider.EOL);
@@ -27,12 +28,17 @@ export function isStringEmpty(text: unknown): boolean {
 }
 
 export function stateGenerator(length = 30): string {
-  const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  // unreserved characters according to RFC 3986
+  const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-._~';
   const result = [];
   for (let i = length; i > 0; --i) {
     result.push(chars[Math.floor(Math.random() * chars.length)]);
   }
   return result.join('');
+}
+
+export function createSha256(data: string): string {
+  return createHash('sha256').update(data, 'ascii').digest('base64url');
 }
 
 export function toString(value: unknown): string | undefined {

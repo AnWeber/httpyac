@@ -26,6 +26,7 @@ class AuthorizationCodeFlow implements OpenIdFlow {
     if (id) {
       return new Promise<models.OpenIdInformation | false>((resolve, reject) => {
         const state = utils.stateGenerator();
+        const verifier = config.usePkce ? utils.stateGenerator(64) : undefined;
         try {
           utils.report(context, 'execute OAuth2 authorization_code flow');
           const authUrl = `${config.authorizationEndpoint}${
@@ -37,6 +38,7 @@ class AuthorizationCodeFlow implements OpenIdFlow {
             state,
             audience: config.audience,
             redirect_uri: config.redirectUri.toString(),
+            ...(verifier ? { code_challenge: utils.createSha256(verifier), code_challenge_method: 'S256' } : {}),
           })}`;
 
           let unregisterProgress: (() => void) | undefined;
@@ -65,6 +67,7 @@ class AuthorizationCodeFlow implements OpenIdFlow {
                       scope: config.scope,
                       code: params.code,
                       redirect_uri: config.redirectUri.toString(),
+                      ...(verifier ? { code_verifier: verifier } : {}),
                     }),
                   },
                   {

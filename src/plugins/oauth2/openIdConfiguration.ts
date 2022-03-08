@@ -61,6 +61,7 @@ export function getOpenIdConfiguration(
       ['false', '0', false].indexOf(getVariable(variables, variablePrefix, 'useAuthorizationHeader')) < 0,
     useDeviceCodeClientSecret:
       ['true', '1', true].indexOf(getVariable(variables, variablePrefix, 'useDeviceCodeClientSecret')) >= 0,
+    usePkce: ['true', '1', true].indexOf(getVariable(variables, variablePrefix, 'usePkce')) >= 0,
   };
   return config;
 }
