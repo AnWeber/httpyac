@@ -21,6 +21,7 @@ export interface OpenIdConfiguration {
   subjectIssuer?: string;
   useAuthorizationHeader: boolean;
   useDeviceCodeClientSecret?: boolean;
+  usePkce: boolean;
   redirectUri: URL;
 }
 
