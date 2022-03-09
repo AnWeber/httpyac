@@ -32,6 +32,8 @@ class PasswordFlow implements OpenIdFlow {
             scope: config.scope,
             username: config.username,
             password: config.password,
+            audience: config.audience,
+            resource: config.resource,
           }),
         },
         {
@@ -44,8 +46,6 @@ class PasswordFlow implements OpenIdFlow {
             tokenEndpoint: config.tokenEndpoint,
             grantType: 'password',
             username: config.username,
-            audience: config.audience,
-            resource: config.resource,
           },
         },
         context
