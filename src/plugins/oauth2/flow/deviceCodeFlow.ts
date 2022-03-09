@@ -154,6 +154,8 @@ class DeviceCodeFlow implements OpenIdFlow {
           client_id: config.clientId,
           client_secret: config.useDeviceCodeClientSecret ? config.clientSecret : undefined,
           scope: config.scope || 'openid',
+          audience: config.audience,
+          resource: config.resource,
         }),
       },
       { showProgressBar: false }
