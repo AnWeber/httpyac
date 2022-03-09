@@ -30,6 +30,8 @@ class ClientCredentialsFlow implements OpenIdFlow {
           body: utils.toQueryParams({
             grant_type: 'client_credentials',
             scope: config.scope,
+            audience: config.audience,
+            resource: config.resource,
           }),
         },
         {
