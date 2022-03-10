@@ -25,12 +25,7 @@ class ImportMetaAction {
   async process(context: ImportProcessorContext): Promise<boolean> {
     const httpFile = await utils.replaceFilePath(this.fileName, context, async (absoluteFileName: models.PathLike) => {
       io.log.trace(`parse imported file ${absoluteFileName}`);
-      const text = await io.fileProvider.readFile(absoluteFileName, 'utf-8');
-      const ref = await this.httpFileStore.getOrCreate(absoluteFileName, () => Promise.resolve(text), 0, {
-        workingDir: context.httpFile.rootDir,
-        config: context.config,
-        activeEnvironment: context.httpFile.activeEnvironment,
-      });
+      const ref = await this.getHttpFile(absoluteFileName, context);
       if (!context.options.httpFiles) {
         context.options.httpFiles = [];
       }
@@ -54,5 +49,18 @@ class ImportMetaAction {
       return await utils.executeGlobalScripts(cloneContext);
     }
     return !!httpFile;
+  }
+
+  private async getHttpFile(absoluteFileName: models.PathLike, context: ImportProcessorContext) {
+    const httpFile = await this.httpFileStore.get(absoluteFileName);
+    if (httpFile) {
+      return httpFile;
+    }
+    const text = await io.fileProvider.readFile(absoluteFileName, 'utf-8');
+    return await this.httpFileStore.parse(absoluteFileName, text, {
+      workingDir: context.httpFile.rootDir,
+      config: context.config,
+      activeEnvironment: context.httpFile.activeEnvironment,
+    });
   }
 }
