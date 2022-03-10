@@ -18,8 +18,10 @@ export async function requestOpenIdInformation(
     }
 
     if (
-      request.headers && options.config.useAuthorizationHeader
-      && options.config.clientId && options.config.clientSecret
+      request.headers &&
+      options.config.useAuthorizationHeader &&
+      options.config.clientId &&
+      options.config.clientSecret
     ) {
       request.headers.authorization = `Basic ${Buffer.from(
         `${options.config.clientId}:${options.config.clientSecret}`
