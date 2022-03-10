@@ -25,10 +25,14 @@ class ImportMetaAction {
   async process(context: ImportProcessorContext): Promise<boolean> {
     const httpFile = await utils.replaceFilePath(this.fileName, context, async (absoluteFileName: models.PathLike) => {
       io.log.trace(`parse imported file ${absoluteFileName}`);
-      const ref = await this.getHttpFile(absoluteFileName, context);
       if (!context.options.httpFiles) {
         context.options.httpFiles = [];
       }
+      const httpFile = context.options.httpFiles.find(obj => obj.ref.fileName === absoluteFileName);
+      if (httpFile) {
+        return httpFile.ref;
+      }
+      const ref = await this.getHttpFile(absoluteFileName, context);
       context.options.httpFiles.push({ base: context.httpFile, ref });
       return ref;
     });
