@@ -1,5 +1,4 @@
 import { fileProvider } from '../io';
-import { createHash } from 'crypto';
 
 export function toMultiLineString(lines: Array<string>): string {
   return lines.join(fileProvider.EOL);
@@ -35,10 +34,6 @@ export function stateGenerator(length = 30): string {
     result.push(chars[Math.floor(Math.random() * chars.length)]);
   }
   return result.join('');
-}
-
-export function createSha256(data: string): string {
-  return createHash('sha256').update(data, 'ascii').digest('base64url');
 }
 
 export function toString(value: unknown): string | undefined {
