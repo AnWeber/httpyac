@@ -204,6 +204,38 @@ Content-Type: application/json
       expect(requests[0].headers['content-type']).toBe('application/json');
       expect(await requests[0].body.getText()).toBe(body);
     });
+    it('x-www-form-urlencoded', async () => {
+      const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
+      const httpFileStore = new HttpFileStore();
+      const httpFile = await httpFileStore.getOrCreate(
+        `any.http`,
+        async () =>
+          Promise.resolve(`
+@clientId=test
+@clientSecret=xxxx-xxxxxxx-xxxxxx-xxxx
+
+          POST http://localhost:8080/post
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials&client_id={{clientId}}&client_secret={{clientSecret}}
+        `),
+        0,
+        {
+          workingDir: __dirname,
+        }
+      );
+
+      const result = await send({
+        httpFile,
+      });
+      expect(result).toBeTruthy();
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests.length).toBe(1);
+      expect(requests[0].headers['content-type']).toBe('application/x-www-form-urlencoded');
+      expect(await requests[0].body.getText()).toBe(
+        `grant_type=client_credentials&client_id=test&client_secret=xxxx-xxxxxxx-xxxxxx-xxxx`
+      );
+    });
   });
   describe('graphql', () => {
     it('query + operation + variables', async () => {
