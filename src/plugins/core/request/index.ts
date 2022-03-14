@@ -8,8 +8,8 @@ import { transformRequestBody } from './transformRequestBodyAction';
 export function initOnRequestHook(api: models.HttpyacHooksApi) {
   api.hooks.onRequest.addHook('attachDefaultHeaders', attachDefaultHeaders);
   api.hooks.onRequest.addHook('setEnvRequestOptions', setEnvRequestOptions);
-  api.hooks.onRequest.addHook('transformRequestBody', transformRequestBody);
   api.hooks.onRequest.addHook('requestVariableReplacer', requestVariableReplacer);
+  api.hooks.onRequest.addHook('transformRequestBody', transformRequestBody);
 
   api.hooks.onRequest.addInterceptor(isTrustedInterceptor);
 }
