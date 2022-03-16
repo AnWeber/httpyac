@@ -1,3 +1,14 @@
+## 5.2.1 (2022-03-16)
+
+#### Features
+
+- merge all responses on using `repeat-mode` and add count of status (httpyac.github.io#34)
+
+#### Fix
+
+- Variable substitution did not work inside body of `application/x-www-form-urlencoded` (httpyac/httpyac.github.io#36)
+- revert modification of `# @import` and store imported http files in httpFileStore (AnWeber/vscode-httpyac#112)
+
 ## 5.2.0 (2022-03-10)
 
 #### Features
