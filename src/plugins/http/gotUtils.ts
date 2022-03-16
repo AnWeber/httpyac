@@ -1,6 +1,6 @@
 import { log, userInteractionProvider } from '../../io';
 import * as models from '../../models';
-import { parseContentType } from '../../utils/requestUtils';
+import { parseContentType, repeat } from '../../utils';
 import { default as filesize } from 'filesize';
 import { default as got, OptionsOfUnknownResponseBody, CancelError, Response } from 'got';
 import { HttpProxyAgent } from 'http-proxy-agent';
@@ -38,12 +38,41 @@ export async function gotHttpClient(
     initProxy(options, request.proxy || context?.config?.proxy);
 
     log.debug('request', options);
-    let response: models.HttpResponse | undefined;
-    if (context.repeat && context.repeat.count > 0) {
-      response = await loadRepeat(url, options, context);
-    } else {
-      response = await load(url, options, context);
-    }
+
+    const response = await repeat(async () => {
+      if (context.progress && context.progress.isCanceled()) {
+        return undefined;
+      }
+      const responsePromise = got(url, options);
+
+      let prevPercent = 0;
+      if (context.showProgressBar) {
+        responsePromise.on('downloadProgress', data => {
+          const newData = data.percent - prevPercent;
+          prevPercent = data.percent;
+
+          if (context.progress?.report) {
+            log.debug('call http request');
+            context.progress.report({
+              message: 'call http request',
+              increment: newData * 100,
+            });
+          }
+        });
+      }
+      const dispose =
+        context.progress &&
+        context.progress.register(() => {
+          responsePromise.cancel();
+        });
+
+      const response = await responsePromise;
+      if (dispose) {
+        dispose();
+      }
+      return toHttpResponse(response);
+    }, context);
+
     if (response) {
       response.name = `${response.statusCode} - ${request.method || 'GET'} ${request.url}`;
       return response;
@@ -79,54 +108,6 @@ function requestToOptions(request: models.HttpClientRequest): OptionsOfUnknownRe
     log.warn(message);
   }
   return result;
-}
-
-async function loadRepeat(url: string, options: OptionsOfUnknownResponseBody, context: models.HttpClientContext) {
-  const loadFunc = async () => toHttpResponse(await got(url, options));
-  const loader: Array<() => Promise<models.HttpResponse>> = [];
-  for (let index = 0; index < (context.repeat?.count || 1); index++) {
-    loader.push(loadFunc);
-  }
-  if (context.repeat?.type === models.RepeatOrder.parallel) {
-    const responses = await Promise.all(loader.map(obj => obj()));
-    return responses.pop();
-  }
-  const responses = [];
-  for (const load of loader) {
-    responses.push(await load());
-  }
-  return responses.pop();
-}
-
-async function load(url: string, options: OptionsOfUnknownResponseBody, context: models.HttpClientContext) {
-  const responsePromise = got(url, options);
-
-  let prevPercent = 0;
-  if (context.showProgressBar) {
-    responsePromise.on('downloadProgress', data => {
-      const newData = data.percent - prevPercent;
-      prevPercent = data.percent;
-
-      if (context.progress?.report) {
-        log.debug('call http request');
-        context.progress.report({
-          message: 'call http request',
-          increment: newData * 100,
-        });
-      }
-    });
-  }
-  const dispose =
-    context.progress &&
-    context.progress.register(() => {
-      responsePromise.cancel();
-    });
-
-  const response = await responsePromise;
-  if (dispose) {
-    dispose();
-  }
-  return toHttpResponse(response);
 }
 
 function initProxy(options: OptionsOfUnknownResponseBody, proxy: string | undefined) {
