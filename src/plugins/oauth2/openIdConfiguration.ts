@@ -8,20 +8,56 @@ import { URL } from 'url';
 export const DEFAULT_CALLBACK_URI = 'http://localhost:3000/callback';
 const DefaultOAuthVariablePrefix = 'oauth2';
 
-function getVariable(variables: models.Variables, variablePrefix: string | undefined, name: string): string {
-  const getter = (prefix: string) => variables[`${prefix}_${name}`] || get(variables, `${prefix}.${name}`);
+function getVariableRaw(variables: models.Variables, name: string, variablePrefix: string): unknown {
+  let varValue = variables[`${variablePrefix}_${name}`];
+  if (typeof varValue === 'undefined' || varValue === null) {
+    varValue = get(variables, `${variablePrefix}.${name}`);
+  }
+  return varValue;
+}
+
+function getVariableUnknown(variables: models.Variables, variablePrefix: string | undefined, name: string): unknown {
+  const getter = getVariableRaw.bind(undefined, variables, name);
   let value: unknown;
   if (variablePrefix) {
     value = getter(variablePrefix);
   }
-  if (!value) {
+  if (value === undefined) {
     value = getter(DefaultOAuthVariablePrefix);
   }
   const expandedValue = utils.expandVariable(value, variables);
+  return expandedValue;
+}
+
+function getString(variables: models.Variables, variablePrefix: string | undefined, name: string): string {
+  const expandedValue = getVariableUnknown(variables, variablePrefix, name);
+  if (typeof expandedValue === 'undefined' || expandedValue === null) {
+    return '';
+  }
   if (utils.isString(expandedValue)) {
     return expandedValue;
   }
-  return '';
+  return `${expandedValue}`;
+}
+
+function getBooleanLike(
+  variables: models.Variables,
+  variablePrefix: string | undefined,
+  name: string,
+  defaultValue = false
+): boolean {
+  const expandedValue = getVariableUnknown(variables, variablePrefix, name);
+  if (typeof expandedValue === 'boolean') return expandedValue;
+  if (typeof expandedValue === 'number') return !!expandedValue;
+  if (typeof expandedValue === 'undefined' || expandedValue === null) return defaultValue;
+  const stringValue = utils.isString(expandedValue) ? expandedValue : `${expandedValue}`;
+  const trimmedValue = stringValue.trim();
+  if (!trimmedValue) return defaultValue;
+  if (/^true$/iu.test(trimmedValue)) return true;
+  if (/^false$/iu.test(trimmedValue)) return false;
+  const numberValue = parseFloat(stringValue);
+  if (isNaN(numberValue)) return defaultValue;
+  return !!numberValue;
 }
 
 function getUrl(
@@ -30,7 +66,7 @@ function getUrl(
   name: string,
   defaultUrl: string
 ): URL {
-  const url = getVariable(variables, variablePrefix, name);
+  const url = getString(variables, variablePrefix, name);
   try {
     return new URL(url || defaultUrl);
   } catch {
@@ -44,26 +80,24 @@ export function getOpenIdConfiguration(
 ): models.OpenIdConfiguration {
   const config: models.OpenIdConfiguration = {
     variablePrefix: variablePrefix || DefaultOAuthVariablePrefix,
-    authorizationEndpoint: getVariable(variables, variablePrefix, 'authorizationEndpoint'),
-    deviceCodeEndpoint: getVariable(variables, variablePrefix, 'deviceCodeEndpoint'),
-    tokenEndpoint: getVariable(variables, variablePrefix, 'tokenEndpoint'),
-    clientId: getVariable(variables, variablePrefix, 'clientId'),
-    clientSecret: getVariable(variables, variablePrefix, 'clientSecret'),
-    responseType: getVariable(variables, variablePrefix, 'responseType'),
-    responseMode: getVariable(variables, variablePrefix, 'responseMode'),
-    audience: getVariable(variables, variablePrefix, 'audience'),
-    scope: getVariable(variables, variablePrefix, 'scope'),
-    resource: getVariable(variables, variablePrefix, 'resource'),
-    username: getVariable(variables, variablePrefix, 'username'),
-    password: getVariable(variables, variablePrefix, 'password'),
-    subjectIssuer: getVariable(variables, variablePrefix, 'subjectIssuer'),
+    authorizationEndpoint: getString(variables, variablePrefix, 'authorizationEndpoint'),
+    deviceCodeEndpoint: getString(variables, variablePrefix, 'deviceCodeEndpoint'),
+    tokenEndpoint: getString(variables, variablePrefix, 'tokenEndpoint'),
+    clientId: getString(variables, variablePrefix, 'clientId'),
+    clientSecret: getString(variables, variablePrefix, 'clientSecret'),
+    responseType: getString(variables, variablePrefix, 'responseType'),
+    responseMode: getString(variables, variablePrefix, 'responseMode'),
+    audience: getString(variables, variablePrefix, 'audience'),
+    scope: getString(variables, variablePrefix, 'scope'),
+    resource: getString(variables, variablePrefix, 'resource'),
+    username: getString(variables, variablePrefix, 'username'),
+    password: getString(variables, variablePrefix, 'password'),
+    subjectIssuer: getString(variables, variablePrefix, 'subjectIssuer'),
     redirectUri: getUrl(variables, variablePrefix, 'redirectUri', DEFAULT_CALLBACK_URI),
-    keepAlive: ['true', '1', true].indexOf(getVariable(variables, variablePrefix, 'keepAlive')) < 0,
-    useAuthorizationHeader:
-      ['false', '0', false].indexOf(getVariable(variables, variablePrefix, 'useAuthorizationHeader')) < 0,
-    useDeviceCodeClientSecret:
-      ['true', '1', true].indexOf(getVariable(variables, variablePrefix, 'useDeviceCodeClientSecret')) >= 0,
-    usePkce: ['true', '1', true].indexOf(getVariable(variables, variablePrefix, 'usePkce')) >= 0,
+    keepAlive: getBooleanLike(variables, variablePrefix, 'keepAlive', true),
+    useAuthorizationHeader: getBooleanLike(variables, variablePrefix, 'useAuthorizationHeader', true),
+    useDeviceCodeClientSecret: getBooleanLike(variables, variablePrefix, 'useDeviceCodeClientSecret'),
+    usePkce: getBooleanLike(variables, variablePrefix, 'usePkce'),
   };
   return config;
 }
