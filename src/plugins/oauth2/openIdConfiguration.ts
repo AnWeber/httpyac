@@ -1,6 +1,7 @@
 import { log, userInteractionProvider } from '../../io';
 import type * as models from '../../models';
 import * as utils from '../../utils';
+import { isEqualWith } from 'lodash';
 import get from 'lodash/get';
 import { URL } from 'url';
 
@@ -65,6 +66,20 @@ export function getOpenIdConfiguration(
     usePkce: ['true', '1', true].indexOf(getVariable(variables, variablePrefix, 'usePkce')) >= 0,
   };
   return config;
+}
+
+export function isOpenIdConfigurationEqual(
+  config1: models.OpenIdConfiguration,
+  config2: models.OpenIdConfiguration
+): boolean {
+  return isEqualWith(config1, config2, (prop1, prop2, key) => {
+    const urlKeys: (keyof models.OpenIdConfiguration)[] = ['redirectUri'];
+    const propname = key as keyof models.OpenIdConfiguration;
+    if (key && urlKeys.includes(propname)) {
+      return `${prop1}` === `${prop2}`;
+    }
+    return undefined;
+  });
 }
 
 export function assertConfiguration(config: models.OpenIdConfiguration, keys: string[]): boolean {

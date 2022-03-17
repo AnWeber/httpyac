@@ -3,9 +3,8 @@ import type * as models from '../../models';
 import { userSessionStore } from '../../store';
 import * as utils from '../../utils';
 import * as flows from './flow';
-import { getOpenIdConfiguration } from './openIdConfiguration';
+import { getOpenIdConfiguration, isOpenIdConfigurationEqual } from './openIdConfiguration';
 import { HookCancel } from 'hookpoint';
-import { isEqual } from 'lodash';
 
 export async function oauth2VariableReplacer(
   text: unknown,
@@ -79,7 +78,7 @@ function getSessionOpenIdInformation(
   config: models.OpenIdConfiguration
 ): models.OpenIdInformation | false {
   const openIdInformation = userSessionStore.userSessions.find(obj => obj.id === cacheKey);
-  if (utils.isOpenIdInformation(openIdInformation) && isEqual(openIdInformation.config, config)) {
+  if (utils.isOpenIdInformation(openIdInformation) && isOpenIdConfigurationEqual(openIdInformation.config, config)) {
     return openIdInformation;
   }
   return false;
