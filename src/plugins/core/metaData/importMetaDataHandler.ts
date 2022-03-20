@@ -1,6 +1,8 @@
 import * as io from '../../../io';
 import * as models from '../../../models';
 import * as utils from '../../../utils';
+import { isGlobalHttpRegion } from '../../../utils';
+import { registerRegionDependent, resetDependentRegions } from './refMetaDataHandler';
 
 export function importMetaDataHandler(type: string, value: string | undefined, context: models.ParserContext) {
   if (type === 'import' && value) {
@@ -10,10 +12,20 @@ export function importMetaDataHandler(type: string, value: string | undefined, c
   return false;
 }
 
+interface ImportRegionDependentsEntry {
+  refFile: models.HttpFile;
+  refRegion: models.HttpRegion;
+  dependents: Array<{
+    depFile: models.HttpFile;
+    depRegion: models.HttpRegion;
+  }>;
+}
+
 export interface ImportProcessorContext extends models.ProcessorContext {
   options: {
     httpFiles?: Array<{ base: models.HttpFile; ref: models.HttpFile }>;
     globalScriptsExecuted?: Array<models.HttpFile>;
+    refDependencies?: Array<ImportRegionDependentsEntry>;
   };
 }
 
@@ -53,13 +65,20 @@ class ImportMetaAction {
       if (!context.options.globalScriptsExecuted) {
         context.options.globalScriptsExecuted = [];
       }
-      context.options.globalScriptsExecuted.push(httpFile);
+      io.log.trace(`execute global scripts for import ${httpFile.fileName}`);
       const cloneContext: ImportProcessorContext = {
         ...context,
         httpFile,
       };
-      io.log.trace(`execute global scripts for import ${httpFile.fileName}`);
-      return await utils.executeGlobalScripts(cloneContext);
+      const globResult = await utils.executeGlobalScripts(cloneContext);
+      if (globResult) {
+        for (const globRegion of httpFile.httpRegions.filter(isGlobalHttpRegion)) {
+          registerRegionDependent(context, httpFile, globRegion, context.httpFile, context.httpRegion);
+          resetDependentRegions(context, httpFile, globRegion);
+        }
+        context.options.globalScriptsExecuted.push(httpFile);
+      }
+      return globResult;
     }
     return !!httpFile;
   }
