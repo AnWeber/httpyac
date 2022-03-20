@@ -2,7 +2,7 @@ import * as io from '../../../io';
 import * as models from '../../../models';
 import * as utils from '../../../utils';
 import { isGlobalHttpRegion } from '../../../utils';
-import { registerRegionDependent, resetDependentRegions } from './refMetaDataHandler';
+import { registerRegionDependent } from './refMetaDataHandler';
 
 export function importMetaDataHandler(type: string, value: string | undefined, context: models.ParserContext) {
   if (type === 'import' && value) {
@@ -74,7 +74,6 @@ class ImportMetaAction {
       if (globResult) {
         for (const globRegion of httpFile.httpRegions.filter(isGlobalHttpRegion)) {
           registerRegionDependent(context, httpFile, globRegion, context.httpFile, context.httpRegion);
-          resetDependentRegions(context, httpFile, globRegion);
         }
         context.options.globalScriptsExecuted.push(httpFile);
       }
