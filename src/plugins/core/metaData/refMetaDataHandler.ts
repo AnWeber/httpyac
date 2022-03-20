@@ -50,7 +50,6 @@ class RefMetaAction {
         if (result) {
           const env = utils.toEnvironmentKey(context.httpFile.activeEnvironment);
           Object.assign(context.variables, refContext.httpRegion.variablesPerEnv[env]);
-          resetDependentRegions(refContext, reference.httpFile, reference.httpRegion);
         }
         return result;
       }
