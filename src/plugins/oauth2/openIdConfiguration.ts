@@ -16,16 +16,6 @@ function getVariableRaw(variables: models.Variables, name: string, variablePrefi
   return varValue;
 }
 
-function ensureString(expandedValue: unknown): string {
-  if (typeof expandedValue === 'undefined' || expandedValue === null) {
-    return '';
-  }
-  if (utils.isString(expandedValue)) {
-    return expandedValue;
-  }
-  return `${expandedValue}`;
-}
-
 function getVariableUnknown(variables: models.Variables, variablePrefix: string | undefined, name: string): unknown {
   const getter = (prefix: string) => getVariableRaw(variables, name, prefix);
   let value: unknown;
@@ -41,7 +31,7 @@ function getVariableUnknown(variables: models.Variables, variablePrefix: string 
 
 function getString(variables: models.Variables, variablePrefix: string | undefined, name: string): string {
   const expandedValue = getVariableUnknown(variables, variablePrefix, name);
-  return ensureString(expandedValue);
+  return utils.ensureString(expandedValue);
 }
 
 function getBooleanLike(
@@ -51,16 +41,7 @@ function getBooleanLike(
   defaultValue = false
 ): boolean {
   const expandedValue = getVariableUnknown(variables, variablePrefix, name);
-  if (typeof expandedValue === 'boolean') return expandedValue;
-  if (typeof expandedValue === 'number') return !!expandedValue;
-  const stringValue = ensureString(expandedValue);
-  const trimmedValue = stringValue.trim();
-  if (!trimmedValue) return defaultValue;
-  if (/^true$/iu.test(trimmedValue)) return true;
-  if (/^false$/iu.test(trimmedValue)) return false;
-  const numberValue = parseFloat(stringValue);
-  if (isNaN(numberValue)) return defaultValue;
-  return !!numberValue;
+  return utils.toBoolean(expandedValue, defaultValue);
 }
 
 function getUrl(

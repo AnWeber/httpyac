@@ -1,4 +1,5 @@
 export * from './assertUtils';
+export * from './booleanUtils';
 export * from './configUtils';
 export * from './environmentUtils';
 export * from './errorUtils';

@@ -8,18 +8,8 @@ export async function setWebsocketEnvRejectUnauthorized(
 ): Promise<void> {
   if (isWebsocketRequest(request) && variables) {
     if (typeof variables.request_rejectUnauthorized !== 'undefined') {
-      const rejectUnauthorized = toBoolean(variables.request_rejectUnauthorized);
+      const rejectUnauthorized = utils.toBoolean(variables.request_rejectUnauthorized);
       request.options = Object.assign({}, request.options, { rejectUnauthorized });
     }
   }
-}
-
-function toBoolean(value: unknown): boolean {
-  if (utils.isString(value)) {
-    return ['0', 'false', 'no'].indexOf(value.toLowerCase()) < 0;
-  }
-  if (typeof value === 'boolean') {
-    return value;
-  }
-  return !!value;
 }

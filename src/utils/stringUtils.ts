@@ -37,7 +37,10 @@ export function stateGenerator(length = 30): string {
 }
 
 export function toString(value: unknown): string | undefined {
-  if (isString(value) || typeof value === 'number') {
+  if (isString(value)) {
+    return value;
+  }
+  if (typeof value === 'number') {
     return `${value}`;
   }
   if (value instanceof Date) {
@@ -54,4 +57,14 @@ export function toString(value: unknown): string | undefined {
     return JSON.stringify(value);
   }
   return undefined;
+}
+
+export function ensureString(value: unknown): string {
+  if (typeof value === 'undefined' || value === null) {
+    return '';
+  }
+  if (isString(value)) {
+    return value;
+  }
+  return `${value}`;
 }
