@@ -12,7 +12,7 @@ export function importMetaDataHandler(type: string, value: string | undefined, c
   return false;
 }
 
-interface ImportRegionDependentsEntry {
+export interface ImportRegionDependentsEntry {
   refFile: models.HttpFile;
   refRegion: models.HttpRegion;
   dependents: Array<{

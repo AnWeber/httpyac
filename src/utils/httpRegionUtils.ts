@@ -1,4 +1,5 @@
 import * as models from '../models';
+import { resetDependentRegions } from '../plugins/core/metaData/refMetaDataHandler';
 import { toEnvironmentKey } from './environmentUtils';
 import { report } from './logUtils';
 import { cloneResponse } from './requestUtils';
@@ -74,6 +75,7 @@ export async function processHttpRegionActions(
     const newVariables = context.variables;
     context.variables = variables;
     autoShareNewVariables(newVariables, context);
+    resetDependentRegions(context, context.httpFile, context.httpRegion);
   }
 }
 function initRegionScopedVariables(context: models.ProcessorContext) {
