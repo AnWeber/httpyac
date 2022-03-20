@@ -92,8 +92,7 @@ export function isOpenIdConfigurationEqual(
 ): boolean {
   return isEqualWith(config1, config2, (prop1, prop2, key) => {
     const urlKeys: (keyof models.OpenIdConfiguration)[] = ['redirectUri'];
-    const propname = key as keyof models.OpenIdConfiguration;
-    if (key && urlKeys.includes(propname)) {
+    if (key && urlKeys.some(obj => obj === key)) {
       return `${prop1}` === `${prop2}`;
     }
     return undefined;
