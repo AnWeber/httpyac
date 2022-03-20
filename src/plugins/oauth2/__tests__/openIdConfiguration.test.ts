@@ -2,6 +2,70 @@ import { OpenIdConfiguration } from '../../../models';
 import { getOpenIdConfiguration, DEFAULT_CALLBACK_URI } from '../openIdConfiguration';
 
 describe('getOpenIdConfiguration', () => {
+  describe('tokenEndpoint', () => {
+    it('should be empty when nothing passed', () => {
+      const result = getOpenIdConfiguration('prefix', {}) as OpenIdConfiguration;
+      expect(result.tokenEndpoint).toEqual('');
+    });
+    it('should use value if passed', () => {
+      const result = getOpenIdConfiguration('prefix', {
+        prefix_tokenEndpoint: 'https://httpyac.github.io',
+      }) as OpenIdConfiguration;
+      expect(result.tokenEndpoint).toEqual('https://httpyac.github.io');
+    });
+    it('should use empty if null passed', () => {
+      const result = getOpenIdConfiguration('prefix', {
+        prefix_tokenEndpoint: null,
+      }) as OpenIdConfiguration;
+      expect(result.tokenEndpoint).toEqual('');
+    });
+    it('should use fallback to oauth2 value', () => {
+      const result = getOpenIdConfiguration('prefix', {
+        oauth2_tokenEndpoint: 'https://httpyac.github.io',
+      }) as OpenIdConfiguration;
+      expect(result.tokenEndpoint).toEqual('https://httpyac.github.io');
+    });
+  });
+  describe('useAuthorizationHeader', () => {
+    it('should use default when nothing passed', () => {
+      const result = getOpenIdConfiguration('prefix', {}) as OpenIdConfiguration;
+      expect(result.useAuthorizationHeader).toEqual(true);
+    });
+    it('should use value if passed as boolean', () => {
+      const result = getOpenIdConfiguration('prefix', { prefix_useAuthorizationHeader: false }) as OpenIdConfiguration;
+      expect(result.useAuthorizationHeader).toEqual(false);
+    });
+    it('should use check false if passed as string', () => {
+      const result = getOpenIdConfiguration('prefix', {
+        prefix_useAuthorizationHeader: 'false',
+      }) as OpenIdConfiguration;
+      expect(result.useAuthorizationHeader).toEqual(false);
+    });
+    it('should use check true if passed as string', () => {
+      const result = getOpenIdConfiguration('prefix', {
+        prefix_useAuthorizationHeader: 'True',
+      }) as OpenIdConfiguration;
+      expect(result.useAuthorizationHeader).toEqual(true);
+    });
+    it('should use false if passed as number', () => {
+      const result = getOpenIdConfiguration('prefix', {
+        prefix_useAuthorizationHeader: '0',
+      }) as OpenIdConfiguration;
+      expect(result.useAuthorizationHeader).toEqual(false);
+    });
+    it('should use default on unknown value', () => {
+      const result = getOpenIdConfiguration('prefix', {
+        prefix_useAuthorizationHeader: new Date(),
+      }) as OpenIdConfiguration;
+      expect(result.useAuthorizationHeader).toEqual(true);
+    });
+    it('should use fallback to oauth2 value', () => {
+      const result = getOpenIdConfiguration('prefix', {
+        oauth2_useAuthorizationHeader: false,
+      }) as OpenIdConfiguration;
+      expect(result.useAuthorizationHeader).toEqual(false);
+    });
+  });
   describe('redirectUri', () => {
     it('should default when nothing passed', () => {
       const result = getOpenIdConfiguration('prefix', {}) as OpenIdConfiguration;
