@@ -1,3 +1,9 @@
+## 5.2.2 (2022-03-20)
+
+#### Fix
+
+- OAuth2 uses only fallback, if prefixed value is undefined or null (#228)
+
 ## 5.2.1 (2022-03-16)
 
 #### Features
