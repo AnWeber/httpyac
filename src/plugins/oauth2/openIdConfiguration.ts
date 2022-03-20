@@ -16,8 +16,18 @@ function getVariableRaw(variables: models.Variables, name: string, variablePrefi
   return varValue;
 }
 
+function ensureString(expandedValue: unknown): string {
+  if (typeof expandedValue === 'undefined' || expandedValue === null) {
+    return '';
+  }
+  if (utils.isString(expandedValue)) {
+    return expandedValue;
+  }
+  return `${expandedValue}`;
+}
+
 function getVariableUnknown(variables: models.Variables, variablePrefix: string | undefined, name: string): unknown {
-  const getter = getVariableRaw.bind(undefined, variables, name);
+  const getter = (prefix: string) => getVariableRaw(variables, name, prefix);
   let value: unknown;
   if (variablePrefix) {
     value = getter(variablePrefix);
@@ -31,13 +41,7 @@ function getVariableUnknown(variables: models.Variables, variablePrefix: string 
 
 function getString(variables: models.Variables, variablePrefix: string | undefined, name: string): string {
   const expandedValue = getVariableUnknown(variables, variablePrefix, name);
-  if (typeof expandedValue === 'undefined' || expandedValue === null) {
-    return '';
-  }
-  if (utils.isString(expandedValue)) {
-    return expandedValue;
-  }
-  return `${expandedValue}`;
+  return ensureString(expandedValue);
 }
 
 function getBooleanLike(
@@ -49,8 +53,7 @@ function getBooleanLike(
   const expandedValue = getVariableUnknown(variables, variablePrefix, name);
   if (typeof expandedValue === 'boolean') return expandedValue;
   if (typeof expandedValue === 'number') return !!expandedValue;
-  if (typeof expandedValue === 'undefined' || expandedValue === null) return defaultValue;
-  const stringValue = utils.isString(expandedValue) ? expandedValue : `${expandedValue}`;
+  const stringValue = ensureString(expandedValue);
   const trimmedValue = stringValue.trim();
   if (!trimmedValue) return defaultValue;
   if (/^true$/iu.test(trimmedValue)) return true;
