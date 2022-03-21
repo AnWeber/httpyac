@@ -1,8 +1,6 @@
 import * as io from '../../../io';
 import * as models from '../../../models';
 import * as utils from '../../../utils';
-import { isGlobalHttpRegion } from '../../../utils';
-import { registerRegionDependent } from './refMetaDataHandler';
 
 export function importMetaDataHandler(type: string, value: string | undefined, context: models.ParserContext) {
   if (type === 'import' && value) {
@@ -12,20 +10,10 @@ export function importMetaDataHandler(type: string, value: string | undefined, c
   return false;
 }
 
-export interface ImportRegionDependentsEntry {
-  refFile: models.HttpFile;
-  refRegion: models.HttpRegion;
-  dependents: Array<{
-    depFile: models.HttpFile;
-    depRegion: models.HttpRegion;
-  }>;
-}
-
 export interface ImportProcessorContext extends models.ProcessorContext {
   options: {
     httpFiles?: Array<{ base: models.HttpFile; ref: models.HttpFile }>;
     globalScriptsExecuted?: Array<models.HttpFile>;
-    refDependencies?: Array<ImportRegionDependentsEntry>;
   };
 }
 
@@ -72,8 +60,8 @@ class ImportMetaAction {
       };
       const globResult = await utils.executeGlobalScripts(cloneContext);
       if (globResult) {
-        for (const globRegion of httpFile.httpRegions.filter(isGlobalHttpRegion)) {
-          registerRegionDependent(context, httpFile, globRegion, context.httpFile, context.httpRegion);
+        for (const globRegion of httpFile.httpRegions.filter(utils.isGlobalHttpRegion)) {
+          utils.registerRegionDependent(context, httpFile, globRegion, context.httpFile, context.httpRegion);
         }
         context.options.globalScriptsExecuted.push(httpFile);
       }
