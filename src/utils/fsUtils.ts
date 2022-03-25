@@ -30,7 +30,7 @@ export function extensionName(fileName: PathLike) {
 }
 
 export function replaceInvalidChars(fileName: string): string {
-  const result = fileName.replace(/[/\\?%*:|"<>\s()@]/gu, '_');
+  const result = fileName.replace(/[/\\?%*:|"<>\s()@\-~*,=$]/gu, '_');
   return result
     .split('_')
     .filter(obj => obj.length > 0)
