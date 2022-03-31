@@ -113,6 +113,28 @@ ${body}
       expect(await requests[0].body.getText()).toBe(body);
     });
 
+    it('post json variable', async () => {
+      initFileProvider();
+      const body = JSON.stringify({ foo: 'foo', bar: 'bar' });
+      const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
+
+      const result = await exec(`
+
+{{
+  exports.body = ${body}
+}}
+POST http://localhost:8080/post
+Content-Type: application/json
+
+{{body}}
+        `);
+      expect(result).toBeTruthy();
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests.length).toBe(1);
+      expect(requests[0].headers['content-type']).toBe('application/json');
+      expect(await requests[0].body.getText()).toBe(body);
+    });
+
     it('imported body', async () => {
       const body = JSON.stringify({ foo: 'foo', bar: 'bar' }, null, 2);
       initFileProvider({

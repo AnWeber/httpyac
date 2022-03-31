@@ -37,6 +37,8 @@ async function replaceVariablesInBody(
       }
       if (utils.isString(result) || Buffer.isBuffer(result)) {
         replacedRequest.body = result;
+      } else {
+        replacedRequest.body = utils.toString(result);
       }
     } else if (Array.isArray(replacedRequest.body)) {
       const replacedBody: Array<models.HttpRequestBodyLine> = [];
