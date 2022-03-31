@@ -13,19 +13,25 @@ export async function parseVariable(
   if (!next.done) {
     const textLine = next.value.textLine;
 
-    const match = /^\s*@(?<key>[^\s=]*)\s*(?<operator>=\s*)"?(?<value>.*)"?\s*$/u.exec(textLine);
+    const match = /^\s*@(?<key>[^\s=]*)\s*(?<operator>=*)\s*"?(?<value>.*)"?\s*$/u.exec(textLine);
 
     if (match && match.groups && match.groups.key && match.groups.value) {
       const key = match.groups.key;
+      const replaceValue = match.groups.operator?.length > 1;
       const value = match.groups.value;
       if (!httpRegion.hooks.execute.hasHook(VariableHookId)) {
         httpRegion.hooks.execute.addInterceptor(new VariableInterceptor());
       }
-      httpRegion.hooks.execute.addHook(VariableHookId, context => {
-        context.options.replaceVariables = true;
+      httpRegion.hooks.execute.addHook(VariableHookId, async context => {
+        let result: unknown = value;
+        if (replaceValue) {
+          result = await utils.replaceVariables(value, models.VariableType.variable, context);
+        } else {
+          context.options.replaceVariables = true;
+        }
         utils.setVariableInContext(
           {
-            [key]: value,
+            [key]: result,
           },
           context
         );
@@ -81,6 +87,15 @@ class VariableInterceptor implements HookInterceptor<[models.ProcessorContext], 
         await this.replaceAllVariables(context);
         delete context.options.replaceVariables;
       }
+    }
+    return true;
+  }
+
+  async afterLoop(hookContext: HookTriggerContext<[models.ProcessorContext], true>) {
+    const context = hookContext.args[0];
+    if (context.options.replaceVariables) {
+      await this.replaceAllVariables(context);
+      delete context.options.replaceVariables;
     }
     return true;
   }

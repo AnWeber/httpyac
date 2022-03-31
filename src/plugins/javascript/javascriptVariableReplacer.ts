@@ -8,33 +8,18 @@ export async function replaceJavascriptExpressions(
   type: VariableType | string,
   context: ProcessorContext
 ): Promise<unknown> {
-  if (!utils.isString(text)) {
-    return text;
-  }
-  let match: RegExpExecArray | null;
-  let start;
-  let result = text;
-  while (start !== result) {
-    start = result;
-    while ((match = utils.HandlebarsSingleLine.exec(start)) !== null) {
-      const [searchValue, jsVariable] = match;
-
-      try {
-        const value = utils.toString(await evalExpression(jsVariable, context));
-
-        if (value) {
-          result = result.replace(searchValue, value);
-        }
-      } catch (err) {
-        if (type === VariableType.variable) {
-          log.trace(`variable ${jsVariable} not defined`);
-          log.trace(err);
-        } else {
-          log.warn(`expression ${jsVariable} throws error`);
-          log.warn(err);
-        }
+  return utils.parseHandlebarsString(text, async (variable: string, searchValue: string) => {
+    try {
+      return await evalExpression(variable, context);
+    } catch (err) {
+      if (type === VariableType.variable) {
+        log.trace(`variable ${variable} not defined`);
+        log.trace(err);
+      } else {
+        log.warn(`expression ${variable} throws error`);
+        log.warn(err);
       }
+      return searchValue;
     }
-  }
-  return result;
+  });
 }

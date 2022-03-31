@@ -37,14 +37,9 @@ describe('send', () => {
   afterEach(() => localServer.stop());
 
   async function build(code) {
-    return await new HttpFileStore().getOrCreate(
-        `any.http`,
-        async () => Promise.resolve(code),
-        0,
-        {
-          workingDir: __dirname,
-        }
-    );
+    return await new HttpFileStore().getOrCreate(`any.http`, async () => Promise.resolve(code), 0, {
+      workingDir: __dirname,
+    });
   }
 
   async function exec(code) {
@@ -372,8 +367,6 @@ POST http://localhost:8080/post?test={{foo.test}}
 
 foo={{foo.foo}}
         `);
-
-      const [, ...httpRegions] = httpFile.httpRegions;
       const result = await send({
         httpFile,
         httpRegion: httpFile.httpRegions[1],
@@ -463,7 +456,7 @@ foo={{foo.foo}}
         .forGet('/json')
         .thenReply(200, JSON.stringify({ foo: 'bar', test: 1 }), { 'content-type': 'application/json' });
 
-        const result = await exec(`
+      const result = await exec(`
 # @disabled
 GET  http://localhost:8080/json
         `);
@@ -616,7 +609,7 @@ POST  http://localhost:8080/post
         .forGet('/json')
         .thenReply(200, JSON.stringify({ foo: 'bar', test: 1 }), { 'content-type': 'application/json' });
 
-        const result = await exec(`
+      const result = await exec(`
 GET  http://localhost:8080/json
 Authorization: Basic john:doe
 
@@ -646,7 +639,7 @@ Authorization: Basic john doe
         .matching(request => !!request.headers.authorization)
         .thenReply(200);
 
-        const result = await exec(`
+      const result = await exec(`
 GET  http://localhost:8080/json
 Authorization: Digest john doe
         `);
@@ -658,6 +651,53 @@ Authorization: Digest john doe
       expect(requests[0].headers.authorization).toBe(
         'Digest username="john", realm="json@localhost", nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093", uri="/json", response="4d157d692f3e05a1cbe192ddbc427782", opaque="5ccc069c403ebaf9f0171e9517f40e41"'
       );
+    });
+    it('string variable', async () => {
+      initFileProvider();
+      const mockedEndpoints = await localServer
+        .forGet('/test')
+        .thenReply(200, JSON.stringify({ slideshow: { author: 'httpyac' } }), {
+          'content-type': 'application/json',
+        });
+
+      const result = await exec(`
+# @name foo
+GET  http://localhost:8080/test
+
+@slideshow={{foo.slideshow.author}}
+
+###
+#@ref foo
+
+
+GET  http://localhost:8080/test?author={{slideshow}}
+      `);
+
+      expect(result).toBeTruthy();
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests[1].url).toBe('http://localhost:8080/test?author=httpyac');
+    });
+    it('object variable', async () => {
+      initFileProvider();
+      const mockedEndpoints = await localServer
+        .forGet('/test')
+        .thenReply(200, JSON.stringify({ slideshow: { author: 'httpyac' } }), {
+          'content-type': 'application/json',
+        });
+
+      const result = await exec(`
+GET  http://localhost:8080/test
+
+@slideshow=={{response.parsedBody.slideshow}}
+
+###
+
+GET  http://localhost:8080/test?author={{slideshow.author}}
+      `);
+
+      expect(result).toBeTruthy();
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests[1].url).toBe('http://localhost:8080/test?author=httpyac');
     });
   });
 });

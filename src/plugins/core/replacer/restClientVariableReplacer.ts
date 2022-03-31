@@ -2,7 +2,7 @@ import { ProcessorContext, VariableType } from '../../../models';
 import * as utils from '../../../utils';
 import dayjs, { OpUnitType } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 dayjs.extend(utc);
 
@@ -11,19 +11,12 @@ export async function restClientVariableReplacer(
   _type: VariableType | string,
   { variables }: ProcessorContext
 ): Promise<unknown> {
-  if (!utils.isString(text)) {
-    return text;
-  }
-  let match: RegExpExecArray | null;
-  let result = text;
-  while ((match = utils.HandlebarsSingleLine.exec(text)) !== null) {
-    const [searchValue, variable] = match;
-
+  return utils.parseHandlebarsString(text, async (variable: string) => {
     const trimmedVariable = variable.trim();
-    let replacement: unknown = null;
     if (trimmedVariable === '$guid') {
-      replacement = uuidv4();
-    } else if (trimmedVariable.startsWith('$randomInt')) {
+      return uuid();
+    }
+    if (trimmedVariable.startsWith('$randomInt')) {
       const valMatch = /^\$randomInt\s*(?<min>-?\d+)?\s*(?<max>-?\d+)?\s*$/u.exec(trimmedVariable);
       if (valMatch && valMatch.groups?.min && valMatch.groups?.max) {
         let min = Number(valMatch.groups?.min);
@@ -35,7 +28,7 @@ export async function restClientVariableReplacer(
             max = min;
             min = temp;
           }
-          replacement = `${Math.floor(Math.random() * (max - min)) + min}`;
+          return `${Math.floor(Math.random() * (max - min)) + min}`;
         }
       }
     } else if (trimmedVariable.startsWith('$timestamp')) {
@@ -47,7 +40,7 @@ export async function restClientVariableReplacer(
         if (valMatch.groups?.offset && valMatch.groups?.option) {
           date = date.add(Number(valMatch.groups.offset), valMatch.groups.option as OpUnitType);
         }
-        replacement = `${date.unix()}`;
+        return `${date.unix()}`;
       }
     } else if (trimmedVariable.startsWith('$datetime')) {
       const valMatch =
@@ -61,12 +54,12 @@ export async function restClientVariableReplacer(
         }
 
         if (valMatch.groups.type === 'rfc1123') {
-          replacement = date.toDate().toUTCString();
-        } else if (valMatch.groups.type === 'iso8601') {
-          replacement = date.toISOString();
-        } else {
-          replacement = date.format(valMatch.groups.type.slice(1, valMatch.groups.type.length - 1));
+          return date.toDate().toUTCString();
         }
+        if (valMatch.groups.type === 'iso8601') {
+          return date.toISOString();
+        }
+        return date.format(valMatch.groups.type.slice(1, valMatch.groups.type.length - 1));
       }
     } else if (trimmedVariable.startsWith('$localDatetime')) {
       const valMatch =
@@ -80,22 +73,18 @@ export async function restClientVariableReplacer(
         }
 
         if (valMatch.groups.type === 'rfc1123') {
-          replacement = date.locale('en').format('ddd, DD MMM YYYY HH:mm:ss ZZ');
-        } else if (valMatch.groups.type === 'iso8601') {
-          replacement = date.format();
-        } else {
-          replacement = date.format(valMatch.groups.type.slice(1, valMatch.groups.type.length - 1));
+          return date.locale('en').format('ddd, DD MMM YYYY HH:mm:ss ZZ');
         }
+        if (valMatch.groups.type === 'iso8601') {
+          return date.format();
+        }
+        return date.format(valMatch.groups.type.slice(1, valMatch.groups.type.length - 1));
       }
     } else if (trimmedVariable.startsWith('$processEnv')) {
-      replacement = process.env[trimmedVariable.slice('$processEnv'.length).trim()];
+      return process.env[trimmedVariable.slice('$processEnv'.length).trim()];
     } else if (trimmedVariable.startsWith('$dotenv')) {
-      replacement = variables[trimmedVariable.slice('$dotenv'.length).trim()];
+      return variables[trimmedVariable.slice('$dotenv'.length).trim()];
     }
-
-    if (replacement) {
-      result = result.replace(searchValue, `${replacement}`);
-    }
-  }
-  return result;
+    return undefined;
+  });
 }

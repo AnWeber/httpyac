@@ -2,32 +2,16 @@ import * as utils from '../../utils';
 import { v4 } from 'uuid';
 
 export async function replaceDynamicIntellijVariables(text: unknown): Promise<unknown> {
-  if (!utils.isString(text)) {
-    return text;
-  }
-  let match: RegExpExecArray | null;
-  let result = text;
-  while ((match = utils.HandlebarsSingleLine.exec(text)) !== null) {
-    const [searchValue, variable] = match;
-
-    let replacement: unknown = null;
+  return utils.parseHandlebarsString(text, async (variable: string) => {
     switch (variable.trim()) {
       case '$uuid':
-        replacement = v4();
-        break;
+        return v4();
       case '$timestamp':
-        replacement = Date.now();
-        break;
+        return Date.now();
       case '$randomInt':
-        replacement = Math.floor(Math.random() * 1000);
-        break;
+        return Math.floor(Math.random() * 1000);
       default:
-        replacement = null;
-        break;
+        return undefined;
     }
-    if (replacement) {
-      result = result.replace(searchValue, `${replacement}`);
-    }
-  }
-  return result;
+  });
 }

@@ -1,6 +1,7 @@
 import { javascriptProvider } from '../io';
 import * as models from '../models';
 import { report } from './logUtils';
+import { isString, toString } from './stringUtils';
 
 export const HandlebarsSingleLine = /\{{2}(.+?)\}{2}/gu;
 export const RegionSeparator = /^\s*#{3,}(?<title>.*)$/u;
@@ -383,3 +384,30 @@ export const knownMetaData: Array<{
     description: 'enable trace log level',
   },
 ];
+
+export async function parseHandlebarsString(
+  text: unknown,
+  evalExpression: (variable: string, searchValue: string) => Promise<unknown>
+) {
+  if (!isString(text)) {
+    return text;
+  }
+  let match: RegExpExecArray | null;
+  let start;
+  let result = text;
+  while (start !== result) {
+    start = result;
+    while ((match = HandlebarsSingleLine.exec(start)) !== null) {
+      const [searchValue, variable] = match;
+      const value = await evalExpression(variable, searchValue);
+      if (typeof value !== 'undefined' && searchValue === text) {
+        return value;
+      }
+      const valueString = toString(value);
+      if (valueString) {
+        result = result.replace(searchValue, valueString);
+      }
+    }
+  }
+  return result;
+}
