@@ -112,6 +112,7 @@ export function convertCliOptionsToContext(cliOptions: SendOptions) {
     scriptConsole: new Logger({
       level: getLogLevel(cliOptions),
       onlyFailedTests: cliOptions.filter === SendFilterOptions.onlyFailed,
+      collectMessages: true,
     }),
     config: {
       log: {

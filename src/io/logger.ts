@@ -7,12 +7,13 @@ export class Logger implements ConsoleLogHandler {
       level?: LogLevel;
       logMethod?: (level: LogLevel, ...params: unknown[]) => void;
       onlyFailedTests?: boolean;
+      collectMessages?: boolean;
       noTrace?: boolean;
     }
   ) {}
 
   collectMessages(): void {
-    if (this.options.onlyFailedTests) {
+    if (this.options.collectMessages) {
       this.collectCache = [];
     }
   }
