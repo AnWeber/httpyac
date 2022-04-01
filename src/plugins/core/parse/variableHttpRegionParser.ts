@@ -1,8 +1,5 @@
 import * as models from '../../../models';
 import * as utils from '../../../utils';
-import { HookCancel, HookInterceptor, HookTriggerContext } from 'hookpoint';
-
-const VariableHookId = 'variable';
 
 export async function parseVariable(
   getLineReader: models.getHttpLineGenerator,
@@ -13,16 +10,13 @@ export async function parseVariable(
   if (!next.done) {
     const textLine = next.value.textLine;
 
-    const match = /^\s*@(?<key>[^\s=]*)\s*(?<operator>=*)\s*"?(?<value>.*)"?\s*$/u.exec(textLine);
+    const match = /^\s*@(?<key>[^\s=:]*)\s*(?<operator>:?)=*\s*"?(?<value>.*)"?\s*$/u.exec(textLine);
 
     if (match && match.groups && match.groups.key && match.groups.value) {
       const key = match.groups.key;
-      const replaceValue = match.groups.operator?.length > 1;
+      const replaceValue = !!match.groups.operator;
       const value = match.groups.value;
-      if (!httpRegion.hooks.execute.hasHook(VariableHookId)) {
-        httpRegion.hooks.execute.addInterceptor(new VariableInterceptor());
-      }
-      httpRegion.hooks.execute.addHook(VariableHookId, async context => {
+      httpRegion.hooks.execute.addHook('variable', async context => {
         let result: unknown = value;
         if (replaceValue) {
           result = await utils.replaceVariables(value, models.VariableType.variable, context);
@@ -75,38 +69,4 @@ export async function parseVariable(
     }
   }
   return false;
-}
-
-class VariableInterceptor implements HookInterceptor<[models.ProcessorContext], boolean> {
-  id = 'variable';
-
-  async beforeTrigger(hookContext: HookTriggerContext<[models.ProcessorContext], true>) {
-    const context = hookContext.args[0];
-    if (hookContext.hookItem?.id !== VariableHookId) {
-      if (context.options.replaceVariables) {
-        await this.replaceAllVariables(context);
-        delete context.options.replaceVariables;
-      }
-    }
-    return true;
-  }
-
-  async afterLoop(hookContext: HookTriggerContext<[models.ProcessorContext], true>) {
-    const context = hookContext.args[0];
-    if (context.options.replaceVariables) {
-      await this.replaceAllVariables(context);
-      delete context.options.replaceVariables;
-    }
-    return true;
-  }
-
-  private async replaceAllVariables(context: models.ProcessorContext): Promise<boolean> {
-    for (const [key, value] of Object.entries(context.variables)) {
-      const result = await utils.replaceVariables(value, models.VariableType.variable, context);
-      if (result !== HookCancel) {
-        context.variables[key] = result;
-      }
-    }
-    return true;
-  }
 }

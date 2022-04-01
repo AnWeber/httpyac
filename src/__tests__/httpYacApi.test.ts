@@ -710,16 +710,37 @@ GET  http://localhost:8080/test?author={{slideshow}}
       const result = await exec(`
 GET  http://localhost:8080/test
 
-@slideshow=={{response.parsedBody.slideshow}}
-
+@slideshow={{response.parsedBody.slideshow}}
 ###
-
 GET  http://localhost:8080/test?author={{slideshow.author}}
       `);
 
       expect(result).toBeTruthy();
       const requests = await mockedEndpoints.getSeenRequests();
       expect(requests[1].url).toBe('http://localhost:8080/test?author=httpyac');
+    });
+    it('direct replace variable', async () => {
+      initFileProvider();
+      await localServer.forGet('/test').thenReply(200, JSON.stringify({ slideshow: { author: 'httpyac' } }), {
+        'content-type': 'application/json',
+      });
+      const mockedEndpoints = await localServer.forGet('/text').thenReply(200, 'foo', {
+        'content-type': 'text/plain',
+      });
+
+      const result = await exec(`
+GET  http://localhost:8080/test
+
+@slideshow:={{response.parsedBody.slideshow}}
+###
+GET  http://localhost:8080/text?author={{slideshow.author}}
+###
+GET  http://localhost:8080/text?author={{slideshow.author}}
+      `);
+
+      expect(result).toBeTruthy();
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests[0].url).toBe('http://localhost:8080/text?author=httpyac');
     });
   });
 });
