@@ -674,7 +674,7 @@ Authorization: Digest john doe
         'Digest username="john", realm="json@localhost", nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093", uri="/json", response="4d157d692f3e05a1cbe192ddbc427782", opaque="5ccc069c403ebaf9f0171e9517f40e41"'
       );
     });
-    it('string variable', async () => {
+    it('set string variable', async () => {
       initFileProvider();
       const mockedEndpoints = await localServer
         .forGet('/test')
@@ -683,15 +683,12 @@ Authorization: Digest john doe
         });
 
       const result = await exec(`
-# @name foo
+# @name fooString
 GET  http://localhost:8080/test
 
-@slideshow={{foo.slideshow.author}}
-
+@slideshow={{fooString.slideshow.author}}
 ###
-#@ref foo
-
-
+#@ref fooString
 GET  http://localhost:8080/test?author={{slideshow}}
       `);
 
@@ -699,7 +696,7 @@ GET  http://localhost:8080/test?author={{slideshow}}
       const requests = await mockedEndpoints.getSeenRequests();
       expect(requests[1].url).toBe('http://localhost:8080/test?author=httpyac');
     });
-    it('object variable', async () => {
+    it('set object variable', async () => {
       initFileProvider();
       const mockedEndpoints = await localServer
         .forGet('/test')
@@ -708,9 +705,10 @@ GET  http://localhost:8080/test?author={{slideshow}}
         });
 
       const result = await exec(`
+# @name fooObject
 GET  http://localhost:8080/test
 
-@slideshow={{response.parsedBody.slideshow}}
+@slideshow={{fooObject.slideshow}}
 ###
 GET  http://localhost:8080/test?author={{slideshow.author}}
       `);
@@ -718,6 +716,24 @@ GET  http://localhost:8080/test?author={{slideshow.author}}
       expect(result).toBeTruthy();
       const requests = await mockedEndpoints.getSeenRequests();
       expect(requests[1].url).toBe('http://localhost:8080/test?author=httpyac');
+    });
+    it('set object variable with number', async () => {
+      initFileProvider();
+      const mockedEndpoints = await localServer
+        .forGet('/get')
+        .thenReply(200, JSON.stringify({ foo: { test: 1 } }), { 'content-type': 'application/json' });
+
+      const result = await exec(`
+# @name objectNumber
+GET http://localhost:8080/get
+@foo={{objectNumber.foo}}
+###
+GET http://localhost:8080/get?test={{foo.test}}
+`);
+      expect(result).toBeTruthy();
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests[0].url).toBe('http://localhost:8080/get');
+      expect(requests[1].url).toBe('http://localhost:8080/get?test=1');
     });
     it('direct replace variable', async () => {
       initFileProvider();
