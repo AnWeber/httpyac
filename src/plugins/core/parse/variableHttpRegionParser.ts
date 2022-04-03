@@ -10,18 +10,18 @@ export async function parseVariable(
   if (!next.done) {
     const textLine = next.value.textLine;
 
-    const match = /^\s*@(?<key>[^\s=:]*)\s*(?<operator>:?)=*\s*"?(?<value>.*)"?\s*$/u.exec(textLine);
+    const match = /^\s*@(?<key>[^\s=:]*)\s*(?<lazyIndicator>:?)=*\s*"?(?<value>.*)"?\s*$/u.exec(textLine);
 
     if (match && match.groups && match.groups.key && match.groups.value) {
       const key = match.groups.key;
-      const replaceValue = !!match.groups.operator;
+      const isLazy = !!match.groups.lazyIndicator;
       const value = match.groups.value;
       httpRegion.hooks.execute.addHook('variable', async context => {
         let result: unknown = value;
-        if (replaceValue) {
-          result = await utils.replaceVariables(value, models.VariableType.variable, context);
+        if (isLazy) {
+          context.options.lazyVariables = true;
         } else {
-          context.options.replaceVariables = true;
+          result = await utils.replaceVariables(value, models.VariableType.variable, context);
         }
         utils.setVariableInContext(
           {

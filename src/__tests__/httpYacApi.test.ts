@@ -662,7 +662,7 @@ GET http://localhost:8080/get?test={{foo.test}}
       const result = await exec(`
 GET  http://localhost:8080/test
 
-@slideshow:={{response.parsedBody.slideshow}}
+@slideshow={{response.parsedBody.slideshow}}
 ###
 GET  http://localhost:8080/text?author={{slideshow.author}}
 
@@ -680,7 +680,7 @@ GET  http://localhost:8080/text?another_author={{slideshow.author}}
       const mockedEndpoints = await localServer.forGet('/text').thenJson(200, { slideshow: { author: 'foo' } });
       const result = await exec(`
   GET http://localhost:8080/test
-  @slideshow={{response.parsedBody.slideshow}}
+  @slideshow:={{response.parsedBody.slideshow}}
   ###
   GET http://localhost:8080/text?author={{slideshow.author}}
   ###

@@ -4,21 +4,21 @@ import { HookCancel, HookInterceptor, HookTriggerContext } from 'hookpoint';
 
 const VariableHookId = 'variable';
 
-export class VariableInterceptor implements HookInterceptor<[models.ProcessorContext], boolean> {
+export class LazyVariableInterceptor implements HookInterceptor<[models.ProcessorContext], boolean> {
   id = 'variable';
 
   async beforeLoop(hookContext: HookTriggerContext<[models.ProcessorContext], true>) {
     const context = hookContext.args[0];
-    context.options.replaceVariables = true;
+    context.options.lazyVariables = true;
     return true;
   }
 
   async beforeTrigger(hookContext: HookTriggerContext<[models.ProcessorContext], true>) {
     const context = hookContext.args[0];
     if (hookContext.hookItem?.id !== VariableHookId) {
-      if (context.options.replaceVariables) {
+      if (context.options.lazyVariables) {
         await this.replaceAllVariables(context);
-        delete context.options.replaceVariables;
+        delete context.options.lazyVariables;
       }
     }
     return true;
