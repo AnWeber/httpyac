@@ -1,3 +1,43 @@
+## 5.3.0 (2022-04-03)
+
+#### Breaking Changes
+
+- The default behavior of setting variables has been changed. Now the variables are evaluated directly (query evaluates to `?foo=foobar`).
+
+```
+@bar=bar
+@foo=foo{{bar}}
+
+###
+@bar=bar2
+GET https://httpbin.org/anything?foo={{foo}} HTTP/1.1
+```
+
+The previous behavior can be enforced by means of `:=` (query evaluates to `?foo=foobar2`).
+
+```
+@bar=bar
+@foo:=foo{{bar}}
+
+###
+@bar=bar2
+GET https://httpbin.org/anything?foo={{foo}} HTTP/1.1
+```
+
+#### Features
+
+- allow simple transform response variables (#235)
+
+```
+GET https://httpbin.org/json
+
+@foo={{response.parsedBody.slideshow.author}}
+```
+
+#### Fix
+
+- right order of cli output (#237)
+
 ## 5.2.3 (2022-03-26)
 
 #### Fix
