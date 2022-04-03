@@ -43,7 +43,6 @@ export async function processHttpRegionActions(
   delete context.httpRegion.response;
   delete context.httpRegion.testResults;
 
-  const variables = context.variables;
   try {
     context.scriptConsole?.collectMessages?.();
 
@@ -51,8 +50,6 @@ export async function processHttpRegionActions(
       context.showProgressBar = showProgressBar;
     }
     report(context, `${context.httpRegion.symbol.name}`);
-
-    context.variables = initRegionScopedVariables(context);
 
     let executeHook: Hook<[models.ProcessorContext], boolean, boolean[]> = context.httpRegion.hooks.execute;
     if (!isGlobalHttpRegion(context.httpRegion)) {
@@ -71,28 +68,8 @@ export async function processHttpRegionActions(
     if (!context.httpRegion.metaData.noLog) {
       context.scriptConsole?.flush?.();
     }
-    const newVariables = context.variables;
-    context.variables = variables;
-    autoShareNewVariables(newVariables, context);
+
     resetDependentRegions(context, context.httpFile, context.httpRegion);
-  }
-}
-
-function initRegionScopedVariables(context: models.ProcessorContext) {
-  const env = toEnvironmentKey(context.httpFile.activeEnvironment);
-
-  let httpRegions = context.httpFile.httpRegions;
-  if (context.config?.useRegionScopedVariables) {
-    httpRegions = context.httpFile.httpRegions.filter(obj => isGlobalHttpRegion(obj));
-  }
-  return Object.assign({}, context.variables, ...httpRegions.map(obj => obj.variablesPerEnv[env]));
-}
-
-function autoShareNewVariables(variables: models.Variables, context: models.ProcessorContext) {
-  for (const [key, value] of Object.entries(variables)) {
-    if (!context.variables[key]) {
-      context.variables[key] = value;
-    }
   }
 }
 
@@ -158,7 +135,7 @@ interface ImportRegionDependentsEntry {
   }>;
 }
 
-interface HttpRegionDepedenciesContext extends models.ProcessorContext {
+interface HttpRegionDependenciesContext extends models.ProcessorContext {
   options: {
     refDependencies?: Array<ImportRegionDependentsEntry>;
   };
@@ -171,7 +148,7 @@ export function registerRegionDependent(
   dependentFile: models.HttpFile,
   dependentRegion: models.HttpRegion
 ): void {
-  const depContext = context as HttpRegionDepedenciesContext;
+  const depContext = context as HttpRegionDependenciesContext;
   depContext.options.refDependencies ||= [];
   let refDepEntry = depContext.options.refDependencies.find(e => e.refFile === refFile && e.refRegion === refRegion);
   if (!refDepEntry) {
@@ -188,7 +165,7 @@ export function registerRegionDependent(
 }
 
 function resetDependentRegionsWithVisitor(
-  context: HttpRegionDepedenciesContext,
+  context: HttpRegionDependenciesContext,
   refFile: models.HttpFile,
   refRegion: models.HttpRegion,
   visitedDependents: Array<{ depFile: models.HttpFile; depRegion: models.HttpRegion }>

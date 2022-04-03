@@ -338,8 +338,7 @@ gql launchesQuery < ./graphql.gql
   describe('metadata', () => {
     it('name + ref', async () => {
       initFileProvider();
-      const refEndpoints = await localServer.forGet('/json')
-        .thenJson(200, { foo: 'bar', test: 1 });
+      const refEndpoints = await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
       const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
       const httpFile = await build(`
 # @name foo
@@ -376,8 +375,7 @@ foo={{foo.foo}}
 GET  http://localhost:8080/json
         `,
       });
-      await localServer.forGet('/json')
-        .thenJson(200, { foo: 'bar', test: 1 });
+      await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
       const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
       const httpFile = await build(`
 
@@ -400,8 +398,7 @@ foo={{foo.foo}}
 
     it('name + forceRef', async () => {
       initFileProvider();
-      const refEndpoints = await localServer.forGet('/json')
-        .thenJson(200, { foo: 'bar', test: 1});
+      const refEndpoints = await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
       const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
 
       const httpFile = await build(`
@@ -435,8 +432,7 @@ foo={{foo.foo}}
 
     it('disabled', async () => {
       initFileProvider();
-      const mockedEndpoints = await localServer.forGet('/json')
-        .thenJson(200, { foo: 'bar', test: 1 });
+      const mockedEndpoints = await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
       const result = await exec(`
 # @disabled
 GET http://localhost:8080/json
@@ -448,11 +444,10 @@ GET http://localhost:8080/json
 
     it('jwt', async () => {
       initFileProvider();
-      await localServer.forGet('/json').thenJson(200,
-        {
-          foo: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
-          test: 1,
-        });
+      await localServer.forGet('/json').thenJson(200, {
+        foo: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
+        test: 1,
+      });
       const httpFile = await build(`
 # @jwt foo
 GET  http://localhost:8080/json
@@ -526,8 +521,7 @@ GET  http://localhost:8080/json?test={{expression.index++}}
   describe('variables', () => {
     it('file variables', async () => {
       initFileProvider();
-      const mockedEndpoints = await localServer.forGet('/json')
-        .thenJson(200, { foo: 'bar', test: 1 });
+      const mockedEndpoints = await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
       const result = await exec(`
 @foo=foo
 @bar={{foo}}bar
@@ -540,8 +534,7 @@ GET http://localhost:8080/json?bar={{bar}}
 
     it('host', async () => {
       initFileProvider();
-      const mockedEndpoints = await localServer.forGet('/json')
-        .thenJson(200, { foo: 'bar', test: 1 });
+      const mockedEndpoints = await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
       const result = await exec(`
 @host=http://localhost:8080
 GET /json
@@ -553,8 +546,7 @@ GET /json
 
     it('escape handlebar', async () => {
       initFileProvider();
-      const mockedEndpoints = await localServer.forPost('/post')
-        .thenJson(200, { foo: 'bar', test: 1 });
+      const mockedEndpoints = await localServer.forPost('/post').thenJson(200, { foo: 'bar', test: 1 });
       const escape = `\\{\\{title\\}\\}`;
       const result = await exec(`
 POST  http://localhost:8080/post
@@ -570,8 +562,7 @@ POST  http://localhost:8080/post
 
     it('basic auth', async () => {
       initFileProvider();
-      const mockedEndpoints = await localServer.forGet('/json')
-        .thenJson(200,{ foo: 'bar', test: 1 });
+      const mockedEndpoints = await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
       const result = await exec(`
 GET  http://localhost:8080/json
 Authorization: Basic john:doe
@@ -589,7 +580,8 @@ Authorization: Basic john doe
 
     it('digest auth', async () => {
       initFileProvider();
-      const missingAuthEndpoints = await localServer.forGet('/json')
+      const missingAuthEndpoints = await localServer
+        .forGet('/json')
         .matching(request => !request.headers.authorization)
         .thenReply(401, null, {
           'www-authenticate':
@@ -615,8 +607,7 @@ Authorization: Digest john doe
 
     it('set string variable', async () => {
       initFileProvider();
-      const mockedEndpoints = await localServer.forGet('/test')
-        .thenJson(200, { slideshow: { author: 'httpyac' } });
+      const mockedEndpoints = await localServer.forGet('/test').thenJson(200, { slideshow: { author: 'httpyac' } });
       const result = await exec(`
 # @name fooString
 GET  http://localhost:8080/test
@@ -649,8 +640,7 @@ GET  http://localhost:8080/test?author={{slideshow.author}}
 
     it('set object variable with number', async () => {
       initFileProvider();
-      const mockedEndpoints = await localServer.forGet('/get')
-        .thenJson(200, { foo: { test: 1 } });
+      const mockedEndpoints = await localServer.forGet('/get').thenJson(200, { foo: { test: 1 } });
       const result = await exec(`
 # @name objectNumber
 GET http://localhost:8080/get
@@ -683,6 +673,23 @@ GET  http://localhost:8080/text?another_author={{slideshow.author}}
       const requests = await mockedEndpoints.getSeenRequests();
       expect(requests[0].url).toBe('http://localhost:8080/text?author=httpyac');
       expect(requests[1].url).toBe('http://localhost:8080/text?another_author=httpyac');
+    });
+    it('lazy replace variable', async () => {
+      initFileProvider();
+      await localServer.forGet('/test').thenJson(200, { slideshow: { author: 'httpyac' } });
+      const mockedEndpoints = await localServer.forGet('/text').thenJson(200, { slideshow: { author: 'foo' } });
+      const result = await exec(`
+  GET http://localhost:8080/test
+  @slideshow={{response.parsedBody.slideshow}}
+  ###
+  GET http://localhost:8080/text?author={{slideshow.author}}
+  ###
+  GET http://localhost:8080/text?another_author={{slideshow.author}}
+      `);
+      expect(result).toBeTruthy();
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests[0].url).toBe('http://localhost:8080/text?author=httpyac');
+      expect(requests[1].url).toBe('http://localhost:8080/text?another_author=foo');
     });
   });
 });
