@@ -62,9 +62,6 @@
       "prettier --parser=typescript --write"
     ]
   },
-  "resolutions": {
-    "keyv": "^4.1.1"
-  },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^3.2.0",
     "@types/aws4": "^1.11.1",
