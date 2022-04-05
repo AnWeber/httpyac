@@ -110,10 +110,14 @@ export function registerRegionDependent(
   dependentFile: models.HttpFile,
   dependentRegion: models.HttpRegion
 ): void {
-  const refDepEntry = refRegion.dependentsPerEnv[toEnvironmentKey(refFile.activeEnvironment)];
-  const depEntry = refDepEntry.find(d => d.httpFile === dependentFile && d.httpRegion === dependentRegion);
+  const envKey = toEnvironmentKey(refFile.activeEnvironment);
+  let refDependents = refRegion.dependentsPerEnv[envKey];
+  if (typeof refDependents === 'undefined') {
+    refDependents = refRegion.dependentsPerEnv[envKey] = [];
+  }
+  const depEntry = refDependents.find(d => d.httpFile === dependentFile && d.httpRegion === dependentRegion);
   if (!depEntry) {
-    refDepEntry.push({
+    refDependents.push({
       httpFile: dependentFile,
       httpRegion: dependentRegion,
     });
@@ -125,8 +129,12 @@ function resetDependentRegionsWithVisitor(
   refRegion: models.HttpRegion,
   visitedDependents: Array<{ httpFile: models.HttpFile; httpRegion: models.HttpRegion }>
 ): void {
-  const refDepEntry = refRegion.dependentsPerEnv[toEnvironmentKey(refFile.activeEnvironment)];
-  const unvisitedDependents = refDepEntry.filter(
+  const envKey = toEnvironmentKey(refFile.activeEnvironment);
+  let refDependents = refRegion.dependentsPerEnv[envKey];
+  if (typeof refDependents === 'undefined') {
+    refDependents = refRegion.dependentsPerEnv[envKey] = [];
+  }
+  const unvisitedDependents = refDependents.filter(
     d => !visitedDependents.find(v => v.httpFile === d.httpFile && v.httpRegion === d.httpRegion)
   );
   for (const { httpFile, httpRegion } of unvisitedDependents) {
