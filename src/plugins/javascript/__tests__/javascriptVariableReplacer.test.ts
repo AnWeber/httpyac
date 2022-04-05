@@ -95,8 +95,8 @@ describe('javascriptVariableReplacer', () => {
       expect(result).toEqual(`foo=3`);
     });
     it('should return non replaced value', async () => {
-      jest.spyOn(log, 'warn').mockImplementation();
-      const result = await replaceJavascriptExpressions(`foo={{bar}}`, 'unittest', {
+      jest.spyOn(log, 'trace').mockImplementation();
+      const result = await replaceJavascriptExpressions(`foo={{bar}}`, models.VariableType.variable, {
         variables: {},
         httpFile: {
           fileName: 'test',
@@ -108,6 +108,23 @@ describe('javascriptVariableReplacer', () => {
         },
       } as unknown as models.ProcessorContext);
       expect(result).toEqual(`foo={{bar}}`);
+    });
+    it('should throw error', async () => {
+      jest.spyOn(log, 'error').mockImplementation();
+      await expect(
+        async () =>
+          await replaceJavascriptExpressions(`foo={{bar}}`, 'unittest', {
+            variables: {},
+            httpFile: {
+              fileName: 'test',
+            },
+            httpRegion: {
+              symbol: {
+                startLine: 1,
+              },
+            },
+          } as unknown as models.ProcessorContext)
+      ).rejects.toThrow();
     });
   });
 });

@@ -8,7 +8,7 @@ export async function replaceJavascriptExpressions(
   type: VariableType | string,
   context: ProcessorContext
 ): Promise<unknown> {
-  return utils.parseHandlebarsString(text, async (variable: string, searchValue: string) => {
+  return await utils.parseHandlebarsString(text, async (variable: string, searchValue: string) => {
     try {
       return await evalExpression(variable, context);
     } catch (err) {
