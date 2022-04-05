@@ -44,23 +44,24 @@ export async function processHttpRegionActions(
   delete context.httpRegion.response;
   delete context.httpRegion.testResults;
 
-  try {
-    if (context.progress) {
-      context.showProgressBar = showProgressBar;
+  if (context.progress) {
+    context.showProgressBar = showProgressBar;
+  }
+  report(context, `${context.httpRegion.symbol.name}`);
+
+  let executeHook: Hook<[models.ProcessorContext], boolean, boolean[]> = context.httpRegion.hooks.execute;
+  if (!isGlobalHttpRegion(context.httpRegion)) {
+    executeHook = context.httpFile.hooks.execute.merge(executeHook);
+    for (const globalRegion of context.httpFile.httpRegions.filter(isGlobalHttpRegion)) {
+      registerRegionDependent(context, context.httpFile, globalRegion, context.httpFile, context.httpRegion);
     }
-    report(context, `${context.httpRegion.symbol.name}`);
+  }
 
-    let executeHook: Hook<[models.ProcessorContext], boolean, boolean[]> = context.httpRegion.hooks.execute;
-    if (!isGlobalHttpRegion(context.httpRegion)) {
-      executeHook = context.httpFile.hooks.execute.merge(executeHook);
-    }
-
-    const result = await executeHook.trigger(context);
-
-    return result !== HookCancel && result.every(obj => !!obj);
-  } finally {
+  const result = await executeHook.trigger(context);
+  if (!isGlobalHttpRegion(context.httpRegion)) {
     resetDependentRegions(context, context.httpFile, context.httpRegion);
   }
+  return result !== HookCancel && result.every(obj => !!obj);
 }
 
 export async function logResponse(
