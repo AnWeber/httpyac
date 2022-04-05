@@ -1,3 +1,4 @@
+import { HttpFile } from './httpFile';
 import { ExecuteHook, OnRequestHook, OnStreaming, OnResponseHook, ResponseLoggingHook } from './httpFileHooks';
 import { Request } from './httpRequest';
 import { HttpResponse } from './httpResponse';
@@ -16,6 +17,7 @@ export interface ProcessedHttpRegion {
 
 export interface HttpRegion extends ProcessedHttpRegion {
   variablesPerEnv: Record<string, Variables>;
+  dependentsPerEnv: Record<string, Array<{ httpRegion: HttpRegion; httpFile: HttpFile }>>;
   hooks: {
     execute: ExecuteHook;
     onRequest: OnRequestHook;

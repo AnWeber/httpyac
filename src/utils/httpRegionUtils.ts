@@ -103,70 +103,47 @@ export async function executeGlobalScripts(context: {
   return true;
 }
 
-interface ImportRegionDependentsEntry {
-  refFile: models.HttpFile;
-  refRegion: models.HttpRegion;
-  dependents: Array<{
-    depFile: models.HttpFile;
-    depRegion: models.HttpRegion;
-  }>;
-}
-
-interface HttpRegionDependenciesContext extends models.ProcessorContext {
-  options: {
-    refDependencies?: Array<ImportRegionDependentsEntry>;
-  };
-}
-
 export function registerRegionDependent(
-  context: models.ProcessorContext,
+  _context: object,
   refFile: models.HttpFile,
   refRegion: models.HttpRegion,
   dependentFile: models.HttpFile,
   dependentRegion: models.HttpRegion
 ): void {
-  const depContext = context as HttpRegionDependenciesContext;
-  depContext.options.refDependencies ||= [];
-  let refDepEntry = depContext.options.refDependencies.find(e => e.refFile === refFile && e.refRegion === refRegion);
-  if (!refDepEntry) {
-    refDepEntry = { refFile, refRegion, dependents: [] };
-    depContext.options.refDependencies.push(refDepEntry);
-  }
-  const depEntry = refDepEntry.dependents.find(d => d.depFile === dependentFile && d.depRegion === dependentRegion);
+  const refDepEntry = refRegion.dependentsPerEnv[toEnvironmentKey(refFile.activeEnvironment)];
+  const depEntry = refDepEntry.find(d => d.httpFile === dependentFile && d.httpRegion === dependentRegion);
   if (!depEntry) {
-    refDepEntry.dependents.push({
-      depFile: dependentFile,
-      depRegion: dependentRegion,
+    refDepEntry.push({
+      httpFile: dependentFile,
+      httpRegion: dependentRegion,
     });
   }
 }
 
 function resetDependentRegionsWithVisitor(
-  context: HttpRegionDependenciesContext,
   refFile: models.HttpFile,
   refRegion: models.HttpRegion,
-  visitedDependents: Array<{ depFile: models.HttpFile; depRegion: models.HttpRegion }>
+  visitedDependents: Array<{ httpFile: models.HttpFile; httpRegion: models.HttpRegion }>
 ): void {
-  const refDepEntry = context.options.refDependencies?.find(e => e.refFile === refFile && e.refRegion === refRegion);
-  if (!refDepEntry) return;
-  const unvisitedDependents = refDepEntry.dependents.filter(
-    d => !visitedDependents.find(v => v.depFile === d.depFile && v.depRegion === d.depRegion)
+  const refDepEntry = refRegion.dependentsPerEnv[toEnvironmentKey(refFile.activeEnvironment)];
+  const unvisitedDependents = refDepEntry.filter(
+    d => !visitedDependents.find(v => v.httpFile === d.httpFile && v.httpRegion === d.httpRegion)
   );
-  for (const { depFile, depRegion } of unvisitedDependents) {
-    delete depRegion.response;
-    delete depRegion.variablesPerEnv[toEnvironmentKey(depFile.activeEnvironment)];
+  for (const { httpFile, httpRegion } of unvisitedDependents) {
+    delete httpRegion.response;
+    delete httpRegion.variablesPerEnv[toEnvironmentKey(httpFile.activeEnvironment)];
 
-    visitedDependents.push({ depFile, depRegion });
-    resetDependentRegionsWithVisitor(context, depFile, depRegion, visitedDependents);
+    visitedDependents.push({ httpFile, httpRegion });
+    resetDependentRegionsWithVisitor(httpFile, httpRegion, visitedDependents);
   }
 }
 
 export function resetDependentRegions(
-  context: models.ProcessorContext,
+  _context: object,
   refFile: models.HttpFile,
   refRegion: models.HttpRegion
 ): void {
-  resetDependentRegionsWithVisitor(context, refFile, refRegion, []);
+  resetDependentRegionsWithVisitor(refFile, refRegion, []);
 }
 
 export function isGlobalHttpRegion(httpRegion: models.HttpRegion): boolean {
