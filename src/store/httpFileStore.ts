@@ -339,6 +339,7 @@ function initHttpRegion(start: number): models.HttpRegion {
       responseLogging: new models.ResponseLoggingHook(),
     },
     variablesPerEnv: {},
+    dependentsPerEnv: {},
   };
 }
 
