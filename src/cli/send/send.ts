@@ -3,12 +3,13 @@ import { fileProvider, Logger } from '../../io';
 import * as models from '../../models';
 import { HttpFileStore } from '../../store';
 import * as utils from '../../utils';
+import { bailOnFailedTestInterceptor } from './bailOnFailedTestInterceptor';
 import { toSendJsonOutput } from './jsonOutput';
+import { loggerFlushInterceptor } from './loggerFlushInterceptor';
 import { SendOptions, getLogLevel, SendFilterOptions, OutputType } from './options';
 import { default as chalk } from 'chalk';
 import { Command } from 'commander';
 import { promises as fs } from 'fs';
-import { HookTriggerContext } from 'hookpoint';
 import inquirer from 'inquirer';
 import { sep } from 'path';
 
@@ -47,6 +48,7 @@ async function execute(fileNames: Array<string>, options: SendOptions): Promise<
   const httpFiles: models.HttpFile[] = await getHttpFiles(fileNames, options, context.config);
 
   if (httpFiles.length > 0) {
+    initCliHooks(httpFiles, options);
     let isFirstRequest = true;
     const jsonOutput: Record<string, Array<models.HttpRegion>> = {};
     while (options.interactive || isFirstRequest) {
@@ -101,6 +103,11 @@ function toNumber(value: string) {
 }
 
 export function convertCliOptionsToContext(cliOptions: SendOptions) {
+  const scriptConsole = new Logger({
+    level: getLogLevel(cliOptions),
+    onlyFailedTests: cliOptions.filter === SendFilterOptions.onlyFailed,
+  });
+  scriptConsole.collectMessages();
   const context: Omit<models.HttpFileSendContext, 'httpFile'> = {
     repeat: cliOptions.repeat
       ? {
@@ -109,11 +116,7 @@ export function convertCliOptionsToContext(cliOptions: SendOptions) {
             cliOptions['repeat-mode'] === 'sequential' ? models.RepeatOrder.sequential : models.RepeatOrder.parallel,
         }
       : undefined,
-    scriptConsole: new Logger({
-      level: getLogLevel(cliOptions),
-      onlyFailedTests: cliOptions.filter === SendFilterOptions.onlyFailed,
-      collectMessages: true,
-    }),
+    scriptConsole,
     config: {
       log: {
         level: getLogLevel(cliOptions),
@@ -124,7 +127,7 @@ export function convertCliOptionsToContext(cliOptions: SendOptions) {
       },
     },
     logStream: cliOptions.json ? undefined : getStreamLogger(cliOptions),
-    logResponse: cliOptions.json ? undefined : getRequestLogger(cliOptions),
+    logResponse: cliOptions.json ? undefined : getRequestLogger(cliOptions, scriptConsole),
     variables: cliOptions.var
       ? Object.fromEntries(
           cliOptions.var.map(obj => {
@@ -139,21 +142,10 @@ export function convertCliOptionsToContext(cliOptions: SendOptions) {
 }
 
 function initCliHooks(httpFiles: Array<models.HttpFile>, cliOptions: SendOptions) {
-  if (httpFiles.length > 0) {
+  for (const httpFile of httpFiles) {
+    httpFile.hooks.execute.addInterceptor(loggerFlushInterceptor);
     if (cliOptions.bail) {
-      const bailOnFailedTest = {
-        afterTrigger: async function bail(hookContext: HookTriggerContext<[models.ProcessorContext], boolean>) {
-          const context = hookContext.args[0];
-          const failedTest = context.httpRegion.testResults?.find?.(obj => !obj.result);
-          if (failedTest) {
-            throw failedTest.error || new Error('bail on failed test');
-          }
-          return true;
-        },
-      };
-      for (const httpFile of httpFiles) {
-        httpFile.httpRegions.forEach(httpRegion => httpRegion.hooks.execute.addInterceptor(bailOnFailedTest));
-      }
+      httpFile.hooks.execute.addInterceptor(bailOnFailedTestInterceptor);
     }
   }
 }
@@ -185,8 +177,6 @@ async function getHttpFiles(
     );
     httpFiles.push(httpFile);
   }
-
-  initCliHooks(httpFiles, options);
   return httpFiles;
 }
 
@@ -273,14 +263,17 @@ function getStreamLogger(options: SendOptions): models.StreamLogger | undefined 
   return undefined;
 }
 
-function getRequestLogger(options: SendOptions): models.RequestLogger | undefined {
+function getRequestLogger(
+  options: SendOptions,
+  scriptConsole: models.ConsoleLogHandler
+): models.RequestLogger | undefined {
   const requestLoggerOptions = getRequestLoggerOptions(
     options.output,
     options.filter === SendFilterOptions.onlyFailed,
     !options.raw
   );
   if (requestLoggerOptions) {
-    return utils.requestLoggerFactory(
+    const logger = utils.requestLoggerFactory(
       console.info,
       requestLoggerOptions,
       options['output-failed']
@@ -291,6 +284,10 @@ function getRequestLogger(options: SendOptions): models.RequestLogger | undefine
           )
         : undefined
     );
+    return async (response, httpRegion) => {
+      await logger(response, httpRegion);
+      scriptConsole.flush();
+    };
   }
   return undefined;
 }

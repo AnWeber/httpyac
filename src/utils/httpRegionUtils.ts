@@ -44,8 +44,6 @@ export async function processHttpRegionActions(
   delete context.httpRegion.testResults;
 
   try {
-    context.scriptConsole?.collectMessages?.();
-
     if (context.progress) {
       context.showProgressBar = showProgressBar;
     }
@@ -57,18 +55,9 @@ export async function processHttpRegionActions(
     }
 
     const result = await executeHook.trigger(context);
-    const processedHttpRegion = toProcessedHttpRegion(context);
-    processedHttpRegion.response = await logResponse(processedHttpRegion?.response, context);
-    if (context.processedHttpRegions && !isGlobalHttpRegion(context.httpRegion)) {
-      context.processedHttpRegions.push(processedHttpRegion);
-    }
-    delete context.httpRegion.response;
+
     return result !== HookCancel && result.every(obj => !!obj);
   } finally {
-    if (!context.httpRegion.metaData.noLog) {
-      context.scriptConsole?.flush?.();
-    }
-
     resetDependentRegions(context, context.httpFile, context.httpRegion);
   }
 }
@@ -110,20 +99,6 @@ export async function executeGlobalScripts(context: {
     }
   }
   return true;
-}
-
-export function toProcessedHttpRegion(context: models.ProcessorContext): models.ProcessedHttpRegion {
-  return {
-    metaData: context.httpRegion.metaData && {
-      ...context.httpRegion.metaData,
-    },
-    symbol: context.httpRegion.symbol,
-    testResults: context.httpRegion.testResults,
-    request: context.httpRegion.request && {
-      ...context.httpRegion.request,
-    },
-    response: context.httpRegion.response && cloneResponse(context.httpRegion.response),
-  };
 }
 
 interface ImportRegionDependentsEntry {

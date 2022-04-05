@@ -7,15 +7,12 @@ export class Logger implements ConsoleLogHandler {
       level?: LogLevel;
       logMethod?: (level: LogLevel, ...params: unknown[]) => void;
       onlyFailedTests?: boolean;
-      collectMessages?: boolean;
       noTrace?: boolean;
     }
   ) {}
 
   collectMessages(): void {
-    if (this.options.collectMessages) {
-      this.collectCache = [];
-    }
+    this.collectCache = [];
   }
 
   flush(): void {
@@ -23,7 +20,7 @@ export class Logger implements ConsoleLogHandler {
       for (const action of this.collectCache) {
         action();
       }
-      delete this.collectCache;
+      this.collectCache = [];
     }
   }
 
