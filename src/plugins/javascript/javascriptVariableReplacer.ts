@@ -16,8 +16,8 @@ export async function replaceJavascriptExpressions(
         log.trace(`variable ${variable} not defined`);
         log.trace(err);
       } else {
-        log.warn(`expression ${variable} throws error`);
-        log.warn(err);
+        log.error(`expression ${variable} throws error`);
+        throw err;
       }
       return searchValue;
     }
