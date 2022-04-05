@@ -1,3 +1,4 @@
+import * as io from '../io';
 import * as models from '../models';
 import { toEnvironmentKey } from './environmentUtils';
 import { report } from './logUtils';
@@ -138,6 +139,7 @@ function resetDependentRegionsWithVisitor(
     d => !visitedDependents.find(v => v.httpFile === d.httpFile && v.httpRegion === d.httpRegion)
   );
   for (const { httpFile, httpRegion } of unvisitedDependents) {
+    io.log.trace(`resetting '${httpFile.fileName}:${getDisplayName(httpRegion)}': dependent of '${refFile.fileName}:${getDisplayName(refRegion)}'`);
     delete httpRegion.response;
     delete httpRegion.variablesPerEnv[toEnvironmentKey(httpFile.activeEnvironment)];
 
