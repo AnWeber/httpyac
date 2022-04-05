@@ -80,7 +80,7 @@ async function execute(fileNames: Array<string>, options: SendOptions): Promise<
         } else if (context.scriptConsole) {
           context.scriptConsole.info('');
           context.scriptConsole.info(
-            chalk`{bold ${cliJsonOutput.summary.totalRequests}} requests tested ({green ${cliJsonOutput.summary.successRequests} succeeded}, {red ${cliJsonOutput.summary.failedRequests} failed})`
+            chalk`{bold ${cliJsonOutput.summary.totalRequests}} requests processed ({green ${cliJsonOutput.summary.successRequests} succeeded}, {red ${cliJsonOutput.summary.failedRequests} failed})`
           );
         }
       }
