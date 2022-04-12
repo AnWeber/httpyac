@@ -81,7 +81,9 @@ class LoopMetaAction implements HookInterceptor<[models.ProcessorContext], boole
 
   async process(context: models.ProcessorContext): Promise<boolean> {
     this.iteration = this.iterate(context);
-    this.name = context.httpRegion.metaData.name;
+    if (utils.isString(context.httpRegion.metaData.name)) {
+      this.name = context.httpRegion.metaData.name;
+    }
     utils.report(context, 'start loop');
     const next = await this.iteration.next();
     if (!next.done) {

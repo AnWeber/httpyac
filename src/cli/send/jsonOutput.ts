@@ -1,4 +1,5 @@
 import { HttpRegion, HttpResponse, TestResult } from '../../models';
+import * as utils from '../../utils';
 import { SendFilterOptions, SendOptions } from './options';
 
 export interface SendJsonOutput {
@@ -48,9 +49,9 @@ export function toSendJsonOutput(context: Record<string, Array<HttpRegion>>, opt
         const result: SendOutputRequest = {
           fileName,
           response: convertResponse(httpRegion.response, output),
-          name: httpRegion.metaData?.name,
-          title: httpRegion.metaData?.title,
-          description: httpRegion.metaData?.description,
+          name: utils.toString(httpRegion.metaData?.name),
+          title: utils.toString(httpRegion.metaData?.title),
+          description: utils.toString(httpRegion.metaData?.description),
           line: httpRegion.symbol.startLine,
           testResults: httpRegion.testResults,
           summary: {

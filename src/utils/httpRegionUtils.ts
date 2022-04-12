@@ -2,14 +2,15 @@ import * as models from '../models';
 import { toEnvironmentKey } from './environmentUtils';
 import { report } from './logUtils';
 import { cloneResponse } from './requestUtils';
+import { isString } from './stringUtils';
 import { HookCancel, Hook } from 'hookpoint';
 
 export function getDisplayName(httpRegion?: models.HttpRegion, defaultName = 'global'): string {
   if (httpRegion) {
-    if (httpRegion.metaData.title) {
+    if (isString(httpRegion.metaData.title)) {
       return httpRegion.metaData.title;
     }
-    if (httpRegion.metaData.name) {
+    if (isString(httpRegion.metaData.name)) {
       return httpRegion.metaData.name;
     }
     if (httpRegion.request?.url) {
@@ -27,7 +28,7 @@ export function getDisplayName(httpRegion?: models.HttpRegion, defaultName = 'gl
 }
 
 export function getRegionDescription(httpRegion: models.HttpRegion, defaultName = '-'): string {
-  if (httpRegion.metaData.description) {
+  if (isString(httpRegion.metaData.description)) {
     return httpRegion.metaData.description;
   }
   if (httpRegion.request?.url) {

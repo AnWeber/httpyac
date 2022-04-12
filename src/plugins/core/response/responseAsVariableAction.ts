@@ -29,7 +29,7 @@ function setLastResponseInVariables(context: models.ProcessorContext, response: 
 
 function handleNameMetaData(response: models.HttpResponse, body: unknown, context: models.ProcessorContext) {
   const { httpRegion } = context;
-  if (httpRegion.metaData.name) {
+  if (utils.isString(httpRegion.metaData.name)) {
     const name = httpRegion.metaData.name
       .trim()
       .replace(/\s/gu, '-')
