@@ -22,11 +22,9 @@ export async function send(context: models.SendContext): Promise<boolean> {
 }
 
 async function sendHttpRegion(context: models.HttpRegionSendContext): Promise<boolean> {
-  if (!context.httpRegion.metaData.disabled) {
-    const processorContext = await createEmptyProcessorContext(context);
-    if (await utils.executeGlobalScripts(processorContext)) {
-      return await utils.processHttpRegionActions(processorContext, true);
-    }
+  const processorContext = await createEmptyProcessorContext(context);
+  if (await utils.executeGlobalScripts(processorContext)) {
+    return await utils.processHttpRegionActions(processorContext, true);
   }
   return false;
 }
@@ -35,14 +33,12 @@ async function sendHttpRegions(context: models.HttpRegionsSendContext): Promise<
   const processorContext = await createEmptyProcessorContext(context);
   if (await utils.executeGlobalScripts(processorContext)) {
     for (const httpRegion of context.httpRegions) {
-      if (!httpRegion.metaData.disabled) {
-        const regionProcessorContext: models.ProcessorContext = {
-          ...processorContext,
-          httpRegion,
-        };
-        if (!(await utils.processHttpRegionActions(regionProcessorContext, false))) {
-          return false;
-        }
+      const regionProcessorContext: models.ProcessorContext = {
+        ...processorContext,
+        httpRegion,
+      };
+      if (!(await utils.processHttpRegionActions(regionProcessorContext, false))) {
+        return false;
       }
     }
     return true;
@@ -53,10 +49,6 @@ async function sendHttpRegions(context: models.HttpRegionsSendContext): Promise<
 async function sendHttpFile(context: models.HttpFileSendContext): Promise<boolean> {
   const processorContext = await createEmptyProcessorContext(context);
   for (const httpRegion of context.httpFile.httpRegions) {
-    if (httpRegion.metaData.disabled) {
-      log.debug(`${httpRegion.symbol.name} is disabled`);
-      continue;
-    }
     if (httpRegion.request && context.httpRegionPredicate && !context.httpRegionPredicate(httpRegion)) {
       log.debug(`${httpRegion.symbol.name} disabled by predicate`);
       continue;
