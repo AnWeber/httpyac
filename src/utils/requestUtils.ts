@@ -240,23 +240,28 @@ export function requestLoggerFactory(
       }
 
       if (isString(response.body) && opt.responseBodyLength !== undefined) {
-        if (result.length > 0) {
-          result.push('');
-        }
-        let body = response.body;
+        let body: string | undefined = response.body;
         if (options.responseBodyPrettyPrint && response.prettyPrintBody) {
           body = response.prettyPrintBody;
         }
         body = getPartOfBody(body, opt.responseBodyLength);
-        result.push(body);
+        if (body) {
+          if (result.length > 0) {
+            result.push('');
+          }
+          result.push(body);
+        }
       }
       log(toMultiLineString(result));
     }
   };
 }
 
-function getPartOfBody(body: string, length: number) {
+export function getPartOfBody(body: string, length: number | undefined) {
   let result = body;
+  if (typeof length === 'undefined' || length < 0) {
+    return undefined;
+  }
   if (length > 0) {
     result = body.slice(0, Math.min(body.length, length));
     if (body.length >= length) {
