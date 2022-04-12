@@ -387,7 +387,7 @@ POST http://localhost:8080/post?test={{foo.test}}
 foo={{foo.foo}}
       `);
 
-        await send({
+      await send({
         httpFile,
         httpRegion: httpFile.httpRegions[1],
       });
@@ -444,6 +444,35 @@ GET http://localhost:8080/json
       expect(requests.length).toBe(0);
     });
 
+    it('disabled with script', async () => {
+      initFileProvider();
+      const mockedEndpoints = await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
+
+      await exec(`
+# @disabled !this.token
+{{
+  exports.token = 'test'
+}}
+GET http://localhost:8080/json
+      `);
+
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests.length).toBe(0);
+    });
+    it('disabled with expression', async () => {
+      initFileProvider();
+      const mockedEndpoints = await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
+
+      await exec(`
+{{
+  httpRegion.metaData.disabled = true;
+}}
+GET http://localhost:8080/json
+      `);
+
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests.length).toBe(0);
+    });
     it('jwt', async () => {
       initFileProvider();
       await localServer.forGet('/json').thenJson(200, {
