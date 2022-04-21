@@ -1,3 +1,17 @@
+## 5.4.0 (2022-04-21)
+
+#### Features
+
+- add `dayjs` and `uuid` to require
+- `# @disabled` allows evalExpression which is evaluated on each step in execution (#246)
+
+#### Fixes
+
+- throw error on javascript error (#245)
+- correct order of output using `# @ref` (#245)
+- correct order of output using `# @loop` (#243)
+- right request count using `# @loop` (#242)
+
 ## 5.3.0 (2022-04-03)
 
 #### Breaking Changes
