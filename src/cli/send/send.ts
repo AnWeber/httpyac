@@ -84,6 +84,7 @@ async function execute(fileNames: Array<string>, options: SendOptions): Promise<
           context.scriptConsole.info(
             chalk`{bold ${cliJsonOutput.summary.totalRequests}} requests processed ({green ${cliJsonOutput.summary.successRequests} succeeded}, {red ${cliJsonOutput.summary.failedRequests} failed})`
           );
+          context.scriptConsole.flush();
         }
       }
     }

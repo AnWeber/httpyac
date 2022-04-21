@@ -1,9 +1,7 @@
 import * as io from '../../../io';
 import * as models from '../../../models';
 import * as utils from '../../../utils';
-import { HookInterceptor, HookTriggerContext } from 'hookpoint';
-import cloneDeep from 'lodash/cloneDeep';
-import { v4 as uuid } from 'uuid';
+import { HookCancel, HookInterceptor, HookTriggerContext } from 'hookpoint';
 
 export function loopMetaDataHandler(type: string, value: string | undefined, context: models.ParserContext): boolean {
   if (type === 'loop' && value) {
@@ -37,8 +35,7 @@ export function loopMetaDataHandler(type: string, value: string | undefined, con
 }
 
 function addHook(context: models.ParserContext, data: Omit<LoopMetaData, 'index'>) {
-  const loopAction = new LoopMetaAction(data);
-  context.httpRegion.hooks.execute.addObjHook(obj => obj.process, loopAction);
+  const loopAction = new LoopMetaInterceptor(data);
   context.httpRegion.hooks.execute.addInterceptor(loopAction);
 }
 
@@ -56,168 +53,130 @@ interface LoopMetaData {
   expression?: string;
 }
 
-class LoopMetaAction implements HookInterceptor<[models.ProcessorContext], boolean> {
+class LoopMetaInterceptor implements HookInterceptor<[models.ProcessorContext], boolean> {
   id;
-  private iteration:
-    | AsyncGenerator<{
-        index: number;
-        variables: models.Variables;
-      }>
-    | undefined;
-
-  name: string | undefined;
-  index = 0;
-  request: models.Request | undefined;
+  isInLoop = false;
   constructor(private readonly data: LoopMetaData) {
-    this.id = `loop_${uuid()}`;
+    this.id = `loop_${data.type}`;
   }
 
-  async beforeTrigger(hookContext: HookTriggerContext<[models.ProcessorContext], boolean>): Promise<boolean> {
-    if (hookContext.hookItem?.id === this.id) {
-      this.index = hookContext.index;
-    }
-    return true;
-  }
-
-  async process(context: models.ProcessorContext): Promise<boolean> {
-    this.iteration = this.iterate(context);
-    if (utils.isString(context.httpRegion.metaData.name)) {
-      this.name = context.httpRegion.metaData.name;
-    }
-    utils.report(context, 'start loop');
-    const next = await this.iteration.next();
-    if (!next.done) {
-      if (context.request) {
-        this.request = cloneDeep(context.request);
-      }
-      Object.assign(context.variables, next.value.variables);
+  async beforeLoop(hookContext: HookTriggerContext<[models.ProcessorContext], boolean>): Promise<boolean> {
+    if (this.isInLoop) {
       return true;
     }
-    return false;
-  }
-
-  async afterTrigger(hookContext: HookTriggerContext<[models.ProcessorContext], boolean>): Promise<boolean> {
     const context = hookContext.args[0];
-    if (this.iteration && hookContext.index + 1 === hookContext.length) {
-      this.setResponsesList(context);
-      const next = await this.iteration.next();
-
-      if (!next.done) {
-        utils.report(context, `${next.value.index} loop pass`);
-        Object.assign(context.variables, next.value.variables);
-        await utils.logResponse(context.httpRegion.response, context);
-        context.httpRegion = this.createHttpRegionClone(context.httpRegion, next.value.index);
-        if (this.request) {
-          context.request = cloneDeep(this.request);
+    const iteration = this.iterate(context);
+    const responses = [];
+    try {
+      this.isInLoop = true;
+      let next = await iteration.next();
+      while (!next.done) {
+        utils.report(context, `${next.value.index + 1} loop pass`);
+        const loopContext = {
+          ...context,
+          httpRegion: this.createHttpRegionClone(context.httpRegion, next.value.index),
+          variables: Object.assign(context.variables, next.value.variables),
+        };
+        const result = await hookContext.hook.trigger(loopContext);
+        if (result === HookCancel) {
+          return false;
         }
-        hookContext.index = this.index;
+        responses.push(loopContext.variables.response);
+        next = await iteration.next();
       }
-    } else if (this.name && context.variables[this.name]) {
-      utils.setVariableInContext(
-        {
-          [`${this.name}0`]: context.variables[this.name],
-          [`${this.name}0Response`]: context.variables.response,
-        },
-        context
-      );
+      if (context.httpRegion.metaData.name) {
+        utils.setVariableInContext(
+          {
+            [`${context.httpRegion.metaData.name}List`]: responses,
+          },
+          context
+        );
+      }
+      this.breakHookLoop(hookContext);
+    } finally {
+      this.isInLoop = false;
     }
-
     return true;
   }
 
-  private setResponsesList(context: models.ProcessorContext) {
-    const listName = `${this.name}List`;
-    let responses: unknown = context.variables[listName];
-    if (!responses) {
-      responses = [];
-      utils.setVariableInContext(
-        {
-          [listName]: responses,
-        },
-        context
-      );
-    }
-    if (Array.isArray(responses) && utils.isHttpResponse(context.variables.response)) {
-      responses.push(utils.shrinkCloneResponse(context.variables.response));
-    }
+  private breakHookLoop(hookContext: HookTriggerContext<[models.ProcessorContext], boolean | undefined>) {
+    hookContext.index = hookContext.length;
   }
-
   private async *iterate(context: models.ProcessorContext) {
     switch (this.data.type) {
       case LoopMetaType.forOf:
-        if (this.data.variable && this.data.iterable) {
-          const array = await io.javascriptProvider.evalExpression(this.data.iterable, context);
-          let iterable: Array<unknown> | undefined;
-          if (Array.isArray(array)) {
-            iterable = array;
-          }
-          if (iterable) {
-            let index = 0;
-            for (const variable of iterable) {
-              const variables: models.Variables = {
-                $index: index,
-              };
-              variables[this.data.variable] = variable;
-              yield {
-                index,
-                variables,
-              };
-              index++;
-            }
-          }
-        }
+        await (yield* this.iterateForOfLoop(context));
         break;
       case LoopMetaType.for:
-        if (this.data.counter) {
-          for (let index = 0; index < this.data.counter; index++) {
-            yield {
-              index,
-              variables: {
-                $index: index,
-              },
-            };
-          }
-        }
+        yield* this.iterateForLoop();
         break;
       case LoopMetaType.while:
-        if (this.data.expression) {
-          let index = 0;
-          while (await io.javascriptProvider.evalExpression(this.data.expression, context)) {
-            yield {
-              index,
-              variables: {
-                $index: index,
-              },
-            };
-            index++;
-          }
-        }
+        await (yield* this.iterateWhileLoop(context));
         break;
       default:
         break;
     }
   }
 
+  private async *iterateForOfLoop(context: models.ProcessorContext) {
+    if (this.data.variable && this.data.iterable) {
+      const array = await io.javascriptProvider.evalExpression(this.data.iterable, context);
+      let iterable: Array<unknown> | undefined;
+      if (Array.isArray(array)) {
+        iterable = array;
+      }
+      if (iterable) {
+        let index = 0;
+        for (const variable of iterable) {
+          const variables: models.Variables = {
+            $index: index,
+          };
+          variables[this.data.variable] = variable;
+          yield {
+            index,
+            variables,
+          };
+          index++;
+        }
+      }
+    }
+  }
+
+  private async *iterateWhileLoop(context: models.ProcessorContext) {
+    if (this.data.expression) {
+      let index = 0;
+      while (await io.javascriptProvider.evalExpression(this.data.expression, context)) {
+        yield {
+          index,
+          variables: {
+            $index: index,
+          },
+        };
+        index++;
+      }
+    }
+  }
+
+  private *iterateForLoop() {
+    if (this.data.counter) {
+      for (let index = 0; index < this.data.counter; index++) {
+        yield {
+          index,
+          variables: {
+            $index: index,
+          },
+        };
+      }
+    }
+  }
+
   private createHttpRegionClone(httpRegion: models.HttpRegion, index: number): models.HttpRegion {
     return {
+      ...httpRegion,
       metaData: {
         ...httpRegion.metaData,
-        name: this.name ? `${this.name}${index}` : undefined,
+        name: httpRegion.metaData.name ? `${httpRegion.metaData.name}${index}` : undefined,
       },
-      request: httpRegion.request
-        ? {
-            ...httpRegion.request,
-          }
-        : undefined,
-      symbol: httpRegion.symbol,
-      hooks: {
-        execute: new models.ExecuteHook(),
-        onRequest: new models.OnRequestHook(),
-        onStreaming: new models.OnStreaming(),
-        onResponse: new models.OnResponseHook(),
-        responseLogging: new models.ResponseLoggingHook(),
-      },
-      variablesPerEnv: httpRegion.variablesPerEnv,
     };
   }
 }
