@@ -13,10 +13,10 @@ export async function replaceJavascriptExpressions(
       return await evalExpression(variable, context);
     } catch (err) {
       if (type === VariableType.variable) {
-        log.trace(`variable ${variable} not defined`);
-        log.trace(err);
+        (context.scriptConsole || log).trace(`variable ${variable} not defined`);
+        (context.scriptConsole || log).trace(err);
       } else {
-        log.error(`expression ${variable} throws error`);
+        (context.scriptConsole || log).error(`expression ${variable} throws error`);
         throw err;
       }
       return searchValue;

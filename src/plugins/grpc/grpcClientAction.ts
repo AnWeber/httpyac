@@ -269,10 +269,8 @@ export class GrpcClientAction {
 
       const flatServiceKeys = Object.keys(flatServices);
       if (flatServiceKeys) {
-        log.error(`Service ${service} does not exist. Available Services`, ...flatServiceKeys);
         throw new Error(`Service ${service} does not exist. Available Services: ${flatServiceKeys.join(', ')}`);
       } else {
-        log.error(`Service ${service} does not exist. No Service imported`);
         throw new Error(`Service ${service} does not exist. No Service imported`);
       }
     } else {

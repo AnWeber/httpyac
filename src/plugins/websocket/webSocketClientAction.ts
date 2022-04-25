@@ -70,7 +70,7 @@ export class WebSocketClientAction {
       client.on('open', () => {
         io.log.debug('WebSocket open');
         if (request.body) {
-          client.send(request.body, err => io.log.error(err));
+          client.send(request.body, err => (context.scriptConsole || io.log).error(err));
         }
         utils.setVariableInContext(webSocketVariables, context);
         context.variables.websocketClient = client;

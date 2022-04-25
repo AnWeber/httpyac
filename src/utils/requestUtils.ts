@@ -404,7 +404,7 @@ export async function triggerRequestResponseHooks(
     }
     return true;
   } catch (err) {
-    log.error(context.request?.url, context.request, err);
+    (context.scriptConsole || log).error(context.request);
     throw err;
   }
 }

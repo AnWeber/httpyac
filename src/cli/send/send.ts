@@ -46,50 +46,52 @@ export function sendCommand() {
 async function execute(fileNames: Array<string>, options: SendOptions): Promise<void> {
   const context = convertCliOptionsToContext(options);
   const httpFiles: models.HttpFile[] = await getHttpFiles(fileNames, options, context.config);
+  try {
+    if (httpFiles.length > 0) {
+      initCliHooks(httpFiles, options);
+      let isFirstRequest = true;
+      const jsonOutput: Record<string, Array<models.HttpRegion>> = {};
+      while (options.interactive || isFirstRequest) {
+        const selection = await selectAction(httpFiles, options);
 
-  if (httpFiles.length > 0) {
-    initCliHooks(httpFiles, options);
-    let isFirstRequest = true;
-    const jsonOutput: Record<string, Array<models.HttpRegion>> = {};
-    while (options.interactive || isFirstRequest) {
-      const selection = await selectAction(httpFiles, options);
+        const processedHttpRegions: Array<models.HttpRegion> = [];
 
-      const processedHttpRegions: Array<models.HttpRegion> = [];
-
-      if (selection) {
-        await send(Object.assign({ processedHttpRegions }, context, selection));
-        jsonOutput[fileProvider.toString(selection.httpFile.fileName)] = [...processedHttpRegions];
-      } else {
-        for (const httpFile of httpFiles) {
-          if (!options.json && context.scriptConsole && httpFiles.length > 1) {
-            context.scriptConsole.info(`--------------------- ${httpFile.fileName}  --`);
+        if (selection) {
+          await send(Object.assign({ processedHttpRegions }, context, selection));
+          jsonOutput[fileProvider.toString(selection.httpFile.fileName)] = [...processedHttpRegions];
+        } else {
+          for (const httpFile of httpFiles) {
+            if (!options.json && context.scriptConsole && httpFiles.length > 1) {
+              context.scriptConsole.info(`--------------------- ${httpFile.fileName}  --`);
+            }
+            await send(Object.assign({ processedHttpRegions }, context, { httpFile }));
+            jsonOutput[fileProvider.toString(httpFile.fileName)] = [...processedHttpRegions];
+            processedHttpRegions.length = 0;
           }
-          await send(Object.assign({ processedHttpRegions }, context, { httpFile }));
-          jsonOutput[fileProvider.toString(httpFile.fileName)] = [...processedHttpRegions];
-          processedHttpRegions.length = 0;
         }
-      }
-      isFirstRequest = false;
+        isFirstRequest = false;
 
-      if (
-        options.json ||
-        Object.keys(jsonOutput).length > 1 ||
-        Object.entries(jsonOutput).some(([, httpRegions]) => httpRegions.length > 1)
-      ) {
-        const cliJsonOutput = toSendJsonOutput(jsonOutput, options);
-        if (options.json) {
-          console.info(JSON.stringify(cliJsonOutput, null, 2));
-        } else if (context.scriptConsole) {
-          context.scriptConsole.info('');
-          context.scriptConsole.info(
-            chalk`{bold ${cliJsonOutput.summary.totalRequests}} requests processed ({green ${cliJsonOutput.summary.successRequests} succeeded}, {red ${cliJsonOutput.summary.failedRequests} failed})`
-          );
-          context.scriptConsole.flush();
+        if (
+          options.json ||
+          Object.keys(jsonOutput).length > 1 ||
+          Object.entries(jsonOutput).some(([, httpRegions]) => httpRegions.length > 1)
+        ) {
+          const cliJsonOutput = toSendJsonOutput(jsonOutput, options);
+          if (options.json) {
+            console.info(JSON.stringify(cliJsonOutput, null, 2));
+          } else if (context.scriptConsole) {
+            context.scriptConsole.info('');
+            context.scriptConsole.info(
+              chalk`{bold ${cliJsonOutput.summary.totalRequests}} requests processed ({green ${cliJsonOutput.summary.successRequests} succeeded}, {red ${cliJsonOutput.summary.failedRequests} failed})`
+            );
+          }
         }
       }
+    } else {
+      console.error(`httpYac cannot find the specified file ${fileNames.join(', ')}.`);
     }
-  } else {
-    console.error(`httpYac cannot find the specified file ${fileNames.join(', ')}.`);
+  } finally {
+    context.scriptConsole?.flush?.();
   }
 }
 

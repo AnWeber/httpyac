@@ -49,7 +49,7 @@ export class IntellijAction {
       return await utils.replaceFilePath(file, context, path => io.fileProvider.readFile(path, 'utf-8'));
     } catch (err) {
       io.userInteractionProvider.showErrorMessage?.(`error loading script ${file}`);
-      io.log.error(file, err);
+      (context.scriptConsole || io.log).error(file, err);
       return false;
     }
   }
