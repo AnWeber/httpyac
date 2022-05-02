@@ -734,5 +734,22 @@ GET  http://localhost:8080/text?another_author={{slideshow.author}}
       expect(requests[0].url).toBe('http://localhost:8080/text?author=httpyac');
       expect(requests[1].url).toBe('http://localhost:8080/text?another_author=foo');
     });
+
+    it('string empty variable', async () => {
+      initFileProvider();
+      await localServer.forGet('/test').thenJson(200, { slideshow: { author: 'httpyac' } });
+      const mockedEndpoints = await localServer.forGet('/text').thenJson(200, { slideshow: { author: 'foo' } });
+
+      await exec(`
+{{
+  exports.foo = "";
+}}
+  GET http://localhost:8080/text?foo={{foo}}
+
+      `);
+
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests[0].url).toBe('http://localhost:8080/text?foo=');
+    });
   });
 });
