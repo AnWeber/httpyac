@@ -5,13 +5,15 @@ import type { CancelableRequest, OptionsOfUnknownResponseBody, Response } from '
 import { URL } from 'url';
 import { v4 as uuid } from 'uuid';
 
+const DigestAuth = /^\s*(digest)\s+(?<user>[^\s]*)\s+(?<password>([^\s]+.*))$/iu;
+const DigestAuthColon = /^\s*(digest)\s+(?<user>.*):(?<password>.*)$/iu;
 export async function digestAuthVariableReplacer(
   text: unknown,
   type: string,
   { request }: ProcessorContext
 ): Promise<unknown> {
   if (type.toLowerCase() === 'authorization' && isString(text) && isHttpRequest(request)) {
-    const match = /^\s*(digest)\s+(?<user>[^\s]*)\s+(?<password>([^\s]+.*))$/iu.exec(text);
+    const match = DigestAuthColon.exec(text) || DigestAuth.exec(text);
 
     if (match && match.groups && match.groups.user && match.groups.password) {
       if (!request.options.hooks) {
