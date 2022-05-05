@@ -44,7 +44,7 @@ class RefMetaAction {
       );
       const envKey = utils.toEnvironmentKey(context.httpFile.activeEnvironment);
       log.trace('import variables', reference.httpRegion.variablesPerEnv[envKey]);
-      Object.assign(context.variables, reference.httpRegion.variablesPerEnv[envKey]);
+      utils.setVariableInContext(reference.httpRegion.variablesPerEnv[envKey], context);
       if (this.data.force || !context.variables[this.data.name]) {
         const refContext = {
           ...context,
@@ -53,8 +53,7 @@ class RefMetaAction {
         };
         const result = await utils.processHttpRegionActions(refContext);
         if (result) {
-          const env = utils.toEnvironmentKey(context.httpFile.activeEnvironment);
-          Object.assign(context.variables, refContext.httpRegion.variablesPerEnv[env]);
+          utils.setVariableInContext(refContext.httpRegion.variablesPerEnv[envKey], context);
         }
         return result;
       }
