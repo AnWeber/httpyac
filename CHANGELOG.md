@@ -1,3 +1,15 @@
+## 5.4.1 (2022-05-09)
+
+#### Features
+
+- allow variables in outputRedirection (httpyac/httpyac.github.io#46)
+
+#### Fixes
+
+- allow empty string as variable (#268)
+- add response parser for GRPC, WS, SSE to fix issues in httpbook (AnWeber/httpbook#51)
+- add user with space in http auth digest (#274)
+
 ## 5.4.0 (2022-04-21)
 
 #### Features
