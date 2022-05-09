@@ -1,5 +1,6 @@
 import { fileProvider, log } from '../../../io';
 import * as models from '../../../models';
+import * as utils from '../../../utils';
 
 export async function parseOutputRedirection(
   getLineReader: models.getHttpLineGenerator,
@@ -11,7 +12,7 @@ export async function parseOutputRedirection(
   if (!next.done) {
     const textLine = next.value.textLine;
 
-    const match = /^\s*>>(?<force>!)?\s+(?<fileName>[^\s{%}]+\s*)$/u.exec(textLine);
+    const match = /^\s*>>(?<force>!)?\s+(?<fileName>.+)\s*$/u.exec(textLine);
     if (match && match.groups?.fileName) {
       const fileName = match.groups.fileName;
       const force = !!match.groups.force;
@@ -19,9 +20,17 @@ export async function parseOutputRedirection(
       httpRegion.hooks.onResponse.addHook('outputRedirection', async (response, context) => {
         try {
           if (response.rawBody) {
-            const file = await getOutputRedirectionFileName(fileName, force, context.httpFile.fileName);
-            if (file) {
-              await fileProvider.writeBuffer(file, response.rawBody);
+            const fileNameReplaced = utils.toString(
+              await utils.replaceVariables(fileName, models.VariableType.variable, context)
+            );
+
+            if (fileNameReplaced) {
+              const file = await getOutputRedirectionFileName(fileNameReplaced, force, context.httpFile.fileName);
+              if (file) {
+                await fileProvider.writeBuffer(file, response.rawBody);
+              } else {
+                log.debug(`file ${fileName} not found`);
+              }
             } else {
               log.debug(`file ${fileName} not found`);
             }
