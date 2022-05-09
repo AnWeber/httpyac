@@ -1,6 +1,6 @@
 import { ProcessorContext, VariableType } from '../../../models';
 import * as utils from '../../../utils';
-import dayjs, { OpUnitType } from 'dayjs';
+import dayjs, { ManipulateType } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { v4 as uuid } from 'uuid';
 
@@ -38,7 +38,7 @@ export async function restClientVariableReplacer(
 
         let date = dayjs.utc();
         if (valMatch.groups?.offset && valMatch.groups?.option) {
-          date = date.add(Number(valMatch.groups.offset), valMatch.groups.option as OpUnitType);
+          date = date.add(Number(valMatch.groups.offset), valMatch.groups.option as ManipulateType);
         }
         return `${date.unix()}`;
       }
@@ -50,7 +50,7 @@ export async function restClientVariableReplacer(
       if (valMatch?.groups?.type) {
         let date = dayjs.utc();
         if (valMatch.groups?.offset && valMatch.groups?.option) {
-          date = date.add(Number(valMatch.groups.offset), valMatch.groups.option as OpUnitType);
+          date = date.add(Number(valMatch.groups.offset), valMatch.groups.option as ManipulateType);
         }
 
         if (valMatch.groups.type === 'rfc1123') {
@@ -69,7 +69,7 @@ export async function restClientVariableReplacer(
       if (valMatch?.groups?.type) {
         let date = dayjs.utc().local();
         if (valMatch.groups?.offset && valMatch.groups?.option) {
-          date = date.add(Number(valMatch.groups.offset), valMatch.groups.option as OpUnitType);
+          date = date.add(Number(valMatch.groups.offset), valMatch.groups.option as ManipulateType);
         }
 
         if (valMatch.groups.type === 'rfc1123') {
