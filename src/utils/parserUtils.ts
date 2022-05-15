@@ -451,6 +451,7 @@ export async function parseInlineResponse(
           startOffset: 0,
           endLine: next.value.line,
           endOffset: next.value.textLine.length,
+          children: [],
         },
         body: [],
       };
@@ -466,7 +467,14 @@ export async function parseInlineResponse(
       if (headersResult) {
         result.nextParserLine = headersResult.nextLine || result.nextParserLine;
         for (const parseResult of headersResult.parseResults) {
-          symbols.push(...parseResult.symbols);
+          if (context.data.httpResponseSymbol.symbol.children) {
+            context.data.httpResponseSymbol.symbol.children.push(
+              ...parseResult.symbols.map(symbol => ({
+                ...symbol,
+                kind: models.HttpSymbolKind.response,
+              }))
+            );
+          }
         }
       }
       return result;
