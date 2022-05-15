@@ -18,20 +18,22 @@ async function getAllEnvironmentVariables(context: VariableProviderContext) {
       envJsonFiles.push(...(await readAbsoluteDirs(globalEnvAbsolute, envJsonFilter)));
     }
   }
-  if (context.httpFile.rootDir) {
-    envJsonFiles.push(...(await readAbsoluteDirs(context.httpFile.rootDir, envJsonFilter)));
-  }
   if (context.config?.envDirName) {
     const absolute = await utils.toAbsoluteFilename(context.config.envDirName, context.httpFile.rootDir);
     if (absolute) {
       envJsonFiles.push(...(await readAbsoluteDirs(absolute, envJsonFilter)));
     }
-    const dirOfFile = fileProvider.dirname(context.httpFile.fileName);
-    if (dirOfFile) {
-      envJsonFiles.push(...(await readAbsoluteDirs(dirOfFile, envJsonFilter)));
-    }
+  }
+  const dirOfFile = fileProvider.dirname(context.httpFile.fileName);
+  if (dirOfFile) {
+    await utils.iterateUntilRoot(dirOfFile, context.httpFile.rootDir, async (dir: PathLike) => {
+      envJsonFiles.push(...(await readAbsoluteDirs(dir, envJsonFilter)));
+    });
   }
   const environments: Record<string, Variables> = {};
+  if (envJsonFiles.length > 0) {
+    log.trace(`Intellij environment files found: ${envJsonFiles.join(', ')}`);
+  }
   for (const file of envJsonFiles) {
     const envs = await getEnvironmentVariables(file);
     if (envs) {

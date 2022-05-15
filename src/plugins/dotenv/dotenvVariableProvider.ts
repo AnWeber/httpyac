@@ -86,8 +86,10 @@ async function getVariablesOfFolder(searchFiles: string[], workingDir: PathLike)
   const files = await fileProvider.readdir(workingDir);
   const foundFiles = searchFiles.filter(file => files.indexOf(file) >= 0);
   const vars = [];
+
   for (const fileName of foundFiles) {
     const envFileName = fileProvider.joinPath(workingDir, fileName);
+    log.trace(`.env environment file found: ${envFileName}`);
     try {
       const content = await fileProvider.readFile(envFileName, 'utf-8');
       const variables = parse(content);
