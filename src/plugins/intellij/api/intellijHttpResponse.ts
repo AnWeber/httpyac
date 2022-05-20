@@ -1,5 +1,5 @@
 import { HttpResponse } from '../../../models';
-import { isString } from '../../../utils';
+import { isString, getHeader, getHeaderArray } from '../../../utils';
 import {
   HttpResponse as JetBrainsHttpResponse,
   ContentType as JetBrainsContentType,
@@ -28,7 +28,7 @@ export class IntellijHeaders implements JetBrainsResponseHeaders {
 
   valueOf(headerName: string): string | null {
     if (this.headers) {
-      const obj = this.headers[headerName];
+      const obj = getHeader(this.headers, headerName);
       if (obj && isString(obj)) {
         return obj;
       }
@@ -37,9 +37,14 @@ export class IntellijHeaders implements JetBrainsResponseHeaders {
   }
   valuesOf(headerName: string): string[] {
     if (this.headers) {
-      const obj = this.headers[headerName];
-      if (obj && Array.isArray(obj)) {
-        return obj;
+      const obj = getHeader(this.headers, headerName);
+      if (obj) {
+        if (isString(obj)) {
+          return [obj];
+        }
+        if (Array.isArray(obj)) {
+          return obj;
+        }
       }
     }
     return [];
