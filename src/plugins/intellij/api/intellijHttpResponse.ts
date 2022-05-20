@@ -1,5 +1,5 @@
 import { HttpResponse } from '../../../models';
-import { isString, getHeader, getHeaderArray } from '../../../utils';
+import { isString, getHeader } from '../../../utils';
 import {
   HttpResponse as JetBrainsHttpResponse,
   ContentType as JetBrainsContentType,
