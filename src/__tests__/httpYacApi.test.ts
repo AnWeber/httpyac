@@ -504,13 +504,13 @@ GET  http://localhost:8080/json
 }}
 ###
 # @loop for item of data
-GET  http://localhost:8080/json?test={{item}}
+GET  http://localhost:8080/json?index={{$index}}&test={{item}}
       `);
 
       const requests = await mockedEndpoints.getSeenRequests();
-      expect(requests[0].url).toBe('http://localhost:8080/json?test=a');
-      expect(requests[1].url).toBe('http://localhost:8080/json?test=b');
-      expect(requests[2].url).toBe('http://localhost:8080/json?test=c');
+      expect(requests[0].url).toBe('http://localhost:8080/json?index=0&test=a');
+      expect(requests[1].url).toBe('http://localhost:8080/json?index=1&test=b');
+      expect(requests[2].url).toBe('http://localhost:8080/json?index=2&test=c');
     });
 
     it('loop for', async () => {
@@ -547,6 +547,35 @@ GET  http://localhost:8080/json?test={{expression.index++}}
       expect(requests[0].url).toBe('http://localhost:8080/json?test=0');
       expect(requests[1].url).toBe('http://localhost:8080/json?test=1');
       expect(requests[2].url).toBe('http://localhost:8080/json?test=2');
+    });
+    it('loop for + ref', async () => {
+      initFileProvider();
+      const mockedEndpoints = await localServer.forGet('/test').thenCallback(req => ({
+        status: 200,
+        body: `foo${req.url.slice(-1)}`,
+      }));
+
+      const httpFile = await build(`
+# @name foo
+# @loop for 2
+GET http://localhost:8080/test?index={{$index}}
+
+###
+# @ref foo
+# @loop for item of fooList
+GET http://localhost:8080/test?index={{$index}}&item={{item.body}}
+      `);
+
+      await send({
+        httpFile,
+        httpRegion: httpFile.httpRegions[1],
+      });
+
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests[0].url).toBe('http://localhost:8080/test?index=0');
+      expect(requests[1].url).toBe('http://localhost:8080/test?index=1');
+      expect(requests[2].url).toBe('http://localhost:8080/test?index=0&item=foo0');
+      expect(requests[3].url).toBe('http://localhost:8080/test?index=1&item=foo1');
     });
   });
 
