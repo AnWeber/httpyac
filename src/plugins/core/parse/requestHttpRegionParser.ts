@@ -166,6 +166,7 @@ export class HttpClientAction {
         request.options.https = request.options.https || {};
         request.options.https.rejectUnauthorized = false;
       }
+      this.ensureStringHeaders(request);
       utils.report(context, `send ${request.method || 'GET'} ${request.url}`);
       if (httpClientProvider.exchange) {
         const exchange = httpClientProvider.exchange;
@@ -173,5 +174,21 @@ export class HttpClientAction {
       }
     }
     return false;
+  }
+
+  private ensureStringHeaders(request: models.HttpRequest) {
+    if (request.headers) {
+      for (const [header, val] of Object.entries(request.headers)) {
+        if (typeof val !== 'undefined') {
+          let result: string | string[];
+          if (Array.isArray(val)) {
+            result = val.map(obj => utils.toString(obj) || obj);
+          } else {
+            result = utils.toString(val) || val;
+          }
+          request.headers[header] = result;
+        }
+      }
+    }
   }
 }
