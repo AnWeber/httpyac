@@ -40,9 +40,11 @@ export async function parseProtoImport(
         [
           utils.parseComments,
           utils.parseRequestHeaderFactory(protoDefinition.loaderOptions),
-          utils.parseDefaultHeadersFactory((headers, context: models.ProtoProcessorContext) =>
-            Object.assign(context.options.protoDefinitions?.[protoDefinition.fileName].loaderOptions, headers)
-          ),
+          utils.parseDefaultHeadersFactory((headers, context: models.ProtoProcessorContext) => {
+            if (context.options.protoDefinitions) {
+              Object.assign(context.options.protoDefinitions[protoDefinition.fileName].loaderOptions, headers);
+            }
+          }),
         ],
         context
       );

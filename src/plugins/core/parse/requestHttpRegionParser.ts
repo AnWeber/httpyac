@@ -48,7 +48,7 @@ export async function parseRequestLine(
       [
         utils.parseComments,
         utils.parseRequestHeaderFactory(headers),
-        utils.parseDefaultHeadersFactory((headers, context) => Object.assign(context.request?.headers, headers)),
+        utils.parseDefaultHeadersFactory(),
         utils.parseQueryLineFactory(url => (request.url += url)),
         utils.parseUrlLineFactory(url => (request.url += url)),
       ],

@@ -51,7 +51,7 @@ export async function parseWebsocketLine(
       [
         parserUtils.parseComments,
         parserUtils.parseRequestHeaderFactory(headers),
-        parserUtils.parseDefaultHeadersFactory((headers, context) => Object.assign(context.request?.headers, headers)),
+        utils.parseDefaultHeadersFactory(),
         parserUtils.parseUrlLineFactory(url => (requestLine.request.url += url)),
       ],
       context

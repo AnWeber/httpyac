@@ -49,7 +49,15 @@ export async function parseEventSource(
       [
         utils.parseComments,
         utils.parseRequestHeaderFactory(headers),
-        utils.parseDefaultHeadersFactory((headers, context) => Object.assign(context.request?.headers, headers)),
+        utils.parseDefaultHeadersFactory((headers, context) => {
+          if (context.request) {
+            if (context.request.headers) {
+              Object.assign(context.request?.headers, headers);
+            } else {
+              context.request.headers = headers;
+            }
+          }
+        }),
         utils.parseUrlLineFactory(url => (eventSourceLine.request.url += url)),
       ],
       context

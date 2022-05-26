@@ -51,7 +51,7 @@ export async function parseAmqpLine(
       [
         utils.parseComments,
         utils.parseRequestHeaderFactory(headers),
-        utils.parseDefaultHeadersFactory((headers, context) => Object.assign(context.request?.headers, headers)),
+        utils.parseDefaultHeadersFactory(),
         utils.parseUrlLineFactory(url => (requestLine.request.url += url)),
       ],
       context

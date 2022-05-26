@@ -103,7 +103,15 @@ export function parseRequestHeaderFactory(headers: Record<string, unknown>): Par
 }
 
 export function parseDefaultHeadersFactory(
-  setHeaders: (headers: Record<string, unknown>, context: models.ProcessorContext) => void
+  setHeaders: (headers: Record<string, unknown>, context: models.ProcessorContext) => void = (headers, context) => {
+    if (context.request) {
+      if (context.request.headers) {
+        Object.assign(context.request?.headers, headers);
+      } else {
+        context.request.headers = headers;
+      }
+    }
+  }
 ): ParseLineMethod {
   return function parseDefaultHeaders(
     httpLine: models.HttpLine,

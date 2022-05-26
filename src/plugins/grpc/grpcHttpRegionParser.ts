@@ -50,7 +50,7 @@ export async function parseGrpcLine(
       [
         utils.parseComments,
         utils.parseRequestHeaderFactory(headers),
-        utils.parseDefaultHeadersFactory((headers, context) => Object.assign(context.request?.headers, headers)),
+        utils.parseDefaultHeadersFactory(),
         utils.parseUrlLineFactory(url => (grpcLine.request.url += url)),
       ],
       context
