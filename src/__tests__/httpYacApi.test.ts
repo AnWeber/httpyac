@@ -787,5 +787,20 @@ GET  http://localhost:8080/text?another_author={{slideshow.author}}
       const requests = await mockedEndpoints.getSeenRequests();
       expect(requests[0].url).toBe('http://localhost:8080/text?foo=');
     });
+    it.only('nested replace variable', async () => {
+      initFileProvider();
+      const mockedEndpoints = await localServer.forGet('/test').thenJson(200, { slideshow: { author: 'httpyac' } });
+
+      await exec(`
+@baz=works
+{{
+  exports.test = { bar: '{{baz}}'};
+}}
+GET http://localhost:8080/test?test={{JSON.stringify(test)}}
+      `);
+
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests[0].url).toBe('http://localhost:8080/test?test={%22bar%22:%22works%22}');
+    });
   });
 });
