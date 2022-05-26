@@ -1,8 +1,8 @@
 import { Request } from '../../models';
-import type { ChannelOptions } from '@grpc/grpc-js';
+import type { ChannelOptions, ChannelCredentials } from '@grpc/grpc-js';
 
 export interface GrpcRequest extends Request<'GRPC'> {
-  headers?: Record<string, unknown>;
+  headers?: Record<string, string | Buffer | ChannelCredentials>;
   options?: ChannelOptions;
 }
 
