@@ -92,9 +92,10 @@ class LoopMetaInterceptor implements HookInterceptor<[models.ProcessorContext], 
           responses.push(loopContext.variables.response);
           next = await iteration.next();
         }
-        if (context.httpRegion.metaData.name) {
+        if (context.httpRegion.metaData.name && responses.length > 0) {
           utils.setVariableInContext(
             {
+              [`${context.httpRegion.metaData.name}`]: responses[0],
               [`${context.httpRegion.metaData.name}List`]: responses,
             },
             context
