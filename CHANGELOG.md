@@ -1,3 +1,13 @@
+## 5.4.2 (2022-05-28)
+
+#### Fixes
+
+- `# @loop` allows statements before the loop is executed (#279)
+- `# @loop` sets variable for `# @name` (#279)
+- ensure string headers in http requests
+- ignore casing in Intellij Headers (httpyac/httpyac.github.io#47)
+- use correct symbol for response Header (AnWeber/httpbook#53)
+
 ## 5.4.1 (2022-05-09)
 
 #### Features
