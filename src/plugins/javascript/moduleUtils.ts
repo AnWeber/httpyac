@@ -98,20 +98,27 @@ export async function runScript(
     return mod.require(id);
   }
 
-  const context = vm.createContext({
-    ...global,
-    Buffer,
-    process,
-    requireUncached: (id: string) => {
-      io.log.warn(`requireUncached is deprecated. It can no longer be supported due to esm conversion.`);
-      const dirName = io.fileProvider.dirname(filename);
-      if (dirName) {
-        clearModule(id, toModuleFilename(dirName));
+  const context = vm.createContext(
+    Object.assign(
+      Object.defineProperties(
+        {
+          ...global,
+        },
+        Object.getOwnPropertyDescriptors(global)
+      ),
+      {
+        requireUncached: (id: string) => {
+          io.log.warn(`requireUncached is deprecated. It can no longer be supported due to esm conversion.`);
+          const dirName = io.fileProvider.dirname(filename);
+          if (dirName) {
+            clearModule(id, toModuleFilename(dirName));
+          }
+          return mod.require(id);
+        },
+        ...checkVariableNames(options.context),
       }
-      return mod.require(id);
-    },
-    ...checkVariableNames(options.context),
-  });
+    )
+  );
 
   const contextKeys = Object.keys(context);
   const compiledWrapper = vm.runInContext(Module.wrap(`${io.fileProvider.EOL}${source}`), context, {
