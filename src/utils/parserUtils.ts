@@ -393,6 +393,7 @@ export const knownMetaData: Array<{
   },
 ];
 
+const maxNestedVariables = 100;
 export async function parseHandlebarsString(
   text: unknown,
   evalExpression: (variable: string, searchValue: string) => Promise<unknown>
@@ -403,7 +404,8 @@ export async function parseHandlebarsString(
   let match: RegExpExecArray | null;
   let start;
   let result = text;
-  while (start !== result) {
+  let infiniteLoopStopper = 0;
+  while (start !== result && infiniteLoopStopper++ < maxNestedVariables) {
     start = result;
     while ((match = HandlebarsSingleLine.exec(start)) !== null) {
       const [searchValue, variable] = match;
