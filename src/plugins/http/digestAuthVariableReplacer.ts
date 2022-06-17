@@ -1,5 +1,6 @@
 import { ProcessorContext } from '../../models';
-import { isHttpRequest, isString } from '../../utils';
+import { isHttpRequest, isString, logResponse } from '../../utils';
+import { toHttpResponse } from './gotUtils';
 import { createHash } from 'crypto';
 import type { CancelableRequest, OptionsOfUnknownResponseBody, Response } from 'got';
 import { URL } from 'url';
@@ -10,11 +11,11 @@ const DigestAuthColon = /^\s*(digest)\s+(?<user>.*):(?<password>.*)$/iu;
 export async function digestAuthVariableReplacer(
   text: unknown,
   type: string,
-  { request }: ProcessorContext
+  context: ProcessorContext
 ): Promise<unknown> {
+  const { request } = context;
   if (type.toLowerCase() === 'authorization' && isString(text) && isHttpRequest(request)) {
     const match = DigestAuthColon.exec(text) || DigestAuth.exec(text);
-
     if (match && match.groups && match.groups.user && match.groups.password) {
       if (!request.options.hooks) {
         request.options.hooks = {};
@@ -22,20 +23,22 @@ export async function digestAuthVariableReplacer(
       if (!request.options.hooks.afterResponse) {
         request.options.hooks.afterResponse = [];
       }
-      request.options.hooks.afterResponse.push(digestFactory(match.groups.user, match.groups.password));
+      request.options.hooks.afterResponse.push(digestFactory(match.groups.user, match.groups.password, context));
       return undefined;
     }
   }
   return text;
 }
 
-function digestFactory(username: string, password: string) {
-  return function digestAfterResponse(
+function digestFactory(username: string, password: string, context: ProcessorContext) {
+  return async function digestAfterResponse(
     response: Response,
     retryWithMergedOptions: (options: OptionsOfUnknownResponseBody) => CancelableRequest<Response>
   ) {
     const wwwAuthenticate = response.headers['www-authenticate'];
     if (response.statusCode === 401 && wwwAuthenticate && wwwAuthenticate.toLowerCase().startsWith('digest')) {
+      await logResponse(toHttpResponse(response), context);
+
       const url = new URL(response.url);
       const challenge = {
         qop: '',

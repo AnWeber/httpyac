@@ -127,7 +127,7 @@ function initProxy(options: OptionsOfUnknownResponseBody, proxy: string | undefi
   }
 }
 
-function toHttpResponse(response: Response<unknown>): models.HttpResponse {
+export function toHttpResponse(response: Response<unknown>): models.HttpResponse {
   const httpResponse: models.HttpResponse = {
     statusCode: response.statusCode,
     protocol: `HTTP/${response.httpVersion}`,
