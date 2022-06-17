@@ -151,7 +151,7 @@ export function toHttpResponse(response: Response<unknown>): models.HttpResponse
       redirectUrls: response.redirectUrls,
       size: filesize(
         response.rawHeaders.map(obj => obj.length).reduce((size, current) => size + current, 0) +
-          response.rawBody.length
+          (response.rawBody?.length || 0)
       ),
     },
   };

@@ -6,6 +6,7 @@ import { clientCertVariableReplacer } from './clientCertVariableReplacer';
 import { CookieJarInterceptor } from './cookieJarInterceptor';
 import { digestAuthVariableReplacer } from './digestAuthVariableReplacer';
 import { gotHttpClient } from './gotUtils';
+import { logHttpRedirect } from './logHttpRedirect';
 
 httpClientProvider.exchange = gotHttpClient;
 
@@ -15,4 +16,5 @@ export function registerHttpPlugin(api: models.HttpyacHooksApi) {
   api.hooks.replaceVariable.addHook('basicAuth', basicAuthVariableReplacer);
   api.hooks.replaceVariable.addHook('clientCertificate', clientCertVariableReplacer);
   api.hooks.replaceVariable.addHook('digestAuth', digestAuthVariableReplacer);
+  api.hooks.onRequest.addHook('logHttpRedirect', logHttpRedirect);
 }
