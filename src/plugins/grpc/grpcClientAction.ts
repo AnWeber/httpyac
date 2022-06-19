@@ -308,14 +308,15 @@ export class GrpcClientAction {
   }
 
   private toHttpResponse(data: unknown, responseTemplate: Partial<models.HttpResponse>): models.HttpResponse {
-    const json = utils.toString(data);
+    const body = utils.isString(data) ? data : JSON.stringify(data, null, 2);
     const response: models.HttpResponse = {
       headers: {},
       ...responseTemplate,
       statusCode: 0,
       statusMessage: 'OK',
       protocol: 'GRPC',
-      body: json,
+      body,
+      rawBody: Buffer.from(body),
       parsedBody: data,
       contentType: {
         mimeType: 'application/grpc+json',
