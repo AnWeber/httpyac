@@ -87,6 +87,7 @@ function getGrpcLine(textLine: string, line: number): { request: GrpcRequest; sy
         startOffset: 0,
         endLine: line,
         endOffset: textLine.length,
+        children: utils.parseHandlebarsSymbols(textLine, line),
       },
     };
   }
@@ -106,6 +107,7 @@ function getGrpcLine(textLine: string, line: number): { request: GrpcRequest; sy
         startOffset: 0,
         endLine: line,
         endOffset: textLine.length,
+        children: utils.parseHandlebarsSymbols(textLine, line),
       },
     };
   }

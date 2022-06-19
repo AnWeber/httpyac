@@ -5,6 +5,8 @@ import { isString, toString } from './stringUtils';
 
 export const HandlebarsSingleLine = /\{{2}(.+?)\}{2}/gu;
 export const RegionSeparator = /^\s*#{3,}(?<title>.*)$/u;
+export const OAuth2Regex =
+  /^\s*(?<type>openid|oauth2)(\s+(?<flow>client(_credentials)?|(authorization_)?code|device(_code)?|password|implicit|hybrid))?(\s+(?<variablePrefix>[^\s]*))?\s*((token_exchange)\s+(?<tokenExchangePrefix>[^\s]*))?\s*$/iu;
 
 export type ParseLineMethod = (
   httpLine: models.HttpLine,
@@ -64,6 +66,7 @@ export function parseRequestHeaderFactory(headers: Record<string, unknown>): Par
         headers[headerName] = headerValue;
       }
 
+      const valueOffset = httpLine.textLine.indexOf(headerValue);
       return {
         symbols: [
           {
@@ -89,9 +92,10 @@ export function parseRequestHeaderFactory(headers: Record<string, unknown>): Par
                 description: 'request header value',
                 kind: models.HttpSymbolKind.value,
                 startLine: httpLine.line,
-                startOffset: httpLine.textLine.indexOf(headerValue),
+                startOffset: valueOffset,
                 endLine: httpLine.line,
-                endOffset: httpLine.textLine.indexOf(headerValue) + headerValue.length,
+                endOffset: valueOffset + headerValue.length,
+                children: parseHandlebarsSymbols(headerValue, httpLine.line, valueOffset),
               },
             ],
           },
@@ -132,6 +136,17 @@ export function parseDefaultHeadersFactory(
             startOffset: httpLine.textLine.indexOf(val),
             endOffset: httpLine.textLine.length,
             endLine: httpLine.line,
+            children: [
+              {
+                name: fileHeaders.groups.variableName,
+                description: 'Header Variable',
+                kind: models.HttpSymbolKind.variable,
+                startLine: httpLine.line,
+                startOffset: fileHeaders.index,
+                endOffset: fileHeaders.groups.variableName.length,
+                endLine: httpLine.line,
+              },
+            ],
           },
         ],
       };
@@ -175,6 +190,7 @@ export function parseUrlLineFactory(attachUrl: (url: string) => void): ParseLine
             startOffset: httpLine.textLine.indexOf(val),
             endOffset: httpLine.textLine.length,
             endLine: httpLine.line,
+            children: parseHandlebarsSymbols(httpLine.textLine, httpLine.line),
           },
         ],
       };
@@ -198,6 +214,7 @@ export function parseQueryLineFactory(attachUrl: (url: string) => void): ParseLi
             startOffset: httpLine.textLine.indexOf(val),
             endOffset: httpLine.textLine.length,
             endLine: httpLine.line,
+            children: parseHandlebarsSymbols(httpLine.textLine, httpLine.line, 0),
           },
         ],
       };
@@ -420,6 +437,27 @@ export async function parseHandlebarsString(
     }
   }
   return result;
+}
+
+export function parseHandlebarsSymbols(line: string | undefined, startLine: number, offset = 0) {
+  const symbols: Array<models.HttpSymbol> = [];
+  if (line) {
+    let match: RegExpExecArray | null;
+    while ((match = HandlebarsSingleLine.exec(line)) !== null) {
+      const [searchValue, variable] = match;
+      symbols.push({
+        name: variable,
+        description: variable,
+        startLine,
+        endLine: startLine,
+        kind: models.HttpSymbolKind.variable,
+        startOffset: offset + match.index,
+        endOffset: offset + match.index + searchValue.length,
+        source: variable,
+      });
+    }
+  }
+  return symbols;
 }
 
 export async function parseInlineResponse(

@@ -100,6 +100,11 @@ function getRequestLine(
         startOffset: textLine.indexOf(requestLineMatch.groups.url),
         endLine: line,
         endOffset: textLine.length,
+        children: utils.parseHandlebarsSymbols(
+          requestLineMatch.groups.url,
+          line,
+          textLine.indexOf(requestLineMatch.groups.url)
+        ),
       }
     );
 

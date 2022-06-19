@@ -24,10 +24,12 @@ export async function parseRequestBody(
             startOffset: 0,
             endLine: next.value.line,
             endOffset: next.value.textLine.length,
+            children: utils.parseHandlebarsSymbols(next.value.textLine, next.value.line),
           };
           symbols.push(requestBody.symbol);
         } else {
           requestBody.symbol.endLine = next.value.line;
+          requestBody.symbol.children?.push?.(...utils.parseHandlebarsSymbols(next.value.textLine, next.value.line));
           requestBody.symbol.endOffset = next.value.textLine.length;
         }
 

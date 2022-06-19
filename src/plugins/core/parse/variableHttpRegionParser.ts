@@ -38,7 +38,7 @@ export async function parseVariable(
           {
             name: match.groups.key,
             description: match.groups.value,
-            kind: models.HttpSymbolKind.variable,
+            kind: models.HttpSymbolKind.variableDefinition,
             startLine: next.value.line,
             startOffset: 0,
             endLine: next.value.line,

@@ -97,6 +97,7 @@ function getEventSourceLine(
         startOffset: 0,
         endLine: line,
         endOffset: textLine.length,
+        children: utils.parseHandlebarsSymbols(textLine, line),
       },
     };
   }

@@ -87,6 +87,7 @@ function getMQTTLine(textLine: string, line: number): { request: MQTTRequest; sy
         startOffset: 0,
         endLine: line,
         endOffset: textLine.length,
+        children: utils.parseHandlebarsSymbols(textLine, line),
       },
     };
   }
@@ -106,6 +107,7 @@ function getMQTTLine(textLine: string, line: number): { request: MQTTRequest; sy
         startOffset: 0,
         endLine: line,
         endOffset: textLine.length,
+        children: utils.parseHandlebarsSymbols(textLine, line),
       },
     };
   }

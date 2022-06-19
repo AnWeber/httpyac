@@ -90,6 +90,7 @@ function getAmqpLine(textLine: string, line: number): { request: AmqpRequest; sy
         startOffset: 0,
         endLine: line,
         endOffset: textLine.length,
+        children: utils.parseHandlebarsSymbols(textLine, line),
       },
     };
   }
@@ -109,6 +110,7 @@ function getAmqpLine(textLine: string, line: number): { request: AmqpRequest; sy
         startOffset: 0,
         endLine: line,
         endOffset: textLine.length,
+        children: utils.parseHandlebarsSymbols(textLine, line),
       },
     };
   }
