@@ -1,3 +1,14 @@
+## 5.5.0 (2022-06-19)
+
+#### Features
+
+- log redirect responses (HTTP 302)
+- add symbols for handlebar in url, header and body
+
+#### Fixes
+
+- grpc requests allows output redirection (#297)
+
 ## 5.4.2 (2022-05-28)
 
 #### Fixes
