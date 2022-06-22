@@ -6,7 +6,7 @@ const lastValue: Record<string, string> = {};
 
 export async function showInputBoxVariableReplacer(text: unknown): Promise<unknown> {
   return utils.parseHandlebarsString(text, async (variable: string) => {
-    const inputRegex = /^\$(?<type>(input|password))\s*(?<placeholder>[^$]*)(\$value:\s*(?<value>.*))?\s*$/u;
+    const inputRegex = /^\$(?<type>(prompt|input|password))\s*(?<placeholder>[^$]*)(\$value:\s*(?<value>.*))?\s*$/u;
     const matchInput = inputRegex.exec(variable);
     if (matchInput?.groups?.placeholder) {
       const placeholder = matchInput.groups.placeholder;
