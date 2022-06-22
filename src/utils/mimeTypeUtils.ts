@@ -10,6 +10,7 @@ export function isMimeTypeJSON(contentType: ContentType | undefined): boolean {
   return (
     !!contentType &&
     (contentType.mimeType === 'application/json' ||
+      contentType.mimeType === 'text/json' ||
       contentType.mimeType.indexOf('+json') >= 0 ||
       contentType.mimeType.indexOf('x-amz-json') >= 0)
   );
