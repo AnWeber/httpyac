@@ -1,3 +1,9 @@
+## 5.5.1 (2022-06-23)
+
+#### Fixes
+
+- support Request Body in AWS Signature (#299)
+
 ## 5.5.0 (2022-06-19)
 
 #### Features
