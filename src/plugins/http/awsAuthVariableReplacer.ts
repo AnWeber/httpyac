@@ -30,6 +30,7 @@ export async function awsAuthVariableReplacer(
         path: url.pathname,
         region: match.groups.region,
         service: match.groups.service,
+        body: Buffer.isBuffer(request.body) || utils.isString(request.body) ? request.body : undefined,
       };
       const result = await aws4.sign(requestOptions, credentials);
 
