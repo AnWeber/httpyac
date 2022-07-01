@@ -163,7 +163,7 @@ export function toHttpResponse(response: Response<unknown>): models.HttpResponse
   return httpResponse;
 }
 
-function getBody(body: unknown) {
+export function getBody(body: unknown) {
   if (typeof body === 'string') {
     return body;
   }
