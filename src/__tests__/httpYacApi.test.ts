@@ -369,6 +369,43 @@ foo={{foo.foo}}
       expect(await requests[0].body.getText()).toBe('foo=bar');
     });
 
+    it('name + ref + falsy body', async () => {
+      initFileProvider();
+      const refEndpoints = await localServer.forGet('/json').thenReply(200);
+      const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
+      const httpFile = await build(`
+# @name child
+GET  http://localhost:8080/json
+
+###
+# @ref child
+# @name parent
+POST http://localhost:8080/post?test={{child}}
+
+foo={{child}}
+
+###
+# @ref child
+# @ref parent
+POST http://localhost:8080/post?test={{parent}}
+
+foo={{parent}}
+      `);
+
+      await send({
+        httpFile,
+        httpRegion: httpFile.httpRegions[2],
+      });
+
+      const refRequests = await refEndpoints.getSeenRequests();
+      expect(refRequests[0].url).toBe('http://localhost:8080/json');
+      expect(refRequests.length).toBe(1);
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests[0].url).toBe('http://localhost:8080/post?test=');
+      expect(await requests[0].body.getText()).toBe('foo=');
+      expect(await requests[1].body.getText()).toBe('foo=');
+    });
+
     it('name + import + ref', async () => {
       initFileProvider({
         'import.http': `
