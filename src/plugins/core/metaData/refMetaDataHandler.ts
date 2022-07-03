@@ -45,7 +45,7 @@ class RefMetaAction {
       const envKey = utils.toEnvironmentKey(context.httpFile.activeEnvironment);
       log.trace('import variables', reference.httpRegion.variablesPerEnv[envKey]);
       utils.setVariableInContext(reference.httpRegion.variablesPerEnv[envKey], context);
-      if (this.data.force || !context.variables[this.data.name]) {
+      if (this.data.force || utils.isUndefined(context.variables[this.data.name])) {
         const refContext = {
           ...context,
           httpFile: reference.httpFile,

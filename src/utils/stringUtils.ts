@@ -8,6 +8,10 @@ export function toMultiLineArray(text: string): Array<string> {
   return text.split(/\r?\n/gu);
 }
 
+export function isUndefined(obj: unknown): obj is undefined {
+  return typeof obj === 'undefined';
+}
+
 export function isString(text: unknown): text is string {
   return typeof text === 'string';
 }
