@@ -6,11 +6,11 @@ import { HookInterceptor, HookTriggerContext } from 'hookpoint';
 export class CreateRequestBodyInterceptor implements HookInterceptor<[models.ProcessorContext], boolean | void> {
   constructor(private readonly rawBody: Array<string | models.RequestBodyImport>) {}
 
-  async beforeTrigger(
+  async beforeLoop(
     hookContext: HookTriggerContext<[models.ProcessorContext], boolean | undefined>
   ): Promise<boolean | undefined> {
     const context = hookContext.args[0];
-    if (context.request && hookContext.index === 0) {
+    if (context.request) {
       const contentType = context.request.contentType;
       const requestBodyLines = await this.normalizeBody(this.rawBody, context);
       if (requestBodyLines.length > 0) {
