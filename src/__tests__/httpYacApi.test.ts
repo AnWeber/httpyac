@@ -824,7 +824,7 @@ GET  http://localhost:8080/text?another_author={{slideshow.author}}
       const requests = await mockedEndpoints.getSeenRequests();
       expect(requests[0].url).toBe('http://localhost:8080/text?foo=');
     });
-    it.only('nested replace variable', async () => {
+    it('nested replace variable', async () => {
       initFileProvider();
       const mockedEndpoints = await localServer.forGet('/test').thenJson(200, { slideshow: { author: 'httpyac' } });
 
