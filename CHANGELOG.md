@@ -1,3 +1,9 @@
+## 5.5.3 (2022-07-11)
+
+#### Fixes
+
+- prevent missing body with request body and `@loop` (#302)
+
 ## 5.5.2 (2022-07-05)
 
 #### Fixes
