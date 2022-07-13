@@ -52,13 +52,17 @@ export function testFactory({ httpRegion, scriptConsole }: ProcessorContext): Te
   testFunction.header = (headerKey: string, val: string | string[] | undefined) => {
     if (httpRegion.response) {
       const response = httpRegion.response;
-      testFunction(`response header ${headerKey} equals ${val}`, () => utils.assertHeaderEquals(response, headerKey, val));
+      testFunction(`response header ${headerKey} equals ${val}`, () =>
+        utils.assertHeaderEquals(response, headerKey, val)
+      );
     }
   };
   testFunction.headerContains = (headerKey: string, val: string) => {
     if (httpRegion.response) {
       const response = httpRegion.response;
-      testFunction(`response header ${headerKey} contains ${val}`, () => utils.assertHeaderContains(response, headerKey, val));
+      testFunction(`response header ${headerKey} contains ${val}`, () =>
+        utils.assertHeaderContains(response, headerKey, val)
+      );
     }
   };
   testFunction.responseBody = (val: unknown) => {

@@ -1,3 +1,9 @@
+## 5.5.4 (2022-07-12)
+
+#### Fixes
+
+- output header key in test.header (#304)
+
 ## 5.5.3 (2022-07-11)
 
 #### Fixes
