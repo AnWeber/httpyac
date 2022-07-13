@@ -308,7 +308,7 @@ export class GrpcClientAction {
   }
 
   private toHttpResponse(data: unknown, responseTemplate: Partial<models.HttpResponse>): models.HttpResponse {
-    const body = utils.isString(data) ? data : JSON.stringify(data, null, 2);
+    const body = utils.isString(data) ? data : utils.stringifySafe(data, 2);
     const response: models.HttpResponse = {
       headers: {},
       ...responseTemplate,

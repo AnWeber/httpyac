@@ -79,7 +79,7 @@ async function execute(fileNames: Array<string>, options: SendOptions): Promise<
         ) {
           const cliJsonOutput = toSendJsonOutput(jsonOutput, options);
           if (options.json) {
-            console.info(JSON.stringify(cliJsonOutput, null, 2));
+            console.info(utils.stringifySafe(cliJsonOutput, 2));
           } else if (context.scriptConsole) {
             context.scriptConsole.info('');
             context.scriptConsole.info(

@@ -1,7 +1,7 @@
 import * as io from '../io';
 import * as models from '../models';
 import * as mimeTypeUtils from './mimeTypeUtils';
-import { isString, toMultiLineArray } from './stringUtils';
+import { isString, stringifySafe, toMultiLineArray } from './stringUtils';
 
 export function toMarkdown(
   response: models.HttpResponse,
@@ -140,7 +140,7 @@ export function toMarkdownHeader(headers: Record<string, unknown>): Array<string
         if (Array.isArray(value)) {
           val = value.join(', ');
         } else if (!isString(value)) {
-          val = JSON.stringify(value);
+          val = stringifySafe(value);
         }
       }
       return `*${key}*: ${val}`;

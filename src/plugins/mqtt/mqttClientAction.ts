@@ -172,7 +172,7 @@ export class MQTTClientAction {
     data: Array<MQTTMessage | Error>,
     responseTemplate: Partial<models.HttpResponse>
   ): models.HttpResponse {
-    const body = JSON.stringify(data, null, 2);
+    const body = utils.stringifySafe(data, 2);
     const rawBody: Buffer = Buffer.isBuffer(data) ? data : Buffer.from(body);
     const response: models.HttpResponse = {
       statusCode: 0,

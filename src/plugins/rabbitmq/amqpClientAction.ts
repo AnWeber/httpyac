@@ -208,7 +208,7 @@ export class AmqpClientAction {
   }
 
   private toMergedHttpResponse(messages: Array<AmqpResponse | AmqpError>, request: AmqpRequest): models.HttpResponse {
-    const body = JSON.stringify(messages, null, 2);
+    const body = utils.stringifySafe(messages, 2);
     const rawBody: Buffer = Buffer.isBuffer(messages) ? messages : Buffer.from(body);
     const response: models.HttpResponse = {
       statusCode: 0,

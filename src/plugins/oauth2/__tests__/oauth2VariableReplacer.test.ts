@@ -1,6 +1,7 @@
 import { httpClientProvider } from '../../../io/httpClientProvider';
 import * as models from '../../../models';
 import { userSessionStore } from '../../../store';
+import * as utils from '../../../utils';
 import { oauth2VariableReplacer } from '../oauth2VariableReplacer';
 
 const JWTToken =
@@ -17,7 +18,7 @@ describe('oauth2VariableReplacer', () => {
         return Promise.resolve({
           statusCode: 200,
           protocol: 'https',
-          body: JSON.stringify({
+          body: utils.stringifySafe({
             expires_in: 1000,
             access_token: JWTToken,
           }),

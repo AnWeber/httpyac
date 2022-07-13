@@ -55,7 +55,7 @@ function handleJWTMetaData(response: models.HttpResponse, body: unknown, { httpR
         }
       }
       response.parsedBody = Object.fromEntries(entries);
-      response.prettyPrintBody = JSON.stringify(response.parsedBody, null, 2);
+      response.prettyPrintBody = utils.stringifySafe(response.parsedBody, 2);
       response.body = response.prettyPrintBody;
     }
   }

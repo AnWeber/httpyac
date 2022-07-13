@@ -60,7 +60,7 @@ export function toOpenIdInformation(
   if (isAuthToken(jwtToken)) {
     const parsedToken = utils.decodeJWT(jwtToken.access_token);
     if (parsedToken) {
-      log.debug(JSON.stringify(parsedToken, null, 2));
+      log.debug(utils.stringifySafe(parsedToken, 2));
     }
     return {
       ...session,

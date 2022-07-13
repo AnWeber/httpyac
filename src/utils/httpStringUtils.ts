@@ -1,5 +1,5 @@
 import { HttpResponse, Request } from '../models';
-import { isString, toMultiLineString } from './stringUtils';
+import { isString, stringifySafe, toMultiLineString } from './stringUtils';
 
 export function toHttpString(
   response: HttpResponse,
@@ -75,7 +75,7 @@ export function toHttpStringHeader(headers: Record<string, unknown>): Array<stri
       if (Array.isArray(value)) {
         val = value.join(', ');
       } else if (!isString(value)) {
-        val = JSON.stringify(value);
+        val = stringifySafe(value);
       }
     }
     return `${key}: ${val}`;

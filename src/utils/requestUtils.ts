@@ -1,7 +1,7 @@
 import { log } from '../io';
 import * as models from '../models';
 import { isMimeTypeJSON, isMimeTypeXml, parseMimeType } from './mimeTypeUtils';
-import { isString, toMultiLineString } from './stringUtils';
+import { isString, toMultiLineString, stringifySafe } from './stringUtils';
 import { default as chalk } from 'chalk';
 import { HookCancel } from 'hookpoint';
 import { TextDecoder } from 'util';
@@ -362,7 +362,7 @@ export function setAdditionalResponseBody(httpResponse: models.HttpResponse, con
           httpResponse.parsedBody = JSON.parse(httpResponse.body);
         }
         if (!httpResponse.prettyPrintBody && httpResponse.body.length < requestPrettyPrintBodyMaxSize) {
-          httpResponse.prettyPrintBody = JSON.stringify(httpResponse.parsedBody, null, 2);
+          httpResponse.prettyPrintBody = stringifySafe(httpResponse.parsedBody, 2);
         }
       } catch (err) {
         log.warn('json parse error', httpResponse.body, err);

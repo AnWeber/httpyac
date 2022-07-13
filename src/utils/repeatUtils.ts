@@ -1,5 +1,6 @@
 import * as models from '../models';
 import { cloneResponse } from './requestUtils';
+import { stringifySafe } from './stringUtils';
 
 export async function repeat(
   load: () => Promise<models.HttpResponse | undefined>,
@@ -60,7 +61,7 @@ function mergeRepeatResponse(responses: Array<models.HttpResponse>): models.Http
       parsedBody.responses.push(cloneResponse(response));
     }
     result.parsedBody = parsedBody;
-    result.body = JSON.stringify(parsedBody, null, 2);
+    result.body = stringifySafe(parsedBody, 2);
 
     return result;
   }

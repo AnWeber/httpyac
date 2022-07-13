@@ -69,7 +69,7 @@ export class GqlAction {
         if (utils.isString(context.request.body)) {
           gqlRequestBody.variables = JSON.parse(context.request.body);
         }
-        context.request.body = JSON.stringify(gqlRequestBody);
+        context.request.body = utils.stringifySafe(gqlRequestBody);
       }
     }
     return true;

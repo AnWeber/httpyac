@@ -1,4 +1,4 @@
-import { fileProvider } from '../io';
+import { fileProvider, log } from '../io';
 
 export function toMultiLineString(lines: Array<string>): string {
   return lines.join(fileProvider.EOL);
@@ -55,12 +55,33 @@ export function toString(value: unknown): string | undefined {
   }
   if (Array.isArray(value) && value.every(obj => Buffer.isBuffer(obj))) {
     const jsonData = value.map(obj => Buffer.isBuffer(obj) && obj.toString('utf8'));
-    return JSON.stringify(jsonData, null, 2);
+    return stringifySafe(jsonData);
   }
   if (value) {
-    return JSON.stringify(value);
+    return stringifySafe(value);
   }
   return undefined;
+}
+
+export function stringifySafe(obj: unknown, indent = 0) {
+  try {
+    return JSON.stringify(obj, null, indent);
+  } catch (err) {
+    log.debug(`JSON.stringify error`, err);
+    const getCircularReplacer = () => {
+      const seen = new WeakSet();
+      return (_key: string, value: unknown) => {
+        if (typeof value === 'object' && value !== null) {
+          if (seen.has(value)) {
+            return undefined;
+          }
+          seen.add(value);
+        }
+        return value;
+      };
+    };
+    return JSON.stringify(obj, getCircularReplacer(), indent);
+  }
 }
 
 export function ensureString(value: unknown): string {
