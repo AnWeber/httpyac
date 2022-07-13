@@ -1,3 +1,9 @@
+## 5.5.5 (2022-07-12)
+
+#### Fixes
+
+- prevent circular JSON.stringify with fallback (AnWeber/vscode-httpyac#139)
+
 ## 5.5.4 (2022-07-12)
 
 #### Fixes
