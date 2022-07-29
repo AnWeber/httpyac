@@ -16,16 +16,6 @@ export function isString(text: unknown): text is string {
   return typeof text === 'string';
 }
 
-export function toNumber<T>(text: string | undefined, defaultVal?: T | undefined): number | T | undefined {
-  if (text) {
-    const number = Number.parseInt(text, 10);
-    if (!Number.isNaN(number)) {
-      return number;
-    }
-  }
-  return defaultVal;
-}
-
 export function isStringEmpty(text: unknown): boolean {
   return typeof text === 'string' && /^(\s*)?$/u.test(text);
 }

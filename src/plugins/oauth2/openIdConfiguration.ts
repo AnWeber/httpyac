@@ -9,7 +9,15 @@ export const DEFAULT_CALLBACK_URI = 'http://localhost:3000/callback';
 const DefaultOAuthVariablePrefix = 'oauth2';
 
 function getVariableRaw(variables: models.Variables, name: string, variablePrefix: string): unknown {
-  let varValue = variables[`${variablePrefix}_${name}`];
+  const variableName = `${variablePrefix}_${name}`;
+  let varValue = variables[variableName];
+
+  const caseInsensitiveVariables = Object.entries(variables)
+    .filter(([key]) => key.toLowerCase() === variableName.toLowerCase())
+    .map(([, value]) => value);
+  if (caseInsensitiveVariables.length === 1) {
+    return caseInsensitiveVariables.pop();
+  }
   if (typeof varValue === 'undefined' || varValue === null) {
     varValue = get(variables, `${variablePrefix}.${name}`);
   }
@@ -50,6 +58,10 @@ export function getOpenIdConfiguration(
     const expandedValue = getVariableUnknown(variables, variablePrefix, name);
     return utils.toBoolean(expandedValue, defaultValue);
   };
+  const getNumber = (name: string, defaultValue = undefined) => {
+    const expandedValue = getVariableUnknown(variables, variablePrefix, name);
+    return utils.toNumber(expandedValue, defaultValue);
+  };
 
   const config: models.OpenIdConfiguration = {
     variablePrefix: variablePrefix || DefaultOAuthVariablePrefix,
@@ -71,6 +83,7 @@ export function getOpenIdConfiguration(
     useAuthorizationHeader: getBoolean('useAuthorizationHeader', true),
     useDeviceCodeClientSecret: getBoolean('useDeviceCodeClientSecret'),
     usePkce: getBoolean('usePkce'),
+    serverPort: getNumber('serverPort'),
   };
   return config;
 }

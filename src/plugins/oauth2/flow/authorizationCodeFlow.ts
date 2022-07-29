@@ -55,7 +55,8 @@ class AuthorizationCodeFlow implements OpenIdFlow {
 
           registerListener({
             id: state,
-            url: config.redirectUri,
+            port: config.serverPort || Number(config.redirectUri.port),
+            path: config.redirectUri.pathname,
             name: `authorization for ${config.clientId}: ${config.authorizationEndpoint}`,
             resolve: params => {
               if (params.code && params.state === state) {

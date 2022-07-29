@@ -1,9 +1,9 @@
 import { log } from '../../../io';
 import { createServer, Server } from 'http';
-import { URL } from 'url';
 
 interface RequestListener {
-  url: URL;
+  path: string;
+  port: number;
   id: string;
   name: string;
   resolve: (params: Record<string, string>) => { valid: boolean; message: string; statusMessage: string };
@@ -18,7 +18,7 @@ let serverTimeoutTime = 0;
 
 export function registerListener(listener: RequestListener): void {
   listeners.push(listener);
-  initServer(Number(listener.url.port), listener.url.pathname);
+  initServer(listener.port, listener.path);
 }
 
 export function unregisterListener(id: string): void {
@@ -67,7 +67,6 @@ function closeServer() {
 function initServer(port: number, callbackPath: string) {
   resetServer(600);
   if (!server) {
-    log.debug(`open http server on port ${port}`);
     server = createServer((req, res) => {
       try {
         let statusMessage = 'invalid';
@@ -134,6 +133,12 @@ function initServer(port: number, callbackPath: string) {
       }
     });
     server.listen(port);
+    const address = server.address();
+    if (address) {
+      log.debug(`open http server on port ${typeof address === 'string' ? address : address.port}`);
+    } else {
+      log.debug(`open http server on port ${port}`);
+    }
   }
 }
 

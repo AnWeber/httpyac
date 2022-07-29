@@ -10,6 +10,7 @@ export * from './logUtils';
 export * from './markdownUtils';
 export * from './mimeTypeUtils';
 export * from './modelUtils';
+export * from './numberUtils';
 export * from './parserUtils';
 export * from './promiseUtils';
 export * from './repeatUtils';

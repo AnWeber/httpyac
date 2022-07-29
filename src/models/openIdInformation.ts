@@ -23,6 +23,7 @@ export interface OpenIdConfiguration {
   useDeviceCodeClientSecret?: boolean;
   usePkce: boolean;
   redirectUri: URL;
+  serverPort?: number;
 }
 
 export interface OpenIdInformation extends UserSession {
