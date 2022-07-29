@@ -47,7 +47,7 @@ class ImplicitFlow implements OpenIdFlow {
           if (context.progress) {
             unregisterProgress = context.progress.register(() => {
               unregisterListener(state);
-              reject(new Error('progress cancel'));
+              resolve(false);
             });
           }
 

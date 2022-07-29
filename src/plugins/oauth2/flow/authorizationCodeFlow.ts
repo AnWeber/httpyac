@@ -49,7 +49,7 @@ class AuthorizationCodeFlow implements OpenIdFlow {
           if (context.progress) {
             unregisterProgress = context.progress.register(() => {
               unregisterListener(state);
-              reject(new Error('process canceled'));
+              resolve(false);
             });
           }
 
