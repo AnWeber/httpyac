@@ -40,6 +40,9 @@ export function toString(value: unknown): string | undefined {
   if (value instanceof Date) {
     return value.toISOString();
   }
+  if (value instanceof Error) {
+    return value.message;
+  }
   if (Buffer.isBuffer(value)) {
     return value.toString('utf-8');
   }
