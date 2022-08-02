@@ -93,12 +93,14 @@ export class HttpFileStore implements models.HttpFileStore {
     return await parseHttpFile(httpFile, text, this);
   }
 
-  remove(fileName: models.PathLike): void {
+  remove(fileName: models.PathLike): boolean {
     const cacheKey = fileProvider.toString(fileName);
     const index = this.storeCache.findIndex(obj => obj.cacheKey === cacheKey);
     if (index >= 0) {
       this.storeCache.splice(index, 1);
+      return true;
     }
+    return false;
   }
 
   rename(oldFileName: models.PathLike, newFileName: models.PathLike): void {

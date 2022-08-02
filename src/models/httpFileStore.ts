@@ -25,7 +25,7 @@ export interface HttpFileStore {
 
   parse(fileName: PathLike, text: string, options: HttpFileStoreOptions): Promise<HttpFile>;
 
-  remove(fileName: PathLike): void;
+  remove(fileName: PathLike): boolean;
 
   rename(oldFileName: PathLike, newFileName: PathLike): void;
 
