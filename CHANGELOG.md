@@ -1,3 +1,13 @@
+## 5.6.0 (2022-08-04)
+
+#### Features
+
+- add OAuth2 config setting to change server.listener port (#315)
+
+#### Fixes
+
+- no exception after cancel while OAuth2 Authorization Code flow
+
 ## 5.5.5 (2022-07-12)
 
 #### Fixes
