@@ -831,9 +831,9 @@ GET  http://localhost:8080/text?another_author={{slideshow.author}}
       await exec(`
 @baz=works
 {{
-  exports.test = { bar: '{{baz}}'};
+  exports.testObj = { bar: '{{baz}}'};
 }}
-GET http://localhost:8080/test?test={{JSON.stringify(test)}}
+GET http://localhost:8080/test?test={{JSON.stringify(testObj)}}
       `);
 
       const requests = await mockedEndpoints.getSeenRequests();

@@ -56,17 +56,25 @@ export function expandVariable(value: unknown, variables: models.Variables): unk
 }
 
 export function setVariableInContext(variables: models.Variables, context: models.ProcessorContext) {
-  for (const [key, value] of Object.entries(variables)) {
-    if (!io.javascriptProvider.isAllowedKeyword || io.javascriptProvider.isAllowedKeyword(key)) {
-      context.variables[key] = value;
+  if (variables) {
+    const checkedVariables = cleanVariables(variables);
+    Object.assign(context.variables, checkedVariables);
+    const envKey = toEnvironmentKey(context.httpFile.activeEnvironment);
+    if (!context.httpRegion.variablesPerEnv[envKey]) {
+      context.httpRegion.variablesPerEnv[envKey] = {};
     }
+    Object.assign(context.httpRegion.variablesPerEnv[envKey], checkedVariables);
   }
-  const envKey = toEnvironmentKey(context.httpFile.activeEnvironment);
-  if (!context.httpRegion.variablesPerEnv[envKey]) {
-    context.httpRegion.variablesPerEnv[envKey] = {};
-  }
-  Object.assign(context.httpRegion.variablesPerEnv[envKey], variables);
 }
+
+export function cleanVariables(variables: models.Variables) {
+  return Object.fromEntries(
+    Object.entries(variables).filter(
+      ([key]) => !io.javascriptProvider.isAllowedKeyword || io.javascriptProvider.isAllowedKeyword(key)
+    )
+  );
+}
+
 export function deleteVariableInContext(key: string, context: models.ProcessorContext) {
   delete context.variables[key];
 

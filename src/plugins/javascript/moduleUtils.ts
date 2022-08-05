@@ -172,10 +172,11 @@ export async function evalExpression(expression: string, context: ProcessorConte
   const value = await runScript(script, {
     fileName: context.httpFile.fileName,
     context: {
+      ...context.variables,
       httpFile: context.httpFile,
       httpRegion: context.httpRegion,
+      request: context.request,
       console: context.scriptConsole,
-      ...context.variables,
     },
     lineOffset,
   });
@@ -186,11 +187,11 @@ function checkVariableNames(context: Record<string, unknown>) {
   const result: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(context)) {
-    if (JAVASCRIPT_KEYWORDS.indexOf(key) < 0 && typeof value !== 'undefined') {
-      const name = key
-        .trim()
-        .replace(/\s/gu, '-')
-        .replace(/-./gu, val => val[1].toUpperCase());
+    const name = key
+      .trim()
+      .replace(/\s/gu, '-')
+      .replace(/-./gu, val => val[1].toUpperCase());
+    if (JAVASCRIPT_KEYWORDS.indexOf(name) < 0 && typeof value !== 'undefined') {
       result[name] = value;
     }
   }

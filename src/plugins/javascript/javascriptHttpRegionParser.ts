@@ -125,13 +125,13 @@ async function executeScriptData(scriptData: ScriptData, context: models.Process
   const result = await runScript(scriptData.script, {
     fileName: context.httpFile.fileName,
     context: {
+      ...context.variables,
+      console: context.scriptConsole,
+      httpFile: context.httpFile,
+      httpRegion: context.httpRegion,
       request: context.request,
       sleep: utils.sleep,
       test: utils.testFactory(context),
-      httpFile: context.httpFile,
-      httpRegion: context.httpRegion,
-      console: context.scriptConsole,
-      ...context.variables,
     },
     lineOffset: scriptData.lineOffset,
     require: javascriptProvider.require,
