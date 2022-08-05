@@ -1,3 +1,4 @@
+import { javascriptProvider } from '../../../io';
 import * as models from '../../../models';
 import { userSessionStore } from '../../../store';
 import * as utils from '../../../utils';
@@ -29,7 +30,10 @@ function setLastResponseInVariables(context: models.ProcessorContext, response: 
 
 function handleNameMetaData(response: models.HttpResponse, body: unknown, context: models.ProcessorContext) {
   const { httpRegion } = context;
-  if (utils.isString(httpRegion.metaData.name)) {
+  if (
+    utils.isString(httpRegion.metaData.name) &&
+    (!javascriptProvider.isAllowedKeyword || javascriptProvider.isAllowedKeyword(httpRegion.metaData.name))
+  ) {
     const name = httpRegion.metaData.name
       .trim()
       .replace(/\s/gu, '-')

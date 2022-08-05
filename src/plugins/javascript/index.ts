@@ -16,6 +16,7 @@ export function registerJavascriptPlugin(api: models.HttpyacHooksApi) {
   addDefaultRequire();
   httpyac.io.javascriptProvider.evalExpression = moduleUtils.evalExpression;
   httpyac.io.javascriptProvider.runScript = moduleUtils.runScript;
+  httpyac.io.javascriptProvider.isAllowedKeyword = moduleUtils.isAllowedKeyword;
 }
 
 function addDefaultRequire() {

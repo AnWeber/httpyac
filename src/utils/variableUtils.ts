@@ -56,7 +56,11 @@ export function expandVariable(value: unknown, variables: models.Variables): unk
 }
 
 export function setVariableInContext(variables: models.Variables, context: models.ProcessorContext) {
-  Object.assign(context.variables, variables);
+  for (const [key, value] of Object.entries(variables)) {
+    if (!io.javascriptProvider.isAllowedKeyword || io.javascriptProvider.isAllowedKeyword(key)) {
+      context.variables[key] = value;
+    }
+  }
   const envKey = toEnvironmentKey(context.httpFile.activeEnvironment);
   if (!context.httpRegion.variablesPerEnv[envKey]) {
     context.httpRegion.variablesPerEnv[envKey] = {};

@@ -1,4 +1,5 @@
 import * as io from '../../io';
+import { log } from '../../io';
 import { PathLike, ProcessorContext } from '../../models';
 import { isPromise } from '../../utils/promiseUtils';
 import { toMultiLineArray } from '../../utils/stringUtils';
@@ -195,6 +196,20 @@ function checkVariableNames(context: Record<string, unknown>) {
   }
   return result;
 }
+
+export function isAllowedKeyword(key: string) {
+  if (JAVASCRIPT_KEYWORDS.indexOf(key) >= 0) {
+    log.debug(`Keyword ${key} prevented, because Javascript Keyword`);
+    return false;
+  }
+  if (HTTPYAC_KEYWORDS.indexOf(key) >= 0) {
+    log.debug(`Keyword ${key} prevented, because used by httpYac`);
+    return false;
+  }
+  return true;
+}
+
+export const HTTPYAC_KEYWORDS = ['httpFile', 'httpRegion', 'request', 'test', 'sleep'];
 
 export const JAVASCRIPT_KEYWORDS = [
   'await',

@@ -15,4 +15,5 @@ export interface JavascriptProvider {
   ): Promise<Record<string, unknown>>;
   evalExpression(expression: string, context: ProcessorContext): Promise<unknown>;
   loadModule?<T>(request: string, context: string, force?: boolean): T | undefined;
+  isAllowedKeyword?(keyword: string): boolean;
 }
