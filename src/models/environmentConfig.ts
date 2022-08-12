@@ -13,7 +13,7 @@ export interface EnvironmentConfig {
     supportAnsiColors?: boolean;
   };
 
-  request?: Record<string, unknown>;
+  request?: ConfigRequest;
   proxy?: string;
   /** count auf characters before pretty print is ommited (default: 1000000)*/
   requestPrettyPrintBodyMaxSize?: number;
@@ -31,6 +31,13 @@ export interface EnvironmentConfig {
   configureHooks?: ConfigureHooks;
   /** configuration for plugins */
   plugins?: Record<string, unknown>;
+}
+
+export interface ConfigRequest {
+  timeout?: number;
+  followRedirects?: boolean;
+  rejectUnauthorized?: boolean;
+  [key: string]: unknown;
 }
 
 export type ConfigureHooks = (api: HttpyacHooksApi) => void | Promise<void>;

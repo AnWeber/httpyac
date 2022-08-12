@@ -37,18 +37,7 @@ export class MQTTClientAction {
         return;
       }
 
-      const options: IClientOptions = {
-        clientId: `httpyac_${Math.random().toString(16).slice(2, 8)}`,
-        username: utils.getHeaderString(request.headers, 'username'),
-        password: utils.getHeaderString(request.headers, 'password'),
-        keepalive: utils.toNumber(utils.getHeaderString(request.headers, 'keepalive')),
-        clean: !!utils.getHeader(request.headers, 'clean'),
-        ...request.options,
-      };
-
-      if (httpRegion.metaData.noRejectUnauthorized) {
-        options.rejectUnauthorized = false;
-      }
+      const options: IClientOptions = this.getClientOptions(request, httpRegion);
 
       const responseTemplate: Partial<models.HttpResponse> = {
         request,
@@ -132,6 +121,26 @@ export class MQTTClientAction {
         .then(() => client.end())
         .catch(err => reject(err));
     });
+  }
+
+  private getClientOptions(request: MQTTRequest, context: models.ProcessorContext): IClientOptions {
+    const { httpRegion, config } = context;
+
+    const configOptions: Record<string, unknown> = {};
+    if (config?.request) {
+      configOptions.connectTimeout = utils.toNumber(config.request.timeout);
+      if (!utils.isUndefined(config.request.rejectUnauthorized)) {
+        configOptions.rejectUnauthorized = utils.toBoolean(config.request.rejectUnauthorized, true);
+      }
+    }
+
+    const metaDataOptions: Record<string, unknown> = {
+      headers: request.headers,
+    };
+    if (httpRegion.metaData.noRejectUnauthorized) {
+      metaDataOptions.rejectUnauthorized = false;
+    }
+    return Object.assign({}, config?.request, request.options, metaDataOptions);
   }
 
   private subscribeToTopics(client: MqttClient, topics: string[], qos: QoS) {
