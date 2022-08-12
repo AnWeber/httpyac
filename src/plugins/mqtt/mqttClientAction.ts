@@ -29,15 +29,13 @@ export class MQTTClientAction {
   }
 
   private async requestMQTT(request: MQTTRequest, context: models.ProcessorContext): Promise<models.HttpResponse> {
-    const { httpRegion } = context;
-
     return await new Promise<models.HttpResponse>((resolve, reject) => {
       if (!request.url) {
         reject(new Error('request url undefined'));
         return;
       }
 
-      const options: IClientOptions = this.getClientOptions(request, httpRegion);
+      const options: IClientOptions = this.getClientOptions(request, context);
 
       const responseTemplate: Partial<models.HttpResponse> = {
         request,
