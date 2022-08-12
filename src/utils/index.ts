@@ -1,6 +1,6 @@
 export * from './assertUtils';
-export * from './booleanUtils';
 export * from './configUtils';
+export * from './convertUtils';
 export * from './environmentUtils';
 export * from './errorUtils';
 export * from './fsUtils';
@@ -10,7 +10,6 @@ export * from './logUtils';
 export * from './markdownUtils';
 export * from './mimeTypeUtils';
 export * from './modelUtils';
-export * from './numberUtils';
 export * from './parserUtils';
 export * from './promiseUtils';
 export * from './repeatUtils';

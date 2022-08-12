@@ -34,10 +34,10 @@ export function sendCommand() {
     )
     .option('--raw', 'prevent formatting of response body')
     .option('--quiet', '')
-    .option('--repeat <count>', 'repeat count for requests', toNumber)
+    .option('--repeat <count>', 'repeat count for requests', utils.toNumber)
     .option('--repeat-mode <mode>', 'repeat mode: sequential, parallel (default)')
     .option('-s, --silent', 'log only request')
-    .option('--timeout <timeout>', 'maximum time allowed for connections', toNumber)
+    .option('--timeout <timeout>', 'maximum time allowed for connections', utils.toNumber)
     .option('--var  <variables...>', 'list of variables')
     .option('-v, --verbose', 'make the operation more talkative')
     .action(execute);
@@ -94,16 +94,6 @@ async function execute(fileNames: Array<string>, options: SendOptions): Promise<
   } finally {
     context.scriptConsole?.flush?.();
   }
-}
-
-function toNumber(value: string) {
-  if (value) {
-    const val = Number(value);
-    if (!Number.isNaN(val)) {
-      return val;
-    }
-  }
-  return undefined;
 }
 
 export function convertCliOptionsToContext(cliOptions: SendOptions) {

@@ -36,11 +36,7 @@ class DeviceCodeFlow implements OpenIdFlow {
 
         const deviceCodeBody: DeviceCodeBody = JSON.parse(deviceCodeResponse.body);
 
-        let interval = deviceCodeBody.interval ? Number(deviceCodeBody.interval) * 1000 : 5000;
-        if (Number.isNaN(interval)) {
-          interval = 5000;
-        }
-
+        let interval = utils.toNumber(deviceCodeBody.interval) || 5000;
         this.showUserCode(deviceCodeBody);
 
         while (new Date().getTime() - deviceCodeTime < Number(deviceCodeBody.expires_in) * 1000) {
