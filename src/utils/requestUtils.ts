@@ -1,5 +1,6 @@
 import { log } from '../io';
 import * as models from '../models';
+import { toBoolean, toNumber } from './convertUtils';
 import { isMimeTypeJSON, isMimeTypeXml, parseMimeType } from './mimeTypeUtils';
 import { isString, toMultiLineString, stringifySafe } from './stringUtils';
 import { default as chalk } from 'chalk';
@@ -73,16 +74,7 @@ export function getHeaderBoolean(
 ): boolean {
   const value = getHeader(headers, headerName);
 
-  if (isString(value)) {
-    return ['true', '1', 'TRUE'].indexOf(value) >= 0;
-  }
-  if (value === true) {
-    return true;
-  }
-  if (value === false) {
-    return false;
-  }
-  return defaultValue;
+  return toBoolean(value, defaultValue);
 }
 
 export function getHeader<T>(headers: Record<string, T> | undefined, headerName: string): T | undefined {
@@ -97,15 +89,7 @@ export function getHeader<T>(headers: Record<string, T> | undefined, headerName:
 
 export function getHeaderNumber<T>(headers: Record<string, T> | undefined, headerName: string): number | undefined {
   const value = getHeader(headers, headerName);
-  if (isString(value)) {
-    const val = Number(value);
-    if (Number.isSafeInteger(val)) {
-      return val;
-    }
-  } else if (Number.isInteger(value)) {
-    return Number(value);
-  }
-  return undefined;
+  return toNumber(value);
 }
 
 export function getHeaderArray(
