@@ -27,8 +27,6 @@ export class WebSocketClientAction {
     request: WebsocketRequest,
     context: models.ProcessorContext
   ): Promise<models.HttpResponse> {
-    const { httpRegion } = context;
-
     const startTime = new Date().getTime();
 
     return await new Promise<models.HttpResponse>((resolve, reject) => {
@@ -36,14 +34,7 @@ export class WebSocketClientAction {
         reject(new Error('request url undefined'));
         return;
       }
-      const options: ClientOptions = Object.assign({}, request.options);
-      if (httpRegion.metaData.noRedirect) {
-        options.followRedirects = !httpRegion.metaData.noRedirect;
-      }
-      if (httpRegion.metaData.noRejectUnauthorized) {
-        options.rejectUnauthorized = false;
-      }
-      options.headers = request.headers;
+      const options: ClientOptions = this.getClientOptions(request, context);
 
       const responseTemplate: Partial<models.HttpResponse> = {
         request,
@@ -128,6 +119,32 @@ export class WebSocketClientAction {
         resolve(this.toMergedHttpResponse(code, reason, mergedData, getResponseTemplate()));
       });
     });
+  }
+
+  private getClientOptions(request: WebsocketRequest, context: models.ProcessorContext): ClientOptions {
+    const { httpRegion, config } = context;
+
+    const configOptions: Record<string, unknown> = {};
+    if (config?.request) {
+      configOptions.handshakeTimeout = utils.toNumber(config.request.timeout);
+      if (!utils.isUndefined(config.request.rejectUnauthorized)) {
+        configOptions.rejectUnauthorized = utils.toBoolean(config.request.rejectUnauthorized, true);
+      }
+      if (!utils.isUndefined(config.request.followRedirects)) {
+        configOptions.followRedirects = utils.toBoolean(config.request.followRedirects, true);
+      }
+    }
+
+    const metaDataOptions: Record<string, unknown> = {
+      headers: request.headers,
+    };
+    if (httpRegion.metaData.noRedirect) {
+      metaDataOptions.followRedirects = !httpRegion.metaData.noRedirect;
+    }
+    if (httpRegion.metaData.noRejectUnauthorized) {
+      metaDataOptions.rejectUnauthorized = false;
+    }
+    return Object.assign({}, config?.request, request.options, metaDataOptions);
   }
 
   private toMergedHttpResponse(
