@@ -60,7 +60,7 @@ export function getOpenIdConfiguration(
   };
   const getNumber = (name: string, defaultValue = undefined) => {
     const expandedValue = getVariableUnknown(variables, variablePrefix, name);
-    return utils.toNumber(expandedValue, defaultValue);
+    return utils.toNumber(expandedValue) || defaultValue;
   };
 
   const config: models.OpenIdConfiguration = {
