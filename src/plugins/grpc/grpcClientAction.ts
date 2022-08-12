@@ -33,7 +33,7 @@ export class GrpcClientAction {
           if (serviceData.ServiceClass) {
             const client = new serviceData.ServiceClass(
               serviceData.server,
-              this.getChannelCredentials(request),
+              request.channelCredentials || grpc.credentials.createInsecure(),
               this.getChannelOptions(request, serviceData)
             );
             const method = client[serviceData.method]?.bind?.(client);
@@ -46,14 +46,6 @@ export class GrpcClientAction {
       }, context);
     }
     return false;
-  }
-
-  private getChannelCredentials(request: GrpcRequest): grpc.ChannelCredentials {
-    const channelCredentials = utils.getHeader(request.headers, 'channelcredentials');
-    if (channelCredentials instanceof grpc.ChannelCredentials) {
-      return channelCredentials;
-    }
-    return grpc.credentials.createInsecure();
   }
 
   private getChannelOptions(request: GrpcRequest, serviceData: ServiceData) {
@@ -85,11 +77,13 @@ export class GrpcClientAction {
     context: models.ProcessorContext
   ): Promise<models.HttpResponse> {
     const data = this.getData(request);
-    const metaData = this.getMetaData(request);
 
     const startTime = new Date().getTime();
     return await new Promise<models.HttpResponse>((resolve, reject) => {
-      const args: Array<unknown> = [metaData];
+      const args: Array<unknown> = [this.getMetaData(request)];
+      if (request.callOptions) {
+        args.push(request.callOptions);
+      }
 
       let disposeCancellation: models.Dispose | undefined;
       let responseMetaData: Record<string, unknown> = {};
@@ -222,13 +216,10 @@ export class GrpcClientAction {
 
   private getMetaData(request: GrpcRequest): grpc.Metadata {
     const metaData = new grpc.Metadata();
-    const specialKeys = ['channelcredentials'];
     if (request.headers) {
       for (const [key, value] of Object.entries(request.headers)) {
-        if (specialKeys.indexOf(key.toLowerCase()) < 0) {
-          if (utils.isString(value) || Buffer.isBuffer(value)) {
-            metaData.add(key, value);
-          }
+        if (utils.isString(value) || Buffer.isBuffer(value)) {
+          metaData.add(key, value);
         }
       }
     }
