@@ -1,3 +1,9 @@
+## 5.6.2 (2022-08-14)
+
+#### Fixes
+
+- respect timeout in GRPC, MQTT and Websocket Requests (#320)
+
 ## 5.6.1 (2022-08-05)
 
 #### Fixes
