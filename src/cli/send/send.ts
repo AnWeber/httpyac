@@ -59,14 +59,18 @@ async function execute(fileNames: Array<string>, options: SendOptions): Promise<
 
         if (selection) {
           await send(Object.assign({ processedHttpRegions }, context, selection));
-          jsonOutput[fileProvider.toString(selection.httpFile.fileName)] = [...processedHttpRegions];
+          jsonOutput[fileProvider.toString(selection.httpFile.fileName)] = [
+            ...processedHttpRegions.filter(obj => !utils.isGlobalHttpRegion(obj)),
+          ];
         } else {
           for (const httpFile of httpFiles) {
             if (!options.json && context.scriptConsole && httpFiles.length > 1) {
               context.scriptConsole.info(`--------------------- ${httpFile.fileName}  --`);
             }
             await send(Object.assign({ processedHttpRegions }, context, { httpFile }));
-            jsonOutput[fileProvider.toString(httpFile.fileName)] = [...processedHttpRegions];
+            jsonOutput[fileProvider.toString(httpFile.fileName)] = [
+              ...processedHttpRegions.filter(obj => !utils.isGlobalHttpRegion(obj)),
+            ];
             processedHttpRegions.length = 0;
           }
         }
