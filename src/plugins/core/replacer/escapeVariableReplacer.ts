@@ -3,6 +3,7 @@ import { isString } from '../../../utils';
 import { HookTriggerContext } from 'hookpoint';
 
 export const escapeVariableInterceptor = {
+  id: 'escapeVariable',
   afterLoop: async function escapeVariable(
     hookContext: HookTriggerContext<[unknown, string, models.ProcessorContext], unknown>
   ): Promise<boolean> {

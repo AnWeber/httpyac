@@ -16,7 +16,7 @@ export async function parseVariable(
       const key = match.groups.key;
       const isLazy = !!match.groups.lazyIndicator;
       const value = match.groups.value;
-      httpRegion.hooks.execute.addHook('variable', async context => {
+      httpRegion.hooks.execute.addHook(`variable_${key}`, async context => {
         let result: unknown = value;
         if (isLazy) {
           context.options.lazyVariables = true;

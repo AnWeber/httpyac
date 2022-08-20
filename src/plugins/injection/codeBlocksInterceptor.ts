@@ -6,6 +6,7 @@ import { HookInterceptor, HookTriggerContext } from 'hookpoint';
 export abstract class CodeBlockInterceptor
   implements HookInterceptor<[models.getHttpLineGenerator, models.ParserContext], undefined>
 {
+  abstract get id(): string;
   constructor(
     private readonly extensions: Array<string>,
     private readonly beginCodeBlock: RegExp | Array<RegExp>,

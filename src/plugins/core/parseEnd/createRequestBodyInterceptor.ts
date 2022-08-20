@@ -4,6 +4,7 @@ import * as utils from '../../../utils';
 import { HookInterceptor, HookTriggerContext } from 'hookpoint';
 
 export class CreateRequestBodyInterceptor implements HookInterceptor<[models.ProcessorContext], boolean | void> {
+  id = 'createRequestBody';
   constructor(private readonly rawBody: Array<string | models.RequestBodyImport>) {}
 
   async beforeLoop(

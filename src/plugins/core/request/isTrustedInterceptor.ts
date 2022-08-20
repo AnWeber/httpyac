@@ -3,6 +3,7 @@ import * as models from '../../../models';
 import { HookTriggerContext } from 'hookpoint';
 
 export const isTrustedInterceptor = {
+  id: 'isTrusted',
   afterLoop: async function escapeVariable(
     hookContext: HookTriggerContext<[models.Request, models.ProcessorContext], void>
   ): Promise<boolean> {

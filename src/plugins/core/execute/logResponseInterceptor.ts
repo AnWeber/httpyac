@@ -3,6 +3,7 @@ import * as utils from '../../../utils';
 import { HookInterceptor, HookTriggerContext } from 'hookpoint';
 
 export class LogResponseInterceptor implements HookInterceptor<[models.ProcessorContext], boolean | void> {
+  id = 'logResponse';
   async afterLoop(
     hookContext: HookTriggerContext<[models.ProcessorContext], boolean | undefined>
   ): Promise<boolean | undefined> {

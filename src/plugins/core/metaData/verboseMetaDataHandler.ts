@@ -6,6 +6,7 @@ export function verboseMetaDataHandler(type: string, _value: string | undefined,
     const level = type === 'debug' ? models.LogLevel.debug : models.LogLevel.trace;
     log.options.level = level;
     context.httpRegion.hooks.execute.addInterceptor({
+      id: 'verbose',
       async beforeLoop() {
         log.options.level = level;
         return true;

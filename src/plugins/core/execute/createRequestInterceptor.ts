@@ -4,6 +4,7 @@ import { HookInterceptor, HookTriggerContext } from 'hookpoint';
 import cloneDeep from 'lodash/cloneDeep';
 
 export class CreateRequestInterceptor implements HookInterceptor<[models.ProcessorContext], boolean | void> {
+  id = 'createRequest';
   async beforeLoop(
     hookContext: HookTriggerContext<[models.ProcessorContext], boolean | undefined>
   ): Promise<boolean | undefined> {

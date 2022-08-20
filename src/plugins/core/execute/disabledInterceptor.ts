@@ -3,6 +3,7 @@ import * as models from '../../../models';
 import { HookInterceptor, HookTriggerContext } from 'hookpoint';
 
 export class DisabledInterceptor implements HookInterceptor<[models.ProcessorContext], boolean | void> {
+  id = 'disabled';
   async beforeLoop(
     hookContext: HookTriggerContext<[models.ProcessorContext], boolean | undefined>
   ): Promise<boolean | undefined> {

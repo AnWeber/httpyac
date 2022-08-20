@@ -7,6 +7,7 @@ export function noteMetaDataHandler(type: string, value: string | undefined, con
     const note = value || `Are you sure you want to send the request ${getDisplayName(context.httpRegion)}?`;
 
     context.httpRegion.hooks.execute.addInterceptor({
+      id: 'note',
       beforeLoop: () => userInteractionProvider.showNote(note),
     });
     return true;

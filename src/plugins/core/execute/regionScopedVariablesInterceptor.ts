@@ -7,6 +7,7 @@ interface RegionScopedVariableOptions {
 }
 
 export class RegionScopedVariablesInterceptor implements HookInterceptor<[models.ProcessorContext], boolean | void> {
+  id = 'regionScopedVariables';
   async beforeLoop(
     hookContext: HookTriggerContext<[models.ProcessorContext], boolean | undefined>
   ): Promise<boolean | undefined> {

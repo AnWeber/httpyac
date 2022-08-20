@@ -4,6 +4,7 @@ import { HookTriggerContext } from 'hookpoint';
 
 export function registerCancelExecutionInterceptor(parserContext: models.ParserContext) {
   parserContext.httpRegion.hooks.execute.addInterceptor({
+    id: 'cancel',
     beforeLoop: async function checkUserCancellation(
       hookContext: HookTriggerContext<[models.ProcessorContext], boolean>
     ) {

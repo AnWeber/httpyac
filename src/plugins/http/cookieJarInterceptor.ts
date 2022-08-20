@@ -10,6 +10,7 @@ export interface CookieSession extends models.UserSession {
 }
 
 export class CookieJarInterceptor implements HookInterceptor<[models.ProcessorContext], boolean | void> {
+  id = 'cookieJar';
   async beforeTrigger(
     hookContext: HookTriggerContext<[models.ProcessorContext], boolean | undefined>
   ): Promise<boolean | undefined> {
