@@ -4,9 +4,10 @@ module.exports = {
   testPathIgnorePatterns: ['./node_modules/'],
   transform: {
     '^.+\\.tsx?$': [
-      'esbuild-jest',
+      '<rootDir>/buildSrc/jestEsbuildTransformer',
       {
-        sourcemap: true,
+        loader: 'ts',
+        target: 'node16',
       },
     ],
   },

@@ -79,7 +79,6 @@
     "@typescript-eslint/parser": "^5.33.0",
     "concurrently": "^7.3.0",
     "esbuild": "^0.15.3",
-    "esbuild-jest": "^0.5.0",
     "eslint": "^8.22.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-node": "^11.1.0",
