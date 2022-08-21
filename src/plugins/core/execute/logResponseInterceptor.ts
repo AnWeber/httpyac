@@ -10,7 +10,11 @@ export class LogResponseInterceptor implements HookInterceptor<[models.Processor
     const context = hookContext.args[0];
     if (context.httpRegion.response) {
       const processedHttpRegion = this.toProcessedHttpRegion(context);
-      processedHttpRegion.response = await utils.logResponse(processedHttpRegion?.response, context);
+      if (processedHttpRegion?.response) {
+        processedHttpRegion.response.tags = processedHttpRegion.response.tags ?? [];
+        processedHttpRegion.response.tags.push('httpRegion', context.isMainContext ? 'mainResponse' : 'refResponse');
+        processedHttpRegion.response = await utils.logResponse(processedHttpRegion.response, context);
+      }
       if (context.processedHttpRegions) {
         context.processedHttpRegions.push(processedHttpRegion);
       }

@@ -7,7 +7,7 @@ import { RepeatOptions } from './repeatOptions';
 
 export interface HttpClientContext {
   progress?: Progress | undefined;
-  showProgressBar?: boolean;
+  isMainContext?: boolean;
   repeat?: RepeatOptions;
   httpRegion?: HttpRegion;
   logResponse?: RequestLogger;

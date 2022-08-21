@@ -38,10 +38,13 @@ export async function requestOpenIdInformation(
         options: {},
         ...request,
       },
-      { showProgressBar: false }
+      { isMainContext: false }
     );
     if (response) {
+      response.tags = ['auth', 'oauth2', 'automatic'];
       if (utils.isProcessorContext(context)) {
+        response.tags = response.tags ?? [];
+        response.tags.push('httpRegion');
         await utils.logResponse(response, context);
       }
       if (response.statusCode < 400 && utils.isString(response.body)) {

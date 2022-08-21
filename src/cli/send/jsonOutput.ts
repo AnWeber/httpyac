@@ -91,6 +91,7 @@ function convertResponse(response: HttpResponse | undefined, output: string | un
     delete response.prettyPrintBody;
     delete response.parsedBody;
     delete response.contentType;
+    delete response.tags;
 
     switch (output) {
       case 'body':

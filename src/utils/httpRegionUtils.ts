@@ -40,14 +40,13 @@ export function getRegionDescription(httpRegion: models.HttpRegion, defaultName 
 
 export async function processHttpRegionActions(
   context: models.ProcessorContext,
-  showProgressBar?: boolean
+  isMainContext?: boolean
 ): Promise<boolean> {
   delete context.httpRegion.response;
   delete context.httpRegion.testResults;
 
-  if (context.progress) {
-    context.showProgressBar = showProgressBar;
-  }
+  context.isMainContext = isMainContext;
+
   report(context, `${context.httpRegion.symbol.name}`);
 
   let executeHook: Hook<[models.ProcessorContext], boolean, boolean[]> = context.httpRegion.hooks.execute;
@@ -66,22 +65,19 @@ export async function processHttpRegionActions(
 }
 
 export async function logResponse(
-  response: models.HttpResponse | undefined,
+  response: models.HttpResponse,
   context: models.ProcessorContext
 ): Promise<models.HttpResponse | undefined> {
-  if (response) {
-    const clone = cloneResponse(response);
-    const onResponseLogging = context.httpRegion.hooks.responseLogging.merge(context.httpFile.hooks.responseLogging);
-    const regionResult = await onResponseLogging.trigger(clone, context);
-    if (regionResult === HookCancel) {
-      return undefined;
-    }
-    if (!context.httpRegion.metaData.noLog && clone && context.logResponse) {
-      await context.logResponse(clone, context.httpRegion);
-    }
-    return clone;
+  const clone = cloneResponse(response);
+  const onResponseLogging = context.httpRegion.hooks.responseLogging.merge(context.httpFile.hooks.responseLogging);
+  const regionResult = await onResponseLogging.trigger(clone, context);
+  if (regionResult === HookCancel) {
+    return undefined;
   }
-  return response;
+  if (!context.httpRegion.metaData.noLog && clone && context.logResponse) {
+    await context.logResponse(clone, context.httpRegion);
+  }
+  return clone;
 }
 
 export async function executeGlobalScripts(context: {

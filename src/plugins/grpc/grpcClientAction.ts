@@ -332,6 +332,7 @@ export class GrpcClientAction {
       response.statusCode = error.code || -1;
       response.statusMessage = error.details;
     }
+    response.tags = ['grpc', 'httpRegion'];
     return response;
   }
 

@@ -50,6 +50,7 @@ class RefMetaAction {
           ...context,
           httpFile: reference.httpFile,
           httpRegion: reference.httpRegion,
+          isMainContext: false,
         };
         const result = await utils.processHttpRegionActions(refContext);
         if (result) {

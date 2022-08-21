@@ -46,16 +46,17 @@ export async function gotHttpClient(
       const responsePromise = got(url, options);
 
       let prevPercent = 0;
-      if (context.showProgressBar) {
+      if (context.isMainContext && context.progress) {
         responsePromise.on('downloadProgress', data => {
           const newData = data.percent - prevPercent;
           prevPercent = data.percent;
 
           if (context.progress?.report) {
             log.debug('call http request');
+            const divider = context.progress.divider || 1;
             context.progress.report({
               message: 'call http request',
-              increment: newData * 100,
+              increment: (newData / divider) * 100,
             });
           }
         });

@@ -49,6 +49,7 @@ class DeviceCodeFlow implements OpenIdFlow {
             const time = new Date().getTime();
             const response = await this.authenticateUser(config, deviceCodeBody, context);
             if (response && utils.isString(response.body)) {
+              response.tags = ['auth', 'oauth2', 'deviceCode', 'automatic'];
               const parsedBody = JSON.parse(response.body);
               if (response.statusCode === 200) {
                 utils.report(context, 'accessToken received');
@@ -130,7 +131,7 @@ class DeviceCodeFlow implements OpenIdFlow {
           device_code: deviceCodeBody.device_code,
         }),
       },
-      { showProgressBar: false }
+      { isMainContext: false }
     );
     if (response && utils.isProcessorContext(context)) {
       await utils.logResponse(response, context);
@@ -154,10 +155,11 @@ class DeviceCodeFlow implements OpenIdFlow {
           resource: config.resource,
         }),
       },
-      { showProgressBar: false }
+      { isMainContext: false }
     );
 
     if (response && utils.isProcessorContext(context)) {
+      response.tags = ['auth', 'oauth2', 'deviceCode', 'automatic'];
       await utils.logResponse(response, context);
     }
     return response;

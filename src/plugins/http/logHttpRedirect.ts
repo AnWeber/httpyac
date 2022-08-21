@@ -25,6 +25,7 @@ export async function logHttpRedirect(request: models.Request, context: models.P
     });
     request.options.hooks.beforeRedirect.push(async (_options, response) => {
       const httpResponse = toHttpResponse(response);
+      httpResponse.tags = ['redirect', 'automatic'];
       if (currentRequest) {
         httpResponse.request = currentRequest;
       }

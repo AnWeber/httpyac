@@ -19,4 +19,5 @@ export interface HttpResponse {
 
   timings?: HttpTimings;
   meta?: Record<string, unknown>;
+  tags?: Array<string>;
 }

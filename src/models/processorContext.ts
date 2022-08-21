@@ -9,6 +9,7 @@ import { Variables } from './variables';
 export type Dispose = () => void;
 
 export interface Progress {
+  divider: number;
   isCanceled: () => boolean;
   register: (event: () => void) => Dispose;
   report?: (value: { message?: string; increment?: number }) => void;
@@ -37,7 +38,7 @@ export interface HttpRegionSendContext extends HttpFileSendContext {
 export interface ProcessorContext extends HttpRegionSendContext {
   variables: Variables;
   request?: Request;
-  showProgressBar?: boolean;
+  isMainContext?: boolean;
   options: Record<string, unknown>;
 }
 

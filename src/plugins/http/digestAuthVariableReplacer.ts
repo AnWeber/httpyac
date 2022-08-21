@@ -37,7 +37,9 @@ function digestFactory(username: string, password: string, context: ProcessorCon
   ) {
     const wwwAuthenticate = response.headers['www-authenticate'];
     if (response.statusCode === 401 && wwwAuthenticate && wwwAuthenticate.toLowerCase().startsWith('digest')) {
-      await logResponse(toHttpResponse(response), context);
+      const httpResponse = toHttpResponse(response);
+      httpResponse.tags = ['auth', 'digest', 'automatic'];
+      await logResponse(httpResponse, context);
 
       const url = new URL(response.url);
       const challenge = {

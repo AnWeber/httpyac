@@ -331,6 +331,7 @@ export function cloneResponse(response: models.HttpResponse): models.HttpRespons
     contentType: response.contentType,
     timings: response.timings,
     meta: response.meta,
+    tags: response.tags,
   };
   if (response.request) {
     clone.request = {
