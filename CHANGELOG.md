@@ -1,3 +1,14 @@
+## 5.6.3 (2022-08-24)
+
+#### Features
+
+- add response tags to allow better filtering in responseLogging Hook (#322)
+
+#### Fixes
+
+- update dependency hookpoint@2.0.1
+- modify usage because of Variadic option (#326)
+
 ## 5.6.2 (2022-08-14)
 
 #### Fixes
