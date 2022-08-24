@@ -9,7 +9,7 @@ import { Variables } from './variables';
 export type Dispose = () => void;
 
 export interface Progress {
-  divider: number;
+  divider?: number;
   isCanceled: () => boolean;
   register: (event: () => void) => Dispose;
   report?: (value: { message?: string; increment?: number }) => void;
