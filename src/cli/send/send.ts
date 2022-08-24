@@ -16,6 +16,7 @@ import { sep } from 'path';
 export function sendCommand() {
   const program = new Command('send')
     .description('send/ execute http files')
+    .usage('<fileName...> [options]')
     .argument('<fileName...>', 'path to file or glob pattern')
     .option('-a, --all', 'execute all http requests in a http file')
     .option('--bail', 'stops when a test case fails')
