@@ -4,7 +4,7 @@
   "license": "MIT",
   "publisher": "AnWeber",
   "description": "HTTP/REST CLI Client for *.http files",
-  "version": "5.6.3",
+  "version": "5.6.4",
   "homepage": "https://github.com/AnWeber/httpyac",
   "repository": {
     "type": "git",
@@ -106,7 +106,7 @@
     "filesize": "^9.0.11",
     "globby": "^13.1.2",
     "got": "^11.8.5",
-    "hookpoint": "^2.1.0",
+    "hookpoint": "^2.1.1",
     "http-proxy-agent": "^5.0.0",
     "https-proxy-agent": "^5.0.1",
     "inquirer": "^8.2.4",

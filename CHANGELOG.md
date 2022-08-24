@@ -1,3 +1,9 @@
+## 5.6.4 (2022-08-24)
+
+#### Fixes
+
+- update dependency hookpoint@2.1.1
+
 ## 5.6.3 (2022-08-24)
 
 #### Features
