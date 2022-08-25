@@ -1,3 +1,9 @@
+## 5.6.5 (2022-08-25)
+
+#### Fixes
+
+- issue with breaking change in minor version of tough-cookie
+
 ## 5.6.4 (2022-08-24)
 
 #### Fixes
