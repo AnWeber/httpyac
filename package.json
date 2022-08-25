@@ -114,7 +114,7 @@
     "mqtt": "^4.3.7",
     "open": "8.4.0",
     "socks-proxy-agent": "^7.0.0",
-    "tough-cookie": "^4.0.0",
+    "tough-cookie": "^4.1.2",
     "uuid": "^8.3.2",
     "ws": "^8.8.1",
     "xml-formatter": "^2.6.1"
