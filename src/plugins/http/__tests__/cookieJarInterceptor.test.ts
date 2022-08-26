@@ -1,5 +1,6 @@
 import * as models from '../../../models';
 import { CookieJarInterceptor } from '../cookieJarInterceptor';
+import { HookTriggerContext, IHook } from 'hookpoint';
 
 describe('cookieJarInterceptor', () => {
   describe('cookieJarInterceptor', () => {
@@ -22,20 +23,10 @@ describe('cookieJarInterceptor', () => {
         httpFile: {},
         options: {},
       } as unknown as models.ProcessorContext;
-      const result = await cookieJarInterceptor.beforeTrigger({
-        arg: {} as unknown as models.ProcessorContext,
-        args: [context],
-        index: 0,
-        length: 2,
-      });
+      const result = await cookieJarInterceptor.beforeTrigger(getHookContext(context, 2));
       expect(result).toBeTruthy();
       expect(request.options.cookieJar).toBeDefined();
-      const resultAfterTrigger = await cookieJarInterceptor.afterTrigger({
-        arg: context,
-        args: [context],
-        index: 0,
-        length: 1,
-      });
+      const resultAfterTrigger = await cookieJarInterceptor.afterTrigger(getHookContext(context, 1));
       expect(resultAfterTrigger).toBeTruthy();
     });
     it('should ignore cookie jar because of config', async () => {
@@ -57,12 +48,7 @@ describe('cookieJarInterceptor', () => {
         httpFile: {},
         options: {},
       } as unknown as models.ProcessorContext;
-      const result = await cookieJarInterceptor.beforeTrigger({
-        arg: {} as unknown as models.ProcessorContext,
-        args: [context],
-        index: 0,
-        length: 2,
-      });
+      const result = await cookieJarInterceptor.beforeTrigger(getHookContext(context, 2));
       expect(result).toBeTruthy();
       expect(request.options.cookieJar).toBeUndefined();
     });
@@ -87,12 +73,7 @@ describe('cookieJarInterceptor', () => {
         httpFile: {},
         options: {},
       } as unknown as models.ProcessorContext;
-      const result = await cookieJarInterceptor.beforeTrigger({
-        arg: {} as unknown as models.ProcessorContext,
-        args: [context],
-        index: 0,
-        length: 2,
-      });
+      const result = await cookieJarInterceptor.beforeTrigger(getHookContext(context, 2));
       expect(result).toBeTruthy();
       expect(request.options.cookieJar).toBeUndefined();
     });
@@ -105,18 +86,23 @@ describe('cookieJarInterceptor', () => {
           cookieJar: undefined,
         },
       };
-      const result = await cookieJarInterceptor.beforeTrigger({
-        arg: {} as unknown as models.ProcessorContext,
-        args: [
-          {
-            request,
-          } as unknown as models.ProcessorContext,
-        ],
-        index: 0,
-        length: 2,
-      });
+      const result = await cookieJarInterceptor.beforeTrigger(getHookContext({ request }, 2));
       expect(result).toBeTruthy();
       expect(request.options.cookieJar).toBeUndefined();
     });
   });
 });
+
+function getHookContext(
+  context: unknown,
+  length: number
+): HookTriggerContext<[models.ProcessorContext], boolean | undefined> {
+  return {
+    arg: context as models.ProcessorContext,
+    args: [context as models.ProcessorContext],
+    index: 0,
+    length,
+    results: [],
+    hook: {} as unknown as IHook<[models.ProcessorContext], boolean | undefined, unknown>,
+  };
+}
