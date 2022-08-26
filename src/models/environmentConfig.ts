@@ -4,7 +4,14 @@ import { LogLevel } from './logHandler';
 import { Variables } from './variables';
 
 export interface EnvironmentConfig {
-  cookieJarEnabled?: boolean;
+  cookieJarEnabled?:
+    | boolean
+    | {
+        allowSpecialUseDomain?: boolean | undefined;
+        looseMode?: boolean | undefined;
+        rejectPublicSuffixes?: boolean | undefined;
+        prefixSecurity?: string | undefined;
+      };
   log?: {
     /** log level of outputs */
     level?: LogLevel;

@@ -33,7 +33,11 @@ export class CookieJarInterceptor implements HookInterceptor<[models.ProcessorCo
         }
       }
       options.memoryStore = memoryStore;
-      const jar = new CookieJar(memoryStore);
+      const cookieJarOptions = {};
+      if (config.cookieJarEnabled !== true) {
+        Object.assign(cookieJarOptions, config.cookieJarEnabled);
+      }
+      const jar = new CookieJar(memoryStore, cookieJarOptions);
       if (request.headers && request.url) {
         const cookieHeader = utils.getHeader(request.headers, 'cookie');
         if (cookieHeader) {
