@@ -1,3 +1,9 @@
+## 5.7.0 (2022-09-06)
+
+#### Featues
+
+- allow setting CookieJar Options (httpyac/httpyac.github.io#55)
+
 ## 5.6.5 (2022-08-25)
 
 #### Fixes
