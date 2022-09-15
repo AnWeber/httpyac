@@ -14,7 +14,7 @@ export async function parseOutputRedirection(
 
     const match = /^\s*>>(?<force>!)?\s+(?<fileName>.+)\s*$/u.exec(textLine);
     if (match && match.groups?.fileName) {
-      const fileName = match.groups.fileName;
+      const fileName = match.groups.fileName.trim();
       const force = !!match.groups.force;
 
       httpRegion.hooks.onResponse.addHook('outputRedirection', async (response, context) => {

@@ -29,7 +29,7 @@ export class ParseHook extends LastOutHook<[getHttpLineGenerator, ParserContext]
   }
 }
 
-export class ParseMetaDataHook extends LastOutHook<[string, string, ParserContext], boolean> {
+export class ParseMetaDataHook extends LastOutHook<[string, string | undefined, ParserContext], boolean> {
   constructor() {
     super(obj => !!obj);
     this.id = 'ParseMetaDataHook';

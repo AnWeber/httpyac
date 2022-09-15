@@ -50,7 +50,7 @@ function getIntellijContent(lineReader: models.HttpLineGenerator): IntelliJParse
         endLine: startLine,
         endOffset: next.value.textLine.length,
         data: {
-          fileName: fileMatches.groups.fileName,
+          fileName: fileMatches.groups.fileName.trim(),
         },
       };
     }

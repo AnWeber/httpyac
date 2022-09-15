@@ -78,7 +78,7 @@ async function getGQLContent(lineReader: models.HttpLineGenerator): Promise<GqlP
 
     const fileMatches = /^\s*gql(\s+(?<name>[^\s(]+))?\s+<\s+(?<fileName>.+)\s*$/u.exec(next.value.textLine);
     if (fileMatches && fileMatches.groups?.fileName) {
-      const parserPath = fileMatches.groups.fileName;
+      const parserPath = fileMatches.groups.fileName.trim();
       return {
         startLine,
         endLine: startLine,

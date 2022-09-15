@@ -17,7 +17,7 @@ export async function parseProtoImport(
     const matchProto = ProtoImport.exec(next.value.textLine);
 
     if (matchProto?.groups?.fileName) {
-      const protoDefinition = new models.ProtoDefinition(matchProto.groups.fileName);
+      const protoDefinition = new models.ProtoDefinition(matchProto.groups.fileName.trim());
 
       const protoSymbol: models.HttpSymbol = {
         name: next.value.textLine,

@@ -58,7 +58,7 @@ function parseLine(textLine: string) {
   const fileImport = /^<(?:(?<injectVariables>@)(?<encoding>\w+)?)?\s+(?<fileName>.+?)\s*$/u.exec(textLine);
   if (fileImport && fileImport.length === 4 && fileImport.groups) {
     return {
-      fileName: fileImport.groups.fileName,
+      fileName: fileImport.groups.fileName.trim(),
       injectVariables: !!fileImport.groups.injectVariables,
       encoding: getBufferEncoding(fileImport.groups.encoding),
     };

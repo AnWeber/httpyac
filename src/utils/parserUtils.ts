@@ -267,7 +267,9 @@ export function parseComments(
           ],
         },
       ];
+      let val: string | undefined;
       if (match.groups.value) {
+        val = match.groups.value.trim();
         result.symbols[0].children.push({
           name: match.groups.value,
           description: 'value of meta data',
@@ -278,7 +280,7 @@ export function parseComments(
           endOffset: httpLine.textLine.indexOf(match.groups.value) + match.groups.value.length,
         });
       }
-      context.httpFile.hooks.parseMetaData.trigger(key, match.groups.value, context);
+      context.httpFile.hooks.parseMetaData.trigger(key, val, context);
     }
     return result;
   }
