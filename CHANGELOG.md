@@ -1,6 +1,12 @@
+## 5.7.1 (2022-09-19)
+
+#### Fixes
+
+- trim filename in `@import` (AnWeber/vscode-httpyac#150)
+
 ## 5.7.0 (2022-09-06)
 
-#### Featues
+#### Features
 
 - allow setting CookieJar Options (httpyac/httpyac.github.io#55)
 
