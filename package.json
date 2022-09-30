@@ -103,7 +103,7 @@
     "dotenv": "^16.0.1",
     "encodeurl": "^1.0.2",
     "eventsource": "^2.0.2",
-    "filesize": "^9.0.11",
+    "filesize": "^10.0.5",
     "globby": "^13.1.2",
     "got": "^11.8.5",
     "hookpoint": "^2.1.2",
