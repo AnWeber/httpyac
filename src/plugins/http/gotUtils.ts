@@ -1,7 +1,7 @@
 import { log, userInteractionProvider } from '../../io';
 import * as models from '../../models';
 import { parseContentType, repeat } from '../../utils';
-import { default as filesize } from 'filesize';
+import { filesize } from 'filesize';
 import { default as got, OptionsOfUnknownResponseBody, CancelError, Response } from 'got';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
