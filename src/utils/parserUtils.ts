@@ -177,7 +177,7 @@ class DefaultHeadersAction {
 
 export function parseUrlLineFactory(attachUrl: (url: string) => void): ParseLineMethod {
   return function parseUrlLine(httpLine: models.HttpLine) {
-    if (/^\s*(\/).*$/u.test(httpLine.textLine)) {
+    if (/^\s*(\/)[^*]*$/u.test(httpLine.textLine)) {
       const val = httpLine.textLine.trim();
       attachUrl(val);
       return {
