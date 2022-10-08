@@ -1,3 +1,10 @@
+## 5.7.3 (2022-10-08)
+
+#### Fixes
+
+- update inquirer and filesize
+- parser error on `/* ... */` comment directly after header
+
 ## 5.7.2 (2022-09-28)
 
 #### Fixes

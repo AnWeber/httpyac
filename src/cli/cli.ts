@@ -18,7 +18,7 @@ export async function createProgram() {
 
 export async function execute(rawArgs: string[]): Promise<void> {
   try {
-    initIOProvider();
+    await initIOProvider();
     const program = await createProgram();
     await program.parseAsync(rawArgs);
   } catch (err) {

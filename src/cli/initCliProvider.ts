@@ -1,13 +1,12 @@
 import { fileProvider, userInteractionProvider, log } from '../io';
 import * as models from '../models';
 import { promises as fs, createReadStream } from 'fs';
-import inquirer from 'inquirer';
 import { EOL } from 'os';
 import { join, isAbsolute, dirname, extname } from 'path';
 
-export function initIOProvider(): void {
+export async function initIOProvider(): Promise<void> {
   initFileProvider();
-  initUserInteractionProvider();
+  await initUserInteractionProvider();
   initFixTestSymbols();
 }
 
@@ -72,7 +71,8 @@ function toBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
   });
 }
 
-function initUserInteractionProvider() {
+async function initUserInteractionProvider() {
+  const inquirer = (await import('inquirer')).default;
   userInteractionProvider.showNote = async function showNote(note: string) {
     const answer = await inquirer.prompt([
       {

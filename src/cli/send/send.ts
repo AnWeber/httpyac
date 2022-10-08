@@ -10,7 +10,6 @@ import { SendOptions, getLogLevel, SendFilterOptions, OutputType } from './optio
 import { default as chalk } from 'chalk';
 import { Command } from 'commander';
 import { promises as fs } from 'fs';
-import inquirer from 'inquirer';
 import { sep } from 'path';
 
 export function sendCommand() {
@@ -224,7 +223,9 @@ async function selectAction(httpFiles: models.HttpFile[], cliOptions: SendOption
         }
       }
     }
-    const answer = await inquirer.prompt([
+    const answer = await (
+      await import('inquirer')
+    ).default.prompt([
       {
         type: 'list',
         name: 'region',
