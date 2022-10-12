@@ -105,7 +105,7 @@
     "eventsource": "^2.0.2",
     "filesize": "^10.0.5",
     "globby": "^13.1.2",
-    "got": "^11.8.5",
+    "got": "^12.5.2",
     "hookpoint": "^2.1.2",
     "http-proxy-agent": "^5.0.0",
     "https-proxy-agent": "^5.0.1",
