@@ -1,3 +1,9 @@
+## 5.7.4 (2022-10-21)
+
+#### Fixes
+
+- fix missing jwt data (httpyac/httpyac.github.io#56)
+
 ## 5.7.3 (2022-10-08)
 
 #### Fixes

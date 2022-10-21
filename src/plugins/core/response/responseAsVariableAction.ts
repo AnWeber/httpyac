@@ -6,10 +6,9 @@ export async function responseAsVariable(
   response: models.HttpResponse,
   context: models.ProcessorContext
 ): Promise<void> {
-  const body = response.parsedBody || response.body;
   if (context.httpRegion.metaData.name || context.httpRegion.metaData.jwt) {
-    handleJWTMetaData(response, body, context);
-    handleNameMetaData(response, body, context);
+    handleJWTMetaData(response, context);
+    handleNameMetaData(response, context);
   }
   setLastResponseInVariables(context, response);
 }
@@ -27,19 +26,23 @@ function setLastResponseInVariables(context: models.ProcessorContext, response: 
   context.variables.response = response;
 }
 
-function handleNameMetaData(response: models.HttpResponse, body: unknown, context: models.ProcessorContext) {
+function handleNameMetaData(response: models.HttpResponse, context: models.ProcessorContext) {
   const { httpRegion } = context;
   if (utils.isString(httpRegion.metaData.name)) {
     const name = httpRegion.metaData.name
       .trim()
       .replace(/\s/gu, '-')
       .replace(/-./gu, value => value[1].toUpperCase());
-    utils.setVariableInContext({ [name]: body, [`${name}Response`]: response }, context);
+    utils.setVariableInContext(
+      { [name]: response.parsedBody || response.body, [`${name}Response`]: response },
+      context
+    );
   }
 }
 
-function handleJWTMetaData(response: models.HttpResponse, body: unknown, { httpRegion }: models.ProcessorContext) {
+function handleJWTMetaData(response: models.HttpResponse, { httpRegion }: models.ProcessorContext) {
   if (httpRegion.metaData.jwt) {
+    const body = response.parsedBody || response.body;
     if (body && typeof body === 'object') {
       const entries = Object.entries(body);
 
