@@ -59,6 +59,18 @@ describe('send', () => {
 
       const requests = await mockedEndpoints.getSeenRequests();
       expect(requests[0].headers['user-agent']).toBe('httpyac');
+      expect(requests[0].url).toBe('http://localhost:8080/get');
+    });
+
+    it('get http with protocol', async () => {
+      initFileProvider();
+      const mockedEndpoints = await localServer.forGet('/get').thenReply(200);
+
+      await exec(`GET http://localhost:8080/get HTTP/1.1`);
+
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests[0].headers['user-agent']).toBe('httpyac');
+      expect(requests[0].url).toBe('http://localhost:8080/get');
     });
 
     it('get http with multiline', async () => {

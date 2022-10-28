@@ -3,8 +3,9 @@ import * as models from '../../../models';
 import * as utils from '../../../utils';
 
 const RequestLineRegex =
-  /^\s*(?<method>GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE|PROPFIND|PROPPATCH|MKCOL|COPY|MOVE|LOCK|UNLOCK|CHECKOUT|CHECKIN|REPORT|MERGE|MKACTIVITY|MKWORKSPACE|VERSION-CONTROL|BASELINE-CONTROL|MKCALENDAR|ACL|SEARCH)\s*(?<url>.+?)(\s+HTTP\/(?<version>(\S+)))?$/u;
+  /^\s*(?<method>GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE|PROPFIND|PROPPATCH|MKCOL|COPY|MOVE|LOCK|UNLOCK|CHECKOUT|CHECKIN|REPORT|MERGE|MKACTIVITY|MKWORKSPACE|VERSION-CONTROL|BASELINE-CONTROL|MKCALENDAR|ACL|SEARCH)\s*(?<url>.+?)$/u;
 
+const ProtocolRegex = /(?<url>.*)\s+HTTP\/(?<version>(\S+))/u;
 export async function parseRequestLine(
   getLineReader: models.getHttpLineGenerator,
   context: models.ParserContext
@@ -54,6 +55,8 @@ export async function parseRequestLine(
       ],
       context
     );
+
+    parseProtocol(request);
 
     if (headersResult) {
       result.nextParserLine = headersResult.nextLine || result.nextParserLine;
@@ -113,11 +116,7 @@ function getRequestLine(
         protocol: 'HTTP',
         url: requestLineMatch.groups.url,
         method: utils.isHttpRequestMethod(requestLineMatch.groups.method) ? requestLineMatch.groups.method : 'GET',
-        options: {
-          http2: requestLineMatch.groups.version
-            ? ['1.1', '1.0'].indexOf(requestLineMatch.groups.version) < 0
-            : undefined,
-        },
+        options: {},
       },
       requestSymbols,
     };
@@ -153,6 +152,18 @@ function isValidRequestLine(textLine: string, httpRegion: models.HttpRegion) {
     return false;
   }
   return true;
+}
+
+function parseProtocol(request: models.HttpRequest) {
+  if (request.url) {
+    const match = ProtocolRegex.exec(request.url);
+    if (match?.groups?.version && match.groups.url) {
+      request.url = match.groups.url.trim();
+      if (['1.1', '1.0'].indexOf(match.groups.version) < 0) {
+        request.options.http2 = true;
+      }
+    }
+  }
 }
 
 export class HttpClientAction {

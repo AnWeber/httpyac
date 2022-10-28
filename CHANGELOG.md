@@ -1,3 +1,9 @@
+## Unreleased
+
+#### Fixes
+
+- support protocol with multiline urls (AnWeber/vscode-httpyac#159)
+
 ## 5.7.4 (2022-10-21)
 
 #### Fixes
