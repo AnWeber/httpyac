@@ -14,7 +14,7 @@ export const escapeVariableInterceptor = {
       let result = text;
       while (isString(result) && (match = escapeRegex.exec(text)) !== null) {
         const [searchValue, variable] = match;
-        result = result.replace(searchValue, `{{${variable}}}`);
+        result = result.replace(searchValue, () => `{{${variable}}}`);
       }
       if (result !== text) {
         hookContext.results.push(result);

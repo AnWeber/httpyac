@@ -48,7 +48,7 @@ export function expandVariable(value: unknown, variables: models.Variables): unk
       const [searchValue, variableName] = match;
       const val = expandVariable(variables[variableName], variables);
       variables[variableName] = val;
-      result = result.replace(searchValue, `${val}`);
+      result = result.replace(searchValue, () => `${val}`);
     }
     return result;
   }

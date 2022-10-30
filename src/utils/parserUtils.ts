@@ -434,7 +434,7 @@ export async function parseHandlebarsString(
       }
       const valueString = toString(value);
       if (typeof valueString !== 'undefined') {
-        result = result.replace(searchValue, valueString);
+        result = result.replace(searchValue, () => valueString);
       }
     }
   }
