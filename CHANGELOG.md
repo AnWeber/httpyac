@@ -1,3 +1,9 @@
+## 5.7.6 (2022-11-05)
+
+#### Fixes
+
+- Cookie Header support variable replacment (#352)
+
 ## 5.7.5 (2022-10-30)
 
 #### Fixes

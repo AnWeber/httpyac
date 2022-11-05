@@ -38,18 +38,6 @@ export class CookieJarInterceptor implements HookInterceptor<[models.ProcessorCo
         Object.assign(cookieJarOptions, config.cookieJarEnabled);
       }
       const jar = new CookieJar(memoryStore, cookieJarOptions);
-      if (request.headers && request.url) {
-        const cookieHeader = utils.getHeader(request.headers, 'cookie');
-        if (cookieHeader) {
-          if (utils.isString(cookieHeader)) {
-            await jar.setCookie(cookieHeader, request.url);
-          } else if (Array.isArray(cookieHeader)) {
-            for (const val of cookieHeader) {
-              await jar.setCookie(val, request.url);
-            }
-          }
-        }
-      }
       request.options.cookieJar = jar;
     }
     return true;
