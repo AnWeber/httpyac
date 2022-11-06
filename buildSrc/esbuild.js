@@ -10,6 +10,7 @@ const makeAllPackagesExternalPlugin = {
 
 const isWatchBuild = process.argv.indexOf('--watch') >= 0;
 const noMinify = process.argv.indexOf('--no-minify') >= 0;
+const noExternal = process.argv.indexOf('--no-external') >= 0;
 
 esbuild
   .build({
@@ -22,6 +23,6 @@ esbuild
     sourcemap: true,
     target: 'node14',
     watch: isWatchBuild,
-    plugins: [makeAllPackagesExternalPlugin],
+    plugins: noExternal ? [] : [makeAllPackagesExternalPlugin],
   })
   .catch(() => process.exit(1));

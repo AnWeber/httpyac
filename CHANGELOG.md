@@ -1,4 +1,8 @@
-## 5.7.6 (2022-11-05)
+## 5.8.0 (2022-11-06)
+
+#### Features
+
+- add docker image for httpyac
 
 #### Fixes
 

@@ -4,7 +4,7 @@
   "license": "MIT",
   "publisher": "AnWeber",
   "description": "HTTP/REST CLI Client for *.http files",
-  "version": "5.7.5",
+  "version": "5.8.0",
   "homepage": "https://github.com/AnWeber/httpyac",
   "repository": {
     "type": "git",
@@ -41,6 +41,7 @@
   "scripts": {
     "compile": "npm run esbuild && npm run tsc",
     "esbuild": "node ./buildSrc/esbuild.js",
+    "docker_build": "npm run esbuild -- --no-external --no-minify",
     "eslint": "eslint src --ext ts",
     "format": "prettier --write --parser typescript \"src/**/*.ts?(x)\"",
     "lint": "npm run format && npm run eslint && npm run tsc:check && npm run lockfile-lint && npm run packageJson-lint",
