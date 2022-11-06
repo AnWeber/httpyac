@@ -27,7 +27,7 @@ export async function parseEventSource(
     context.httpRegion.request = eventSourceLine.request;
     const requestSymbol: models.HttpSymbol = {
       name: next.value.textLine,
-      description: 'websocket request-line',
+      description: 'SSE request-line',
       kind: models.HttpSymbolKind.requestLine,
       startLine: next.value.line,
       startOffset: 0,
@@ -82,7 +82,7 @@ function getEventSourceLine(
   line: number
 ): { request: EventSourceRequest; symbol: models.HttpSymbol } | undefined {
   const lineMatch = EventSourceLine.exec(textLine);
-  if (lineMatch && lineMatch.length > 1 && lineMatch.groups) {
+  if (lineMatch && lineMatch.length > 1 && lineMatch.groups?.url) {
     return {
       request: {
         protocol: 'SSE',

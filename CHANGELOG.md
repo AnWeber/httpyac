@@ -7,6 +7,7 @@
 #### Fixes
 
 - Cookie Header support variable replacment (#352)
+- Parsing Issue with non HTTP responses
 
 ## 5.7.5 (2022-10-30)
 

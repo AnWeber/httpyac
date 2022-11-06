@@ -8,6 +8,6 @@ import * as ws from 'ws';
 export function registerWebsocketPlugin(api: models.HttpyacHooksApi) {
   api.hooks.onRequest.addHook('setWebsocketEnvRejectUnauthorized', setWebsocketEnvRejectUnauthorized);
   api.hooks.parse.addHook('websocket', parseWebsocketLine, { before: ['request'] });
-  api.hooks.parse.addHook('websocketResponse', parseWebSocketResponse, { before: ['websocket'] });
+  api.hooks.parse.addHook('websocketResponse', parseWebSocketResponse, { before: ['requestBody'] });
   javascriptProvider.require.ws = ws;
 }
