@@ -20,6 +20,12 @@ npm install -g httpyac
 httpyac --version
 ```
 
+or using docker
+
+```shell
+docker run -it -v ${PWD}:/data ghcr.io/anweber/httpyac:latest "**/*.http"
+```
+
 ## Commands
 
 ```shell
