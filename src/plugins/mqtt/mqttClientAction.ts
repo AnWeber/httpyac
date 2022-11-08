@@ -124,21 +124,26 @@ export class MQTTClientAction {
   private getClientOptions(request: MQTTRequest, context: models.ProcessorContext): IClientOptions {
     const { httpRegion, config } = context;
 
-    const configOptions: Record<string, unknown> = {};
+    const configOptions: IClientOptions = {};
     if (config?.request) {
-      configOptions.connectTimeout = utils.toNumber(config.request.timeout);
+      if (config.request.timeout !== undefined) {
+        configOptions.connectTimeout = utils.toNumber(config.request.timeout);
+      }
       if (!utils.isUndefined(config.request.rejectUnauthorized)) {
         configOptions.rejectUnauthorized = utils.toBoolean(config.request.rejectUnauthorized, true);
       }
     }
-
-    const metaDataOptions: Record<string, unknown> = {
-      headers: request.headers,
-    };
     if (httpRegion.metaData.noRejectUnauthorized) {
-      metaDataOptions.rejectUnauthorized = false;
+      configOptions.rejectUnauthorized = false;
     }
-    return Object.assign({}, config?.request, request.options, metaDataOptions);
+
+    const headers = Object.fromEntries(
+      Object.entries(request.headers || {}).filter(
+        ([key]) => ['topic', 'qos', 'retain', 'subscribe', 'publish'].indexOf(key.toLowerCase()) < 0
+      )
+    );
+
+    return Object.assign({}, config?.request, request.options, configOptions, headers);
   }
 
   private subscribeToTopics(client: MqttClient, topics: string[], qos: QoS) {

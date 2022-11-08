@@ -1,3 +1,9 @@
+## unreleased
+
+#### Fixes
+
+- allow set of MQTT Username and Password with Request Headers (httpyac/httpyac.github.io#58)
+
 ## 5.8.0 (2022-11-06)
 
 #### Features
