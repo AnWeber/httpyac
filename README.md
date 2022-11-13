@@ -23,7 +23,7 @@ httpyac --version
 or using docker
 
 ```shell
-docker run -it -v ${PWD}:/data ghcr.io/anweber/httpyac:latest "**/*.http"
+docker run -it -v ${PWD}:/data ghcr.io/anweber/httpyac:latest --version
 ```
 
 ## Commands

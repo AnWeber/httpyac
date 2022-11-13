@@ -3,6 +3,7 @@
 #### Fixes
 
 - allow set of MQTT Username and Password with Request Headers (httpyac/httpyac.github.io#58)
+- display corret version in docker command
 
 ## 5.8.0 (2022-11-06)
 
