@@ -3,7 +3,7 @@ import * as models from '../models';
 import { report } from './logUtils';
 import { isString, toString } from './stringUtils';
 
-export const HandlebarsSingleLine = /\{{2}(.+?)\}{2}/gu;
+export const HandlebarsSingleLine = /\{{2}\s*(.+?)\s*\}{2}/gu;
 export const RegionSeparator = /^\s*#{3,}(?<title>.*)$/u;
 export const OAuth2Regex =
   /^\s*(?<type>openid|oauth2)(\s+(?<flow>client(_credentials)?|(authorization_)?code|device(_code)?|password|implicit|hybrid))?(\s+(?<variablePrefix>[^\s]*))?\s*((token_exchange)\s+(?<tokenExchangePrefix>[^\s]*))?\s*$/iu;
