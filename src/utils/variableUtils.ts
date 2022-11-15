@@ -43,7 +43,7 @@ export function expandVariable(value: unknown, variables: models.Variables): unk
   if (value && isString(value)) {
     let result = value;
     let match: RegExpExecArray | null;
-    const variableRegex = /\{{2}([a-zA-Z0-9_]+)\}{2}/gu;
+    const variableRegex = /\{{2}\s*([a-zA-Z0-9_]+)\s*\}{2}/gu;
     while ((match = variableRegex.exec(result)) !== null) {
       const [searchValue, variableName] = match;
       const val = expandVariable(variables[variableName], variables);
