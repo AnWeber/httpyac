@@ -69,7 +69,10 @@ export class WebSocketClientAction {
         onStreaming
           .trigger(context)
           .then(() => client.close(WEBSOCKET_CLOSE_NORMAL, 'CLOSE_NORMAL'))
-          .catch(err => reject(err));
+          .catch(err => {
+            client.close(WEBSOCKET_CLOSE_GOING_AWAY, 'CLOSE_GOING_AWAY_WITH_ERROR');
+            reject(err);
+          });
       });
       client.on('upgrade', message => {
         io.log.debug('WebSocket upgrade', message);

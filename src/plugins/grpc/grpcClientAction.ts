@@ -156,7 +156,10 @@ export class GrpcClientAction {
           onStreaming
             .trigger(context)
             .then(() => stream.end())
-            .catch(err => reject(err));
+            .catch(err => {
+              stream.destroy(err);
+              reject(err);
+            });
         }
       },
     ];

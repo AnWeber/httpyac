@@ -117,7 +117,10 @@ export class MQTTClientAction {
       onStreaming
         .trigger(context)
         .then(() => client.end())
-        .catch(err => reject(err));
+        .catch(err => {
+          client.end(true, undefined, err => err && io.log.error('error on close', err));
+          reject(err);
+        });
     });
   }
 
