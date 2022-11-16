@@ -1,3 +1,9 @@
+## 5.8.2 (2022-11-16)
+
+#### Fixes
+
+- allow whitespace around variable definition (#354)
+
 ## 5.8.1 (2022-11-13)
 
 #### Fixes
