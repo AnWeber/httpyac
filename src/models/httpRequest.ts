@@ -17,7 +17,6 @@ export interface Request<TMethod extends string = string> {
 
 export interface HttpRequest extends Request<HttpMethod> {
   body?: string | Array<HttpRequestBodyLine> | Buffer;
-  rawBody?: Array<string | RequestBodyImport>;
   headers?: Record<string, string | string[] | undefined>;
   proxy?: string;
   options: OptionsOfUnknownResponseBody;
