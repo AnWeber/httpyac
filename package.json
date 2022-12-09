@@ -96,7 +96,7 @@
     "@grpc/grpc-js": "^1.7.3",
     "@grpc/proto-loader": "^0.7.3",
     "aws4": "^1.11.0",
-    "chalk": "^4.1.2",
+    "chalk": "^5.2.0",
     "clipboardy": "^3.0.0",
     "commander": "^9.4.1",
     "dayjs": "^1.11.6",
