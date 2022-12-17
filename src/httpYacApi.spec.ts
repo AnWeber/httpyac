@@ -1,6 +1,6 @@
-import { send } from '../httpYacApi';
-import * as io from '../io';
-import { HttpFileStore } from '../store';
+import { send } from './httpYacApi';
+import * as io from './io';
+import { HttpFileStore } from './store';
 import { promises as fs } from 'fs';
 import { getLocal } from 'mockttp';
 import { EOL } from 'os';

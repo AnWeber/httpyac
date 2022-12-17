@@ -1,5 +1,5 @@
-import * as models from '../../../../models';
-import { attachDefaultHeaders } from '../attachDefaultHeaders';
+import * as models from '../../../models';
+import { attachDefaultHeaders } from './attachDefaultHeaders';
 
 describe('attachDefaultHeaders', () => {
   describe('attachDefaultHeaders', () => {

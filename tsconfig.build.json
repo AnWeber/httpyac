@@ -7,7 +7,7 @@
 		"src/**/*.ts"
 	],
 	"exclude": [
-		"**/__tests__/*.ts",
+		"**/*.spec.ts",
 		"node_modules",
 		"dist",
 		"buildSrc",

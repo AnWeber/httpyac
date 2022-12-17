@@ -1,8 +1,8 @@
-import { httpClientProvider } from '../../../io/httpClientProvider';
-import * as models from '../../../models';
-import { userSessionStore } from '../../../store';
-import * as utils from '../../../utils';
-import { oauth2VariableReplacer } from '../oauth2VariableReplacer';
+import { httpClientProvider } from '../../io/httpClientProvider';
+import * as models from '../../models';
+import { userSessionStore } from '../../store';
+import * as utils from '../../utils';
+import { oauth2VariableReplacer } from './oauth2VariableReplacer';
 
 const JWTToken =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';

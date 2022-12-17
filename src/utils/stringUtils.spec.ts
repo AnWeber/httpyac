@@ -1,4 +1,4 @@
-import { stateGenerator } from '../stringUtils';
+import { stateGenerator } from './stringUtils';
 
 describe('state generator', () => {
   it('generates strings of the expected length', () => {

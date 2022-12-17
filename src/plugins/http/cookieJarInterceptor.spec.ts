@@ -1,5 +1,5 @@
-import * as models from '../../../models';
-import { CookieJarInterceptor } from '../cookieJarInterceptor';
+import * as models from '../../models';
+import { CookieJarInterceptor } from './cookieJarInterceptor';
 import { HookTriggerContext, IHook } from 'hookpoint';
 
 describe('cookieJarInterceptor', () => {

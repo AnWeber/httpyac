@@ -1,5 +1,5 @@
-import * as models from '../../../../models';
-import { setEnvRequestOptions } from '../setEnvRequestOptions';
+import * as models from '../../../models';
+import { setEnvRequestOptions } from './setEnvRequestOptions';
 
 describe('setEnvRequestOptions', () => {
   describe('setEnvRequestOptions', () => {

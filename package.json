@@ -95,6 +95,7 @@
     "@cloudamqp/amqp-client": "^2.1.0",
     "@grpc/grpc-js": "^1.7.3",
     "@grpc/proto-loader": "^0.7.3",
+    "@xmldom/xmldom": "^0.8.6",
     "aws4": "^1.11.0",
     "chalk": "^4.1.2",
     "clipboardy": "^3.0.0",
@@ -118,6 +119,6 @@
     "tough-cookie": "^4.1.2",
     "uuid": "^9.0.0",
     "ws": "^8.11.0",
-    "xml-formatter": "^3.0.1"
+    "xpath": "^0.0.32"
   }
 }

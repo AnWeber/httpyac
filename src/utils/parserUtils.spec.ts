@@ -1,4 +1,4 @@
-import { parseRequestHeaderFactory } from '../parserUtils';
+import { parseRequestHeaderFactory } from './parserUtils';
 import { ParserContext } from '@/models';
 
 describe('http header test', () => {

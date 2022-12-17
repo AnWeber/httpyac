@@ -1,5 +1,5 @@
-import * as models from '../../../../models';
-import { transformRequestBody } from '../transformRequestBodyAction';
+import * as models from '../../../models';
+import { transformRequestBody } from './transformRequestBodyAction';
 
 describe('transformRequestBodyAction', () => {
   describe('transformRequestBodyAction', () => {

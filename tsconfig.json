@@ -30,7 +30,7 @@
 		"tsconfig.build.json"
 	],
 	"exclude": [
-		"src/**/__tests__/*.ts",
+		"src/**/*.spec.ts",
 		"node_modules",
 		"dist",
 		"buildSrc"
