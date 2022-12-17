@@ -80,9 +80,9 @@ export async function restClientVariableReplacer(
         return date.format(valMatch.groups.type.slice(1, valMatch.groups.type.length - 1));
       }
     } else if (trimmedVariable.startsWith('$processEnv')) {
-      return process.env[trimmedVariable.slice('$processEnv'.length).trim()];
+      return process.env[trimmedVariable.slice('$processEnv'.length).trim()] || '';
     } else if (trimmedVariable.startsWith('$dotenv')) {
-      return variables[trimmedVariable.slice('$dotenv'.length).trim()];
+      return variables[trimmedVariable.slice('$dotenv'.length).trim()] || '';
     }
     return undefined;
   });
