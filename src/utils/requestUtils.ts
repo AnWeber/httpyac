@@ -3,10 +3,12 @@ import * as models from '../models';
 import { toBoolean, toNumber } from './convertUtils';
 import { isMimeTypeJSON, isMimeTypeXml, parseMimeType } from './mimeTypeUtils';
 import { isString, toMultiLineString, stringifySafe } from './stringUtils';
-import { DOMParser, XMLSerializer } from '@xmldom/xmldom';
+import { DOMParser } from '@xmldom/xmldom';
 import { default as chalk } from 'chalk';
 import { HookCancel } from 'hookpoint';
+import { EOL } from 'os';
 import { TextDecoder } from 'util';
+import { formatXml } from 'xmldom-format';
 
 export function isHttpRequestMethod(method: string | undefined): method is models.HttpMethod {
   if (method) {
@@ -363,7 +365,11 @@ export function setAdditionalResponseBody(httpResponse: models.HttpResponse, con
       const document = new DOMParser().parseFromString(httpResponse.body, httpResponse.contentType?.mimeType);
       httpResponse.parsedBody = document;
       try {
-        httpResponse.prettyPrintBody = new XMLSerializer().serializeToString(document);
+        httpResponse.prettyPrintBody = formatXml(document, {
+          eol: EOL,
+          indentation: '  ',
+          useWhitespaceInAutoClosingNode: true,
+        });
       } catch (err) {
         log.warn('xml format error', httpResponse.body, err);
       }
