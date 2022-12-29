@@ -60,7 +60,7 @@ export async function getOAuth2Response(
       }
       if (openIdInformation) {
         log.trace(`openid flow ${flow} finished`);
-        context.variables.oauth2Session = openIdInformation;
+        await utils.setVariableInContext({ oauth2Session: openIdInformation }, context);
         userSessionStore.setUserSession(openIdInformation);
         keepAlive(cacheKey, context.variables);
         return openIdInformation;
