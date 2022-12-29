@@ -53,7 +53,7 @@
     "tsc-watch": "tsc --watch --project tsconfig.build.json",
     "tsc:check": "tsc --noEmit --project tsconfig.json",
     "tsc": "tsc --declaration --emitDeclarationOnly --project tsconfig.build.json",
-    "watch": "concurrently \"npm run esbuild -- --no-minify --watch\" \"npm run tsc -- --watch\" \"npm test -- --coverage --watch\""
+    "watch": "concurrently \"npm run esbuild -- --no-minify --watch\" \"npm run tsc -- --watch\" \"npm test -- --coverage --watch --coverageProvider=v8\""
   },
   "lint-staged": {
     "*.js": [

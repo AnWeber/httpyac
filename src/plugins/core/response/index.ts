@@ -1,8 +1,10 @@
 import * as models from '../../../models';
-import { setAdditionalResponseBody } from '../../../utils';
-import { responseAsVariable } from './responseAsVariableAction';
+import { handleJWTMetaData } from './handleJWTMetaData';
+import { handleNameMetaData } from './handleNameMetaData';
+import { setLastResponseInVariables } from './setLastResponseInVariables';
 
 export function initOnResponseHook(api: models.HttpyacHooksApi) {
-  api.hooks.onResponse.addHook('addAdditionalBody', setAdditionalResponseBody);
-  api.hooks.onResponse.addHook('responseAsVariable', responseAsVariable);
+  api.hooks.onResponse.addHook('handleJWTMetaData', handleJWTMetaData);
+  api.hooks.onResponse.addHook('handleMetaDataName', handleNameMetaData);
+  api.hooks.onResponse.addHook('setLastResponseInVariables', setLastResponseInVariables);
 }

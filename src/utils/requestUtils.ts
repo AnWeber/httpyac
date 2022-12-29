@@ -1,14 +1,11 @@
 import { log } from '../io';
 import * as models from '../models';
 import { toBoolean, toNumber } from './convertUtils';
-import { isMimeTypeJSON, isMimeTypeXml, parseMimeType } from './mimeTypeUtils';
-import { isString, toMultiLineString, stringifySafe } from './stringUtils';
-import { DOMParser } from '@xmldom/xmldom';
+import { parseMimeType } from './mimeTypeUtils';
+import { isString, toMultiLineString } from './stringUtils';
 import { default as chalk } from 'chalk';
 import { HookCancel } from 'hookpoint';
-import { EOL } from 'os';
 import { TextDecoder } from 'util';
-import { formatXml } from 'xmldom-format';
 
 export function isHttpRequestMethod(method: string | undefined): method is models.HttpMethod {
   if (method) {
@@ -341,40 +338,6 @@ export function cloneResponse(response: models.HttpResponse): models.HttpRespons
     };
   }
   return clone;
-}
-
-export function setAdditionalResponseBody(httpResponse: models.HttpResponse, context?: models.ProcessorContext): void {
-  if (isString(httpResponse.body) && httpResponse.body.length > 0) {
-    const requestPrettyPrintBodyMaxSize = context?.config?.requestPrettyPrintBodyMaxSize || 1000000;
-    if (isMimeTypeJSON(httpResponse.contentType)) {
-      try {
-        if (!httpResponse.parsedBody) {
-          httpResponse.parsedBody = JSON.parse(httpResponse.body);
-        }
-        if (!httpResponse.prettyPrintBody && httpResponse.body.length < requestPrettyPrintBodyMaxSize) {
-          httpResponse.prettyPrintBody = stringifySafe(httpResponse.parsedBody, 2);
-        }
-      } catch (err) {
-        log.warn('json parse error', httpResponse.body, err);
-      }
-    } else if (
-      isMimeTypeXml(httpResponse.contentType) &&
-      !httpResponse.prettyPrintBody &&
-      httpResponse.body.length < requestPrettyPrintBodyMaxSize
-    ) {
-      const document = new DOMParser().parseFromString(httpResponse.body, httpResponse.contentType?.mimeType);
-      httpResponse.parsedBody = document;
-      try {
-        httpResponse.prettyPrintBody = formatXml(document, {
-          eol: EOL,
-          indentation: '  ',
-          useWhitespaceInAutoClosingNode: true,
-        });
-      } catch (err) {
-        log.warn('xml format error', httpResponse.body, err);
-      }
-    }
-  }
 }
 
 export async function triggerRequestResponseHooks(

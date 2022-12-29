@@ -30,7 +30,7 @@ jobs:
           node-version: 16
       - run: npm install
       - run: npm run lint
-      - run: npm test -- --coverage
+      - run: npm test -- --coverage --coverageProvider=v8
       - run: npm run compile -- --no-minify
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2

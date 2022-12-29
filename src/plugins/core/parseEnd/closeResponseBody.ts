@@ -11,7 +11,6 @@ export async function closeResponseBody(context: models.ParserContext): Promise<
       if (response.headers) {
         response.contentType = utils.parseContentType(response.headers);
       }
-      utils.setAdditionalResponseBody(response);
     }
 
     delete context.data.httpResponseSymbol;

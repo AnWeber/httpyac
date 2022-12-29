@@ -3,6 +3,7 @@
 #### Features
 
 - provide Global Variable Cache (#358)
+- add XPath Variable Replacer (httpyac/httpyac.github.io#62)
 
 #### Fixes
 
