@@ -1,5 +1,6 @@
 import * as httpyac from '../..';
 import * as models from '../../models';
+import { provideGlobalVariableStore, GlobalVariablesInterceptor } from './globalVariableProvider';
 import { parseJavascript } from './javascriptHttpRegionParser';
 import { replaceJavascriptExpressions } from './javascriptVariableReplacer';
 import * as moduleUtils from './moduleUtils';
@@ -12,6 +13,8 @@ httpyac.io.javascriptProvider.loadModule = moduleUtils.loadModule;
 export function registerJavascriptPlugin(api: models.HttpyacHooksApi) {
   api.hooks.replaceVariable.addHook('javascript', replaceJavascriptExpressions, { before: ['aws'] });
   api.hooks.parse.addHook('javascript', parseJavascript, { before: ['request'] });
+  api.hooks.execute.addInterceptor(new GlobalVariablesInterceptor());
+  api.hooks.provideVariables.addHook('globalVariables', provideGlobalVariableStore);
 
   addDefaultRequire();
   httpyac.io.javascriptProvider.evalExpression = moduleUtils.evalExpression;

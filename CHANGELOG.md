@@ -1,5 +1,9 @@
 ## (unreleased)
 
+#### Features
+
+- provide Global Variable Cache (#358)
+
 #### Fixes
 
 - replace header variables before body (httpyac/httpyac.github.io#63)
