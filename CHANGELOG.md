@@ -1,3 +1,9 @@
+## (unreleased)
+
+#### Fixes
+
+- replace header variables before body (httpyac/httpyac.github.io#63)
+
 ## 5.8.2 (2022-11-16)
 
 #### Fixes
