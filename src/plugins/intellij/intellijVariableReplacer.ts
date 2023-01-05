@@ -31,6 +31,9 @@ export async function replaceDynamicIntellijVariables(text: unknown): Promise<un
     if (trimmedVariable.startsWith('$random.alphabetic')) {
       return randomAlphabetic(trimmedVariable);
     }
+    if (trimmedVariable.startsWith('$random.alphanumeric')) {
+      return randomAlphanumeric(trimmedVariable);
+    }
     if (trimmedVariable.startsWith('$random.hexadecimal')) {
       return randomHexadecimal(trimmedVariable);
     }
@@ -80,11 +83,23 @@ function randomAlphabetic(variable: string) {
   if (match && match.groups?.length) {
     const length = utils.toNumber(match.groups?.length);
     if (length) {
+      return randomText(length, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz');
+    }
+  }
+  return undefined;
+}
+
+function randomAlphanumeric(variable: string) {
+  const match = /^\$random.alphanumeric\s*\(\s*(?<length>-?\d+)\s*\)\s*$/u.exec(variable);
+  if (match && match.groups?.length) {
+    const length = utils.toNumber(match.groups?.length);
+    if (length) {
       return randomText(length);
     }
   }
   return undefined;
 }
+
 function randomHexadecimal(variable: string) {
   const match = /^\$random.hexadecimal\s*\(\s*(?<length>-?\d+)\s*\)\s*$/u.exec(variable);
   if (match && match.groups?.length) {
@@ -96,7 +111,7 @@ function randomHexadecimal(variable: string) {
   return undefined;
 }
 
-function randomText(length: number, chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz') {
+function randomText(length: number, chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_') {
   const result = [];
 
   if (length > 0) {
