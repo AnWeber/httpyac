@@ -20,4 +20,7 @@ export class IntellijHttpClient implements JetBrainsHttpClient {
       this.context.scriptConsole.info(text);
     }
   }
+  exit(): void {
+    this.context.scriptConsole?.warn('exit not supportd');
+  }
 }
