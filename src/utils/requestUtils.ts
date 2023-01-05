@@ -18,6 +18,7 @@ export function isHttpRequestMethod(method: string | undefined): method is model
       'COPY',
       'DELETE',
       'GET',
+      'GRAPHQL',
       'HEAD',
       'LOCK',
       'MERGE',

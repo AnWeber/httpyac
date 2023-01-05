@@ -345,6 +345,27 @@ gql launchesQuery < ./graphql.gql
         '{"query":"\\nquery launchesQuery($limit: Int!){\\n  launchesPast(limit: $limit) {\\n    mission_name\\n    launch_date_local\\n    launch_site {\\n      site_name_long\\n    }\\n    rocket {\\n      rocket_name\\n      rocket_type\\n    }\\n    ships {\\n      name\\n      home_port\\n      image\\n    }\\n  }\\n}\\n        ","operationName":"launchesQuery","variables":{"limit":10}}'
       );
     });
+    it('use graphql method', async () => {
+      initFileProvider();
+      const mockedEndpoints = await localServer.forPost('/graphql').thenReply(200);
+
+      await exec(`
+GRAPHQL http://localhost:8080/graphql
+Content-Type: application/json
+
+query company_query {
+  company {
+    coo
+  }
+}
+      `);
+
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests[0].url).toBe('http://localhost:8080/graphql');
+      expect(await requests[0].body.getText()).toBe(
+        '{"query":"query company_query {\\n  company {\\n    coo\\n  }\\n}","operationName":"company_query"}'
+      );
+    });
   });
 
   describe('metadata', () => {

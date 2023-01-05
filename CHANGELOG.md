@@ -1,3 +1,9 @@
+## Unreleased
+
+#### Features
+
+- add Intellijj Http Graphql Method support AnWeber/vscode-httpyac#165
+
 ## 5.9.0 (2023-01-03)
 
 #### Features
