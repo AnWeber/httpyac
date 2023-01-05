@@ -19,9 +19,9 @@ export async function restClientVariableReplacer(
     if (trimmedVariable.startsWith('$randomInt')) {
       const valMatch = /^\$randomInt\s*(?<min>-?\d+)?\s*(?<max>-?\d+)?\s*$/u.exec(trimmedVariable);
       if (valMatch && valMatch.groups?.min && valMatch.groups?.max) {
-        let min = utils.toNumber(valMatch.groups?.min);
-        let max = utils.toNumber(valMatch.groups?.max);
-        if (min && max) {
+        let min = utils.toNumber(valMatch.groups?.min) || 0;
+        let max = utils.toNumber(valMatch.groups?.max) || 100;
+        if (!Number.isNaN(min) && !Number.isNaN(max)) {
           if (min > max) {
             const temp = max;
             max = min;
