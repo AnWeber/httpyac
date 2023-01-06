@@ -2,63 +2,65 @@ import * as utils from '../../utils';
 import { v4 } from 'uuid';
 
 export async function replaceDynamicIntellijVariables(text: unknown): Promise<unknown> {
-  return utils.parseHandlebarsString(text, async (variable: string) => {
-    const trimmedVariable = variable.trim();
-    if (['$uuid', '$random.uuid'].indexOf(trimmedVariable) >= 0) {
-      return v4();
-    }
-    if (trimmedVariable === '$timestamp') {
-      return Date.now();
-    }
-    if (trimmedVariable === '$isoTimestamp') {
-      return new Date().toISOString();
-    }
-    if (trimmedVariable === '$randomInt') {
-      return Math.floor(Math.random() * 1000);
-    }
-    if (trimmedVariable.startsWith('$random.integer')) {
-      const float = randomFloat(trimmedVariable);
-      if (float) {
-        return `${Math.floor(float)}`;
-      }
-    }
-    if (trimmedVariable.startsWith('$random.float')) {
-      const float = randomFloat(trimmedVariable);
-      if (float) {
-        return `${float}`;
-      }
-    }
-    if (trimmedVariable.startsWith('$random.alphabetic')) {
-      return randomAlphabetic(trimmedVariable);
-    }
-    if (trimmedVariable.startsWith('$random.alphanumeric')) {
-      return randomAlphanumeric(trimmedVariable);
-    }
-    if (trimmedVariable.startsWith('$random.hexadecimal')) {
-      return randomHexadecimal(trimmedVariable);
-    }
+  return utils.parseHandlebarsString(text, async (variable: string) => replaceIntellijVariable(variable));
+}
 
-    if (trimmedVariable.startsWith('$random.email')) {
-      return `${randomText(30)}@${randomText(10)}.${randomArrayValue([
-        'com',
-        'org',
-        'at',
-        'de',
-        'fr',
-        'uk',
-        'it',
-        'ch',
-        'info',
-        'edu',
-        'asia',
-        'gov',
-        'app',
-        'io',
-      ])}`;
+export function replaceIntellijVariable(variable: string): string | undefined {
+  const trimmedVariable = variable.trim();
+  if (['$uuid', '$random.uuid'].indexOf(trimmedVariable) >= 0) {
+    return v4();
+  }
+  if (trimmedVariable === '$timestamp') {
+    return utils.toString(Date.now());
+  }
+  if (trimmedVariable === '$isoTimestamp') {
+    return new Date().toISOString();
+  }
+  if (trimmedVariable === '$randomInt') {
+    return `${Math.floor(Math.random() * 1000)}`;
+  }
+  if (trimmedVariable.startsWith('$random.integer')) {
+    const float = randomFloat(trimmedVariable);
+    if (float) {
+      return `${Math.floor(float)}`;
     }
+  }
+  if (trimmedVariable.startsWith('$random.float')) {
+    const float = randomFloat(trimmedVariable);
+    if (float) {
+      return `${float}`;
+    }
+  }
+  if (trimmedVariable.startsWith('$random.alphabetic')) {
+    return randomAlphabetic(trimmedVariable);
+  }
+  if (trimmedVariable.startsWith('$random.alphanumeric')) {
+    return randomAlphanumeric(trimmedVariable);
+  }
+  if (trimmedVariable.startsWith('$random.hexadecimal')) {
+    return randomHexadecimal(trimmedVariable);
+  }
 
-    return undefined;
-  });
+  if (trimmedVariable.startsWith('$random.email')) {
+    return `${randomText(30)}@${randomText(10)}.${randomArrayValue([
+      'com',
+      'org',
+      'at',
+      'de',
+      'fr',
+      'uk',
+      'it',
+      'ch',
+      'info',
+      'edu',
+      'asia',
+      'gov',
+      'app',
+      'io',
+    ])}`;
+  }
+
+  return undefined;
 }
 
 function randomFloat(variable: string) {

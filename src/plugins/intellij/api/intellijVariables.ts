@@ -1,11 +1,11 @@
 import * as models from '../../../models';
 import { userSessionStore } from '../../../store';
 import * as utils from '../../../utils';
-import { Variables as JetBrainsVariables } from './http-client';
+import { Variables } from './http-client';
 
 type IntellijGlobalCacheSession = models.UserSession;
 
-export class IntellijVariables implements JetBrainsVariables {
+export class IntellijVariables implements Variables {
   private userSession: IntellijGlobalCacheSession;
   constructor(private readonly context: models.ProcessorContext) {
     this.userSession = this.getIntellijSession(context);

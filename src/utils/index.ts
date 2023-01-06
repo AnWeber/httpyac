@@ -1,4 +1,5 @@
 export * from './assertUtils';
+export * from './bufferEncodingUtils';
 export * from './configUtils';
 export * from './convertUtils';
 export * from './environmentUtils';

@@ -61,13 +61,15 @@ export class IntellijAction {
 }
 
 function initIntellijVariables(context: models.ProcessorContext) {
-  let response: unknown;
-  if (context.httpRegion.response) {
-    response = new intellij.IntellijHttpResponse(context.httpRegion.response);
-  }
-  const client = new intellij.IntellijHttpClient(context);
-  return {
-    client,
-    response,
+  const variables: Record<string, unknown> = {
+    client: new intellij.IntellijHttpClient(context),
+    crypto: new intellij.IntellijCryptoSupport(),
   };
+  if (context.request) {
+    variables.request = new intellij.IntellijHttpClientRequest(context);
+  }
+  if (context.httpRegion.response) {
+    variables.response = new intellij.IntellijHttpResponse(context.httpRegion.response);
+  }
+  return variables;
 }

@@ -1,12 +1,12 @@
-import { ProcessorContext } from '../../../models';
+import * as models from '../../../models';
 import { testFactory } from '../../../utils';
-import { HttpClient as JetBrainsHttpClient, Variables as JetBrainsVariables } from './http-client';
+import { HttpClient, Variables } from './http-client';
 import { IntellijVariables } from './intellijVariables';
 import { ok } from 'assert';
 
-export class IntellijHttpClient implements JetBrainsHttpClient {
-  global: JetBrainsVariables;
-  constructor(private readonly context: ProcessorContext) {
+export class IntellijHttpClient implements HttpClient {
+  global: Variables;
+  constructor(private readonly context: models.ProcessorContext) {
     this.global = new IntellijVariables(context);
   }
   test(testName: string, func: () => void): void {
