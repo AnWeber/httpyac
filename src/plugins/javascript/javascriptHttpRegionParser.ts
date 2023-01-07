@@ -135,6 +135,7 @@ async function executeScriptData(scriptData: ScriptData, context: models.Process
       request: context.request,
       sleep: utils.sleep,
       test: utils.testFactory(context),
+      $random: utils.randomData,
     },
     lineOffset: scriptData.lineOffset,
     require: javascriptProvider.require,

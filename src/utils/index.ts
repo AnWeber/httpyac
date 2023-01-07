@@ -13,6 +13,7 @@ export * from './mimeTypeUtils';
 export * from './modelUtils';
 export * from './parserUtils';
 export * from './promiseUtils';
+export * from './randomUtils';
 export * from './repeatUtils';
 export * from './requestUtils';
 export * from './stringUtils';

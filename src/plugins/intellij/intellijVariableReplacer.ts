@@ -42,22 +42,7 @@ export function replaceIntellijVariable(variable: string): string | undefined {
   }
 
   if (trimmedVariable.startsWith('$random.email')) {
-    return `${randomText(30)}@${randomText(10)}.${randomArrayValue([
-      'com',
-      'org',
-      'at',
-      'de',
-      'fr',
-      'uk',
-      'it',
-      'ch',
-      'info',
-      'edu',
-      'asia',
-      'gov',
-      'app',
-      'io',
-    ])}`;
+    return utils.randomEmail();
   }
 
   return undefined;
@@ -85,7 +70,7 @@ function randomAlphabetic(variable: string) {
   if (match && match.groups?.length) {
     const length = utils.toNumber(match.groups?.length);
     if (length) {
-      return randomText(length, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz');
+      return utils.randomText(length, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz');
     }
   }
   return undefined;
@@ -96,7 +81,7 @@ function randomAlphanumeric(variable: string) {
   if (match && match.groups?.length) {
     const length = utils.toNumber(match.groups?.length);
     if (length) {
-      return randomText(length);
+      return utils.randomText(length);
     }
   }
   return undefined;
@@ -107,25 +92,8 @@ function randomHexadecimal(variable: string) {
   if (match && match.groups?.length) {
     const length = utils.toNumber(match.groups?.length);
     if (length) {
-      return randomText(length, '1234567890ABCDEF');
+      return utils.randomText(length, '1234567890ABCDEF');
     }
   }
   return undefined;
-}
-
-function randomText(length: number, chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_') {
-  const result = [];
-
-  if (length > 0) {
-    const abc = chars.split('');
-    for (let index = 0; index < length; index++) {
-      result.push(randomArrayValue(abc));
-    }
-  }
-
-  return result.join('');
-}
-
-function randomArrayValue(values: Array<unknown>) {
-  return values[Math.floor(Math.random() * (values.length - 1))];
 }

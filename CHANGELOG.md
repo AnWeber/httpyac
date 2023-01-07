@@ -3,6 +3,9 @@
 #### Features
 
 - add Intellijj Http Graphql Method support AnWeber/vscode-httpyac#165
+- update Intellijj Dynamic Variables
+- add Intellij PreRequest Script Support
+- add `$random` Utils to create Mock Data
 
 ## 5.9.0 (2023-01-03)
 
