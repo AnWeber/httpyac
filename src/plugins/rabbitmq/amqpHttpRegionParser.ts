@@ -78,6 +78,7 @@ function getAmqpLine(textLine: string, line: number): { request: AmqpRequest; sy
   if (lineMatch && lineMatch.length > 1 && lineMatch.groups) {
     return {
       request: {
+        supportsStreaming: true,
         url: lineMatch.groups.url,
         protocol: 'AMQP',
         method: 'AMQP',
@@ -98,6 +99,7 @@ function getAmqpLine(textLine: string, line: number): { request: AmqpRequest; sy
   if (protocolMatch && protocolMatch.length > 1 && protocolMatch.groups) {
     return {
       request: {
+        supportsStreaming: true,
         url: protocolMatch.groups.url,
         protocol: 'AMQP',
         method: 'AMQP',

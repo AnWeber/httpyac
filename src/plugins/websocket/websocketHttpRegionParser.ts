@@ -79,6 +79,7 @@ function getWebsocketLine(
   if (lineMatch && lineMatch.length > 1 && lineMatch.groups) {
     return {
       request: {
+        supportsStreaming: true,
         protocol: 'WS',
         url: lineMatch.groups.url,
         method: 'WS',
@@ -99,6 +100,7 @@ function getWebsocketLine(
   if (protocolMatch && protocolMatch.length > 1 && protocolMatch.groups) {
     return {
       request: {
+        supportsStreaming: true,
         protocol: 'WS',
         url: protocolMatch.groups.url,
         method: 'WS',

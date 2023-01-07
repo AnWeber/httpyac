@@ -2,7 +2,10 @@ import * as models from '../../../models';
 import * as utils from '../../../utils';
 import encodeUrl from 'encodeurl';
 
-export async function transformRequestBody(request: models.Request): Promise<void> {
+export async function transformRequestBodyToBuffer(
+  request: models.Request,
+  context: models.ProcessorContext
+): Promise<void> {
   if (request.body) {
     if (utils.isString(request.body)) {
       if (utils.isMimeTypeFormUrlEncoded(request.contentType)) {
@@ -12,18 +15,28 @@ export async function transformRequestBody(request: models.Request): Promise<voi
       Array.isArray(request.body) &&
       request.body.every(obj => ['function', 'string'].indexOf(typeof obj) >= 0)
     ) {
-      request.body = await normalizeBody(request.body);
+      request.body = await normalizeBody(request.body, context);
     }
   }
 }
 
-async function normalizeBody(body: Array<models.HttpRequestBodyLine>): Promise<Buffer> {
+async function normalizeBody(
+  body: Array<models.HttpRequestBodyLine>,
+  context: models.ProcessorContext
+): Promise<Buffer> {
   const buffers: Array<Buffer> = [];
   for (const obj of body) {
     if (utils.isString(obj)) {
       buffers.push(Buffer.from(obj));
     } else {
-      buffers.push(await obj());
+      const result = await obj(context);
+      if (result) {
+        if (utils.isString(result)) {
+          buffers.push(Buffer.from(result));
+        } else {
+          buffers.push(result);
+        }
+      }
     }
   }
   return Buffer.concat(buffers);

@@ -1,5 +1,6 @@
 import { ContentType } from './contentType';
 import { HttpMethod } from './httpMethod';
+import { ProcessorContext } from './processorContext';
 import type { OptionsOfUnknownResponseBody } from 'got';
 
 export interface HeadersContainer {
@@ -7,6 +8,7 @@ export interface HeadersContainer {
 }
 
 export interface Request<TMethod extends string = string> {
+  supportsStreaming?: boolean;
   protocol?: string;
   url?: string;
   method?: TMethod;
@@ -22,7 +24,7 @@ export interface HttpRequest extends Request<HttpMethod> {
   options: OptionsOfUnknownResponseBody;
 }
 
-export type HttpRequestBodyLine = string | (() => Promise<Buffer>);
+export type HttpRequestBodyLine = string | ((context: ProcessorContext) => Promise<Buffer | string | undefined>);
 
 export interface RequestBodyImport {
   fileName: string;
