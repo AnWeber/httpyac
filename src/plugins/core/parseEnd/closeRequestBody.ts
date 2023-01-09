@@ -85,12 +85,13 @@ async function toHttpRequestBodyLineArray(rawBody: Array<string | models.Request
     if (utils.isString(line)) {
       result.push(line);
     } else {
-      const forceInjectVariables = (filename: string, context: models.ProcessorContext) => {
+      const { injectVariables, fileName } = line;
+      const forceInjectVariables = (file: string, context: models.ProcessorContext) => {
         if (context.httpRegion.metaData.injectVariables) {
           return true;
         }
         if (context.config?.requestBodyInjectVariablesExtensions) {
-          const extname = utils.extensionName(filename);
+          const extname = utils.extensionName(file);
           if (extname) {
             return context.config.requestBodyInjectVariablesExtensions.indexOf(extname) >= 0;
           }
@@ -99,8 +100,8 @@ async function toHttpRequestBodyLineArray(rawBody: Array<string | models.Request
       };
       result.push(
         async (context: models.ProcessorContext) =>
-          await utils.replaceFilePath(line.fileName, context, async (path: models.PathLike) => {
-            if (forceInjectVariables(line.fileName, context) || line.injectVariables) {
+          await utils.replaceFilePath(fileName, context, async (path: models.PathLike) => {
+            if (injectVariables || forceInjectVariables(line.fileName, context)) {
               return await fileProvider.readFile(path, line.encoding);
             }
             return fileProvider.readBuffer(path);

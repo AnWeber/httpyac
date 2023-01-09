@@ -366,6 +366,23 @@ query company_query {
         '{"query":"query company_query {\\n  company {\\n    coo\\n  }\\n}","operationName":"company_query"}'
       );
     });
+    it('imported buffer body with replace', async () => {
+      const body = JSON.stringify({ foo: 'foo', bar: '{{bar}}' }, null, 2);
+      initFileProvider({ 'body.json': body });
+      const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
+
+      await exec(`
+@bar=bar2
+POST http://localhost:8080/post
+Content-Type: application/json
+
+<@ ./body.json
+      `);
+
+      const requests = await mockedEndpoints.getSeenRequests();
+      expect(requests[0].headers['content-type']).toBe('application/json');
+      expect(await requests[0].body.getText()).toBe(JSON.stringify({ foo: 'foo', bar: 'bar2' }, null, 2));
+    });
   });
 
   describe('metadata', () => {
@@ -717,7 +734,7 @@ Authorization: Basic john doe
       const missingAuthEndpoints = await localServer
         .forGet('/json')
         .matching(request => !request.headers.authorization)
-        .thenReply(401, null, {
+        .thenReply(401, undefined, {
           'www-authenticate':
             'Digest realm="json@localhost",qop="auth,auth-int",nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093",opaque="5ccc069c403ebaf9f0171e9517f40e41"',
         });

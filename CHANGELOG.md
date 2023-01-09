@@ -1,3 +1,9 @@
+## 5.10.1 (2023-01-09)
+
+#### Fix
+
+- variables in request body import are replaced (#377)
+
 ## 5.10.0 (2023-01-08)
 
 #### Features
