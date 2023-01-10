@@ -382,7 +382,7 @@ export function mergeRawHttpHeaders(rawHeaders: string[]): Record<string, string
       continue; // Likely at end of array, continue will make for-condition to evaluate falsy
     }
     const headerName = headerRawName.toLowerCase();
-    mergedHeaders[headerName] ||= [];
+    mergedHeaders[headerName] = mergedHeaders[headerName] || [];
     mergedHeaders[headerName].push(headerRawValue);
   }
   return mergedHeaders;
