@@ -15,6 +15,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         language: ['javascript']
+        node-version: [14.x, 16.x, 18.x, 19.x]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -27,7 +28,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: 16
+          node-version: ${{ matrix.node-version }}
       - run: npm install
       - run: npm run lint
       - run: npm test -- --coverage --coverageProvider=v8
