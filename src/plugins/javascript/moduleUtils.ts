@@ -150,8 +150,12 @@ function toModuleFilename(fileName: PathLike) {
 function deleteVariables(contextKeys: string[], context: vm.Context, deleteVariable?: (key: string) => void) {
   if (deleteVariable) {
     for (const key of contextKeys) {
-      if (typeof context[key] === 'undefined') {
-        deleteVariable(key);
+      try {
+        if (context[key] === undefined) {
+          deleteVariable(key);
+        }
+      } catch (err) {
+        log.info(err);
       }
     }
   }
