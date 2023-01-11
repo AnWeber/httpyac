@@ -7,15 +7,15 @@ on:
     branches:
       - main
   schedule:
-    - cron: '0 0 * * 1'
+    - cron: "0 0 * * 1"
 jobs:
   build:
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        language: ['javascript']
-        node-version: [14.x, 16.x, 18.x, 19.x]
+        language: ["javascript"]
+        node-version: [14.x, 16.x, 18.x]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
