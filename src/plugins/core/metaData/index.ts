@@ -1,6 +1,7 @@
 import { HttpyacHooksApi } from '../../../models';
 import { DefaultMetaDataHandler } from './defaultMetaDataHandler';
 import { importMetaDataHandler } from './importMetaDataHandler';
+import { jwtMetaDataHandler } from './jwtMetaDataHandler';
 import { keepStreamingMetaDataHandler } from './keepStreamingMetaDataHandler';
 import { loopMetaDataHandler } from './loopMetaDataHandler';
 import { noRedirectMetaDataHandler } from './noRedirectMetaDataHandler';
@@ -15,6 +16,7 @@ import { verboseMetaDataHandler } from './verboseMetaDataHandler';
 
 export function initParseMetData(api: HttpyacHooksApi) {
   api.hooks.parseMetaData.addHook('import', importMetaDataHandler);
+  api.hooks.parseMetaData.addHook('jwt', jwtMetaDataHandler);
   api.hooks.parseMetaData.addHook('keepStreaming', keepStreamingMetaDataHandler);
   api.hooks.parseMetaData.addHook('loop', loopMetaDataHandler);
   api.hooks.parseMetaData.addHook('noRedirect', noRedirectMetaDataHandler);
