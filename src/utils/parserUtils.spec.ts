@@ -32,7 +32,7 @@ describe('http header test', () => {
 
     for (const test of tests) {
       const parseHeaders = parseRequestHeaderFactory({});
-      const match = parseHeaders(
+      const match = await parseHeaders(
         {
           line: 0,
           textLine: test.value,

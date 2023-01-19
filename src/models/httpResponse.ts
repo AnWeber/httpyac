@@ -21,3 +21,7 @@ export interface HttpResponse {
   meta?: Record<string, unknown>;
   tags?: Array<string>;
 }
+
+export interface StreamResponse {
+  message?: string;
+}

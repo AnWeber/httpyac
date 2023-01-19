@@ -1,5 +1,5 @@
 import { HttpRegion } from './httpRegion';
-import { HttpResponse } from './httpResponse';
+import { HttpResponse, StreamResponse } from './httpResponse';
 
 export const enum LogLevel {
   trace = 1,
@@ -27,10 +27,6 @@ export interface ConsoleLogHandler extends LogHandler {
   logTest(result: boolean, message: string): void;
   collectMessages(): void;
   flush(): void;
-}
-
-export interface StreamResponse {
-  message?: string;
 }
 
 export type RequestLogger = (response: HttpResponse, httpRegion?: HttpRegion) => Promise<void>;

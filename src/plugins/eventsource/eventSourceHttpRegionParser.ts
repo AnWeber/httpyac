@@ -44,7 +44,7 @@ export async function parseEventSource(
     const headers = {};
     eventSourceLine.request.headers = headers;
 
-    const headersResult = utils.parseSubsequentLines(
+    const headersResult = await utils.parseSubsequentLines(
       lineReader,
       [
         utils.parseComments,

@@ -25,14 +25,15 @@ export class EventSourceClientAction {
     request: EventSourceRequest,
     context: models.ProcessorContext
   ): Promise<models.HttpResponse> {
-    const { httpRegion } = context;
-
     if (!request.url) {
       throw new Error('request url undefined');
     }
     const options: EventSource.EventSourceInitDict = {};
-    if (httpRegion.metaData.noRejectUnauthorized) {
+    if (request.noRejectUnauthorized) {
       options.rejectUnauthorized = false;
+    }
+    if (request.proxy) {
+      options.proxy = request.proxy;
     }
     const headers = { ...request.headers };
     utils.deleteHeader(headers, 'event');

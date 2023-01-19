@@ -35,7 +35,7 @@ export async function parseProtoImport(
         symbols,
       };
 
-      const headersResult = utils.parseSubsequentLines(
+      const headersResult = await utils.parseSubsequentLines(
         lineReader,
         [
           utils.parseComments,

@@ -47,7 +47,7 @@ export async function parseMetaData(
         });
         data.metaTitle = delimiterMatch.groups?.title;
       } else {
-        const commentResult = utils.parseComments(next.value, context, MetaDataRegex);
+        const commentResult = await utils.parseComments(next.value, context, MetaDataRegex);
         if (commentResult) {
           result.symbols = commentResult.symbols;
         }

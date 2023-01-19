@@ -44,7 +44,7 @@ export async function parseRequestLine(
     const headers = {};
     request.headers = headers;
 
-    const headersResult = utils.parseSubsequentLines(
+    const headersResult = await utils.parseSubsequentLines(
       lineReader,
       [
         utils.parseComments,
@@ -175,10 +175,10 @@ export class HttpClientAction {
       if (utils.isString(httpRegion.metaData.proxy)) {
         request.proxy = httpRegion.metaData.proxy;
       }
-      if (httpRegion.metaData.noRedirect) {
-        request.options.followRedirect = !httpRegion.metaData.noRedirect;
+      if (request.noRedirect) {
+        request.options.followRedirect = false;
       }
-      if (httpRegion.metaData.noRejectUnauthorized) {
+      if (request.noRejectUnauthorized) {
         request.options.https = request.options.https || {};
         request.options.https.rejectUnauthorized = false;
       }

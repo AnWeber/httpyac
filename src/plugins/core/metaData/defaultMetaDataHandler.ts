@@ -1,8 +1,18 @@
 import * as models from '../../../models';
+import { HookInterceptor, HookTriggerContext } from 'hookpoint';
 
-export function defaultMetaDataHandler(type: string, value: string | undefined, context: models.ParserContext) {
-  context.httpRegion.metaData = Object.assign(context.httpRegion.metaData || {}, {
-    [type]: value || true,
-  });
-  return true;
+export class DefaultMetaDataHandler implements HookInterceptor<[string, string, models.ParserContext], boolean> {
+  id = 'defaultMetaData';
+  async afterLoop(
+    hookContext: HookTriggerContext<[string, string, models.ParserContext], boolean | undefined>
+  ): Promise<boolean | undefined> {
+    if (hookContext.results.every(obj => !obj)) {
+      const [type, value, context] = hookContext.args;
+      Object.assign(context.httpRegion.metaData || {}, {
+        [type]: value || true,
+      });
+      hookContext.results.push(true);
+    }
+    return true;
+  }
 }

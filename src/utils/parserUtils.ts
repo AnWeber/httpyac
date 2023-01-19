@@ -11,18 +11,18 @@ export const OAuth2Regex =
 export type ParseLineMethod = (
   httpLine: models.HttpLine,
   context: models.ParserContext
-) => models.SymbolParserResult | false;
+) => Promise<models.SymbolParserResult | false>;
 
 export interface ParseSubsequentLinesResult {
   nextLine?: number;
   parseResults: Array<models.SymbolParserResult>;
 }
 
-export function parseSubsequentLines(
+export async function parseSubsequentLines(
   lineReader: models.HttpLineGenerator,
   requestLineParser: Array<ParseLineMethod>,
   context: models.ParserContext
-): ParseSubsequentLinesResult {
+): Promise<ParseSubsequentLinesResult> {
   const result: ParseSubsequentLinesResult = {
     parseResults: [],
   };
@@ -30,7 +30,7 @@ export function parseSubsequentLines(
   while (!next.done) {
     let hasResult = false;
     for (const lineParser of requestLineParser) {
-      const parseResult = lineParser(next.value, context);
+      const parseResult = await lineParser(next.value, context);
       if (parseResult) {
         result.parseResults.push(parseResult);
         hasResult = true;
@@ -49,7 +49,7 @@ export function parseSubsequentLines(
 }
 
 export function parseRequestHeaderFactory(headers: Record<string, unknown>): ParseLineMethod {
-  return function parseRequestHeader(httpLine: models.HttpLine) {
+  return async function parseRequestHeader(httpLine: models.HttpLine) {
     const headerMatch = /^\s*(?<key>[!#$%&'*+\-.^_`|~0-9A-Za-z]+)\s*:\s*(?<value>.*?),?\s*$/u.exec(httpLine.textLine);
     if (headerMatch?.groups?.key) {
       const headerName = headerMatch.groups.key;
@@ -117,10 +117,10 @@ export function parseDefaultHeadersFactory(
     }
   }
 ): ParseLineMethod {
-  return function parseDefaultHeaders(
+  return async function parseDefaultHeaders(
     httpLine: models.HttpLine,
     parserContext: models.ParserContext
-  ): models.SymbolParserResult | false {
+  ): Promise<models.SymbolParserResult | false> {
     const fileHeaders = /^\s*\.{3}(?<variableName>[^\s]+),?\s*$/u.exec(httpLine.textLine);
     if (fileHeaders?.groups?.variableName) {
       const defaultsHeadersAction = new DefaultHeadersAction(fileHeaders.groups.variableName, setHeaders);
@@ -176,7 +176,7 @@ class DefaultHeadersAction {
 }
 
 export function parseUrlLineFactory(attachUrl: (url: string) => void): ParseLineMethod {
-  return function parseUrlLine(httpLine: models.HttpLine) {
+  return async function parseUrlLine(httpLine: models.HttpLine) {
     if (/^\s*(\/)[^*]*$/u.test(httpLine.textLine)) {
       const val = httpLine.textLine.trim();
       attachUrl(val);
@@ -200,7 +200,7 @@ export function parseUrlLineFactory(attachUrl: (url: string) => void): ParseLine
 }
 
 export function parseQueryLineFactory(attachUrl: (url: string) => void): ParseLineMethod {
-  return function parseQueryLine(httpLine: models.HttpLine): models.SymbolParserResult | false {
+  return async function parseQueryLine(httpLine: models.HttpLine): Promise<models.SymbolParserResult | false> {
     if (/^\s*(\?|&)([^=\s]+)=(.*)$/u.test(httpLine.textLine)) {
       const val = httpLine.textLine.trim();
       attachUrl(val);
@@ -223,11 +223,11 @@ export function parseQueryLineFactory(attachUrl: (url: string) => void): ParseLi
   };
 }
 
-export function parseComments(
+export async function parseComments(
   httpLine: models.HttpLine,
   context: models.ParserContext,
   metaRegex = /^\s*((#\s+)|(\/{2}))/u
-): models.SymbolParserResult | false {
+): Promise<models.SymbolParserResult | false> {
   if (metaRegex.test(httpLine.textLine)) {
     const result: models.SymbolParserResult = {
       symbols: [
@@ -280,7 +280,7 @@ export function parseComments(
           endOffset: httpLine.textLine.indexOf(match.groups.value) + match.groups.value.length,
         });
       }
-      context.httpFile.hooks.parseMetaData.trigger(key, val, context);
+      await context.httpFile.hooks.parseMetaData.trigger(key, val, context);
     }
     return result;
   }

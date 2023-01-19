@@ -46,7 +46,7 @@ export async function parseAmqpLine(
     const headers = {};
     requestLine.request.headers = headers;
 
-    const headersResult = utils.parseSubsequentLines(
+    const headersResult = await utils.parseSubsequentLines(
       lineReader,
       [
         utils.parseComments,

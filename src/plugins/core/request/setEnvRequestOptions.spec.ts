@@ -4,44 +4,41 @@ import { setEnvRequestOptions } from './setEnvRequestOptions';
 describe('setEnvRequestOptions', () => {
   describe('setEnvRequestOptions', () => {
     it('should set rejectUnauthorized=false', async () => {
-      const request: models.HttpRequest = { protocol: 'HTTP', options: {} };
+      const request: models.Request = { protocol: 'HTTP' };
       await setEnvRequestOptions(request, {
         variables: { request_rejectUnauthorized: false },
       } as unknown as models.ProcessorContext);
-      expect(request.options.https?.rejectUnauthorized).toEqual(false);
+      expect(request.noRejectUnauthorized).toEqual(true);
     });
     it('should set rejectUnauthorized=false', async () => {
-      const request: models.HttpRequest = { protocol: 'HTTP', options: {} };
+      const request: models.Request = { protocol: 'HTTP' };
       await setEnvRequestOptions(request, {
         variables: { request_rejectUnauthorized: 'false' },
       } as unknown as models.ProcessorContext);
-      expect(request.options.https?.rejectUnauthorized).toEqual(false);
+      expect(request.noRejectUnauthorized).toEqual(true);
     });
     it('should set rejectUnauthorized=true', async () => {
-      const request: models.HttpRequest = { protocol: 'HTTP', options: {} };
+      const request: models.Request = { protocol: 'HTTP' };
       await setEnvRequestOptions(request, {
         variables: { request_rejectUnauthorized: 'true' },
       } as unknown as models.ProcessorContext);
-      expect(request.options.https?.rejectUnauthorized).toEqual(true);
+      expect(request.noRejectUnauthorized).toEqual(false);
     });
     it('should ignore rejectUnauthorized', async () => {
-      const request: models.HttpRequest = { protocol: 'HTTP', options: {} };
+      const request: models.Request = { protocol: 'HTTP' };
       await setEnvRequestOptions(request, {
         variables: {},
       } as unknown as models.ProcessorContext);
-      expect(request.options.https?.rejectUnauthorized).toBeUndefined();
+      expect(request.noRejectUnauthorized).toBeUndefined();
     });
     it('should set proxy', async () => {
-      const httpRegion = {
-        metaData: {},
-      } as models.HttpRegion;
-      await setEnvRequestOptions({ protocol: 'HTTP' }, {
-        httpRegion,
+      const request: models.Request = { protocol: 'HTTP' };
+      await setEnvRequestOptions(request, {
         variables: {
           request_proxy: 'http://localhost:8080',
         },
       } as unknown as models.ProcessorContext);
-      expect(httpRegion.metaData.proxy).toBe('http://localhost:8080');
+      expect(request.proxy).toBe('http://localhost:8080');
     });
   });
 });

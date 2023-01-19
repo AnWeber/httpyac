@@ -141,10 +141,10 @@ export class WebSocketClientAction {
     const metaDataOptions: Record<string, unknown> = {
       headers: request.headers,
     };
-    if (httpRegion.metaData.noRedirect) {
-      metaDataOptions.followRedirects = !httpRegion.metaData.noRedirect;
+    if (request.noRedirect) {
+      metaDataOptions.followRedirects = false;
     }
-    if (httpRegion.metaData.noRejectUnauthorized) {
+    if (request.noRejectUnauthorized) {
       metaDataOptions.rejectUnauthorized = false;
     }
     return Object.assign({}, config?.request, request.options, metaDataOptions);

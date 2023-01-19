@@ -45,7 +45,7 @@ export async function parseGrpcLine(
     const headers = {};
     grpcLine.request.headers = headers;
 
-    const headersResult = utils.parseSubsequentLines(
+    const headersResult = await utils.parseSubsequentLines(
       lineReader,
       [
         utils.parseComments,

@@ -15,12 +15,14 @@ export interface Request<TMethod extends string = string> {
   body?: unknown;
   headers?: Record<string, unknown>;
   contentType?: ContentType;
+  noRejectUnauthorized?: boolean;
+  noRedirect?: boolean;
+  proxy?: string;
 }
 
 export interface HttpRequest extends Request<HttpMethod> {
   body?: string | Array<HttpRequestBodyLine> | Buffer;
   headers?: Record<string, string | string[] | undefined>;
-  proxy?: string;
   options: OptionsOfUnknownResponseBody;
 }
 

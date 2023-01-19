@@ -27,6 +27,7 @@ export * from './protoDefinition';
 export * from './repeatOptions';
 export * from './scriptData';
 export * from './sessionStore';
+export * from './requestClient';
 export * from './testFunction';
 export * from './testResult';
 export * from './userInteractionProvider';

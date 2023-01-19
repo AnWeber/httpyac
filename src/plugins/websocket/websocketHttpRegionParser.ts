@@ -46,7 +46,7 @@ export async function parseWebsocketLine(
     const headers = {};
     requestLine.request.headers = headers;
 
-    const headersResult = parserUtils.parseSubsequentLines(
+    const headersResult = await parserUtils.parseSubsequentLines(
       lineReader,
       [
         parserUtils.parseComments,

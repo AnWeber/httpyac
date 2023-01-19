@@ -125,7 +125,7 @@ export class MQTTClientAction {
   }
 
   private getClientOptions(request: MQTTRequest, context: models.ProcessorContext): IClientOptions {
-    const { httpRegion, config } = context;
+    const { config } = context;
 
     const configOptions: IClientOptions = {};
     if (config?.request) {
@@ -136,7 +136,7 @@ export class MQTTClientAction {
         configOptions.rejectUnauthorized = utils.toBoolean(config.request.rejectUnauthorized, true);
       }
     }
-    if (httpRegion.metaData.noRejectUnauthorized) {
+    if (request.noRejectUnauthorized) {
       configOptions.rejectUnauthorized = false;
     }
 
