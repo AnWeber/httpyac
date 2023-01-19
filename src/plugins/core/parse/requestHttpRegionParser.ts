@@ -170,11 +170,8 @@ export class HttpClientAction {
   id = 'httpClient';
 
   async process(context: models.ProcessorContext): Promise<boolean> {
-    const { httpRegion, request } = context;
+    const { request } = context;
     if (utils.isHttpRequest(request)) {
-      if (utils.isString(httpRegion.metaData.proxy)) {
-        request.proxy = httpRegion.metaData.proxy;
-      }
       if (request.noRedirect) {
         request.options.followRedirect = false;
       }
