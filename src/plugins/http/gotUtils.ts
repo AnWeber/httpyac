@@ -91,7 +91,7 @@ function requestToOptions(request: models.HttpClientRequest): OptionsOfUnknownRe
   const result: Record<string, unknown> = {};
   const warnHeaders: Array<string> = [];
 
-  const ignoreHeaders = ['protocol', 'url', 'proxy', 'options', 'contentType'];
+  const ignoreHeaders = ['protocol', 'url', 'proxy', 'options', 'contentType', 'noRedirect', 'noRejectUnauthorized'];
   for (const [key, value] of Object.entries(request)) {
     if (['method', 'body', 'headers'].indexOf(key) >= 0) {
       result[key] = value;
