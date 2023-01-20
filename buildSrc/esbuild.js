@@ -12,8 +12,8 @@ const isWatchBuild = process.argv.indexOf('--watch') >= 0;
 const noMinify = process.argv.indexOf('--no-minify') >= 0;
 const noExternal = process.argv.indexOf('--no-external') >= 0;
 
-esbuild
-  .build({
+async function build() {
+  const options = {
     logLevel: 'info',
     entryPoints: ['./src/index.ts'],
     outfile: 'dist/index.js',
@@ -22,7 +22,15 @@ esbuild
     platform: 'node',
     sourcemap: true,
     target: 'node14',
-    watch: isWatchBuild,
     plugins: noExternal ? [] : [makeAllPackagesExternalPlugin],
-  })
-  .catch(() => process.exit(1));
+  };
+
+  if (isWatchBuild) {
+    const ctx = await esbuild.context(options);
+    await ctx.watch();
+  } else {
+    await esbuild.build(options);
+  }
+}
+
+build().catch(() => process.exit(1));
