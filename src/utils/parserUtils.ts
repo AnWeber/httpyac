@@ -512,7 +512,7 @@ export async function parseInlineResponse(
         symbols,
       };
 
-      const headersResult = parseSubsequentLines(lineReader, [parseRequestHeaderFactory(headers)], context);
+      const headersResult = await parseSubsequentLines(lineReader, [parseRequestHeaderFactory(headers)], context);
 
       if (headersResult) {
         result.nextParserLine = headersResult.nextLine || result.nextParserLine;
