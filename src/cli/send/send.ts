@@ -140,7 +140,7 @@ export function convertCliOptionsToContext(cliOptions: SendOptions) {
 }
 
 function initCliHooks(httpFiles: Array<models.HttpFile>, cliOptions: SendOptions) {
-  for (const httpFile of httpFiles) {
+  for (const httpFile of utils.distinct(httpFiles)) {
     httpFile.hooks.execute.addInterceptor(loggerFlushInterceptor);
     if (cliOptions.bail) {
       httpFile.hooks.execute.addInterceptor(bailOnFailedTestInterceptor);
