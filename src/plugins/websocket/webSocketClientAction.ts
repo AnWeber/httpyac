@@ -125,7 +125,7 @@ export class WebSocketClientAction {
   }
 
   private getClientOptions(request: WebsocketRequest, context: models.ProcessorContext): ClientOptions {
-    const { httpRegion, config } = context;
+    const { config } = context;
 
     const configOptions: Record<string, unknown> = {};
     if (config?.request) {
