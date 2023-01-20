@@ -1,4 +1,5 @@
 /* eslint-disable no-undef */
+import { log } from '../../io';
 import { Variables } from '../../models';
 import * as utils from '../../utils';
 import { DOMParser } from '@xmldom/xmldom';
@@ -21,7 +22,7 @@ export function getNode(variableName: string | undefined, variables: Variables) 
     }
   }
   if (xml) {
-    return new DOMParser().parseFromString(xml);
+    return parseFromString(xml);
   }
   return undefined;
 }
@@ -31,4 +32,12 @@ export function isNode(obj: unknown): obj is Node {
   return (
     node && utils.isString(node.nodeName) && Number.isInteger(node.nodeType) && typeof node.cloneNode === 'function'
   );
+}
+
+export function parseFromString(xml: string, mimeType?: string | undefined): Document {
+  return new DOMParser({
+    errorHandler(level: string, message: unknown) {
+      log.debug(level, message);
+    },
+  }).parseFromString(xml, mimeType);
 }

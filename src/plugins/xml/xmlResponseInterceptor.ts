@@ -1,7 +1,7 @@
 import * as io from '../../io';
 import * as models from '../../models';
 import * as utils from '../../utils';
-import { DOMParser } from '@xmldom/xmldom';
+import { parseFromString } from './nodeUtils';
 import { HookTriggerContext } from 'hookpoint';
 import { EOL } from 'os';
 import { formatXml } from 'xmldom-format';
@@ -19,7 +19,7 @@ export const xmlResponseInterceptor = {
         utils.isString(response.body) &&
         response.body.length > 0
       ) {
-        const document = new DOMParser().parseFromString(response.body, response.contentType?.mimeType);
+        const document = parseFromString(response.body, response.contentType?.mimeType);
         response.parsedBody = document;
         try {
           response.prettyPrintBody = formatXml(document, {
