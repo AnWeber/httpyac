@@ -2,9 +2,15 @@ import { HttpResponse, StreamResponse } from './httpResponse';
 import { EventEmitter } from 'events';
 
 export interface RequestClient {
-  send(body?: Buffer | string): Promise<undefined | HttpResponse>;
+  reportMessage: string;
+  connect(): Promise<undefined | HttpResponse>;
+  send(body: Buffer | string): Promise<undefined | HttpResponse>;
   close(): void;
   on<K extends keyof RequestClientEventMap>(
+    type: K,
+    listener: (this: RequestClient, ev: RequestClientEventMap[K]) => void
+  ): void;
+  off<K extends keyof RequestClientEventMap>(
     type: K,
     listener: (this: RequestClient, ev: RequestClientEventMap[K]) => void
   ): void;
@@ -12,12 +18,36 @@ export interface RequestClient {
 
 interface RequestClientEventMap {
   progress: number;
-  message: HttpResponse & StreamResponse;
-  metaData: HttpResponse & StreamResponse;
+  message: [string, HttpResponse & StreamResponse];
+  metaData: [string, HttpResponse & StreamResponse];
 }
 
-export class AbstractRequestClient extends EventEmitter {
-  public onMessage(message: string | undefined, rawMessage: unknown) {
-    this.emit('message', message, rawMessage);
+export abstract class AbstractRequestClient implements RequestClient {
+  abstract reportMessage: string;
+  abstract connect(): Promise<undefined | HttpResponse>;
+  abstract send(body?: string | Buffer): Promise<HttpResponse | undefined>;
+  private eventEmitter = new EventEmitter();
+  abstract close(): void;
+
+  on<K extends keyof RequestClientEventMap>(
+    type: K,
+    listener: (this: RequestClient, ev: RequestClientEventMap[K]) => void
+  ): void {
+    this.eventEmitter.on(type, listener);
+  }
+  off<K extends keyof RequestClientEventMap>(
+    type: K,
+    listener: (this: RequestClient, ev: RequestClientEventMap[K]) => void
+  ) {
+    this.eventEmitter.off(type, listener);
+  }
+  protected onMessage(type: string, response: HttpResponse & StreamResponse) {
+    this.eventEmitter.emit('message', [type, response]);
+  }
+  protected onProgress(percent: number) {
+    this.eventEmitter.emit('progress', percent);
+  }
+  protected onMetaData(type: string, response: HttpResponse & StreamResponse) {
+    this.eventEmitter.emit('metaData', [type, response]);
   }
 }

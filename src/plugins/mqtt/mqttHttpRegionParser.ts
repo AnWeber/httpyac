@@ -1,7 +1,7 @@
 import * as models from '../../models';
 import * as utils from '../../utils';
-import { MQTTClientAction } from './mqttClientAction';
 import { MQTTRequest } from './mqttRequest';
+import { MQTTRequestClient } from './mqttRequestClient';
 
 const RegexMqttLine = /^\s*(mqtt(s)?)\s*(?<url>.+?)\s*$/iu;
 const RegexMqttProtocol = /^\s*mqtt(s)?:\/\/(?<url>.+?)\s*$/iu;
@@ -63,7 +63,10 @@ export async function parseMQTTLine(
       }
     }
 
-    context.httpRegion.hooks.execute.addObjHook(obj => obj.process, new MQTTClientAction());
+    context.httpRegion.hooks.execute.addHook(
+      'mqtt',
+      utils.executeRequestClientFactory((request, context) => new MQTTRequestClient(request, context))
+    );
 
     return result;
   }

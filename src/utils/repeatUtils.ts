@@ -12,8 +12,8 @@ export async function repeat(
   }
   const responses = [];
   if (context.repeat?.type === models.RepeatOrder.parallel) {
-    const results = await Promise.all(loader.map(obj => obj()));
-    for (const result of results) {
+    const responses = await Promise.all(loader.map(obj => obj()));
+    for (const result of responses) {
       if (result) {
         responses.push(result);
       }
@@ -26,15 +26,16 @@ export async function repeat(
       }
     }
   }
-  return mergeRepeatResponse(responses);
+  return mergeResponses(responses);
 }
 
-function mergeRepeatResponse(responses: Array<models.HttpResponse>): models.HttpResponse | undefined {
+export function mergeResponses(responses: Array<models.HttpResponse>): models.HttpResponse | undefined {
   if (responses.length > 1) {
     const result: models.HttpResponse = cloneResponse(responses[0]);
 
     delete result.prettyPrintBody;
     delete result.rawBody;
+
     const parsedBody: {
       responses: Array<models.HttpResponse>;
       statusCount: Record<string, number>;

@@ -17,6 +17,7 @@ export * from './promiseUtils';
 export * from './randomUtils';
 export * from './repeatUtils';
 export * from './requestUtils';
+export * from './requestClientUtils';
 export * from './stringUtils';
 export * from './testUtils';
 export * from './variableUtils';
