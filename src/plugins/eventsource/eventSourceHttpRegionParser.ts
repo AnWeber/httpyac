@@ -1,7 +1,7 @@
 import * as models from '../../models';
 import * as utils from '../../utils';
-import { EventSourceClientAction } from './eventSourceClientAction';
 import { EventSourceRequest } from './eventSourceRequest';
+import { EventSourceRequestClient } from './eventSourceRequestClient';
 
 const EventSourceLine = /^\s*(sse|eventsource)\s*(?<url>.+?)\s*$/iu;
 
@@ -70,7 +70,10 @@ export async function parseEventSource(
       }
     }
 
-    context.httpRegion.hooks.execute.addObjHook(obj => obj.process, new EventSourceClientAction());
+    context.httpRegion.hooks.execute.addHook(
+      'SSE',
+      utils.executeRequestClientFactory(request => new EventSourceRequestClient(request))
+    );
 
     return result;
   }

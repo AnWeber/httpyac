@@ -10,7 +10,10 @@ export function executeRequestClientFactory<T extends models.RequestClient>(
 ) {
   return async function (context: models.ProcessorContext) {
     const { request } = context;
-    if (request) {
+    if (request?.url) {
+      if (!(await onRequest(context))) {
+        return false;
+      }
       const client = requestClientFactory(request, context);
       setVariableInContext(
         {
@@ -20,9 +23,6 @@ export function executeRequestClientFactory<T extends models.RequestClient>(
       );
       const dispose = registerCancellation(client, context);
       try {
-        if (!(await onRequest(context))) {
-          return false;
-        }
         const messagePromises: Array<Promise<models.HttpResponse | undefined>> = [];
         addProgressEvent(client, context);
         addMessageEvent(client, context, messagePromises);

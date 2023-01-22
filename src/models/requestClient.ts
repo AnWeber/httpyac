@@ -1,18 +1,19 @@
 import { HttpResponse, StreamResponse } from './httpResponse';
 import { EventEmitter } from 'events';
 
-export interface RequestClient {
+export interface RequestClient<T = unknown> {
   reportMessage: string;
+  nativeClient: T;
   connect(): Promise<undefined | HttpResponse>;
   send(body: Buffer | string): Promise<undefined | HttpResponse>;
   close(): void;
   on<K extends keyof RequestClientEventMap>(
     type: K,
-    listener: (this: RequestClient, ev: RequestClientEventMap[K]) => void
+    listener: (this: RequestClient<T>, ev: RequestClientEventMap[K]) => void
   ): void;
   off<K extends keyof RequestClientEventMap>(
     type: K,
-    listener: (this: RequestClient, ev: RequestClientEventMap[K]) => void
+    listener: (this: RequestClient<T>, ev: RequestClientEventMap[K]) => void
   ): void;
 }
 
@@ -22,7 +23,7 @@ interface RequestClientEventMap {
   metaData: [string, HttpResponse & StreamResponse];
 }
 
-export abstract class AbstractRequestClient implements RequestClient {
+export abstract class AbstractRequestClient<T> implements RequestClient<T> {
   abstract reportMessage: string;
   abstract connect(): Promise<undefined | HttpResponse>;
   abstract send(body?: string | Buffer): Promise<HttpResponse | undefined>;

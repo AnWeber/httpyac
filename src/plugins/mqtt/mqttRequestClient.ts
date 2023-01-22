@@ -4,7 +4,7 @@ import * as utils from '../../utils';
 import { isMQTTRequest, MQTTRequest } from './mqttRequest';
 import { connect, IClientOptions, QoS, MqttClient } from 'mqtt';
 
-export class MQTTRequestClient extends models.AbstractRequestClient {
+export class MQTTRequestClient extends models.AbstractRequestClient<MqttClient> {
   private client: MqttClient | undefined;
   private responseTemplate: Partial<models.HttpResponse> & { protocol: string } = {
     protocol: 'MQTT',
