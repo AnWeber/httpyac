@@ -5,8 +5,8 @@ export interface RequestClient<T = unknown> {
   reportMessage: string;
   nativeClient: T;
   connect(): Promise<undefined | HttpResponse>;
-  send(body: Buffer | string): Promise<undefined | HttpResponse>;
-  close(): void;
+  send(body?: Buffer | string): Promise<undefined | HttpResponse>;
+  close(error?: boolean): void;
   on<K extends keyof RequestClientEventMap>(
     type: K,
     listener: (this: RequestClient<T>, ev: RequestClientEventMap[K]) => void
@@ -24,11 +24,14 @@ interface RequestClientEventMap {
 }
 
 export abstract class AbstractRequestClient<T> implements RequestClient<T> {
+  abstract nativeClient: T;
   abstract reportMessage: string;
   abstract connect(): Promise<undefined | HttpResponse>;
   abstract send(body?: string | Buffer): Promise<HttpResponse | undefined>;
   private eventEmitter = new EventEmitter();
-  abstract close(): void;
+  close(): void {
+    this.eventEmitter.removeAllListeners();
+  }
 
   on<K extends keyof RequestClientEventMap>(
     type: K,

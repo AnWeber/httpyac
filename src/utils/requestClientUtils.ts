@@ -29,8 +29,9 @@ export function executeRequestClientFactory<T extends models.RequestClient>(
         addMetaDataEvent(client, context, messagePromises);
 
         report(context, client.reportMessage);
-        const responses = await Promise.all([
-          repeat(() => client.connect(), context),
+        const connectResponse = await client.connect();
+        const sendResponses = await Promise.all([
+          repeat(() => client.send(), context),
           onStreaming(context).then(response => {
             client.close();
             return response;
@@ -38,33 +39,33 @@ export function executeRequestClientFactory<T extends models.RequestClient>(
         ]);
 
         const messageResponses = await Promise.all(messagePromises);
-        const response = mergeResponses(toResponses(responses, messageResponses));
+        const response = mergeResponses(toResponses(connectResponse, ...sendResponses, ...messageResponses));
         if (response) {
           if (!(await onResponse(response, context))) {
             return false;
           }
         }
+        client.close();
         return true;
       } catch (err) {
         (context.scriptConsole || log).error(context.request);
+        client.close(true);
         throw err;
       } finally {
         dispose?.();
         deleteVariableInContext('$client', context);
-        client.close();
       }
     }
     return false;
   };
 }
 
-function toResponses(...obj: Array<Array<models.HttpResponse | undefined>>) {
+function toResponses(...responses: Array<models.HttpResponse | undefined>) {
   const result: Array<models.HttpResponse> = [];
-  for (const resposens of obj) {
-    for (const response of resposens) {
-      if (response) {
-        result.push(response);
-      }
+
+  for (const response of responses) {
+    if (response) {
+      result.push(response);
     }
   }
   return result;

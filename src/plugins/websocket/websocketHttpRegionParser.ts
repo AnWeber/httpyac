@@ -1,8 +1,8 @@
 import * as models from '../../models';
 import * as utils from '../../utils';
 import * as parserUtils from '../../utils/parserUtils';
-import { WebSocketClientAction } from './webSocketClientAction';
 import { WebsocketRequest } from './websocketRequest';
+import { WebsocketRequestClient } from './websocketRequestClient';
 
 const WebsocketLine = /^\s*(ws|wss|websocket)\s*(?<url>.+?)\s*$/iu;
 const WebsocketProtocol = /^\s*ws(s)?:\/\/(?<url>.+?)\s*$/iu;
@@ -64,7 +64,10 @@ export async function parseWebsocketLine(
       }
     }
 
-    context.httpRegion.hooks.execute.addObjHook(obj => obj.process, new WebSocketClientAction());
+    context.httpRegion.hooks.execute.addHook(
+      'ws',
+      utils.executeRequestClientFactory((request, context) => new WebsocketRequestClient(request, context))
+    );
 
     return result;
   }

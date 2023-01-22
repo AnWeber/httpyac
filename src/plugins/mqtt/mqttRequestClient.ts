@@ -54,22 +54,20 @@ export class MQTTRequestClient extends models.AbstractRequestClient<MqttClient> 
     const client = this.nativeClient;
     if (isMQTTRequest(this.request)) {
       this.subscribe(client, this.subscribeTopics, this.request);
-      this.publish(client, this.publishTopics, this.request);
     }
     return undefined;
   }
 
   async send(body?: string | Buffer): Promise<models.HttpResponse | undefined> {
     if (isMQTTRequest(this.request)) {
-      this.publish(this.nativeClient, this.publishTopics, {
-        ...this.request,
-        body: utils.toString(body),
-      });
+      const request = body ? { ...this.request, body: utils.toString(body) } : this.request;
+      this.publish(this.nativeClient, this.publishTopics, request);
     }
     return undefined;
   }
 
   close(): void {
+    super.close();
     this.nativeClient.end(true, undefined, err => err && log.error('error on close', err));
   }
 
@@ -99,8 +97,17 @@ export class MQTTRequestClient extends models.AbstractRequestClient<MqttClient> 
       });
     });
 
-    const events = ['connect', 'reconnect', 'packetsend', 'packetreceive', 'disconnect', 'close', 'offline', 'end'];
-    for (const event of events) {
+    const metaDataEvents = [
+      'connect',
+      'reconnect',
+      'packetsend',
+      'packetreceive',
+      'disconnect',
+      'close',
+      'offline',
+      'end',
+    ];
+    for (const event of metaDataEvents) {
       if (utils.isString(event)) {
         client.on(event, (packet: unknown) => {
           this.onMetaData(event, {

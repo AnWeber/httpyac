@@ -17,11 +17,13 @@ export class EventSourceRequestClient extends models.AbstractRequestClient<Event
     return `perform SSE Request (${this.request.url})`;
   }
 
-  get nativeClient(): EventSource | undefined {
+  get nativeClient(): EventSource {
     if (!this.client) {
       if (isEventSourceRequest(this.request)) {
         this.client = new EventSource(this.request.url || '', this.getClientOptions(this.request));
         this.registerEvents(this.client, this.request);
+      } else {
+        throw new Error('no valid Request received');
       }
     }
     return this.client;
@@ -38,6 +40,7 @@ export class EventSourceRequestClient extends models.AbstractRequestClient<Event
   }
 
   close(): void {
+    super.close();
     this.nativeClient?.close();
   }
 
