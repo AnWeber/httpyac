@@ -52,9 +52,9 @@ export class WebsocketRequestClient extends models.AbstractRequestClient<WebSock
     return undefined;
   }
 
-  close(error?: boolean): void {
-    super.close();
-    if (error) {
+  override close(reason: models.RequestClientCloseReason): void {
+    this.removeAllListeners();
+    if (reason === models.RequestClientCloseReason.ERROR) {
       this.client?.close(WEBSOCKET_CLOSE_GOING_AWAY, 'WEBSOCKET_CLOSE_GOING_AWAY');
     } else {
       this.client?.close(WEBSOCKET_CLOSE_NORMAL, 'CLOSE_NORMAL');

@@ -32,7 +32,6 @@ export async function repeat(
 export function mergeResponses(responses: Array<models.HttpResponse>): models.HttpResponse | undefined {
   if (responses.length > 1) {
     const result: models.HttpResponse = cloneResponse(responses[0]);
-
     delete result.prettyPrintBody;
     delete result.rawBody;
 

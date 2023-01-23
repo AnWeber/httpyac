@@ -32,9 +32,9 @@ export function executeRequestClientFactory<T extends models.RequestClient>(
         const connectResponse = await client.connect();
         const sendResponses = await Promise.all([
           repeat(() => client.send(), context),
-          onStreaming(context).then(response => {
-            client.close();
-            return response;
+          onStreaming(context).then(() => {
+            client.close(models.RequestClientCloseReason.STREAMING);
+            return undefined;
           }),
         ]);
 
@@ -45,11 +45,11 @@ export function executeRequestClientFactory<T extends models.RequestClient>(
             return false;
           }
         }
-        client.close();
+        client.close(models.RequestClientCloseReason.SUCCESS);
         return true;
       } catch (err) {
         (context.scriptConsole || log).error(context.request);
-        client.close(true);
+        client.close(models.RequestClientCloseReason.ERROR);
         throw err;
       } finally {
         dispose?.();
@@ -73,7 +73,7 @@ function toResponses(...responses: Array<models.HttpResponse | undefined>) {
 
 function registerCancellation<T extends models.RequestClient>(client: T, context: models.ProcessorContext) {
   if (context.progress?.register) {
-    return context.progress?.register(() => client.close());
+    return context.progress?.register(() => client.close(models.RequestClientCloseReason.CANCELLATION));
   }
   return undefined;
 }
@@ -105,7 +105,7 @@ function addMessageEvent<T extends models.RequestClient>(
     log.debug(type, response?.message || response?.body);
     loadingPromises.push(Promise.resolve(response));
     if (!context.httpRegion.metaData.noStreamingLog && context.logStream) {
-      loadingPromises.push(context.logStream(type, response));
+      loadingPromises.push(context.logStream(type, { ...response }));
     }
   });
 }
@@ -136,7 +136,6 @@ async function onStreaming(context: models.ProcessorContext) {
     onStreaming.addInterceptor(createIsCanceledInterceptor(() => !!context.progress?.isCanceled()));
   }
   await onStreaming.trigger(context);
-  return undefined;
 }
 
 async function onResponse(response: models.HttpResponse, context: models.ProcessorContext) {

@@ -1,7 +1,7 @@
 import * as models from '../../models';
 import * as utils from '../../utils';
-import { GrpcClientAction } from './grpcClientAction';
 import { GrpcRequest } from './grpcRequest';
+import { GrpcRequestClient } from './grpcRequestClient';
 
 const GrpcLine = /^\s*(GRPC|grpc)\s*(?<url>.+?)\s*$/u;
 const GrpcProtocol = /^\s*grpc:\/\/(?<url>.+?)\s*$/u;
@@ -63,7 +63,10 @@ export async function parseGrpcLine(
       }
     }
 
-    context.httpRegion.hooks.execute.addObjHook(obj => obj.process, new GrpcClientAction());
+    context.httpRegion.hooks.execute.addHook(
+      'grpc',
+      utils.executeRequestClientFactory((request, context) => new GrpcRequestClient(request, context))
+    );
 
     return result;
   }

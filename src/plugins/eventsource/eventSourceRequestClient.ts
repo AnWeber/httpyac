@@ -39,8 +39,8 @@ export class EventSourceRequestClient extends models.AbstractRequestClient<Event
     return undefined;
   }
 
-  close(): void {
-    super.close();
+  override close(): void {
+    this.removeAllListeners();
     this.nativeClient?.close();
   }
 

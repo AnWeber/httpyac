@@ -66,8 +66,8 @@ export class MQTTRequestClient extends models.AbstractRequestClient<MqttClient> 
     return undefined;
   }
 
-  close(): void {
-    super.close();
+  override close(): void {
+    this.removeAllListeners();
     this.nativeClient.end(true, undefined, err => err && log.error('error on close', err));
   }
 
