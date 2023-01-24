@@ -1,5 +1,5 @@
-import { utils } from '../..';
-import { AmqpRequest } from './amqpRequest';
+import { utils } from '../../..';
+import { AmqpRequest } from '../amqpRequest';
 
 export const AmqpChannelId = 'amqp_channel_id';
 export const AmqpQueue = 'amqp_queue';

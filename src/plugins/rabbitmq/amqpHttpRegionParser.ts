@@ -1,8 +1,8 @@
 import * as models from '../../models';
 import * as utils from '../../utils';
-import { AmqpClientAction } from './amqpClientAction';
-import { getAmqpMethod } from './amqpConstants';
+import { getAmqpMethod } from './amqpMethods/amqpConstants';
 import { AmqpRequest } from './amqpRequest';
+import { AmqpRequestClient } from './amqpRequestClient';
 
 const AmqpLine = /^\s*(amqp)\s*(?<url>.+?)\s*$/iu;
 const AmqpProtocol = /^\s*amqp(s)?:\/\/(?<url>.+?)\s*$/iu;
@@ -66,7 +66,10 @@ export async function parseAmqpLine(
 
     requestLine.request.method = getAmqpMethod(requestLine.request);
 
-    context.httpRegion.hooks.execute.addObjHook(obj => obj.process, new AmqpClientAction());
+    context.httpRegion.hooks.execute.addHook(
+      'amqp',
+      utils.executeRequestClientFactory((request, context) => new AmqpRequestClient(request, context))
+    );
 
     return result;
   }
