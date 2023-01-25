@@ -4,6 +4,7 @@ import { HttpRegion, ProcessedHttpRegion } from './httpRegion';
 import { Request } from './httpRequest';
 import { ConsoleLogHandler, RequestLogger, StreamLogger } from './logHandler';
 import { RepeatOptions } from './repeatOptions';
+import { RequestClient } from './requestClient';
 import { Variables } from './variables';
 
 export type Dispose = () => void;
@@ -38,6 +39,7 @@ export interface HttpRegionSendContext extends HttpFileSendContext {
 export interface ProcessorContext extends HttpRegionSendContext {
   variables: Variables;
   request?: Request;
+  requestClient?: RequestClient;
   isMainContext?: boolean;
   options: Record<string, unknown>;
 }

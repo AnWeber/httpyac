@@ -16,26 +16,27 @@ export function executeRequestClientFactory<T extends models.RequestClient>(
       if (!(await onRequest(context))) {
         return false;
       }
-      const client = requestClientFactory(request, context);
+      const requestClient = requestClientFactory(request, context);
       setVariableInContext(
         {
-          $client: client,
+          $requestClient: requestClient,
         },
         context
       );
-      const dispose = registerCancellation(client, context);
+      context.requestClient = requestClient;
+      const dispose = registerCancellation(requestClient, context);
       try {
         const messagePromises: Array<Promise<models.HttpResponse | undefined>> = [];
-        addProgressEvent(client, context);
-        addMessageEvent(client, context, messagePromises);
-        addMetaDataEvent(client, context, messagePromises);
+        addProgressEvent(requestClient, context);
+        addMessageEvent(requestClient, context, messagePromises);
+        addMetaDataEvent(requestClient, context, messagePromises);
 
-        report(context, client.reportMessage);
-        const connectResponse = await client.connect();
+        report(context, requestClient.reportMessage);
+        const connectResponse = await requestClient.connect();
         const sendResponses = await Promise.all([
-          repeat(() => client.send(), context),
+          repeat(() => requestClient.send(), context),
           onStreaming(context).then(() => {
-            client.close();
+            requestClient.close();
           }),
         ]);
 
@@ -46,19 +47,20 @@ export function executeRequestClientFactory<T extends models.RequestClient>(
             return false;
           }
         }
-        client.close();
+        requestClient.close();
         return true;
       } catch (err) {
         (context.scriptConsole || log).error(context.request);
         if (isError(err)) {
-          client.close(err);
+          requestClient.close(err);
         } else {
-          client.close(new Error(toString(err)));
+          requestClient.close(new Error(toString(err)));
         }
         throw err;
       } finally {
         dispose?.();
-        deleteVariableInContext('$client', context);
+        delete context.requestClient;
+        deleteVariableInContext('$requestClient', context);
       }
     }
     return false;
