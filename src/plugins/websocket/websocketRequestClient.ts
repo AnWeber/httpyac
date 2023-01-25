@@ -27,7 +27,7 @@ export class WebsocketRequestClient extends models.AbstractRequestClient<WebSock
   async connect(): Promise<void> {
     if (isWebsocketRequest(this.request)) {
       const nativeClient = new WebSocket(this.request.url || '', this.getClientOptions(this.request));
-      this._nativeClient = this.nativeClient;
+      this._nativeClient = nativeClient;
       this.registerEvents(nativeClient);
       await new Promise<void>(resolve => {
         nativeClient.on('open', () => {
@@ -66,12 +66,12 @@ export class WebsocketRequestClient extends models.AbstractRequestClient<WebSock
       this.onMessage('message', {
         ...this.responseTemplate,
         statusCode: 200,
-        name: `WS (${this.request.url})`,
+        name: `${client.protocol} (${this.request.url})`,
         message: utils.toString(message),
-        body: {
-          message: utils.toString(message),
+        headers: {
           date: new Date(),
         },
+        body: utils.toString(message),
       });
     });
 
