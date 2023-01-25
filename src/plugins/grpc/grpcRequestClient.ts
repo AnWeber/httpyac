@@ -17,7 +17,6 @@ interface GrpcError {
 }
 
 export class GrpcRequestClient extends models.AbstractRequestClient<GrpcStream | undefined> {
-  private _nativeClient: GrpcStream | undefined;
   private serviceData: ServiceData | undefined;
   private responseTemplate: Partial<models.HttpResponse> & { protocol: string } = {
     protocol: 'GRPC',
@@ -30,12 +29,9 @@ export class GrpcRequestClient extends models.AbstractRequestClient<GrpcStream |
     return `perform gRPC Request (${this.request.url})`;
   }
 
+  private _nativeClient: GrpcStream | undefined;
   get nativeClient(): GrpcStream | undefined {
     return this._nativeClient;
-  }
-
-  private set nativeClient(client: GrpcStream | undefined) {
-    this._nativeClient = client;
   }
 
   private getChannelOptions(request: GrpcRequest, serviceData: ServiceData) {
@@ -60,22 +56,20 @@ export class GrpcRequestClient extends models.AbstractRequestClient<GrpcStream |
     return Object.assign(options, request.options);
   }
 
-  async connect(): Promise<models.HttpResponse | undefined> {
+  async connect(): Promise<void> {
     if (isGrpcRequest(this.request)) {
-      return new Promise<undefined>(resolve => {
+      return new Promise<void>(resolve => {
         const protoDefinitions = this.context.options.protoDefinitions;
         if (isGrpcRequest(this.request) && protoDefinitions) {
           this.serviceData = getSerivceData(this.request.url || '', protoDefinitions);
           if (this.serviceData.ServiceClass) {
             const method = this.getServiceDataMethod(this.serviceData, this.request);
-            const { methodArgs, needsResolve } = this.getMethodArgs(this.serviceData, this.request, () =>
-              resolve(undefined)
-            );
-            this.nativeClient = method(...methodArgs);
+            const { methodArgs, needsResolve } = this.getMethodArgs(this.serviceData, this.request, () => resolve());
+            this._nativeClient = method(...methodArgs);
             const methodName = this.serviceData.method;
-            this.registerEvents(this.nativeClient, methodName);
+            this.registerEvents(this._nativeClient, methodName);
             if (needsResolve) {
-              resolve(undefined);
+              resolve();
             }
           }
         }
@@ -113,20 +107,20 @@ export class GrpcRequestClient extends models.AbstractRequestClient<GrpcStream |
     return method;
   }
 
-  async send(body?: string | Buffer): Promise<models.HttpResponse | undefined> {
-    return new Promise<undefined>(resolve => {
+  async send(body?: string | Buffer): Promise<void> {
+    return new Promise<void>(resolve => {
       if (
         isGrpcRequest(this.request) &&
         (this.nativeClient instanceof Writable || this.nativeClient instanceof Duplex)
       ) {
         this.nativeClient.write(this.getData(body || this.request.body));
         if (!body) {
-          this.waitForStreamEnd(() => resolve(undefined));
+          this.waitForStreamEnd(resolve);
         } else {
-          resolve(undefined);
+          resolve();
         }
       } else {
-        this.waitForStreamEnd(() => resolve(undefined));
+        this.waitForStreamEnd(resolve);
       }
     });
   }
@@ -143,17 +137,12 @@ export class GrpcRequestClient extends models.AbstractRequestClient<GrpcStream |
     this.nativeClient?.on('close', streamResolve);
   }
 
-  override close(reason: models.RequestClientCloseReason): void {
-    if (this.nativeClient) {
-      if (reason === models.RequestClientCloseReason.ERROR) {
-        this.nativeClient.destroy();
-      } else if (reason === models.RequestClientCloseReason.CANCELLATION) {
-        this.nativeClient.destroy(new Error('Cancellation'));
-      } else if (reason === models.RequestClientCloseReason.SUCCESS) {
-        if (this.nativeClient instanceof Writable || this.nativeClient instanceof Duplex) {
-          this.nativeClient.end();
-        }
-        this.removeAllListeners();
+  override close(err?: Error): void {
+    if (err) {
+      this.nativeClient?.destroy(err);
+    } else {
+      if (this.nativeClient instanceof Writable || this.nativeClient instanceof Duplex) {
+        this.nativeClient.end();
       }
     }
   }

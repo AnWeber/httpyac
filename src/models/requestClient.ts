@@ -1,18 +1,14 @@
 import { HttpResponse, StreamResponse } from './httpResponse';
 import { EventEmitter } from 'events';
 
-export enum RequestClientCloseReason {
-  ERROR = 'ERROR',
-  CANCELLATION = 'CANCELLATION',
-  STREAMING = 'STREAMING',
-  SUCCESS = 'END',
-}
+export type RequestClientResponse = undefined | void | HttpResponse;
+
 export interface RequestClient<T = unknown> {
   reportMessage: string;
   nativeClient: T;
-  connect(): Promise<undefined | HttpResponse>;
-  send(body?: Buffer | string): Promise<undefined | HttpResponse>;
-  close(reason: RequestClientCloseReason): void;
+  connect(): Promise<RequestClientResponse>;
+  send(body?: Buffer | string): Promise<RequestClientResponse>;
+  close(err?: Error): void;
   on<K extends keyof RequestClientEventMap>(
     type: K,
     listener: (this: RequestClient<T>, ev: RequestClientEventMap[K]) => void
@@ -30,16 +26,12 @@ interface RequestClientEventMap {
 }
 
 export abstract class AbstractRequestClient<T> implements RequestClient<T> {
-  abstract close(reason: RequestClientCloseReason): void;
+  abstract close(err?: Error): void;
   abstract nativeClient: T;
   abstract reportMessage: string;
-  abstract connect(): Promise<undefined | HttpResponse>;
-  abstract send(body?: string | Buffer): Promise<HttpResponse | undefined>;
+  abstract connect(): Promise<RequestClientResponse>;
+  abstract send(body?: string | Buffer): Promise<RequestClientResponse>;
   private eventEmitter = new EventEmitter();
-
-  removeAllListeners() {
-    this.eventEmitter.removeAllListeners();
-  }
 
   on<K extends keyof RequestClientEventMap>(
     type: K,

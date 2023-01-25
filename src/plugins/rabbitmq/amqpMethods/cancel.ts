@@ -8,6 +8,7 @@ export async function cancel({ channel, request }: AmqpMethodContext) {
     const result = await channel.basicCancel(tag);
     return {
       protocol: 'AMQP',
+      name: `AMQP cancel`,
       statusCode: 0,
       headers: {
         channelId: channel.id,

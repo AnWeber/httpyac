@@ -3,7 +3,6 @@ import { AmqpRequest } from '../amqpRequest';
 import { AMQPChannel } from '@cloudamqp/amqp-client';
 
 export interface AmqpMethodContext {
-  body?: string | Buffer;
   channel: AMQPChannel;
   request: AmqpRequest;
   context: ProcessorContext;

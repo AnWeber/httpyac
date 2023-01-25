@@ -7,8 +7,8 @@ import WebSocket, { ClientOptions } from 'ws';
 const WEBSOCKET_CLOSE_NORMAL = 1000;
 const WEBSOCKET_CLOSE_GOING_AWAY = 1001;
 
-export class WebsocketRequestClient extends models.AbstractRequestClient<WebSocket> {
-  private client: WebSocket | undefined;
+export class WebsocketRequestClient extends models.AbstractRequestClient<WebSocket | undefined> {
+  private _nativeClient: WebSocket | undefined;
   private responseTemplate: Partial<models.HttpResponse> & { protocol: string } = {
     protocol: 'WS',
   };
@@ -20,44 +20,37 @@ export class WebsocketRequestClient extends models.AbstractRequestClient<WebSock
     return `perform WebSocket Request (${this.request.url})`;
   }
 
-  get nativeClient(): WebSocket {
-    if (!this.client) {
-      if (isWebsocketRequest(this.request)) {
-        this.client = new WebSocket(this.request.url || '', this.getClientOptions(this.request));
-        this.registerEvents(this.client);
-      } else {
-        throw new Error('no valid Request received');
-      }
-    }
-    return this.client;
+  get nativeClient(): WebSocket | undefined {
+    return this._nativeClient;
   }
 
-  async connect(): Promise<models.HttpResponse | undefined> {
+  async connect(): Promise<void> {
     if (isWebsocketRequest(this.request)) {
-      const client = this.nativeClient;
-
-      return await new Promise(resolve => {
-        client.on('open', () => {
-          resolve(undefined);
+      const nativeClient = new WebSocket(this.request.url || '', this.getClientOptions(this.request));
+      this._nativeClient = this.nativeClient;
+      this.registerEvents(nativeClient);
+      await new Promise<void>(resolve => {
+        nativeClient.on('open', () => {
+          resolve();
         });
       });
     }
-    return undefined;
   }
 
-  async send(body: string | Buffer): Promise<models.HttpResponse | undefined> {
+  async send(body?: string | Buffer): Promise<void> {
     if (isWebsocketRequest(this.request)) {
-      this.nativeClient?.send(body);
+      const sendBody = body || this.request.body;
+      if (sendBody) {
+        this.nativeClient?.send(sendBody);
+      }
     }
-    return undefined;
   }
 
-  override close(reason: models.RequestClientCloseReason): void {
-    this.removeAllListeners();
-    if (reason === models.RequestClientCloseReason.ERROR) {
-      this.client?.close(WEBSOCKET_CLOSE_GOING_AWAY, 'WEBSOCKET_CLOSE_GOING_AWAY');
+  override close(err?: Error): void {
+    if (err) {
+      this._nativeClient?.close(WEBSOCKET_CLOSE_GOING_AWAY, err.message);
     } else {
-      this.client?.close(WEBSOCKET_CLOSE_NORMAL, 'CLOSE_NORMAL');
+      this._nativeClient?.close(WEBSOCKET_CLOSE_NORMAL, 'CLOSE_NORMAL');
     }
   }
 

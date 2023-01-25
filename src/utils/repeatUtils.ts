@@ -3,10 +3,10 @@ import { cloneResponse } from './requestUtils';
 import { stringifySafe } from './stringUtils';
 
 export async function repeat(
-  load: () => Promise<models.HttpResponse | undefined>,
+  load: () => Promise<models.HttpResponse | void | undefined>,
   context: { repeat?: models.RepeatOptions }
 ) {
-  const loader: Array<() => Promise<models.HttpResponse | undefined>> = [];
+  const loader: Array<() => Promise<models.HttpResponse | void | undefined>> = [];
   for (let index = 0; index < (context.repeat?.count || 1); index++) {
     loader.push(load);
   }

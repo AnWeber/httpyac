@@ -8,6 +8,7 @@ export async function purge({ channel, request, onMessage }: AmqpMethodContext) 
     const result = await channel.queuePurge(queue);
     onMessage(queue, {
       protocol: 'AMQP',
+      name: `AMQP purge`,
       statusCode: 0,
       headers: {
         queue,

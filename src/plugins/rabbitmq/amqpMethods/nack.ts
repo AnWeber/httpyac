@@ -12,6 +12,7 @@ export async function nack({ channel, request }: AmqpMethodContext) {
     );
     return {
       protocol: 'AMQP',
+      name: `AMQP nack`,
       statusCode: 0,
       headers: {
         channelId: channel.id,

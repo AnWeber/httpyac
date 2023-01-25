@@ -12,6 +12,7 @@ export async function deleteMessage({ channel, request, onMessage }: AmqpMethodC
     const result = await channel.exchangeDelete(exchange, options);
     onMessage(exchange, {
       protocol: 'AMQP',
+      name: `AMQP delete`,
       statusCode: 0,
       headers: {
         channelId: channel.id,
@@ -34,6 +35,7 @@ export async function deleteMessage({ channel, request, onMessage }: AmqpMethodC
     const result = await channel.queueDelete(queue, options);
     onMessage(queue, {
       protocol: 'AMQP',
+      name: `AMQP delete`,
       statusCode: 0,
       headers: {
         channelId: channel.id,

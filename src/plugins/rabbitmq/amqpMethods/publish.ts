@@ -5,8 +5,8 @@ import { AmqpMethodContext } from './amqpMethodContext';
 import { getNonAmqpHeaders } from './amqpUtils';
 import { AMQPProperties } from '@cloudamqp/amqp-client';
 
-export async function publish({ channel, body, request, onMessage }: AmqpMethodContext) {
-  if (body) {
+export async function publish({ channel, request, onMessage }: AmqpMethodContext) {
+  if (request.body) {
     const properties: AMQPProperties = {
       appId: 'httpyac',
       timestamp: new Date(),
@@ -30,12 +30,13 @@ export async function publish({ channel, body, request, onMessage }: AmqpMethodC
       const publish = await channel.basicPublish(
         exchange,
         routingKey,
-        body,
+        request.body,
         properties,
         utils.getHeaderBoolean(request.headers, constants.AmqpMandatory)
       );
       onMessage(exchange, {
         protocol: 'AMQP',
+        name: `AMQP publish ${routingKey}`,
         statusCode: 0,
         headers: {
           exchange,
@@ -58,12 +59,13 @@ export async function publish({ channel, body, request, onMessage }: AmqpMethodC
       const publish = await channel.basicPublish(
         '',
         queue,
-        body,
+        request.body,
         properties,
         utils.getHeaderBoolean(request.headers, constants.AmqpMandatory)
       );
       onMessage(queue, {
         protocol: 'AMQP',
+        name: `AMQP publish ${routingKey}`,
         statusCode: 0,
         headers: {
           queue,
@@ -88,5 +90,6 @@ export async function publish({ channel, body, request, onMessage }: AmqpMethodC
     io.userInteractionProvider.showWarnMessage?.(message);
     io.log.warn(message);
   }
+
   return undefined;
 }

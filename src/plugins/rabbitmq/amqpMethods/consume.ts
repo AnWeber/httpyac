@@ -13,31 +13,28 @@ export async function consume({ channel, request, onMessage }: AmqpMethodContext
     args: getNonAmqpHeaders(request.headers),
   };
   for (const queue of queues) {
-    await channel.basicConsume(queue, options, async message => {
-      const result = {
-        channelId: channel.id,
-        exchange: message.exchange,
-        routingKey: message.routingKey,
-        bodySize: message.bodySize,
-        deliveryTag: message.deliveryTag,
-        consumerTag: message.consumerTag,
-        redelivered: message.redelivered,
-        messageCount: message.messageCount,
-        replyCode: message.replyCode,
-        replyText: message.replyCode,
-        body: message.bodyString(),
-        options,
-      };
+    channel.basicConsume(queue, options, async message => {
       onMessage(queue, {
         protocol: 'AMQP',
+        name: `AMQP consume ${queue}`,
         statusCode: 0,
         headers: {
           channelId: channel.id,
           method: 'consume',
           queue,
+          exchange: message.exchange,
+          routingKey: message.routingKey,
+          bodySize: message.bodySize,
+          deliveryTag: message.deliveryTag,
+          consumerTag: message.consumerTag,
+          redelivered: message.redelivered,
+          messageCount: message.messageCount,
+          replyCode: message.replyCode,
+          replyText: message.replyCode,
+          options,
         },
-        message: `${result.body} (deliveryTag: ${result.deliveryTag}, channelId: ${result.channelId})`,
-        body: utils.stringifySafe(result, 2),
+        message: `${message.bodyString()} (deliveryTag: ${message.deliveryTag}, channelId: ${message.channelId})`,
+        body: message.bodyString(),
       });
     });
   }

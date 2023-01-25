@@ -11,6 +11,7 @@ export async function ack({ channel, request }: AmqpMethodContext) {
     );
     return {
       protocol: 'AMQP',
+      name: `AMQP ack`,
       statusCode: 0,
       headers: {
         channelId: channel.id,

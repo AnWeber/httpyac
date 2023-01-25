@@ -13,6 +13,7 @@ export async function bind({ channel, request, onMessage }: AmqpMethodContext) {
       const result = await channel.queueBind(queue, exchange, routingKey, getNonAmqpHeaders(request.headers));
       onMessage(queue, {
         protocol: 'AMQP',
+        name: `AMQP bind ${routingKey}`,
         statusCode: 0,
         headers: {
           channelId: channel.id,
@@ -34,6 +35,7 @@ export async function bind({ channel, request, onMessage }: AmqpMethodContext) {
       const result = await channel.exchangeBind(destination, exchange, routingKey, getNonAmqpHeaders(request.headers));
       onMessage(exchange, {
         protocol: 'AMQP',
+        name: `AMQP bind ${routingKey}`,
         statusCode: 0,
         headers: {
           channelId: channel.id,

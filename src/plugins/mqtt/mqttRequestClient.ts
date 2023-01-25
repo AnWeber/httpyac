@@ -4,8 +4,7 @@ import * as utils from '../../utils';
 import { isMQTTRequest, MQTTRequest } from './mqttRequest';
 import { connect, IClientOptions, QoS, MqttClient } from 'mqtt';
 
-export class MQTTRequestClient extends models.AbstractRequestClient<MqttClient> {
-  private client: MqttClient | undefined;
+export class MQTTRequestClient extends models.AbstractRequestClient<MqttClient | undefined> {
   private responseTemplate: Partial<models.HttpResponse> & { protocol: string } = {
     protocol: 'MQTT',
   };
@@ -17,17 +16,9 @@ export class MQTTRequestClient extends models.AbstractRequestClient<MqttClient> 
     return `perform MQTT Request (${this.request.url})`;
   }
 
-  get nativeClient(): MqttClient {
-    if (!this.client) {
-      const options: IClientOptions = {};
-      if (isMQTTRequest(this.request)) {
-        Object.assign(options, this.getClientOptions(this.request, this.context));
-      }
-      this.client = connect(this.request.url || '', options);
-      this.registerEvents(this.client);
-    }
-
-    return this.client;
+  private _nativeClient: MqttClient | undefined;
+  get nativeClient(): MqttClient | undefined {
+    return this._nativeClient;
   }
 
   private get publishTopics() {
@@ -50,25 +41,27 @@ export class MQTTRequestClient extends models.AbstractRequestClient<MqttClient> 
     return [];
   }
 
-  async connect(): Promise<models.HttpResponse | undefined> {
-    const client = this.nativeClient;
+  async connect(): Promise<void> {
     if (isMQTTRequest(this.request)) {
-      this.subscribe(client, this.subscribeTopics, this.request);
+      const options: IClientOptions = {};
+      if (isMQTTRequest(this.request)) {
+        Object.assign(options, this.getClientOptions(this.request, this.context));
+      }
+      this._nativeClient = connect(this.request.url || '', options);
+      this.registerEvents(this._nativeClient);
+      this.subscribe(this._nativeClient, this.subscribeTopics, this.request);
     }
-    return undefined;
   }
 
-  async send(body?: string | Buffer): Promise<models.HttpResponse | undefined> {
-    if (isMQTTRequest(this.request)) {
+  async send(body?: string | Buffer): Promise<void> {
+    if (isMQTTRequest(this.request) && this.nativeClient) {
       const request = body ? { ...this.request, body: utils.toString(body) } : this.request;
       this.publish(this.nativeClient, this.publishTopics, request);
     }
-    return undefined;
   }
 
   override close(): void {
-    this.removeAllListeners();
-    this.nativeClient.end(true, undefined, err => err && log.error('error on close', err));
+    this.nativeClient?.end(true, undefined, err => err && log.error('error on close', err));
   }
 
   private registerEvents(client: MqttClient) {

@@ -2,7 +2,7 @@ import * as models from '../../models';
 import * as utils from '../../utils';
 import * as amqpMethods from './amqpMethods';
 import * as constants from './amqpMethods/amqpConstants';
-import { isAmqpRequest } from './amqpRequest';
+import { AmqpRequest, isAmqpRequest } from './amqpRequest';
 import { AMQPClient, AMQPChannel } from '@cloudamqp/amqp-client';
 
 export class AmqpRequestClient extends models.AbstractRequestClient<AMQPClient> {
@@ -39,25 +39,32 @@ export class AmqpRequestClient extends models.AbstractRequestClient<AMQPClient> 
       const client = this.nativeClient;
       await client.connect();
       this._channel = await client.channel(this.channelId);
+      await this.executeAmqpMethod(this.request);
     }
     return undefined;
   }
 
   async send(body?: string | Buffer): Promise<models.HttpResponse | undefined> {
-    if (isAmqpRequest(this.request) && this.channel) {
+    if (isAmqpRequest(this.request) && this.channel && body) {
+      await this.executeAmqpMethod({
+        ...this.request,
+        body,
+      });
+    }
+    return undefined;
+  }
+
+  private async executeAmqpMethod(request: AmqpRequest) {
+    if (this.channel) {
       const context: amqpMethods.AmqpMethodContext = {
-        body: body || this.request.body,
         channel: this.channel,
-        request: this.request,
+        request,
         context: this.context,
         onMessage: (type, msg) => this.onMessage(type, msg),
       };
       try {
-        if (!body) {
-          const method = this.getMethod(constants.getAmqpMethod(this.request));
-          return await method.exchange(context);
-        }
-        return await this.getMethod().exchange(context);
+        const method = this.getMethod(constants.getAmqpMethod(request));
+        return await method.exchange(context);
       } catch (err) {
         return amqpMethods.errorToHttpResponse(err);
       }
@@ -65,19 +72,13 @@ export class AmqpRequestClient extends models.AbstractRequestClient<AMQPClient> 
     return undefined;
   }
 
-  override close(reason: models.RequestClientCloseReason): void {
-    if (reason === models.RequestClientCloseReason.ERROR) {
-      this.removeAllListeners();
+  override close(err?: Error): void {
+    if (err) {
+      this.channel?.close();
+      this._nativeClient?.close(err.message);
+    } else {
       this._channel?.close();
-      this._nativeClient?.close(`error`);
-    } else if (reason === models.RequestClientCloseReason.CANCELLATION) {
-      this.removeAllListeners();
-      this._channel?.close();
-      this._nativeClient?.close(`cancellation`);
-    } else if (reason === models.RequestClientCloseReason.SUCCESS) {
-      this.removeAllListeners();
-      this._channel?.close();
-      this._nativeClient?.close(`finished`);
+      this._nativeClient?.close();
     }
   }
 

@@ -15,6 +15,7 @@ export async function declare({ channel, request, onMessage }: AmqpMethodContext
     const result = await channel.exchangeDeclare(exchange, type, options);
     onMessage(exchange, {
       protocol: 'AMQP',
+      name: `AMQP declare`,
       statusCode: 0,
       headers: {
         channelId: channel.id,
@@ -38,6 +39,7 @@ export async function declare({ channel, request, onMessage }: AmqpMethodContext
     const result = await channel.queueDeclare(queue, options);
     onMessage(queue, {
       protocol: 'AMQP',
+      name: `AMQP declare`,
       statusCode: 0,
       headers: {
         channelId: channel.id,

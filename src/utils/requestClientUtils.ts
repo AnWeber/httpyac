@@ -1,7 +1,9 @@
 import { log } from '../io';
 import * as models from '../models';
+import { isError } from './errorUtils';
 import { report } from './logUtils';
 import { repeat, mergeResponses } from './repeatUtils';
+import { toString } from './stringUtils';
 import { setVariableInContext, deleteVariableInContext } from './variableUtils';
 import { HookCancel } from 'hookpoint';
 
@@ -33,8 +35,7 @@ export function executeRequestClientFactory<T extends models.RequestClient>(
         const sendResponses = await Promise.all([
           repeat(() => client.send(), context),
           onStreaming(context).then(() => {
-            client.close(models.RequestClientCloseReason.STREAMING);
-            return undefined;
+            client.close();
           }),
         ]);
 
@@ -45,11 +46,15 @@ export function executeRequestClientFactory<T extends models.RequestClient>(
             return false;
           }
         }
-        client.close(models.RequestClientCloseReason.SUCCESS);
+        client.close();
         return true;
       } catch (err) {
         (context.scriptConsole || log).error(context.request);
-        client.close(models.RequestClientCloseReason.ERROR);
+        if (isError(err)) {
+          client.close(err);
+        } else {
+          client.close(new Error(toString(err)));
+        }
         throw err;
       } finally {
         dispose?.();
@@ -60,7 +65,7 @@ export function executeRequestClientFactory<T extends models.RequestClient>(
   };
 }
 
-function toResponses(...responses: Array<models.HttpResponse | undefined>) {
+function toResponses(...responses: Array<models.HttpResponse | void | undefined>) {
   const result: Array<models.HttpResponse> = [];
 
   for (const response of responses) {
@@ -73,7 +78,7 @@ function toResponses(...responses: Array<models.HttpResponse | undefined>) {
 
 function registerCancellation<T extends models.RequestClient>(client: T, context: models.ProcessorContext) {
   if (context.progress?.register) {
-    return context.progress?.register(() => client.close(models.RequestClientCloseReason.CANCELLATION));
+    return context.progress?.register(() => client.close(new Error('user cancellation')));
   }
   return undefined;
 }
@@ -140,9 +145,6 @@ async function onStreaming(context: models.ProcessorContext) {
 
 async function onResponse(response: models.HttpResponse, context: models.ProcessorContext) {
   const onResponse = context.httpRegion.hooks.onResponse.merge(context.httpFile.hooks.onResponse);
-  if (context.progress) {
-    onResponse.addInterceptor(createIsCanceledInterceptor(() => !!context.progress?.isCanceled()));
-  }
   if ((await onResponse.trigger(response, context)) === HookCancel) {
     return false;
   }

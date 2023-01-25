@@ -4,8 +4,7 @@ import * as utils from '../../utils';
 import { isEventSourceRequest, EventSourceRequest } from './eventSourceRequest';
 import EventSource from 'eventsource';
 
-export class EventSourceRequestClient extends models.AbstractRequestClient<EventSource> {
-  private client: EventSource | undefined;
+export class EventSourceRequestClient extends models.AbstractRequestClient<EventSource | undefined> {
   private responseTemplate: Partial<models.HttpResponse> & { protocol: string } = {
     protocol: 'SSE',
   };
@@ -17,30 +16,23 @@ export class EventSourceRequestClient extends models.AbstractRequestClient<Event
     return `perform SSE Request (${this.request.url})`;
   }
 
-  get nativeClient(): EventSource {
-    if (!this.client) {
-      if (isEventSourceRequest(this.request)) {
-        this.client = new EventSource(this.request.url || '', this.getClientOptions(this.request));
-        this.registerEvents(this.client, this.request);
-      } else {
-        throw new Error('no valid Request received');
-      }
+  private _nativeClient: EventSource | undefined;
+  get nativeClient(): EventSource | undefined {
+    return this._nativeClient;
+  }
+
+  async connect(): Promise<void> {
+    if (isEventSourceRequest(this.request)) {
+      this._nativeClient = new EventSource(this.request.url || '', this.getClientOptions(this.request));
+      this.registerEvents(this._nativeClient, this.request);
     }
-    return this.client;
   }
 
-  async connect(): Promise<models.HttpResponse | undefined> {
-    const client = this.nativeClient;
-    log.debug(client);
-    return undefined;
-  }
-
-  async send(): Promise<models.HttpResponse | undefined> {
-    return undefined;
+  async send(): Promise<void> {
+    log.debug('SSE does not support send');
   }
 
   override close(): void {
-    this.removeAllListeners();
     this.nativeClient?.close();
   }
 

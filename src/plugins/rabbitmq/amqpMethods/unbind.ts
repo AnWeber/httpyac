@@ -15,6 +15,7 @@ export async function unbind({ channel, request, onMessage }: AmqpMethodContext)
       const result = await channel.queueUnbind(queue, exchange, routingKey, nonAmqpHeaders);
       onMessage(queue, {
         protocol: 'AMQP',
+        name: `AMQP unbind ${routingKey}`,
         statusCode: 0,
         headers: {
           channelId: channel.id,
@@ -39,6 +40,7 @@ export async function unbind({ channel, request, onMessage }: AmqpMethodContext)
       const result = await channel.exchangeUnbind(destination, exchange, routingKey, nonAmqpHeaders);
       onMessage(exchange, {
         protocol: 'AMQP',
+        name: `AMQP unbind ${routingKey}`,
         statusCode: 0,
         headers: {
           channelId: channel.id,
