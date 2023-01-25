@@ -33,7 +33,7 @@ export async function consume({ channel, request, onMessage }: AmqpMethodContext
           replyText: message.replyCode,
           options,
         },
-        message: `${message.bodyString()} (deliveryTag: ${message.deliveryTag}, channelId: ${message.channelId})`,
+        message: `${message.bodyString()} (deliveryTag: ${message.deliveryTag})`,
         body: message.bodyString(),
       });
     });
