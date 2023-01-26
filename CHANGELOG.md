@@ -8,6 +8,8 @@
 - to access previous Client you can use `$requestClient.nativeClient`
 - removed Variables: amqpClient, amqpChannel, grpcStream, mqttClient, websocketClient
 
+- requireUncached is removed
+
 #### Features
 
 - support Intellij Request Body separator

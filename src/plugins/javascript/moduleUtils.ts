@@ -108,14 +108,6 @@ export async function runScript(
         Object.getOwnPropertyDescriptors(global)
       ),
       {
-        requireUncached: (id: string) => {
-          io.log.warn(`requireUncached is deprecated. It can no longer be supported due to esm conversion.`);
-          const dirName = io.fileProvider.dirname(filename);
-          if (dirName) {
-            clearModule(id, toModuleFilename(dirName));
-          }
-          return mod.require(id);
-        },
         ...checkVariableNames(options.context),
       }
     )
