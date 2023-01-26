@@ -6,13 +6,24 @@ export async function transformRequestBodyToBuffer(
   context: models.ProcessorContext
 ): Promise<void> {
   if (request.body) {
-    if (Array.isArray(request.body) && request.body.every(obj => ['function', 'string'].indexOf(typeof obj) >= 0)) {
-      request.body = await normalizeBody(request.body, context);
-    }
+    request.body = await transformToBufferOrString(request.body, context);
   }
 }
 
-async function normalizeBody(
+export async function transformToBufferOrString(
+  body: models.RequestBody,
+  context: models.ProcessorContext
+): Promise<string | Buffer> {
+  if (utils.isString(body)) {
+    return body;
+  }
+  if (Buffer.isBuffer(body)) {
+    return body;
+  }
+  return await normalizeBody(body, context);
+}
+
+export async function normalizeBody(
   body: Array<models.HttpRequestBodyLine>,
   context: models.ProcessorContext
 ): Promise<Buffer | string> {

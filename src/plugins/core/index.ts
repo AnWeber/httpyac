@@ -5,7 +5,7 @@ import { initParseMetData } from './metaData';
 import { initParseHook } from './parse';
 import { initParseEndHook } from './parseEnd';
 import { initReplaceVariableHook } from './replacer';
-import { initOnRequestHook } from './request';
+import * as request from './request';
 import { initOnResponseHook } from './response';
 
 export function registerCorePlugins(api: models.HttpyacHooksApi) {
@@ -18,4 +18,14 @@ export function registerCorePlugins(api: models.HttpyacHooksApi) {
 
   initProvideEnvironmentsHook(api);
   initReplaceVariableHook(api);
+}
+
+function initOnRequestHook(api: models.HttpyacHooksApi) {
+  api.hooks.onRequest.addHook('attachDefaultHeaders', request.attachDefaultHeaders);
+  api.hooks.onRequest.addHook('setEnvRequestOptions', request.setEnvRequestOptions);
+  api.hooks.onRequest.addHook('transformRequestBody', request.transformRequestBodyToBuffer);
+  api.hooks.onRequest.addHook('requestVariableReplacer', request.requestVariableReplacer);
+  api.hooks.onRequest.addHook('encodeRequestBody', request.encodeRequestBody);
+
+  api.hooks.onRequest.addInterceptor(request.isTrustedInterceptor);
 }

@@ -1,3 +1,17 @@
+## 6.0.0 (2023-02-xx)
+
+#### Breaking Changes
+
+- Protocol Specific Request Clients are replaced with generic interface RequestClient.
+- use `$requestClient.send(<body>)` to send string or Buffer with current client
+- add EventListener `$requestClient.on('message', (response) => ...)` to access respones of client
+- to access previous Client you can use `$requestClient.nativeClient`
+- removed Variables: amqpClient, amqpChannel, grpcStream, mqttClient, websocketClient
+
+#### Features
+
+- support Intellij Request Body separator
+
 ## 5.10.2 (2023-01-21)
 
 #### Fix

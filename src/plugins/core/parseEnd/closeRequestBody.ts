@@ -1,6 +1,7 @@
 import { fileProvider } from '../../../io';
 import * as models from '../../../models';
 import * as utils from '../../../utils';
+import { transformToBufferOrString, replaceVariablesInBody } from '../request';
 
 export async function closeRequestBody(context: models.ParserContext): Promise<void> {
   const requestBody = getAndRemoveRequestBody(context);
@@ -10,14 +11,26 @@ export async function closeRequestBody(context: models.ParserContext): Promise<v
 
     const requestBodyLines = await toHttpRequestBodyLineArray(requestBody.rawBody);
     if (requestBodyLines.length > 0) {
-      if (utils.isMimeTypeFormUrlEncoded(request.contentType)) {
-        request.body = formUrlEncodedJoin(requestBodyLines);
-      } else {
-        addLineForNewlineDelimitedJSON(requestBodyLines, request);
-        request.body = concatStrings(requestBodyLines, request.contentType);
+      const requestContents = splitRequestContents(requestBodyLines, request.contentType);
+      if (requestContents.length > 0 && !requestContents[0].wait) {
+        request.body = requestContents.shift()?.body;
+      }
+      if (requestContents.length > 0) {
+        createStreamingBodySendFactory(requestContents, context);
       }
     }
   }
+}
+
+function transformLinesToBody(
+  requestBodyLines: models.HttpRequestBodyLine[],
+  contentType: models.ContentType | undefined
+) {
+  if (utils.isMimeTypeFormUrlEncoded(contentType)) {
+    return formUrlEncodedJoin(requestBodyLines);
+  }
+  addLineForNewlineDelimitedJSON(requestBodyLines, contentType);
+  return concatStrings(requestBodyLines, contentType);
 }
 
 function concatStrings(requestBodyLines: models.HttpRequestBodyLine[], contentType: models.ContentType | undefined) {
@@ -58,9 +71,9 @@ function getAndRemoveRequestBody(context: models.ParserContext) {
 
 function addLineForNewlineDelimitedJSON(
   requestBodyLines: models.HttpRequestBodyLine[],
-  request: models.Request<string>
+  contentType: models.ContentType | undefined
 ) {
-  if (requestBodyLines.every(obj => utils.isString(obj)) && utils.isMimeTypeNewlineDelimitedJSON(request.contentType)) {
+  if (requestBodyLines.every(obj => utils.isString(obj)) && utils.isMimeTypeNewlineDelimitedJSON(contentType)) {
     requestBodyLines.push('');
   }
 }
@@ -124,4 +137,102 @@ function formUrlEncodedJoin(body: Array<models.HttpRequestBodyLine>): string {
     return result;
   }
   return '';
+}
+
+function splitRequestContents(
+  requestBodyLines: Array<models.HttpRequestBodyLine>,
+  contentType: models.ContentType | undefined
+) {
+  const store: Array<models.HttpRequestBodyLine> = [];
+  const requestContents: Array<RequestContent> = [];
+  let wait = false;
+  for (const line of requestBodyLines) {
+    const match = separatorMatch(line);
+    if (match) {
+      requestContents.push({
+        wait,
+        body: transformLinesToBody(store, contentType),
+      });
+      wait = match.waitForServer;
+      store.length = 0;
+    } else {
+      store.push(line);
+    }
+  }
+  if (store.length > 0) {
+    requestContents.push({
+      wait,
+      body: transformLinesToBody(store, contentType),
+    });
+  }
+  return requestContents;
+}
+
+type RequestContent = {
+  wait: boolean;
+  body?: string | Array<models.HttpRequestBodyLine>;
+};
+
+function separatorMatch(line: models.HttpRequestBodyLine) {
+  if (utils.isString(line)) {
+    const separatorMatch = /\s*={3}\s*(?<wait>wait-for-server)?\s*$/u.exec(line);
+    if (separatorMatch) {
+      return {
+        waitForServer: !!separatorMatch?.groups?.wait,
+      };
+    }
+  }
+  return undefined;
+}
+
+function createStreamingBodySendFactory(streamingContents: Array<RequestContent>, context: models.ParserContext) {
+  context.httpRegion.hooks.onStreaming.addHook('streaming_body', async context => {
+    if (context.requestClient) {
+      return new Promise<void>(resolve => {
+        sendStreamingContents(streamingContents, context, resolve);
+      });
+    }
+    return undefined;
+  });
+}
+
+async function sendStreamingContents(
+  streamingContents: Array<RequestContent>,
+  context: models.ProcessorContext,
+  resolve: () => void
+) {
+  let messageWaitCount = 0;
+  for (const streamingContent of streamingContents) {
+    const isLast = streamingContents.indexOf(streamingContent) === streamingContents.length - 1;
+    if (streamingContent.wait) {
+      messageWaitCount++;
+    }
+    if (messageWaitCount === 0) {
+      await sendWithRequestClient(streamingContent, context);
+      if (isLast) {
+        resolve();
+      }
+    } else {
+      let count = 0;
+      const messageCount = messageWaitCount;
+      context.requestClient?.on('message', async () => {
+        if (++count === messageCount) {
+          await sendWithRequestClient(streamingContent, context);
+          if (isLast) {
+            resolve();
+          }
+        }
+      });
+    }
+  }
+}
+
+async function sendWithRequestClient(streamingContent: RequestContent, context: models.ProcessorContext) {
+  await replaceVariablesInBody(streamingContent, context);
+  if (streamingContent.body) {
+    const body = await transformToBufferOrString(streamingContent.body, context);
+    if (body) {
+      await context.requestClient?.send(body);
+    }
+  }
 }

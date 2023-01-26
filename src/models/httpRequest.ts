@@ -7,12 +7,14 @@ export interface HeadersContainer {
   headers: Record<string, unknown>;
 }
 
-export interface Request<TMethod extends string = string> {
+export type RequestBody = string | Array<HttpRequestBodyLine> | Buffer;
+
+export interface Request<TMethod extends string = string, TBody = RequestBody> {
   supportsStreaming?: boolean;
   protocol?: string;
   url?: string;
   method?: TMethod;
-  body?: unknown;
+  body?: TBody;
   headers?: Record<string, unknown>;
   contentType?: ContentType;
   noRejectUnauthorized?: boolean;
@@ -21,7 +23,6 @@ export interface Request<TMethod extends string = string> {
 }
 
 export interface HttpRequest extends Request<HttpMethod> {
-  body?: string | Array<HttpRequestBodyLine> | Buffer;
   headers?: Record<string, string | string[] | undefined>;
   options: OptionsOfUnknownResponseBody;
 }

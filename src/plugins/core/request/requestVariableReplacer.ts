@@ -25,24 +25,24 @@ export async function requestVariableReplacer(
   return undefined;
 }
 
-async function replaceVariablesInBody(
-  replacedRequest: models.Request,
+export async function replaceVariablesInBody(
+  request: { body?: models.RequestBody },
   context: models.ProcessorContext
 ): Promise<boolean> {
-  if (replacedRequest.body) {
-    if (utils.isString(replacedRequest.body)) {
-      const result = await utils.replaceVariables(replacedRequest.body, models.VariableType.body, context);
+  if (request.body) {
+    if (utils.isString(request.body)) {
+      const result = await utils.replaceVariables(request.body, models.VariableType.body, context);
       if (result === HookCancel) {
         return false;
       }
       if (utils.isString(result) || Buffer.isBuffer(result)) {
-        replacedRequest.body = result;
+        request.body = result;
       } else {
-        replacedRequest.body = utils.toString(result);
+        request.body = utils.toString(result);
       }
-    } else if (Array.isArray(replacedRequest.body)) {
+    } else if (Array.isArray(request.body)) {
       const replacedBody: Array<models.HttpRequestBodyLine> = [];
-      for (const obj of replacedRequest.body) {
+      for (const obj of request.body) {
         if (utils.isString(obj)) {
           const result = await utils.replaceVariables(obj, models.VariableType.body, context);
           if (result === HookCancel) {
@@ -55,7 +55,7 @@ async function replaceVariablesInBody(
           replacedBody.push(obj);
         }
       }
-      replacedRequest.body = replacedBody;
+      request.body = replacedBody;
     }
   }
   return true;
