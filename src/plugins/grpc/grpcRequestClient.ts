@@ -121,18 +121,6 @@ export class GrpcRequestClient extends models.AbstractRequestClient<GrpcStream |
     return method;
   }
 
-  private waitForStreamEnd(resolve: () => void) {
-    let isResolved = false;
-    const streamResolve = () => {
-      if (!isResolved) {
-        isResolved = true;
-        resolve();
-      }
-    };
-    this.nativeClient?.on('end', streamResolve);
-    this.nativeClient?.on('close', streamResolve);
-  }
-
   override close(err?: Error): void {
     if (err) {
       this.nativeClient?.destroy(err);
