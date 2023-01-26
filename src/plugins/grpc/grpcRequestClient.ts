@@ -58,24 +58,38 @@ export class GrpcRequestClient extends models.AbstractRequestClient<GrpcStream |
 
   async connect(): Promise<void> {
     if (isGrpcRequest(this.request)) {
-      return new Promise<void>(resolve => {
-        const protoDefinitions = this.context.options.protoDefinitions;
-        if (isGrpcRequest(this.request) && protoDefinitions) {
-          this.serviceData = getSerivceData(this.request.url || '', protoDefinitions);
-          if (this.serviceData.ServiceClass) {
-            const method = this.getServiceDataMethod(this.serviceData, this.request);
-            const { methodArgs, needsResolve } = this.getMethodArgs(this.serviceData, this.request, () => resolve());
-            this._nativeClient = method(...methodArgs);
-            const methodName = this.serviceData.method;
-            this.registerEvents(this._nativeClient, methodName);
-            if (needsResolve) {
-              resolve();
-            }
-          }
-        }
-      });
+      const protoDefinitions = this.context.options.protoDefinitions;
+      if (isGrpcRequest(this.request) && protoDefinitions) {
+        this.serviceData = getSerivceData(this.request.url || '', protoDefinitions);
+      }
     }
     return undefined;
+  }
+
+  async send(body?: string | Buffer): Promise<void> {
+    let promise: Promise<void> | undefined;
+    if (!this.nativeClient) {
+      promise = new Promise<void>(resolve => {
+        this.createNativeClient(resolve);
+      });
+    }
+    if (isGrpcRequest(this.request) && (this.nativeClient instanceof Writable || this.nativeClient instanceof Duplex)) {
+      this.nativeClient.write(this.getData(body || this.request.body));
+    }
+    return promise;
+  }
+
+  private createNativeClient(resolve: () => void) {
+    if (this.serviceData?.ServiceClass && isGrpcRequest(this.request)) {
+      const method = this.getServiceDataMethod(this.serviceData, this.request);
+      const { methodArgs, needsResolve } = this.getMethodArgs(this.serviceData, this.request, () => resolve());
+      this._nativeClient = method(...methodArgs);
+      const methodName = this.serviceData.method;
+      this.registerEvents(this._nativeClient, methodName);
+      if (needsResolve) {
+        resolve();
+      }
+    }
   }
 
   private getMethodArgs(serviceData: ServiceData, request: GrpcRequest, resolve: () => void) {
@@ -105,24 +119,6 @@ export class GrpcRequestClient extends models.AbstractRequestClient<GrpcStream |
     );
     const method = client[serviceData.method]?.bind?.(client);
     return method;
-  }
-
-  async send(body?: string | Buffer): Promise<void> {
-    return new Promise<void>(resolve => {
-      if (
-        isGrpcRequest(this.request) &&
-        (this.nativeClient instanceof Writable || this.nativeClient instanceof Duplex)
-      ) {
-        this.nativeClient.write(this.getData(body || this.request.body));
-        if (!body) {
-          this.waitForStreamEnd(resolve);
-        } else {
-          resolve();
-        }
-      } else {
-        this.waitForStreamEnd(resolve);
-      }
-    });
   }
 
   private waitForStreamEnd(resolve: () => void) {
