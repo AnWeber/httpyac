@@ -1,9 +1,10 @@
 import { HttpRegion } from './httpRegion';
-import { HttpRequest } from './httpRequest';
+import { HttpRequest, Request } from './httpRequest';
 import { HttpResponse } from './httpResponse';
 import { RequestLogger } from './logHandler';
-import { Progress } from './processorContext';
+import { ProcessorContext, Progress } from './processorContext';
 import { RepeatOptions } from './repeatOptions';
+import { RequestClient } from './requestClient';
 
 export interface HttpClientContext {
   progress?: Progress | undefined;
@@ -22,5 +23,6 @@ export type HttpClientRequest = Partial<HttpRequest> & Omit<Omit<HttpRequest, 'o
 export type HttpClient = (request: HttpClientRequest, context: HttpClientContext) => Promise<HttpResponse | false>;
 
 export interface HttpClientProvider {
+  cretateRequestClient?: (request: Request, context: ProcessorContext) => RequestClient;
   exchange?: HttpClient;
 }

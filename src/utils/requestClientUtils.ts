@@ -32,8 +32,8 @@ export function executeRequestClientFactory<T extends models.RequestClient>(
         addMetaDataEvent(requestClient, context, messagePromises);
 
         report(context, requestClient.reportMessage);
-        const connectResponse = await requestClient.connect();
-        const sendResponses = await Promise.all([
+        await requestClient.connect();
+        await Promise.all([
           repeat(() => requestClient.send(), context),
           onStreaming(context).then(() => {
             requestClient.close();
@@ -41,7 +41,7 @@ export function executeRequestClientFactory<T extends models.RequestClient>(
         ]);
 
         const messageResponses = await Promise.all(messagePromises);
-        const response = mergeResponses(toResponses(connectResponse, ...sendResponses, ...messageResponses));
+        const response = mergeResponses(toResponses(...messageResponses));
         if (response) {
           if (!(await onResponse(response, context))) {
             return false;

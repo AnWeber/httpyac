@@ -65,7 +65,12 @@ export async function parseRequestLine(
       }
     }
 
-    context.httpRegion.hooks.execute.addObjHook(obj => obj.process, new HttpClientAction());
+    if (httpClientProvider.cretateRequestClient) {
+      context.httpRegion.hooks.execute.addHook(
+        'http',
+        utils.executeRequestClientFactory(httpClientProvider.cretateRequestClient)
+      );
+    }
 
     if (context.httpRegion.request.headers) {
       const contentType = utils.getHeader(context.httpRegion.request.headers, 'content-type');
@@ -161,46 +166,6 @@ function parseProtocol(request: models.HttpRequest) {
       request.url = match.groups.url.trim();
       if (['1.1', '1.0'].indexOf(match.groups.version) < 0) {
         request.options.http2 = true;
-      }
-    }
-  }
-}
-
-export class HttpClientAction {
-  id = 'httpClient';
-
-  async process(context: models.ProcessorContext): Promise<boolean> {
-    const { request } = context;
-    if (utils.isHttpRequest(request)) {
-      if (request.noRedirect) {
-        request.options.followRedirect = false;
-      }
-      if (request.noRejectUnauthorized) {
-        request.options.https = request.options.https || {};
-        request.options.https.rejectUnauthorized = false;
-      }
-      this.ensureStringHeaders(request);
-      utils.report(context, `send ${request.method || 'GET'} ${request.url}`);
-      if (httpClientProvider.exchange) {
-        const exchange = httpClientProvider.exchange;
-        return utils.triggerRequestResponseHooks(async () => await exchange(request, context), context);
-      }
-    }
-    return false;
-  }
-
-  private ensureStringHeaders(request: models.HttpRequest) {
-    if (request.headers) {
-      for (const [header, val] of Object.entries(request.headers)) {
-        if (typeof val !== 'undefined') {
-          let result: string | string[];
-          if (Array.isArray(val)) {
-            result = val.map(obj => utils.toString(obj) || obj);
-          } else {
-            result = utils.toString(val) || val;
-          }
-          request.headers[header] = result;
-        }
       }
     }
   }

@@ -7,9 +7,11 @@ import { CookieJarInterceptor } from './cookieJarInterceptor';
 import { cookieVariableReplacer } from './cookieVariableReplacer';
 import { digestAuthVariableReplacer } from './digestAuthVariableReplacer';
 import { gotHttpClient } from './gotUtils';
+import { HttpRequestClient } from './httpRequestClient';
 import { logHttpRedirect } from './logHttpRedirect';
 
 httpClientProvider.exchange = gotHttpClient;
+httpClientProvider.cretateRequestClient = (request, context) => new HttpRequestClient(request, context);
 
 export function registerHttpPlugin(api: models.HttpyacHooksApi) {
   api.hooks.execute.addInterceptor(new CookieJarInterceptor());

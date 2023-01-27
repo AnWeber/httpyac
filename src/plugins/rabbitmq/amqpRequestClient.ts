@@ -34,7 +34,7 @@ export class AmqpRequestClient extends models.AbstractRequestClient<AMQPClient> 
     return this._nativeClient;
   }
 
-  async connect(): Promise<models.HttpResponse | undefined> {
+  async connect(): Promise<void> {
     if (isAmqpRequest(this.request)) {
       const client = this.nativeClient;
       await client.connect();
@@ -44,14 +44,13 @@ export class AmqpRequestClient extends models.AbstractRequestClient<AMQPClient> 
     return undefined;
   }
 
-  async send(body?: string | Buffer): Promise<models.HttpResponse | undefined> {
+  async send(body?: string | Buffer): Promise<void> {
     if (isAmqpRequest(this.request) && this.channel && body) {
       await this.executeAmqpMethod({
         ...this.request,
         body,
       });
     }
-    return undefined;
   }
 
   private async executeAmqpMethod(request: AmqpRequest) {

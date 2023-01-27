@@ -18,7 +18,7 @@ export interface GqlPostRequest {
 
 export class GqlAction {
   id = 'gql';
-  before = ['httpClient'];
+  before = ['http'];
 
   constructor(private readonly gqlData: GqlData) {}
 
