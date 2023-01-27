@@ -4,6 +4,7 @@ import { EventEmitter } from 'events';
 export type RequestClientResponse = undefined | void | HttpResponse;
 
 export interface RequestClient<T = unknown> {
+  readonly supportsStreaming: boolean;
   reportMessage: string;
   nativeClient: T;
   connect(): Promise<void>;
@@ -26,6 +27,7 @@ interface RequestClientEventMap {
 }
 
 export abstract class AbstractRequestClient<T> implements RequestClient<T> {
+  abstract readonly supportsStreaming: boolean;
   abstract close(err?: Error): void;
   abstract nativeClient: T;
   abstract reportMessage: string;

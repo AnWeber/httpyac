@@ -16,6 +16,10 @@ export class EventSourceRequestClient extends models.AbstractRequestClient<Event
     return `perform SSE Request (${this.request.url})`;
   }
 
+  get supportsStreaming() {
+    return true;
+  }
+
   private _nativeClient: EventSource | undefined;
   get nativeClient(): EventSource | undefined {
     return this._nativeClient;

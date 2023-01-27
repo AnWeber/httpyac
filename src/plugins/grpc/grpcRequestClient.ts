@@ -29,6 +29,10 @@ export class GrpcRequestClient extends models.AbstractRequestClient<GrpcStream |
     return `perform gRPC Request (${this.request.url})`;
   }
 
+  get supportsStreaming() {
+    return !!this.serviceData?.methodDefinition?.requestStream || !!this.serviceData?.methodDefinition?.responseStream;
+  }
+
   private _nativeClient: GrpcStream | undefined;
   get nativeClient(): GrpcStream | undefined {
     return this._nativeClient;

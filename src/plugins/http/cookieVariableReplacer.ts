@@ -8,7 +8,7 @@ export async function cookieVariableReplacer(text: unknown, type: string, contex
     type.toLowerCase() === 'cookie' &&
     isHttpRequest(request) &&
     request.url &&
-    request.options.cookieJar instanceof CookieJar
+    request.options?.cookieJar instanceof CookieJar
   ) {
     if (isString(text)) {
       request.options.cookieJar.setCookie(text, request.url);

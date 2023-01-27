@@ -16,6 +16,10 @@ export class MQTTRequestClient extends models.AbstractRequestClient<MqttClient |
     return `perform MQTT Request (${this.request.url})`;
   }
 
+  get supportsStreaming() {
+    return true;
+  }
+
   private _nativeClient: MqttClient | undefined;
   get nativeClient(): MqttClient | undefined {
     return this._nativeClient;

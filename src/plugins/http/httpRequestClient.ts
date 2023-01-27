@@ -11,6 +11,10 @@ export class HttpRequestClient extends models.AbstractRequestClient<typeof got> 
     return `perform Http Request (${this.request.url})`;
   }
 
+  get supportsStreaming() {
+    return false;
+  }
+
   get nativeClient(): typeof got {
     return got;
   }

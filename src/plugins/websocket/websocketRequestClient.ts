@@ -20,6 +20,10 @@ export class WebsocketRequestClient extends models.AbstractRequestClient<WebSock
     return `perform WebSocket Request (${this.request.url})`;
   }
 
+  get supportsStreaming() {
+    return true;
+  }
+
   get nativeClient(): WebSocket | undefined {
     return this._nativeClient;
   }

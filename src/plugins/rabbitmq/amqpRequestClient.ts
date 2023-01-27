@@ -13,6 +13,10 @@ export class AmqpRequestClient extends models.AbstractRequestClient<AMQPClient> 
     return `perform AMQP Request (${this.request.url})`;
   }
 
+  get supportsStreaming() {
+    return true;
+  }
+
   private get channelId() {
     return utils.getHeaderNumber(this.request.headers, constants.AmqpChannelId);
   }

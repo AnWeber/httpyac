@@ -4,10 +4,13 @@ import { toHttpResponse, getBody } from './gotUtils';
 
 export async function logHttpRedirect(request: models.Request, context: models.ProcessorContext): Promise<void> {
   if (request && utils.isHttpRequest(request)) {
-    if (!request.options.hooks) {
+    if (!request.options) {
+      request.options = {};
+    }
+    if (!request.options?.hooks) {
       request.options.hooks = {};
     }
-    if (!request.options.hooks.beforeRedirect) {
+    if (!request.options?.hooks.beforeRedirect) {
       request.options.hooks.beforeRedirect = [];
     }
     if (!request.options.hooks.beforeRequest) {
@@ -24,11 +27,7 @@ export async function logHttpRedirect(request: models.Request, context: models.P
       };
     });
     request.options.hooks.beforeRedirect.push(async (_options, response) => {
-      const httpResponse = toHttpResponse(response);
-      httpResponse.tags = ['redirect', 'automatic'];
-      if (currentRequest) {
-        httpResponse.request = currentRequest;
-      }
+      const httpResponse = toHttpResponse(response, currentRequest || {});
       await utils.logResponse(httpResponse, context);
     });
   }

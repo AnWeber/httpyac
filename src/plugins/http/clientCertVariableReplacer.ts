@@ -55,6 +55,9 @@ async function setClientCertificateOptions(
   httpFile: models.HttpFile
 ) {
   const dir = fileProvider.dirname(httpFile.fileName);
+  if (!request.options) {
+    request.options = {};
+  }
   request.options.https = Object.assign({}, request.options.https, {
     certificate: await resolveFile(clientCertificateOptions.cert, dir),
     key: await resolveFile(clientCertificateOptions.key, dir),

@@ -111,7 +111,7 @@ function addMessageEvent<T extends models.RequestClient>(
   client.on('message', ([type, response]) => {
     log.debug(type, response?.message || response?.body);
     loadingPromises.push(Promise.resolve(response));
-    if (!context.httpRegion.metaData.noStreamingLog && context.logStream) {
+    if (client.supportsStreaming && !context.httpRegion.metaData.noStreamingLog && context.logStream) {
       loadingPromises.push(context.logStream(type, { ...response }));
     }
   });

@@ -165,6 +165,9 @@ function parseProtocol(request: models.HttpRequest) {
     if (match?.groups?.version && match.groups.url) {
       request.url = match.groups.url.trim();
       if (['1.1', '1.0'].indexOf(match.groups.version) < 0) {
+        if (!request.options) {
+          request.options = {};
+        }
         request.options.http2 = true;
       }
     }
