@@ -17,6 +17,9 @@ export async function digestAuthVariableReplacer(
   if (type.toLowerCase() === 'authorization' && isString(text) && isHttpRequest(request)) {
     const match = DigestAuthColon.exec(text) || DigestAuth.exec(text);
     if (match && match.groups && match.groups.user && match.groups.password) {
+      if (!request.options) {
+        request.options = {};
+      }
       if (!request.options.hooks) {
         request.options.hooks = {};
       }
@@ -37,8 +40,7 @@ function digestFactory(username: string, password: string, context: ProcessorCon
   ) {
     const wwwAuthenticate = response.headers['www-authenticate'];
     if (response.statusCode === 401 && wwwAuthenticate && wwwAuthenticate.toLowerCase().startsWith('digest')) {
-      const httpResponse = toHttpResponse(response);
-      httpResponse.tags = ['auth', 'digest', 'automatic'];
+      const httpResponse = toHttpResponse(response, {});
       await logResponse(httpResponse, context);
 
       const url = new URL(response.url);

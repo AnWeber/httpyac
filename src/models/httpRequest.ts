@@ -24,7 +24,7 @@ export interface Request<TMethod extends string = string, TBody = RequestBody> {
 
 export interface HttpRequest extends Request<HttpMethod> {
   headers?: Record<string, string | string[] | undefined>;
-  options: OptionsOfUnknownResponseBody;
+  options?: OptionsOfUnknownResponseBody;
 }
 
 export type HttpRequestBodyLine = string | ((context: ProcessorContext) => Promise<Buffer | string | undefined>);

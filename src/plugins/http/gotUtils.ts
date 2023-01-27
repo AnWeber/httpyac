@@ -1,6 +1,6 @@
-import { log, userInteractionProvider } from '../../io';
+import { log } from '../../io';
 import * as models from '../../models';
-import { parseContentType, repeat } from '../../utils';
+import { parseContentType, toString } from '../../utils';
 import { filesize } from 'filesize';
 import { default as got, OptionsOfUnknownResponseBody, CancelError, Response } from 'got';
 import { HttpProxyAgent } from 'http-proxy-agent';
@@ -13,72 +13,11 @@ export async function gotHttpClient(
   context: models.HttpClientContext
 ): Promise<models.HttpResponse | false> {
   try {
-    const defaults: OptionsOfUnknownResponseBody = {
-      decompress: true,
-      retry: 0,
-      throwHttpErrors: false,
-      headers: {
-        accept: '*/*',
-        'user-agent': 'httpyac',
-      },
-    };
+    const options = getClientOptions(request, context);
 
-    const url = request.url;
-
-    if (!url) {
-      throw new Error('empty url');
-    }
-    const options: OptionsOfUnknownResponseBody = merge(
-      {},
-      defaults,
-      context?.config?.request,
-      request.options,
-      requestToOptions(request)
-    );
-    initProxy(options, request.proxy || context?.config?.proxy);
-
-    log.debug('request', options);
-
-    const response = await repeat(async () => {
-      if (context.progress && context.progress.isCanceled()) {
-        return undefined;
-      }
-      const responsePromise = got(url, options);
-
-      let prevPercent = 0;
-      if (context.isMainContext && context.progress) {
-        responsePromise.on('downloadProgress', data => {
-          const newData = data.percent - prevPercent;
-          prevPercent = data.percent;
-
-          if (context.progress?.report) {
-            log.debug('call http request');
-            const divider = context.progress.divider || 1;
-            context.progress.report({
-              message: 'call http request',
-              increment: (newData / divider) * 100,
-            });
-          }
-        });
-      }
-      const dispose =
-        context.progress &&
-        context.progress.register(() => {
-          responsePromise.cancel();
-        });
-
-      const response = await responsePromise;
-      if (dispose) {
-        dispose();
-      }
-      return toHttpResponse(response);
-    }, context);
-
-    if (response) {
-      response.name = `${response.statusCode} - ${request.method || 'GET'} ${request.url}`;
-      return response;
-    }
-    throw new Error('no response');
+    const cancelableRequest = got(request.url || '', options);
+    const response = await cancelableRequest;
+    return toHttpResponse(response, request);
   } catch (err) {
     if (err instanceof CancelError) {
       return false;
@@ -87,28 +26,43 @@ export async function gotHttpClient(
   }
 }
 
-function requestToOptions(request: models.HttpClientRequest): OptionsOfUnknownResponseBody {
-  const result: Record<string, unknown> = {};
-  const warnHeaders: Array<string> = [];
+export function getClientOptions(
+  request: models.HttpRequest,
+  context: models.HttpClientContext
+): OptionsOfUnknownResponseBody {
+  const { config } = context;
 
-  const ignoreHeaders = ['protocol', 'url', 'proxy', 'options', 'contentType', 'noRedirect', 'noRejectUnauthorized'];
-  for (const [key, value] of Object.entries(request)) {
-    if (['method', 'body', 'headers'].indexOf(key) >= 0) {
-      result[key] = value;
-    } else if (ignoreHeaders.indexOf(key) < 0) {
-      warnHeaders.push(key);
-      result[key] = value;
-    }
-  }
+  const options: OptionsOfUnknownResponseBody = merge(
+    {
+      decompress: true,
+      retry: 0,
+      throwHttpErrors: false,
+      headers: {
+        accept: '*/*',
+        'user-agent': 'httpyac',
+      },
+    },
+    config?.request,
+    {
+      method: request.method,
+      headers: request.headers,
+      body: request.body,
+    },
+    request.options
+  );
 
-  if (warnHeaders.length > 0) {
-    const message = `Please use request.options[...] instead of request[...] for setting Got Options (${warnHeaders.join(
-      ','
-    )}). Support will be removed`;
-    userInteractionProvider.showWarnMessage?.(message);
-    log.warn(message);
+  if (request.noRedirect) {
+    options.followRedirect = false;
   }
-  return result;
+  if (request.noRejectUnauthorized) {
+    options.https = request.options?.https || {};
+    options.https.rejectUnauthorized = false;
+  }
+  initProxy(options, request.proxy || config?.proxy);
+  ensureStringHeaders(options.headers);
+
+  log.debug('request', options);
+  return options;
 }
 
 function initProxy(options: OptionsOfUnknownResponseBody, proxy: string | undefined) {
@@ -127,9 +81,25 @@ function initProxy(options: OptionsOfUnknownResponseBody, proxy: string | undefi
     }
   }
 }
+function ensureStringHeaders(headers?: Record<string, unknown>) {
+  if (headers) {
+    for (const [header, val] of Object.entries(headers)) {
+      if (typeof val !== 'undefined') {
+        let result: string | string[];
+        if (Array.isArray(val)) {
+          result = val.map(obj => toString(obj) || obj);
+        } else {
+          result = toString(val) || '';
+        }
+        headers[header] = result;
+      }
+    }
+  }
+}
 
-export function toHttpResponse(response: Response<unknown>): models.HttpResponse {
-  const httpResponse: models.HttpResponse = {
+export function toHttpResponse(response: Response<unknown>, request: models.Request) {
+  return {
+    name: `${response.statusCode} - ${request.method || 'GET'} ${request.url}`,
     statusCode: response.statusCode,
     protocol: `HTTP/${response.httpVersion}`,
     statusMessage: response.statusMessage,
@@ -147,6 +117,7 @@ export function toHttpResponse(response: Response<unknown>): models.HttpResponse
       body: getBody(response.request.options.body),
     },
     contentType: parseContentType(response.headers),
+
     meta: {
       ip: response.ip,
       redirectUrls: response.redirectUrls,
@@ -156,14 +127,7 @@ export function toHttpResponse(response: Response<unknown>): models.HttpResponse
       ),
     },
   };
-  delete response.headers[':status'];
-  if (httpResponse.httpVersion && httpResponse.httpVersion.startsWith('HTTP/')) {
-    httpResponse.httpVersion = httpResponse.httpVersion.slice('HTTP/'.length);
-  }
-
-  return httpResponse;
 }
-
 export function getBody(body: unknown) {
   if (typeof body === 'string') {
     return body;

@@ -18,7 +18,7 @@ export interface HttpClientContext {
   };
 }
 
-export type HttpClientRequest = Partial<HttpRequest> & Omit<Omit<HttpRequest, 'options'>, 'protocol'>;
+export type HttpClientRequest = Partial<HttpRequest> & Omit<HttpRequest, 'protocol'>;
 
 export type HttpClient = (request: HttpClientRequest, context: HttpClientContext) => Promise<HttpResponse | false>;
 
