@@ -76,6 +76,7 @@ export class WebsocketRequestClient extends models.AbstractRequestClient<WebSock
           date: new Date(),
         },
         body: utils.toString(message),
+        rawBody: Buffer.isBuffer(message) ? message : undefined,
       });
     });
 

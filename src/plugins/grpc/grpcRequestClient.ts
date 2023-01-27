@@ -189,7 +189,7 @@ export class GrpcRequestClient extends models.AbstractRequestClient<GrpcStream |
       statusCode: 0,
       statusMessage: 'OK',
       body,
-      rawBody: Buffer.from(body),
+      rawBody: Buffer.isBuffer(data) ? data : Buffer.from(body),
       parsedBody: data,
       contentType: {
         mimeType: 'application/grpc+json',

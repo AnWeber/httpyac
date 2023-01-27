@@ -80,10 +80,10 @@ export class MQTTRequestClient extends models.AbstractRequestClient<MqttClient |
           message: message.toString('utf-8'),
           date: new Date(),
         },
+        rawBody: message,
         headers: {
           ...packet.properties,
         },
-        rawBody: message,
       });
     });
     client.on('error', err => {

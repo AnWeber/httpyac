@@ -117,7 +117,6 @@ export function toHttpResponse(response: Response<unknown>, request: models.Requ
       body: getBody(response.request.options.body),
     },
     contentType: parseContentType(response.headers),
-
     meta: {
       ip: response.ip,
       redirectUrls: response.redirectUrls,
