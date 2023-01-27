@@ -65,6 +65,7 @@ export class EventSourceRequestClient extends models.AbstractRequestClient<Event
           statusCode: message.status || 200,
           name: `EventSource (${this.request.url})`,
           body: message.data,
+          rawBody: Buffer.from(message.data),
         });
       });
     }

@@ -35,6 +35,7 @@ export async function consume({ channel, request, onMessage }: AmqpMethodContext
         },
         message: `${message.bodyString()} (deliveryTag: ${message.deliveryTag})`,
         body: message.bodyString(),
+        rawBody: message.body ? Buffer.from(message.body) : undefined,
       });
     });
   }
