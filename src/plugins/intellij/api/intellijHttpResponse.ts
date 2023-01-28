@@ -1,9 +1,9 @@
 import * as models from '../../../models';
-import { isString, getHeader } from '../../../utils';
-import { HttpResponse, ContentType, ResponseHeaders } from './http-client';
+import * as utils from '../../../utils';
+import { HttpResponse, ContentType, ResponseHeaders, TextStreamResponse } from './http-client';
 
 export class IntellijHttpResponse implements HttpResponse {
-  body: unknown;
+  body: string | TextStreamResponse | unknown;
   status: number;
   contentType: ContentType;
   headers: ResponseHeaders;
@@ -11,12 +11,16 @@ export class IntellijHttpResponse implements HttpResponse {
   constructor(response: models.HttpResponse) {
     this.body = response.parsedBody || response.body;
     this.status = response.statusCode;
-    this.contentType = {
-      mimeType: response.contentType?.mimeType || 'application/octet-stream',
-      charset: response.contentType?.charset || 'utf-8',
-    };
+    this.contentType = toContentType(response.contentType);
     this.headers = new IntellijHeaders(response.headers);
   }
+}
+
+function toContentType(contentType?: models.ContentType) {
+  return {
+    mimeType: contentType?.mimeType || 'application/octet-stream',
+    charset: contentType?.charset || 'utf-8',
+  };
 }
 
 export class IntellijHeaders implements ResponseHeaders {
@@ -24,8 +28,8 @@ export class IntellijHeaders implements ResponseHeaders {
 
   valueOf(headerName: string): string | null {
     if (this.headers) {
-      const obj = getHeader(this.headers, headerName);
-      if (obj && isString(obj)) {
+      const obj = utils.getHeader(this.headers, headerName);
+      if (obj && utils.isString(obj)) {
         return obj;
       }
     }
@@ -33,9 +37,9 @@ export class IntellijHeaders implements ResponseHeaders {
   }
   valuesOf(headerName: string): string[] {
     if (this.headers) {
-      const obj = getHeader(this.headers, headerName);
+      const obj = utils.getHeader(this.headers, headerName);
       if (obj) {
-        if (isString(obj)) {
+        if (utils.isString(obj)) {
           return [obj];
         }
         if (Array.isArray(obj)) {
@@ -44,5 +48,56 @@ export class IntellijHeaders implements ResponseHeaders {
       }
     }
     return [];
+  }
+}
+
+export class IntellijTextStreamResponse implements HttpResponse {
+  body: TextStreamResponse;
+  status = 0;
+  contentType: ContentType = toContentType();
+  headers: ResponseHeaders;
+
+  private lazyHeaders: Record<string, unknown> = {};
+  constructor(private readonly requestClient: models.RequestClient, private readonly resolve: () => void) {
+    this.body = {
+      onEachLine: (...args) => this.onEachLine(...args),
+      onEachMessage: (...args) => this.onEachMessage(...args),
+    };
+    this.headers = new IntellijHeaders(this.lazyHeaders);
+  }
+  onEachLine(
+    subscriber: (line: string | object, unsubscribe: () => void) => void,
+    onFinish?: (() => void) | undefined
+  ): void {
+    this.onEachMessage(subscriber, onFinish);
+  }
+  onEachMessage(
+    subscriber: (
+      message: string | object,
+      unsubscribe: () => void,
+      output?: ((answer: string) => void) | undefined
+    ) => void,
+    onFinish?: (() => void) | undefined
+  ): void {
+    const subscriberHandler = (evt: [string, models.HttpResponse]) => {
+      const [, response] = evt;
+      this.status = response.statusCode;
+      Object.assign(this.headers, response.headers);
+      this.contentType = toContentType(response.contentType);
+
+      const message = utils.toString(response.body);
+      if (message) {
+        const unsubscribe = () => {
+          this.requestClient.off('message', subscriberHandler);
+          this.resolve();
+        };
+        const output = (answer: string) => this.requestClient.send(answer);
+        subscriber(message, unsubscribe, output);
+      }
+    };
+    this.requestClient.on('message', subscriberHandler);
+    if (onFinish) {
+      this.requestClient.on('end', onFinish);
+    }
   }
 }

@@ -58,6 +58,7 @@ export function executeRequestClientFactory<T extends models.RequestClient>(
         }
         throw err;
       } finally {
+        requestClient.triggerEnd();
         dispose?.();
         delete context.requestClient;
         deleteVariableInContext('$requestClient', context);

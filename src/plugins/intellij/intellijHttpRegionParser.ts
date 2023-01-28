@@ -7,6 +7,7 @@ export interface IntelliJParserResult {
   endLine: number;
   endOffset: number;
   data: models.ScriptData | IntellijScriptData;
+  isBeforeRequest: boolean;
 }
 
 export async function parseIntellijScript(
@@ -17,7 +18,15 @@ export async function parseIntellijScript(
   const intellijContent = getIntellijContent(lineReader, !!httpRegion.request);
 
   if (intellijContent) {
-    httpRegion.hooks.execute.addObjHook(obj => obj.process, new IntellijAction(intellijContent.data));
+    const intellijAction = new IntellijAction(intellijContent.data);
+
+    if (intellijContent.isBeforeRequest) {
+      httpRegion.hooks.onRequest.addObjHook(obj => obj.processOnRequest, intellijAction);
+    } else {
+      httpRegion.hooks.onStreaming.addObjHook(obj => obj.processOnStreaming, intellijAction);
+      httpRegion.hooks.onResponse.addObjHook(obj => obj.processOnResponse, intellijAction);
+    }
+
     return {
       nextParserLine: intellijContent.endLine,
       symbols: [
@@ -53,6 +62,7 @@ function getIntellijContent(lineReader: models.HttpLineGenerator, hasRequest: bo
         data: {
           fileName: fileMatches.groups.fileName.trim(),
         },
+        isBeforeRequest: fileMatches.groups.event === '<',
       };
     }
 
@@ -69,6 +79,7 @@ function getIntellijContent(lineReader: models.HttpLineGenerator, hasRequest: bo
           script: singleLineMatch.groups.script,
           lineOffset: startLine,
         },
+        isBeforeRequest: singleLineMatch.groups.event === '<',
       };
     }
 
@@ -89,6 +100,7 @@ function getIntellijContent(lineReader: models.HttpLineGenerator, hasRequest: bo
               script: toMultiLineString(scriptLines),
               lineOffset: startLine,
             },
+            isBeforeRequest: multiLineMatch.groups.event === '<',
           };
         }
         scriptLines.push(next.value.textLine);

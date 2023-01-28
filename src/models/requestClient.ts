@@ -18,12 +18,14 @@ export interface RequestClient<T = unknown> {
     type: K,
     listener: (this: RequestClient<T>, ev: RequestClientEventMap[K]) => void
   ): void;
+  triggerEnd(): void;
 }
 
 interface RequestClientEventMap {
   progress: number;
   message: [string, HttpResponse & StreamResponse];
   metaData: [string, HttpResponse & StreamResponse];
+  end: void;
 }
 
 export abstract class AbstractRequestClient<T> implements RequestClient<T> {
@@ -55,5 +57,8 @@ export abstract class AbstractRequestClient<T> implements RequestClient<T> {
   }
   protected onMetaData(type: string, response: HttpResponse & StreamResponse) {
     this.eventEmitter.emit('metaData', [type, response]);
+  }
+  public triggerEnd() {
+    this.eventEmitter.emit('end');
   }
 }

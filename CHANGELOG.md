@@ -13,6 +13,7 @@
 #### Features
 
 - support Intellij Request Body separator
+- support Intellij TextResponseStreaming (onEachLIne, onEachMessage)
 
 ## 5.10.2 (2023-01-21)
 

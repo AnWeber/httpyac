@@ -10,47 +10,87 @@ export interface IntellijScriptData {
 export class IntellijAction {
   id = 'intellij';
 
-  constructor(private readonly scriptData: models.ScriptData | IntellijScriptData) {}
+  constructor(private scriptData: models.ScriptData | IntellijScriptData) {}
 
-  async process(context: models.ProcessorContext): Promise<boolean> {
-    const intellijVars = initIntellijVariables(context);
+  private isStreamingScript(scriptData: models.ScriptData) {
+    return ['onEachLine', 'onEachMessage'].some(obj => scriptData.script.indexOf(obj) > 0);
+  }
 
-    let data: models.ScriptData;
-    if (this.isIntellijScriptData(this.scriptData)) {
-      const script = await this.loadScript(this.scriptData.fileName, context);
-      if (!script) {
-        return false;
-      }
-      data = {
-        script,
-        lineOffset: 0,
-      };
-    } else {
-      data = this.scriptData;
+  async processOnRequest(_request: models.Request, context: models.ProcessorContext): Promise<void> {
+    utils.report(context, 'execute Intellij Javascript');
+    const scriptData = await this.loadScript(context);
+    if (!scriptData || this.isStreamingScript(scriptData)) {
+      return;
     }
 
-    utils.report(context, 'execute intellij javascript');
+    const intellijVars = initIntellijVariables(context);
+    await this.executeScriptData(scriptData, intellijVars, context);
+  }
+
+  async processOnStreaming(context: models.ProcessorContext): Promise<void> {
+    const scriptData = await this.loadScript(context);
+    if (!scriptData) {
+      return;
+    }
+    this.scriptData = scriptData;
+    if (this.isStreamingScript(scriptData) && context.requestClient) {
+      const requestClient = context.requestClient;
+      await new Promise<void>(resolve => {
+        const intellijVars = initIntellijVariables(context);
+        intellijVars.response = new intellij.IntellijTextStreamResponse(requestClient, resolve);
+        this.executeScriptData(scriptData, intellijVars, context);
+      });
+    }
+  }
+
+  async processOnResponse(response: models.HttpResponse, context: models.ProcessorContext): Promise<void> {
+    utils.report(context, 'execute Intellij Javascript');
+    const scriptData = await this.loadScript(context);
+    if (!scriptData || this.isStreamingScript(scriptData)) {
+      return;
+    }
+
+    const intellijVars = initIntellijVariables(context);
+    intellijVars.response = new intellij.IntellijHttpResponse(response);
+    await this.executeScriptData(scriptData, intellijVars, context);
+  }
+
+  private async executeScriptData(
+    scriptData: models.ScriptData,
+    intellijVars: Record<string, unknown>,
+    context: models.ProcessorContext
+  ) {
     if (io.javascriptProvider.runScript) {
-      await io.javascriptProvider.runScript(data.script, {
+      await io.javascriptProvider.runScript(scriptData.script, {
         fileName: context.httpFile.fileName,
         context: {
           console: context.scriptConsole,
           ...intellijVars,
         },
-        lineOffset: data.lineOffset,
+        lineOffset: scriptData.lineOffset,
       });
       return true;
     }
     return false;
   }
 
-  private async loadScript(file: string, context: models.ProcessorContext) {
-    try {
-      return await utils.replaceFilePath(file, context, path => io.fileProvider.readFile(path, 'utf-8'));
-    } catch (err) {
-      io.userInteractionProvider.showErrorMessage?.(`error loading script ${file}`);
-      (context.scriptConsole || io.log).error(file, err);
-      return false;
+  private async loadScript(context: models.ProcessorContext): Promise<models.ScriptData | undefined> {
+    if (this.isIntellijScriptData(this.scriptData)) {
+      try {
+        return {
+          script:
+            (await utils.replaceFilePath(this.scriptData.fileName, context, path =>
+              io.fileProvider.readFile(path, 'utf-8')
+            )) || '',
+          lineOffset: 0,
+        };
+      } catch (err) {
+        io.userInteractionProvider.showErrorMessage?.(`error loading script ${this.scriptData.fileName}`);
+        (context.scriptConsole || io.log).error(this.scriptData.fileName, err);
+        return undefined;
+      }
+    } else {
+      return this.scriptData;
     }
   }
 
@@ -67,9 +107,6 @@ function initIntellijVariables(context: models.ProcessorContext) {
   };
   if (context.request) {
     variables.request = new intellij.IntellijHttpClientRequest(context);
-  }
-  if (context.httpRegion.response) {
-    variables.response = new intellij.IntellijHttpResponse(context.httpRegion.response);
   }
   return variables;
 }
