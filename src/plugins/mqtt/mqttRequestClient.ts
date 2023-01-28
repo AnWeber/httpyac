@@ -8,6 +8,7 @@ export class MQTTRequestClient extends models.AbstractRequestClient<MqttClient |
   private responseTemplate: Partial<models.HttpResponse> & { protocol: string } = {
     protocol: 'MQTT',
   };
+  private promises: Array<Promise<void>> = [];
 
   constructor(private readonly request: models.Request, private readonly context: models.ProcessorContext) {
     super();
@@ -47,25 +48,45 @@ export class MQTTRequestClient extends models.AbstractRequestClient<MqttClient |
 
   async connect(): Promise<void> {
     if (isMQTTRequest(this.request)) {
+      const request = this.request;
       const options: IClientOptions = {};
       if (isMQTTRequest(this.request)) {
         Object.assign(options, this.getClientOptions(this.request, this.context));
       }
-      this._nativeClient = connect(this.request.url || '', options);
-      this.registerEvents(this._nativeClient);
-      this.subscribe(this._nativeClient, this.subscribeTopics, this.request);
+      await new Promise<void>(resolve => {
+        this._nativeClient = connect(this.request.url || '', options);
+        const nativeClient = this._nativeClient;
+        function onConnect() {
+          nativeClient.off('connect', onConnect);
+          resolve();
+        }
+        this._nativeClient.on('connect', onConnect);
+        this.registerEvents(this._nativeClient);
+        this.subscribe(this._nativeClient, this.subscribeTopics, request);
+      });
     }
   }
 
   async send(body?: string | Buffer): Promise<void> {
     if (isMQTTRequest(this.request) && this.nativeClient) {
-      const request = body ? { ...this.request, body: utils.toString(body) } : this.request;
-      this.publish(this.nativeClient, this.publishTopics, request);
+      const request = { ...this.request, body: utils.toString(body || this.request.body) };
+      const promise = this.publish(this.nativeClient, this.publishTopics, request);
+      this.promises.push(promise);
+      await promise;
+      const index = this.promises.findIndex(obj => obj === promise);
+      if (index >= 0) {
+        this.promises.splice(index, 1);
+      }
     }
   }
 
-  override close(): void {
-    this.nativeClient?.end(true, undefined, err => err && log.error('error on close', err));
+  close(err?: Error): void {
+    const close = () => this.nativeClient?.end(!!err, undefined, err => err && log.error('error on close', err));
+    if (this.promises.length > 0) {
+      Promise.all([...this.promises]).then(close);
+    } else {
+      close();
+    }
   }
 
   private registerEvents(client: MqttClient) {
@@ -95,14 +116,15 @@ export class MQTTRequestClient extends models.AbstractRequestClient<MqttClient |
     });
 
     const metaDataEvents = [
-      'connect',
-      'reconnect',
-      'packetsend',
-      'packetreceive',
-      'disconnect',
       'close',
-      'offline',
+      'connect',
+      'disconnect',
       'end',
+      'offline',
+      'outgoingEmpty',
+      'packetreceive',
+      'packetsend',
+      'reconnect',
     ];
     for (const event of metaDataEvents) {
       if (utils.isString(event)) {
@@ -110,7 +132,7 @@ export class MQTTRequestClient extends models.AbstractRequestClient<MqttClient |
           this.onMetaData(event, {
             ...this.responseTemplate,
             statusCode: 0,
-            message: packet ? `${event}: ${utils.toString(packet)}` : event,
+            message: packet ? `${utils.toString(packet)}` : undefined,
             body: {
               event,
               packet,
@@ -154,30 +176,37 @@ export class MQTTRequestClient extends models.AbstractRequestClient<MqttClient |
       });
     }
   }
-  private publish(client: MqttClient, topics: string[], request: MQTTRequest) {
+  private async publish(client: MqttClient, topics: string[], request: MQTTRequest) {
     if (request.body) {
-      for (const topic of topics) {
-        client.publish(
-          topic,
-          request.body,
-          {
-            qos: this.toQoS(utils.getHeaderString(request.headers, 'qos')),
-            retain: !!utils.getHeader(request.headers, 'retain'),
-          },
-          err => err && log.error('publish error', err)
-        );
-      }
+      const body = request.body;
+      const header = {
+        qos: this.toQoS(utils.getHeaderString(request.headers, 'qos')),
+        retain: !!utils.getHeader(request.headers, 'retain'),
+      };
+      await Promise.all(
+        topics.map(
+          topic =>
+            new Promise<void>(resolve => {
+              client.publish(topic, body, header, err => {
+                if (err) {
+                  log.error('publish error', err);
+                }
+                resolve();
+              });
+            })
+        )
+      );
     }
   }
 
-  private toQoS(qos: string | undefined): QoS {
+  private toQoS(qos: string | undefined, defaultVal: QoS = 0): QoS {
     switch (qos) {
       case '2':
         return 2;
       case '1':
         return 1;
       default:
-        return 0;
+        return defaultVal;
     }
   }
 }
