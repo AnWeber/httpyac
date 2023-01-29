@@ -4,6 +4,7 @@ export * from './eventsource';
 export * from './graphql';
 export * from './grpc';
 export * from './http';
+export * from './kafka';
 export * from './intellij';
 export * from './injection';
 export * from './javascript';

@@ -12,7 +12,7 @@ export type RequestBody = string | Array<HttpRequestBodyLine> | Buffer;
 export interface Request<TMethod extends string = string, TBody = RequestBody> {
   supportsStreaming?: boolean;
   protocol?: string;
-  url?: string;
+  url: string;
   method?: TMethod;
   body?: TBody;
   headers?: Record<string, unknown>;
