@@ -1,6 +1,5 @@
 export * from './arrayUtils';
 export * from './assertUtils';
-export * from './booleanUtils';
 export * from './bufferEncodingUtils';
 export * from './configUtils';
 export * from './convertUtils';

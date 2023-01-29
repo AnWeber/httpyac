@@ -1,7 +1,9 @@
 import * as models from '../models';
+import { parseMimeType } from './mimeTypeUtils';
 import * as parser from './parserUtils';
 import { executeRequestClientFactory } from './requestClientUtils';
-import { isStringEmpty } from './stringUtils';
+import { getHeader } from './requestUtils';
+import { isString, isStringEmpty } from './stringUtils';
 
 interface RequestParserContext {
   protocol: string;
@@ -58,6 +60,7 @@ export function parseRequestLineFactory(requestContext: RequestParserContext) {
           parser.parseComments,
           parser.parseRequestHeaderFactory(headers),
           parser.parseDefaultHeadersFactory(),
+          parser.parseQueryLineFactory(url => (requestLine.request.url += url)),
           parser.parseUrlLineFactory(url => (requestLine.request.url += url)),
         ],
         context
@@ -70,9 +73,15 @@ export function parseRequestLineFactory(requestContext: RequestParserContext) {
         }
       }
       requestContext.modifyRequest?.(requestLine.request);
+      if (requestLine.request.headers) {
+        const contentType = getHeader(requestLine.request.headers, 'content-type');
+        if (isString(contentType)) {
+          requestLine.request.contentType = parseMimeType(contentType);
+        }
+      }
 
       context.httpRegion.hooks.execute.addHook(
-        requestContext.protocol,
+        requestContext.protocol.toLowerCase(),
         executeRequestClientFactory(requestContext.requestClientFactory)
       );
 
@@ -109,7 +118,6 @@ function getRequestParseLine(
   if (protocolMatch && protocolMatch.length > 1 && protocolMatch.groups) {
     return {
       request: {
-        supportsStreaming: true,
         url: protocolMatch.groups.url,
         protocol: context.protocol.toUpperCase(),
         method: protocolMatch.groups?.method || context.method || context.protocol,
