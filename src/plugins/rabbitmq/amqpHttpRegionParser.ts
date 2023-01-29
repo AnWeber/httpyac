@@ -11,6 +11,7 @@ export const parseAmqpLine = utils.parseRequestLineFactory({
     return new AmqpRequestClient(request, context);
   },
   modifyRequest(request) {
+    request.supportsStreaming = true;
     if (isAmqpRequest(request)) {
       request.method = getAmqpMethod(request);
     }

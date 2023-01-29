@@ -89,7 +89,6 @@ function getRequestParseLine(
   if (lineMatch && lineMatch.length > 1 && lineMatch.groups) {
     return {
       request: {
-        supportsStreaming: true,
         url: lineMatch.groups.url,
         protocol: context.protocol.toUpperCase(),
         method: lineMatch.groups?.method || context.method || context.protocol,
