@@ -15,15 +15,15 @@ export type FileEncoding =
 
 export interface FileProvider {
   EOL: string;
-  exists(fileName: PathLike): Promise<boolean>;
-  joinPath(fileName: PathLike, path: string): PathLike;
-  dirname(fileName: PathLike): PathLike | undefined;
-  isAbsolute(fileName: PathLike): Promise<boolean>;
+  exists(path: PathLike): Promise<boolean>;
+  joinPath(path: PathLike, joinPath: string): PathLike;
+  dirname(path: PathLike): PathLike | undefined;
+  isAbsolute(path: PathLike): Promise<boolean>;
   readFile(fileName: PathLike, encoding: FileEncoding): Promise<string>;
   readBuffer(fileName: PathLike): Promise<Buffer>;
   writeBuffer(fileName: PathLike, buffer: Buffer): Promise<void>;
   readdir: (dirname: PathLike) => Promise<string[]>;
   hasExtension(fileName: PathLike, ...extensions: Array<string>): boolean;
-  fsPath(fileName: PathLike): string | undefined;
-  toString(fileName: PathLike): string;
+  fsPath(path: PathLike): string | undefined;
+  toString(path: PathLike): string;
 }

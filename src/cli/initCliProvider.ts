@@ -20,16 +20,16 @@ function initFixTestSymbols() {
 
 function initFileProvider(): void {
   fileProvider.EOL = EOL;
-  fileProvider.isAbsolute = async (fileName: models.PathLike) => isAbsolute(fileProvider.toString(fileName));
-  fileProvider.dirname = (fileName: string) => dirname(fileProvider.toString(fileName));
+  fileProvider.isAbsolute = async (path: models.PathLike) => isAbsolute(fileProvider.toString(path));
+  fileProvider.dirname = (path: string) => dirname(fileProvider.toString(path));
   fileProvider.hasExtension = (fileName: models.PathLike, ...extensions: Array<string>) =>
     extensions.indexOf(extname(fileProvider.toString(fileName))) >= 0;
-  fileProvider.joinPath = (fileName: models.PathLike, path: string): models.PathLike =>
-    join(fileProvider.toString(fileName), path);
+  fileProvider.joinPath = (path: models.PathLike, joinPath: string): models.PathLike =>
+    join(fileProvider.toString(path), joinPath);
 
-  fileProvider.exists = async (fileName: models.PathLike): Promise<boolean> => {
+  fileProvider.exists = async (path: models.PathLike): Promise<boolean> => {
     try {
-      return !!(await fs.stat(fileProvider.toString(fileName)));
+      return !!(await fs.stat(fileProvider.toString(path)));
     } catch (err) {
       return false;
     }
