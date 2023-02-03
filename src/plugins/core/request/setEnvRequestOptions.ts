@@ -6,6 +6,7 @@ export async function setEnvRequestOptions(
   { variables }: models.ProcessorContext
 ): Promise<void> {
   await setEnvRejectUnauthorized(request, variables);
+  await setEnvNoRedirect(request, variables);
   await setEnvProxy(request, variables);
 }
 
@@ -13,6 +14,14 @@ async function setEnvRejectUnauthorized(request: models.Request, variables: mode
   if (request && variables) {
     if (typeof variables.request_rejectUnauthorized !== 'undefined') {
       request.noRejectUnauthorized = !utils.toBoolean(variables.request_rejectUnauthorized);
+    }
+  }
+}
+
+async function setEnvNoRedirect(request: models.Request, variables: models.Variables): Promise<void> {
+  if (request && variables) {
+    if (typeof variables.request_noRedirect !== 'undefined') {
+      request.noRedirect = utils.toBoolean(variables.request_noRedirect);
     }
   }
 }

@@ -26,8 +26,8 @@ export async function logHttpRedirect(request: models.Request, context: models.P
         body: getBody(options.body),
       };
     });
-    request.options.hooks.beforeRedirect.push(async (_options, response) => {
-      const httpResponse = toHttpResponse(response, currentRequest || {});
+    request.options.hooks.beforeRedirect.push(async (options, response) => {
+      const httpResponse = toHttpResponse(response, currentRequest || { url: utils.toString(options.url) || '' });
       await utils.logResponse(httpResponse, context);
     });
   }

@@ -40,7 +40,7 @@ function digestFactory(username: string, password: string, context: ProcessorCon
   ) {
     const wwwAuthenticate = response.headers['www-authenticate'];
     if (response.statusCode === 401 && wwwAuthenticate && wwwAuthenticate.toLowerCase().startsWith('digest')) {
-      const httpResponse = toHttpResponse(response, {});
+      const httpResponse = toHttpResponse(response, { url: response.request.requestUrl });
       await logResponse(httpResponse, context);
 
       const url = new URL(response.url);
