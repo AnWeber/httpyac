@@ -15,6 +15,10 @@
 - support Intellij Request Body separator
 - support Intellij TextResponseStreaming (onEachLIne, onEachMessage)
 
+#### Fixes
+
+- no-redirect did not prevent redirect (AnWeber/vscode-httpyac#171)
+
 ## 5.10.2 (2023-01-21)
 
 #### Fix

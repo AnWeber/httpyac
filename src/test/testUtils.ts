@@ -1,5 +1,6 @@
 import { send } from '../httpYacApi';
 import * as io from '../io';
+import * as models from '../models';
 import '../registerPlugins';
 import * as store from '../store';
 import { promises as fs } from 'fs';
@@ -15,9 +16,15 @@ export async function parseHttp(code: string) {
 export async function sendHttp(code: string) {
   const httpFile = await parseHttp(code);
 
-  return send({
+  const result: Array<models.HttpResponse> = [];
+  httpFile.hooks.onResponse.addHook('testResponse', response => {
+    result.push(response);
+  });
+
+  await send({
     httpFile,
   });
+  return result;
 }
 
 export function initFileProvider(files?: Record<string, string> | undefined) {
