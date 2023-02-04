@@ -27,6 +27,18 @@ export async function sendHttp(code: string) {
   return result;
 }
 
+export async function sendHttpFile(httpFile: models.HttpFile) {
+  const result: Array<models.HttpResponse> = [];
+  httpFile.hooks.onResponse.addHook('testResponse', response => {
+    result.push(response);
+  });
+
+  await send({
+    httpFile,
+  });
+  return result;
+}
+
 export function initFileProvider(files?: Record<string, string> | undefined) {
   const fileProvider = io.fileProvider;
   fileProvider.EOL = EOL;
@@ -49,5 +61,10 @@ export function initFileProvider(files?: Record<string, string> | undefined) {
     }
     throw new Error('No File');
   };
-  fileProvider.readdir = async dirname => fs.readdir(fileProvider.toString(dirname));
+  fileProvider.readdir = async dirname => {
+    if (files) {
+      return Object.keys(files);
+    }
+    return fs.readdir(fileProvider.toString(dirname));
+  };
 }
