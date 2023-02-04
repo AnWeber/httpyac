@@ -19,7 +19,8 @@ GET https://localhost:8007/json
 
       throw new Error('no error while sendhttp');
     } catch (err) {
-      expect(err.toString()).toContain('self signed certificate in certificate chain');
+      expect(err instanceof Error && err.name).toBe('RequestError');
+      expect(err.toString()).toContain('signed certificate in certificate chain');
     } finally {
       localServer.stop();
     }
