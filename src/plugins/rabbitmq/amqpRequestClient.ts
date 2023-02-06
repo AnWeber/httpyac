@@ -1,11 +1,18 @@
 import * as models from '../../models';
+import * as store from '../../store';
 import * as utils from '../../utils';
 import * as amqpMethods from './amqpMethods';
 import * as constants from './amqpMethods/amqpConstants';
 import { AmqpRequest, isAmqpRequest } from './amqpRequest';
 import { AMQPClient, AMQPChannel } from '@cloudamqp/amqp-client';
 
-export class AmqpRequestClient extends models.AbstractRequestClient<AMQPClient> {
+interface AmqpSession {
+  client: AMQPClient;
+  channel: AMQPChannel;
+}
+
+export class AmqpRequestClient extends models.AbstractRequestClient<AMQPClient | undefined> {
+  private closeClientOnFinish = true;
   constructor(private readonly request: models.Request, private readonly context: models.ProcessorContext) {
     super();
   }
@@ -17,32 +24,60 @@ export class AmqpRequestClient extends models.AbstractRequestClient<AMQPClient> 
     return true;
   }
 
-  private get channelId() {
-    return utils.getHeaderNumber(this.request.headers, constants.AmqpChannelId);
-  }
-
   private _channel: AMQPChannel | undefined;
   public get channel(): AMQPChannel | undefined {
     return this._channel;
   }
 
   private _nativeClient: AMQPClient | undefined;
-  get nativeClient(): AMQPClient {
-    if (!this._nativeClient) {
-      if (isAmqpRequest(this.request)) {
-        this._nativeClient = new AMQPClient(this.request.url || '');
-      } else {
-        throw new Error('no valid Request received');
+  get nativeClient(): AMQPClient | undefined {
+    return this._nativeClient;
+  }
+
+  private async initAMQPClient(request: AmqpRequest): Promise<void> {
+    const channelId = utils.getHeaderNumber(request.headers, constants.AmqpChannelId);
+    if (channelId) {
+      const userSession: (models.UserSession & Partial<AmqpSession>) | undefined =
+        store.userSessionStore.getUserSession(this.getAmqpSessionId(request, channelId));
+      if (userSession && userSession.client && userSession.channel) {
+        this._nativeClient = userSession.client;
+        this._channel = userSession.channel;
+        this.closeClientOnFinish = false;
+        return;
       }
     }
-    return this._nativeClient;
+
+    this._nativeClient = new AMQPClient(request.url || '');
+    await this._nativeClient.connect();
+    this._channel = await this._nativeClient.channel(channelId);
+
+    this.setUserSession(request, this._nativeClient, this._channel);
+  }
+
+  private getAmqpSessionId(request: AmqpRequest, channelId: number) {
+    return `amqp_${request.url}_${channelId}`;
+  }
+  private setUserSession(request: AmqpRequest, client: AMQPClient, channel: AMQPChannel) {
+    const session: models.UserSession & AmqpSession = {
+      id: this.getAmqpSessionId(request, channel.id),
+      description: `${request.url} and channel ${channel.id}`,
+      details: {
+        url: request.url,
+      },
+      title: `AMQP Client for ${request.url}`,
+      type: 'AMQP',
+      client,
+      channel,
+      delete: async () => {
+        this.close();
+      },
+    };
+    store.userSessionStore.setUserSession(session);
   }
 
   async connect(): Promise<void> {
     if (isAmqpRequest(this.request)) {
-      const client = this.nativeClient;
-      await client.connect();
-      this._channel = await client.channel(this.channelId);
+      await this.initAMQPClient(this.request);
       await this.executeAmqpMethod(this.request);
     }
     return undefined;
@@ -76,12 +111,17 @@ export class AmqpRequestClient extends models.AbstractRequestClient<AMQPClient> 
   }
 
   override close(err?: Error): void {
-    if (err) {
-      this.channel?.close();
-      this._nativeClient?.close(err.message);
-    } else {
-      this._channel?.close();
-      this._nativeClient?.close();
+    if (this.closeClientOnFinish) {
+      if (isAmqpRequest(this.request) && this._channel?.id) {
+        store.userSessionStore.removeUserSession(this.getAmqpSessionId(this.request, this._channel.id));
+      }
+      if (err) {
+        this.channel?.close();
+        this._nativeClient?.close(err.message);
+      } else {
+        this._channel?.close();
+        this._nativeClient?.close();
+      }
     }
   }
 
