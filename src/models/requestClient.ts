@@ -8,7 +8,7 @@ export interface RequestClient<T = unknown> {
   reportMessage: string;
   nativeClient: T;
   connect(): Promise<void>;
-  send(body?: Buffer | string): Promise<void>;
+  send(body?: unknown): Promise<void>;
   close(err?: Error): void;
   on<K extends keyof RequestClientEventMap>(
     type: K,
@@ -34,7 +34,7 @@ export abstract class AbstractRequestClient<T> implements RequestClient<T> {
   abstract nativeClient: T;
   abstract reportMessage: string;
   abstract connect(): Promise<void>;
-  abstract send(body?: string | Buffer): Promise<void>;
+  abstract send(body?: unknown): Promise<void>;
   private eventEmitter = new EventEmitter();
 
   on<K extends keyof RequestClientEventMap>(

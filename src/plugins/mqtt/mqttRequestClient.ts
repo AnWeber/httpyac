@@ -67,7 +67,7 @@ export class MQTTRequestClient extends models.AbstractRequestClient<MqttClient |
     }
   }
 
-  async send(body?: string | Buffer): Promise<void> {
+  async send(body?: unknown): Promise<void> {
     if (isMQTTRequest(this.request) && this.nativeClient) {
       const request = { ...this.request, body: utils.toString(body || this.request.body) };
       const promise = this.publish(this.nativeClient, this.publishTopics, request);

@@ -24,11 +24,11 @@ export class KafkaRequestClient extends models.AbstractRequestClient<Kafka | und
       await this.executeKafkaMethod(this.request);
     }
   }
-  async send(body?: string | Buffer): Promise<void> {
+  async send(body?: unknown): Promise<void> {
     if (isKafkaRequest(this.request) && this.nativeClient && body) {
       await this.executeKafkaMethod({
         ...this.request,
-        body,
+        body: utils.toBufferLike(body),
       });
     }
   }

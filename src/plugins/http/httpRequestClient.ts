@@ -25,12 +25,12 @@ export class HttpRequestClient extends models.AbstractRequestClient<typeof got> 
 
   private cancelableRequest: CancelableRequest<Response<unknown>> | undefined;
 
-  async send(body?: string | Buffer): Promise<void> {
+  async send(body?: unknown): Promise<void> {
     if (utils.isHttpRequest(this.request) && this.request.url) {
       try {
         const options = getClientOptions(this.request, this.context);
         if (body) {
-          options.body = body;
+          options.body = utils.toBufferLike(body);
         }
         this.cancelableRequest = got(this.request.url, options);
         this.registerEvents(this.cancelableRequest);

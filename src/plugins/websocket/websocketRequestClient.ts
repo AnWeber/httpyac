@@ -41,9 +41,9 @@ export class WebsocketRequestClient extends models.AbstractRequestClient<WebSock
     }
   }
 
-  async send(body?: string | Buffer): Promise<void> {
+  async send(body?: unknown): Promise<void> {
     if (isWebsocketRequest(this.request)) {
-      const sendBody = body || this.request.body;
+      const sendBody = utils.toBufferLike(body || this.request.body);
       if (sendBody) {
         this.nativeClient?.send(sendBody);
       }

@@ -48,11 +48,11 @@ export class AmqpRequestClient extends models.AbstractRequestClient<AMQPClient> 
     return undefined;
   }
 
-  async send(body?: string | Buffer): Promise<void> {
+  async send(body?: unknown): Promise<void> {
     if (isAmqpRequest(this.request) && this.channel && body) {
       await this.executeAmqpMethod({
         ...this.request,
-        body,
+        body: utils.toBufferLike(body),
       });
     }
   }

@@ -1,4 +1,4 @@
-import { ensureString } from './stringUtils';
+import { toString, ensureString } from './stringUtils';
 
 export function toBoolean(value: unknown, defaultValue = false): boolean {
   if (typeof value === 'boolean') return value;
@@ -32,4 +32,11 @@ export function toNumber(value: unknown): number | undefined {
     }
   }
   return undefined;
+}
+
+export function toBufferLike(value: unknown): Buffer | string | undefined {
+  if (Buffer.isBuffer(value)) {
+    return value;
+  }
+  return toString(value);
 }

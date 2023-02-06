@@ -70,7 +70,7 @@ export class GrpcRequestClient extends models.AbstractRequestClient<GrpcStream |
     return undefined;
   }
 
-  async send(body?: string | Buffer): Promise<void> {
+  async send(body?: unknown): Promise<void> {
     let promise: Promise<void> | undefined;
     if (!this.nativeClient) {
       promise = new Promise<void>(resolve => {
