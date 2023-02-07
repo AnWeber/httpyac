@@ -105,7 +105,7 @@ export class WebsocketRequestClient extends models.AbstractRequestClient<WebSock
     client.on('message', message => {
       this.onMessage('message', {
         ...this.responseTemplate,
-        statusCode: 200,
+        statusCode: 0,
         name: `${client.protocol} (${this.request.url})`,
         message: utils.toString(message),
         headers: {
@@ -115,7 +115,18 @@ export class WebsocketRequestClient extends models.AbstractRequestClient<WebSock
         rawBody: Buffer.isBuffer(message) ? message : undefined,
       });
     });
-    client.on('close', () => {
+    client.on('close', (statusCode, reason) => {
+      this.onMessage('message', {
+        ...this.responseTemplate,
+        statusCode,
+        name: `${client.protocol} (${this.request.url})`,
+        message: utils.toString(reason),
+        headers: {
+          date: new Date(),
+        },
+        body: utils.toString(reason),
+        rawBody: Buffer.isBuffer(reason) ? reason : undefined,
+      });
       this.removeWebsocketSession();
     });
 
