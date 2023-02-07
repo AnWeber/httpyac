@@ -39,8 +39,9 @@ export class KafkaRequestClient extends models.AbstractRequestClient<Kafka | und
   get supportsStreaming() {
     return true;
   }
-  close(err?: Error | undefined): void {
+  disconnect(err?: Error | undefined): void {
     io.log.error(err);
+    this.onDisconnect();
   }
 
   private async executeKafkaMethod(request: KafkaRequest) {

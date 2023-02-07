@@ -36,8 +36,9 @@ export class EventSourceRequestClient extends models.AbstractRequestClient<Event
     log.debug('SSE does not support send');
   }
 
-  override close(): void {
+  override disconnect(): void {
     this.nativeClient?.close();
+    this.onDisconnect();
   }
 
   private getClientOptions(request: EventSourceRequest): EventSource.EventSourceInitDict {

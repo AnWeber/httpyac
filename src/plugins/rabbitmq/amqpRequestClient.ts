@@ -69,7 +69,7 @@ export class AmqpRequestClient extends models.AbstractRequestClient<AMQPClient |
       client,
       channel,
       delete: async () => {
-        this.close();
+        this.disconnect();
       },
     };
     store.userSessionStore.setUserSession(session);
@@ -110,7 +110,7 @@ export class AmqpRequestClient extends models.AbstractRequestClient<AMQPClient |
     return undefined;
   }
 
-  override close(err?: Error): void {
+  override disconnect(err?: Error): void {
     if (this.closeClientOnFinish) {
       if (isAmqpRequest(this.request) && this._channel?.id) {
         store.userSessionStore.removeUserSession(this.getAmqpSessionId(this.request, this._channel.id));
@@ -122,6 +122,7 @@ export class AmqpRequestClient extends models.AbstractRequestClient<AMQPClient |
         this._channel?.close();
         this._nativeClient?.close();
       }
+      this.onDisconnect();
     }
   }
 

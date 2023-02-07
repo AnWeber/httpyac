@@ -125,7 +125,7 @@ export class GrpcRequestClient extends models.AbstractRequestClient<GrpcStream |
     return method;
   }
 
-  override close(err?: Error): void {
+  override disconnect(err?: Error): void {
     if (err) {
       this.nativeClient?.destroy(err);
     } else {
@@ -133,6 +133,7 @@ export class GrpcRequestClient extends models.AbstractRequestClient<GrpcStream |
         this.nativeClient.end();
       }
     }
+    this.onDisconnect();
   }
 
   private registerEvents(stream: GrpcStream, methodName: string): void {
@@ -161,15 +162,7 @@ export class GrpcRequestClient extends models.AbstractRequestClient<GrpcStream |
       });
     }
   }
-  private getData(body: unknown): unknown {
-    if (utils.isString(body)) {
-      return JSON.parse(body);
-    }
-    if (Buffer.isBuffer(body)) {
-      return JSON.parse(body.toString('utf-8'));
-    }
-    return body;
-  }
+
   private getMetaData(request: GrpcRequest): grpc.Metadata {
     const metaData = new grpc.Metadata();
     if (request.headers) {

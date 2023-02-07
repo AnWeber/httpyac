@@ -20,10 +20,14 @@ export function keepStreamingMetaDataHandler(type: string, _value: string | unde
         await new Promise(resolve => {
           userSessionStore.setUserSession(streamSession);
           const dispose = context.progress?.register?.(() => userSessionStore.removeUserSession(id));
+
           streamSession.delete = () => {
             dispose?.();
             resolve(true);
           };
+          if (context.requestClient) {
+            context.requestClient.on('disconnect', () => streamSession.delete?.());
+          }
         });
       }
     });

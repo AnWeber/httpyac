@@ -115,7 +115,7 @@ function getRequestParseLine(
     };
   }
   const protocolMatch = context.protocolRegex?.exec(httpLine.textLine);
-  if (protocolMatch && protocolMatch.length > 1 && protocolMatch.groups) {
+  if (protocolMatch && protocolMatch.length > 1 && protocolMatch.groups?.url) {
     return {
       request: {
         url: protocolMatch.groups.url,

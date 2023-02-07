@@ -36,7 +36,7 @@ export function executeRequestClientFactory<T extends models.RequestClient>(
         await Promise.all([
           repeat(() => requestClient.send(), context),
           onStreaming(context).then(() => {
-            requestClient.close();
+            requestClient.disconnect();
           }),
         ]);
 
@@ -47,14 +47,14 @@ export function executeRequestClientFactory<T extends models.RequestClient>(
             return false;
           }
         }
-        requestClient.close();
+        requestClient.disconnect();
         return true;
       } catch (err) {
         (context.scriptConsole || log).error(context.request);
         if (isError(err)) {
-          requestClient.close(err);
+          requestClient.disconnect(err);
         } else {
-          requestClient.close(new Error(toString(err)));
+          requestClient.disconnect(new Error(toString(err)));
         }
         throw err;
       } finally {
@@ -81,7 +81,7 @@ function toResponses(...responses: Array<models.HttpResponse | void | undefined>
 
 function registerCancellation<T extends models.RequestClient>(client: T, context: models.ProcessorContext) {
   if (context.progress?.register) {
-    return context.progress?.register(() => client.close(new Error('user cancellation')));
+    return context.progress?.register(() => client.disconnect(new Error('user cancellation')));
   }
   return undefined;
 }

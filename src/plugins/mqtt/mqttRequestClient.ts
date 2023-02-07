@@ -80,8 +80,11 @@ export class MQTTRequestClient extends models.AbstractRequestClient<MqttClient |
     }
   }
 
-  close(err?: Error): void {
-    const close = () => this.nativeClient?.end(!!err, undefined, err => err && log.error('error on close', err));
+  disconnect(err?: Error): void {
+    const close = () => {
+      this.nativeClient?.end(!!err, undefined, err => err && log.error('error on close', err));
+      this.onDisconnect();
+    };
     if (this.promises.length > 0) {
       Promise.all([...this.promises]).then(close);
     } else {

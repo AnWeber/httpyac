@@ -47,9 +47,10 @@ export class HttpRequestClient extends models.AbstractRequestClient<typeof got> 
     }
   }
 
-  override close(err?: Error): void {
+  override disconnect(err?: Error): void {
     if (err) {
       this.cancelableRequest?.cancel();
+      this.onDisconnect();
     }
   }
 

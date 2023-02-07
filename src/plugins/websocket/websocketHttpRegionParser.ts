@@ -3,8 +3,8 @@ import { WebsocketRequestClient } from './websocketRequestClient';
 
 export const parseWebsocketLine = utils.parseRequestLineFactory({
   protocol: 'WS',
-  methodRegex: /^\s*(ws|wss|websocket)\s*(?<url>.+?)\s*$/iu,
-  protocolRegex: /^\s*ws(s)?:\/\/(?<url>.+?)\s*$/iu,
+  methodRegex: /^\s*(ws|wss|websocket)\s+(?<url>.+?)\s*$/iu,
+  protocolRegex: /^\s*(?<url>ws(s)?:\/\/.+?)\s*$/iu,
   requestClientFactory(request, context) {
     return new WebsocketRequestClient(request, context);
   },

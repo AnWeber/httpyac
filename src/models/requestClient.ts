@@ -9,7 +9,7 @@ export interface RequestClient<T = unknown> {
   nativeClient: T;
   connect(): Promise<void>;
   send(body?: unknown): Promise<void>;
-  close(err?: Error): void;
+  disconnect(err?: Error): void;
   on<K extends keyof RequestClientEventMap>(
     type: K,
     listener: (this: RequestClient<T>, ev: RequestClientEventMap[K]) => void
@@ -25,12 +25,13 @@ interface RequestClientEventMap {
   progress: number;
   message: [string, HttpResponse & StreamResponse];
   metaData: [string, HttpResponse & StreamResponse];
+  disconnect: void;
   end: void;
 }
 
 export abstract class AbstractRequestClient<T> implements RequestClient<T> {
   abstract readonly supportsStreaming: boolean;
-  abstract close(err?: Error): void;
+  abstract disconnect(err?: Error): void;
   abstract nativeClient: T;
   abstract reportMessage: string;
   abstract connect(): Promise<void>;
@@ -57,6 +58,9 @@ export abstract class AbstractRequestClient<T> implements RequestClient<T> {
   }
   protected onMetaData(type: string, response: HttpResponse & StreamResponse) {
     this.eventEmitter.emit('metaData', [type, response]);
+  }
+  protected onDisconnect() {
+    this.eventEmitter.emit('disconnect');
   }
   public triggerEnd() {
     this.eventEmitter.emit('end');
