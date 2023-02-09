@@ -34,6 +34,19 @@ async function getAllEnvironmentVariables(context: VariableProviderContext) {
   if (envJsonFiles.length > 0) {
     log.trace(`Intellij environment files found: ${envJsonFiles.join(', ')}`);
   }
+  envJsonFiles.sort((path1, path2) => {
+    const path1String = fileProvider.toString(path1);
+    const path2String = fileProvider.toString(path2);
+    const path1Private = path1String.endsWith('private.env.json');
+    const path2Private = path2String.endsWith('private.env.json');
+    if (path1Private === path2Private) {
+      return path1String.localeCompare(path2String);
+    }
+    if (path1Private) {
+      return 1;
+    }
+    return -1;
+  });
   for (const file of envJsonFiles) {
     const envs = await getEnvironmentVariables(file);
     if (envs) {

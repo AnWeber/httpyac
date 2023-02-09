@@ -19,6 +19,7 @@
 #### Fixes
 
 - no-redirect did not prevent redirect (AnWeber/vscode-httpyac#171)
+- `private.env.json` settings overrides other `env.json` settings to be Intellij compatible (AnWeber/vscode-httpyac#175)
 
 ## 5.10.2 (2023-01-21)
 
