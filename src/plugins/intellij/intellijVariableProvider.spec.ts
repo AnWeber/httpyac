@@ -50,7 +50,7 @@ describe('intellijVariableProvider', () => {
         foo: 'bar',
       });
     });
-    it('should pick variables from http-client.private.env.json over http-client.private.env.json', async () => {
+    it('should pick variables from http-client.private.env.json over http-client.env.json', async () => {
       initFileProvider({
         'http-client.private.env.json': JSON.stringify({
           test: {
