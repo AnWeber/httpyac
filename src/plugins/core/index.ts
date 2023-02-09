@@ -28,4 +28,5 @@ function initOnRequestHook(api: models.HttpyacHooksApi) {
   api.hooks.onRequest.addHook('encodeRequestBody', request.encodeRequestBody);
 
   api.hooks.onRequest.addInterceptor(request.isTrustedInterceptor);
+  api.hooks.onRequest.addInterceptor(request.excludeProxyInterceptor);
 }

@@ -58,7 +58,7 @@ export function getClientOptions(
     options.https = request.options?.https || {};
     options.https.rejectUnauthorized = false;
   }
-  initProxy(options, request.proxy || config?.proxy);
+  initProxy(options, request.proxy);
   ensureStringHeaders(options.headers);
 
   log.debug('request', options);

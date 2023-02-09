@@ -361,6 +361,10 @@ export const knownMetaData: Array<{
     description: 'SSL client certificate is not send for this request',
   },
   {
+    name: 'noProxy',
+    description: 'disable proxy for this request',
+  },
+  {
     name: 'noRejectUnauthorized',
     description: 'all invalid SSL certificates will be ignored and no error will be thrown.',
   },

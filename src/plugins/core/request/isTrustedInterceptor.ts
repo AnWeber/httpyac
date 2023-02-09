@@ -4,7 +4,7 @@ import { HookTriggerContext } from 'hookpoint';
 
 export const isTrustedInterceptor = {
   id: 'isTrusted',
-  afterLoop: async function escapeVariable(
+  afterLoop: async function isTrusted(
     hookContext: HookTriggerContext<[models.Request, models.ProcessorContext], void>
   ): Promise<boolean> {
     if (!io.userInteractionProvider.isTrusted()) {

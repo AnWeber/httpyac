@@ -22,6 +22,7 @@ export interface EnvironmentConfig {
 
   request?: ConfigRequest;
   proxy?: string;
+  proxyExcludeList?: Array<string>;
   /** count auf characters before pretty print is ommited (default: 1000000)*/
   requestPrettyPrintBodyMaxSize?: number;
   requestBodyInjectVariablesExtensions?: Array<string>;

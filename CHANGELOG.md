@@ -14,6 +14,7 @@
 
 - support Intellij Request Body separator
 - support Intellij TextResponseStreaming (onEachLIne, onEachMessage)
+- add `proxyExcludeList` config (AnWeber/vscode-httpyac#176)
 
 #### Fixes
 

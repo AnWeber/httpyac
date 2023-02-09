@@ -3,6 +3,9 @@ import * as store from '../../store';
 import * as utils from '../../utils';
 import { isWebsocketRequest, WebsocketRequest } from './websocketRequest';
 import { IncomingMessage } from 'http';
+import { HttpProxyAgent } from 'http-proxy-agent';
+import { HttpsProxyAgent } from 'https-proxy-agent';
+import { SocksProxyAgent } from 'socks-proxy-agent';
 import WebSocket, { ClientOptions } from 'ws';
 
 const WEBSOCKET_CLOSE_NORMAL = 1000;
@@ -175,6 +178,9 @@ export class WebsocketRequestClient extends models.AbstractRequestClient<WebSock
     if (request.noRejectUnauthorized) {
       metaDataOptions.rejectUnauthorized = false;
     }
+    if (request.proxy) {
+      this.initProxy(configOptions, request.proxy);
+    }
     return Object.assign({}, config?.request, request.options, metaDataOptions);
   }
 
@@ -200,6 +206,19 @@ export class WebsocketRequestClient extends models.AbstractRequestClient<WebSock
   private removeWebsocketSession() {
     if (isWebsocketRequest(this.request)) {
       store.userSessionStore.removeUserSession(this.getWebsocketId(this.request));
+    }
+  }
+
+  private initProxy(options: ClientOptions, proxy: string | undefined) {
+    if (proxy) {
+      if (proxy.startsWith('socks://')) {
+        const socksProxy = new SocksProxyAgent(proxy);
+        options.agent = socksProxy;
+      } else if (proxy.startsWith('http://')) {
+        options.agent = new HttpProxyAgent(proxy);
+      } else {
+        options.agent = new HttpsProxyAgent(proxy);
+      }
     }
   }
 }
