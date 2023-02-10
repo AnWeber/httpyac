@@ -153,7 +153,11 @@ function deleteVariables(contextKeys: string[], context: vm.Context, deleteVaria
   }
 }
 
-export async function evalExpression(expression: string, context: ProcessorContext): Promise<unknown> {
+export async function evalExpression(
+  expression: string,
+  context: ProcessorContext,
+  scriptContext?: Record<string, unknown>
+): Promise<unknown> {
   if (!io.userInteractionProvider.isTrusted('evalExpression')) {
     return undefined;
   }
@@ -173,6 +177,7 @@ export async function evalExpression(expression: string, context: ProcessorConte
       httpRegion: context.httpRegion,
       request: context.request,
       console: context.scriptConsole,
+      ...scriptContext,
     },
     lineOffset,
   });

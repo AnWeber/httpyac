@@ -13,7 +13,11 @@ export interface JavascriptProvider {
       deleteVariable?: (key: string) => void;
     }
   ): Promise<Record<string, unknown>>;
-  evalExpression(expression: string, context: ProcessorContext): Promise<unknown>;
+  evalExpression(
+    expression: string,
+    context: ProcessorContext,
+    scriptContext?: Record<string, unknown>
+  ): Promise<unknown>;
   loadModule?<T>(request: string, context: string, force?: boolean): T | undefined;
   isAllowedKeyword?(keyword: string): boolean;
 }

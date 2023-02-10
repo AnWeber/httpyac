@@ -14,6 +14,7 @@ export interface HttpFileHooks {
   readonly replaceVariable: ReplaceVariableHook;
   readonly provideEnvironments: ProvideEnvironmentsHook;
   readonly provideVariables: ProvideVariablesHook;
+  readonly provideAssertValue: ProvideAssertValue;
 
   readonly execute: ExecuteHook;
   readonly onStreaming: OnStreaming;
@@ -36,6 +37,15 @@ export class ParseMetaDataHook extends LastOutHook<[string, string | undefined, 
   }
 }
 
+export class ProvideAssertValue extends LastOutHook<
+  [string, string | undefined, HttpResponse, ProcessorContext],
+  unknown
+> {
+  constructor() {
+    super(obj => !!obj);
+    this.id = 'ProvideAssertValue';
+  }
+}
 export class ParseEndRegionHook extends SeriesHook<[ParserContext], void> {
   constructor() {
     super();

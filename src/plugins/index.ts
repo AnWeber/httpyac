@@ -1,3 +1,4 @@
+export * from './assert';
 export * from './core';
 export * from './dotenv';
 export * from './eventsource';

@@ -15,5 +15,6 @@ pluginStore.json = plugins.registerJsonPlugin;
 pluginStore.mqtt = plugins.registerMqttPlugin;
 pluginStore.oauth2 = plugins.registerOAuth2Plugin;
 pluginStore.rabbitMQ = plugins.registerRabbitMQPlugin;
+pluginStore.assert = plugins.registerAssertPlugin;
 pluginStore.websocket = plugins.registerWebsocketPlugin;
 pluginStore.xml = plugins.registerXmlPuglin;

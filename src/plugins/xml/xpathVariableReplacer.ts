@@ -19,7 +19,7 @@ export async function xpathVariableReplacer(
           if (results.length === 1) {
             const resultNode = results[0];
             if (isNode(resultNode)) {
-              return resultNode.nodeValue;
+              return resultNode.textContent;
             }
             return resultNode;
           }

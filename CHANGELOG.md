@@ -12,6 +12,7 @@
 
 #### Features
 
+- simplified asserts ([docs](https://httpyac.github.io/guide/assert.html))
 - support Intellij Request Body separator
 - support Intellij TextResponseStreaming (onEachLIne, onEachMessage)
 - add `proxyExcludeList` config (AnWeber/vscode-httpyac#176)
