@@ -19,6 +19,10 @@ export const predicates: Array<p.TestPredicate> = [
   new p.MatchesPredicate(),
   new p.NotEqualsPredicate(),
   new p.StartsWithPredicate(),
+  new p.SHA256Predicate(),
+  new p.MD5Predicate(),
+  new p.SHA512Predicate(),
+  new p.IsFalsePredicate(),
 ];
 
 export async function parseAssertLine(
@@ -30,16 +34,20 @@ export async function parseAssertLine(
   if (!next.done && next.value.textLine) {
     const textLine = next.value.textLine;
 
-    const regex = `^\\s*\\?\\?\\s*(?<type>[^\\s]*)(\\s+(?<value>.*))?\\s+(?<predicate>(${predicates
-      .map(p => p.id)
-      .join('|')}))\\s*(?<expected>.*)\\s*$`;
+    const idRegex = predicates
+      .reduce((prev, curr) => {
+        prev.push(...curr.id);
+        return prev;
+      }, [] as Array<string>)
+      .join('|');
+    const regex = `^\\s*\\?\\?\\s*(?<type>[^\\s]*)(\\s+(?<value>.*))?\\s+(?<predicate>(${idRegex}))\\s*(?<expected>.*)\\s*$`;
     const match = new RegExp(regex, 'iu').exec(textLine);
 
     if (match && match.groups && !!match.groups.type && match.groups.predicate) {
       const type = match.groups.type;
       const valueString = match.groups.value;
       const expectedString = match.groups.expected;
-      const predicate = predicates.find(obj => obj.id === match.groups?.predicate);
+      const predicate = predicates.find(obj => match.groups?.predicate && obj.id.indexOf(match.groups.predicate) >= 0);
       if (predicate) {
         httpRegion.hooks.onResponse.addHook(`test ${textLine}`, async (response, context) => {
           const value = await context.httpFile.hooks.provideAssertValue.trigger(type, valueString, response, context);
@@ -48,10 +56,10 @@ export async function parseAssertLine(
 
           const expectedConverted = predicate.noAutoConvert ? expected : convertToType(value, expected);
           const test = utils.testFactory(context);
-          test(`${valueString || type} ${predicate.id} ${utils.toString(expected) || ''}`.trim(), () => {
+          test(`${valueString || type} ${predicate.id[0]} ${utils.toString(expected) || ''}`.trim(), () => {
             ok(
               predicate.match(value, expectedConverted),
-              `${value || type} ${predicate.id} ${expectedConverted || expected || ''}`.trim()
+              `${valueString || type} (${value}) ${predicate.id[0]} ${utils.toString(expectedConverted) || ''}`.trim()
             );
           });
         });

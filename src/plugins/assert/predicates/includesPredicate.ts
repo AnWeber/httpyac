@@ -2,7 +2,7 @@ import { toString } from '../../../utils';
 import { TestPredicate } from './testPredicate';
 
 export class IncludesPredicate implements TestPredicate {
-  readonly id = 'includes';
+  readonly id = ['contains', 'includes'];
   match(value: unknown, expected: unknown): boolean {
     const valString = toString(value);
     const expectedString = toString(expected);

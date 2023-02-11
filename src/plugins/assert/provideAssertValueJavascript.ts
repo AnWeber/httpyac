@@ -18,7 +18,7 @@ export async function provideAssertValueJavascript(
         response,
       });
     }
-    return response.parsedBody || response.body;
+    return response.body;
   }
   return false;
 }

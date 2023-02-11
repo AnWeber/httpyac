@@ -13,15 +13,25 @@ describe('assert.body', () => {
     const httpFile = await parseHttp(`
     GET http://localhost:5001/get
 
-    ?? body == {"foo": "bar"}
+    ?? body == {"foo":"bar"}
+    ?? body sha256 eji/gfOD9pQzrW6QDTWz4jhVk/dqe3q11DVbi6Qe4ks=
+    ?? body sha512 DbaK1OQdOya6P8SKXafJ9ha4E+d8tOlRGH4fKjfCutlAQQififYBLue0TiH4Y8XZVT47Zl7a6GQLsidLVVJm6w==
+    ?? body md5 m7WPJhkuS6APAeLnsTa72A==
     `);
 
     const responses = await sendHttpFile(httpFile);
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
-    expect(httpFile.httpRegions[0].testResults?.length).toBe(1);
-    expect(httpFile.httpRegions[0].testResults?.[0].result).toBeTruthy();
-    expect(httpFile.httpRegions[0].testResults?.[0].message).toBe('body == {"foo": "bar"}');
+    expect(httpFile.httpRegions[0].testResults?.length).toBe(4);
+    expect(httpFile.httpRegions[0].testResults?.every(obj => obj.result)).toBeTruthy();
+    expect(httpFile.httpRegions[0].testResults?.[0].message).toBe('body == {"foo":"bar"}');
+    expect(httpFile.httpRegions[0].testResults?.[1].message).toBe(
+      'body sha256 eji/gfOD9pQzrW6QDTWz4jhVk/dqe3q11DVbi6Qe4ks='
+    );
+    expect(httpFile.httpRegions[0].testResults?.[2].message).toBe(
+      'body sha512 DbaK1OQdOya6P8SKXafJ9ha4E+d8tOlRGH4fKjfCutlAQQififYBLue0TiH4Y8XZVT47Zl7a6GQLsidLVVJm6w=='
+    );
+    expect(httpFile.httpRegions[0].testResults?.[3].message).toBe('body md5 m7WPJhkuS6APAeLnsTa72A==');
   });
   it('should equal body property', async () => {
     initFileProvider();
