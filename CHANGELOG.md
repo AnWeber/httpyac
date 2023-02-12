@@ -1,21 +1,85 @@
-## 6.0.0 (2023-02-xx)
+## 6.0.0 (2023-02-12)
 
 #### Breaking Changes
 
-- Protocol Specific Request Clients are replaced with generic interface RequestClient.
-- use `$requestClient.send(<body>)` to send string or Buffer with current client
-- add EventListener `$requestClient.on('message', (response) => ...)` to access respones of client
+- Protocol Specific Request Clients are replaced with generic interface RequestClient (`$requestClient`).
 - to access previous Client you can use `$requestClient.nativeClient`
 - removed Variables: amqpClient, amqpChannel, grpcStream, mqttClient, websocketClient
-
 - requireUncached is removed
 
 #### Features
 
-- simplified asserts ([docs](https://httpyac.github.io/guide/assert.html))
-- support Intellij Request Body separator
-- support Intellij TextResponseStreaming (onEachLIne, onEachMessage)
-- add `proxyExcludeList` config (AnWeber/vscode-httpyac#176)
+- use `$requestClient.send(<body>)` to send string or Buffer with current client. Add EventListener `$requestClient.on('message', (response) => ...)` to access respones of client
+
+```
+MQTT tcp://broker.hivemq.com
+topic: httpyac
+
+{{@streaming
+  async function writeStream(){
+    await sleep(1000);
+    $requestClient.on("message", (response) => {
+      console.info(response);
+    });
+    $requestClient.send("find me");
+    await sleep(1000);
+    $requestClient.send("wait for response");
+    await sleep(1000);
+  }
+  exports.waitPromise = writeStream();
+}}
+```
+
+- extended and simpler assert logic ([docs](https://httpyac.github.io/guide/assert.html))
+
+```
+GET https://httpbin.org/anything
+
+?? status == 200
+```
+
+- multiple specification of request body per response (like Intellij Request Body separator)
+
+```
+MQTT tcp://broker.hivemq.com
+topic: httpyac
+
+Send one
+===
+Send two
+=== wait-for-server
+=== wait-for-server
+Send three
+```
+
+- websocket requests with same url as a websocket request are requested with the same url. You can keep a WebSocket Client open and send additional requests.
+
+```
+# @keepStreaming
+wss://scrumpoker.foo
+
+###
+wss://scrumpoker.foo
+["CONNECT\naccept-version:1.1,1.0\nheart-beat:10000,10000\n\n\u0000"]
+===
+["SUBSCRIBE\nid:sub-0\ndestination:/user/topic/username\n\n\u0000"]
+===
+["SUBSCRIBE\nid:sub-1\ndestination:/user/topic/notification\n\n\u0000"]
+===
+["SUBSCRIBE\nid:sub-3\ndestination:/topic/setting/cardset/{{roomId}}\n\n\u0000"]
+===
+["SEND\ndestination:/ws/room/register\n\n{\"roomID\":\"{{roomId}}\"}\u0000"]
+===
+["SEND\ndestination:/ws/user/username\n\n{\"username\":\"httpyac\"}\u0000"]
+###
+wss://scrumpoker.foo
+["SEND\ndestination:/ws/room/{{roomId}}/estimate\n\n{\"estimation\":\"5\"}\u0000"]
+
+```
+
+- add parallel option to cli and test runner to execute requests in parallel.
+- process each line of an event stream like Intellij ([see](https://www.jetbrains.com/help/idea/http-response-handling-examples.html#stream_scripting))
+- add `proxyExcludeList` config to exclude some url from proxy calls (AnWeber/vscode-httpyac#176)
 
 #### Fixes
 
