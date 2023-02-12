@@ -36,6 +36,7 @@ export function sendCommand() {
     .option('--quiet', '')
     .option('--repeat <count>', 'repeat count for requests', utils.toNumber)
     .option('--repeat-mode <mode>', 'repeat mode: sequential, parallel (default)')
+    .option('--parallel <count>', 'send parallel requests', utils.toNumber)
     .option('-s, --silent', 'log only request')
     .option('--timeout <timeout>', 'maximum time allowed for connections', utils.toNumber)
     .option('--var  <variables...>', 'list of variables')
@@ -63,19 +64,22 @@ async function execute(fileNames: Array<string>, options: SendOptions): Promise<
             ...processedHttpRegions.filter(obj => !utils.isGlobalHttpRegion(obj)),
           ];
         } else {
-          for (const httpFile of httpFiles) {
-            if (!options.json && context.scriptConsole && httpFiles.length > 1) {
-              context.scriptConsole.info(`--------------------- ${httpFile.fileName}  --`);
-            }
-            await send(Object.assign({ processedHttpRegions }, context, { httpFile }));
-            jsonOutput[fileProvider.toString(httpFile.fileName)] = [
-              ...processedHttpRegions.filter(obj => !utils.isGlobalHttpRegion(obj)),
-            ];
-            processedHttpRegions.length = 0;
-          }
+          const sendFuncs = httpFiles.map(
+            httpFile =>
+              async function sendHttpFile() {
+                if (!options.json && context.scriptConsole && httpFiles.length > 1) {
+                  context.scriptConsole.info(`--------------------- ${httpFile.fileName}  --`);
+                }
+                await send(Object.assign({ processedHttpRegions }, context, { httpFile }));
+                jsonOutput[fileProvider.toString(httpFile.fileName)] = [
+                  ...processedHttpRegions.filter(obj => !utils.isGlobalHttpRegion(obj)),
+                ];
+                processedHttpRegions.length = 0;
+              }
+          );
+          await utils.promiseQueue(options.parallel || 1, ...sendFuncs);
+          isFirstRequest = false;
         }
-        isFirstRequest = false;
-
         if (
           options.json ||
           Object.keys(jsonOutput).length > 1 ||
