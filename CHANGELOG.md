@@ -1,3 +1,9 @@
+## 6.1.0 (2023-02-13)
+
+#### Features
+
+- add code completion for tests
+
 ## 6.0.0 (2023-02-12)
 
 #### Breaking Changes

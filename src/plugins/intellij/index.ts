@@ -1,4 +1,5 @@
 import * as models from '../../models';
+import './completionItemProvider';
 import { provideIntellijGlobalVariables } from './intellijGlobalVariableProvider';
 import { parseIntellijScript } from './intellijHttpRegionParser';
 import { replaceIntellijProjectContext } from './intellijProjectContextReplacer';

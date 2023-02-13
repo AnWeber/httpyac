@@ -3,6 +3,7 @@ import * as models from '../../models';
 import { callOptionsRequestHook } from './callOptionsRequestHook';
 import { channelCredentialsRequestHook } from './channelCredentialsRequestHook';
 import { channelOptionsRequestHook } from './channelOptionsRequestHook';
+import './completionItemProvider';
 import { parseGrpcLine } from './grpcHttpRegionParser';
 import { parseGrpcResponse } from './grpcResponseHttpRegionParser';
 import { parseProtoImport } from './protoHttpRegionParser';

@@ -1,5 +1,6 @@
 import * as httpyac from '../..';
 import * as models from '../../models';
+import './completionItemProvider';
 import { provideGlobalVariableStore, GlobalVariablesInterceptor } from './globalVariableProvider';
 import { parseJavascript } from './javascriptHttpRegionParser';
 import { replaceJavascriptExpressions } from './javascriptVariableReplacer';
