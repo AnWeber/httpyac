@@ -37,6 +37,7 @@ export function getClientOptions(
       decompress: true,
       retry: 0,
       throwHttpErrors: false,
+      allowGetBody: true,
       headers: {
         accept: '*/*',
         'user-agent': 'httpyac',
