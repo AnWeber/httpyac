@@ -145,4 +145,19 @@ GET http://localhost:6005/test?test={{JSON.stringify(testObj)}}
     const requests = await mockedEndpoints.getSeenRequests();
     expect(requests[0].url).toBe('http://localhost:6005/test?test={%22bar%22:%22works%22}');
   });
+
+  it('support await syntax in custom scripts', async () => {
+    initFileProvider();
+    const mockedEndpoints = await localServer.forGet('/test').thenJson(200, { slideshow: { author: 'httpyac' } });
+    await sendHttp(`
+{{
+const asyncFn = async () => ({ bar: 'works'});
+exports.testObj = await asyncFn();
+}}
+GET http://localhost:6005/test?test={{JSON.stringify(testObj)}}
+    `);
+
+    const requests = await mockedEndpoints.getSeenRequests();
+    expect(requests[0].url).toBe('http://localhost:6005/test?test={%22bar%22:%22works%22}');
+  });
 });

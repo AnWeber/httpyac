@@ -114,12 +114,13 @@ export async function runScript(
   );
 
   const contextKeys = Object.keys(context);
-  const compiledWrapper = vm.runInContext(Module.wrap(`${io.fileProvider.EOL}${source}`), context, {
+  const sourceAsync = `return (async()=>{${io.fileProvider.EOL}${source}})()`;
+  const compiledWrapper = vm.runInContext(Module.wrap(sourceAsync), context, {
     filename,
     lineOffset: options.lineOffset,
     displayErrors: true,
   });
-  compiledWrapper.apply(context, [mod.exports, extendedRequire, mod, filename, path.dirname(filename)]);
+  await compiledWrapper.apply(context, [mod.exports, extendedRequire, mod, filename, path.dirname(filename)]);
 
   deleteVariables(contextKeys, context, options.deleteVariable);
 
