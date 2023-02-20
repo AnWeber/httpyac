@@ -18,7 +18,7 @@ function initFixTestSymbols() {
   }
 }
 
-function initFileProvider(): void {
+export function initFileProvider(): void {
   fileProvider.EOL = EOL;
   fileProvider.isAbsolute = async (path: models.PathLike) => isAbsolute(fileProvider.toString(path));
   fileProvider.dirname = (path: string) => dirname(fileProvider.toString(path));
