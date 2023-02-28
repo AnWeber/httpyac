@@ -10,11 +10,14 @@ export async function parseVariable(
   if (!next.done) {
     const textLine = next.value.textLine;
 
-    const match = /^\s*@(?<key>[^\s=:]*)\s*(?<lazyIndicator>:?)=*\s*"?(?<value>.*)"?\s*$/u.exec(textLine);
+    const match = /^\s*@(?<useGlobal>global\.)?(?<key>[^\s=:]*)\s*(?<lazyIndicator>:?)=*\s*"?(?<value>.*)"?\s*$/u.exec(
+      textLine
+    );
 
     if (match && match.groups && match.groups.key && match.groups.value) {
       const key = match.groups.key;
       const isLazy = !!match.groups.lazyIndicator;
+      const useGlobal = !!match.groups.useGlobal;
       const value = match.groups.value;
       httpRegion.hooks.execute.addHook(`variable_${key}`, async context => {
         let result: unknown = value;
@@ -23,12 +26,17 @@ export async function parseVariable(
         } else {
           result = await utils.replaceVariables(value, models.VariableType.variable, context);
         }
-        utils.setVariableInContext(
-          {
-            [key]: result,
-          },
-          context
-        );
+        const globalVar = context.variables.$global;
+        if (useGlobal && globalVar && typeof globalVar === 'object') {
+          Object.assign(globalVar, { [key]: result });
+        } else {
+          utils.setVariableInContext(
+            {
+              [key]: result,
+            },
+            context
+          );
+        }
         return true;
       });
 
