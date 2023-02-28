@@ -11,7 +11,7 @@ export async function promiseQueue<T>(batchSize: number, ...promises: Array<() =
   const result: Array<T> = [];
   const queue = async () => {
     let promise: (() => Promise<T>) | undefined;
-    while ((promise = promises.pop())) {
+    while ((promise = promises.shift())) {
       result.push(await promise());
     }
   };
