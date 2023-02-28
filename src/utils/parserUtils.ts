@@ -1,5 +1,6 @@
 import { javascriptProvider } from '../io';
 import * as models from '../models';
+import { getBufferEncoding } from './bufferEncodingUtils';
 import { report } from './logUtils';
 import { isString, toString } from './stringUtils';
 
@@ -535,4 +536,16 @@ export async function parseInlineResponse(
     }
   }
   return false;
+}
+
+export function parseFileImport(text: string) {
+  const fileImport = /^<(?:(?<injectVariables>@)(?<encoding>\w+)?)?\s+(?<fileName>.+?)\s*$/u.exec(text);
+  if (fileImport && fileImport.length === 4 && fileImport.groups) {
+    return {
+      fileName: fileImport.groups.fileName.trim(),
+      injectVariables: !!fileImport.groups.injectVariables,
+      encoding: getBufferEncoding(fileImport.groups.encoding),
+    };
+  }
+  return undefined;
 }
