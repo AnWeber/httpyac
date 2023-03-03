@@ -4,6 +4,10 @@
 
 - allow sending body in GET Request (AnWeber/vscode-httpyac#179)
 
+### Fixes
+
+- GRPC Request needs to be object instead of Buffer/string (Anweber/httpyac#407)
+
 ## 6.1.0 (2023-02-13)
 
 #### Features

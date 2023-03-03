@@ -78,7 +78,7 @@ export class GrpcRequestClient extends models.AbstractRequestClient<GrpcStream |
       });
     }
     if (isGrpcRequest(this.request) && (this.nativeClient instanceof Writable || this.nativeClient instanceof Duplex)) {
-      this.nativeClient.write(utils.toBufferLike(body || this.request.body));
+      this.nativeClient.write(this.getData(body || this.request.body));
     }
     return promise;
   }
@@ -103,7 +103,7 @@ export class GrpcRequestClient extends models.AbstractRequestClient<GrpcStream |
       methodArgs.push(request.callOptions);
     }
     if (!serviceData.methodDefinition?.requestStream) {
-      methodArgs.splice(0, 0, utils.toBufferLike(this.request.body));
+      methodArgs.splice(0, 0, this.getData(this.request.body));
     }
     if (!serviceData.methodDefinition?.responseStream) {
       needsResolve = false;
@@ -113,6 +113,16 @@ export class GrpcRequestClient extends models.AbstractRequestClient<GrpcStream |
       });
     }
     return { methodArgs, needsResolve };
+  }
+
+  private getData(body: unknown): unknown {
+    if (utils.isString(body)) {
+      return JSON.parse(body);
+    }
+    if (Buffer.isBuffer(body)) {
+      return JSON.parse(body.toString('utf-8'));
+    }
+    return body;
   }
 
   private getServiceDataMethod(serviceData: ServiceData, request: GrpcRequest): (...args: unknown[]) => GrpcStream {
