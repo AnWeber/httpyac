@@ -1,8 +1,10 @@
-## (unreleased)
+## 6.2.0 (2023-03-05)
 
 ### Features
 
 - allow sending body in GET Request (AnWeber/vscode-httpyac#179)
+- allow import of files into variable (AnWeber/vscode-httpyac#180)
+- allow setting global var with variable notation (AnWeber/vscode-httpyac#180)
 
 ### Fixes
 
