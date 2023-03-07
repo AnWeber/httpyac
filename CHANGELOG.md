@@ -1,3 +1,9 @@
+## 6.2.1 (2023-03-07)
+
+### Fixes
+
+- no infinite loop using cli with selection (#409)
+
 ## 6.2.0 (2023-03-05)
 
 ### Features

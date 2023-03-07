@@ -54,6 +54,7 @@ async function execute(fileNames: Array<string>, options: SendOptions): Promise<
       let isFirstRequest = true;
       const jsonOutput: Record<string, Array<models.HttpRegion>> = {};
       while (options.interactive || isFirstRequest) {
+        isFirstRequest = false;
         const selection = await selectAction(httpFiles, options);
 
         const processedHttpRegions: Array<models.HttpRegion> = [];
@@ -78,7 +79,6 @@ async function execute(fileNames: Array<string>, options: SendOptions): Promise<
               }
           );
           await utils.promiseQueue(options.parallel || 1, ...sendFuncs);
-          isFirstRequest = false;
         }
         if (
           options.json ||
