@@ -1,3 +1,9 @@
+## [Unreleased]
+
+### Fixes
+
+- fix Maximum call stack size exceeded when remove AMQP Session from store (#410)
+
 ## 6.2.1 (2023-03-07)
 
 ### Fixes

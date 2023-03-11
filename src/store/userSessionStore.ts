@@ -45,10 +45,10 @@ export class UserSessionStore implements SessionStore {
   removeUserSession(id: string): void {
     const userSession = this.userSessions.find(obj => obj.id === id);
     if (userSession) {
+      this.userSessions.splice(this.userSessions.indexOf(userSession), 1);
       if (userSession.delete) {
         userSession.delete();
       }
-      this.userSessions.splice(this.userSessions.indexOf(userSession), 1);
       this.notifySessionChanged();
     }
   }
