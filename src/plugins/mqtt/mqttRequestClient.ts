@@ -99,13 +99,11 @@ export class MQTTRequestClient extends models.AbstractRequestClient<MqttClient |
         statusCode: 0,
         name: `MQTT ${topic} (${this.request.url})`,
         message: message.toString('utf-8'),
-        body: {
-          topic,
-          message: message.toString('utf-8'),
-          date: new Date(),
-        },
+        request: this.request,
+        body: message.toString('utf-8'),
         rawBody: message,
         headers: {
+          topic,
           ...packet.properties,
         },
       });
@@ -114,7 +112,8 @@ export class MQTTRequestClient extends models.AbstractRequestClient<MqttClient |
       this.onMessage('error', {
         ...this.responseTemplate,
         statusCode: 1,
-        body: utils.toString(err),
+        request: this.request,
+        body: utils.errorToString(err),
       });
     });
 

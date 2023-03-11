@@ -1,5 +1,6 @@
 import * as models from '../../../models';
 import * as utils from '../../../utils';
+import { AmqpRequest } from '../amqpRequest';
 import { AmqpError } from './amqpMethodContext';
 
 export function getNonAmqpHeaders(headers: Record<string, string | Array<string> | undefined> | undefined) {
@@ -14,12 +15,13 @@ export function isAmqpError(obj: unknown): obj is AmqpError {
   return guard?.isError;
 }
 
-export function errorToHttpResponse(err: unknown): models.HttpResponse & models.StreamResponse {
+export function errorToHttpResponse(err: unknown, request: AmqpRequest): models.HttpResponse & models.StreamResponse {
   if (utils.isError(err)) {
     return {
       protocol: 'AMQP',
       statusCode: 1,
       message: err.message,
+      request,
       body: utils.stringifySafe({
         name: err.name,
         message: err.message,

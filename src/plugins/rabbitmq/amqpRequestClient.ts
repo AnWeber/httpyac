@@ -104,7 +104,7 @@ export class AmqpRequestClient extends models.AbstractRequestClient<AMQPClient |
         const method = this.getMethod(constants.getAmqpMethod(request));
         return await method.exchange(context);
       } catch (err) {
-        return amqpMethods.errorToHttpResponse(err);
+        return amqpMethods.errorToHttpResponse(err, request);
       }
     }
     return undefined;

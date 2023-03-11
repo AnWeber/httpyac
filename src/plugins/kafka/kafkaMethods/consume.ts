@@ -33,6 +33,7 @@ export async function consume({ request, kafka, onMessage }: KafkaMethodContext)
           method: 'consume',
           ...payload.message.headers,
         },
+        request,
         message: payload.message.value ? utils.toString(payload.message.value) : utils.toString(payload.message.key),
         body: utils.toString(payload.message.value),
         rawBody: payload.message.value || undefined,

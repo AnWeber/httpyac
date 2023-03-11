@@ -199,6 +199,7 @@ export class GrpcRequestClient extends models.AbstractRequestClient<GrpcStream |
         charset: 'UTF-8',
         contentType: 'application/grpc+json; charset=utf-8',
       },
+      request: this.request,
     };
     if (this.isGrpcError(data)) {
       response.statusCode = data.code || 2;

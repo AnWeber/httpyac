@@ -17,13 +17,14 @@ export interface KafkaError {
   stack?: unknown;
 }
 
-export function errorToHttpResponse(err: unknown): models.HttpResponse & models.StreamResponse {
+export function errorToHttpResponse(err: unknown, request: KafkaRequest): models.HttpResponse & models.StreamResponse {
   if (utils.isError(err)) {
     return {
       protocol: 'KAFKA',
       statusCode: 1,
+      request,
       message: err.message,
-      body: utils.stringifySafe({
+      body: utils.errorToString({
         name: err.name,
         message: err.message,
         stack: err.stack,

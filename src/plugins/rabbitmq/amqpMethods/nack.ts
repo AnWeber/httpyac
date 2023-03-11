@@ -18,6 +18,7 @@ export async function nack({ channel, request }: AmqpMethodContext) {
         channelId: channel.id,
         method: 'nack',
       },
+      request,
       body: utils.stringifySafe(
         {
           tag,

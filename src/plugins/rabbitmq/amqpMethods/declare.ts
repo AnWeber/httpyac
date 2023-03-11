@@ -22,6 +22,7 @@ export async function declare({ channel, request, onMessage }: AmqpMethodContext
         exchange,
         method: 'declare',
       },
+      request,
       message: `declare`,
       body: utils.stringifySafe(
         {
@@ -46,6 +47,7 @@ export async function declare({ channel, request, onMessage }: AmqpMethodContext
         queue,
         method: 'declare',
       },
+      request,
       message: `declare`,
       body: utils.stringifySafe(
         {

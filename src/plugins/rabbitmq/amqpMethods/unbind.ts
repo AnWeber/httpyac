@@ -23,6 +23,7 @@ export async function unbind({ channel, request, onMessage }: AmqpMethodContext)
           exchange,
           method: 'unbind',
         },
+        request,
         message: `unbind ${exchange} (${routingKey}, ${queue})`,
         body: utils.stringifySafe(
           {
@@ -47,6 +48,7 @@ export async function unbind({ channel, request, onMessage }: AmqpMethodContext)
           exchange,
           method: 'unbind',
         },
+        request,
         message: `unbind ${exchange} (${routingKey}, ${destination})`,
         body: utils.stringifySafe(
           {

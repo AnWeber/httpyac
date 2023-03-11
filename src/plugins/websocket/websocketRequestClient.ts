@@ -73,7 +73,8 @@ export class WebsocketRequestClient extends models.AbstractRequestClient<WebSock
             this.onMessage('error', {
               ...this.responseTemplate,
               statusCode: 400,
-              body: utils.toString(err),
+              request: this.request,
+              body: utils.errorToString(err),
             });
           }
         });
@@ -102,6 +103,7 @@ export class WebsocketRequestClient extends models.AbstractRequestClient<WebSock
       this.onMessage('error', {
         ...this.responseTemplate,
         statusCode: 400,
+        request: this.request,
         body: utils.toString(err),
       });
     });
@@ -114,6 +116,7 @@ export class WebsocketRequestClient extends models.AbstractRequestClient<WebSock
         headers: {
           date: new Date(),
         },
+        request: this.request,
         body: utils.toString(message),
         rawBody: Buffer.isBuffer(message) ? message : undefined,
       });
@@ -127,6 +130,7 @@ export class WebsocketRequestClient extends models.AbstractRequestClient<WebSock
         headers: {
           date: new Date(),
         },
+        request: this.request,
         body: utils.toString(reason),
         rawBody: Buffer.isBuffer(reason) ? reason : undefined,
       });

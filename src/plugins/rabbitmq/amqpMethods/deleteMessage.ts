@@ -19,6 +19,7 @@ export async function deleteMessage({ channel, request, onMessage }: AmqpMethodC
         exchange,
         method: 'delete',
       },
+      request,
       message: `delete`,
       body: utils.stringifySafe(
         {
@@ -42,6 +43,7 @@ export async function deleteMessage({ channel, request, onMessage }: AmqpMethodC
         queue,
         method: 'delete',
       },
+      request,
       message: `delete`,
       body: utils.stringifySafe(
         {

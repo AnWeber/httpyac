@@ -17,6 +17,7 @@ export async function ack({ channel, request }: AmqpMethodContext) {
         channelId: channel.id,
         method: 'ack',
       },
+      request,
       body: utils.stringifySafe({
         tag,
         ack: true,

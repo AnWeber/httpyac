@@ -21,6 +21,7 @@ export async function bind({ channel, request, onMessage }: AmqpMethodContext) {
           queue,
           exchange,
         },
+        request,
         message: `bind ${exchange} (${routingKey}, ${queue})`,
         body: utils.stringifySafe({
           bind: true,
@@ -42,6 +43,7 @@ export async function bind({ channel, request, onMessage }: AmqpMethodContext) {
           method: 'bind',
           exchange,
         },
+        request,
         message: `bind ${exchange} (${routingKey}, ${destination})`,
         body: utils.stringifySafe({
           bind: true,

@@ -56,7 +56,7 @@ export class KafkaRequestClient extends models.AbstractRequestClient<Kafka | und
         const method = this.getMethod(request.method);
         return await method.exchange(context);
       } catch (err) {
-        return kafkaMethods.errorToHttpResponse(err);
+        return kafkaMethods.errorToHttpResponse(err, request);
       }
     }
     return undefined;

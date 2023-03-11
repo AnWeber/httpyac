@@ -3,6 +3,7 @@
 ### Fixes
 
 - fix Maximum call stack size exceeded when remove AMQP Session from store (#410)
+- add missing request to GRPC, AMQP, Websocket and EventSource Responses (#413)
 
 ## 6.2.1 (2023-03-07)
 

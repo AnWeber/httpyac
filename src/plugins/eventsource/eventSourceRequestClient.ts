@@ -65,6 +65,7 @@ export class EventSourceRequestClient extends models.AbstractRequestClient<Event
           ...this.responseTemplate,
           statusCode: message.status || 200,
           name: `EventSource (${this.request.url})`,
+          request: this.request,
           body: message.data,
           rawBody: Buffer.from(message.data),
         });
@@ -74,7 +75,8 @@ export class EventSourceRequestClient extends models.AbstractRequestClient<Event
       this.onMessage('error', {
         ...this.responseTemplate,
         statusCode: 400,
-        body: utils.toString(err),
+        request: this.request,
+        body: utils.errorToString(err),
       });
     };
 

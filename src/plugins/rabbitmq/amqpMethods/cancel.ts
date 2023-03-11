@@ -14,6 +14,7 @@ export async function cancel({ channel, request }: AmqpMethodContext) {
         channelId: channel.id,
         method: 'cancel',
       },
+      request,
       body: utils.stringifySafe(
         {
           tag,

@@ -42,6 +42,7 @@ export async function publish({ channel, request, onMessage }: AmqpMethodContext
           exchange,
           channelId: channel.id,
         },
+        request,
         message: `publish ${routingKey}`,
         body: utils.stringifySafe(
           {
@@ -71,6 +72,7 @@ export async function publish({ channel, request, onMessage }: AmqpMethodContext
           queue,
           channelId: channel.id,
         },
+        request,
         message: `publish ${routingKey}`,
         body: utils.stringifySafe({
           published: true,

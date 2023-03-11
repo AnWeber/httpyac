@@ -1,4 +1,5 @@
 import { ErrorDescription } from '../models';
+import { stringifySafe, toString } from './stringUtils';
 
 export function isError(val: unknown): val is Error {
   if (!val) {
@@ -31,4 +32,15 @@ export function parseError(err: Error): ErrorDescription {
     error: err,
     displayMessage: err.message,
   };
+}
+
+export function errorToString(err: unknown): string | undefined {
+  if (isError(err)) {
+    return stringifySafe({
+      message: err.message,
+      name: err.name,
+      stack: err.stack,
+    });
+  }
+  return toString(err);
 }

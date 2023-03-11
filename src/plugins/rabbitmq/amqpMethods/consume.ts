@@ -33,6 +33,7 @@ export async function consume({ channel, request, onMessage }: AmqpMethodContext
           replyText: message.replyCode,
           options,
         },
+        request,
         message: `${message.bodyString()} (deliveryTag: ${message.deliveryTag})`,
         body: message.bodyString(),
         rawBody: message.body ? Buffer.from(message.body) : undefined,

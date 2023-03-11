@@ -14,6 +14,7 @@ export async function purge({ channel, request, onMessage }: AmqpMethodContext) 
         queue,
         channelId: channel.id,
       },
+      request,
       message: `purge`,
       body: utils.stringifySafe(
         {
