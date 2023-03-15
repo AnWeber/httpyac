@@ -72,10 +72,9 @@ export async function importHttpFileInContext(
       context.options.globalScriptsExecuted = [];
     }
     log.trace(`execute global scripts for import ${httpFile.fileName}`);
+    context.options.globalScriptsExecuted.push(httpFile);
     const globResult = await executeGlobalScripts(context);
-    if (globResult) {
-      context.options.globalScriptsExecuted.push(httpFile);
-    }
+
     return globResult;
   }
   return !!httpFile;
