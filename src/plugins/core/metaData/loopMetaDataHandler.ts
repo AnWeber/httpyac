@@ -189,12 +189,8 @@ class LoopMetaInterceptor implements HookInterceptor<[models.ProcessorContext], 
   }
 
   private createHttpRegionClone(httpRegion: models.HttpRegion, index: number): models.HttpRegion {
-    return {
-      ...httpRegion,
-      metaData: {
-        ...httpRegion.metaData,
-        name: httpRegion.metaData.name ? `${httpRegion.metaData.name}${index}` : undefined,
-      },
-    };
+    const clone = httpRegion.clone();
+    clone.metaData.name = httpRegion.metaData.name ? `${httpRegion.metaData.name}${index}` : undefined;
+    return clone;
   }
 }

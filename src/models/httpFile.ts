@@ -1,4 +1,4 @@
-import { HttpFileHooks } from './httpFileHooks';
+import { HttpFileHooks } from './hooks';
 import { HttpRegion } from './httpRegion';
 import { PathLike } from './pathLike';
 
@@ -8,4 +8,6 @@ export interface HttpFile {
   readonly hooks: HttpFileHooks;
   readonly httpRegions: Array<HttpRegion>;
   activeEnvironment?: string[];
+
+  findHttpRegion(name: string): HttpRegion | undefined;
 }

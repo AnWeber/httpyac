@@ -24,7 +24,7 @@ export async function send(context: models.SendContext): Promise<boolean> {
 async function sendHttpRegion(context: models.HttpRegionSendContext): Promise<boolean> {
   const processorContext = await createEmptyProcessorContext(context);
   if (await utils.executeGlobalScripts(processorContext)) {
-    return await utils.processHttpRegionActions(processorContext, true);
+    return await context.httpRegion.execute(processorContext, true);
   }
   return false;
 }
@@ -36,11 +36,7 @@ async function sendHttpRegions(context: models.HttpRegionsSendContext): Promise<
       context.progress.divider = context.httpRegions.length;
     }
     for (const httpRegion of context.httpRegions) {
-      const regionProcessorContext: models.ProcessorContext = {
-        ...processorContext,
-        httpRegion,
-      };
-      if (!(await utils.processHttpRegionActions(regionProcessorContext, true))) {
+      if (!(await httpRegion.execute(processorContext, true))) {
         return false;
       }
     }
@@ -54,7 +50,7 @@ async function sendHttpFile(context: models.HttpFileSendContext): Promise<boolea
   for (const httpRegion of context.httpFile.httpRegions) {
     if (context.httpRegionPredicate && !context.httpRegionPredicate(httpRegion)) {
       log.debug(`${httpRegion.symbol.name} disabled by predicate`);
-    } else if (!utils.isGlobalHttpRegion(httpRegion)) {
+    } else if (!httpRegion.isGlobal()) {
       httpRegions.push(httpRegion);
     }
   }

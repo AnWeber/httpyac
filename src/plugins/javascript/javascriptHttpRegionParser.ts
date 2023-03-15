@@ -1,6 +1,7 @@
 import { javascriptProvider } from '../../io';
 import * as models from '../../models';
 import * as utils from '../../utils';
+import { HttpyacJsApi } from './httpyacJsApi';
 import { runScript } from './moduleUtils';
 import { HookInterceptor, HookTriggerContext } from 'hookpoint';
 
@@ -15,7 +16,7 @@ export interface ScriptData {
 
 export async function parseJavascript(
   getLineReader: models.getHttpLineGenerator,
-  { httpRegion, httpFile }: models.ParserContext
+  { httpRegion, httpFile, httpFileStore }: models.ParserContext
 ): Promise<models.HttpRegionParserResult> {
   const lineReader = getLineReader();
   let next = lineReader.next();
@@ -36,22 +37,26 @@ export async function parseJavascript(
 
           switch (match.groups.event) {
             case 'request':
-              addRequestHook(isOnEveryRequest ? httpFile.hooks : httpRegion.hooks, scriptData);
+              addRequestHook(isOnEveryRequest ? httpFile.hooks : httpRegion.hooks, scriptData, httpFileStore);
               break;
             case 'streaming':
-              addStreamingHook(isOnEveryRequest ? httpFile.hooks : httpRegion.hooks, scriptData);
+              addStreamingHook(isOnEveryRequest ? httpFile.hooks : httpRegion.hooks, scriptData, httpFileStore);
               break;
             case 'response':
-              addResponseHook(isOnEveryRequest ? httpFile.hooks : httpRegion.hooks, scriptData);
+              addResponseHook(isOnEveryRequest ? httpFile.hooks : httpRegion.hooks, scriptData, httpFileStore);
               break;
             case 'after':
-              addExecuteAfterInterceptor(isOnEveryRequest ? httpFile.hooks : httpRegion.hooks, scriptData);
+              addExecuteAfterInterceptor(
+                isOnEveryRequest ? httpFile.hooks : httpRegion.hooks,
+                scriptData,
+                httpFileStore
+              );
               break;
             case 'responseLogging':
-              addResponseLoggingHook(isOnEveryRequest ? httpFile.hooks : httpRegion.hooks, scriptData);
+              addResponseLoggingHook(isOnEveryRequest ? httpFile.hooks : httpRegion.hooks, scriptData, httpFileStore);
               break;
             default:
-              addExecuteHook(isOnEveryRequest ? httpFile.hooks : httpRegion.hooks, scriptData);
+              addExecuteHook(isOnEveryRequest ? httpFile.hooks : httpRegion.hooks, scriptData, httpFileStore);
               break;
           }
 
@@ -78,52 +83,81 @@ export async function parseJavascript(
   return false;
 }
 
-function addStreamingHook(hooks: { onStreaming: models.OnStreaming }, scriptData: ScriptData) {
+function addStreamingHook(
+  hooks: { onStreaming: models.OnStreaming },
+  scriptData: ScriptData,
+  httpFileStore: models.HttpFileStore
+) {
   hooks.onStreaming.addHook('js', async context => {
-    await executeScriptData(scriptData, context, 'streaming');
+    await executeScriptData(scriptData, context, httpFileStore, 'streaming');
   });
 }
 
-function addExecuteHook(hooks: { execute: models.ExecuteHook }, scriptData: ScriptData) {
-  hooks.execute.addHook('js', context => executeScriptData(scriptData, context));
+function addExecuteHook(
+  hooks: { execute: models.ExecuteHook },
+  scriptData: ScriptData,
+  httpFileStore: models.HttpFileStore
+) {
+  hooks.execute.addHook('js', context => executeScriptData(scriptData, context, httpFileStore));
 }
-function addRequestHook(hooks: { onRequest: models.OnRequestHook }, scriptData: ScriptData) {
+function addRequestHook(
+  hooks: { onRequest: models.OnRequestHook },
+  scriptData: ScriptData,
+  httpFileStore: models.HttpFileStore
+) {
   hooks.onRequest.addHook('js', async (_request, context) => {
-    await executeScriptData(scriptData, context, 'request');
+    await executeScriptData(scriptData, context, httpFileStore, 'request');
   });
 }
 
-function addResponseHook(hooks: { onResponse: models.OnResponseHook }, scriptData: ScriptData) {
+function addResponseHook(
+  hooks: { onResponse: models.OnResponseHook },
+  scriptData: ScriptData,
+  httpFileStore: models.HttpFileStore
+) {
   hooks.onResponse.addHook('js', async (response, context) => {
     context.variables.response = response;
-    await executeScriptData(scriptData, context, 'response');
+    await executeScriptData(scriptData, context, httpFileStore, 'response');
   });
 }
-function addResponseLoggingHook(hooks: { responseLogging: models.ResponseLoggingHook }, scriptData: ScriptData) {
+function addResponseLoggingHook(
+  hooks: { responseLogging: models.ResponseLoggingHook },
+  scriptData: ScriptData,
+  httpFileStore: models.HttpFileStore
+) {
   hooks.responseLogging.addHook('js', async (response, context) => {
     const originalResponse = context.variables.response;
     context.variables.response = response;
-    await executeScriptData(scriptData, context, 'responseLogging');
+    await executeScriptData(scriptData, context, httpFileStore, 'responseLogging');
     context.variables.response = originalResponse;
   });
 }
 
-function addExecuteAfterInterceptor(hooks: { execute: models.ExecuteHook }, scriptData: ScriptData) {
-  hooks.execute.addInterceptor(new AfterJavascriptHookInterceptor(scriptData));
+function addExecuteAfterInterceptor(
+  hooks: { execute: models.ExecuteHook },
+  scriptData: ScriptData,
+  httpFileStore: models.HttpFileStore
+) {
+  hooks.execute.addInterceptor(new AfterJavascriptHookInterceptor(scriptData, httpFileStore));
 }
 
 export class AfterJavascriptHookInterceptor implements HookInterceptor<[models.ProcessorContext], boolean> {
   id: string;
-  constructor(private readonly scriptData: ScriptData) {
+  constructor(private readonly scriptData: ScriptData, private readonly httpFileStore: models.HttpFileStore) {
     this.id = `afterJavascript_${scriptData.script}`;
   }
   async afterLoop(
     context: HookTriggerContext<[models.ProcessorContext], boolean | undefined>
   ): Promise<boolean | undefined> {
-    return await executeScriptData(this.scriptData, context.args[0], 'after');
+    return await executeScriptData(this.scriptData, context.args[0], this.httpFileStore, 'after');
   }
 }
-async function executeScriptData(scriptData: ScriptData, context: models.ProcessorContext, eventName?: string) {
+async function executeScriptData(
+  scriptData: ScriptData,
+  context: models.ProcessorContext,
+  httpFileStore: models.HttpFileStore,
+  eventName?: string
+) {
   utils.report(context, eventName ? `execute javascript (@${eventName})` : 'execute javascript');
   const result = await runScript(scriptData.script, {
     fileName: context.httpFile.fileName,
@@ -135,6 +169,7 @@ async function executeScriptData(scriptData: ScriptData, context: models.Process
       request: context.request,
       sleep: utils.sleep,
       test: utils.testFactory(context),
+      $httpyac: new HttpyacJsApi(context, httpFileStore),
       $random: utils.randomData,
     },
     lineOffset: scriptData.lineOffset,

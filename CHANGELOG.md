@@ -1,4 +1,12 @@
-## [Unreleased]
+## 6.3.0 (2023-03-15)
+
+### Breaking Changes
+
+- some utils functions are removed and added directly to httpRegion (e.g isGlobalHttpRegion)
+
+### Features
+
+- add Additional orchestration capabilities by providing [`$httpyac`](https://github.com/AnWeber/httpyac/blob/main/src/plugins/javascript/httpyacJsApi.ts) in Script (#405)
 
 ### Fixes
 

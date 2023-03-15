@@ -4,7 +4,7 @@ export * from './environmentConfig';
 export * from './fileProvider';
 export * from './httpClientProvider';
 export * from './httpFile';
-export * from './httpFileHooks';
+export * from './hooks';
 export * from './httpFileStore';
 export * from './httpHooksApi';
 export * from './httpMethod';

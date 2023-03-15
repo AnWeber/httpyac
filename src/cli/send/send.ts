@@ -62,7 +62,7 @@ async function execute(fileNames: Array<string>, options: SendOptions): Promise<
         if (selection) {
           await send(Object.assign({ processedHttpRegions }, context, selection));
           jsonOutput[fileProvider.toString(selection.httpFile.fileName)] = [
-            ...processedHttpRegions.filter(obj => !utils.isGlobalHttpRegion(obj)),
+            ...processedHttpRegions.filter(obj => !obj.isGlobal()),
           ];
         } else {
           const sendFuncs = httpFiles.map(
@@ -73,7 +73,7 @@ async function execute(fileNames: Array<string>, options: SendOptions): Promise<
                 }
                 await send(Object.assign({ processedHttpRegions }, context, { httpFile }));
                 jsonOutput[fileProvider.toString(httpFile.fileName)] = [
-                  ...processedHttpRegions.filter(obj => !utils.isGlobalHttpRegion(obj)),
+                  ...processedHttpRegions.filter(obj => !obj.isGlobal()),
                 ];
                 processedHttpRegions.length = 0;
               }

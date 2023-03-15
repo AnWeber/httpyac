@@ -1,5 +1,5 @@
 import * as models from '../../../models';
-import * as utils from '../../../utils';
+import { toEnvironmentKey } from '../../../utils';
 import { HookInterceptor, HookTriggerContext } from 'hookpoint';
 
 interface RegionScopedVariableOptions {
@@ -12,9 +12,9 @@ export class RegionScopedVariablesInterceptor implements HookInterceptor<[models
     hookContext: HookTriggerContext<[models.ProcessorContext], boolean | undefined>
   ): Promise<boolean | undefined> {
     const context = hookContext.args[0];
-    const env = utils.toEnvironmentKey(context.httpFile.activeEnvironment);
+    const env = toEnvironmentKey(context.httpFile.activeEnvironment);
     if (context.config?.useRegionScopedVariables) {
-      const httpRegions = context.httpFile.httpRegions.filter(obj => utils.isGlobalHttpRegion(obj));
+      const httpRegions = context.httpFile.httpRegions.filter(obj => obj.isGlobal());
       const regionScopedVariables: RegionScopedVariableOptions = context.options;
       regionScopedVariables.variables = context.variables;
       context.variables = Object.assign({}, context.variables, ...httpRegions.map(obj => obj.variablesPerEnv[env]));

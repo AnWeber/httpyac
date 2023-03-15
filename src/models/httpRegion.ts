@@ -1,8 +1,8 @@
-import { HttpFile } from './httpFile';
-import { ExecuteHook, OnRequestHook, OnStreaming, OnResponseHook, ResponseLoggingHook } from './httpFileHooks';
+import { ExecuteHook, OnRequestHook, OnStreaming, OnResponseHook, ResponseLoggingHook } from './hooks';
 import { Request } from './httpRequest';
 import { HttpResponse } from './httpResponse';
 import { HttpSymbol } from './httpSymbol';
+import { ProcessorContext } from './processorContext';
 import { TestResult } from './testResult';
 import { Variables } from './variables';
 
@@ -15,14 +15,18 @@ export interface ProcessedHttpRegion {
   responseRefs?: Array<string>;
 }
 
+export type PartialProperty<T, TProperty extends string> = Omit<T, TProperty> & Partial<T>;
+
 export interface HttpRegion extends ProcessedHttpRegion {
   variablesPerEnv: Record<string, Variables>;
-  dependentsPerEnv: Record<string, Array<{ httpRegion: HttpRegion; httpFile: HttpFile }>>;
-  hooks: {
+  readonly hooks: {
     execute: ExecuteHook;
     onRequest: OnRequestHook;
     onStreaming: OnStreaming;
     onResponse: OnResponseHook;
     responseLogging: ResponseLoggingHook;
   };
+  isGlobal(): boolean;
+  clone(): HttpRegion;
+  execute(context: PartialProperty<ProcessorContext, 'httpRegion'>, isMainContext?: boolean): Promise<boolean>;
 }

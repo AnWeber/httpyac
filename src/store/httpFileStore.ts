@@ -2,10 +2,11 @@ import { fileProvider, log, userInteractionProvider } from '../io';
 import * as models from '../models';
 import { userSessionStore as sessionStore } from '../store';
 import * as utils from '../utils';
+import { getEnvironmentConfig } from './getEnvironmentConfig';
+import { HttpFile } from './httpFile';
+import { parseHttpFile } from './parser';
 import { pluginStore } from './pluginStore';
-import { default as chalk } from 'chalk';
 import { HookCancel } from 'hookpoint';
-import merge from 'lodash/merge';
 
 interface HttpFileStoreEntry {
   version: number;
@@ -67,7 +68,7 @@ export class HttpFileStore implements models.HttpFileStore {
                 obj => obj.symbol.source === httpRegion.symbol.source
               );
               if (prevHttpRegion) {
-                httpRegion.variablesPerEnv = prevHttpRegion.variablesPerEnv;
+                Object.assign(httpRegion.variablesPerEnv, prevHttpRegion.variablesPerEnv);
               }
             }
             httpFile.activeEnvironment = httpFileStoreEntry.httpFile.activeEnvironment;
@@ -129,26 +130,7 @@ export class HttpFileStore implements models.HttpFileStore {
       options.config?.envDirName || 'env'
     );
 
-    const httpFile: models.HttpFile = {
-      fileName: absoluteFileName,
-      rootDir,
-      hooks: {
-        parse: new models.ParseHook(),
-        parseMetaData: new models.ParseMetaDataHook(),
-        parseEndRegion: new models.ParseEndRegionHook(),
-        provideAssertValue: new models.ProvideAssertValue(),
-        replaceVariable: new models.ReplaceVariableHook(),
-        provideEnvironments: new models.ProvideEnvironmentsHook(),
-        provideVariables: new models.ProvideVariablesHook(),
-        execute: new models.ExecuteHook(),
-        onStreaming: new models.OnStreaming(),
-        onRequest: new models.OnRequestHook(),
-        onResponse: new models.OnResponseHook(),
-        responseLogging: new models.ResponseLoggingHook(),
-      },
-      httpRegions: [],
-      activeEnvironment: options.activeEnvironment,
-    };
+    const httpFile = new HttpFile(absoluteFileName, rootDir);
 
     options.config = await getEnvironmentConfig(options.config, httpFile.rootDir);
 
@@ -207,159 +189,4 @@ export class HttpFileStore implements models.HttpFileStore {
       }
     }
   }
-}
-
-export async function getEnvironmentConfig(
-  config?: models.EnvironmentConfig,
-  rootDir?: models.PathLike
-): Promise<models.EnvironmentConfig> {
-  const environmentConfigs: Array<models.EnvironmentConfig> = [];
-  if (rootDir) {
-    const fileConfig = await utils.getHttpyacConfig(rootDir);
-    if (fileConfig) {
-      environmentConfigs.push(fileConfig);
-    }
-  }
-  if (config) {
-    environmentConfigs.push(config);
-  }
-
-  const result = merge(
-    {
-      log: {
-        level: models.LogLevel.warn,
-        supportAnsiColors: true,
-      },
-      cookieJarEnabled: true,
-      envDirName: 'env',
-    },
-    ...environmentConfigs
-  );
-
-  refreshStaticConfig(result);
-  return result;
-}
-
-function refreshStaticConfig(config: models.EnvironmentConfig) {
-  if (typeof config?.log?.level === 'undefined') {
-    log.options.level = models.LogLevel.warn;
-  } else {
-    log.options.level = config?.log?.level;
-  }
-  if (config?.log?.supportAnsiColors === false) {
-    chalk.level = 0;
-  }
-}
-
-async function parseHttpFile(
-  httpFile: models.HttpFile,
-  text: string,
-  httpFileStore: models.HttpFileStore
-): Promise<models.HttpFile> {
-  const lines = utils.toMultiLineArray(text);
-
-  const parserContext: models.ParserContext = {
-    lines,
-    httpFile,
-    httpRegion: initHttpRegion(0),
-    data: {},
-    httpFileStore,
-  };
-
-  for (let line = 0; line < lines.length; line++) {
-    const httpRegionParserResult = await httpFile.hooks.parse.trigger(createReaderFactory(line, lines), parserContext);
-    if (httpRegionParserResult && httpRegionParserResult !== HookCancel) {
-      if (httpRegionParserResult.endRegionLine !== undefined && httpRegionParserResult.endRegionLine >= 0) {
-        parserContext.httpRegion.symbol.endLine = httpRegionParserResult.endRegionLine;
-        parserContext.httpRegion.symbol.endOffset = lines[httpRegionParserResult.endRegionLine].length;
-        await closeHttpRegion(parserContext);
-        parserContext.httpRegion = initHttpRegion(httpRegionParserResult.nextParserLine + 1);
-      }
-      if (httpRegionParserResult.symbols) {
-        if (parserContext.httpRegion.symbol.children) {
-          parserContext.httpRegion.symbol.children.push(...httpRegionParserResult.symbols);
-        } else {
-          parserContext.httpRegion.symbol.children = httpRegionParserResult.symbols;
-        }
-      }
-      line = httpRegionParserResult.nextParserLine;
-    }
-  }
-
-  await closeHttpRegion(parserContext);
-  parserContext.httpRegion.symbol.endLine = lines.length - 1;
-  parserContext.httpRegion.symbol.endOffset = lines[lines.length - 1].length;
-  setSource(httpFile.httpRegions, lines);
-  return httpFile;
-}
-
-async function closeHttpRegion(parserContext: models.ParserContext): Promise<void> {
-  await parserContext.httpFile.hooks.parseEndRegion.trigger(parserContext);
-
-  const { httpRegion } = parserContext;
-  parserContext.httpRegion.symbol.name = utils.getDisplayName(httpRegion);
-  parserContext.httpRegion.symbol.description = utils.getRegionDescription(httpRegion);
-  parserContext.httpFile.httpRegions.push(parserContext.httpRegion);
-}
-
-function setSource(httpRegions: Array<models.HttpRegion>, lines: Array<string>) {
-  for (const httpRegion of httpRegions) {
-    setSymbolSource(httpRegion.symbol, lines);
-  }
-}
-
-function setSymbolSource(symbol: models.HttpSymbol, lines: Array<string>): void {
-  symbol.source = utils.toMultiLineString(lines.slice(symbol.startLine, symbol.endLine + 1));
-  let endOffset: number | undefined = symbol.endOffset - lines[symbol.endLine].length;
-  if (endOffset >= 0) {
-    endOffset = undefined;
-  }
-  symbol.source = symbol.source.slice(symbol.startOffset, endOffset);
-  if (symbol.children) {
-    for (const child of symbol.children) {
-      setSymbolSource(child, lines);
-    }
-  }
-}
-
-function initHttpRegion(start: number): models.HttpRegion {
-  return {
-    metaData: {},
-    symbol: {
-      name: '-',
-      description: '-',
-      kind: models.HttpSymbolKind.request,
-      startLine: start,
-      startOffset: 0,
-      endLine: start,
-      endOffset: 0,
-    },
-    hooks: {
-      execute: new models.ExecuteHook(),
-      onRequest: new models.OnRequestHook(),
-      onStreaming: new models.OnStreaming(),
-      onResponse: new models.OnResponseHook(),
-      responseLogging: new models.ResponseLoggingHook(),
-    },
-    variablesPerEnv: {},
-    dependentsPerEnv: {},
-  };
-}
-
-function createReaderFactory(startLine: number, lines: Array<string>) {
-  return function* createReader(noStopOnMetaTag?: boolean) {
-    for (let line = startLine; line < lines.length; line++) {
-      const textLine = lines[line];
-      yield {
-        textLine,
-        line,
-      };
-      if (!noStopOnMetaTag) {
-        // if parser region is not closed stop at delimiter
-        if (utils.RegionSeparator.test(textLine)) {
-          break;
-        }
-      }
-    }
-  };
 }

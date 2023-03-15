@@ -1,8 +1,8 @@
 import * as utils from '../utils';
 import { EnvironmentConfig } from './environmentConfig';
 import { FileProvider } from './fileProvider';
+import { HttpFileHooks } from './hooks';
 import { HttpFile } from './httpFile';
-import { HttpFileHooks } from './httpFileHooks';
 import { LogHandler } from './logHandler';
 import { PathLike } from './pathLike';
 import { SessionStore } from './sessionStore';
