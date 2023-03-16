@@ -1,4 +1,4 @@
-import { HttpRegion, HttpResponse, TestResult } from '../../models';
+import { ProcessedHttpRegion, HttpResponse, TestResult } from '../../models';
 import * as utils from '../../utils';
 import { SendFilterOptions, SendOptions } from './options';
 
@@ -37,7 +37,10 @@ function sum(x: number, y: number) {
   return x + y;
 }
 
-export function toSendJsonOutput(context: Record<string, Array<HttpRegion>>, options: SendOptions): SendJsonOutput {
+export function toSendJsonOutput(
+  context: Record<string, Array<ProcessedHttpRegion>>,
+  options: SendOptions
+): SendJsonOutput {
   const requests: Array<SendOutputRequest> = [];
   for (const [fileName, httpRegions] of Object.entries(context)) {
     requests.push(

@@ -12,12 +12,18 @@ export interface ProcessedHttpRegion {
   symbol: HttpSymbol;
   metaData: Record<string, string | undefined | true>;
   testResults?: Array<TestResult>;
-  responseRefs?: Array<string>;
+  isGlobal: boolean;
 }
 
 export type PartialProperty<T, TProperty extends string> = Omit<T, TProperty> & Partial<T>;
 
-export interface HttpRegion extends ProcessedHttpRegion {
+export interface HttpRegion {
+  request?: Request;
+  response?: HttpResponse;
+  symbol: HttpSymbol;
+  metaData: Record<string, string | undefined | true>;
+  testResults?: Array<TestResult>;
+  responseRefs?: Array<string>;
   variablesPerEnv: Record<string, Variables>;
   readonly hooks: {
     execute: ExecuteHook;

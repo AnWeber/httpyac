@@ -52,17 +52,17 @@ async function execute(fileNames: Array<string>, options: SendOptions): Promise<
     if (httpFiles.length > 0) {
       initCliHooks(httpFiles, options);
       let isFirstRequest = true;
-      const jsonOutput: Record<string, Array<models.HttpRegion>> = {};
+      const jsonOutput: Record<string, Array<models.ProcessedHttpRegion>> = {};
       while (options.interactive || isFirstRequest) {
         isFirstRequest = false;
         const selection = await selectAction(httpFiles, options);
 
-        const processedHttpRegions: Array<models.HttpRegion> = [];
+        const processedHttpRegions: Array<models.ProcessedHttpRegion> = [];
 
         if (selection) {
           await send(Object.assign({ processedHttpRegions }, context, selection));
           jsonOutput[fileProvider.toString(selection.httpFile.fileName)] = [
-            ...processedHttpRegions.filter(obj => !obj.isGlobal()),
+            ...processedHttpRegions.filter(obj => !obj.isGlobal),
           ];
         } else {
           const sendFuncs = httpFiles.map(
@@ -73,7 +73,7 @@ async function execute(fileNames: Array<string>, options: SendOptions): Promise<
                 }
                 await send(Object.assign({ processedHttpRegions }, context, { httpFile }));
                 jsonOutput[fileProvider.toString(httpFile.fileName)] = [
-                  ...processedHttpRegions.filter(obj => !obj.isGlobal()),
+                  ...processedHttpRegions.filter(obj => !obj.isGlobal),
                 ];
                 processedHttpRegions.length = 0;
               }
