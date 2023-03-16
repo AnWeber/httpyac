@@ -1,3 +1,9 @@
+## 6.3.1 (2023-03-16)
+
+### Fixes
+
+- add activeEnvironment to HttpFile (#415)
+
 ## 6.3.0 (2023-03-15)
 
 ### Breaking Changes

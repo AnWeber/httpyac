@@ -131,6 +131,7 @@ export class HttpFileStore implements models.HttpFileStore {
     );
 
     const httpFile = new HttpFile(absoluteFileName, rootDir);
+    httpFile.activeEnvironment = options.activeEnvironment;
 
     options.config = await getEnvironmentConfig(options.config, httpFile.rootDir);
 
