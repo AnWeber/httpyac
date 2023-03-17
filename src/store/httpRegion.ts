@@ -24,9 +24,9 @@ export class HttpRegion implements models.HttpRegion {
       description: '-',
       kind: models.HttpSymbolKind.request,
       startLine: start,
-      startOffset: start,
+      startOffset: 0,
       endLine: start,
-      endOffset: start,
+      endOffset: 0,
     };
   }
 

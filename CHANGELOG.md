@@ -3,6 +3,7 @@
 ### Fixes
 
 - `# @import` imports variables of \*.http files (AnWeber/vscode-httpyac#184)
+- setSource uses correct startOffset (AnWeber/httpbook#82)
 
 ## 6.3.1 (2023-03-16)
 
