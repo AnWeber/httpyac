@@ -1,3 +1,10 @@
+## 6.3.3 (2023-03-23)
+
+### Fixes
+
+- allow async/await syntax in code snippets (#398)
+- unable to use variable as graphql input (#421)
+
 ## 6.3.2 (2023-03-17)
 
 ### Fixes
