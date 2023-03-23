@@ -1,5 +1,5 @@
 import { log, userInteractionProvider } from '../../io';
-import { ProcessorContext } from '../../models';
+import { ProcessorContext, Request } from '../../models';
 import * as utils from '../../utils';
 
 export type GqlLoadData = string | ((context: ProcessorContext) => Promise<string | undefined>);
@@ -22,8 +22,8 @@ export class GqlAction {
 
   constructor(private readonly gqlData: GqlData) {}
 
-  async process(context: ProcessorContext): Promise<boolean> {
-    if (context.request && this.gqlData?.query) {
+  async process(request: Request, context: ProcessorContext): Promise<void> {
+    if (request && this.gqlData?.query) {
       utils.report(context, 'build GraphQL query');
       let query: string | undefined;
       if (utils.isString(this.gqlData.query)) {
@@ -66,12 +66,11 @@ export class GqlAction {
         if (this.gqlData.operationName) {
           gqlRequestBody.operationName = this.gqlData.operationName;
         }
-        if (utils.isString(context.request.body)) {
-          gqlRequestBody.variables = JSON.parse(context.request.body);
+        if (utils.isString(request.body)) {
+          gqlRequestBody.variables = JSON.parse(request.body);
         }
-        context.request.body = utils.stringifySafe(gqlRequestBody);
+        request.body = utils.stringifySafe(gqlRequestBody);
       }
     }
-    return true;
   }
 }

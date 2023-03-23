@@ -29,7 +29,7 @@ export async function parseGraphql(
           context.httpRegion.metaData.name = gqlContent.name;
         }
       }
-      context.httpRegion.hooks.execute.addObjHook(obj => obj.process, new GqlAction(gqlData));
+      context.httpRegion.hooks.onRequest.addObjHook(obj => obj.process, new GqlAction(gqlData));
     } else if (gqlContent.name) {
       gqlData.fragments[gqlContent.name] = gqlContent.gql;
     }
