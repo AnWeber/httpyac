@@ -86,6 +86,49 @@ query launchesQuery($limit: Int!){
     );
   });
 
+  it('query + operation + loop', async () => {
+    initFileProvider();
+    const mockedEndpoints = await localServer.forPost('/graphql').thenReply(200);
+
+    await sendHttp(`
+{{
+  exports.variables = {
+    "limit": 10
+  };
+}}
+
+# @loop for 1
+POST  http://localhost:7002/graphql
+
+query launchesQuery($limit: Int!){
+  launchesPast(limit: $limit) {
+    mission_name
+    launch_date_local
+    launch_site {
+      site_name_long
+    }
+    rocket {
+      rocket_name
+      rocket_type
+    }
+    ships {
+      name
+      home_port
+      image
+    }
+  }
+}
+
+{{ variables }}
+    `);
+
+    const requests = await mockedEndpoints.getSeenRequests();
+    expect(requests[0].url).toBe('http://localhost:7002/graphql');
+    expect(await requests[0].body.getText()).toBe(
+      '{"query":"query launchesQuery($limit: Int!){\\n  launchesPast(limit: $limit) {\\n    mission_name\\n    launch_date_local\\n    launch_site {\\n      site_name_long\\n    }\\n    rocket {\\n      rocket_name\\n      rocket_type\\n    }\\n    ships {\\n      name\\n      home_port\\n      image\\n    }\\n  }\\n}","operationName":"launchesQuery","variables":{"limit":10}}'
+    );
+  });
+
   it('query + operation + partial variable replacement', async () => {
     initFileProvider();
     const mockedEndpoints = await localServer.forPost('/graphql').thenReply(200);

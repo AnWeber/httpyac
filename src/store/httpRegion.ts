@@ -38,7 +38,7 @@ export class HttpRegion implements models.HttpRegion {
     const httpRegion = new HttpRegion(this.httpFile);
     httpRegion.request = this.request;
     Object.assign(httpRegion.symbol, this.symbol);
-    Object.assign(httpRegion.hooks, this.symbol);
+    Object.assign(httpRegion.hooks, this.hooks);
     Object.assign(httpRegion.variablesPerEnv, this.variablesPerEnv);
     Object.assign(httpRegion.metaData, this.metaData);
     return httpRegion;
