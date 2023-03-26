@@ -19,7 +19,7 @@ export class HttpyacJsApi {
     utils.setVariableInContext(vars, this.context);
   }
 
-  async execute(httpRegion: models.HttpRegion | string, vars?: models.Variables): Promise<boolean> {
+  async execute(httpRegion: models.HttpRegion | string, vars?: models.Variables): Promise<models.Variables> {
     if (vars) {
       utils.setVariableInContext(vars, this.context);
     }
@@ -35,8 +35,7 @@ export class HttpyacJsApi {
         const envKey = utils.toEnvironmentKey(this.context.httpFile.activeEnvironment);
         utils.setVariableInContext(obj.variablesPerEnv[envKey], this.context);
       }
-      return result;
     }
-    return false;
+    return this.context.variables;
   }
 }
