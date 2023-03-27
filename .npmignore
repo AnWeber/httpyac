@@ -6,3 +6,12 @@ assets
 buildSrc
 icon.png
 .github
+tsconfig.json
+tsconfig.*.json
+jest.config.js
+.dockerignore
+.eslintrc.yml
+.prettierignore.yaml
+.husky
+Dockerfile
+coverage
