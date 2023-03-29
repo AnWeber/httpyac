@@ -3,6 +3,7 @@
 ### Fixes
 
 - response is correctly parsed with HttpSymbolKind.Response
+- Markdown and Asciidoctor Files are parsed correctly in CLI (#425)
 
 ## 6.3.3 (2023-03-23)
 

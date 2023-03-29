@@ -22,8 +22,13 @@ export function initFileProvider(): void {
   fileProvider.EOL = EOL;
   fileProvider.isAbsolute = async (path: models.PathLike) => isAbsolute(fileProvider.toString(path));
   fileProvider.dirname = (path: string) => dirname(fileProvider.toString(path));
-  fileProvider.hasExtension = (fileName: models.PathLike, ...extensions: Array<string>) =>
-    extensions.indexOf(extname(fileProvider.toString(fileName))) >= 0;
+  fileProvider.hasExtension = (fileName: models.PathLike, ...extensions: Array<string>) => {
+    let extension = extname(fileProvider.toString(fileName));
+    if (extension.startsWith('.')) {
+      extension = extension.slice(1);
+    }
+    return extensions.indexOf(extension) >= 0;
+  };
   fileProvider.joinPath = (path: models.PathLike, joinPath: string): models.PathLike =>
     join(fileProvider.toString(path), joinPath);
 
