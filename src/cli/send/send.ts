@@ -10,6 +10,7 @@ import { SendOptions, getLogLevel, SendFilterOptions, OutputType } from './optio
 import { default as chalk } from 'chalk';
 import { Command } from 'commander';
 import { promises as fs } from 'fs';
+import type { Options } from 'globby';
 import { sep } from 'path';
 
 export function sendCommand() {
@@ -183,11 +184,8 @@ async function getHttpFiles(
 }
 
 async function queryGlobbyPattern(fileName: string) {
-  const globOptions = {
-    expandDirectories: {
-      files: ['*.rest', '*.http'],
-      extensions: ['http', 'rest'],
-    },
+  const globOptions: Options = {
+    gitignore: true,
   };
   const { globby } = await import('globby');
   const paths = await globby(fileName, globOptions);
