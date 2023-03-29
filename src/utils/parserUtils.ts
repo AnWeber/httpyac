@@ -475,8 +475,8 @@ export async function parseInlineResponse(
   const lineReader = getLineReader();
   const next = lineReader.next();
   if (!next.done) {
-    const responseSymbol = context.data.httpResponseSymbol;
-    if (responseSymbol) {
+    if (context.data.httpResponseSymbol) {
+      const responseSymbol = context.data.httpResponseSymbol;
       responseSymbol.body.push(next.value.textLine);
 
       responseSymbol.symbol.endLine = next.value.line;
@@ -497,17 +497,19 @@ export async function parseInlineResponse(
         headers,
       };
 
+      const responseSymbol: models.HttpSymbol & { children: Array<models.HttpSymbol> } = {
+        name: 'response',
+        description: 'response',
+        kind: models.HttpSymbolKind.response,
+        startLine: next.value.line,
+        startOffset: 0,
+        endLine: next.value.line,
+        endOffset: next.value.textLine.length,
+        children: [],
+      };
+
       context.data.httpResponseSymbol = {
-        symbol: {
-          name: 'response',
-          description: 'response',
-          kind: models.HttpSymbolKind.response,
-          startLine: next.value.line,
-          startOffset: 0,
-          endLine: next.value.line,
-          endOffset: next.value.textLine.length,
-          children: [],
-        },
+        symbol: responseSymbol,
         body: [],
       };
       const symbols = [context.data.httpResponseSymbol.symbol];
@@ -522,13 +524,10 @@ export async function parseInlineResponse(
       if (headersResult) {
         result.nextParserLine = headersResult.nextLine || result.nextParserLine;
         for (const parseResult of headersResult.parseResults) {
-          if (context.data.httpResponseSymbol.symbol.children) {
-            context.data.httpResponseSymbol.symbol.children.push(
-              ...parseResult.symbols.map(symbol => ({
-                ...symbol,
-                kind: models.HttpSymbolKind.response,
-              }))
-            );
+          for (const child of parseResult.symbols) {
+            responseSymbol.children.push(child);
+            responseSymbol.endLine = child.endLine;
+            responseSymbol.endOffset = child.endOffset;
           }
         }
       }
