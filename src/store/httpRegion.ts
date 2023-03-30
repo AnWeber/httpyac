@@ -34,8 +34,8 @@ export class HttpRegion implements models.HttpRegion {
     return !(this.request || this.metaData.name);
   }
 
-  public clone() {
-    const httpRegion = new HttpRegion(this.httpFile);
+  public clone(httpFile?: models.HttpFile) {
+    const httpRegion = new HttpRegion(httpFile || this.httpFile);
     httpRegion.request = this.request;
     Object.assign(httpRegion.symbol, this.symbol);
     Object.assign(httpRegion.hooks, this.hooks);

@@ -1,4 +1,5 @@
 import { ExecuteHook, OnRequestHook, OnStreaming, OnResponseHook, ResponseLoggingHook } from './hooks';
+import { HttpFile } from './httpFile';
 import { Request } from './httpRequest';
 import { HttpResponse } from './httpResponse';
 import { HttpSymbol } from './httpSymbol';
@@ -33,6 +34,6 @@ export interface HttpRegion {
     responseLogging: ResponseLoggingHook;
   };
   isGlobal(): boolean;
-  clone(): HttpRegion;
+  clone(httpFile?: HttpFile): HttpRegion;
   execute(context: PartialProperty<ProcessorContext, 'httpRegion'>, isMainContext?: boolean): Promise<boolean>;
 }
