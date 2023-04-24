@@ -1,3 +1,9 @@
+## unreleased
+
+### Features
+
+- feat: add support for custom plugins in httpFileStore initialization (AnWeber/vscode-httpyac#186)
+
 ## 6.3.4 (2023-03-30)
 
 ### Fixes

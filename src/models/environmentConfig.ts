@@ -32,7 +32,7 @@ export interface EnvironmentConfig {
 
   /** environment variables  */
   environments?: Record<string, Variables>;
-  /** relative or absoulte path to env dir */
+  /** relative or absolute path to env dir */
   envDirName?: string;
   useRegionScopedVariables?: boolean;
   /** hookApi for extending httpyac */

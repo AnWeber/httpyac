@@ -18,6 +18,8 @@ interface HttpFileStoreEntry {
 export class HttpFileStore implements models.HttpFileStore {
   private readonly storeCache: Array<HttpFileStoreEntry> = [];
 
+  constructor(private readonly plugins: Record<string, models.ConfigureHooks> = {}) {}
+
   private getFromStore(fileName: models.PathLike, version: number) {
     const cacheKey = fileProvider.toString(fileName);
     let httpFileStoreEntry = this.storeCache.find(obj => obj.cacheKey === cacheKey);
@@ -115,11 +117,11 @@ export class HttpFileStore implements models.HttpFileStore {
     }
   }
 
-  clear(): void {
+  public clear(): void {
     this.storeCache.length = 0;
   }
 
-  async initHttpFile(fileName: models.PathLike, options: models.HttpFileStoreOptions) {
+  public async initHttpFile(fileName: models.PathLike, options: models.HttpFileStoreOptions): Promise<models.HttpFile> {
     const absoluteFileName = (await utils.toAbsoluteFilename(fileName, options.workingDir)) || fileName;
 
     const rootDir = await utils.findRootDirOfFile(
@@ -135,7 +137,7 @@ export class HttpFileStore implements models.HttpFileStore {
 
     options.config = await getEnvironmentConfig(options.config, httpFile.rootDir);
 
-    const hooks: Record<string, models.ConfigureHooks> = { ...pluginStore };
+    const hooks: Record<string, models.ConfigureHooks> = { ...pluginStore, ...this.plugins };
     if (rootDir) {
       Object.assign(hooks, await utils.getPlugins(rootDir));
       if (options.config?.configureHooks) {
