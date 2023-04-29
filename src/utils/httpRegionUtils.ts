@@ -1,4 +1,5 @@
 import * as models from '../models';
+import { createResponseProxy } from './requestClientUtils';
 import { cloneResponse } from './requestUtils';
 import { isString } from './stringUtils';
 import { HookCancel } from 'hookpoint';
@@ -41,7 +42,7 @@ export async function logResponse(
 ): Promise<models.HttpResponse | undefined> {
   const clone = cloneResponse(response);
   const onResponseLogging = context.httpRegion.hooks.responseLogging.merge(context.httpFile.hooks.responseLogging);
-  const regionResult = await onResponseLogging.trigger(clone, context);
+  const regionResult = await onResponseLogging.trigger(createResponseProxy(clone), context);
   if (regionResult === HookCancel) {
     return undefined;
   }

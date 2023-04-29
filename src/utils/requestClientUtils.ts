@@ -148,7 +148,7 @@ async function onStreaming(context: models.ProcessorContext) {
 
 async function onResponse(response: models.HttpResponse, context: models.ProcessorContext) {
   const onResponse = context.httpRegion.hooks.onResponse.merge(context.httpFile.hooks.onResponse);
-  if ((await onResponse.trigger(response, context)) === HookCancel) {
+  if ((await onResponse.trigger(createResponseProxy(response), context)) === HookCancel) {
     return false;
   }
   context.httpRegion.response = response;
@@ -164,4 +164,23 @@ function createIsCanceledInterceptor(isCanceled: () => boolean) {
       return !isCanceled();
     },
   };
+}
+export function createResponseProxy(response: models.HttpResponse): models.HttpResponse {
+  const proxy = new Proxy(response, {
+    set(...args) {
+      const [target, property, value] = args;
+
+      const result = Reflect.set(...args);
+      if (property === 'body') {
+        delete target.prettyPrintBody;
+        delete target.parsedBody;
+        delete target.rawBody;
+        if (typeof value === 'string') {
+          target.rawBody = Buffer.from(value);
+        }
+      }
+      return result;
+    },
+  });
+  return proxy;
 }

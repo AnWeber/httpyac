@@ -5,6 +5,10 @@
 - add support for custom plugins in httpFileStore initialization (AnWeber/vscode-httpyac#186)
 - add modifier `$input-askonce` to ask only once for $input (#436)
 
+### Fixes
+
+- ensure deletion of additional body properties (prettyPrintBody, parsedBody, rawBody), if `body` property is modified (AnWeber/httpbook#84)
+
 ## 6.3.4 (2023-03-30)
 
 ### Fixes

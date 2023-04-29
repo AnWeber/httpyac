@@ -4,7 +4,6 @@ import { toBoolean, toNumber } from './convertUtils';
 import { parseMimeType } from './mimeTypeUtils';
 import { isString, toMultiLineString } from './stringUtils';
 import { default as chalk } from 'chalk';
-import { HookCancel } from 'hookpoint';
 import { TextDecoder } from 'util';
 
 export function isHttpRequestMethod(method: string | undefined): method is models.HttpMethod {
@@ -339,31 +338,6 @@ export function cloneResponse(response: models.HttpResponse): models.HttpRespons
     };
   }
   return clone;
-}
-
-export async function triggerRequestResponseHooks(
-  method: () => Promise<models.HttpResponse | false>,
-  context: models.ProcessorContext
-): Promise<boolean> {
-  try {
-    const onRequest = context.httpFile.hooks.onRequest.merge(context.httpRegion.hooks.onRequest);
-    if (context.request && (await onRequest.trigger(context.request, context)) === HookCancel) {
-      return false;
-    }
-
-    const response = await method();
-    if (response) {
-      const onResponse = context.httpRegion.hooks.onResponse.merge(context.httpFile.hooks.onResponse);
-      if ((await onResponse.trigger(response, context)) === HookCancel) {
-        return false;
-      }
-      context.httpRegion.response = response;
-    }
-    return true;
-  } catch (err) {
-    (context.scriptConsole || log).error(context.request);
-    throw err;
-  }
 }
 
 /**

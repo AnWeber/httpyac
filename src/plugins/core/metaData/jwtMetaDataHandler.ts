@@ -18,9 +18,11 @@ export function jwtMetaDataHandler(type: string, value: string | undefined, cont
             entries.push([`${key}_parsed`, val]);
           }
         }
-        response.parsedBody = Object.fromEntries(entries);
-        response.prettyPrintBody = utils.stringifySafe(response.parsedBody, 2);
-        response.body = response.prettyPrintBody;
+        const result = Object.fromEntries(entries);
+        const resultString = utils.stringifySafe(response.parsedBody, 2);
+        response.body = resultString;
+        response.prettyPrintBody = resultString;
+        response.parsedBody = result;
       }
     });
     return true;
