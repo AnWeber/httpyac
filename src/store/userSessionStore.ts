@@ -26,8 +26,8 @@ export class UserSessionStore implements SessionStore {
     this.notifySessionChanged();
   }
 
-  getUserSession(id: string): UserSession | undefined {
-    return this.userSessions.find(obj => obj.id === id);
+  getUserSession<T extends UserSession>(id: string): T | undefined {
+    return this.userSessions.find(obj => obj.id === id) as T;
   }
 
   setUserSession<T extends UserSession>(userSession: T): void {
