@@ -13,7 +13,7 @@ export async function parseHttp(code: string) {
   });
 }
 
-export async function sendHttp(code: string) {
+export async function sendHttp(code: string, variables: models.Variables = {}) {
   const httpFile = await parseHttp(code);
 
   const result: Array<models.HttpResponse> = [];
@@ -23,6 +23,7 @@ export async function sendHttp(code: string) {
 
   await send({
     httpFile,
+    variables,
   });
   return result;
 }

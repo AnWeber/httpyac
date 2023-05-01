@@ -78,7 +78,11 @@ export async function getVariables(context: models.VariableProviderContext): Pro
   if (vars === HookCancel) {
     return context.variables || {};
   }
-  const variables = Object.assign({}, ...vars.map(variables => utils.cleanVariables(variables)), context.variables);
+  const variables = Object.assign(
+    context.variables || {},
+    ...vars.map(variables => utils.cleanVariables(variables)),
+    context.variables
+  );
   log.debug(variables);
   return variables;
 }
