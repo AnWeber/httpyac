@@ -1,3 +1,9 @@
+## 6.4.1 (2023-05-01)
+
+### Fixes
+
+- using askonce modifier is optional (AnWeber/vscode-httpyac#190)
+
 ## 6.4.0 (2023-04-29)
 
 ### Features

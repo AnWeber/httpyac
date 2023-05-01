@@ -11,7 +11,7 @@ interface InputSession extends UserSession {
 export async function showInputBoxVariableReplacer(text: unknown): Promise<unknown> {
   return utils.parseHandlebarsString(text, async (variable: string) => {
     const inputRegex =
-      /^\$(?<type>(prompt|input|password))(?<save>-askonce)\s*(?<placeholder>[^$]*)(\$value:\s*(?<value>.*))?\s*$/u;
+      /^\$(?<type>(prompt|input|password))(?<save>-askonce)?\s*(?<placeholder>[^$]*)(\$value:\s*(?<value>.*))?\s*$/u;
     const matchInput = inputRegex.exec(variable);
 
     if (matchInput?.groups?.placeholder) {
