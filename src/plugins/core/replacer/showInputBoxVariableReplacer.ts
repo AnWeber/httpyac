@@ -15,7 +15,7 @@ export async function showInputBoxVariableReplacer(text: unknown): Promise<unkno
     const matchInput = inputRegex.exec(variable);
 
     if (matchInput?.groups?.placeholder) {
-      const placeholder = matchInput.groups.placeholder;
+      const placeholder = matchInput.groups.placeholder.trim();
       const inputType = matchInput.groups.type;
 
       const id = `input_${placeholder}`;
