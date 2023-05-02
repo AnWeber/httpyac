@@ -3,8 +3,8 @@ import { getLocal } from 'mockttp';
 
 describe('variables.digestAuth', () => {
   const localServer = getLocal();
-  beforeEach(() => localServer.start(6002));
-  afterEach(() => localServer.stop());
+  beforeAll(async () => await localServer.start());
+  afterAll(async () => await localServer.stop());
 
   it('digest auth', async () => {
     initFileProvider();
@@ -20,14 +20,19 @@ describe('variables.digestAuth', () => {
       .matching(request => !!request.headers.authorization)
       .thenReply(200);
 
-    await sendHttp(`
-GET  http://localhost:6002/json
+    await sendHttp(
+      `
+GET  /json
 Authorization: Digest john doe
 
 ###
-GET  http://localhost:6002/json
+GET  /json
 Authorization: Digest john:doe
-    `);
+    `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const authMissingRequests = await missingAuthEndpoints.getSeenRequests();
     expect(authMissingRequests.length).toBe(2);

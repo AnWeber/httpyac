@@ -3,15 +3,15 @@ import { getLocal } from 'mockttp';
 
 describe('assert.body', () => {
   const localServer = getLocal();
-  beforeEach(() => localServer.start(5001));
-  afterEach(() => localServer.stop());
+  beforeAll(async () => await localServer.start());
+  afterAll(async () => await localServer.stop());
   it('should equal body', async () => {
     initFileProvider();
     await localServer.forGet('/get').thenJson(200, {
       foo: 'bar',
     });
     const httpFile = await parseHttp(`
-    GET http://localhost:5001/get
+    GET /get
 
     ?? body == {"foo":"bar"}
     ?? body sha256 eji/gfOD9pQzrW6QDTWz4jhVk/dqe3q11DVbi6Qe4ks=
@@ -19,7 +19,9 @@ describe('assert.body', () => {
     ?? body md5 m7WPJhkuS6APAeLnsTa72A==
     `);
 
-    const responses = await sendHttpFile(httpFile);
+    const responses = await sendHttpFile(httpFile, {
+      host: `http://localhost:${localServer.port}`,
+    });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
     expect(httpFile.httpRegions[0].testResults?.length).toBe(4);
@@ -39,12 +41,14 @@ describe('assert.body', () => {
       foo: 'bar',
     });
     const httpFile = await parseHttp(`
-    GET http://localhost:5001/get
+    GET /get
 
     ?? body foo == bar
     `);
 
-    const responses = await sendHttpFile(httpFile);
+    const responses = await sendHttpFile(httpFile, {
+      host: `http://localhost:${localServer.port}`,
+    });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
     expect(httpFile.httpRegions[0].testResults?.length).toBe(1);
@@ -57,12 +61,14 @@ describe('assert.body', () => {
       foo: ['bar'],
     });
     const httpFile = await parseHttp(`
-    GET http://localhost:5001/get
+    GET /get
 
     ?? body foo == {{["bar"]}}
     `);
 
-    const responses = await sendHttpFile(httpFile);
+    const responses = await sendHttpFile(httpFile, {
+      host: `http://localhost:${localServer.port}`,
+    });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
     expect(httpFile.httpRegions[0].testResults?.length).toBe(1);

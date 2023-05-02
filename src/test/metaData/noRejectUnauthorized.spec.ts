@@ -9,13 +9,18 @@ describe('metadata.noRejectUnauthorized', () => {
       }),
     });
     try {
-      await localServer.start(8007);
+      await localServer.start();
       initFileProvider();
       await localServer.forGet('/json').thenReply(200);
 
-      await sendHttp(`
-GET https://localhost:8007/json
-    `);
+      await sendHttp(
+        `
+GET /json
+    `,
+        {
+          host: `https://localhost:${localServer.port}`,
+        }
+      );
 
       throw new Error('no error while sendhttp');
     } catch (err) {
@@ -32,18 +37,23 @@ GET https://localhost:8007/json
       }),
     });
     try {
-      await localServer.start(8007);
+      await localServer.start();
       initFileProvider();
       const mockedEndpoints = await localServer.forGet('/json').thenReply(200);
 
-      const respones = await sendHttp(`
+      const respones = await sendHttp(
+        `
 # @no-reject-unauthorized
-GET https://localhost:8007/json
-    `);
+GET /json
+    `,
+        {
+          host: `http://localhost:${localServer.port}`,
+        }
+      );
 
       const requests = await mockedEndpoints.getSeenRequests();
       expect(requests.length).toBe(1);
-      expect(requests[0].url).toBe('https://localhost:8007/json');
+      expect(requests[0].path).toBe('/json');
       expect(respones.length).toBe(1);
       expect(respones[0].statusCode).toBe(200);
     } finally {
@@ -57,7 +67,7 @@ GET https://localhost:8007/json
       }),
     });
     try {
-      await localServer.start(8007);
+      await localServer.start();
       initFileProvider({
         'http-client.env.json': JSON.stringify({
           Local: {
@@ -67,15 +77,19 @@ GET https://localhost:8007/json
       });
       const mockedEndpoints = await localServer.forGet('/json').thenReply(200);
 
-      const httpFile = await parseHttp(`
-GET https://localhost:8007/json
-    `);
+      const httpFile = await parseHttp(
+        `
+GET /json
+    `
+      );
       httpFile.activeEnvironment = ['Local'];
 
-      const respones = await sendHttpFile(httpFile);
+      const respones = await sendHttpFile(httpFile, {
+        host: `http://localhost:${localServer.port}`,
+      });
       const requests = await mockedEndpoints.getSeenRequests();
       expect(requests.length).toBe(1);
-      expect(requests[0].url).toBe('https://localhost:8007/json');
+      expect(requests[0].path).toBe('/json');
       expect(respones.length).toBe(1);
       expect(respones[0].statusCode).toBe(200);
     } finally {
@@ -89,19 +103,24 @@ GET https://localhost:8007/json
       }),
     });
     try {
-      await localServer.start(8007);
+      await localServer.start();
       initFileProvider({
         '.env': `request_rejectUnauthorized=false`,
       });
       const mockedEndpoints = await localServer.forGet('/json').thenReply(200);
 
-      const respones = await sendHttp(`
-GET https://localhost:8007/json
-    `);
+      const respones = await sendHttp(
+        `
+GET /json
+    `,
+        {
+          host: `http://localhost:${localServer.port}`,
+        }
+      );
 
       const requests = await mockedEndpoints.getSeenRequests();
       expect(requests.length).toBe(1);
-      expect(requests[0].url).toBe('https://localhost:8007/json');
+      expect(requests[0].path).toBe('/json');
       expect(respones.length).toBe(1);
       expect(respones[0].statusCode).toBe(200);
     } finally {

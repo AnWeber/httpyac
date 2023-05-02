@@ -28,7 +28,7 @@ export async function sendHttp(code: string, variables: models.Variables = {}) {
   return result;
 }
 
-export async function sendHttpFile(httpFile: models.HttpFile) {
+export async function sendHttpFile(httpFile: models.HttpFile, variables: models.Variables = {}) {
   const result: Array<models.HttpResponse> = [];
   httpFile.hooks.onResponse.addHook('testResponse', response => {
     result.push(response);
@@ -36,6 +36,7 @@ export async function sendHttpFile(httpFile: models.HttpFile) {
 
   await send({
     httpFile,
+    variables,
   });
   return result;
 }

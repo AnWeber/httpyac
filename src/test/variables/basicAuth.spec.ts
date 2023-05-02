@@ -3,21 +3,26 @@ import { getLocal } from 'mockttp';
 
 describe('variables.basicAuth', () => {
   const localServer = getLocal();
-  beforeEach(() => localServer.start(6001));
-  afterEach(() => localServer.stop());
+  beforeAll(async () => await localServer.start());
+  afterAll(async () => await localServer.stop());
 
   it('basic auth', async () => {
     initFileProvider();
     const mockedEndpoints = await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
 
-    await sendHttp(`
-GET  http://localhost:6001/json
+    await sendHttp(
+      `
+GET  /json
 Authorization: Basic john:doe
 
 ###
-GET  http://localhost:6001/json
+GET  /json
 Authorization: Basic john doe
-    `);
+    `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
     expect(requests[0].headers.authorization).toBe('Basic am9objpkb2U=');

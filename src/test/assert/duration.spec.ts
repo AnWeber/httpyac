@@ -3,21 +3,26 @@ import { getLocal } from 'mockttp';
 
 describe('assert.duration', () => {
   const localServer = getLocal();
-  beforeEach(() => localServer.start(5004));
-  afterEach(() => localServer.stop());
+
+  beforeAll(async () => await localServer.start());
+  afterAll(async () => await localServer.stop());
 
   it('should be faster then 2000', async () => {
     initFileProvider();
     await localServer.forGet('/get').thenReply(200, undefined, {
       foo: 'bar',
     });
-    const httpFile = await parseHttp(`
-    GET http://localhost:5004/get
+    const httpFile = await parseHttp(
+      `
+    GET /get
 
     ?? duration < 2000
-    `);
+    `
+    );
 
-    const responses = await sendHttpFile(httpFile);
+    const responses = await sendHttpFile(httpFile, {
+      host: `http://localhost:${localServer.port}`,
+    });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
     expect(httpFile.httpRegions[0].testResults?.length).toBe(1);

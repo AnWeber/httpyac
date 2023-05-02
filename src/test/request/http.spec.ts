@@ -3,40 +3,42 @@ import { getLocal } from 'mockttp';
 
 describe('request.http', () => {
   const localServer = getLocal();
-  beforeEach(() => localServer.start(7003));
-  afterEach(() => localServer.stop());
+  beforeAll(async () => await localServer.start());
+  afterAll(async () => await localServer.stop());
 
   it('get http', async () => {
     initFileProvider();
     const mockedEndpoints = await localServer.forGet('/get').thenReply(200);
 
-    await sendHttp(`GET http://localhost:7003/get`);
+    await sendHttp(`GET /get`, { host: `http://localhost:${localServer.port}` });
 
     const requests = await mockedEndpoints.getSeenRequests();
     expect(requests[0].headers['user-agent']).toBe('httpyac');
-    expect(requests[0].url).toBe('http://localhost:7003/get');
+    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/get`);
   });
 
   it('get http with protocol', async () => {
     initFileProvider();
     const mockedEndpoints = await localServer.forGet('/get').thenReply(200);
 
-    await sendHttp(`GET http://localhost:7003/get HTTP/1.1`);
+    await sendHttp(`GET /get HTTP/1.1`, { host: `http://localhost:${localServer.port}` });
 
     const requests = await mockedEndpoints.getSeenRequests();
     expect(requests[0].headers['user-agent']).toBe('httpyac');
-    expect(requests[0].url).toBe('http://localhost:7003/get');
+    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/get`);
   });
 
   it('get http with multiline', async () => {
     initFileProvider();
     const mockedEndpoints = await localServer.forGet('/bar').thenReply(200);
 
-    await sendHttp(`
-GET http://localhost:7003
-  /bar
+    await sendHttp(
+      `
+GET /bar
   ?test=foo
-      `);
+      `,
+      { host: `http://localhost:${localServer.port}` }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
     expect(requests[0].path).toBe('/bar?test=foo');
@@ -46,11 +48,14 @@ GET http://localhost:7003
     initFileProvider();
     const mockedEndpoints = await localServer.forGet('/get').thenReply(200);
 
-    await sendHttp(`
-GET http://localhost:7003/get
+    await sendHttp(
+      `
+GET /get
 Authorization: Bearer test
 Date: 2015-06-01
-      `);
+      `,
+      { host: `http://localhost:${localServer.port}` }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
     expect(requests[0].headers.authorization).toBe('Bearer test');
@@ -62,12 +67,15 @@ Date: 2015-06-01
     const body = JSON.stringify({ foo: 'foo', bar: 'bar' }, null, 2);
     const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
 
-    await sendHttp(`
-POST http://localhost:7003/post
+    await sendHttp(
+      `
+POST /post
 Content-Type: application/json
 
 ${body}
-      `);
+      `,
+      { host: `http://localhost:${localServer.port}` }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
     expect(requests[0].headers['content-type']).toBe('application/json');
@@ -79,15 +87,18 @@ ${body}
     const body = JSON.stringify({ foo: 'foo', bar: 'bar' });
     const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
 
-    await sendHttp(`
+    await sendHttp(
+      `
 {{
   exports.body = ${body}
 }}
-POST http://localhost:7003/post
+POST /post
 Content-Type: application/json
 
 {{body}}
-      `);
+      `,
+      { host: `http://localhost:${localServer.port}` }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
     expect(requests[0].headers['content-type']).toBe('application/json');
@@ -98,15 +109,18 @@ Content-Type: application/json
     initFileProvider();
     const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
 
-    await sendHttp(`
+    await sendHttp(
+      `
 @clientId=test
 @clientSecret=xxxx-xxxxxxx-xxxxxx-xxxx
 
-          POST http://localhost:7003/post
+          POST /post
 Content-Type: application/x-www-form-urlencoded
 
 grant_type=client_credentials&client_id={{clientId}}&client_secret={{clientSecret}}
-      `);
+      `,
+      { host: `http://localhost:${localServer.port}` }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
     expect(requests[0].headers['content-type']).toBe('application/x-www-form-urlencoded');

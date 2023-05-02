@@ -4,8 +4,8 @@ import { getLocal } from 'mockttp';
 
 describe('metadata.jwt', () => {
   const localServer = getLocal();
-  beforeEach(() => localServer.start(8002));
-  afterEach(() => localServer.stop());
+  beforeAll(async () => await localServer.start());
+  afterAll(async () => await localServer.stop());
   it('jwt', async () => {
     initFileProvider();
     await localServer.forGet('/json').thenJson(200, {
@@ -14,7 +14,7 @@ describe('metadata.jwt', () => {
     });
     const httpFile = await parseHttp(`
 # @jwt foo
-GET  http://localhost:8002/json
+GET  /json
   `);
     httpFile.hooks.onResponse.addHook('test', response => {
       expect(response?.parsedBody).toBeDefined();
@@ -23,6 +23,9 @@ GET  http://localhost:8002/json
 
     const result = await send({
       httpFile,
+      variables: {
+        host: `http://localhost:${localServer.port}`,
+      },
     });
     expect(result).toBeTruthy();
   });

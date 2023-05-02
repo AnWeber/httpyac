@@ -3,8 +3,8 @@ import { getLocal } from 'mockttp';
 
 describe('scripts.javascript', () => {
   const localServer = getLocal();
-  beforeAll(() => localServer.start());
-  afterAll(() => localServer.stop());
+  beforeAll(async () => await localServer.start());
+  afterAll(async () => await localServer.stop());
 
   it('basic auth', async () => {
     initFileProvider();

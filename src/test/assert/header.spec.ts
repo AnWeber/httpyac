@@ -3,8 +3,8 @@ import { getLocal } from 'mockttp';
 
 describe('assert.header', () => {
   const localServer = getLocal();
-  beforeEach(() => localServer.start(5002));
-  afterEach(() => localServer.stop());
+  beforeAll(async () => await localServer.start());
+  afterAll(async () => await localServer.stop());
 
   it('should equal header', async () => {
     initFileProvider();
@@ -12,12 +12,14 @@ describe('assert.header', () => {
       foo: 'bar',
     });
     const httpFile = await parseHttp(`
-    GET http://localhost:5002/get
+    GET /get
 
     ?? header foo == bar
     `);
 
-    const responses = await sendHttpFile(httpFile);
+    const responses = await sendHttpFile(httpFile, {
+      host: `http://localhost:${localServer.port}`,
+    });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
     expect(httpFile.httpRegions[0].testResults?.length).toBe(1);

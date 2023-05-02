@@ -3,20 +3,22 @@ import { getLocal } from 'mockttp';
 
 describe('assert.xpath', () => {
   const localServer = getLocal();
-  beforeEach(() => localServer.start(5007));
-  afterEach(() => localServer.stop());
+  beforeAll(async () => await localServer.start());
+  afterAll(async () => await localServer.stop());
   it('should equal xpath', async () => {
     initFileProvider();
     await localServer
       .forGet('/get')
       .thenReply(200, `<bookstore><book><title>Everyday Italian</title></book></bookstore>`);
     const httpFile = await parseHttp(`
-    GET http://localhost:5007/get
+    GET /get
 
     ?? xpath /bookstore/book/title == Everyday Italian
     `);
 
-    const responses = await sendHttpFile(httpFile);
+    const responses = await sendHttpFile(httpFile, {
+      host: `http://localhost:${localServer.port}`,
+    });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
     expect(httpFile.httpRegions[0].testResults?.length).toBe(1);

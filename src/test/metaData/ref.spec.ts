@@ -4,8 +4,8 @@ import { getLocal } from 'mockttp';
 
 describe('metadata.ref', () => {
   const localServer = getLocal();
-  beforeAll(() => localServer.start(8005));
-  afterAll(() => localServer.stop());
+  beforeAll(async () => await localServer.start());
+  afterAll(async () => await localServer.stop());
 
   it('name + ref', async () => {
     initFileProvider();
@@ -13,17 +13,17 @@ describe('metadata.ref', () => {
     const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
     const httpFile = await parseHttp(`
 # @name foo
-GET  http://localhost:8005/json
+GET  /json
 
 ###
 # @ref foo
-POST http://localhost:8005/post?test={{foo.test}}
+POST /post?test={{foo.test}}
 
 foo={{foo.foo}}
 
 ###
 # @ref foo
-POST http://localhost:8005/post?test={{foo.test}}
+POST /post?test={{foo.test}}
 
 foo={{foo.foo}}
     `);
@@ -31,12 +31,15 @@ foo={{foo.foo}}
     await send({
       httpFile,
       httpRegion: httpFile.httpRegions[1],
+      variables: {
+        host: `http://localhost:${localServer.port}`,
+      },
     });
 
     const refRequests = await refEndpoints.getSeenRequests();
-    expect(refRequests[0].url).toBe('http://localhost:8005/json');
+    expect(refRequests[0].path).toBe('/json');
     const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe('http://localhost:8005/post?test=1');
+    expect(requests[0].path).toBe('/post?test=1');
     expect(await requests[0].body.getText()).toBe('foo=bar');
   });
 
@@ -46,19 +49,19 @@ foo={{foo.foo}}
     const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
     const httpFile = await parseHttp(`
 # @name child
-GET  http://localhost:8005/json
+GET  /json
 
 ###
 # @ref child
 # @name parent
-POST http://localhost:8005/post?test={{child}}
+POST /post?test={{child}}
 
 foo={{child}}
 
 ###
 # @ref child
 # @ref parent
-POST http://localhost:8005/post?test={{parent}}
+POST /post?test={{parent}}
 
 foo={{parent}}
     `);
@@ -66,13 +69,16 @@ foo={{parent}}
     await send({
       httpFile,
       httpRegion: httpFile.httpRegions[2],
+      variables: {
+        host: `http://localhost:${localServer.port}`,
+      },
     });
 
     const refRequests = await refEndpoints.getSeenRequests();
-    expect(refRequests[0].url).toBe('http://localhost:8005/json');
+    expect(refRequests[0].path).toBe('/json');
     expect(refRequests.length).toBe(1);
     const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe('http://localhost:8005/post?test=');
+    expect(requests[0].path).toBe('/post?test=');
     expect(await requests[0].body.getText()).toBe('foo=');
     expect(await requests[1].body.getText()).toBe('foo=');
   });
@@ -81,7 +87,7 @@ foo={{parent}}
     initFileProvider({
       'import.http': `
 # @name foo
-GET  http://localhost:8005/json
+GET  /json
       `,
     });
     await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
@@ -90,7 +96,7 @@ GET  http://localhost:8005/json
 # @import ./import.http
 ###
 # @ref foo
-POST http://localhost:8005/post?test={{foo.test}}
+POST /post?test={{foo.test}}
 
 foo={{foo.foo}}
     `);
@@ -98,10 +104,13 @@ foo={{foo.foo}}
     await send({
       httpFile,
       httpRegion: httpFile.httpRegions[1],
+      variables: {
+        host: `http://localhost:${localServer.port}`,
+      },
     });
 
     const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe('http://localhost:8005/post?test=1');
+    expect(requests[0].path).toBe('/post?test=1');
     expect(await requests[0].body.getText()).toBe('foo=bar');
   });
 
@@ -111,17 +120,17 @@ foo={{foo.foo}}
     const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
     const httpFile = await parseHttp(`
 # @name foo
-GET  http://localhost:8005/json
+GET  /json
 
 ###
 # @forceRef foo
-POST http://localhost:8005/post?test={{foo.test}}
+POST /post?test={{foo.test}}
 
 foo={{foo.foo}}
 
 ###
 # @forceRef foo
-POST http://localhost:8005/post?test={{foo.test}}
+POST /post?test={{foo.test}}
 
 foo={{foo.foo}}
     `);
@@ -130,12 +139,15 @@ foo={{foo.foo}}
     await send({
       httpFile,
       httpRegions,
+      variables: {
+        host: `http://localhost:${localServer.port}`,
+      },
     });
 
     const refRequests = await refEndpoints.getSeenRequests();
     expect(refRequests.length).toBe(2);
     const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe('http://localhost:8005/post?test=1');
+    expect(requests[0].path).toBe('/post?test=1');
     expect(await requests[0].body.getText()).toBe('foo=bar');
   });
 });

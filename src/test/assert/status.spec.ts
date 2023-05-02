@@ -3,19 +3,21 @@ import { getLocal } from 'mockttp';
 
 describe('assert.status', () => {
   const localServer = getLocal();
-  beforeEach(() => localServer.start(5003));
-  afterEach(() => localServer.stop());
+  beforeAll(async () => await localServer.start());
+  afterAll(async () => await localServer.stop());
 
   it('should be equal 200', async () => {
     initFileProvider();
     await localServer.forGet('/get').thenReply(200);
     const httpFile = await parseHttp(`
-    GET http://localhost:5003/get
+    GET /get
 
     ?? status == 200
     `);
 
-    const responses = await sendHttpFile(httpFile);
+    const responses = await sendHttpFile(httpFile, {
+      host: `http://localhost:${localServer.port}`,
+    });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
     expect(httpFile.httpRegions[0].testResults?.length).toBe(1);
@@ -26,12 +28,14 @@ describe('assert.status', () => {
     initFileProvider();
     await localServer.forGet('/get').thenReply(201);
     const httpFile = await parseHttp(`
-    GET http://localhost:5003/get
+    GET /get
 
     ?? status == 200
     `);
 
-    const responses = await sendHttpFile(httpFile);
+    const responses = await sendHttpFile(httpFile, {
+      host: `http://localhost:${localServer.port}`,
+    });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(201);
     expect(httpFile.httpRegions[0].testResults?.length).toBe(1);
@@ -42,7 +46,7 @@ describe('assert.status', () => {
     initFileProvider();
     await localServer.forGet('/get').thenReply(200);
     const httpFile = await parseHttp(`
-    GET http://localhost:5003/get
+    GET /get
 
     ?? status > 199
     ?? status >= 200
@@ -56,7 +60,9 @@ describe('assert.status', () => {
     ?? status != 20
     `);
 
-    const responses = await sendHttpFile(httpFile);
+    const responses = await sendHttpFile(httpFile, {
+      host: `http://localhost:${localServer.port}`,
+    });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
     expect(httpFile.httpRegions[0].testResults?.length).toBe(10);

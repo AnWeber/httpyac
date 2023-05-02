@@ -3,75 +3,95 @@ import { getLocal } from 'mockttp';
 
 describe('variables.set', () => {
   const localServer = getLocal();
-  beforeEach(() => localServer.start(6005));
-  afterEach(() => localServer.stop());
+  beforeAll(async () => await localServer.start());
+  afterAll(async () => await localServer.stop());
   it('file variables', async () => {
     initFileProvider();
     const mockedEndpoints = await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
 
-    await sendHttp(`
+    await sendHttp(
+      `
 @foo=foo
 @bar={{foo}}bar
-GET http://localhost:6005/json?bar={{bar}}
-    `);
+GET /json?bar={{bar}}
+    `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe('http://localhost:6005/json?bar=foobar');
+    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/json?bar=foobar`);
   });
 
   it('set string variable', async () => {
     initFileProvider();
     const mockedEndpoints = await localServer.forGet('/test').thenJson(200, { slideshow: { author: 'httpyac' } });
 
-    await sendHttp(`
+    await sendHttp(
+      `
 # @name fooString
-GET  http://localhost:6005/test
+GET  /test
 
 @slideshow={{fooString.slideshow.author}}
 ###
 #@ref fooString
-GET  http://localhost:6005/test?author={{slideshow}}
-    `);
+GET  /test?author={{slideshow}}
+    `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe('http://localhost:6005/test');
-    expect(requests[1].url).toBe('http://localhost:6005/test?author=httpyac');
+    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/test`);
+    expect(requests[1].url).toBe(`http://localhost:${localServer.port}/test?author=httpyac`);
   });
 
   it('set object variable', async () => {
     initFileProvider();
     const mockedEndpoints = await localServer.forGet('/test').thenJson(200, { slideshow: { author: 'httpyac' } });
 
-    await sendHttp(`
+    await sendHttp(
+      `
 # @name fooObject
-GET  http://localhost:6005/test
+GET  /test
 
 @slideshow={{fooObject.slideshow}}
 ###
-GET  http://localhost:6005/test?author={{slideshow.author}}
-    `);
+GET  /test?author={{slideshow.author}}
+    `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe('http://localhost:6005/test');
-    expect(requests[1].url).toBe('http://localhost:6005/test?author=httpyac');
+    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/test`);
+    expect(requests[1].url).toBe(`http://localhost:${localServer.port}/test?author=httpyac`);
   });
 
   it('set object variable with number', async () => {
     initFileProvider();
     const mockedEndpoints = await localServer.forGet('/get').thenJson(200, { foo: { test: 1 } });
 
-    await sendHttp(`
+    await sendHttp(
+      `
 # @name objectNumber
-GET http://localhost:6005/get
+GET /get
 
 @foo={{objectNumber.foo}}
 ###
-GET http://localhost:6005/get?test={{foo.test}}
-    `);
+GET /get?test={{foo.test}}
+    `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe('http://localhost:6005/get');
-    expect(requests[1].url).toBe('http://localhost:6005/get?test=1');
+    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/get`);
+    expect(requests[1].url).toBe(`http://localhost:${localServer.port}/get?test=1`);
   });
 
   it('direct replace variable', async () => {
@@ -79,19 +99,24 @@ GET http://localhost:6005/get?test={{foo.test}}
     await localServer.forGet('/test').thenJson(200, { slideshow: { author: 'httpyac' } });
     const mockedEndpoints = await localServer.forGet('/text').thenJson(200, { slideshow: { author: 'foo' } });
 
-    await sendHttp(`
-GET  http://localhost:6005/test
+    await sendHttp(
+      `
+GET  /test
 
 @slideshow={{response.parsedBody.slideshow}}
 ###
-GET  http://localhost:6005/text?author={{slideshow.author}}
+GET  /text?author={{slideshow.author}}
 ###
-GET  http://localhost:6005/text?another_author={{slideshow.author}}
-    `);
+GET  /text?another_author={{slideshow.author}}
+    `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe('http://localhost:6005/text?author=httpyac');
-    expect(requests[1].url).toBe('http://localhost:6005/text?another_author=httpyac');
+    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/text?author=httpyac`);
+    expect(requests[1].url).toBe(`http://localhost:${localServer.port}/text?another_author=httpyac`);
   });
 
   it('lazy replace variable', async () => {
@@ -99,19 +124,24 @@ GET  http://localhost:6005/text?another_author={{slideshow.author}}
     await localServer.forGet('/test').thenJson(200, { slideshow: { author: 'httpyac' } });
     const mockedEndpoints = await localServer.forGet('/text').thenJson(200, { slideshow: { author: 'foo' } });
 
-    await sendHttp(`
-GET http://localhost:6005/test
+    await sendHttp(
+      `
+GET /test
 
 @slideshow:={{response.parsedBody.slideshow}}
 ###
-GET http://localhost:6005/text?author={{slideshow.author}}
+GET /text?author={{slideshow.author}}
 ###
-GET http://localhost:6005/text?another_author={{slideshow.author}}
-    `);
+GET /text?another_author={{slideshow.author}}
+    `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe('http://localhost:6005/text?author=httpyac');
-    expect(requests[1].url).toBe('http://localhost:6005/text?another_author=foo');
+    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/text?author=httpyac`);
+    expect(requests[1].url).toBe(`http://localhost:${localServer.port}/text?another_author=foo`);
   });
 
   it('string empty variable', async () => {
@@ -119,45 +149,60 @@ GET http://localhost:6005/text?another_author={{slideshow.author}}
     await localServer.forGet('/test').thenJson(200, { slideshow: { author: 'httpyac' } });
     const mockedEndpoints = await localServer.forGet('/text').thenJson(200, { slideshow: { author: 'foo' } });
 
-    await sendHttp(`
+    await sendHttp(
+      `
 {{
 exports.foo = "";
 }}
-GET http://localhost:6005/text?foo={{foo}}
+GET /text?foo={{foo}}
 
-    `);
+    `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe('http://localhost:6005/text?foo=');
+    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/text?foo=`);
   });
   it('nested replace variable', async () => {
     initFileProvider();
     const mockedEndpoints = await localServer.forGet('/test').thenJson(200, { slideshow: { author: 'httpyac' } });
 
-    await sendHttp(`
+    await sendHttp(
+      `
 @baz=works
 {{
-exports.testObj = { bar: '{{baz}}'};
+  exports.testObj = { bar: '{{baz}}'};
 }}
-GET http://localhost:6005/test?test={{JSON.stringify(testObj)}}
-    `);
+GET /test?test={{JSON.stringify(testObj)}}
+    `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe('http://localhost:6005/test?test={%22bar%22:%22works%22}');
+    expect(requests[0].path).toBe(`/test?test={%22bar%22:%22works%22}`);
   });
 
   it('support await syntax in custom scripts', async () => {
     initFileProvider();
     const mockedEndpoints = await localServer.forGet('/test').thenJson(200, { slideshow: { author: 'httpyac' } });
-    await sendHttp(`
+    await sendHttp(
+      `
 {{
 const asyncFn = async () => ({ bar: 'works'});
 exports.testObj = await asyncFn();
 }}
-GET http://localhost:6005/test?test={{JSON.stringify(testObj)}}
-    `);
+GET /test?test={{JSON.stringify(testObj)}}
+    `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe('http://localhost:6005/test?test={%22bar%22:%22works%22}');
+    expect(requests[0].path).toBe(`/test?test={%22bar%22:%22works%22}`);
   });
 });

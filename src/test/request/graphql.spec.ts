@@ -3,8 +3,8 @@ import { getLocal } from 'mockttp';
 
 describe('request.graphql', () => {
   const localServer = getLocal();
-  beforeAll(() => localServer.start());
-  afterAll(() => localServer.stop());
+  beforeAll(async () => await localServer.start());
+  afterAll(async () => await localServer.stop());
 
   it('query + operation + variables', async () => {
     initFileProvider();

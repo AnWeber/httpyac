@@ -3,8 +3,8 @@ import { getLocal } from 'mockttp';
 
 describe('request.body', () => {
   const localServer = getLocal();
-  beforeAll(() => localServer.start());
-  afterAll(() => localServer.stop());
+  beforeAll(async () => await localServer.start());
+  afterAll(async () => await localServer.stop());
   it('should send body', async () => {
     initFileProvider();
     const body = JSON.stringify({ foo: 'foo', bar: 'bar' }, null, 2);

@@ -31,7 +31,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: npm install
       - run: npm run lint
-      - run: npm test -- --coverage --coverageProvider=v8
+      - run: npm test -- --coverage
       - run: npm run compile -- --no-minify
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2

@@ -3,17 +3,22 @@ import { getLocal } from 'mockttp';
 
 describe('metadata.disabled', () => {
   const localServer = getLocal();
-  beforeEach(() => localServer.start(8001));
-  afterEach(() => localServer.stop());
+  beforeAll(async () => await localServer.start());
+  afterAll(async () => await localServer.stop());
 
   it('disabled', async () => {
     initFileProvider();
     const mockedEndpoints = await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
 
-    await sendHttp(`
+    await sendHttp(
+      `
 # @disabled
-GET http://localhost:8001/json
-    `);
+GET /json
+    `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
     expect(requests.length).toBe(0);
@@ -23,13 +28,18 @@ GET http://localhost:8001/json
     initFileProvider();
     const mockedEndpoints = await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
 
-    await sendHttp(`
+    await sendHttp(
+      `
 # @disabled !this.token
 {{
 exports.token = 'test'
 }}
-GET http://localhost:8001/json
-    `);
+GET /json
+    `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
     expect(requests.length).toBe(0);
@@ -38,12 +48,17 @@ GET http://localhost:8001/json
     initFileProvider();
     const mockedEndpoints = await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
 
-    await sendHttp(`
+    await sendHttp(
+      `
 {{
 httpRegion.metaData.disabled = true;
 }}
-GET http://localhost:8001/json
-    `);
+GET h/json
+    `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
     expect(requests.length).toBe(0);

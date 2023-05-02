@@ -3,23 +3,28 @@ import { getLocal } from 'mockttp';
 
 describe('metadata.noRedirect', () => {
   const localServer = getLocal();
-  beforeEach(() => localServer.start(8004));
-  afterEach(() => localServer.stop());
+  beforeAll(async () => await localServer.start());
+  afterAll(async () => await localServer.stop());
   it('follow redirect', async () => {
     initFileProvider();
     const redirectEndpoints = await localServer.forGet('/redirect').thenReply(302, undefined, {
-      location: 'http://localhost:8004/json',
+      location: `http://localhost:${localServer.port}/json`,
     });
     const mockedEndpoints = await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
 
-    const respones = await sendHttp(`
+    const respones = await sendHttp(
+      `
 
-GET http://localhost:8004/redirect
-    `);
+GET /redirect
+    `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await redirectEndpoints.getSeenRequests();
     expect(requests.length).toBe(1);
-    expect(requests[0].url).toBe('http://localhost:8004/redirect');
+    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/redirect`);
     const notCalledEndpoints = await mockedEndpoints.getSeenRequests();
     expect(notCalledEndpoints.length).toBe(1);
     expect(respones.length).toBe(1);
@@ -28,18 +33,23 @@ GET http://localhost:8004/redirect
   it('noRedirect', async () => {
     initFileProvider();
     const redirectEndpoints = await localServer.forGet('/redirect').thenReply(302, undefined, {
-      location: 'http://localhost:8004/json',
+      location: `http://localhost:${localServer.port}/json`,
     });
     const mockedEndpoints = await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
 
-    const respones = await sendHttp(`
+    const respones = await sendHttp(
+      `
 # @no-redirect
-GET http://localhost:8004/redirect
-    `);
+GET /redirect
+    `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await redirectEndpoints.getSeenRequests();
     expect(requests.length).toBe(1);
-    expect(requests[0].url).toBe('http://localhost:8004/redirect');
+    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/redirect`);
     const notCalledEndpoints = await mockedEndpoints.getSeenRequests();
     expect(notCalledEndpoints.length).toBe(0);
     expect(respones.length).toBe(1);
