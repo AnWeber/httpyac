@@ -167,7 +167,7 @@ GET /text?foo={{foo}}
   });
   it('nested replace variable', async () => {
     initFileProvider();
-    const mockedEndpoints = await localServer.forGet('/test').thenJson(200, { slideshow: { author: 'httpyac' } });
+    const mockedEndpoints = await localServer.forGet('/nested').thenJson(200, { slideshow: { author: 'httpyac' } });
 
     await sendHttp(
       `
@@ -175,7 +175,7 @@ GET /text?foo={{foo}}
 {{
   exports.testObj = { bar: '{{baz}}'};
 }}
-GET /test?test={{JSON.stringify(testObj)}}
+GET /nested?test={{JSON.stringify(testObj)}}
     `,
       {
         host: `http://localhost:${localServer.port}`,
@@ -183,19 +183,19 @@ GET /test?test={{JSON.stringify(testObj)}}
     );
 
     const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].path).toBe(`/test?test={%22bar%22:%22works%22}`);
+    expect(requests[0].path).toBe(`/nested?test={%22bar%22:%22works%22}`);
   });
 
   it('support await syntax in custom scripts', async () => {
     initFileProvider();
-    const mockedEndpoints = await localServer.forGet('/test').thenJson(200, { slideshow: { author: 'httpyac' } });
+    const mockedEndpoints = await localServer.forGet('/awaittest').thenJson(200, { slideshow: { author: 'httpyac' } });
     await sendHttp(
       `
 {{
 const asyncFn = async () => ({ bar: 'works'});
 exports.testObj = await asyncFn();
 }}
-GET /test?test={{JSON.stringify(testObj)}}
+GET /awaittest?test={{JSON.stringify(testObj)}}
     `,
       {
         host: `http://localhost:${localServer.port}`,
@@ -203,6 +203,6 @@ GET /test?test={{JSON.stringify(testObj)}}
     );
 
     const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].path).toBe(`/test?test={%22bar%22:%22works%22}`);
+    expect(requests[0].path).toBe(`/awaittest?test={%22bar%22:%22works%22}`);
   });
 });
