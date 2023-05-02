@@ -20,7 +20,7 @@ POST http://localhost:${localServer.port}/nameimport
 # @import ./import.http
 ###
 # @ref foo
-POST /nameimport?test={{foo.test}}
+POST http://localhost:${localServer.port}/nameimport?test={{foo.test}}
 
 foo={{foo.foo}}
     `
@@ -29,9 +29,6 @@ foo={{foo.foo}}
     await send({
       httpFile,
       httpRegion: httpFile.httpRegions[1],
-      variables: {
-        host: `http://localhost:${localServer.port}`,
-      },
     });
 
     const requests = await mockedEndpoints.getSeenRequests();
