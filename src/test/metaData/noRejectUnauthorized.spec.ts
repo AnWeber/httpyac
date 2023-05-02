@@ -1,21 +1,25 @@
 import { initFileProvider, sendHttp, parseHttp, sendHttpFile } from '../testUtils';
-import { getLocal, generateCACertificate } from 'mockttp';
+import { Mockttp, getLocal, generateCACertificate } from 'mockttp';
 
 describe('metadata.noRejectUnauthorized', () => {
-  it('should throw self signed certificate error', async () => {
-    const localServer = getLocal({
+  let localServer: Mockttp;
+  beforeAll(async () => {
+    localServer = getLocal({
       https: await generateCACertificate({
         commonName: 'badssl',
       }),
     });
+    await localServer.start();
+  });
+  afterAll(async () => await localServer.stop());
+  it('should throw self signed certificate error', async () => {
     try {
-      await localServer.start();
       initFileProvider();
-      await localServer.forGet('/json').thenReply(200);
+      await localServer.forGet('/selfsignederror').thenReply(200);
 
       await sendHttp(
         `
-GET /json
+GET /selfsignederror
     `,
         {
           host: `https://localhost:${localServer.port}`,
@@ -26,105 +30,73 @@ GET /json
     } catch (err) {
       expect(err instanceof Error && err.name).toBe('RequestError');
       expect(err.toString()).toContain('signed certificate in certificate chain');
-    } finally {
-      localServer.stop();
     }
   });
   it('should use metadata tag', async () => {
-    const localServer = getLocal({
-      https: await generateCACertificate({
-        commonName: 'badssl',
-      }),
-    });
-    try {
-      await localServer.start();
-      initFileProvider();
-      const mockedEndpoints = await localServer.forGet('/json').thenReply(200);
+    initFileProvider();
+    const mockedEndpoints = await localServer.forGet('/metadata').thenReply(200);
 
-      const respones = await sendHttp(
-        `
+    const respones = await sendHttp(
+      `
 # @no-reject-unauthorized
-GET /json
+GET /metadata
     `,
-        {
-          host: `http://localhost:${localServer.port}`,
-        }
-      );
+      {
+        host: `https://localhost:${localServer.port}`,
+      }
+    );
 
-      const requests = await mockedEndpoints.getSeenRequests();
-      expect(requests.length).toBe(1);
-      expect(requests[0].path).toBe('/json');
-      expect(respones.length).toBe(1);
-      expect(respones[0].statusCode).toBe(200);
-    } finally {
-      localServer.stop();
-    }
+    const requests = await mockedEndpoints.getSeenRequests();
+    expect(requests.length).toBe(1);
+    expect(requests[0].path).toBe('/metadata');
+    expect(respones.length).toBe(1);
+    expect(respones[0].statusCode).toBe(200);
   });
   it('should use intellij config', async () => {
-    const localServer = getLocal({
-      https: await generateCACertificate({
-        commonName: 'badssl',
+    initFileProvider({
+      'http-client.env.json': JSON.stringify({
+        Local: {
+          request_rejectUnauthorized: false,
+        },
       }),
     });
-    try {
-      await localServer.start();
-      initFileProvider({
-        'http-client.env.json': JSON.stringify({
-          Local: {
-            request_rejectUnauthorized: false,
-          },
-        }),
-      });
-      const mockedEndpoints = await localServer.forGet('/json').thenReply(200);
+    const mockedEndpoints = await localServer.forGet('/intellijconfig').thenReply(200);
 
-      const httpFile = await parseHttp(
-        `
-GET /json
+    const httpFile = await parseHttp(
+      `
+GET /intellijconfig
     `
-      );
-      httpFile.activeEnvironment = ['Local'];
+    );
+    httpFile.activeEnvironment = ['Local'];
 
-      const respones = await sendHttpFile(httpFile, {
-        host: `http://localhost:${localServer.port}`,
-      });
-      const requests = await mockedEndpoints.getSeenRequests();
-      expect(requests.length).toBe(1);
-      expect(requests[0].path).toBe('/json');
-      expect(respones.length).toBe(1);
-      expect(respones[0].statusCode).toBe(200);
-    } finally {
-      localServer.stop();
-    }
+    const respones = await sendHttpFile(httpFile, {
+      host: `https://localhost:${localServer.port}`,
+    });
+    const requests = await mockedEndpoints.getSeenRequests();
+    expect(requests.length).toBe(1);
+    expect(requests[0].path).toBe('/intellijconfig');
+    expect(respones.length).toBe(1);
+    expect(respones[0].statusCode).toBe(200);
   });
   it('should use .env', async () => {
-    const localServer = getLocal({
-      https: await generateCACertificate({
-        commonName: 'badssl',
-      }),
+    initFileProvider({
+      '.env': `request_rejectUnauthorized=false`,
     });
-    try {
-      await localServer.start();
-      initFileProvider({
-        '.env': `request_rejectUnauthorized=false`,
-      });
-      const mockedEndpoints = await localServer.forGet('/json').thenReply(200);
+    const mockedEndpoints = await localServer.forGet('/dotenv').thenReply(200);
 
-      const respones = await sendHttp(
-        `
-GET /json
+    const respones = await sendHttp(
+      `
+GET /dotenv
     `,
-        {
-          host: `http://localhost:${localServer.port}`,
-        }
-      );
+      {
+        host: `https://localhost:${localServer.port}`,
+      }
+    );
 
-      const requests = await mockedEndpoints.getSeenRequests();
-      expect(requests.length).toBe(1);
-      expect(requests[0].path).toBe('/json');
-      expect(respones.length).toBe(1);
-      expect(respones[0].statusCode).toBe(200);
-    } finally {
-      localServer.stop();
-    }
+    const requests = await mockedEndpoints.getSeenRequests();
+    expect(requests.length).toBe(1);
+    expect(requests[0].path).toBe('/dotenv');
+    expect(respones.length).toBe(1);
+    expect(respones[0].statusCode).toBe(200);
   });
 });

@@ -11,7 +11,7 @@ describe('metadata.import', () => {
     initFileProvider({
       'import.http': `
 # @name foo
-GET  /nameimportjson
+GET /nameimportjson
       `,
     });
     await localServer.forGet('/nameimportjson').thenJson(200, { foo: 'bar', test: 1 });
