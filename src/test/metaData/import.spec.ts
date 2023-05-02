@@ -11,10 +11,10 @@ describe('metadata.import', () => {
     initFileProvider({
       'import.http': `
 # @name foo
-GET /nameimportjson
+GET /nameimport
       `,
     });
-    await localServer.forGet('/nameimportjson').thenJson(200, { foo: 'bar', test: 1 });
+    await localServer.forGet('/nameimport').thenJson(200, { foo: 'bar', test: 1 });
     const mockedEndpoints = await localServer.forPost('/nameimport').thenReply(200);
     const httpFile = await parseHttp(
       `
