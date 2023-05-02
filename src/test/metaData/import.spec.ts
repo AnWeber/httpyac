@@ -11,7 +11,7 @@ describe('metadata.import', () => {
     initFileProvider({
       'import.http': `
 # @name foo
-POST /nameimport
+POST http://localhost:${localServer.port}/nameimport
       `,
     });
     const mockedEndpoints = await localServer.forPost('/nameimport').thenJson(200, { foo: 'bar', test: 1 });
