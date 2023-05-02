@@ -5,8 +5,37 @@ import { getLocal } from 'mockttp';
 describe('metadata.import', () => {
   const localServer = getLocal();
   beforeAll(async () => await localServer.start());
+  beforeEach(() => localServer.reset());
   afterAll(async () => await localServer.stop());
 
+  it('name + import + ref', async () => {
+    initFileProvider({
+      'import.http': `
+# @name foo
+POST http://localhost:${localServer.port}/nameimport
+      `,
+    });
+    const mockedEndpoints = await localServer.forPost('/nameimport').thenJson(200, { foo: 'bar', test: 1 });
+    const httpFile = await parseHttp(
+      `
+# @import ./import.http
+###
+# @ref foo
+POST http://localhost:${localServer.port}/nameimport?test={{foo.test}}
+
+foo={{foo.foo}}
+    `
+    );
+
+    await send({
+      httpFile,
+      httpRegion: httpFile.httpRegions[1],
+    });
+
+    const requests = await mockedEndpoints.getSeenRequests();
+    expect(requests[1].path).toBe(`/nameimport?test=1`);
+    expect(await requests[1].body.getText()).toBe('foo=bar');
+  });
   it('import global variable', async () => {
     initFileProvider({
       'import.http': `
