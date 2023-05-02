@@ -12,16 +12,17 @@ describe('metadata.import', () => {
     initFileProvider({
       'import.http': `
 # @name foo
-POST http://localhost:${localServer.port}/nameimport
+GET http://localhost:${localServer.port}/nameimportjson
       `,
     });
+    await localServer.forGet('/nameimportjson').thenJson(200, { foo: 'bar', test: 1 });
     const mockedEndpoints = await localServer.forPost('/nameimport').thenJson(200, { foo: 'bar', test: 1 });
     const httpFile = await parseHttp(
       `
 # @import ./import.http
 ###
 # @ref foo
-POST http://localhost:${localServer.port}/nameimport?test={{foo.test}}
+POST /nameimport?test={{foo.test}}
 
 foo={{foo.foo}}
     `
@@ -30,11 +31,14 @@ foo={{foo.foo}}
     await send({
       httpFile,
       httpRegion: httpFile.httpRegions[1],
+      variables: {
+        host: `http://localhost:${localServer.port}`,
+      },
     });
 
     const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[1].path).toBe(`/nameimport?test=1`);
-    expect(await requests[1].body.getText()).toBe('foo=bar');
+    expect(requests[0].path).toBe(`/nameimport?test=1`);
+    expect(await requests[0].body.getText()).toBe('foo=bar');
   });
   it('import global variable', async () => {
     initFileProvider({
