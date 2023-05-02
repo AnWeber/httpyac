@@ -3,15 +3,16 @@ import { getLocal } from 'mockttp';
 
 describe('request.graphql', () => {
   const localServer = getLocal();
-  beforeEach(() => localServer.start(7002));
-  afterEach(() => localServer.stop());
+  beforeAll(() => localServer.start());
+  afterAll(() => localServer.stop());
 
   it('query + operation + variables', async () => {
     initFileProvider();
     const mockedEndpoints = await localServer.forPost('/graphql').thenReply(200);
 
-    await sendHttp(`
-POST  http://localhost:7002/graphql
+    await sendHttp(
+      `
+POST /graphql
 
 query launchesQuery($limit: Int!){
   launchesPast(limit: $limit) {
@@ -35,10 +36,14 @@ query launchesQuery($limit: Int!){
 {
     "limit": 10
 }
-    `);
+    `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe('http://localhost:7002/graphql');
+    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/graphql`);
     expect(await requests[0].body.getText()).toBe(
       '{"query":"query launchesQuery($limit: Int!){\\n  launchesPast(limit: $limit) {\\n    mission_name\\n    launch_date_local\\n    launch_site {\\n      site_name_long\\n    }\\n    rocket {\\n      rocket_name\\n      rocket_type\\n    }\\n    ships {\\n      name\\n      home_port\\n      image\\n    }\\n  }\\n}","operationName":"launchesQuery","variables":{"limit":10}}'
     );
@@ -48,14 +53,15 @@ query launchesQuery($limit: Int!){
     initFileProvider();
     const mockedEndpoints = await localServer.forPost('/graphql').thenReply(200);
 
-    await sendHttp(`
+    await sendHttp(
+      `
 {{
   exports.variables = {
     "limit": 10
   };
 }}
 
-POST  http://localhost:7002/graphql
+POST /graphql
 
 query launchesQuery($limit: Int!){
   launchesPast(limit: $limit) {
@@ -77,10 +83,14 @@ query launchesQuery($limit: Int!){
 }
 
 {{ variables }}
-    `);
+    `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe('http://localhost:7002/graphql');
+    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/graphql`);
     expect(await requests[0].body.getText()).toBe(
       '{"query":"query launchesQuery($limit: Int!){\\n  launchesPast(limit: $limit) {\\n    mission_name\\n    launch_date_local\\n    launch_site {\\n      site_name_long\\n    }\\n    rocket {\\n      rocket_name\\n      rocket_type\\n    }\\n    ships {\\n      name\\n      home_port\\n      image\\n    }\\n  }\\n}","operationName":"launchesQuery","variables":{"limit":10}}'
     );
@@ -90,7 +100,8 @@ query launchesQuery($limit: Int!){
     initFileProvider();
     const mockedEndpoints = await localServer.forPost('/graphql').thenReply(200);
 
-    await sendHttp(`
+    await sendHttp(
+      `
 {{
   exports.variables = {
     "limit": 10
@@ -98,7 +109,7 @@ query launchesQuery($limit: Int!){
 }}
 
 # @loop for 1
-POST  http://localhost:7002/graphql
+POST /graphql
 
 query launchesQuery($limit: Int!){
   launchesPast(limit: $limit) {
@@ -120,10 +131,14 @@ query launchesQuery($limit: Int!){
 }
 
 {{ variables }}
-    `);
+    `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe('http://localhost:7002/graphql');
+    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/graphql`);
     expect(await requests[0].body.getText()).toBe(
       '{"query":"query launchesQuery($limit: Int!){\\n  launchesPast(limit: $limit) {\\n    mission_name\\n    launch_date_local\\n    launch_site {\\n      site_name_long\\n    }\\n    rocket {\\n      rocket_name\\n      rocket_type\\n    }\\n    ships {\\n      name\\n      home_port\\n      image\\n    }\\n  }\\n}","operationName":"launchesQuery","variables":{"limit":10}}'
     );
@@ -133,7 +148,8 @@ query launchesQuery($limit: Int!){
     initFileProvider();
     const mockedEndpoints = await localServer.forPost('/graphql').thenReply(200);
 
-    await sendHttp(`
+    await sendHttp(
+      `
 {{
   exports.variables = {
     "foo": 10,
@@ -141,7 +157,7 @@ query launchesQuery($limit: Int!){
   };
 }}
 
-POST  http://localhost:7002/graphql
+POST /graphql
 
 query launchesQuery($limit: ComplexInput!){
   launchesPast(limit: $limit) {
@@ -165,10 +181,14 @@ query launchesQuery($limit: ComplexInput!){
 {
   "limit": {{ variables }}
 }
-    `);
+    `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe('http://localhost:7002/graphql');
+    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/graphql`);
     expect(await requests[0].body.getText()).toBe(
       '{"query":"query launchesQuery($limit: ComplexInput!){\\n  launchesPast(limit: $limit) {\\n    mission_name\\n    launch_date_local\\n    launch_site {\\n      site_name_long\\n    }\\n    rocket {\\n      rocket_name\\n      rocket_type\\n    }\\n    ships {\\n      name\\n      home_port\\n      image\\n    }\\n  }\\n}","operationName":"launchesQuery","variables":{"limit":{"foo":10,"bar":20}}}'
     );
@@ -178,7 +198,8 @@ query launchesQuery($limit: ComplexInput!){
     initFileProvider();
     const mockedEndpoints = await localServer.forPost('/graphql').thenReply(200);
 
-    await sendHttp(`
+    await sendHttp(
+      `
 fragment RocketParts on LaunchRocket {
   rocket_name
   first_stage {
@@ -192,7 +213,7 @@ fragment RocketParts on LaunchRocket {
   }
 }
 
-POST http://localhost:7002/graphql HTTP/1.1
+POST /graphql HTTP/1.1
 Content-Type: application/json
 
 
@@ -212,10 +233,14 @@ query launchesQuery($limit: Int!){
 {
     "limit": 10
 }
-      `);
+      `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe('http://localhost:7002/graphql');
+    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/graphql`);
     expect(await requests[0].body.getText()).toBe(
       '{"query":"query launchesQuery($limit: Int!){\\n  launchesPast(limit: $limit) {\\n    mission_name\\n    launch_date_local\\n    launch_site {\\n      site_name_long\\n    }\\n    rocket {\\n      ...RocketParts\\n    }\\n  }\\n}\\nfragment RocketParts on LaunchRocket {\\n  rocket_name\\n  first_stage {\\n    cores {\\n      flight\\n      core {\\n        reuse_count\\n        status\\n      }\\n    }\\n  }\\n}","operationName":"launchesQuery","variables":{"limit":10}}'
     );
@@ -225,8 +250,9 @@ query launchesQuery($limit: Int!){
     initFileProvider();
     const mockedEndpoints = await localServer.forPost('/graphql').thenReply(200);
 
-    await sendHttp(`
-POST http://localhost:7002/graphql
+    await sendHttp(
+      `
+POST /graphql
 Content-Type: application/json
 
 query company_query {
@@ -234,10 +260,14 @@ query company_query {
     coo
   }
 }
-      `);
+      `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe('http://localhost:7002/graphql');
+    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/graphql`);
     expect(await requests[0].body.getText()).toBe(
       '{"query":"query company_query {\\n  company {\\n    coo\\n  }\\n}","operationName":"company_query"}'
     );
@@ -268,8 +298,9 @@ query launchesQuery($limit: Int!){
     });
     const mockedEndpoints = await localServer.forPost('/graphql').thenReply(200);
 
-    await sendHttp(`
-POST http://localhost:7002/graphql
+    await sendHttp(
+      `
+POST /graphql
 Content-Type: application/json
 
 gql launchesQuery < ./graphql.gql
@@ -277,10 +308,14 @@ gql launchesQuery < ./graphql.gql
 {
     "limit": 10
 }
-      `);
+      `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe('http://localhost:7002/graphql');
+    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/graphql`);
     expect(await requests[0].body.getText()).toBe(
       '{"query":"\\nquery launchesQuery($limit: Int!){\\n  launchesPast(limit: $limit) {\\n    mission_name\\n    launch_date_local\\n    launch_site {\\n      site_name_long\\n    }\\n    rocket {\\n      rocket_name\\n      rocket_type\\n    }\\n    ships {\\n      name\\n      home_port\\n      image\\n    }\\n  }\\n}\\n        ","operationName":"launchesQuery","variables":{"limit":10}}'
     );
@@ -289,8 +324,9 @@ gql launchesQuery < ./graphql.gql
     initFileProvider();
     const mockedEndpoints = await localServer.forPost('/graphql').thenReply(200);
 
-    await sendHttp(`
-GRAPHQL http://localhost:7002/graphql
+    await sendHttp(
+      `
+GRAPHQL /graphql
 Content-Type: application/json
 
 query company_query {
@@ -298,10 +334,14 @@ query company_query {
     coo
   }
 }
-      `);
+      `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe('http://localhost:7002/graphql');
+    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/graphql`);
     expect(await requests[0].body.getText()).toBe(
       '{"query":"query company_query {\\n  company {\\n    coo\\n  }\\n}","operationName":"company_query"}'
     );
@@ -311,13 +351,18 @@ query company_query {
     initFileProvider({ 'body.json': body });
     const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
 
-    await sendHttp(`
+    await sendHttp(
+      `
 @bar=bar2
-POST http://localhost:7002/post
+POST /post
 Content-Type: application/json
 
 <@ ./body.json
-      `);
+      `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
     expect(requests[0].headers['content-type']).toBe('application/json');

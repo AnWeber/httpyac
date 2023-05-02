@@ -1,11 +1,7 @@
 import { userInteractionProvider } from '../../io';
 import { initFileProvider, sendHttp } from '../testUtils';
-import { getLocal } from 'mockttp';
 
 describe('variables.pick', () => {
-  const localServer = getLocal();
-  beforeEach(() => localServer.start(6001));
-  afterEach(() => localServer.stop());
   userInteractionProvider.showListPrompt = async () => 'foo';
 
   it('pick', async () => {

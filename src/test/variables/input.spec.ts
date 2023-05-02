@@ -1,12 +1,7 @@
 import { userInteractionProvider } from '../../io';
 import { initFileProvider, sendHttp } from '../testUtils';
-import { getLocal } from 'mockttp';
 
 describe('variables.input', () => {
-  const localServer = getLocal();
-  beforeEach(() => localServer.start(6001));
-  afterEach(() => localServer.stop());
-
   it('input', async () => {
     initFileProvider();
     userInteractionProvider.showInputPrompt = jest.fn();

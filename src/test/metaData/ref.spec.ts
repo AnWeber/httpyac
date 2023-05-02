@@ -4,8 +4,8 @@ import { getLocal } from 'mockttp';
 
 describe('metadata.ref', () => {
   const localServer = getLocal();
-  beforeEach(() => localServer.start(8005));
-  afterEach(() => localServer.stop());
+  beforeAll(() => localServer.start(8005));
+  afterAll(() => localServer.stop());
 
   it('name + ref', async () => {
     initFileProvider();

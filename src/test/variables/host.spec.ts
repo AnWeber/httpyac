@@ -3,7 +3,7 @@ import { getLocal } from 'mockttp';
 
 describe('variables.host', () => {
   const localServer = getLocal();
-  beforeEach(() => localServer.start(6004));
+  beforeEach(() => localServer.start());
   afterEach(() => localServer.stop());
 
   it('host', async () => {
@@ -11,11 +11,11 @@ describe('variables.host', () => {
     const mockedEndpoints = await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
 
     await sendHttp(`
-@host=http://localhost:6004
+@host=http://localhost:${localServer.port}
 GET /json
     `);
 
     const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe('http://localhost:6004/json');
+    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/json`);
   });
 });

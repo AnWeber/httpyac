@@ -3,19 +3,24 @@ import { getLocal } from 'mockttp';
 
 describe('request.body', () => {
   const localServer = getLocal();
-  beforeEach(() => localServer.start(7001));
-  afterEach(() => localServer.stop());
+  beforeAll(() => localServer.start());
+  afterAll(() => localServer.stop());
   it('should send body', async () => {
     initFileProvider();
     const body = JSON.stringify({ foo: 'foo', bar: 'bar' }, null, 2);
     const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
 
-    await sendHttp(`
-POST http://localhost:7001/post
+    await sendHttp(
+      `
+POST /post
 Content-Type: application/json
 
 ${body}
-    `);
+    `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
     expect(requests[0].headers['content-type']).toBe('application/json');
@@ -26,11 +31,16 @@ ${body}
     const body = JSON.stringify({ foo: 'foo', bar: 'bar' }, null, 2);
     const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
 
-    await sendHttp(`
-POST http://localhost:7001/post
+    await sendHttp(
+      `
+POST /post
 Content-Type: application/json
 ${body}
-    `);
+    `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
     expect(requests[0].headers['content-type']).toBe('application/json');
@@ -41,12 +51,17 @@ ${body}
     initFileProvider({ 'body.json': body });
     const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
 
-    await sendHttp(`
-POST http://localhost:7001/post
+    await sendHttp(
+      `
+POST /post
 Content-Type: application/json
 
 <@ ./body.json
-    `);
+    `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
     expect(requests[0].headers['content-type']).toBe('application/json');
@@ -58,12 +73,17 @@ Content-Type: application/json
     initFileProvider({ 'body.json': body });
     const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
 
-    await sendHttp(`
-POST http://localhost:7001/post
+    await sendHttp(
+      `
+POST /post
 Content-Type: application/json
 
 < ./body.json
-    `);
+    `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
     expect(requests[0].headers['content-type']).toBe('application/json');
@@ -74,13 +94,18 @@ Content-Type: application/json
     initFileProvider({ 'body.json': body });
     const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
 
-    await sendHttp(`
+    await sendHttp(
+      `
 @bar=bar2
-POST http://localhost:7001/post
+POST /post
 Content-Type: application/json
 
 <@ ./body.json
-      `);
+      `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
 
     const requests = await mockedEndpoints.getSeenRequests();
     expect(requests[0].headers['content-type']).toBe('application/json');
