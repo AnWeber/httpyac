@@ -4,6 +4,7 @@ import { getLocal } from 'mockttp';
 describe('request.body', () => {
   const localServer = getLocal();
   beforeAll(async () => await localServer.start());
+  beforeEach(() => localServer.reset());
   afterAll(async () => await localServer.stop());
   it('should send body', async () => {
     initFileProvider();
@@ -110,5 +111,56 @@ Content-Type: application/json
     const requests = await mockedEndpoints.getSeenRequests();
     expect(requests[0].headers['content-type']).toBe('application/json');
     expect(await requests[0].body.getText()).toBe(JSON.stringify({ foo: 'foo', bar: 'bar2' }, null, 2));
+  });
+  it('should send mulitpart form body', async () => {
+    const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
+
+    await sendHttp(
+      `
+@bar=bar2
+POST /post
+Content-Type: multipart/form-data; boundary=WebKitFormBoundary
+
+--WebKitFormBoundary
+Content-Disposition: form-data; name="text"
+
+invoice_text: {{bar}}
+--WebKitFormBoundary--
+      `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
+
+    const requests = await mockedEndpoints.getSeenRequests();
+    expect(requests[0].headers['content-type']).toBe('multipart/form-data; boundary=WebKitFormBoundary');
+    expect(await requests[0].body.getText()).toBe(
+      `--WebKitFormBoundary\r\nContent-Disposition: form-data; name="text"\r\n\r\ninvoice_text: bar2\r\n--WebKitFormBoundary--`
+    );
+  });
+  it('should send mulitpart form body with addMulitpartformBoundary', async () => {
+    const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
+
+    await sendHttp(
+      `
+@bar=bar2
+POST /post
+Content-Type: multipart/form-data; boundary=WebKitFormBoundary
+
+--WebKitFormBoundary
+Content-Disposition: form-data; name="text"
+
+invoice_text: {{bar}}
+      `,
+      {
+        host: `http://localhost:${localServer.port}`,
+      }
+    );
+
+    const requests = await mockedEndpoints.getSeenRequests();
+    expect(requests[0].headers['content-type']).toBe('multipart/form-data; boundary=WebKitFormBoundary');
+    expect(await requests[0].body.getText()).toBe(
+      `--WebKitFormBoundary\r\nContent-Disposition: form-data; name="text"\r\n\r\ninvoice_text: bar2\r\n--WebKitFormBoundary--`
+    );
   });
 });

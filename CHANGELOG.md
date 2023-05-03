@@ -1,3 +1,9 @@
+## [unreleased]
+
+### Fixes
+
+- add multipart end form boundary if it is missing (AnWeber/vscode-httpyac#191, Intellij compatible)
+
 ## 6.4.1 (2023-05-01)
 
 ### Fixes
