@@ -25,4 +25,24 @@ describe('assert.xpath', () => {
     expect(httpFile.httpRegions[0].testResults?.[0].result).toBeTruthy();
     expect(httpFile.httpRegions[0].testResults?.[0].message).toBe('/bookstore/book/title == Everyday Italian');
   });
+  it('should fail xpath', async () => {
+    initFileProvider();
+    await localServer
+      .forGet('/get')
+      .thenReply(200, `<bookstore><book><title>Everyday Italian</title></book></bookstore>`);
+    const httpFile = await parseHttp(`
+    GET /get
+
+    ?? xpath /bookstore/book/title == Everyday Italian2
+    `);
+
+    const responses = await sendHttpFile(httpFile, {
+      host: `http://localhost:${localServer.port}`,
+    });
+    expect(responses.length).toBe(1);
+    expect(responses[0].statusCode).toBe(200);
+    expect(httpFile.httpRegions[0].testResults?.length).toBe(1);
+    expect(httpFile.httpRegions[0].testResults?.[0].result).toBeFalsy();
+    expect(httpFile.httpRegions[0].testResults?.[0].message).toBe('/bookstore/book/title == Everyday Italian2');
+  });
 });
