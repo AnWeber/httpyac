@@ -1,5 +1,5 @@
 export * from './assert';
-export * from './core';
+export * from './core/registerCorePlugin';
 export * from './dotenv';
 export * from './eventsource';
 export * from './graphql';

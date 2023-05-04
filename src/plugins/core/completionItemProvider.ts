@@ -11,11 +11,19 @@ completionItemProvider.emptyLineProvider.push((text: string) => {
       description: 'Input',
     },
     {
+      name: '{{$input-askonce',
+      description: 'Input',
+    },
+    {
       name: '{{$password',
       description: 'Password',
     },
     {
       name: '{{$pick <placeholder> $value:',
+      description: 'Password',
+    },
+    {
+      name: '{{$pick-askonce <placeholder> $value:',
       description: 'Password',
     },
   ];
