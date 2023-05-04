@@ -90,7 +90,7 @@ function convertToType(target: unknown, value: unknown) {
       return utils.toNumber(value);
     }
     if (typeof target === 'boolean') {
-      return utils.toBoolean(value);
+      return utils.toBoolean(value, !!value);
     }
     if (typeof target === 'string') {
       return utils.toString(value);

@@ -8,7 +8,7 @@ export async function provideAssertValueXPath(type: string, value: string | unde
   if (type === 'xpath' && value && response.body) {
     const body = utils.toString(response.body);
     if (!body) {
-      return false;
+      return '';
     }
     try {
       const node = parseFromString(body);
