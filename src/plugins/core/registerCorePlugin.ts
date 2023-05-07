@@ -27,7 +27,6 @@ function initOnRequestHook(api: models.HttpyacHooksApi) {
   api.hooks.onRequest.addHook('transformRequestBody', request.transformRequestBodyToBuffer);
   api.hooks.onRequest.addHook('requestVariableReplacer', request.requestVariableReplacer);
   api.hooks.onRequest.addHook('encodeRequestBody', request.encodeRequestBody);
-  api.hooks.onRequest.addHook('addMulitpartformBoundary', request.addMulitpartformBoundary);
 
   api.hooks.onRequest.addInterceptor(request.isTrustedInterceptor);
   api.hooks.onRequest.addInterceptor(request.excludeProxyInterceptor);

@@ -1,4 +1,3 @@
-export * from './addMulitpartformBoundary';
 export * from './attachDefaultHeaders';
 export * from './encodeRequestBody';
 export * from './excludeProxyInterceptor';

@@ -2,7 +2,6 @@
 
 ### Fixes
 
-- add multipart end form boundary if it is missing (AnWeber/vscode-httpyac#191, Intellij compatible)
 - reuse current NodeJS Context instead of creating custom Context to allow use of crypto in NodeJS@20 (#437)
 
 ## 6.4.1 (2023-05-01)
