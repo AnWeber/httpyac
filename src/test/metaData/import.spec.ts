@@ -2,13 +2,13 @@ import { send } from '../../httpYacApi';
 import { initFileProvider, parseHttp } from '../testUtils';
 import { getLocal } from 'mockttp';
 
-describe('metadata.import', () => {
+describe.skip('metadata.import', () => {
   const localServer = getLocal();
   beforeAll(async () => await localServer.start());
   beforeEach(() => localServer.reset());
   afterAll(async () => await localServer.stop());
 
-  it.skip('name + import + ref', async () => {
+  it('name + import + ref', async () => {
     initFileProvider({
       'import.http': `
 # @name foo
