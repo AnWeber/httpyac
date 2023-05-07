@@ -6,7 +6,7 @@ import { parseJavascript } from './javascriptHttpRegionParser';
 import { replaceJavascriptExpressions } from './javascriptVariableReplacer';
 import * as moduleUtils from './moduleUtils';
 import { default as dayjs } from 'dayjs';
-import * as open from 'open';
+import open from 'open';
 import * as uuid from 'uuid';
 
 // register early to allow using imported Javascript Plugins
