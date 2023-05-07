@@ -2,7 +2,12 @@ import { send } from '../../httpYacApi';
 import { initFileProvider, parseHttp } from '../testUtils';
 import { getLocal } from 'mockttp';
 
-describe.skip('metadata.import', () => {
+let desc = describe;
+if (process.version.startsWith('20')) {
+  desc = describe.skip;
+}
+
+desc('metadata.import', () => {
   const localServer = getLocal();
   beforeAll(async () => await localServer.start());
   beforeEach(() => localServer.reset());
