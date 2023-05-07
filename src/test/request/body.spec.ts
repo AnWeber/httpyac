@@ -138,29 +138,4 @@ invoice_text: {{bar}}
       `--WebKitFormBoundary\r\nContent-Disposition: form-data; name="text"\r\n\r\ninvoice_text: bar2\r\n--WebKitFormBoundary--`
     );
   });
-  it('should send mulitpart form body with addMulitpartformBoundary', async () => {
-    const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
-
-    await sendHttp(
-      `
-@bar=bar2
-POST /post
-Content-Type: multipart/form-data; boundary=WebKitFormBoundary
-
---WebKitFormBoundary
-Content-Disposition: form-data; name="text"
-
-invoice_text: {{bar}}
-      `,
-      {
-        host: `http://localhost:${localServer.port}`,
-      }
-    );
-
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].headers['content-type']).toBe('multipart/form-data; boundary=WebKitFormBoundary');
-    expect(await requests[0].body.getText()).toBe(
-      `--WebKitFormBoundary\r\nContent-Disposition: form-data; name="text"\r\n\r\ninvoice_text: bar2\r\n--WebKitFormBoundary--`
-    );
-  });
 });
