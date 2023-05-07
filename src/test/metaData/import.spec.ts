@@ -3,7 +3,7 @@ import { initFileProvider, parseHttp } from '../testUtils';
 import { getLocal } from 'mockttp';
 
 let desc = describe;
-if (process.version.startsWith('20')) {
+if (/^v?20.*/u.test(process.version)) {
   desc = describe.skip;
 }
 
