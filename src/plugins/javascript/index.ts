@@ -6,6 +6,7 @@ import { parseJavascript } from './javascriptHttpRegionParser';
 import { replaceJavascriptExpressions } from './javascriptVariableReplacer';
 import * as moduleUtils from './moduleUtils';
 import { default as dayjs } from 'dayjs';
+import * as open from 'open';
 import * as uuid from 'uuid';
 
 // register early to allow using imported Javascript Plugins
@@ -27,6 +28,7 @@ function addDefaultRequire() {
   Object.assign(httpyac.io.javascriptProvider.require, {
     httpyac,
     dayjs,
+    open,
     uuid,
   });
 }
