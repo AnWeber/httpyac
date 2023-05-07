@@ -99,28 +99,27 @@ export async function runScript(
     return mod.require(id);
   }
 
-  const context = vm.createContext(
-    Object.assign(
-      Object.defineProperties(
-        {
-          ...global,
-        },
-        Object.getOwnPropertyDescriptors(global)
-      ),
-      {
-        ...checkVariableNames(options.context),
-      }
-    )
-  );
+  const context = Object.assign({
+    ...checkVariableNames(options.context),
+  });
 
   const contextKeys = Object.keys(context);
-  const sourceAsync = `return (async()=>{${io.fileProvider.EOL}${source}})()`;
-  const compiledWrapper = vm.runInContext(Module.wrap(sourceAsync), context, {
+  const sourceAsync = `(async function userJS(exports, require, module, __filename, __dirname${
+    Object.keys(context).length > 0 ? `, ${Object.keys(context).join(', ')}` : ''
+  })${io.fileProvider.EOL}{${source}}${io.fileProvider.EOL})`;
+  const compiledWrapper = vm.runInThisContext(sourceAsync, {
     filename,
     lineOffset: options.lineOffset,
     displayErrors: true,
   });
-  await compiledWrapper.apply(context, [mod.exports, extendedRequire, mod, filename, path.dirname(filename)]);
+  await compiledWrapper.apply(context, [
+    mod.exports,
+    extendedRequire,
+    mod,
+    filename,
+    path.dirname(filename),
+    ...Object.values(context),
+  ]);
 
   deleteVariables(contextKeys, context, options.deleteVariable);
 
