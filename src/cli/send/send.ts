@@ -7,6 +7,7 @@ import { bailOnFailedTestInterceptor } from './bailOnFailedTestInterceptor';
 import { toSendJsonOutput } from './jsonOutput';
 import { loggerFlushInterceptor } from './loggerFlushInterceptor';
 import { SendOptions, getLogLevel, SendFilterOptions, OutputType } from './options';
+import { testExitCodeInterceptor } from './testExitCodeInterceptor';
 import { default as chalk } from 'chalk';
 import { Command } from 'commander';
 import { promises as fs } from 'fs';
@@ -147,6 +148,7 @@ export function convertCliOptionsToContext(cliOptions: SendOptions) {
 function initCliHooks(httpFiles: Array<models.HttpFile>, cliOptions: SendOptions) {
   for (const httpFile of utils.distinct(httpFiles)) {
     httpFile.hooks.execute.addInterceptor(loggerFlushInterceptor);
+    httpFile.hooks.execute.addInterceptor(testExitCodeInterceptor);
     if (cliOptions.bail) {
       httpFile.hooks.execute.addInterceptor(bailOnFailedTestInterceptor);
     }

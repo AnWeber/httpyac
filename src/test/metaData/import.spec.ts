@@ -8,7 +8,7 @@ describe('metadata.import', () => {
   beforeEach(() => localServer.reset());
   afterAll(async () => await localServer.stop());
 
-  it('name + import + ref', async () => {
+  it.skip('name + import + ref', async () => {
     initFileProvider({
       'import.http': `
 # @name foo

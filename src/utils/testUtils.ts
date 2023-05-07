@@ -15,7 +15,6 @@ export function testFactory({ httpRegion, scriptConsole }: ProcessorContext): Te
       try {
         testMethod();
       } catch (err) {
-        process.exitCode = 20;
         testResult.result = false;
         if (utils.isError(err)) {
           testResult.error = utils.parseError(err);
