@@ -3,7 +3,7 @@ import { GrpcRequestClient } from './grpcRequestClient';
 
 export const parseGrpcLine = utils.parseRequestLineFactory({
   protocol: 'GRPC',
-  methodRegex: /^\s*(grpc)\s+(?<url>.+?)\s*$/iu,
+  methodRegex: /^\s*(GRPC)\s+(?<url>.+?)\s*$/u,
   protocolRegex: /^\s*(?<url>grpc:\/\/.+?)\s*$/iu,
   requestClientFactory(request, context) {
     return new GrpcRequestClient(request, context);

@@ -5,7 +5,7 @@ import * as utils from '../../../utils';
 export const parseHttpRequestLine = utils.parseRequestLineFactory({
   protocol: 'HTTP',
   methodRegex:
-    /^\s*(?<method>GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE|PROPFIND|PROPPATCH|MKCOL|COPY|MOVE|LOCK|UNLOCK|CHECKOUT|CHECKIN|REPORT|MERGE|MKACTIVITY|MKWORKSPACE|VERSION-CONTROL|BASELINE-CONTROL|MKCALENDAR|ACL|SEARCH|GRAPHQL)\s*(?<url>.+?)$/iu,
+    /^\s*(?<method>GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE|PROPFIND|PROPPATCH|MKCOL|COPY|MOVE|LOCK|UNLOCK|CHECKOUT|CHECKIN|REPORT|MERGE|MKACTIVITY|MKWORKSPACE|VERSION-CONTROL|BASELINE-CONTROL|MKCALENDAR|ACL|SEARCH|GRAPHQL)\s*(?<url>.+?)$/u,
   protocolRegex: /^\s*(?<url>.+)\s*$/iu,
   requestClientFactory(request, context) {
     if (httpClientProvider.cretateRequestClient) {

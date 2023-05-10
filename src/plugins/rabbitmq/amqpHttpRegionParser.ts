@@ -5,7 +5,7 @@ import { AmqpRequestClient } from './amqpRequestClient';
 
 export const parseAmqpLine = utils.parseRequestLineFactory({
   protocol: 'AMQP',
-  methodRegex: /^\s*(amqp)\s+(?<url>.+?)\s*$/iu,
+  methodRegex: /^\s*(AMQP)\s+(?<url>.+?)\s*$/u,
   protocolRegex: /^\s*(?<url>amqp(s)?:\/\/.+?)\s*$/iu,
   requestClientFactory(request, context) {
     return new AmqpRequestClient(request, context);

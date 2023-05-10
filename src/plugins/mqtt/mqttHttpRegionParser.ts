@@ -3,7 +3,7 @@ import { MQTTRequestClient } from './mqttRequestClient';
 
 export const parseMqttLine = utils.parseRequestLineFactory({
   protocol: 'MQTT',
-  methodRegex: /^\s*(mqtt(s)?)\s+(?<url>.+?)\s*$/iu,
+  methodRegex: /^\s*(MQTT(S)?)\s+(?<url>.+?)\s*$/u,
   protocolRegex: /^\s*(?<url>mqtt(s)?:\/\/.+?)\s*$/iu,
   requestClientFactory(request, context) {
     return new MQTTRequestClient(request, context);

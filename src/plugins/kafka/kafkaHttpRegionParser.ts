@@ -5,7 +5,7 @@ import { KafkaRequestClient } from './kafkaRequestClient';
 
 export const parseKafkaLine = utils.parseRequestLineFactory({
   protocol: 'KAFKA',
-  methodRegex: /^\s*(kafka)\s+(?<url>.+?)\s*$/iu,
+  methodRegex: /^\s*(KAFKA)\s+(?<url>.+?)\s*$/u,
   requestClientFactory(request, context) {
     return new KafkaRequestClient(request, context);
   },

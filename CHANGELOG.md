@@ -1,3 +1,9 @@
+## [unreleased]
+
+### Fixes
+
+- request method detection supports only uppercase character to prevent false positives (#447)
+
 ## [6.4.2] (2023-05-07)
 
 ### Fixes
