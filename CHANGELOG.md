@@ -3,6 +3,7 @@
 ### Fixes
 
 - request method detection supports only uppercase character to prevent false positives (#447)
+- add `# @force-separator` to allow force explicit end separator (usefull to allow method in request body) (#447)
 
 ## [6.4.2] (2023-05-07)
 
