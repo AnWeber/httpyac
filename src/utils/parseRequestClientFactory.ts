@@ -141,10 +141,6 @@ function isValidRequestLine(httpLine: models.HttpLine, httpRegion: models.HttpRe
   if (isStringEmpty(httpLine.textLine)) {
     return false;
   }
-  if (httpRegion.request && httpRegion.metaData.forceSeparator) {
-    return false;
-  }
-
   if (context.methodRegex.exec(httpLine.textLine)?.groups?.url) {
     return true;
   }
