@@ -1,4 +1,4 @@
-## [6.4.4]
+## [6.4.4] (2023-05-23)
 
 ### Fixes
 
@@ -6,7 +6,7 @@
 - allow comment in last line of script (#454)
 - ignore region names which are not valid Javascript Variables (#455)
 
-## [6.4.3]
+## [6.4.3] (2023-05-16)
 
 ### Fixes
 
