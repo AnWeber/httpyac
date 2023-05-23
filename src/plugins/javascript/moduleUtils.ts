@@ -106,7 +106,7 @@ export async function runScript(
   const contextKeys = Object.keys(context);
   const sourceAsync = `(async function userJS(exports, require, module, __filename, __dirname${
     Object.keys(context).length > 0 ? `, ${Object.keys(context).join(', ')}` : ''
-  })${io.fileProvider.EOL}{${source}}${io.fileProvider.EOL})`;
+  }){${io.fileProvider.EOL}${source}${io.fileProvider.EOL}})`;
   const compiledWrapper = vm.runInThisContext(sourceAsync, {
     filename,
     lineOffset: options.lineOffset,

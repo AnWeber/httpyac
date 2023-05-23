@@ -28,4 +28,23 @@ describe('scripts.javascript', () => {
     const requests = await mockedEndpoints.getSeenRequests();
     expect(requests[0].headers.authorization).toBe('Basic 8hiIYW+ERaH03JKCDl62xluD3Rp7yzfpTPxKmwEYZ9U=');
   });
+  it('allow comments in script', async () => {
+    initFileProvider();
+    const mockedEndpoints = await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
+
+    await sendHttp(`
+    {{
+      //pre request script
+      exports.authentcation = \`Basic test\`;
+      // after comment
+    }}
+    GET  http://localhost:${localServer.port}/json
+    authorization: {{authentcation}}
+    key: test
+
+    `);
+
+    const requests = await mockedEndpoints.getSeenRequests();
+    expect(requests[0].headers.authorization).toBe('Basic test');
+  });
 });
