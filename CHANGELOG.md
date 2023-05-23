@@ -4,6 +4,7 @@
 
 - `# @jwt` metadata parsedBody matches body (#454)
 - allow comment in last line of script (#454)
+- ignore region names which are not valid Javascript Variables (#455)
 
 ## [6.4.3]
 

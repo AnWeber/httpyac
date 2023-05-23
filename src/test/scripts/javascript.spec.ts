@@ -1,4 +1,4 @@
-import { initFileProvider, sendHttp } from '../testUtils';
+import { initFileProvider, parseHttp, sendHttp, sendHttpFile } from '../testUtils';
 import { getLocal } from 'mockttp';
 
 describe('scripts.javascript', () => {
@@ -46,5 +46,22 @@ describe('scripts.javascript', () => {
 
     const requests = await mockedEndpoints.getSeenRequests();
     expect(requests[0].headers.authorization).toBe('Basic test');
+  });
+  it('allow invalid variable names', async () => {
+    initFileProvider();
+    const mockedEndpoints = await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
+
+    const httpFile = await parseHttp(`
+    ### test: (1)
+    GET  http://localhost:${localServer.port}/json
+
+    ###
+    GET  http://localhost:${localServer.port}/json?foo={{(new Date()).toString()}}
+    `);
+
+    await sendHttpFile(httpFile);
+
+    const requests = await mockedEndpoints.getSeenRequests();
+    expect(requests.length).toBe(2);
   });
 });
