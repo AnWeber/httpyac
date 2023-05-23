@@ -19,7 +19,7 @@ export function jwtMetaDataHandler(type: string, value: string | undefined, cont
           }
         }
         const result = Object.fromEntries(entries);
-        const resultString = utils.stringifySafe(response.parsedBody, 2);
+        const resultString = utils.stringifySafe(result, 2);
         response.body = resultString;
         response.prettyPrintBody = resultString;
         response.parsedBody = result;

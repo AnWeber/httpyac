@@ -1,3 +1,9 @@
+## [6.4.4]
+
+### Fixes
+
+- `# @jwt` metadata parsedBody matches body (#454)
+
 ## [6.4.3]
 
 ### Fixes

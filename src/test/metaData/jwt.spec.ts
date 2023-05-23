@@ -1,4 +1,6 @@
 import { send } from '../../httpYacApi';
+import { HttpResponse } from '../../models';
+import { stringifySafe } from '../../utils';
 import { initFileProvider, parseHttp } from '../testUtils';
 import { getLocal } from 'mockttp';
 
@@ -16,9 +18,10 @@ describe('metadata.jwt', () => {
 # @jwt foo
 GET  /json
   `);
+
+    let httpReponse: HttpResponse | undefined;
     httpFile.hooks.onResponse.addHook('test', response => {
-      expect(response?.parsedBody).toBeDefined();
-      expect((response?.parsedBody as Record<string, unknown>)?.foo_parsed).toBeDefined();
+      httpReponse = response;
     });
 
     const result = await send({
@@ -28,5 +31,12 @@ GET  /json
       },
     });
     expect(result).toBeTruthy();
+    expect(httpReponse?.parsedBody).toBeDefined();
+    expect(httpReponse?.body).toBe(stringifySafe(httpReponse?.parsedBody, 2));
+    expect((httpReponse?.parsedBody as Record<string, unknown>)?.foo_parsed).toEqual({
+      iat: 1516239022,
+      name: 'John Doe',
+      sub: '1234567890',
+    });
   });
 });
