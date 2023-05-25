@@ -110,7 +110,7 @@
     "globby": "^13.1.4",
     "got": "^11.8.6",
     "hookpoint": "^2.2.1",
-    "http-proxy-agent": "^6.0.1",
+    "http-proxy-agent": "^7.0.0",
     "https-proxy-agent": "^7.0.0",
     "inquirer": "^9.2.2",
     "kafkajs": "^2.2.4",
