@@ -1,3 +1,9 @@
+## [unreleased]
+
+### Fixes
+
+- output-failed did not work, if output none is used (460)
+
 ## [6.4.4] (2023-05-23)
 
 ### Fixes
