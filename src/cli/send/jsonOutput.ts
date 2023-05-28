@@ -46,8 +46,8 @@ export function toSendJsonOutput(
     requests.push(
       ...httpRegions.map(httpRegion => {
         let output = options.output;
-        if (options['output-failed'] && httpRegion.testResults?.some?.(test => !test.result)) {
-          output = options['output-failed'];
+        if (options.outputFailed && httpRegion.testResults?.some?.(test => !test.result)) {
+          output = options.outputFailed;
         }
         const result: SendOutputRequest = {
           fileName,
