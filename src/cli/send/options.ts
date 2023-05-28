@@ -18,9 +18,9 @@ export interface SendOptions {
   insecure?: boolean;
   json?: boolean;
   output?: OutputType;
-  'output-failed'?: OutputType;
+  outputFailed?: OutputType;
   raw?: boolean;
-  'repeat-mode'?: 'sequential' | 'parallel';
+  repeatMode?: 'sequential' | 'parallel';
   repeat?: number;
   parallel?: number;
   timeout?: number;

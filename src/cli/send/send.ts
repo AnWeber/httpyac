@@ -116,8 +116,7 @@ export function convertCliOptionsToContext(cliOptions: SendOptions) {
     repeat: cliOptions.repeat
       ? {
           count: cliOptions.repeat,
-          type:
-            cliOptions['repeat-mode'] === 'sequential' ? models.RepeatOrder.sequential : models.RepeatOrder.parallel,
+          type: cliOptions.repeatMode === 'sequential' ? models.RepeatOrder.sequential : models.RepeatOrder.parallel,
         }
       : undefined,
     scriptConsole,
@@ -280,12 +279,8 @@ function getRequestLogger(
     const logger = utils.requestLoggerFactory(
       console.info,
       requestLoggerOptions,
-      options['output-failed']
-        ? getRequestLoggerOptions(
-            options['output-failed'],
-            options.filter === SendFilterOptions.onlyFailed,
-            !options.raw
-          )
+      options.outputFailed
+        ? getRequestLoggerOptions(options.outputFailed, options.filter === SendFilterOptions.onlyFailed, !options.raw)
         : undefined
     );
     return async (response, httpRegion) => {
