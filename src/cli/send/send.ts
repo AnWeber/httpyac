@@ -275,14 +275,15 @@ function getRequestLogger(
     options.filter === SendFilterOptions.onlyFailed,
     !options.raw
   );
-  if (requestLoggerOptions) {
-    const logger = utils.requestLoggerFactory(
-      console.info,
-      requestLoggerOptions,
-      options.outputFailed
-        ? getRequestLoggerOptions(options.outputFailed, options.filter === SendFilterOptions.onlyFailed, !options.raw)
-        : undefined
-    );
+
+  const requestFailedLoggerOptions = getRequestLoggerOptions(
+    options.outputFailed,
+    options.filter === SendFilterOptions.onlyFailed,
+    !options.raw
+  );
+
+  if (requestLoggerOptions || requestFailedLoggerOptions) {
+    const logger = utils.requestLoggerFactory(console.info, requestLoggerOptions, requestFailedLoggerOptions);
     return async (response, httpRegion) => {
       await logger(response, httpRegion);
       scriptConsole.flush();
