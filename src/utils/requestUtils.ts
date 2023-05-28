@@ -175,13 +175,17 @@ export interface RequestLoggerFactoryOptions {
 
 export function requestLoggerFactory(
   log: (args: string) => void,
-  options: RequestLoggerFactoryOptions,
+  options?: RequestLoggerFactoryOptions,
   optionsFailed?: RequestLoggerFactoryOptions
 ): models.RequestLogger {
   return async function logResponse(response: models.HttpResponse, httpRegion?: models.HttpRegion): Promise<void> {
     let opt = options;
     if (optionsFailed && httpRegion?.testResults && httpRegion.testResults.some(obj => !obj.result)) {
       opt = optionsFailed;
+    }
+
+    if (!opt) {
+      return;
     }
 
     if (opt.onlyFailed && (!httpRegion?.testResults || httpRegion.testResults.every(obj => obj.result))) {
@@ -227,7 +231,7 @@ export function requestLoggerFactory(
 
       if (isString(response.body) && opt.responseBodyLength !== undefined) {
         let body: string | undefined = response.body;
-        if (options.responseBodyPrettyPrint && response.prettyPrintBody) {
+        if (opt.responseBodyPrettyPrint && response.prettyPrintBody) {
           body = response.prettyPrintBody;
         }
         body = getPartOfBody(body, opt.responseBodyLength);
