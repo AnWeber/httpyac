@@ -3,6 +3,7 @@
 ### Fixes
 
 - output-failed did not work, if output none is used (460)
+- prefer httpyac config files for root determination (AnWeber/vscode-httpyac#194)
 
 ## [6.4.4] (2023-05-23)
 

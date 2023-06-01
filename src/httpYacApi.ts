@@ -72,7 +72,7 @@ export async function createEmptyProcessorContext<T extends models.VariableProvi
 }
 
 export async function getVariables(context: models.VariableProviderContext): Promise<Record<string, unknown>> {
-  context.config = await getEnvironmentConfig(context.config, context.httpFile?.rootDir);
+  context.config = await getEnvironmentConfig(context.config, context.httpFile);
 
   const vars = await context.httpFile.hooks.provideVariables.trigger(context.httpFile.activeEnvironment, context);
   if (vars === HookCancel) {
@@ -88,7 +88,7 @@ export async function getVariables(context: models.VariableProviderContext): Pro
 }
 
 export async function getEnvironments(context: models.VariableProviderContext): Promise<Array<string>> {
-  context.config = await getEnvironmentConfig(context.config, context.httpFile?.rootDir);
+  context.config = await getEnvironmentConfig(context.config, context.httpFile);
 
   const result = await context.httpFile.hooks.provideEnvironments.trigger(context);
   if (result !== HookCancel && result.length > 0) {

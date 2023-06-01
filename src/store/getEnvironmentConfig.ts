@@ -6,11 +6,11 @@ import merge from 'lodash/merge';
 
 export async function getEnvironmentConfig(
   config?: models.EnvironmentConfig,
-  rootDir?: models.PathLike
+  httpFile?: models.HttpFile
 ): Promise<models.EnvironmentConfig> {
   const environmentConfigs: Array<models.EnvironmentConfig> = [];
-  if (rootDir) {
-    const fileConfig = await utils.getHttpyacConfig(rootDir);
+  if (httpFile) {
+    const fileConfig = await utils.getHttpyacConfig(httpFile.fileName, httpFile.rootDir);
     if (fileConfig) {
       environmentConfigs.push(fileConfig);
     }

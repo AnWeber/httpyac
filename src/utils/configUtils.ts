@@ -1,15 +1,20 @@
 import * as io from '../io';
 import { ConfigureHooks, EnvironmentConfig, PathLike } from '../models';
-import { toAbsoluteFilename, findRootDir } from './fsUtils';
+import { toAbsoluteFilename, findRootDir, iterateUntilRoot } from './fsUtils';
 
-export async function getHttpyacConfig(rootDir: PathLike): Promise<EnvironmentConfig | undefined> {
-  let result = await loadFileConfig(rootDir);
-  if (!result) {
-    result = (await parseJson<Record<string, EnvironmentConfig>>(io.fileProvider.joinPath(rootDir, 'package.json')))
-      ?.httpyac;
-  }
-  if (result) {
-    await resolveClientCertificates(result, rootDir);
+export async function getHttpyacConfig(
+  filename: PathLike,
+  rootDir: PathLike | undefined
+): Promise<EnvironmentConfig | undefined> {
+  let result: EnvironmentConfig | undefined;
+  if (rootDir) {
+    result = await loadFileConfig(rootDir);
+    if (!result) {
+      result = await loadPackageJsonConig(filename, rootDir);
+    }
+    if (result) {
+      await resolveClientCertificates(result, rootDir);
+    }
   }
   return result;
 }
@@ -44,6 +49,21 @@ async function loadFileConfig(rootDir: PathLike): Promise<EnvironmentConfig | un
       }
       return fileConfig;
     }
+  }
+  return undefined;
+}
+
+async function loadPackageJsonConig(filename: PathLike, rootDir: PathLike) {
+  const result: Array<EnvironmentConfig> = [];
+  await iterateUntilRoot(filename, rootDir, async dir => {
+    const config = (await parseJson<{ httpyac?: EnvironmentConfig }>(io.fileProvider.joinPath(dir, 'package.json')))
+      ?.httpyac;
+    if (config) {
+      result.push(config);
+    }
+  });
+  if (result.length > 0) {
+    return Object.assign({}, ...result.reverse());
   }
   return undefined;
 }

@@ -124,18 +124,19 @@ export class HttpFileStore implements models.HttpFileStore {
   public async initHttpFile(fileName: models.PathLike, options: models.HttpFileStoreOptions): Promise<models.HttpFile> {
     const absoluteFileName = (await utils.toAbsoluteFilename(fileName, options.workingDir)) || fileName;
 
-    const rootDir = await utils.findRootDirOfFile(
-      absoluteFileName,
-      options.workingDir,
-      'package.json',
-      ...utils.defaultConfigFiles,
-      options.config?.envDirName || 'env'
-    );
+    const rootDir =
+      (await utils.findRootDirOfFile(absoluteFileName, options.workingDir, ...utils.defaultConfigFiles)) ||
+      (await utils.findRootDirOfFile(
+        absoluteFileName,
+        options.workingDir,
+        'package.json',
+        options.config?.envDirName || 'env'
+      ));
 
     const httpFile = new HttpFile(absoluteFileName, rootDir);
     httpFile.activeEnvironment = options.activeEnvironment;
 
-    options.config = await getEnvironmentConfig(options.config, httpFile.rootDir);
+    options.config = await getEnvironmentConfig(options.config, httpFile);
 
     const hooks: Record<string, models.ConfigureHooks> = { ...pluginStore, ...this.plugins };
     if (rootDir) {
