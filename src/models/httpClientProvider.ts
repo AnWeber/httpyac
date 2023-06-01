@@ -23,6 +23,6 @@ export type HttpClientRequest = Partial<HttpRequest> & Omit<HttpRequest, 'protoc
 export type HttpClient = (request: HttpClientRequest, context: HttpClientContext) => Promise<HttpResponse | false>;
 
 export interface HttpClientProvider {
-  cretateRequestClient?: (request: Request, context: ProcessorContext) => RequestClient;
+  createRequestClient?: (request: Request, context: ProcessorContext) => RequestClient;
   exchange?: HttpClient;
 }

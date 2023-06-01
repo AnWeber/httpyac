@@ -8,8 +8,8 @@ export const parseHttpRequestLine = utils.parseRequestLineFactory({
     /^\s*(?<method>GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE|PROPFIND|PROPPATCH|MKCOL|COPY|MOVE|LOCK|UNLOCK|CHECKOUT|CHECKIN|REPORT|MERGE|MKACTIVITY|MKWORKSPACE|VERSION-CONTROL|BASELINE-CONTROL|MKCALENDAR|ACL|SEARCH|GRAPHQL)\s+(?<url>.+?)$/u,
   protocolRegex: /^\s*(?<url>.+)\s*$/iu,
   requestClientFactory(request, context) {
-    if (httpClientProvider.cretateRequestClient) {
-      return httpClientProvider.cretateRequestClient(request, context);
+    if (httpClientProvider.createRequestClient) {
+      return httpClientProvider.createRequestClient(request, context);
     }
     throw new Error('Missing Http Client Provider');
   },

@@ -11,7 +11,7 @@ import { HttpRequestClient } from './httpRequestClient';
 import { logHttpRedirect } from './logHttpRedirect';
 
 httpClientProvider.exchange = gotHttpClient;
-httpClientProvider.cretateRequestClient = (request, context) => new HttpRequestClient(request, context);
+httpClientProvider.createRequestClient = (request, context) => new HttpRequestClient(request, context);
 
 export function registerHttpPlugin(api: models.HttpyacHooksApi) {
   api.hooks.execute.addInterceptor(new CookieJarInterceptor());
