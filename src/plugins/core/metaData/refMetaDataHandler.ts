@@ -1,7 +1,6 @@
 import { log } from '../../../io';
 import * as models from '../../../models';
 import * as utils from '../../../utils';
-import { HookCancel } from 'hookpoint';
 
 export function refMetaDataHandler(type: string, name: string | undefined, context: models.ParserContext): boolean {
   if (['ref', 'forceRef'].indexOf(type) >= 0 && name) {
@@ -27,7 +26,7 @@ class RefMetaAction {
 
   constructor(private readonly data: RefMetaHttpRegionData) {}
 
-  async process(context: models.ProcessorContext): Promise<boolean | typeof HookCancel> {
+  async process(context: models.ProcessorContext): Promise<boolean> {
     let result = true;
     utils.report(context, `load reference ${this.data.name}`);
     const reference = utils.findHttpRegionInContext(this.data.name, context);
