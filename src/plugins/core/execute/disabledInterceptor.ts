@@ -24,17 +24,13 @@ export class DisabledInterceptor implements HookInterceptor<[models.ProcessorCon
     const context = hookContext.args[0];
     if (context.httpRegion.metaData.disabled) {
       if (context.httpRegion.metaData.disabled === true) {
-        this.breakHookLoop(hookContext);
+        hookContext.bail = true;
       } else {
         const result = await io.javascriptProvider.evalExpression(context.httpRegion.metaData.disabled, context);
         if (result) {
-          this.breakHookLoop(hookContext);
+          hookContext.bail = true;
         }
       }
     }
-  }
-
-  private breakHookLoop(hookContext: HookTriggerContext<[models.ProcessorContext], boolean | undefined>) {
-    hookContext.index = hookContext.length;
   }
 }

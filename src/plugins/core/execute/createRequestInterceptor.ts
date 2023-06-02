@@ -8,9 +8,9 @@ export class CreateRequestInterceptor implements HookInterceptor<[models.Process
   async beforeLoop(
     hookContext: HookTriggerContext<[models.ProcessorContext], boolean | undefined>
   ): Promise<boolean | undefined> {
-    const context = hookContext.args[0];
+    const [context] = hookContext.args;
     if (context.httpRegion.request) {
-      utils.report(hookContext.arg, 'init request');
+      utils.report(context, 'init request');
       context.request = cloneDeep(context.httpRegion.request);
     }
     return true;

@@ -112,14 +112,11 @@ class LoopMetaInterceptor implements HookInterceptor<[models.ProcessorContext], 
     hookContext: HookTriggerContext<[models.ProcessorContext], boolean>
   ): Promise<boolean | undefined> {
     if (!this.isInLoop && hookContext.hookItem?.id === this.id) {
-      this.breakHookLoop(hookContext);
+      hookContext.bail = true;
     }
     return true;
   }
 
-  private breakHookLoop(hookContext: HookTriggerContext<[models.ProcessorContext], boolean | undefined>) {
-    hookContext.index = hookContext.length;
-  }
   private async *iterate(context: models.ProcessorContext) {
     switch (this.data.type) {
       case LoopMetaType.forOf:

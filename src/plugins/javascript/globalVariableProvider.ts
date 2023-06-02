@@ -18,9 +18,10 @@ export class GlobalVariablesInterceptor implements HookInterceptor<[models.Proce
   async afterLoop(
     hookContext: HookTriggerContext<[models.ProcessorContext], boolean | undefined>
   ): Promise<boolean | undefined> {
-    const global = hookContext.arg.variables.$global;
+    const [context] = hookContext.args;
+    const global = context.variables.$global;
     if (global && typeof global === 'object' && Object.keys(global).length > 0) {
-      const id = getGlobalUserSessionId(hookContext.arg.httpFile.activeEnvironment);
+      const id = getGlobalUserSessionId(context.httpFile.activeEnvironment);
       userSessionStore.setUserSession({
         id,
         title: 'global store',
