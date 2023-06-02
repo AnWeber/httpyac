@@ -43,6 +43,30 @@ foo={{foo.foo}}
     expect(await requests[0].body.getText()).toBe('foo=bar');
   });
 
+  it('not found ref', async () => {
+    initFileProvider();
+    const httpFile = await parseHttp(`
+
+###
+# @ref not_found
+POST /post?test={{foo.test}}
+
+foo={{foo.foo}}
+
+    `);
+
+    await expect(
+      async () =>
+        await send({
+          httpFile,
+          httpRegion: httpFile.httpRegions[1],
+          variables: {
+            host: `http://localhost:${localServer.port}`,
+          },
+        })
+    ).rejects.toThrow(`ref not_found not found`);
+  });
+
   it('name + ref + falsy body', async () => {
     initFileProvider();
     const refEndpoints = await localServer.forGet('/json').thenReply(200);
