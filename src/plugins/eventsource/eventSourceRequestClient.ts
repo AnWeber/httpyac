@@ -57,7 +57,7 @@ export class EventSourceRequestClient extends models.AbstractRequestClient<Event
   }
 
   private registerEvents(client: EventSource, request: EventSourceRequest) {
-    const events = utils.getHeaderArray(request.headers, 'event', ['data']);
+    const events = utils.getHeaderArray(request.headers, 'event', ['data', 'message']);
 
     for (const event of events) {
       client.addEventListener(event, message => {
