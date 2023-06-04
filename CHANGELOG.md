@@ -1,4 +1,4 @@
-## [unreleased]
+## [6.4.5]
 
 ### Fixes
 
