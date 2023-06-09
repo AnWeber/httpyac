@@ -64,11 +64,7 @@ export async function findRootDirOfFile(
     file = fileProvider.joinPath(workingDir, fsPath);
   }
   const dirName = fileProvider.dirname(file);
-  const dir = await findRootDir(dirName, ...files);
-  if (dir) {
-    return dir;
-  }
-  return dir || workingDir;
+  return await findRootDir(dirName, ...files);
 }
 
 export async function findRootDir(

@@ -3,6 +3,7 @@
 ### Fixes
 
 - default headers do not overwrite headers with other casing (Anweber/vscode-httpyac#200)
+- env dir is resolved correctly (Anweber/vscode-httpyac#198)
 
 ## [6.4.5]
 
