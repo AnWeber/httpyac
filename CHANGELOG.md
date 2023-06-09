@@ -1,3 +1,9 @@
+## [unreleased]
+
+### Fixes
+
+- default headers do not overwrite headers with other casing (Anweber/vscode-httpyac#200)
+
 ## [6.4.5]
 
 ### Fixes

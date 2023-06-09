@@ -1,4 +1,5 @@
 import * as models from '../../../models';
+import { getHeader } from '../../../utils';
 import { attachDefaultHeaders } from './attachDefaultHeaders';
 
 describe('attachDefaultHeaders', () => {
@@ -36,6 +37,17 @@ describe('attachDefaultHeaders', () => {
         },
       } as unknown as models.ProcessorContext);
       expect(request.headers?.foo).toEqual('foo');
+    });
+    it('do not override existing headers ignoring casing', async () => {
+      const request: models.Request = { url: 'foo', headers: { Foo: 'foo' } };
+      await attachDefaultHeaders(request, {
+        config: {
+          defaultHeaders: {
+            foo: 'bar',
+          },
+        },
+      } as unknown as models.ProcessorContext);
+      expect(getHeader(request.headers, 'foo')).toEqual('foo');
     });
   });
 });

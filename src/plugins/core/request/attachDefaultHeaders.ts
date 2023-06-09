@@ -11,7 +11,7 @@ export async function attachDefaultHeaders(request: models.Request, context: mod
       };
     } else {
       for (const [key, value] of Object.entries(defaultHeaders)) {
-        if (!request.headers[key]) {
+        if (!utils.getHeader(request.headers, key)) {
           request.headers[key] = value;
         }
       }
