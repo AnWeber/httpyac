@@ -162,22 +162,10 @@ export function toQueryParams(params: Record<string, undefined | string | number
     .join('&');
 }
 
-export interface RequestLoggerFactoryOptions {
-  useShort?: boolean;
-  requestOutput?: boolean;
-  requestHeaders?: boolean;
-  requestBodyLength?: number;
-  responseHeaders?: boolean;
-  responseBodyPrettyPrint?: boolean;
-  responseBodyLength?: number;
-  timings?: boolean;
-  onlyFailed?: boolean;
-}
-
 export function requestLoggerFactory(
   log: (args: string) => void,
-  options?: RequestLoggerFactoryOptions,
-  optionsFailed?: RequestLoggerFactoryOptions
+  options?: models.RequestLoggerFactoryOptions,
+  optionsFailed?: models.RequestLoggerFactoryOptions
 ): models.RequestLogger {
   return async function logResponse(response: models.HttpResponse, httpRegion?: models.HttpRegion): Promise<void> {
     let opt = options;

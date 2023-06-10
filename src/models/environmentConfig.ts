@@ -1,6 +1,7 @@
 import { ClientCertificateOptions } from './clientCertificateOptions';
 import { HttpyacHooksApi } from './httpHooksApi';
 import { LogLevel } from './logHandler';
+import { RequestLoggerFactoryOptions } from './requestLoggerFactoryOptions';
 import { Variables } from './variables';
 
 export interface EnvironmentConfig {
@@ -18,6 +19,8 @@ export interface EnvironmentConfig {
 
     /** enable ansi color support */
     supportAnsiColors?: boolean;
+    /** logger options for cli */
+    options?: RequestLoggerFactoryOptions;
   };
 
   request?: ConfigRequest;

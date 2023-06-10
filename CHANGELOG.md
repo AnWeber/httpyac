@@ -2,6 +2,7 @@
 
 ### Features
 
+- support configuration of output request logger options in .httpyac config (#467)
 - calculate average of timings for repeat (httpyac/httpyac.github.io#69)
 - `--output exchange` displays timings in cli (httpyac/httpyac.github.io#69)
 

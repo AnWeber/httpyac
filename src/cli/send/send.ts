@@ -49,7 +49,9 @@ export function sendCommand() {
 
 async function execute(fileNames: Array<string>, options: SendOptions): Promise<void> {
   const context = convertCliOptionsToContext(options);
-  const httpFiles: models.HttpFile[] = await getHttpFiles(fileNames, options, context.config);
+  const { httpFiles, config } = await getHttpFiles(fileNames, options, context.config || {});
+  context.config = config;
+  initRequestLogger(options, context);
   try {
     if (httpFiles.length > 0) {
       initCliHooks(httpFiles, options);
@@ -107,11 +109,6 @@ async function execute(fileNames: Array<string>, options: SendOptions): Promise<
 }
 
 export function convertCliOptionsToContext(cliOptions: SendOptions) {
-  const scriptConsole = new Logger({
-    level: getLogLevel(cliOptions),
-    onlyFailedTests: cliOptions.filter === SendFilterOptions.onlyFailed,
-  });
-  scriptConsole.collectMessages();
   const context: Omit<models.HttpFileSendContext, 'httpFile'> = {
     repeat: cliOptions.repeat
       ? {
@@ -119,7 +116,6 @@ export function convertCliOptionsToContext(cliOptions: SendOptions) {
           type: cliOptions.repeatMode === 'sequential' ? models.RepeatOrder.sequential : models.RepeatOrder.parallel,
         }
       : undefined,
-    scriptConsole,
     config: {
       log: {
         level: getLogLevel(cliOptions),
@@ -129,8 +125,6 @@ export function convertCliOptionsToContext(cliOptions: SendOptions) {
         https: cliOptions.insecure ? { rejectUnauthorized: false } : undefined,
       },
     },
-    logStream: cliOptions.json ? undefined : getStreamLogger(cliOptions),
-    logResponse: cliOptions.json ? undefined : getRequestLogger(cliOptions, scriptConsole),
     variables: cliOptions.var
       ? Object.fromEntries(
           cliOptions.var.map(obj => {
@@ -140,8 +134,26 @@ export function convertCliOptionsToContext(cliOptions: SendOptions) {
         )
       : undefined,
   };
-
   return context;
+}
+
+export function initRequestLogger(cliOptions: SendOptions, context: Omit<models.HttpFileSendContext, 'httpFile'>) {
+  const scriptConsole = new Logger({
+    level: getLogLevel(cliOptions),
+    onlyFailedTests: cliOptions.filter === SendFilterOptions.onlyFailed,
+  });
+  scriptConsole.collectMessages();
+  context.scriptConsole = scriptConsole;
+  if (!cliOptions.json) {
+    context.logStream = getStreamLogger(cliOptions);
+    const logger = getRequestLogger(cliOptions, context.config);
+    context.logResponse = async (response, httpRegion) => {
+      if (logger) {
+        await logger(response, httpRegion);
+      }
+      scriptConsole.flush();
+    };
+  }
 }
 
 function initCliHooks(httpFiles: Array<models.HttpFile>, cliOptions: SendOptions) {
@@ -154,11 +166,7 @@ function initCliHooks(httpFiles: Array<models.HttpFile>, cliOptions: SendOptions
   }
 }
 
-async function getHttpFiles(
-  fileNames: Array<string>,
-  options: SendOptions,
-  config: models.EnvironmentConfig | undefined
-) {
+async function getHttpFiles(fileNames: Array<string>, options: SendOptions, config: models.EnvironmentConfig) {
   const httpFiles: models.HttpFile[] = [];
   const httpFileStore = new HttpFileStore();
 
@@ -181,7 +189,11 @@ async function getHttpFiles(
     );
     httpFiles.push(httpFile);
   }
-  return httpFiles;
+
+  return {
+    httpFiles,
+    config: parseOptions.config,
+  };
 }
 
 async function queryGlobbyPattern(fileName: string) {
@@ -268,84 +280,70 @@ function getStreamLogger(options: SendOptions): models.StreamLogger | undefined 
 
 function getRequestLogger(
   options: SendOptions,
-  scriptConsole: models.ConsoleLogHandler
+  config: models.EnvironmentConfig | undefined
 ): models.RequestLogger | undefined {
-  const requestLoggerOptions = getRequestLoggerOptions(
-    options.output,
-    options.filter === SendFilterOptions.onlyFailed,
-    !options.raw
+  const cliLoggerOptions = {
+    onlyFailed: options.filter === SendFilterOptions.onlyFailed,
+    responseBodyPrettyPrint: !options.raw,
+  };
+  const requestLoggerOptions = Object.assign(
+    cliLoggerOptions,
+    getRequestLoggerOptions(options.output),
+    config?.log?.options
   );
 
-  const requestFailedLoggerOptions = getRequestLoggerOptions(
-    options.outputFailed,
-    options.filter === SendFilterOptions.onlyFailed,
-    !options.raw
+  const requestFailedLoggerOptions = Object.assign(
+    cliLoggerOptions,
+    getRequestLoggerOptions(options.outputFailed),
+    config?.log?.options
   );
 
   if (requestLoggerOptions || requestFailedLoggerOptions) {
-    const logger = utils.requestLoggerFactory(console.info, requestLoggerOptions, requestFailedLoggerOptions);
-    return async (response, httpRegion) => {
-      await logger(response, httpRegion);
-      scriptConsole.flush();
-    };
+    return utils.requestLoggerFactory(console.info, requestLoggerOptions, requestFailedLoggerOptions);
   }
   return undefined;
 }
-function getRequestLoggerOptions(
-  output: OutputType | undefined,
-  onlyFailed: boolean,
-  responseBodyPrettyPrint: boolean
-): utils.RequestLoggerFactoryOptions | undefined {
+function getRequestLoggerOptions(output: OutputType | undefined): models.RequestLoggerFactoryOptions | undefined {
   switch (output) {
     case 'body':
       return {
         responseBodyLength: 0,
-        responseBodyPrettyPrint,
-        onlyFailed,
       };
     case 'headers':
       return {
         requestOutput: true,
         requestHeaders: true,
         responseHeaders: true,
-        onlyFailed,
       };
     case 'response':
       return {
         responseHeaders: true,
-        responseBodyPrettyPrint,
         responseBodyLength: 0,
-        onlyFailed,
       };
     case 'none':
       return undefined;
     case 'short':
-      return { useShort: true, onlyFailed };
+      return { useShort: true };
     case 'timings':
       return {
         timings: true,
-        onlyFailed,
       };
     case 'exchange':
       return {
         requestOutput: true,
         requestHeaders: true,
-        responseBodyPrettyPrint,
         requestBodyLength: 0,
         responseHeaders: true,
         responseBodyLength: 0,
         timings: true,
-        onlyFailed,
       };
     default:
       return {
         requestOutput: true,
         requestHeaders: true,
-        responseBodyPrettyPrint,
         requestBodyLength: 0,
         responseHeaders: true,
         responseBodyLength: 0,
-        onlyFailed,
       };
   }
 }
