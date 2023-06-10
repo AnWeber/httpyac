@@ -1,3 +1,8 @@
+## [unreleased]
+### Fixes
+
+- use `env` as default env dirname (Anweber/vscode-httpyac#198)
+
 ## [6.4.6]  (2023-06-09)
 
 ### Fixes

@@ -8,12 +8,18 @@ const defaultFiles: Array<string> = ['.env'];
 export async function provideDotenvEnvironments(context: VariableProviderContext): Promise<string[]> {
   const files: Array<string> = [];
 
-  files.push(...(await readEnvDir(process.env.HTTPYAC_ENV, context)));
-  files.push(...(await readEnvDir(context.config?.envDirName, context)));
+  if (process.env.HTTPYAC_ENV) {
+    try {
+      files.push(...(await fileProvider.readdir(process.env.HTTPYAC_ENV)));
+    } catch (err) {
+      log.warn(`HTTPYAC_ENV ${process.env.HTTPYAC_ENV} has read error`, err);
+    }
+  }
 
   const dirOfFile = fileProvider.dirname(context.httpFile.fileName);
   if (dirOfFile) {
     await utils.iterateUntilRoot(dirOfFile, context.httpFile.rootDir, async (dir: PathLike) => {
+      files.push(...(await readEnvDir(getEnvdirname(context) || 'env', dir)));
       files.push(...(await fileProvider.readdir(dir)));
     });
   }
@@ -29,10 +35,10 @@ export async function provideDotenvEnvironments(context: VariableProviderContext
     });
 }
 
-async function readEnvDir(dir: string | undefined, context: VariableProviderContext): Promise<Array<string>> {
+async function readEnvDir(dir: string | undefined, rootDir: PathLike | undefined): Promise<Array<string>> {
   const files = [];
   if (dir && utils.isString(dir)) {
-    const absoluteDir = await utils.toAbsoluteFilename(dir, context.httpFile.rootDir);
+    const absoluteDir = await utils.toAbsoluteFilename(dir, rootDir);
     if (absoluteDir) {
       files.push(...(await fileProvider.readdir(absoluteDir)));
     }
@@ -47,25 +53,33 @@ export async function provideDotenvVariables(
   const searchFiles = getSearchFiles(env);
   const variables: Array<Variables> = [];
 
-  const globalEnv = process.env.HTTPYAC_ENV;
-  if (globalEnv && utils.isString(globalEnv)) {
-    const globalEnvAbsolute = await utils.toAbsoluteFilename(globalEnv, context.httpFile.rootDir);
-    if (globalEnvAbsolute) {
-      variables.push(...(await getEnvVariables(searchFiles, globalEnvAbsolute)));
-    }
+  if (process.env.HTTPYAC_ENV) {
+    variables.push(...(await getEnvVariables(searchFiles, process.env.HTTPYAC_ENV)));
   }
-
-  await getEnvFolderVariables(context.config?.envDirName, searchFiles, context.httpFile.rootDir);
   const dirOfFile = fileProvider.dirname(context.httpFile.fileName);
   if (dirOfFile) {
     const vars: Array<Variables> = [];
     await utils.iterateUntilRoot(dirOfFile, context.httpFile.rootDir, async (dir: PathLike) => {
-      vars.unshift(...(await getEnvFolderVariables(context.config?.envDirName, searchFiles, dir)));
+      vars.unshift(...(await getEnvFolderVariables(getEnvdirname(context), searchFiles, dir)));
       vars.unshift(...(await getEnvVariables(searchFiles, dir)));
     });
     variables.push(...vars);
   }
   return Object.assign({}, ...variables);
+}
+
+function getEnvdirname(context: VariableProviderContext) {
+  return context.config?.envDirName || 'env';
+}
+
+function getSearchFiles(env: string[] | undefined) {
+  const searchFiles = [...defaultFiles];
+  if (env) {
+    for (const environment of env) {
+      searchFiles.push(`${environment}.env`, `.env.${environment}`);
+    }
+  }
+  return searchFiles;
 }
 
 async function getEnvFolderVariables(
@@ -81,16 +95,6 @@ async function getEnvFolderVariables(
     }
   }
   return variables;
-}
-
-function getSearchFiles(env: string[] | undefined) {
-  const searchFiles = [...defaultFiles];
-  if (env) {
-    for (const environment of env) {
-      searchFiles.push(`${environment}.env`, `.env.${environment}`);
-    }
-  }
-  return searchFiles;
 }
 
 async function getEnvVariables(searchFiles: string[], dir: PathLike) {

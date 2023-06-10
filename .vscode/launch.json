@@ -13,7 +13,8 @@
       "program": "${workspaceFolder}/bin/httpyac.js",
       "args": [
         "send",
-        "${file}"
+        "${file}",
+        "--all"
       ],
       "outFiles": [
         "${workspaceFolder}/dist/**/*.js"
