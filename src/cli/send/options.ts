@@ -4,7 +4,7 @@ export enum SendFilterOptions {
   onlyFailed = 'only-failed',
 }
 
-export type OutputType = 'body' | 'headers' | 'response' | 'none' | 'short' | 'exchange';
+export type OutputType = 'body' | 'headers' | 'response' | 'none' | 'short' | 'exchange' | 'timings';
 
 export interface SendOptions {
   env?: Array<string>;

@@ -321,7 +321,22 @@ function getRequestLoggerOptions(
       return undefined;
     case 'short':
       return { useShort: true, onlyFailed };
+    case 'timings':
+      return {
+        timings: true,
+        onlyFailed,
+      };
     case 'exchange':
+      return {
+        requestOutput: true,
+        requestHeaders: true,
+        responseBodyPrettyPrint,
+        requestBodyLength: 0,
+        responseHeaders: true,
+        responseBodyLength: 0,
+        timings: true,
+        onlyFailed,
+      };
     default:
       return {
         requestOutput: true,

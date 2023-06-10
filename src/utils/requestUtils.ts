@@ -170,6 +170,7 @@ export interface RequestLoggerFactoryOptions {
   responseHeaders?: boolean;
   responseBodyPrettyPrint?: boolean;
   responseBodyLength?: number;
+  timings?: boolean;
   onlyFailed?: boolean;
 }
 
@@ -228,7 +229,12 @@ export function requestLoggerFactory(
         }
         result.push(...logResponseHeader(response));
       }
-
+      if (opt.timings) {
+        if (result.length > 0) {
+          result.push('');
+        }
+        result.push(...logTimings(response));
+      }
       if (isString(response.body) && opt.responseBodyLength !== undefined) {
         let body: string | undefined = response.body;
         if (opt.responseBodyPrettyPrint && response.prettyPrintBody) {
@@ -298,6 +304,21 @@ function logResponseHeader(response: models.HttpResponse) {
     result.push(
       ...Object.entries(response.headers)
         .filter(([key]) => !key.startsWith(':'))
+        .map(([key, value]) => chalk`{yellow ${key}}: ${value}`)
+        .sort()
+    );
+  }
+  return result;
+}
+
+function logTimings(response: models.HttpResponse) {
+  const result: Array<string> = [];
+
+  if (response.timings) {
+    result.push(chalk`{cyan.bold Timings}:`);
+    result.push(
+      ...Object.entries(response.timings)
+        .filter(([, value]) => !!value)
         .map(([key, value]) => chalk`{yellow ${key}}: ${value}`)
         .sort()
     );

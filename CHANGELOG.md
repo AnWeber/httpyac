@@ -1,4 +1,10 @@
 ## [unreleased]
+
+### Features
+
+- calculate average of timings for repeat (httpyac/httpyac.github.io#69)
+- `--output exchange` displays timings in cli (httpyac/httpyac.github.io#69)
+
 ### Fixes
 
 - use `env` as default env dirname (Anweber/vscode-httpyac#198)
