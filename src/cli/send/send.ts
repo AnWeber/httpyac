@@ -286,15 +286,11 @@ function getRequestLogger(
     onlyFailed: options.filter === SendFilterOptions.onlyFailed,
     responseBodyPrettyPrint: !options.raw,
   };
-  const requestLoggerOptions = Object.assign(
-    cliLoggerOptions,
-    getRequestLoggerOptions(options.output),
-    config?.log?.options
-  );
+  const requestLoggerOptions = getRequestLoggerOptions(options.output, cliLoggerOptions, config?.log?.options);
 
-  const requestFailedLoggerOptions = Object.assign(
+  const requestFailedLoggerOptions = getRequestLoggerOptions(
+    options.outputFailed,
     cliLoggerOptions,
-    getRequestLoggerOptions(options.outputFailed),
     config?.log?.options
   );
 
@@ -303,33 +299,42 @@ function getRequestLogger(
   }
   return undefined;
 }
-function getRequestLoggerOptions(output: OutputType | undefined): models.RequestLoggerFactoryOptions | undefined {
+function getRequestLoggerOptions(
+  output: OutputType | undefined,
+  ...options: Array<models.RequestLoggerFactoryOptions | undefined>
+): models.RequestLoggerFactoryOptions | undefined {
+  let result: models.RequestLoggerFactoryOptions | undefined;
   switch (output) {
     case 'body':
-      return {
+      result = {
         responseBodyLength: 0,
       };
+      break;
     case 'headers':
-      return {
+      result = {
         requestOutput: true,
         requestHeaders: true,
         responseHeaders: true,
       };
+      break;
     case 'response':
-      return {
+      result = {
         responseHeaders: true,
         responseBodyLength: 0,
       };
+      break;
     case 'none':
       return undefined;
     case 'short':
-      return { useShort: true };
+      result = { useShort: true };
+      break;
     case 'timings':
-      return {
+      result = {
         timings: true,
       };
+      break;
     case 'exchange':
-      return {
+      result = {
         requestOutput: true,
         requestHeaders: true,
         requestBodyLength: 0,
@@ -337,13 +342,17 @@ function getRequestLoggerOptions(output: OutputType | undefined): models.Request
         responseBodyLength: 0,
         timings: true,
       };
+      break;
     default:
-      return {
+      result = {
         requestOutput: true,
         requestHeaders: true,
         requestBodyLength: 0,
         responseHeaders: true,
         responseBodyLength: 0,
       };
+      break;
   }
+
+  return Object.assign({}, ...options, result);
 }
