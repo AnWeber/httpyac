@@ -1,5 +1,5 @@
 import { userInteractionProvider } from '../../../io';
-import { UserSession } from '../../../models';
+import { UserSession, ProcessorContext } from '../../../models';
 import { userSessionStore } from '../../../store';
 import * as utils from '../../../utils';
 import { HookCancel } from 'hookpoint';
@@ -8,7 +8,11 @@ interface InputSession extends UserSession {
   answer?: string;
 }
 
-export async function showInputBoxVariableReplacer(text: unknown): Promise<unknown> {
+export async function showInputBoxVariableReplacer(
+  text: unknown,
+  _type: string,
+  { variables }: ProcessorContext
+): Promise<unknown> {
   return utils.parseHandlebarsString(text, async (variable: string) => {
     const inputRegex =
       /^\$(?<type>(prompt|input|password))(?<save>-askonce)?\s*(?<placeholder>[^$]*)(\$value:\s*(?<value>.*))?\s*$/u;
@@ -22,8 +26,13 @@ export async function showInputBoxVariableReplacer(text: unknown): Promise<unkno
 
       const session = userSessionStore.getUserSession<InputSession>(id);
 
-      if (session?.answer && matchInput.groups.save) {
-        return session.answer;
+      if (matchInput.groups.save) {
+        if (variables?.[placeholder] !== undefined) {
+          return variables[placeholder];
+        }
+        if (session?.answer) {
+          return session.answer;
+        }
       }
 
       const answer = await userInteractionProvider.showInputPrompt(
