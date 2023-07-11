@@ -1,4 +1,4 @@
-import { fileProvider, log, userInteractionProvider } from '../io';
+import { fileProvider, httpClientProvider, javascriptProvider, log, userInteractionProvider } from '../io';
 import * as models from '../models';
 import { userSessionStore as sessionStore } from '../store';
 import * as utils from '../utils';
@@ -178,6 +178,8 @@ export class HttpFileStore implements models.HttpFileStore {
         fileProvider,
         sessionStore,
         userInteractionProvider,
+        httpClientProvider,
+        javascriptProvider,
         utils,
         getHookCancel: () => HookCancel,
       };
