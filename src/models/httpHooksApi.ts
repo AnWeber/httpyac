@@ -2,7 +2,9 @@ import * as utils from '../utils';
 import { EnvironmentConfig } from './environmentConfig';
 import { FileProvider } from './fileProvider';
 import { HttpFileHooks } from './hooks';
+import { HttpClientProvider } from './httpClientProvider';
 import { HttpFile } from './httpFile';
+import { JavascriptProvider } from './javascriptProvider';
 import { LogHandler } from './logHandler';
 import { PathLike } from './pathLike';
 import { SessionStore } from './sessionStore';
@@ -21,6 +23,8 @@ export interface HttpyacHooksApi {
   readonly fileProvider: FileProvider;
   readonly sessionStore: SessionStore;
   readonly userInteractionProvider: UserInteractionProvider;
+  readonly httpClientProvider: HttpClientProvider;
+  readonly javascriptProvider: JavascriptProvider;
   readonly utils: typeof utils;
   getHookCancel(): typeof HookCancel;
 }
