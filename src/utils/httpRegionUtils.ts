@@ -41,8 +41,7 @@ export async function logResponse(
   context: models.ProcessorContext
 ): Promise<models.HttpResponse | undefined> {
   const clone = cloneResponse(response);
-  const onResponseLogging = context.httpRegion.hooks.responseLogging.merge(context.httpFile.hooks.responseLogging);
-  const regionResult = await onResponseLogging.trigger(createResponseProxy(clone), context);
+  const regionResult = await context.hooks.responseLogging.trigger(createResponseProxy(clone), context);
   if (regionResult === HookCancel) {
     return undefined;
   }

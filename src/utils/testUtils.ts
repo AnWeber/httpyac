@@ -1,8 +1,18 @@
-import * as utils from '.';
-import { ProcessorContext, TestFunction, TestResult, testSymbols } from '../models';
+import { ProcessorContext, HttpResponse, TestFunction, TestResult, testSymbols } from '../models';
+import {
+  assertHasNoResponseBody,
+  assertHasResponseBody,
+  assertHeaderContains,
+  assertHeaderEquals,
+  assertMaxTotalTime,
+  assertResponseBodyEquals,
+  assertStatusEquals,
+} from './assertUtils';
+import { isError, parseError } from './errorUtils';
+import { isHttpResponse } from './requestUtils';
 import { default as chalk } from 'chalk';
 
-export function testFactory({ httpRegion, scriptConsole }: ProcessorContext): TestFunction {
+export function testFactory({ httpRegion, scriptConsole, variables }: ProcessorContext): TestFunction {
   const testFunction = function test(message: string, testMethod: () => void): void {
     const testResult: TestResult = {
       message,
@@ -16,8 +26,8 @@ export function testFactory({ httpRegion, scriptConsole }: ProcessorContext): Te
         testMethod();
       } catch (err) {
         testResult.result = false;
-        if (utils.isError(err)) {
-          testResult.error = utils.parseError(err);
+        if (isError(err)) {
+          testResult.error = parseError(err);
         } else {
           testResult.error = {
             displayMessage: `${err}`,
@@ -36,51 +46,56 @@ export function testFactory({ httpRegion, scriptConsole }: ProcessorContext): Te
     );
   };
 
+  function getHttpResponse(): HttpResponse | undefined {
+    if (isHttpResponse(variables.response)) {
+      return variables.response;
+    }
+    return httpRegion.response;
+  }
+
   testFunction.status = (status: number) => {
-    if (httpRegion.response) {
-      const response = httpRegion.response;
-      testFunction(`response status equals to ${status}`, () => utils.assertStatusEquals(response, status));
+    const response = getHttpResponse();
+    if (response) {
+      testFunction(`response status equals to ${status}`, () => assertStatusEquals(response, status));
     }
   };
   testFunction.totalTime = (maxTotalTime: number) => {
-    if (httpRegion.response) {
-      const response = httpRegion.response;
-      testFunction(`total time exceeded ${maxTotalTime}`, () => utils.assertMaxTotalTime(response, maxTotalTime));
+    const response = getHttpResponse();
+    if (response) {
+      testFunction(`total time exceeded ${maxTotalTime}`, () => assertMaxTotalTime(response, maxTotalTime));
     }
   };
   testFunction.header = (headerKey: string, val: string | string[] | undefined) => {
-    if (httpRegion.response) {
-      const response = httpRegion.response;
-      testFunction(`response header ${headerKey} equals ${val}`, () =>
-        utils.assertHeaderEquals(response, headerKey, val)
-      );
+    const response = getHttpResponse();
+    if (response) {
+      testFunction(`response header ${headerKey} equals ${val}`, () => assertHeaderEquals(response, headerKey, val));
     }
   };
   testFunction.headerContains = (headerKey: string, val: string) => {
-    if (httpRegion.response) {
-      const response = httpRegion.response;
+    const response = getHttpResponse();
+    if (response) {
       testFunction(`response header ${headerKey} contains ${val}`, () =>
-        utils.assertHeaderContains(response, headerKey, val)
+        assertHeaderContains(response, headerKey, val)
       );
     }
   };
   testFunction.responseBody = (val: unknown) => {
-    if (httpRegion.response) {
-      const response = httpRegion.response;
-      testFunction(`response body equals ${val}`, () => utils.assertResponseBodyEquals(response, val));
+    const response = getHttpResponse();
+    if (response) {
+      testFunction(`response body equals ${val}`, () => assertResponseBodyEquals(response, val));
     }
   };
 
   testFunction.hasResponseBody = () => {
-    if (httpRegion.response) {
-      const response = httpRegion.response;
-      testFunction('response body exists', () => utils.assertHasResponseBody(response));
+    const response = getHttpResponse();
+    if (response) {
+      testFunction('response body exists', () => assertHasResponseBody(response));
     }
   };
   testFunction.hasNoResponseBody = () => {
-    if (httpRegion.response) {
-      const response = httpRegion.response;
-      testFunction('response body does not exists', () => utils.assertHasNoResponseBody(response));
+    const response = getHttpResponse();
+    if (response) {
+      testFunction('response body does not exists', () => assertHasNoResponseBody(response));
     }
   };
   return testFunction;

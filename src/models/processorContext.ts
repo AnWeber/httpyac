@@ -1,4 +1,5 @@
 import { EnvironmentConfig } from './environmentConfig';
+import { OnRequestHook, OnResponseHook, OnStreaming, ResponseLoggingHook } from './hooks';
 import { HttpFile } from './httpFile';
 import { HttpRegion, ProcessedHttpRegion } from './httpRegion';
 import { Request } from './httpRequest';
@@ -36,12 +37,19 @@ export interface HttpRegionsSendContext extends HttpFileSendContext {
 export interface HttpRegionSendContext extends HttpFileSendContext {
   httpRegion: HttpRegion;
 }
+
 export interface ProcessorContext extends HttpRegionSendContext {
   variables: Variables;
+  hooks: {
+    onRequest: OnRequestHook;
+    onStreaming: OnStreaming;
+    onResponse: OnResponseHook;
+    responseLogging: ResponseLoggingHook;
+  };
+  options: Record<string, unknown>;
   request?: Request;
   requestClient?: RequestClient;
   isMainContext?: boolean;
-  options: Record<string, unknown>;
 }
 
 export type SendContext = HttpRegionSendContext | HttpFileSendContext | HttpRegionsSendContext;

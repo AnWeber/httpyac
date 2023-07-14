@@ -131,7 +131,7 @@ function addMetaDataEvent<T extends models.RequestClient>(
 }
 
 async function onRequest(context: models.ProcessorContext) {
-  const onRequest = context.httpFile.hooks.onRequest.merge(context.httpRegion.hooks.onRequest);
+  const onRequest = context.hooks.onRequest;
   if (context.progress) {
     onRequest.addInterceptor(createIsCanceledInterceptor(() => !!context.progress?.isCanceled()));
   }
@@ -139,7 +139,7 @@ async function onRequest(context: models.ProcessorContext) {
 }
 
 async function onStreaming(context: models.ProcessorContext) {
-  const onStreaming = context.httpFile.hooks.onStreaming.merge(context.httpRegion.hooks.onStreaming);
+  const onStreaming = context.hooks.onStreaming;
   if (context.progress) {
     onStreaming.addInterceptor(createIsCanceledInterceptor(() => !!context.progress?.isCanceled()));
   }
@@ -147,7 +147,7 @@ async function onStreaming(context: models.ProcessorContext) {
 }
 
 async function onResponse(response: models.HttpResponse, context: models.ProcessorContext) {
-  const onResponse = context.httpRegion.hooks.onResponse.merge(context.httpFile.hooks.onResponse);
+  const onResponse = context.hooks.onResponse;
   if ((await onResponse.trigger(createResponseProxy(response), context)) === HookCancel) {
     return false;
   }

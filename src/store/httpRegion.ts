@@ -45,7 +45,7 @@ export class HttpRegion implements models.HttpRegion {
   }
 
   public async execute(
-    context: models.PartialProperty<models.ProcessorContext, 'httpRegion'>,
+    context: models.PartialProperty<models.ProcessorContext, 'httpRegion', 'hooks'>,
     isMainContext?: boolean
   ): Promise<boolean> {
     delete this.response;
@@ -74,6 +74,14 @@ export class HttpRegion implements models.HttpRegion {
       ...context,
       httpFile: this.httpFile,
       httpRegion: this,
+      hooks: {
+        onRequest: this.hooks.onRequest.merge(this.httpFile.hooks.onRequest) as models.OnRequestHook,
+        onResponse: this.hooks.onResponse.merge(this.httpFile.hooks.onResponse) as models.OnResponseHook,
+        onStreaming: this.hooks.onStreaming.merge(this.httpFile.hooks.onStreaming) as models.OnStreaming,
+        responseLogging: this.hooks.responseLogging.merge(
+          this.httpFile.hooks.responseLogging
+        ) as models.ResponseLoggingHook,
+      },
       isMainContext,
     });
     if (!this.isGlobal()) {

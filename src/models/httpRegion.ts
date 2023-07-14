@@ -16,7 +16,11 @@ export interface ProcessedHttpRegion {
   isGlobal: boolean;
 }
 
-export type PartialProperty<T, TProperty extends string> = Omit<T, TProperty> & Partial<T>;
+export type PartialProperty<T, TProperty extends string, TProperty2 extends string> = Omit<
+  Omit<T, TProperty>,
+  TProperty2
+> &
+  Partial<T>;
 
 export interface HttpRegion {
   request?: Request;
@@ -35,5 +39,5 @@ export interface HttpRegion {
   };
   isGlobal(): boolean;
   clone(httpFile?: HttpFile): HttpRegion;
-  execute(context: PartialProperty<ProcessorContext, 'httpRegion'>, isMainContext?: boolean): Promise<boolean>;
+  execute(context: PartialProperty<ProcessorContext, 'httpRegion', 'hooks'>, isMainContext?: boolean): Promise<boolean>;
 }
