@@ -1,7 +1,8 @@
 import { log } from '../../io';
 import { ProcessorContext, VariableType } from '../../models';
 import * as utils from '../../utils';
-import { getNode, isNode } from './nodeUtils';
+import { getNode } from './nodeUtils';
+import { getSelectReturnType } from './provideAssertValueXPath';
 import { select } from 'xpath';
 
 export async function xpathVariableReplacer(
@@ -16,13 +17,7 @@ export async function xpathVariableReplacer(
         const node = getNode(match.groups.variable, variables);
         if (node) {
           const results = select(match.groups.xpath, node);
-          if (results.length === 1) {
-            const resultNode = results[0];
-            if (isNode(resultNode)) {
-              return resultNode.textContent;
-            }
-            return resultNode;
-          }
+          return getSelectReturnType(results);
         }
       } catch (err) {
         (scriptConsole || log).warn(`xpath ${match.groups.xpath} throws error`, err);
