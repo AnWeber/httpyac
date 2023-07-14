@@ -1,3 +1,9 @@
+## [unreleased]
+
+### Features
+
+- add method `$getOAuth2Response` to javascript context (#499)
+
 ## [6.5.1]  (2023-06-13)
 
 ### Fixes

@@ -7,7 +7,7 @@ describe('variables.pick', () => {
   it('pick', async () => {
     initFileProvider();
     const spy = jest.spyOn(userInteractionProvider, 'showListPrompt');
-    const variables = {};
+    const variables: Record<string, unknown> = {};
 
     await sendHttp(
       `
@@ -17,15 +17,12 @@ describe('variables.pick', () => {
     );
 
     expect(spy).toHaveBeenCalledWith('pick me?', ['foo', 'bar']);
-    expect(variables).toEqual({
-      $global: {},
-      var1: 'foo',
-    });
+    expect(variables.var1).toBe('foo');
   });
   it('pick-askonce', async () => {
     initFileProvider();
     const spy = jest.spyOn(userInteractionProvider, 'showListPrompt');
-    const variables = {};
+    const variables: Record<string, unknown> = {};
 
     await sendHttp(
       `
@@ -36,10 +33,7 @@ describe('variables.pick', () => {
     );
 
     expect(spy).toHaveBeenCalledWith('ask-once?', ['foo', 'bar']);
-    expect(variables).toEqual({
-      $global: {},
-      var1: 'foo',
-      var2: 'foo',
-    });
+    expect(variables.var1).toEqual('foo');
+    expect(variables.var2).toEqual('foo');
   });
 });
