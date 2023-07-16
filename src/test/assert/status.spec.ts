@@ -24,6 +24,25 @@ describe('assert.status', () => {
     expect(httpFile.httpRegions[0].testResults?.[0].result).toBeTruthy();
     expect(httpFile.httpRegions[0].testResults?.[0].message).toBe('status == 200');
   });
+  it('should be equal to 200 with global assert', async () => {
+    initFileProvider();
+    await localServer.forGet('/get').thenReply(200);
+    const httpFile = await parseHttp(`
+    ?? status == 200
+    ###
+    GET /get
+
+    `);
+
+    const responses = await sendHttpFile(httpFile, {
+      host: `http://localhost:${localServer.port}`,
+    });
+    expect(responses.length).toBe(1);
+    expect(responses[0].statusCode).toBe(200);
+    expect(httpFile.httpRegions[1].testResults?.length).toBe(1);
+    expect(httpFile.httpRegions[1].testResults?.[0].result).toBeTruthy();
+    expect(httpFile.httpRegions[1].testResults?.[0].message).toBe('status == 200');
+  });
   it('should not be equal 200', async () => {
     initFileProvider();
     await localServer.forGet('/get').thenReply(201);

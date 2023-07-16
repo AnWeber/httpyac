@@ -1,5 +1,5 @@
 import * as models from '../models';
-import { toEnvironmentKey } from '../utils';
+import { toEnvironmentKey, addHttpFileRequestClientHooks } from '../utils';
 import { Hook, HookCancel } from 'hookpoint';
 
 export class HttpRegion implements models.HttpRegion {
@@ -74,14 +74,7 @@ export class HttpRegion implements models.HttpRegion {
       ...context,
       httpFile: this.httpFile,
       httpRegion: this,
-      hooks: {
-        onRequest: this.hooks.onRequest.merge(this.httpFile.hooks.onRequest) as models.OnRequestHook,
-        onResponse: this.hooks.onResponse.merge(this.httpFile.hooks.onResponse) as models.OnResponseHook,
-        onStreaming: this.hooks.onStreaming.merge(this.httpFile.hooks.onStreaming) as models.OnStreaming,
-        responseLogging: this.hooks.responseLogging.merge(
-          this.httpFile.hooks.responseLogging
-        ) as models.ResponseLoggingHook,
-      },
+      hooks: addHttpFileRequestClientHooks(this.hooks, this.httpFile),
       isMainContext,
     });
     if (!this.isGlobal()) {

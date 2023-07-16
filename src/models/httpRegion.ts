@@ -22,6 +22,13 @@ export type PartialProperty<T, TProperty extends string, TProperty2 extends stri
 > &
   Partial<T>;
 
+export interface RequestClientHooks {
+  onRequest: OnRequestHook;
+  onStreaming: OnStreaming;
+  onResponse: OnResponseHook;
+  responseLogging: ResponseLoggingHook;
+}
+
 export interface HttpRegion {
   request?: Request;
   response?: HttpResponse;
@@ -30,12 +37,8 @@ export interface HttpRegion {
   testResults?: Array<TestResult>;
   responseRefs?: Array<string>;
   variablesPerEnv: Record<string, Variables>;
-  readonly hooks: {
+  readonly hooks: RequestClientHooks & {
     execute: ExecuteHook;
-    onRequest: OnRequestHook;
-    onStreaming: OnStreaming;
-    onResponse: OnResponseHook;
-    responseLogging: ResponseLoggingHook;
   };
   isGlobal(): boolean;
   clone(httpFile?: HttpFile): HttpRegion;

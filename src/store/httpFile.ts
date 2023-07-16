@@ -22,4 +22,8 @@ export class HttpFile implements models.HttpFile {
   public findHttpRegion(name: string): models.HttpRegion | undefined {
     return this.httpRegions.find(obj => obj.metaData?.name === name && !obj.metaData.disabled);
   }
+
+  public get globalHttpRegions() {
+    return this.httpRegions.filter(obj => obj.isGlobal() && !obj.metaData.disabled);
+  }
 }

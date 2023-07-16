@@ -14,10 +14,13 @@ export class RegionScopedVariablesInterceptor implements HookInterceptor<[models
     const context = hookContext.args[0];
     const env = toEnvironmentKey(context.httpFile.activeEnvironment);
     if (context.config?.useRegionScopedVariables) {
-      const httpRegions = context.httpFile.httpRegions.filter(obj => obj.isGlobal());
       const regionScopedVariables: RegionScopedVariableOptions = context.options;
       regionScopedVariables.variables = context.variables;
-      context.variables = Object.assign({}, context.variables, ...httpRegions.map(obj => obj.variablesPerEnv[env]));
+      context.variables = Object.assign(
+        {},
+        context.variables,
+        ...context.httpFile.globalHttpRegions.map(obj => obj.variablesPerEnv[env])
+      );
     } else {
       context.variables = Object.assign(
         context.variables,

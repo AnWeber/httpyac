@@ -7,6 +7,7 @@ export interface HttpFile {
   readonly rootDir?: PathLike;
   readonly hooks: HttpFileHooks;
   readonly httpRegions: Array<HttpRegion>;
+  readonly globalHttpRegions: Array<HttpRegion>;
   activeEnvironment?: string[];
 
   findHttpRegion(name: string): HttpRegion | undefined;

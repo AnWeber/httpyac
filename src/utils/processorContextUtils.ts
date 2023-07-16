@@ -1,6 +1,6 @@
 import { log, fileProvider } from '../io';
 import * as models from '../models';
-import { executeGlobalScripts } from './httpRegionUtils';
+import { addHttpFileRequestClientHooks, executeGlobalScripts } from './httpRegionUtils';
 import { replaceFilePath } from './variableUtils';
 
 interface ImportProcessorContext extends models.ProcessorContext {
@@ -60,6 +60,7 @@ export async function importHttpFileInContext(
         activeEnvironment: context.httpFile.activeEnvironment,
       }
     );
+    context.hooks = addHttpFileRequestClientHooks(context.hooks, ref);
     context.options.httpFiles.push({ base: context.httpFile, ref });
     return ref;
   });

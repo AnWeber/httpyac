@@ -56,12 +56,34 @@ export async function executeGlobalScripts(context: {
   httpFile: models.HttpFile;
   options: Record<string, unknown>;
 }): Promise<boolean> {
-  for (const httpRegion of context.httpFile.httpRegions) {
-    if (httpRegion.isGlobal() && !httpRegion.metaData.disabled) {
-      if (!(await httpRegion.execute(context))) {
-        return false;
-      }
+  for (const httpRegion of context.httpFile.globalHttpRegions) {
+    if (!(await httpRegion.execute(context))) {
+      return false;
     }
   }
   return true;
+}
+
+export function addHttpFileRequestClientHooks(
+  requestClientHooks: models.RequestClientHooks,
+  httpFile: models.HttpFile
+): models.RequestClientHooks {
+  return {
+    onRequest: httpFile.hooks.onRequest.merge(
+      ...httpFile.globalHttpRegions.map(obj => obj.hooks.onRequest),
+      requestClientHooks.onRequest
+    ) as models.OnRequestHook,
+    onResponse: httpFile.hooks.onResponse.merge(
+      requestClientHooks.onResponse,
+      ...httpFile.globalHttpRegions.map(obj => obj.hooks.onResponse)
+    ) as models.OnResponseHook,
+    onStreaming: httpFile.hooks.onStreaming.merge(
+      requestClientHooks.onStreaming,
+      ...httpFile.globalHttpRegions.map(obj => obj.hooks.onStreaming)
+    ) as models.OnStreaming,
+    responseLogging: httpFile.hooks.responseLogging.merge(
+      requestClientHooks.responseLogging,
+      ...httpFile.globalHttpRegions.map(obj => obj.hooks.responseLogging)
+    ) as models.ResponseLoggingHook,
+  };
 }
