@@ -1,14 +1,15 @@
 import { log } from '../../io';
-import { ProcessorContext, VariableType } from '../../models';
+import { VariableType } from '../../models';
 import * as utils from '../../utils';
 import { getNode } from './nodeUtils';
 import { getSelectReturnType } from './provideAssertValueXPath';
-import { select } from 'xpath';
+import { XPathProcessorContext } from './xpathProcessorContext';
+import { select, useNamespaces } from 'xpath';
 
 export async function xpathVariableReplacer(
   text: unknown,
   _type: VariableType | string,
-  { variables, scriptConsole }: ProcessorContext
+  { variables, scriptConsole, options }: XPathProcessorContext
 ): Promise<unknown> {
   return utils.parseHandlebarsString(text, async (variable: string) => {
     const match = /^\s*\$xpath(:(?<variable>[^\s]*))?\s*(?<xpath>.*)\s*$/iu.exec(variable);
@@ -16,7 +17,11 @@ export async function xpathVariableReplacer(
       try {
         const node = getNode(match.groups.variable, variables);
         if (node) {
-          const results = select(match.groups.xpath, node);
+          let evaluate = select;
+          if (options.xpath_namespaces) {
+            evaluate = useNamespaces(options.xpath_namespaces);
+          }
+          const results = evaluate(match.groups.xpath, node);
           return getSelectReturnType(results);
         }
       } catch (err) {

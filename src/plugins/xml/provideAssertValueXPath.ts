@@ -2,9 +2,15 @@ import { log } from '../../io';
 import * as models from '../../models';
 import * as utils from '../../utils';
 import { isNode, parseFromString } from './nodeUtils';
-import { SelectReturnType, SelectedValue, select } from 'xpath';
+import { XPathProcessorContext } from './xpathProcessorContext';
+import { SelectReturnType, SelectedValue, select, useNamespaces } from 'xpath';
 
-export async function provideAssertValueXPath(type: string, value: string | undefined, response: models.HttpResponse) {
+export async function provideAssertValueXPath(
+  type: string,
+  value: string | undefined,
+  response: models.HttpResponse,
+  context: XPathProcessorContext
+) {
   if (type === 'xpath' && value && response.body) {
     const body = utils.toString(response.body);
     if (!body) {
@@ -12,10 +18,17 @@ export async function provideAssertValueXPath(type: string, value: string | unde
     }
     try {
       const node = parseFromString(body);
-      const results = select(value, node);
+
+      let evaluate = select;
+      if (context.options.xpath_namespaces) {
+        evaluate = useNamespaces(context.options.xpath_namespaces);
+      }
+
+      const results = evaluate(value, node);
       return getSelectReturnType(results);
     } catch (err) {
       log.warn(`xpath ${value} throws error`, err);
+      return value;
     }
   }
   return false;

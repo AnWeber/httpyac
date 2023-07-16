@@ -5,6 +5,7 @@
 - add method `$getOAuth2Response` to javascript context (#499)
 - add `HttpClientProvider` and `JavascriptProvider` to httpyac API
 - allow global Asserts and `onRequest`/ `onResponse` hooks and import global Asserts from other Http Files (#488) 
+- support xpath namespaces using `@xpath_ns` (#493)
 
 ## [6.5.1]  (2023-06-13)
 
