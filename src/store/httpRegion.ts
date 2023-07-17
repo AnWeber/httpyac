@@ -1,5 +1,5 @@
 import * as models from '../models';
-import { toEnvironmentKey, addHttpFileRequestClientHooks } from '../utils';
+import { toEnvironmentKey, addHttpFileRequestClientHooks, isError } from '../utils';
 import { Hook, HookCancel } from 'hookpoint';
 
 export class HttpRegion implements models.HttpRegion {
@@ -70,17 +70,27 @@ export class HttpRegion implements models.HttpRegion {
       }
     }
 
-    const result = await executeHook.trigger({
-      ...context,
-      httpFile: this.httpFile,
-      httpRegion: this,
-      hooks: addHttpFileRequestClientHooks(this.hooks, this.httpFile),
-      isMainContext,
-    });
-    if (!this.isGlobal()) {
-      this.resetDependentRegionsWithVisitor(toEnvironmentKey(this.httpFile.activeEnvironment), this, []);
+    try {
+      const result = await executeHook.trigger({
+        ...context,
+        httpFile: this.httpFile,
+        httpRegion: this,
+        hooks: addHttpFileRequestClientHooks(this.hooks, this.httpFile),
+        isMainContext,
+      });
+      if (!this.isGlobal()) {
+        this.resetDependentRegionsWithVisitor(toEnvironmentKey(this.httpFile.activeEnvironment), this, []);
+      }
+      return result !== HookCancel && result.every(obj => !!obj);
+    } catch (err) {
+      if (isError(err)) {
+        if (!err.handled) {
+          await context.logResponse?.(this.response, this);
+          err.handled = true;
+        }
+      }
+      throw err;
     }
-    return result !== HookCancel && result.every(obj => !!obj);
   }
   private dependentsPerEnv: Array<models.HttpRegion> = [];
 

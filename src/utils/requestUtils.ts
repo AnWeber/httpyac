@@ -167,7 +167,10 @@ export function requestLoggerFactory(
   options?: models.RequestLoggerFactoryOptions,
   optionsFailed?: models.RequestLoggerFactoryOptions
 ): models.RequestLogger {
-  return async function logResponse(response: models.HttpResponse, httpRegion?: models.HttpRegion): Promise<void> {
+  return async function logResponse(
+    response: models.HttpResponse | undefined,
+    httpRegion?: models.HttpRegion
+  ): Promise<void> {
     let opt = options;
     if (optionsFailed && httpRegion?.testResults && httpRegion.testResults.some(obj => !obj.result)) {
       opt = optionsFailed;
@@ -193,50 +196,53 @@ export function requestLoggerFactory(
       }
       log('');
     }
-    if (opt.useShort) {
-      log(chalk`{yellow ${response.request?.method || 'GET'}} {gray ${response.request?.url || '?'}}`);
-      log(
-        chalk`{gray =>} {cyan.bold ${response.statusCode}} ({yellow ${response.timings?.total || '?'} ms}, {yellow ${
-          response.meta?.size || '?'
-        }})`
-      );
-    } else {
-      const result: Array<string> = [];
-      if (response.request && opt.requestOutput) {
-        result.push(
-          ...logRequest(response.request, {
-            headers: opt.requestHeaders,
-            bodyLength: opt.requestBodyLength,
-          })
-        );
-      }
 
-      if (opt.responseHeaders) {
-        if (result.length > 0) {
-          result.push('');
+    if (response) {
+      if (opt.useShort) {
+        log(chalk`{yellow ${response?.request?.method || 'GET'}} {gray ${response.request?.url || '?'}}`);
+        log(
+          chalk`{gray =>} {cyan.bold ${response.statusCode}} ({yellow ${response.timings?.total || '?'} ms}, {yellow ${
+            response.meta?.size || '?'
+          }})`
+        );
+      } else {
+        const result: Array<string> = [];
+        if (response.request && opt.requestOutput) {
+          result.push(
+            ...logRequest(response.request, {
+              headers: opt.requestHeaders,
+              bodyLength: opt.requestBodyLength,
+            })
+          );
         }
-        result.push(...logResponseHeader(response));
-      }
-      if (opt.timings) {
-        if (result.length > 0) {
-          result.push('');
-        }
-        result.push(...logTimings(response));
-      }
-      if (isString(response.body) && opt.responseBodyLength !== undefined) {
-        let body: string | undefined = response.body;
-        if (opt.responseBodyPrettyPrint && response.prettyPrintBody) {
-          body = response.prettyPrintBody;
-        }
-        body = getPartOfBody(body, opt.responseBodyLength);
-        if (body) {
+
+        if (opt.responseHeaders) {
           if (result.length > 0) {
             result.push('');
           }
-          result.push(body);
+          result.push(...logResponseHeader(response));
         }
+        if (opt.timings) {
+          if (result.length > 0) {
+            result.push('');
+          }
+          result.push(...logTimings(response));
+        }
+        if (isString(response.body) && opt.responseBodyLength !== undefined) {
+          let body: string | undefined = response.body;
+          if (opt.responseBodyPrettyPrint && response.prettyPrintBody) {
+            body = response.prettyPrintBody;
+          }
+          body = getPartOfBody(body, opt.responseBodyLength);
+          if (body) {
+            if (result.length > 0) {
+              result.push('');
+            }
+            result.push(body);
+          }
+        }
+        log(toMultiLineString(result));
       }
-      log(toMultiLineString(result));
     }
   };
 }

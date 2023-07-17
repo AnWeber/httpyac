@@ -7,6 +7,10 @@
 - allow global Asserts and `onRequest`/ `onResponse` hooks and import global Asserts from other Http Files (#488) 
 - support xpath namespaces using `@xpath_ns` (#493)
 
+### Fixes
+
+- always log current `httpRegion` and `response` on exception (#275)
+
 ## [6.5.1]  (2023-06-13)
 
 ### Fixes

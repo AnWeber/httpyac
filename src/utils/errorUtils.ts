@@ -1,7 +1,7 @@
 import { ErrorDescription } from '../models';
 import { stringifySafe, toString } from './stringUtils';
 
-export function isError(val: unknown): val is Error {
+export function isError(val: unknown): val is Error & { handled?: boolean } {
   if (!val) {
     return false;
   }
