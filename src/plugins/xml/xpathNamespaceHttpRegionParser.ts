@@ -1,4 +1,5 @@
 import * as models from '../../models';
+import * as utils from '../../utils';
 import { XPathProcessorContext } from './xpathProcessorContext';
 
 export async function parseXpathNamespace(
@@ -19,7 +20,10 @@ export async function parseXpathNamespace(
         if (!context.options.xpath_namespaces) {
           context.options.xpath_namespaces = {};
         }
-        context.options.xpath_namespaces[key] = value;
+        const namespace = await utils.replaceVariables(value, models.VariableType.variable, context);
+        if (utils.isString(namespace)) {
+          context.options.xpath_namespaces[key] = namespace;
+        }
         return true;
       });
 
