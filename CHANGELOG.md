@@ -1,3 +1,9 @@
+## [unreleased]
+
+### Fixes
+
+- improve stability of asserts using objects/arrays (#503)
+
 ## [6.6.0]  (2023-07-17)
 
 ### Features

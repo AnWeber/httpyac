@@ -37,6 +37,9 @@ export async function provideAssertValueXPath(
 export function getSelectReturnType(results: SelectReturnType) {
   if (results !== null) {
     if (Array.isArray(results)) {
+      if (results.length === 0) {
+        return undefined;
+      }
       if (results.length === 1) {
         const resultNode = results[0];
         return getTextContent(resultNode);

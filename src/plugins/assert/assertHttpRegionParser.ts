@@ -95,14 +95,18 @@ function convertToType(target: unknown, value: unknown) {
     if (typeof target === 'string') {
       return utils.toString(value);
     }
-    if (typeof target === 'object' && typeof value === 'string') {
-      return JSON.parse(value);
-    }
     if (target === null && value === 'null') {
       return null;
     }
     if (target === undefined && value === 'undefined') {
       return undefined;
+    }
+    if (typeof target === 'object' && typeof value === 'string') {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return value;
+      }
     }
   }
   return value;
