@@ -21,7 +21,7 @@ export function parseRequestLineFactory(requestContext: RequestParserContext) {
   ): Promise<models.HttpRegionParserResult> {
     const lineReader = getLineReader();
     const next = lineReader.next();
-    if (!next.done && isValidRequestLine(next.value, context.httpRegion, requestContext)) {
+    if (!next.done && isValidRequestLine(next.value, context, requestContext)) {
       if (context.httpRegion.request) {
         return {
           endRegionLine: next.value.line - 1,
@@ -137,15 +137,22 @@ function getRequestParseLine(
   return undefined;
 }
 
-function isValidRequestLine(httpLine: models.HttpLine, httpRegion: models.HttpRegion, context: RequestParserContext) {
+function isValidRequestLine(
+  httpLine: models.HttpLine,
+  context: models.ParserContext,
+  requestContext: RequestParserContext
+): boolean {
   if (isStringEmpty(httpLine.textLine)) {
     return false;
   }
-  if (context.methodRegex.exec(httpLine.textLine)?.groups?.url) {
+  if (context.forceRegionDelimiter && !!context.httpRegion.request) {
+    return false;
+  }
+  if (requestContext.methodRegex.exec(httpLine.textLine)?.groups?.url) {
     return true;
   }
-  if (!httpRegion.request && context.protocolRegex) {
-    return context.protocolRegex.exec(httpLine.textLine)?.groups?.url;
+  if (!context?.httpRegion.request && requestContext.protocolRegex) {
+    return !!requestContext.protocolRegex.exec(httpLine.textLine)?.groups?.url;
   }
   return false;
 }

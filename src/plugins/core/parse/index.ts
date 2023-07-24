@@ -1,6 +1,7 @@
 import * as models from '../../../models';
 import { parseComment } from './commentHttpRegionParser';
 import { parseMetaData } from './metaHttpRegionParser';
+import { MultipartMixedInterceptor } from './multipartMixedInterceptor';
 import { parseOutputRedirection } from './outputRedirectionHttpRegionParser';
 import { parseRequestBody } from './requestBodyHttpRegionParser';
 import { parseHttpRequestLine } from './requestHttpRegionParser';
@@ -17,4 +18,6 @@ export function initParseHook(api: models.HttpyacHooksApi) {
   api.hooks.parse.addHook('responseRef', parseResponseRef);
   api.hooks.parse.addHook('response', parseResponse);
   api.hooks.parse.addHook('requestBody', parseRequestBody);
+
+  api.hooks.parse.addInterceptor(new MultipartMixedInterceptor());
 }

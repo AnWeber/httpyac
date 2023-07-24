@@ -1,5 +1,6 @@
 import { HttpyacHooksApi } from '../../../models';
 import { DefaultMetaDataHandler } from './defaultMetaDataHandler';
+import { forceRegionDelimiterMetaDataHandler } from './forceRegionDelimiterMetaDataHandler';
 import { importMetaDataHandler } from './importMetaDataHandler';
 import { jwtMetaDataHandler } from './jwtMetaDataHandler';
 import { keepStreamingMetaDataHandler } from './keepStreamingMetaDataHandler';
@@ -28,6 +29,7 @@ export function initParseMetData(api: HttpyacHooksApi) {
   api.hooks.parseMetaData.addHook('responseRef', responseRefMetaDataHandler);
   api.hooks.parseMetaData.addHook('sleep', sleepMetaDataHandler);
   api.hooks.parseMetaData.addHook('verbose', verboseMetaDataHandler);
+  api.hooks.parseMetaData.addHook('forceRegionDelimiter', forceRegionDelimiterMetaDataHandler);
 
   api.hooks.parseMetaData.addInterceptor(new DefaultMetaDataHandler());
 }

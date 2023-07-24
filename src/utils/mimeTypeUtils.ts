@@ -3,7 +3,8 @@ import { ContentType } from '../models';
 export function parseMimeType(contentType: string): ContentType {
   const [mimeType, ...parameters] = contentType.split(';').map(v => v.trim());
   const charset = parameters.find(p => p.startsWith('charset='))?.split('=')[1];
-  return { mimeType, contentType, charset };
+  const boundary = parameters.find(p => p.startsWith('boundary='))?.split('=')[1];
+  return { mimeType, contentType, charset, boundary };
 }
 
 export function isMimeTypeJSON(contentType: ContentType | undefined): boolean {
@@ -39,6 +40,10 @@ export function isMimeTypeMarkdown(contentType: ContentType | undefined): boolea
 
 export function isMimeTypeMultiPartFormData(contentType: ContentType | undefined): boolean {
   return contentType?.mimeType === 'multipart/form-data';
+}
+
+export function isMimeTypeMultiPartMixed(contentType: ContentType | undefined): boolean {
+  return contentType?.mimeType === 'multipart/mixed';
 }
 
 export function isMimeTypeNewlineDelimitedJSON(contentType: ContentType | undefined): boolean {

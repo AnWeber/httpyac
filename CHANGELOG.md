@@ -1,3 +1,9 @@
+## [6.6.2]  (2023-07-24)
+
+### Fixes
+
+- support OData Batch Processing (#507)
+
 ## [6.6.1]  (2023-07-23)
 
 ### Fixes

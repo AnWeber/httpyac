@@ -43,7 +43,7 @@ export async function parseRequestBody(
   return false;
 }
 
-function getRequestBody(context: models.ParserContext) {
+export function getRequestBody(context: models.ParserContext) {
   let result = context.data.request_body;
   if (!result) {
     result = {

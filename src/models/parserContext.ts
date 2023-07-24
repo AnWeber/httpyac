@@ -15,4 +15,5 @@ export interface ParserContext {
   httpFile: HttpFile;
   data: ParserContextData;
   httpFileStore: HttpFileStore;
+  forceRegionDelimiter?: boolean;
 }
