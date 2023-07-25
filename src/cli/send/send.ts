@@ -146,7 +146,7 @@ export function initRequestLogger(cliOptions: SendOptions, context: Omit<models.
   context.scriptConsole = scriptConsole;
   if (!cliOptions.json) {
     context.logStream = getStreamLogger(cliOptions);
-    const logger = getRequestLogger(cliOptions, context.config);
+    const logger = getRequestLogger(cliOptions, context.config, scriptConsole);
     context.logResponse = async (response, httpRegion) => {
       if (logger) {
         await logger(response, httpRegion);
@@ -280,7 +280,8 @@ function getStreamLogger(options: SendOptions): models.StreamLogger | undefined 
 
 function getRequestLogger(
   options: SendOptions,
-  config: models.EnvironmentConfig | undefined
+  config: models.EnvironmentConfig | undefined,
+  logger: models.ConsoleLogHandler
 ): models.RequestLogger | undefined {
   const cliLoggerOptions = {
     onlyFailed: options.filter === SendFilterOptions.onlyFailed,
@@ -295,7 +296,7 @@ function getRequestLogger(
   );
 
   if (requestLoggerOptions || requestFailedLoggerOptions) {
-    return utils.requestLoggerFactory(console.info, requestLoggerOptions, requestFailedLoggerOptions);
+    return utils.requestLoggerFactory(args => logger.info(args), requestLoggerOptions, requestFailedLoggerOptions);
   }
   return undefined;
 }
