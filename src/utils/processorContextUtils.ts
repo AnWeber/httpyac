@@ -41,29 +41,37 @@ export async function importHttpFileInContext(
   httpFileStore: models.HttpFileStore,
   context: ImportProcessorContext
 ) {
-  const httpFile = await replaceFilePath(fileName, context, async (absoluteFileName: models.PathLike) => {
-    log.trace(`parse imported file ${absoluteFileName}`);
-    if (!context.options.httpFiles) {
-      context.options.httpFiles = [];
-    }
-    const httpFile = context.options.httpFiles.find(obj => obj.ref.fileName === absoluteFileName);
-    if (httpFile) {
-      return httpFile.ref;
-    }
-    const ref = await httpFileStore.getOrCreate(
-      absoluteFileName,
-      async () => await fileProvider.readFile(absoluteFileName, 'utf-8'),
-      0,
-      {
-        workingDir: context.httpFile.rootDir,
-        config: context.config,
-        activeEnvironment: context.httpFile.activeEnvironment,
+  const httpFile: models.HttpFile | undefined = await replaceFilePath(
+    fileName,
+    context,
+    async (absoluteFileName: models.PathLike) => {
+      log.trace(`parse imported file ${absoluteFileName}`);
+      if (!context.options.httpFiles) {
+        context.options.httpFiles = [];
       }
-    );
-    context.hooks = addHttpFileRequestClientHooks(context.hooks, ref);
-    context.options.httpFiles.push({ base: context.httpFile, ref });
-    return ref;
-  });
+      const importedHttpFiles = context.options.httpFiles.filter(obj => obj.ref.fileName === absoluteFileName);
+      if (importedHttpFiles.length > 0) {
+        const ref = importedHttpFiles[0].ref;
+        if (!importedHttpFiles.some(obj => obj.base === context.httpFile)) {
+          context.options.httpFiles.push({ base: context.httpFile, ref });
+        }
+        return ref;
+      }
+      const ref = await httpFileStore.getOrCreate(
+        absoluteFileName,
+        async () => await fileProvider.readFile(absoluteFileName, 'utf-8'),
+        0,
+        {
+          workingDir: context.httpFile.rootDir,
+          config: context.config,
+          activeEnvironment: context.httpFile.activeEnvironment,
+        }
+      );
+      context.hooks = addHttpFileRequestClientHooks(context.hooks, ref);
+      context.options.httpFiles.push({ base: context.httpFile, ref });
+      return ref;
+    }
+  );
 
   if (
     httpFile &&

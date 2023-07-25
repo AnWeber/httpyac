@@ -137,4 +137,44 @@ bar={{bar}}
     expect(requests[0].path).toBe(`/globalhostimport`);
     expect(requests[0].headers['content-type']).toBe('application/json');
   });
+  it('should import httpFile in all files', async () => {
+    initFileProvider({
+      'foo.http': `
+# @name foo
+GET /foo
+      `,
+      'bar.http': `
+      # @name bar
+      # @import ./foo.http
+      # @ref foo
+      GET /bar?test={{foo.test}}
+            `,
+    });
+    await localServer.forGet('/foo').thenJson(200, { foo: 'bar', test: 1 });
+    await localServer.forGet('/bar').thenJson(200, { bar: 'foo', test: 1 });
+    const mockedEndpoints = await localServer.forPost('/test').thenJson(200, { foo: 'bar', test: 1 });
+    const httpFile = await parseHttp(
+      `
+# @import ./foo.http
+# @import ./bar.http
+# @ref foo
+# @ref bar
+POST /test?test={{foo.foo}}{{bar.bar}}
+
+foo={{foo.foo}}
+bar={{bar.bar}}`
+    );
+
+    await send({
+      httpFile,
+      httpRegion: httpFile.httpRegions[1],
+      variables: {
+        host: `http://localhost:${localServer.port}`,
+      },
+    });
+
+    const requests = await mockedEndpoints.getSeenRequests();
+    expect(requests[0].path).toBe(`/test?test=barfoo`);
+    expect(await requests[0].body.getText()).toBe('foo=bar\nbar=foo');
+  });
 });

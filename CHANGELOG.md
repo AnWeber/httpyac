@@ -1,3 +1,9 @@
+## [unreleased]
+
+### Fixes
+
+- support multiple `# @import` of the same file from different httpFiles (#508)
+
 ## [6.6.2]  (2023-07-24)
 
 ### Fixes
