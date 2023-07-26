@@ -115,7 +115,7 @@
     "inquirer": "^9.2.8",
     "kafkajs": "^2.2.4",
     "lodash": "^4.17.21",
-    "mqtt": "^4.3.7",
+    "mqtt": "^5.0.0",
     "open": "^8.4.2",
     "socks-proxy-agent": "^8.0.1",
     "tough-cookie": "^4.1.3",
