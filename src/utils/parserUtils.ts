@@ -437,7 +437,7 @@ export async function parseHandlebarsString(
       if (typeof value !== 'undefined' && searchValue === text) {
         return value;
       }
-      const valueString = toString(value);
+      const valueString = value === null ? 'null' : toString(value);
       if (typeof valueString !== 'undefined') {
         result = result.replace(searchValue, () => valueString);
       }

@@ -1,3 +1,9 @@
+## [unreleased]
+
+### Fixes
+
+- support return of null in variable replacement (#513)
+
 ## [6.6.3]  (2023-07-25)
 
 ### Fixes
