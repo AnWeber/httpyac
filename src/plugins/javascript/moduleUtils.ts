@@ -1,6 +1,7 @@
 import * as io from '../../io';
 import { log } from '../../io';
 import { PathLike, ProcessorContext } from '../../models';
+import { randomData } from '../../utils';
 import { isPromise } from '../../utils/promiseUtils';
 import { toMultiLineArray } from '../../utils/stringUtils';
 import Module from 'module';
@@ -99,8 +100,10 @@ export async function runScript(
     return mod.require(id);
   }
 
+  const validContent = checkVariableNames(options.context);
   const context = Object.assign({
-    ...checkVariableNames(options.context),
+    $context: validContent,
+    ...validContent,
   });
 
   const contextKeys = Object.keys(context);
@@ -168,7 +171,9 @@ export async function evalExpression(
       httpRegion: context.httpRegion,
       request: context.request,
       console: context.scriptConsole,
+      $random: randomData,
       ...scriptContext,
+      $context: context,
     },
     lineOffset,
   });
