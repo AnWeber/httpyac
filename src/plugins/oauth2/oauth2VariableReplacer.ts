@@ -38,7 +38,7 @@ export async function getOAuth2Response(
   prefix: string | undefined,
   context: models.OpenIdContext,
   tokenExchangePrefix?: string
-) {
+): Promise<models.OpenIdInformation | undefined> {
   const openIdFlow = getOpenIdFlow(flow);
   if (openIdFlow) {
     const config = getOpenIdConfiguration(prefix, context.variables);
