@@ -25,7 +25,9 @@ export class GlobalVariablesInterceptor implements HookInterceptor<[models.Proce
       userSessionStore.setUserSession({
         id,
         title: 'global store',
-        description: 'global Variables',
+        description: context.httpFile.activeEnvironment
+          ? `global Variables for ${context.httpFile.activeEnvironment.join(', ')}`
+          : 'global Variables',
         type: 'global_cache',
         details: {
           $global: global,
