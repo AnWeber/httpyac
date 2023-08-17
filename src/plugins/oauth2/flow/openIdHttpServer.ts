@@ -146,11 +146,14 @@ function parseQueryParams(url: string) {
   return url
     .slice(url.indexOf('?') + 1)
     .split('&')
-    .reduce((prev, current) => {
-      const [key, value] = current.split('=');
-      prev[key] = value;
-      return prev;
-    }, {} as Record<string, string>);
+    .reduce(
+      (prev, current) => {
+        const [key, value] = current.split('=');
+        prev[key] = value;
+        return prev;
+      },
+      {} as Record<string, string>
+    );
 }
 
 function getMessageHtml(message: string, valid: boolean) {

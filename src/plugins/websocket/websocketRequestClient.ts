@@ -22,7 +22,10 @@ export class WebsocketRequestClient extends models.AbstractRequestClient<WebSock
     protocol: 'WS',
   };
 
-  constructor(private readonly request: models.Request, private readonly context: models.ProcessorContext) {
+  constructor(
+    private readonly request: models.Request,
+    private readonly context: models.ProcessorContext
+  ) {
     super();
   }
   get reportMessage(): string {

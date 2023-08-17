@@ -9,7 +9,11 @@ export interface ServiceData {
   method: string;
   protocol: string;
   ServiceClass: {
-    new (address: string, credentials: grpc.ChannelCredentials, options?: Partial<grpc.ChannelOptions>): Record<
+    new (
+      address: string,
+      credentials: grpc.ChannelCredentials,
+      options?: Partial<grpc.ChannelOptions>
+    ): Record<
       string,
       // eslint-disable-next-line @typescript-eslint/ban-types
       Function

@@ -18,7 +18,10 @@ export class HttpRegion implements models.HttpRegion {
   };
   readonly symbol: models.HttpSymbol;
 
-  constructor(private readonly httpFile: models.HttpFile, start = 0) {
+  constructor(
+    private readonly httpFile: models.HttpFile,
+    start = 0
+  ) {
     this.symbol = {
       name: '-',
       description: '-',

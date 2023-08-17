@@ -4,7 +4,10 @@ import { getClientOptions, toHttpResponse } from './gotUtils';
 import { default as got, CancelError, Response, CancelableRequest } from 'got';
 
 export class HttpRequestClient extends models.AbstractRequestClient<typeof got> {
-  constructor(private readonly request: models.Request, private readonly context: models.ProcessorContext) {
+  constructor(
+    private readonly request: models.Request,
+    private readonly context: models.ProcessorContext
+  ) {
     super();
   }
   get reportMessage(): string {

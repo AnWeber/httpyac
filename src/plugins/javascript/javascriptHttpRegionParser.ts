@@ -143,7 +143,10 @@ function addExecuteAfterInterceptor(
 
 export class AfterJavascriptHookInterceptor implements HookInterceptor<[models.ProcessorContext], boolean> {
   id: string;
-  constructor(private readonly scriptData: ScriptData, private readonly httpFileStore: models.HttpFileStore) {
+  constructor(
+    private readonly scriptData: ScriptData,
+    private readonly httpFileStore: models.HttpFileStore
+  ) {
     this.id = `afterJavascript_${scriptData.script}`;
   }
   async afterLoop(

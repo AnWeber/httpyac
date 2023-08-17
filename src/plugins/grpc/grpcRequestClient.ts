@@ -22,7 +22,10 @@ export class GrpcRequestClient extends models.AbstractRequestClient<GrpcStream |
     protocol: 'GRPC',
   };
 
-  constructor(private readonly request: models.Request, private readonly context: models.ProtoProcessorContext) {
+  constructor(
+    private readonly request: models.Request,
+    private readonly context: models.ProtoProcessorContext
+  ) {
     super();
   }
   get reportMessage(): string {

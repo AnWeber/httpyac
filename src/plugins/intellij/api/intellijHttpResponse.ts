@@ -58,7 +58,10 @@ export class IntellijTextStreamResponse implements HttpResponse {
   headers: ResponseHeaders;
 
   private lazyHeaders: Record<string, unknown> = {};
-  constructor(private readonly requestClient: models.RequestClient, private readonly resolve: () => void) {
+  constructor(
+    private readonly requestClient: models.RequestClient,
+    private readonly resolve: () => void
+  ) {
     this.body = {
       onEachLine: (...args) => this.onEachLine(...args),
       onEachMessage: (...args) => this.onEachMessage(...args),

@@ -12,7 +12,10 @@ export function importMetaDataHandler(type: string, value: string | undefined, c
 class ImportMetaAction {
   id = 'import';
 
-  constructor(private readonly fileName: string, private readonly httpFileStore: models.HttpFileStore) {}
+  constructor(
+    private readonly fileName: string,
+    private readonly httpFileStore: models.HttpFileStore
+  ) {}
 
   async process(context: models.ProcessorContext): Promise<boolean> {
     return utils.importHttpFileInContext(this.fileName, this.httpFileStore, context);

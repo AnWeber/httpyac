@@ -6,7 +6,10 @@ import { isKafkaRequest, KafkaRequest } from './kafkaRequest';
 import { Kafka } from 'kafkajs';
 
 export class KafkaRequestClient extends models.AbstractRequestClient<Kafka | undefined> {
-  constructor(private readonly request: models.Request, private readonly context: models.ProcessorContext) {
+  constructor(
+    private readonly request: models.Request,
+    private readonly context: models.ProcessorContext
+  ) {
     super();
   }
   private _nativeClient: Kafka | undefined;

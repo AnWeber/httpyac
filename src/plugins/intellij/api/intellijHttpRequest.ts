@@ -59,7 +59,10 @@ class IntellijRequestHeaders implements RequestHeaders {
 }
 
 class IntellijRequestHeader implements RequestHeader {
-  constructor(readonly name: string, private readonly context: models.ProcessorContext) {}
+  constructor(
+    readonly name: string,
+    private readonly context: models.ProcessorContext
+  ) {}
   value(): string {
     return this.getRawValue();
   }

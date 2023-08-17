@@ -101,14 +101,17 @@ function keepAlive(cacheKey: string, variables: models.Variables) {
     openIdInformation.refreshToken &&
     openIdInformation.config.keepAlive
   ) {
-    const timeoutId = setTimeout(async () => {
-      const result = await flows.refreshTokenFlow.perform(openIdInformation, { variables });
-      if (result) {
-        log.trace(`token ${result.title} refreshed`);
-        userSessionStore.setUserSession(result);
-        keepAlive(cacheKey, variables);
-      }
-    }, (openIdInformation.expiresIn - openIdInformation.timeSkew) * 1000);
+    const timeoutId = setTimeout(
+      async () => {
+        const result = await flows.refreshTokenFlow.perform(openIdInformation, { variables });
+        if (result) {
+          log.trace(`token ${result.title} refreshed`);
+          userSessionStore.setUserSession(result);
+          keepAlive(cacheKey, variables);
+        }
+      },
+      (openIdInformation.expiresIn - openIdInformation.timeSkew) * 1000
+    );
     openIdInformation.delete = () => clearTimeout(timeoutId);
   }
 }

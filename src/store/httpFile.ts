@@ -1,7 +1,10 @@
 import * as models from '../models';
 
 export class HttpFile implements models.HttpFile {
-  constructor(public fileName: models.PathLike, public readonly rootDir?: models.PathLike) {}
+  constructor(
+    public fileName: models.PathLike,
+    public readonly rootDir?: models.PathLike
+  ) {}
   readonly hooks = {
     parse: new models.ParseHook(),
     parseMetaData: new models.ParseMetaDataHook(),

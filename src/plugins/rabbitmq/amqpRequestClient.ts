@@ -13,7 +13,10 @@ interface AmqpSession {
 
 export class AmqpRequestClient extends models.AbstractRequestClient<AMQPClient | undefined> {
   private closeClientOnFinish = true;
-  constructor(private readonly request: models.Request, private readonly context: models.ProcessorContext) {
+  constructor(
+    private readonly request: models.Request,
+    private readonly context: models.ProcessorContext
+  ) {
     super();
   }
   get reportMessage(): string {

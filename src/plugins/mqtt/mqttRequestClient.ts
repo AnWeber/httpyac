@@ -12,7 +12,10 @@ export class MQTTRequestClient extends models.AbstractRequestClient<MqttClient |
   };
   private promises: Array<Promise<void>> = [];
 
-  constructor(private readonly request: models.Request, private readonly context: models.ProcessorContext) {
+  constructor(
+    private readonly request: models.Request,
+    private readonly context: models.ProcessorContext
+  ) {
     super();
   }
   get reportMessage(): string {
