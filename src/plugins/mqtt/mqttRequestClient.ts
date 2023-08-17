@@ -2,7 +2,9 @@ import { log } from '../../io';
 import * as models from '../../models';
 import * as utils from '../../utils';
 import { isMQTTRequest, MQTTRequest } from './mqttRequest';
-import { connect, IClientOptions, QoS, MqttClient } from 'mqtt';
+import { connectAsync, IClientOptions, MqttClient, MqttClientEventCallbacks } from 'mqtt';
+
+type QoS = 0 | 1 | 2;
 
 export class MQTTRequestClient extends models.AbstractRequestClient<MqttClient | undefined> {
   private responseTemplate: Partial<models.HttpResponse> & { protocol: string } = {
@@ -53,17 +55,10 @@ export class MQTTRequestClient extends models.AbstractRequestClient<MqttClient |
       if (isMQTTRequest(this.request)) {
         Object.assign(options, this.getClientOptions(this.request, this.context));
       }
-      await new Promise<void>(resolve => {
-        this._nativeClient = connect(this.request.url || '', options);
-        const nativeClient = this._nativeClient;
-        function onConnect() {
-          nativeClient.off('connect', onConnect);
-          resolve();
-        }
-        this._nativeClient.on('connect', onConnect);
-        this.registerEvents(this._nativeClient);
-        this.subscribe(this._nativeClient, this.subscribeTopics, request);
-      });
+
+      this._nativeClient = await connectAsync(this.request.url || '', options);
+      this.registerEvents(this._nativeClient);
+      this.subscribe(this._nativeClient, this.subscribeTopics, request);
     }
   }
 
@@ -117,7 +112,7 @@ export class MQTTRequestClient extends models.AbstractRequestClient<MqttClient |
       });
     });
 
-    const metaDataEvents = [
+    const metaDataEvents: Array<keyof MqttClientEventCallbacks> = [
       'close',
       'connect',
       'disconnect',
@@ -186,21 +181,16 @@ export class MQTTRequestClient extends models.AbstractRequestClient<MqttClient |
         retain: !!utils.getHeader(request.headers, 'retain'),
       };
       await Promise.all(
-        topics.map(
-          topic =>
-            new Promise<void>(resolve => {
-              client.publish(topic, body, header, err => {
-                if (err) {
-                  log.error('publish error', err);
-                }
-                resolve();
-              });
-            })
-        )
+        topics.map(async topic => {
+          try {
+            await client.publishAsync(topic, body, header);
+          } catch (err) {
+            log.error('publish error', err);
+          }
+        })
       );
     }
   }
-
   private toQoS(qos: string | undefined, defaultVal: QoS = 0): QoS {
     switch (qos) {
       case '2':
