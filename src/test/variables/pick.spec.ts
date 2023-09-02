@@ -36,4 +36,22 @@ describe('variables.pick', () => {
     expect(variables.var1).toEqual('foo');
     expect(variables.var2).toEqual('foo');
   });
+  it('pick-variables', async () => {
+    initFileProvider();
+    const spy = jest.spyOn(userInteractionProvider, 'showListPrompt');
+    const variables: Record<string, unknown> = {};
+
+    await sendHttp(
+      `
+{{
+  exports.data = ["foo", "bar"];
+}}
+@var1={{ $pick ask-variable? $value: data }}
+    `,
+      variables
+    );
+
+    expect(spy).toHaveBeenCalledWith('ask-variable?', ['foo', 'bar']);
+    expect(variables.var1).toEqual('foo');
+  });
 });

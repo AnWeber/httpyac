@@ -3,6 +3,7 @@
 ### Fixes
 
 - support return of null in variable replacement (#513)
+- allow for variable use in $pick picklists: `{{ $pick ask-variable? $value: data }}` (#537)
 
 ## [6.6.3]  (2023-07-25)
 

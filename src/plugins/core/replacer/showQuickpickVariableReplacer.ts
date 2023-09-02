@@ -1,5 +1,5 @@
-import { userInteractionProvider } from '../../../io';
-import { UserSession } from '../../../models';
+import { userInteractionProvider, javascriptProvider, log } from '../../../io';
+import { UserSession, ProcessorContext } from '../../../models';
 import { userSessionStore } from '../../../store';
 import * as utils from '../../../utils';
 import { HookCancel } from 'hookpoint';
@@ -8,13 +8,15 @@ interface PickSession extends UserSession {
   answer?: string;
 }
 
-export async function showQuickpickVariableReplacer(text: unknown): Promise<unknown> {
+export async function showQuickpickVariableReplacer(
+  text: unknown,
+  _type: string,
+  context: ProcessorContext
+): Promise<unknown> {
   return utils.parseHandlebarsString(text, async (variable: string) => {
     const matchInput = /^\$pick(?<save>-askonce)?\s*(?<placeholder>[^$]*)(\$value:\s*(?<value>.*))\s*$/u.exec(variable);
     if (matchInput?.groups?.placeholder && matchInput?.groups?.value) {
       const placeholder = matchInput.groups.placeholder.trim();
-      const value = matchInput.groups.value;
-
       const id = `input_${placeholder}`;
 
       const session = userSessionStore.getUserSession<PickSession>(id);
@@ -23,7 +25,8 @@ export async function showQuickpickVariableReplacer(text: unknown): Promise<unkn
         return session.answer;
       }
 
-      const answer = await userInteractionProvider.showListPrompt(placeholder, value.split(','));
+      const items = await getArray(matchInput.groups.value, context);
+      const answer = await userInteractionProvider.showListPrompt(placeholder, items);
       if (answer) {
         userSessionStore.setUserSession({
           id,
@@ -42,4 +45,21 @@ export async function showQuickpickVariableReplacer(text: unknown): Promise<unkn
     }
     return undefined;
   });
+}
+
+async function getArray(value: string, context: ProcessorContext): Promise<Array<string>> {
+  const result = value.split(',');
+
+  if (result.length === 1) {
+    try {
+      const jsResult = await javascriptProvider.evalExpression(value, context);
+      if (Array.isArray(jsResult)) {
+        return jsResult;
+      }
+    } catch (err) {
+      log.trace(err);
+    }
+  }
+
+  return result;
 }
