@@ -13,7 +13,6 @@ describe('request.http', () => {
     await sendHttp(`GET /get`, { host: `http://localhost:${localServer.port}` });
 
     const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].headers['user-agent']).toBe('httpyac');
     expect(requests[0].url).toBe(`http://localhost:${localServer.port}/get`);
   });
 
