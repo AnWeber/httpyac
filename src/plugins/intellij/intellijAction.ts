@@ -8,9 +8,18 @@ export interface IntellijScriptData {
 }
 
 export class IntellijAction {
-  id = 'intellij';
+  public id = 'intellij';
 
-  constructor(private scriptData: models.ScriptData | IntellijScriptData) {}
+  public before: Array<string> | undefined;
+
+  constructor(
+    private scriptData: models.ScriptData | IntellijScriptData,
+    beforeReqeust: boolean
+  ) {
+    if (beforeReqeust) {
+      this.before = ['requestVariableReplacer'];
+    }
+  }
 
   private isStreamingScript(scriptData: models.ScriptData) {
     return ['onEachLine', 'onEachMessage'].some(obj => scriptData.script.indexOf(obj) > 0);

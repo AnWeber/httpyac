@@ -18,7 +18,7 @@ export async function parseIntellijScript(
   const intellijContent = getIntellijContent(lineReader, !!httpRegion.request);
 
   if (intellijContent) {
-    const intellijAction = new IntellijAction(intellijContent.data);
+    const intellijAction = new IntellijAction(intellijContent.data, intellijContent.isBeforeRequest);
 
     if (intellijContent.isBeforeRequest) {
       httpRegion.hooks.onRequest.addObjHook(obj => obj.processOnRequest, intellijAction);
