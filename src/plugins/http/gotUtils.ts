@@ -38,10 +38,6 @@ export function getClientOptions(
       retry: 0,
       throwHttpErrors: false,
       allowGetBody: true,
-      headers: {
-        accept: '*/*',
-        'user-agent': 'httpyac',
-      },
     },
     config?.request,
     {

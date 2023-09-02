@@ -5,6 +5,12 @@
 - support return of null in variable replacement (#513)
 - allow for variable use in $pick picklists: `{{ $pick ask-variable? $value: data }}` (#537)
 - pre request in intellij format is executed before variable replacer (#534)
+- allow removal of UserAgent Header (httpyac/httpyac.github.io#70) using script
+```
+{{@request
+  request.headers["User-Agent"] = undefined
+}}
+```
 
 ## [6.6.3]  (2023-07-25)
 
