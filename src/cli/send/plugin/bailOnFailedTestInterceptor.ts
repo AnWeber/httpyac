@@ -1,4 +1,4 @@
-import * as models from '../../models';
+import * as models from '../../../models';
 import { HookTriggerContext } from 'hookpoint';
 
 export const bailOnFailedTestInterceptor = {

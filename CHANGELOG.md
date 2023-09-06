@@ -1,3 +1,9 @@
+## [6.6.5]  (2023-09-06)
+
+### Fixes
+
+- support of `--bail` does also work in referenced http files (#540)
+
 ## [6.6.4]  (2023-09-02)
 
 ### Fixes

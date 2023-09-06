@@ -1,8 +1,8 @@
-import * as models from '../../models';
+import * as models from '../../../models';
 import { HookTriggerContext } from 'hookpoint';
 
 export const testExitCodeInterceptor = {
-  id: 'bailOnFailed',
+  id: 'testExitCode',
   afterTrigger: async function bail(hookContext: HookTriggerContext<[models.ProcessorContext], boolean>) {
     const context = hookContext.args[0];
     const failedTest = context.httpRegion.testResults?.find?.(obj => !obj.result);

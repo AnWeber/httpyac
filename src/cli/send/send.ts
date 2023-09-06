@@ -3,11 +3,9 @@ import { fileProvider, Logger } from '../../io';
 import * as models from '../../models';
 import { HttpFileStore } from '../../store';
 import * as utils from '../../utils';
-import { bailOnFailedTestInterceptor } from './bailOnFailedTestInterceptor';
+import { createCliPluginRegister } from './plugin';
 import { toSendJsonOutput } from './jsonOutput';
-import { loggerFlushInterceptor } from './loggerFlushInterceptor';
 import { SendOptions, getLogLevel, SendFilterOptions, OutputType } from './options';
-import { testExitCodeInterceptor } from './testExitCodeInterceptor';
 import { default as chalk } from 'chalk';
 import { Command } from 'commander';
 import { promises as fs } from 'fs';
@@ -54,7 +52,6 @@ async function execute(fileNames: Array<string>, options: SendOptions): Promise<
   initRequestLogger(options, context);
   try {
     if (httpFiles.length > 0) {
-      initCliHooks(httpFiles, options);
       let isFirstRequest = true;
       const jsonOutput: Record<string, Array<models.ProcessedHttpRegion>> = {};
       while (options.interactive || isFirstRequest) {
@@ -160,19 +157,11 @@ export function initRequestLogger(cliOptions: SendOptions, context: Omit<models.
   }
 }
 
-function initCliHooks(httpFiles: Array<models.HttpFile>, cliOptions: SendOptions) {
-  for (const httpFile of utils.distinct(httpFiles)) {
-    httpFile.hooks.execute.addInterceptor(loggerFlushInterceptor);
-    httpFile.hooks.execute.addInterceptor(testExitCodeInterceptor);
-    if (cliOptions.bail) {
-      httpFile.hooks.execute.addInterceptor(bailOnFailedTestInterceptor);
-    }
-  }
-}
-
 async function getHttpFiles(fileNames: Array<string>, options: SendOptions, config: models.EnvironmentConfig) {
   const httpFiles: models.HttpFile[] = [];
-  const httpFileStore = new HttpFileStore();
+  const httpFileStore = new HttpFileStore({
+    cli: createCliPluginRegister(!!options.bail),
+  });
 
   const parseOptions: models.HttpFileStoreOptions = {
     workingDir: process.cwd(),
