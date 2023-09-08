@@ -48,4 +48,24 @@ describe('parser', () => {
       expect(httpRegion.symbol.source?.trim()).toBe(`GET https://httpbin.org/anything\n    ...defaultHeaders`);
     }
   });
+  it('should support asserts', async () => {
+    const httpFile = await parseHttp(`
+    GET https://httpbin.org/anything
+    ?? status == 200
+    `);
+    expect(await httpFile.fileName).toBe('any.http');
+    expect(await httpFile.httpRegions.length).toBe(1);
+
+
+    for (const httpRegion of httpFile.httpRegions) {
+      expect(httpRegion.request).toBeDefined();
+      expect(httpRegion.request?.url).toBe('https://httpbin.org/anything');
+      expect(httpRegion.symbol.children?.length).toBe(2);
+      expect(httpRegion.symbol.children[0].name).toBe('    GET https://httpbin.org/anything');
+      expect(httpRegion.symbol.children[0].description).toBe('HTTP request-line');
+      expect(httpRegion.symbol.children[1].name).toBe('script');
+      expect(httpRegion.symbol.children[1].description).toBe('script');
+
+    }
+  });
 });
