@@ -70,7 +70,7 @@ export async function parseAssertLine(
         symbols: [
           {
             name: `assert ${match.groups.type}`,
-            description: match.groups.value ?? "script",
+            description: `${match.groups.predicate} ${match.groups.expected || ''}`.trim(),
             kind: models.HttpSymbolKind.script,
             startLine: next.value.line,
             startOffset: 0,
