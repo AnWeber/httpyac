@@ -69,7 +69,7 @@ export async function parseAssertLine(
         nextParserLine: next.value.line,
         symbols: [
           {
-            name: match.groups.key ?? "script",
+            name: `assert ${match.groups.type}`,
             description: match.groups.value ?? "script",
             kind: models.HttpSymbolKind.script,
             startLine: next.value.line,
