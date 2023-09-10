@@ -46,9 +46,13 @@ export class WebsocketRequestClient extends models.AbstractRequestClient<WebSock
       if (this.closeOnFinish) {
         this.registerEvents(this._nativeClient);
         await new Promise<void>(resolve => {
-          this._nativeClient?.on('open', () => {
+          const resolveListener = () => {
             resolve();
-          });
+            this.nativeClient?.off('open', resolveListener);
+            this.nativeClient?.off('close', resolveListener);
+          };
+          this._nativeClient?.on('open', resolveListener);
+          this._nativeClient?.on('close', resolveListener);
         });
       }
     }
@@ -134,7 +138,7 @@ export class WebsocketRequestClient extends models.AbstractRequestClient<WebSock
           date: new Date(),
         },
         request: this.request,
-        body: utils.toString(reason),
+        body: utils.toString(reason) || 'close',
         rawBody: Buffer.isBuffer(reason) ? reason : undefined,
       });
       this.removeWebsocketSession();
