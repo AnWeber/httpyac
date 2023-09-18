@@ -1,5 +1,6 @@
-import { sendHttpFile, initFileProvider, parseHttp } from '../testUtils';
 import { getLocal } from 'mockttp';
+
+import { initFileProvider, parseHttp, sendHttpFile } from '../testUtils';
 
 describe('assert.duration', () => {
   const localServer = getLocal();

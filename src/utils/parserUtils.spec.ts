@@ -1,5 +1,6 @@
-import { parseRequestHeaderFactory } from './parserUtils';
 import { ParserContext } from '@/models';
+
+import { parseRequestHeaderFactory } from './parserUtils';
 
 describe('http header test', () => {
   it('is valid header', async () => {

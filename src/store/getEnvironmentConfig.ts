@@ -1,8 +1,9 @@
+import { default as chalk } from 'chalk';
+import merge from 'lodash/merge';
+
 import { log } from '../io';
 import * as models from '../models';
 import * as utils from '../utils';
-import { default as chalk } from 'chalk';
-import merge from 'lodash/merge';
 
 export async function getEnvironmentConfig(
   config?: models.EnvironmentConfig,

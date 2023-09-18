@@ -1,5 +1,6 @@
-import { sendHttp, initFileProvider } from '../testUtils';
 import { getLocal } from 'mockttp';
+
+import { initFileProvider, sendHttp } from '../testUtils';
 
 describe('request.http', () => {
   const localServer = getLocal();

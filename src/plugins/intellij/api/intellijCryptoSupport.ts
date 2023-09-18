@@ -1,6 +1,7 @@
+import { createHash, createHmac, Hash, Hmac } from 'crypto';
+
 import * as utils from '../../../utils';
-import { CryptoSupport, DigestBuilder, Digest, HmacSupport, HmacInitializer } from './http-client';
-import { createHash, Hash, createHmac, Hmac } from 'crypto';
+import { CryptoSupport, Digest, DigestBuilder, HmacInitializer, HmacSupport } from './http-client';
 
 export class IntellijCryptoSupport implements CryptoSupport {
   constructor() {

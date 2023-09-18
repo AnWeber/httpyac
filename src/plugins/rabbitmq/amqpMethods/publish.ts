@@ -1,9 +1,10 @@
+import { AMQPProperties } from '@cloudamqp/amqp-client';
+
 import * as io from '../../../io';
 import * as utils from '../../../utils';
 import * as constants from './amqpConstants';
 import { AmqpMethodContext } from './amqpMethodContext';
 import { getNonAmqpHeaders } from './amqpUtils';
-import { AMQPProperties } from '@cloudamqp/amqp-client';
 
 export async function publish({ channel, request, onMessage }: AmqpMethodContext) {
   if (request.body) {

@@ -1,6 +1,7 @@
+import { HookCancel, HookInterceptor, HookTriggerContext } from 'hookpoint';
+
 import * as models from '../../../models';
 import * as utils from '../../../utils';
-import { HookCancel, HookInterceptor, HookTriggerContext } from 'hookpoint';
 
 const VariableHookId = 'variable';
 

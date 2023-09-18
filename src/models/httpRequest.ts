@@ -1,7 +1,8 @@
+import type { OptionsOfUnknownResponseBody } from 'got';
+
 import { ContentType } from './contentType';
 import { HttpMethod } from './httpMethod';
 import { ProcessorContext } from './processorContext';
-import type { OptionsOfUnknownResponseBody } from 'got';
 
 export interface HeadersContainer {
   headers: Record<string, unknown>;

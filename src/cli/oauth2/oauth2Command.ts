@@ -1,7 +1,8 @@
+import { Command } from 'commander';
+
 import { createEmptyProcessorContext } from '../../httpYacApi';
 import { getOAuth2Response } from '../../plugins/oauth2/oauth2VariableReplacer';
 import { HttpFileStore } from '../../store';
-import { Command } from 'commander';
 
 export function oauth2Command() {
   const program = new Command('oauth2')

@@ -1,7 +1,7 @@
 import { fileProvider } from '../../../io';
 import * as models from '../../../models';
 import * as utils from '../../../utils';
-import { transformToBufferOrString, replaceVariablesInBody } from '../request';
+import { replaceVariablesInBody, transformToBufferOrString } from '../request';
 
 export async function closeRequestBody(context: models.ParserContext): Promise<void> {
   const requestBody = getAndRemoveRequestBody(context);

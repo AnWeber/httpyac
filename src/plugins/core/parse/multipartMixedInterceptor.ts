@@ -1,7 +1,8 @@
+import { HookInterceptor, HookTriggerContext } from 'hookpoint';
+
 import * as models from '../../../models';
 import * as utils from '../../../utils';
 import { getRequestBody } from './requestBodyHttpRegionParser';
-import { HookInterceptor, HookTriggerContext } from 'hookpoint';
 
 export class MultipartMixedInterceptor
   implements HookInterceptor<[models.getHttpLineGenerator, models.ParserContext], undefined>

@@ -1,8 +1,9 @@
+import EventSource from 'eventsource';
+
 import { log } from '../../io';
 import * as models from '../../models';
 import * as utils from '../../utils';
-import { isEventSourceRequest, EventSourceRequest } from './eventSourceRequest';
-import EventSource from 'eventsource';
+import { EventSourceRequest, isEventSourceRequest } from './eventSourceRequest';
 
 export class EventSourceRequestClient extends models.AbstractRequestClient<EventSource | undefined> {
   private responseTemplate: Partial<models.HttpResponse> & { protocol: string } = {

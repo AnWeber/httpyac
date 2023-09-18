@@ -1,6 +1,6 @@
 import * as models from '../../models';
 import * as utils from '../../utils';
-import { toHttpResponse, getBody } from './gotUtils';
+import { getBody, toHttpResponse } from './gotUtils';
 
 export async function logHttpRedirect(request: models.Request, context: models.ProcessorContext): Promise<void> {
   if (request && utils.isHttpRequest(request)) {

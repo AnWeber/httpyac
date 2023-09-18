@@ -1,10 +1,12 @@
+import '../registerPlugins';
+
+import { EOL } from 'os';
+import { dirname, extname, isAbsolute, join } from 'path';
+
 import { send } from '../httpYacApi';
 import * as io from '../io';
 import * as models from '../models';
-import '../registerPlugins';
 import * as store from '../store';
-import { EOL } from 'os';
-import { isAbsolute, dirname, extname, join } from 'path';
 
 export async function parseHttp(code: string, filename = 'any.http') {
   return await new store.HttpFileStore().getOrCreate(filename, async () => Promise.resolve(code), 0, {

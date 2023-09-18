@@ -1,6 +1,7 @@
+import { HookInterceptor, HookTriggerContext } from 'hookpoint';
+
 import * as models from '../../../models';
 import { toEnvironmentKey } from '../../../utils';
-import { HookInterceptor, HookTriggerContext } from 'hookpoint';
 
 interface RegionScopedVariableOptions {
   variables?: models.Variables;

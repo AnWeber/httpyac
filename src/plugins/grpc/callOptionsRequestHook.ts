@@ -1,7 +1,8 @@
+import { HookCancel } from 'hookpoint';
+
 import * as models from '../../models';
 import * as utils from '../../utils';
 import { isGrpcRequest } from './grpcRequest';
-import { HookCancel } from 'hookpoint';
 
 export async function callOptionsRequestHook(
   request: models.Request,

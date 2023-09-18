@@ -1,4 +1,6 @@
-import { ProcessorContext, HttpResponse, TestFunction, TestResult, testSymbols } from '../models';
+import { default as chalk } from 'chalk';
+
+import { HttpResponse, ProcessorContext, TestFunction, TestResult, testSymbols } from '../models';
 import {
   assertHasNoResponseBody,
   assertHasResponseBody,
@@ -10,7 +12,6 @@ import {
 } from './assertUtils';
 import { isError, parseError } from './errorUtils';
 import { isHttpResponse } from './requestUtils';
-import { default as chalk } from 'chalk';
 
 export function testFactory({ httpRegion, scriptConsole, variables }: ProcessorContext): TestFunction {
   const testFunction = function test(message: string, testMethod: () => void): void {

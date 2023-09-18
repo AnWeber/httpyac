@@ -1,6 +1,7 @@
-import { ProcessorContext } from './processorContext';
 import { GrpcObject } from '@grpc/grpc-js';
 import { PackageDefinition } from '@grpc/proto-loader';
+
+import { ProcessorContext } from './processorContext';
 
 export class ProtoDefinition {
   loaderOptions: Record<string, string>;

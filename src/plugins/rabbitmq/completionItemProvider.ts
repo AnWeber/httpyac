@@ -1,4 +1,4 @@
-import { completionItemProvider, CompletionItem } from '../../io';
+import { CompletionItem, completionItemProvider } from '../../io';
 import * as utils from '../../utils';
 import { isAmqpRequest } from './amqpRequest';
 

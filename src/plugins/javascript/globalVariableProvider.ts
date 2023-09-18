@@ -1,7 +1,8 @@
+import type { HookInterceptor, HookTriggerContext } from 'hookpoint';
+
 import * as models from '../../models';
 import { userSessionStore } from '../../store';
 import { toEnvironmentKey } from '../../utils';
-import type { HookInterceptor, HookTriggerContext } from 'hookpoint';
 
 export async function provideGlobalVariableStore(env: string[] | undefined): Promise<models.Variables> {
   const id = getGlobalUserSessionId(env);

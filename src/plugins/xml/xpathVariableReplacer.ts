@@ -1,10 +1,11 @@
+import { select, useNamespaces } from 'xpath';
+
 import { log } from '../../io';
 import { VariableType } from '../../models';
 import * as utils from '../../utils';
 import { getNode } from './nodeUtils';
 import { getSelectReturnType } from './provideAssertValueXPath';
 import { XPathProcessorContext } from './xpathProcessorContext';
-import { select, useNamespaces } from 'xpath';
 
 export async function xpathVariableReplacer(
   text: unknown,

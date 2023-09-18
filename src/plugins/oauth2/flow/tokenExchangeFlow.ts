@@ -1,8 +1,9 @@
+import encodeUrl from 'encodeurl';
+
 import type * as models from '../../../models';
 import * as utils from '../../../utils';
 import { assertConfiguration } from '../openIdConfiguration';
 import { requestOpenIdInformation } from './requestOpenIdInformation';
-import encodeUrl from 'encodeurl';
 
 export class TokenExchangeFlow {
   static getCacheKey(config: models.OpenIdConfiguration): string | false {

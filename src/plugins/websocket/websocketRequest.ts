@@ -1,6 +1,7 @@
+import { ClientOptions } from 'ws';
+
 import { Request } from '../../models';
 import { isString } from '../../utils';
-import { ClientOptions } from 'ws';
 
 export interface WebsocketRequest extends Request<'WS'> {
   options?: ClientOptions;

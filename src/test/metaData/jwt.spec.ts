@@ -1,8 +1,9 @@
+import { getLocal } from 'mockttp';
+
 import { send } from '../../httpYacApi';
 import { HttpResponse } from '../../models';
 import { stringifySafe } from '../../utils';
 import { initFileProvider, parseHttp } from '../testUtils';
-import { getLocal } from 'mockttp';
 
 describe('metadata.jwt', () => {
   const localServer = getLocal();

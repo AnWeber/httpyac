@@ -1,7 +1,8 @@
+import { v4 as uuid } from 'uuid';
+
 import * as models from '../../../models';
 import { userSessionStore } from '../../../store';
 import * as utils from '../../../utils';
-import { v4 as uuid } from 'uuid';
 
 export function keepStreamingMetaDataHandler(type: string, _value: string | undefined, context: models.ParserContext) {
   if (type === 'keepStreaming') {

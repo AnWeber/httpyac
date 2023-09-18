@@ -1,8 +1,9 @@
-import { userInteractionProvider, javascriptProvider, log } from '../../../io';
-import { UserSession, ProcessorContext } from '../../../models';
+import { HookCancel } from 'hookpoint';
+
+import { javascriptProvider, log, userInteractionProvider } from '../../../io';
+import { ProcessorContext, UserSession } from '../../../models';
 import { userSessionStore } from '../../../store';
 import * as utils from '../../../utils';
-import { HookCancel } from 'hookpoint';
 
 interface PickSession extends UserSession {
   answer?: string;

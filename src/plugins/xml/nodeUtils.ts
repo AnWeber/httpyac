@@ -1,8 +1,9 @@
 /* eslint-disable no-undef */
+import { DOMParser } from '@xmldom/xmldom';
+
 import { log } from '../../io';
 import { Variables } from '../../models';
 import * as utils from '../../utils';
-import { DOMParser } from '@xmldom/xmldom';
 
 export function getNode(variableName: string | undefined, variables: Variables) {
   let xml: string | undefined;

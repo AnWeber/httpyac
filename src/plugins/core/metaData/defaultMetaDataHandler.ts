@@ -1,5 +1,6 @@
-import * as models from '../../../models';
 import { HookInterceptor, HookTriggerContext } from 'hookpoint';
+
+import * as models from '../../../models';
 
 export class DefaultMetaDataHandler implements HookInterceptor<[string, string, models.ParserContext], boolean> {
   id = 'defaultMetaData';

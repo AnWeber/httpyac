@@ -1,7 +1,8 @@
+import { ok } from 'assert';
+
 import * as models from '../../models';
 import * as utils from '../../utils';
 import * as p from './predicates';
-import { ok } from 'assert';
 
 export const predicates: Array<p.TestPredicate> = [
   new p.EndsWithPredicate(),

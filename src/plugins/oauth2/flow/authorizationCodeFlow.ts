@@ -1,11 +1,12 @@
+import { createHash } from 'crypto';
+import open from 'open';
+
 import type * as models from '../../../models';
 import * as utils from '../../../utils';
 import { assertConfiguration } from '../openIdConfiguration';
 import { OpenIdFlow } from './openIdFlow';
 import { registerListener, unregisterListener } from './openIdHttpServer';
 import { requestOpenIdInformation } from './requestOpenIdInformation';
-import { createHash } from 'crypto';
-import open from 'open';
 
 class AuthorizationCodeFlow implements OpenIdFlow {
   supportsFlow(flow: string): boolean {

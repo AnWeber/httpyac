@@ -1,5 +1,5 @@
 import { OpenIdConfiguration } from '../../models';
-import { getOpenIdConfiguration, DEFAULT_CALLBACK_URI } from './openIdConfiguration';
+import { DEFAULT_CALLBACK_URI, getOpenIdConfiguration } from './openIdConfiguration';
 
 describe('getOpenIdConfiguration', () => {
   describe('tokenEndpoint', () => {

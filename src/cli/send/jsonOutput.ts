@@ -1,4 +1,4 @@
-import { ProcessedHttpRegion, HttpResponse, TestResult } from '../../models';
+import { HttpResponse, ProcessedHttpRegion, TestResult } from '../../models';
 import * as utils from '../../utils';
 import { SendFilterOptions, SendOptions } from './options';
 

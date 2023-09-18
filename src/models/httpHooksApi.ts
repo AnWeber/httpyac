@@ -1,3 +1,5 @@
+import { HookCancel as hookPointHookCancel } from 'hookpoint';
+
 import * as utils from '../utils';
 import { EnvironmentConfig } from './environmentConfig';
 import { FileProvider } from './fileProvider';
@@ -9,7 +11,6 @@ import { LogHandler } from './logHandler';
 import { PathLike } from './pathLike';
 import { SessionStore } from './sessionStore';
 import { UserInteractionProvider } from './userInteractionProvider';
-import { HookCancel as hookPointHookCancel } from 'hookpoint';
 
 export const HookCancel: typeof hookPointHookCancel = hookPointHookCancel;
 

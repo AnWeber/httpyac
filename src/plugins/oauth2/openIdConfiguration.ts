@@ -1,9 +1,10 @@
-import { log, userInteractionProvider } from '../../io';
-import type * as models from '../../models';
-import * as utils from '../../utils';
 import { isEqualWith } from 'lodash';
 import get from 'lodash/get';
 import { URL } from 'url';
+
+import { log, userInteractionProvider } from '../../io';
+import type * as models from '../../models';
+import * as utils from '../../utils';
 
 export const DEFAULT_CALLBACK_URI = 'http://localhost:3000/callback';
 const DefaultOAuthVariablePrefix = 'oauth2';

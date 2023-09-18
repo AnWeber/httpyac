@@ -1,7 +1,8 @@
-import { ProcessorContext } from '../../models';
-import * as utils from '../../utils';
 import aws4 from 'aws4';
 import { URL } from 'url';
+
+import { ProcessorContext } from '../../models';
+import * as utils from '../../utils';
 
 export async function awsAuthVariableReplacer(
   text: unknown,

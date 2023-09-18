@@ -1,9 +1,10 @@
+import { loadPackageDefinition } from '@grpc/grpc-js';
+import { load } from '@grpc/proto-loader';
+import { HookInterceptor, HookTriggerContext } from 'hookpoint';
+
 import * as io from '../../io';
 import * as models from '../../models';
 import * as utils from '../../utils';
-import { loadPackageDefinition } from '@grpc/grpc-js';
-import { load } from '@grpc/proto-loader';
-import { HookTriggerContext, HookInterceptor } from 'hookpoint';
 
 const ProtoImport = /^\s*proto\s+<\s+(?<fileName>.+)\s*$/u;
 

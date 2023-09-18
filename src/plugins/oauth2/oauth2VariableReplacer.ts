@@ -1,10 +1,11 @@
+import { HookCancel } from 'hookpoint';
+
 import { log } from '../../io';
 import type * as models from '../../models';
 import { userSessionStore } from '../../store';
 import * as utils from '../../utils';
 import * as flows from './flow';
 import { getOpenIdConfiguration, isOpenIdConfigurationEqual } from './openIdConfiguration';
-import { HookCancel } from 'hookpoint';
 
 export async function oauth2VariableReplacer(
   text: unknown,

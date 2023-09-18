@@ -1,9 +1,10 @@
+import { HookInterceptor, HookTriggerContext } from 'hookpoint';
+
 import { javascriptProvider } from '../../io';
 import * as models from '../../models';
 import * as utils from '../../utils';
 import { HttpyacJsApi } from './httpyacJsApi';
 import { runScript } from './moduleUtils';
-import { HookInterceptor, HookTriggerContext } from 'hookpoint';
 
 const JavaScriptStart =
   /^\s*\{\{(@js\s+)?(?<modifier>\+|@)?(?<event>(request|streaming|response|after|responseLogging)?)?\s*$/iu;

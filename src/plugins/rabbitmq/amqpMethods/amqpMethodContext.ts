@@ -1,6 +1,7 @@
+import { AMQPChannel } from '@cloudamqp/amqp-client';
+
 import { HttpResponse, ProcessorContext, StreamResponse } from '../../../models';
 import { AmqpRequest } from '../amqpRequest';
-import { AMQPChannel } from '@cloudamqp/amqp-client';
 
 export interface AmqpMethodContext {
   channel: AMQPChannel;

@@ -33,5 +33,5 @@ export * from './testResult';
 export * from './userInteractionProvider';
 export * from './userSession';
 export * from './variableProviderContext';
-export * from './variableType';
 export * from './variables';
+export * from './variableType';

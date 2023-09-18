@@ -1,8 +1,9 @@
+import { connectAsync, IClientOptions, MqttClient, MqttClientEventCallbacks } from 'mqtt';
+
 import { log } from '../../io';
 import * as models from '../../models';
 import * as utils from '../../utils';
 import { isMQTTRequest, MQTTRequest } from './mqttRequest';
-import { connectAsync, IClientOptions, MqttClient, MqttClientEventCallbacks } from 'mqtt';
 
 type QoS = 0 | 1 | 2;
 

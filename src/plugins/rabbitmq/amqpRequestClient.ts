@@ -1,10 +1,11 @@
+import { AMQPChannel, AMQPClient } from '@cloudamqp/amqp-client';
+
 import * as models from '../../models';
 import * as store from '../../store';
 import * as utils from '../../utils';
 import * as amqpMethods from './amqpMethods';
 import * as constants from './amqpMethods/amqpConstants';
 import { AmqpRequest, isAmqpRequest } from './amqpRequest';
-import { AMQPClient, AMQPChannel } from '@cloudamqp/amqp-client';
 
 interface AmqpSession {
   client: AMQPClient;

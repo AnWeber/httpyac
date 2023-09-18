@@ -1,7 +1,8 @@
+import { CancelableRequest, CancelError, default as got, Response } from 'got';
+
 import * as models from '../../models';
 import * as utils from '../../utils';
 import { getClientOptions, toHttpResponse } from './gotUtils';
-import { default as got, CancelError, Response, CancelableRequest } from 'got';
 
 export class HttpRequestClient extends models.AbstractRequestClient<typeof got> {
   constructor(

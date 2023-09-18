@@ -1,6 +1,7 @@
+import { HookInterceptor, HookTriggerContext } from 'hookpoint';
+
 import * as models from '../../../models';
 import * as utils from '../../../utils';
-import { HookInterceptor, HookTriggerContext } from 'hookpoint';
 
 export class LogResponseInterceptor implements HookInterceptor<[models.ProcessorContext], boolean | void> {
   id = 'logResponse';

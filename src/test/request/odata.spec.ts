@@ -1,5 +1,6 @@
-import { parseHttp, sendHttpFile, initFileProvider } from '../testUtils';
 import { getLocal } from 'mockttp';
+
+import { initFileProvider, parseHttp, sendHttpFile } from '../testUtils';
 
 describe('request.odata', () => {
   const localServer = getLocal();

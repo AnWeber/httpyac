@@ -1,10 +1,11 @@
-import { ProcessorContext } from '../../models';
-import { isHttpRequest, isString, logResponse } from '../../utils';
-import { toHttpResponse } from './gotUtils';
 import { createHash } from 'crypto';
 import type { CancelableRequest, OptionsOfUnknownResponseBody, Response } from 'got';
 import { URL } from 'url';
 import { v4 as uuid } from 'uuid';
+
+import { ProcessorContext } from '../../models';
+import { isHttpRequest, isString, logResponse } from '../../utils';
+import { toHttpResponse } from './gotUtils';
 
 const DigestAuth = /^\s*(digest)\s+(?<user>[^\s]*)\s+(?<password>([^\s]+.*))$/iu;
 const DigestAuthColon = /^\s*(digest)\s+(?<user>.*):(?<password>.*)$/iu;

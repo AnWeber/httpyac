@@ -1,7 +1,8 @@
+import { URL } from 'url';
+
 import { fileProvider } from '../../io';
 import * as models from '../../models';
-import { toAbsoluteFilename, isString, isHttpRequest } from '../../utils';
-import { URL } from 'url';
+import { isHttpRequest, isString, toAbsoluteFilename } from '../../utils';
 
 export async function clientCertVariableReplacer(
   text: unknown,

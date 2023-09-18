@@ -1,6 +1,7 @@
+import { getLocal } from 'mockttp';
+
 import { send } from '../../httpYacApi';
 import { initFileProvider, parseHttp, sendHttp } from '../testUtils';
-import { getLocal } from 'mockttp';
 
 describe('metadata.name', () => {
   const localServer = getLocal();

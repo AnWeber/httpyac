@@ -1,6 +1,7 @@
+import { HookInterceptor, HookTriggerContext } from 'hookpoint';
+
 import * as io from '../../../io';
 import * as models from '../../../models';
-import { HookInterceptor, HookTriggerContext } from 'hookpoint';
 
 export class DisabledInterceptor implements HookInterceptor<[models.ProcessorContext], boolean | void> {
   id = 'disabled';

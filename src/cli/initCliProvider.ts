@@ -1,8 +1,9 @@
-import { fileProvider, userInteractionProvider, log } from '../io';
-import * as models from '../models';
-import { promises as fs, createReadStream } from 'fs';
+import { createReadStream, promises as fs } from 'fs';
 import { EOL } from 'os';
-import { join, isAbsolute, dirname, extname } from 'path';
+import { dirname, extname, isAbsolute, join } from 'path';
+
+import { fileProvider, log, userInteractionProvider } from '../io';
+import * as models from '../models';
 
 export async function initIOProvider(): Promise<void> {
   initFileProvider();

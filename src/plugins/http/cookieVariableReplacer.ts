@@ -1,6 +1,7 @@
+import { CookieJar } from 'tough-cookie';
+
 import { ProcessorContext } from '../../models';
 import { isHttpRequest, isString } from '../../utils';
-import { CookieJar } from 'tough-cookie';
 
 export async function cookieVariableReplacer(text: unknown, type: string, context: ProcessorContext): Promise<unknown> {
   const { request } = context;

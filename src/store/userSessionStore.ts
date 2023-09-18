@@ -1,4 +1,4 @@
-import { UserSession, SessionStore, Dispose } from '../models';
+import { Dispose, SessionStore, UserSession } from '../models';
 
 export class UserSessionStore implements SessionStore {
   readonly userSessions: Array<UserSession> = [];

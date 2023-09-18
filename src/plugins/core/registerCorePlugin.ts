@@ -1,5 +1,6 @@
-import * as models from '../../models';
 import './completionItemProvider';
+
+import * as models from '../../models';
 import { initProvideEnvironmentsHook } from './environments';
 import { initExecuteInterceptor } from './execute';
 import { initParseMetData } from './metaData';

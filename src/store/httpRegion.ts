@@ -1,6 +1,7 @@
-import * as models from '../models';
-import { toEnvironmentKey, addHttpFileRequestClientHooks, isError } from '../utils';
 import { Hook, HookCancel } from 'hookpoint';
+
+import * as models from '../models';
+import { addHttpFileRequestClientHooks, isError, toEnvironmentKey } from '../utils';
 
 export class HttpRegion implements models.HttpRegion {
   request?: models.Request<string, models.RequestBody> | undefined;

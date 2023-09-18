@@ -1,7 +1,8 @@
+import { Kafka } from 'kafkajs';
+
 import * as models from '../../../models';
 import * as utils from '../../../utils';
 import { KafkaRequest } from '../kafkaRequest';
-import { Kafka } from 'kafkajs';
 
 export interface KafkaMethodContext {
   kafka: Kafka;

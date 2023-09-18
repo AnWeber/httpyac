@@ -1,9 +1,10 @@
+import { HookCancel } from 'hookpoint';
+
 import * as io from '../io';
 import * as models from '../models';
 import { toEnvironmentKey } from './environmentUtils';
 import { toAbsoluteFilename } from './fsUtils';
 import { isString } from './stringUtils';
-import { HookCancel } from 'hookpoint';
 
 export async function replaceVariables(
   text: unknown,

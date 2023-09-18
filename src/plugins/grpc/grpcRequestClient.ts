@@ -1,11 +1,12 @@
+import * as grpc from '@grpc/grpc-js';
+import { Duplex, Readable, Writable } from 'stream';
+
 import { log } from '../../io';
 import * as models from '../../models';
 import * as utils from '../../utils';
 import { getSerivceData, ServiceData } from './createGrpcService';
 import { GrpcRequest, isGrpcRequest } from './grpcRequest';
 import { PathAwareChannel } from './pathAwareChannel';
-import * as grpc from '@grpc/grpc-js';
-import { Readable, Writable, Duplex } from 'stream';
 
 grpc.setLogger(log);
 type GrpcStream = Readable | Writable | Duplex;

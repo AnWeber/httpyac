@@ -1,3 +1,5 @@
+import { LastOutHook, SeriesHook, WaterfallHook } from 'hookpoint';
+
 import { HttpRegionParserResult } from './httpRegionParserResult';
 import { Request } from './httpRequest';
 import { HttpResponse } from './httpResponse';
@@ -5,7 +7,6 @@ import { getHttpLineGenerator, ParserContext } from './parserContext';
 import { ProcessorContext } from './processorContext';
 import { VariableProviderContext } from './variableProviderContext';
 import { Variables } from './variables';
-import { LastOutHook, WaterfallHook, SeriesHook } from 'hookpoint';
 
 export interface HttpFileHooks {
   readonly parse: ParseHook;

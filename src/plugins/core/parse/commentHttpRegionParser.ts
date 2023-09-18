@@ -1,8 +1,8 @@
 import {
-  HttpSymbolKind,
   getHttpLineGenerator,
   HttpLineGenerator,
   HttpRegionParserResult,
+  HttpSymbolKind,
   ParserContext,
 } from '../../../models';
 import { toMultiLineString } from '../../../utils';

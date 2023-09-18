@@ -1,8 +1,9 @@
+import { HookCancel } from 'hookpoint';
+
 import { userInteractionProvider } from '../../../io';
-import { UserSession, ProcessorContext } from '../../../models';
+import { ProcessorContext, UserSession } from '../../../models';
 import { userSessionStore } from '../../../store';
 import * as utils from '../../../utils';
-import { HookCancel } from 'hookpoint';
 
 interface InputSession extends UserSession {
   answer?: string;

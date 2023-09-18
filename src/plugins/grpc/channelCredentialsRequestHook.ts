@@ -1,8 +1,9 @@
+import { ChannelCredentials } from '@grpc/grpc-js';
+import { HookCancel } from 'hookpoint';
+
 import * as models from '../../models';
 import * as utils from '../../utils';
 import { isGrpcRequest } from './grpcRequest';
-import { ChannelCredentials } from '@grpc/grpc-js';
-import { HookCancel } from 'hookpoint';
 
 export async function channelCredentialsRequestHook(request: models.Request): Promise<void | typeof HookCancel> {
   if (isGrpcRequest(request) && request.headers) {

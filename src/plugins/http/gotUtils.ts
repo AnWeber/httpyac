@@ -1,12 +1,13 @@
-import { log } from '../../io';
-import * as models from '../../models';
-import { parseContentType, toString } from '../../utils';
 import { filesize } from 'filesize';
-import { default as got, OptionsOfUnknownResponseBody, CancelError, Response } from 'got';
+import { CancelError, default as got, OptionsOfUnknownResponseBody, Response } from 'got';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import merge from 'lodash/merge';
 import { SocksProxyAgent } from 'socks-proxy-agent';
+
+import { log } from '../../io';
+import * as models from '../../models';
+import { parseContentType, toString } from '../../utils';
 
 export async function gotHttpClient(
   request: models.HttpClientRequest,

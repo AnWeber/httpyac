@@ -1,6 +1,7 @@
+import { HookTriggerContext } from 'hookpoint';
+
 import * as io from '../../../io';
 import * as models from '../../../models';
-import { HookTriggerContext } from 'hookpoint';
 
 export const isTrustedInterceptor = {
   id: 'isTrusted',

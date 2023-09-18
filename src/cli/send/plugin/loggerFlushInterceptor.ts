@@ -1,5 +1,6 @@
-import * as models from '../../../models';
 import { HookTriggerContext } from 'hookpoint';
+
+import * as models from '../../../models';
 
 export const loggerFlushInterceptor = {
   id: 'loggerFlush',

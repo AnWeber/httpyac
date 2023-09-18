@@ -1,9 +1,11 @@
+import './completionItemProvider';
+
+import * as mqtt from 'mqtt';
+
 import { javascriptProvider } from '../../io';
 import * as models from '../../models';
-import './completionItemProvider';
 import { parseMqttLine } from './mqttHttpRegionParser';
 import { parseMQTTResponse } from './mqttResponseHttpRegionParser';
-import * as mqtt from 'mqtt';
 
 export function registerMqttPlugin(api: models.HttpyacHooksApi) {
   api.hooks.parse.addHook('mqtt', parseMqttLine, { before: ['request'] });

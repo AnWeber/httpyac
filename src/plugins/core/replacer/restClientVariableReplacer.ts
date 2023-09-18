@@ -1,8 +1,9 @@
-import { ProcessorContext, VariableType } from '../../../models';
-import * as utils from '../../../utils';
 import dayjs, { ManipulateType } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { v4 as uuid } from 'uuid';
+
+import { ProcessorContext, VariableType } from '../../../models';
+import * as utils from '../../../utils';
 
 dayjs.extend(utc);
 

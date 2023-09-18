@@ -1,5 +1,6 @@
-import { initFileProvider, sendHttp } from '../testUtils';
 import { getLocal } from 'mockttp';
+
+import { initFileProvider, sendHttp } from '../testUtils';
 
 describe('scripts.intellij', () => {
   const localServer = getLocal();

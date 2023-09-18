@@ -1,8 +1,9 @@
+import { HookCancel } from 'hookpoint';
+
 import * as models from '../models';
 import { createResponseProxy } from './requestClientUtils';
 import { cloneResponse } from './requestUtils';
 import { isString } from './stringUtils';
-import { HookCancel } from 'hookpoint';
 
 export function getDisplayName(httpRegion?: models.HttpRegion, defaultName = 'global'): string {
   if (httpRegion) {

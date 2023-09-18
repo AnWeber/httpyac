@@ -1,7 +1,8 @@
+import { getLocal } from 'mockttp';
+
 import { getEnvironments, send } from '../../httpYacApi';
 import { VariableProviderContext } from '../../models';
 import { initNestedFileProvider, parseHttp, sendHttpFile } from '../testUtils';
-import { getLocal } from 'mockttp';
 
 describe('environment.dotenv', () => {
   const localServer = getLocal();

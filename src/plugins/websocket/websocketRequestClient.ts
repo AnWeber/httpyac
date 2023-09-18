@@ -1,12 +1,13 @@
-import * as models from '../../models';
-import * as store from '../../store';
-import * as utils from '../../utils';
-import { isWebsocketRequest, WebsocketRequest } from './websocketRequest';
 import { IncomingMessage } from 'http';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { SocksProxyAgent } from 'socks-proxy-agent';
 import WebSocket, { ClientOptions } from 'ws';
+
+import * as models from '../../models';
+import * as store from '../../store';
+import * as utils from '../../utils';
+import { isWebsocketRequest, WebsocketRequest } from './websocketRequest';
 
 const WEBSOCKET_CLOSE_NORMAL = 1000;
 const WEBSOCKET_CLOSE_GOING_AWAY = 1001;

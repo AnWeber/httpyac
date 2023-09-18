@@ -1,10 +1,11 @@
+import { HookTriggerContext } from 'hookpoint';
+import { EOL } from 'os';
+import { formatXml } from 'xmldom-format';
+
 import * as io from '../../io';
 import * as models from '../../models';
 import * as utils from '../../utils';
 import { parseFromString } from './nodeUtils';
-import { HookTriggerContext } from 'hookpoint';
-import { EOL } from 'os';
-import { formatXml } from 'xmldom-format';
 
 export const xmlResponseInterceptor = {
   id: 'xmlResponseBody',

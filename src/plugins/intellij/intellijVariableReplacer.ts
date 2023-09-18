@@ -1,5 +1,6 @@
-import * as utils from '../../utils';
 import { v4 } from 'uuid';
+
+import * as utils from '../../utils';
 
 export async function replaceDynamicIntellijVariables(text: unknown): Promise<unknown> {
   return utils.parseHandlebarsString(text, async (variable: string) => replaceIntellijVariable(variable));

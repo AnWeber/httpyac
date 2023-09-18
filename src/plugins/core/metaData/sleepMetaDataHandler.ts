@@ -1,6 +1,6 @@
 import { javascriptProvider } from '../../../io';
 import * as models from '../../../models';
-import { sleep, report } from '../../../utils';
+import { report, sleep } from '../../../utils';
 
 export function sleepMetaDataHandler(type: string, value: string | undefined, context: models.ParserContext) {
   if (type === 'sleep' && value) {

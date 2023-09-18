@@ -1,3 +1,5 @@
+import { HookCancel } from 'hookpoint';
+
 import { fileProvider, httpClientProvider, javascriptProvider, log, userInteractionProvider } from '../io';
 import * as models from '../models';
 import { userSessionStore as sessionStore } from '../store';
@@ -6,7 +8,6 @@ import { getEnvironmentConfig } from './getEnvironmentConfig';
 import { HttpFile } from './httpFile';
 import { parseHttpFile } from './parser';
 import { pluginStore } from './pluginStore';
-import { HookCancel } from 'hookpoint';
 
 interface HttpFileStoreEntry {
   version: number;

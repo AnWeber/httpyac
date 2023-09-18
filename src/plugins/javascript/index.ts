@@ -1,13 +1,15 @@
-import * as httpyac from '../..';
-import * as models from '../../models';
 import './completionItemProvider';
-import { provideGlobalVariableStore, GlobalVariablesInterceptor } from './globalVariableProvider';
-import { parseJavascript } from './javascriptHttpRegionParser';
-import { replaceJavascriptExpressions } from './javascriptVariableReplacer';
-import * as moduleUtils from './moduleUtils';
+
 import { default as dayjs } from 'dayjs';
 import open from 'open';
 import * as uuid from 'uuid';
+
+import * as httpyac from '../..';
+import * as models from '../../models';
+import { GlobalVariablesInterceptor, provideGlobalVariableStore } from './globalVariableProvider';
+import { parseJavascript } from './javascriptHttpRegionParser';
+import { replaceJavascriptExpressions } from './javascriptVariableReplacer';
+import * as moduleUtils from './moduleUtils';
 
 // register early to allow using imported Javascript Plugins
 httpyac.io.javascriptProvider.loadModule = moduleUtils.loadModule;

@@ -1,5 +1,6 @@
-import { HttpResponse, StreamResponse } from './httpResponse';
 import { EventEmitter } from 'events';
+
+import { HttpResponse, StreamResponse } from './httpResponse';
 
 export type RequestClientResponse = undefined | void | HttpResponse;
 

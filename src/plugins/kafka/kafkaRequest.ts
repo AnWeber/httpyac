@@ -1,5 +1,6 @@
-import { Request } from '../../models';
 import { KafkaConfig } from 'kafkajs';
+
+import { Request } from '../../models';
 
 export interface KafkaRequest extends Request<string> {
   headers?: Record<string, string | string[] | undefined> | undefined;

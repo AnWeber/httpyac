@@ -1,6 +1,7 @@
+import * as grpc from '@grpc/grpc-js';
+
 import { log } from '../../io';
 import { ProtoDefinition } from '../../models';
-import * as grpc from '@grpc/grpc-js';
 
 export interface ServiceData {
   server: string;

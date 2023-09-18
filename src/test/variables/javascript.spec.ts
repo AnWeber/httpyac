@@ -1,5 +1,6 @@
-import { initFileProvider, parseHttp, sendHttpFile } from '../testUtils';
 import { getLocal } from 'mockttp';
+
+import { initFileProvider, parseHttp, sendHttpFile } from '../testUtils';
 
 describe('variables.javascript', () => {
   const localServer = getLocal();

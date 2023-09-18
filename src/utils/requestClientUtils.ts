@@ -1,11 +1,12 @@
+import { HookCancel } from 'hookpoint';
+
 import { log } from '../io';
 import * as models from '../models';
 import { isError } from './errorUtils';
 import { report } from './logUtils';
-import { repeat, mergeResponses } from './repeatUtils';
+import { mergeResponses, repeat } from './repeatUtils';
 import { toString } from './stringUtils';
-import { setVariableInContext, deleteVariableInContext } from './variableUtils';
-import { HookCancel } from 'hookpoint';
+import { deleteVariableInContext, setVariableInContext } from './variableUtils';
 
 export function executeRequestClientFactory<T extends models.RequestClient>(
   requestClientFactory: (request: models.Request, context: models.ProcessorContext) => T

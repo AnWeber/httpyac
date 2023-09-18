@@ -1,6 +1,7 @@
+import { HookCancel } from 'hookpoint';
+
 import * as models from '../../../models';
 import * as utils from '../../../utils';
-import { HookCancel } from 'hookpoint';
 
 export async function requestVariableReplacer(
   request: models.Request,

@@ -1,5 +1,6 @@
-import { initFileProvider, sendHttp, parseHttp, sendHttpFile } from '../testUtils';
-import { Mockttp, getLocal, generateCACertificate } from 'mockttp';
+import { generateCACertificate, getLocal, Mockttp } from 'mockttp';
+
+import { initFileProvider, parseHttp, sendHttp, sendHttpFile } from '../testUtils';
 
 describe('metadata.noRejectUnauthorized', () => {
   let localServer: Mockttp;

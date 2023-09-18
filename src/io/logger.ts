@@ -1,4 +1,4 @@
-import { LogLevel, LogHandler, ConsoleLogHandler } from '../models';
+import { ConsoleLogHandler, LogHandler, LogLevel } from '../models';
 
 export class Logger implements ConsoleLogHandler {
   private collectCache: Array<() => void> | undefined;

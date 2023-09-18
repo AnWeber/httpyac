@@ -1,6 +1,7 @@
+import { HookTriggerContext } from 'hookpoint';
+
 import * as models from '../../../models';
 import { isString } from '../../../utils';
-import { HookTriggerContext } from 'hookpoint';
 
 export const escapeVariableInterceptor = {
   id: 'escapeVariable',

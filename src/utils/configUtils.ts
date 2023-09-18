@@ -1,6 +1,6 @@
 import * as io from '../io';
 import { ConfigureHooks, EnvironmentConfig, PathLike } from '../models';
-import { toAbsoluteFilename, findRootDir, iterateUntilRoot } from './fsUtils';
+import { findRootDir, iterateUntilRoot, toAbsoluteFilename } from './fsUtils';
 
 export async function getHttpyacConfig(
   filename: PathLike,

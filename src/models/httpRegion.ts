@@ -1,4 +1,4 @@
-import { ExecuteHook, OnRequestHook, OnStreaming, OnResponseHook, ResponseLoggingHook } from './hooks';
+import { ExecuteHook, OnRequestHook, OnResponseHook, OnStreaming, ResponseLoggingHook } from './hooks';
 import { HttpFile } from './httpFile';
 import { Request } from './httpRequest';
 import { HttpResponse } from './httpResponse';

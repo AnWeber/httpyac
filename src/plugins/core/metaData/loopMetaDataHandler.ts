@@ -1,8 +1,9 @@
+import { HookCancel, HookInterceptor, HookTriggerContext, IHook } from 'hookpoint';
+import { v4 as uuid } from 'uuid';
+
 import * as io from '../../../io';
 import * as models from '../../../models';
 import * as utils from '../../../utils';
-import { HookCancel, HookInterceptor, HookTriggerContext, IHook } from 'hookpoint';
-import { v4 as uuid } from 'uuid';
 
 export function loopMetaDataHandler(type: string, value: string | undefined, context: models.ParserContext): boolean {
   if (type === 'loop' && value) {

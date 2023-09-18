@@ -1,10 +1,11 @@
+import { default as chalk } from 'chalk';
+import { TextDecoder } from 'util';
+
 import { log } from '../io';
 import * as models from '../models';
 import { toBoolean, toNumber } from './convertUtils';
 import { parseMimeType } from './mimeTypeUtils';
 import { isString, toMultiLineString } from './stringUtils';
-import { default as chalk } from 'chalk';
-import { TextDecoder } from 'util';
 
 export function isHttpRequestMethod(method: string | undefined): method is models.HttpMethod {
   if (method) {

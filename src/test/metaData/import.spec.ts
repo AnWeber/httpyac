@@ -1,6 +1,7 @@
+import { getLocal } from 'mockttp';
+
 import { send } from '../../httpYacApi';
 import { initFileProvider, parseHttp } from '../testUtils';
-import { getLocal } from 'mockttp';
 
 let desc = describe;
 if (/^v?20.*/u.test(process.version) && process.env.CI) {

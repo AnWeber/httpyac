@@ -1,6 +1,7 @@
+import { HookTriggerContext } from 'hookpoint';
+
 import { log } from '../../../io';
 import * as models from '../../../models';
-import { HookTriggerContext } from 'hookpoint';
 
 export function registerCancelExecutionInterceptor(parserContext: models.ParserContext) {
   parserContext.httpRegion.hooks.execute.addInterceptor({

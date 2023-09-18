@@ -1,7 +1,8 @@
+import { parse } from 'dotenv';
+
 import { fileProvider, log } from '../../io';
 import { PathLike, VariableProviderContext, Variables } from '../../models';
 import * as utils from '../../utils';
-import { parse } from 'dotenv';
 
 const defaultFiles: Array<string> = ['.env'];
 

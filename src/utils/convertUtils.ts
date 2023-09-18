@@ -1,4 +1,4 @@
-import { toString, ensureString } from './stringUtils';
+import { ensureString, toString } from './stringUtils';
 
 export function toBoolean(value: unknown, defaultValue = false): boolean {
   if (typeof value === 'boolean') return value;

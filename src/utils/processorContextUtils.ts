@@ -1,4 +1,4 @@
-import { log, fileProvider } from '../io';
+import { fileProvider, log } from '../io';
 import * as models from '../models';
 import { addHttpFileRequestClientHooks, executeGlobalScripts } from './httpRegionUtils';
 import { replaceFilePath } from './variableUtils';

@@ -1,10 +1,11 @@
+import { HookCancel } from 'hookpoint';
+
 import * as models from '../../models';
 import * as utils from '../../utils';
 import { HttpRegion } from '../httpRegion';
 import { closeHttpRegion } from './closeHttpRegion';
 import { createReaderFactory } from './createReaderFactory';
 import { setSource } from './setSource';
-import { HookCancel } from 'hookpoint';
 
 export async function parseHttpFile(
   httpFile: models.HttpFile,

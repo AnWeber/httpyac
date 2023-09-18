@@ -1,12 +1,13 @@
+import Module from 'module';
+import path from 'path';
+import vm from 'vm';
+
 import * as io from '../../io';
 import { log } from '../../io';
 import { PathLike, ProcessorContext } from '../../models';
 import { randomData } from '../../utils';
 import { isPromise } from '../../utils/promiseUtils';
 import { toMultiLineArray } from '../../utils/stringUtils';
-import Module from 'module';
-import path from 'path';
-import vm from 'vm';
 
 function resolveModule(request: string, context: string): string | undefined {
   let resolvedPath: string | undefined;

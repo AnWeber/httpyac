@@ -1,7 +1,8 @@
+import { HookInterceptor, HookTriggerContext } from 'hookpoint';
+
 import { fileProvider } from '../../io';
 import * as models from '../../models';
 import * as utils from '../../utils';
-import { HookInterceptor, HookTriggerContext } from 'hookpoint';
 
 export abstract class CodeBlockInterceptor
   implements HookInterceptor<[models.getHttpLineGenerator, models.ParserContext], undefined>

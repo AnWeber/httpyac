@@ -1,7 +1,8 @@
-import * as models from '../../../models';
-import * as utils from '../../../utils';
 import { HookInterceptor, HookTriggerContext } from 'hookpoint';
 import cloneDeep from 'lodash/cloneDeep';
+
+import * as models from '../../../models';
+import * as utils from '../../../utils';
 
 export class CreateRequestInterceptor implements HookInterceptor<[models.ProcessorContext], boolean | void> {
   id = 'createRequest';

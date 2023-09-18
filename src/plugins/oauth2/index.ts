@@ -1,5 +1,5 @@
 import * as models from '../../models';
-import { oauth2VariableReplacer, getOAuth2Response } from './oauth2VariableReplacer';
+import { getOAuth2Response, oauth2VariableReplacer } from './oauth2VariableReplacer';
 
 export function registerOAuth2Plugin(api: models.HttpyacHooksApi) {
   api.hooks.replaceVariable.addHook('oauth2', oauth2VariableReplacer);

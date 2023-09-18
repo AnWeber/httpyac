@@ -1,9 +1,10 @@
+import { Kafka } from 'kafkajs';
+
 import * as io from '../../io';
 import * as models from '../../models';
 import * as utils from '../../utils';
 import * as kafkaMethods from './kafkaMethods';
 import { isKafkaRequest, KafkaRequest } from './kafkaRequest';
-import { Kafka } from 'kafkajs';
 
 export class KafkaRequestClient extends models.AbstractRequestClient<Kafka | undefined> {
   constructor(

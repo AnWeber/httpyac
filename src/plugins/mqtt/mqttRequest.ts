@@ -1,5 +1,6 @@
-import { Request } from '../../models';
 import { IClientOptions as MQTTOptions } from 'mqtt';
+
+import { Request } from '../../models';
 
 export interface MQTTRequest extends Request<'MQTT'> {
   headers?: Record<string, string | string[] | undefined> | undefined;

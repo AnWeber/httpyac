@@ -1,10 +1,11 @@
+import open from 'open';
+
 import * as io from '../../../io';
 import type * as models from '../../../models';
 import * as utils from '../../../utils';
 import { assertConfiguration } from '../openIdConfiguration';
 import { OpenIdFlow } from './openIdFlow';
 import { toOpenIdInformation } from './requestOpenIdInformation';
-import open from 'open';
 
 class DeviceCodeFlow implements OpenIdFlow {
   supportsFlow(flow: string): boolean {

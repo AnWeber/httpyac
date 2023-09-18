@@ -1,4 +1,4 @@
-import { parseHttp, initFileProvider } from '../testUtils';
+import { initFileProvider, parseHttp } from '../testUtils';
 
 describe('parser', () => {
   initFileProvider();

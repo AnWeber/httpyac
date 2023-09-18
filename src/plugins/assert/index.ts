@@ -1,6 +1,7 @@
+import './completionItemProvider';
+
 import * as models from '../../models';
 import { parseAssertLine } from './assertHttpRegionParser';
-import './completionItemProvider';
 import { provideAssertValueDuration } from './provideAssertValueDuration';
 import { provideAssertValueHeader } from './provideAssertValueHeader';
 import { provideAssertValueJavascript } from './provideAssertValueJavascript';

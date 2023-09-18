@@ -1,8 +1,9 @@
+import { ok } from 'assert';
+
 import * as models from '../../../models';
 import { testFactory } from '../../../utils';
 import { HttpClient, Variables } from './http-client';
 import { IntellijVariables } from './intellijVariables';
-import { ok } from 'assert';
 
 export class IntellijHttpClient implements HttpClient {
   global: Variables;

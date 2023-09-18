@@ -1,5 +1,6 @@
-import { log } from '../../../io';
 import { createServer, Server } from 'http';
+
+import { log } from '../../../io';
 
 interface RequestListener {
   path: string;

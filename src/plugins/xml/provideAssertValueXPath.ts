@@ -1,9 +1,10 @@
+import { select, SelectedValue, SelectReturnType, useNamespaces } from 'xpath';
+
 import { log } from '../../io';
 import * as models from '../../models';
 import * as utils from '../../utils';
 import { isNode, parseFromString } from './nodeUtils';
 import { XPathProcessorContext } from './xpathProcessorContext';
-import { SelectReturnType, SelectedValue, select, useNamespaces } from 'xpath';
 
 export async function provideAssertValueXPath(
   type: string,

@@ -1,7 +1,8 @@
+import { HookTriggerContext } from 'hookpoint';
+
 import * as io from '../../io';
 import * as models from '../../models';
 import * as utils from '../../utils';
-import { HookTriggerContext } from 'hookpoint';
 
 export const jsonResponseInterceptor = {
   id: 'jsonResponseBody',

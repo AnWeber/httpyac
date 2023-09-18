@@ -1,7 +1,7 @@
 import { fileProvider } from '../../io';
 import * as models from '../../models';
 import * as utils from '../../utils';
-import { GqlData, GqlAction } from './gqlAction';
+import { GqlAction, GqlData } from './gqlAction';
 
 const EmptyLine = /^\s*$/u;
 

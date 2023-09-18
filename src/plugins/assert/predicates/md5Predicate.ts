@@ -1,6 +1,7 @@
+import { createHash } from 'crypto';
+
 import * as utils from '../../../utils';
 import { TestPredicate } from './testPredicate';
-import { createHash } from 'crypto';
 
 export class MD5Predicate implements TestPredicate {
   readonly id = ['md5'];
