@@ -1,3 +1,4 @@
+import './completionItemProvider';
 import { httpClientProvider } from '../../io';
 import * as models from '../../models';
 import { awsAuthVariableReplacer } from './awsAuthVariableReplacer';

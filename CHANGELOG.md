@@ -1,4 +1,11 @@
-## [6.6.6]  (2023-09-015)23-09-02)
+## [6.6.7]  (2023-09-018)
+
+### Fixes
+
+- reenable Http Header completion (AnWeber/vscode-httpyac#223)
+
+
+## [6.6.6]  (2023-09-15)
 
 ### Fixes
 

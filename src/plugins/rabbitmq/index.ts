@@ -1,5 +1,6 @@
 import { javascriptProvider } from '../../io';
 import * as models from '../../models';
+import './completionItemProvider';
 import '../grpc/completionItemProvider';
 import { parseAmqpLine } from './amqpHttpRegionParser';
 import { parseAmqpResponse } from './amqpResponseHttpRegionParser';

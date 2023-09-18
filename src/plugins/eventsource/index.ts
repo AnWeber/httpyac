@@ -1,3 +1,4 @@
+import './completionItemProvider';
 import { javascriptProvider } from '../../io';
 import * as models from '../../models';
 import { parseEventSource } from './eventSourceHttpRegionParser';
