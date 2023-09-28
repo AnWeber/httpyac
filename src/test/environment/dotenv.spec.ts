@@ -231,8 +231,8 @@ foo=bar`;
       });
       const mockedEndpoints = await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
       const httpFile = await parseHttp(httpContent, '/src/test.http');
-      httpFile.activeEnvironment = ['dev'];
       await send({
+        activeEnvironment: ['dev'],
         httpFile,
       });
       const requests = await mockedEndpoints.getSeenRequests();

@@ -32,7 +32,7 @@ export class HttpyacJsApi {
     if (obj) {
       const result = await obj?.execute(this.context);
       if (result) {
-        const envKey = utils.toEnvironmentKey(this.context.httpFile.activeEnvironment);
+        const envKey = utils.toEnvironmentKey(this.context.activeEnvironment);
         utils.setVariableInContext(obj.variablesPerEnv[envKey], this.context);
       }
     }

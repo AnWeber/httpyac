@@ -83,7 +83,7 @@ export class HttpRegion implements models.HttpRegion {
         isMainContext,
       });
       if (!this.isGlobal()) {
-        this.resetDependentRegionsWithVisitor(toEnvironmentKey(this.httpFile.activeEnvironment), this, []);
+        this.resetDependentRegionsWithVisitor(toEnvironmentKey(context.activeEnvironment), this, []);
       }
       return result !== HookCancel && result.every(obj => !!obj);
     } catch (err) {

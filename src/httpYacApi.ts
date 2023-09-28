@@ -76,7 +76,7 @@ export async function createEmptyProcessorContext<T extends models.VariableProvi
 export async function getVariables(context: models.VariableProviderContext): Promise<Record<string, unknown>> {
   context.config = await getEnvironmentConfig(context.config, context.httpFile);
 
-  const vars = await context.httpFile.hooks.provideVariables.trigger(context.httpFile.activeEnvironment, context);
+  const vars = await context.httpFile.hooks.provideVariables.trigger(context.activeEnvironment, context);
   if (vars === HookCancel) {
     return context.variables || {};
   }

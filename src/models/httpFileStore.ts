@@ -6,7 +6,6 @@ export interface ParseOptions {
   httpFileStore: HttpFileStore;
   config?: EnvironmentConfig;
   workingDir?: PathLike;
-  activeEnvironment?: string[] | undefined;
 }
 
 export type HttpFileStoreOptions = Omit<ParseOptions, 'httpFileStore'>;

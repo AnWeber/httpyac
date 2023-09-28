@@ -31,7 +31,7 @@ class RefMetaAction {
     utils.report(context, `load reference ${this.data.name}`);
     const reference = utils.findHttpRegionInContext(this.data.name, context);
     if (reference) {
-      const envKey = utils.toEnvironmentKey(context.httpFile.activeEnvironment);
+      const envKey = utils.toEnvironmentKey(context.activeEnvironment);
       utils.setVariableInContext(reference.variablesPerEnv[envKey], context);
       log.trace('import variables', reference.variablesPerEnv[envKey]);
       if (this.data.force || utils.isUndefined(context.variables[this.data.name])) {

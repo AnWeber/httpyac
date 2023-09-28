@@ -13,7 +13,7 @@ export class RegionScopedVariablesInterceptor implements HookInterceptor<[models
     hookContext: HookTriggerContext<[models.ProcessorContext], boolean | undefined>
   ): Promise<boolean | undefined> {
     const context = hookContext.args[0];
-    const env = toEnvironmentKey(context.httpFile.activeEnvironment);
+    const env = toEnvironmentKey(context.activeEnvironment);
     if (context.config?.useRegionScopedVariables) {
       const regionScopedVariables: RegionScopedVariableOptions = context.options;
       regionScopedVariables.variables = context.variables;

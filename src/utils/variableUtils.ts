@@ -60,7 +60,7 @@ export function setVariableInContext(variables: models.Variables, context: model
   if (variables) {
     const checkedVariables = cleanVariables(variables);
     Object.assign(context.variables, checkedVariables);
-    const envKey = toEnvironmentKey(context.httpFile.activeEnvironment);
+    const envKey = toEnvironmentKey(context.activeEnvironment);
     if (!context.httpRegion.variablesPerEnv[envKey]) {
       context.httpRegion.variablesPerEnv[envKey] = {};
     }
@@ -79,14 +79,14 @@ export function cleanVariables(variables: models.Variables) {
 export function deleteVariableInContext(key: string, context: models.ProcessorContext) {
   delete context.variables[key];
 
-  const envKey = toEnvironmentKey(context.httpFile.activeEnvironment);
+  const envKey = toEnvironmentKey(context.activeEnvironment);
   if (context.httpRegion.variablesPerEnv[envKey]) {
     delete context.httpRegion.variablesPerEnv[envKey][key];
   }
 }
 
 export function unsetVariableInContext(variables: models.Variables, context: models.ProcessorContext) {
-  const envKey = toEnvironmentKey(context.httpFile.activeEnvironment);
+  const envKey = toEnvironmentKey(context.activeEnvironment);
   const envVariables = context.httpRegion.variablesPerEnv[envKey];
   for (const key of Object.keys(variables)) {
     delete context.variables[key];

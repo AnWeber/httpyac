@@ -64,7 +64,6 @@ export async function importHttpFileInContext(
         {
           workingDir: context.httpFile.rootDir,
           config: context.config,
-          activeEnvironment: context.httpFile.activeEnvironment,
         }
       );
       context.hooks = addHttpFileRequestClientHooks(context.hooks, ref);

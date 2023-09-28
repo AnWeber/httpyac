@@ -19,6 +19,7 @@ export interface Progress {
 
 export interface HttpFileSendContext {
   httpFile: HttpFile;
+  activeEnvironment?: string[];
   config?: EnvironmentConfig;
   progress?: Progress;
   httpRegionPredicate?: (obj: HttpRegion) => boolean;

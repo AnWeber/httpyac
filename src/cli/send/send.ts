@@ -108,6 +108,7 @@ async function execute(fileNames: Array<string>, options: SendOptions): Promise<
 
 export function convertCliOptionsToContext(cliOptions: SendOptions) {
   const context: Omit<models.HttpFileSendContext, 'httpFile'> = {
+    activeEnvironment: cliOptions.env,
     repeat: cliOptions.repeat
       ? {
           count: cliOptions.repeat,
@@ -166,7 +167,6 @@ async function getHttpFiles(fileNames: Array<string>, options: SendOptions, conf
 
   const parseOptions: models.HttpFileStoreOptions = {
     workingDir: process.cwd(),
-    activeEnvironment: options.env,
     config,
   };
   const paths: Array<string> = [];

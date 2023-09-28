@@ -36,6 +36,7 @@ export async function sendHttpFile(httpFile: models.HttpFile, variables: models.
   });
 
   await send({
+    activeEnvironment: httpFile.activeEnvironment,
     httpFile,
     variables,
   });

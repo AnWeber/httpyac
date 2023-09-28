@@ -33,8 +33,8 @@ async function execute(options: OAuth2Options): Promise<void> {
   const httpFileStore = new HttpFileStore();
 
   const context = await createEmptyProcessorContext({
+    activeEnvironment: options.env,
     httpFile: await httpFileStore.initHttpFile('oauth2.http', {
-      activeEnvironment: options.env,
       workingDir: process.cwd(),
     }),
     variables: options.var

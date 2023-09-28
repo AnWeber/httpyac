@@ -12,7 +12,7 @@ export class IntellijVariables implements Variables {
   }
 
   private getIntellijSession(context: models.ProcessorContext): IntellijGlobalCacheSession {
-    const envKey = utils.toEnvironmentKey(context.httpFile.activeEnvironment);
+    const envKey = utils.toEnvironmentKey(context.activeEnvironment);
     const id = `intellij_global_cache_${envKey}`;
     const userSession = userSessionStore.getUserSession(id);
     if (this.isIntellijGlobalCacheSession(userSession)) {

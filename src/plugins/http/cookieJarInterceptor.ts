@@ -15,10 +15,10 @@ export class CookieJarInterceptor implements HookInterceptor<[models.ProcessorCo
   async beforeTrigger(
     hookContext: HookTriggerContext<[models.ProcessorContext], boolean | undefined>
   ): Promise<boolean | undefined> {
-    const { request, httpFile, httpRegion, config, options } = hookContext.args[0];
+    const { request, httpRegion, config, options } = hookContext.args[0];
 
     if (utils.isHttpRequest(request) && !httpRegion.metaData.noCookieJar && config?.cookieJarEnabled) {
-      const idPrefix = this.getCookieStorePrefix(httpFile);
+      const idPrefix = this.getCookieStorePrefix(hookContext.args[0]);
       const cookieSessions: Array<CookieSession> = userSessionStore.userSessions.filter(
         obj => obj.type === 'Cookie' && obj.id.startsWith(idPrefix)
       );
@@ -49,7 +49,7 @@ export class CookieJarInterceptor implements HookInterceptor<[models.ProcessorCo
   async afterTrigger(
     hookContext: HookTriggerContext<[models.ProcessorContext], boolean | undefined>
   ): Promise<boolean | undefined> {
-    const { httpFile, options } = hookContext.args[0];
+    const { options } = hookContext.args[0];
 
     const memoryStore = options.memoryStore;
 
@@ -58,7 +58,7 @@ export class CookieJarInterceptor implements HookInterceptor<[models.ProcessorCo
         if (!err) {
           for (const cookie of cookies) {
             const cookieSession: CookieSession = {
-              id: `${this.getCookieStorePrefix(httpFile)}_${cookie.toString()}`,
+              id: `${this.getCookieStorePrefix(hookContext.args[0])}_${cookie.toString()}`,
               title: `${cookie.domain} ${cookie.path} ${cookie.key}`,
               description: `${cookie}`,
               type: 'Cookie',
@@ -96,7 +96,9 @@ export class CookieJarInterceptor implements HookInterceptor<[models.ProcessorCo
     }
     return true;
   }
-  private getCookieStorePrefix(httpFile: models.HttpFile) {
-    return `Cookies_${utils.toEnvironmentKey(httpFile.activeEnvironment)}_${httpFile.rootDir?.toString?.() || 'none'}`;
+  private getCookieStorePrefix(context: models.ProcessorContext) {
+    return `Cookies_${utils.toEnvironmentKey(context.activeEnvironment)}_${
+      context.httpFile.rootDir?.toString?.() || 'none'
+    }`;
   }
 }

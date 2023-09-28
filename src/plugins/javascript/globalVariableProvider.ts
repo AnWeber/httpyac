@@ -22,12 +22,12 @@ export class GlobalVariablesInterceptor implements HookInterceptor<[models.Proce
     const [context] = hookContext.args;
     const global = context.variables.$global;
     if (global && typeof global === 'object' && Object.keys(global).length > 0) {
-      const id = getGlobalUserSessionId(context.httpFile.activeEnvironment);
+      const id = getGlobalUserSessionId(context.activeEnvironment);
       userSessionStore.setUserSession({
         id,
         title: 'global store',
-        description: context.httpFile.activeEnvironment
-          ? `global Variables for ${context.httpFile.activeEnvironment.join(', ')}`
+        description: context.activeEnvironment
+          ? `global Variables for ${context.activeEnvironment.join(', ')}`
           : 'global Variables',
         type: 'global_cache',
         details: {

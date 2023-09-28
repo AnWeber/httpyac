@@ -1,3 +1,9 @@
+## [6.7.0]
+
+### Feature
+
+- allow change of active Environment in provided context (Anweber/vscode-httpyac#225)
+
 ## [6.6.7]  (2023-09-18)
 
 ### Fixes
