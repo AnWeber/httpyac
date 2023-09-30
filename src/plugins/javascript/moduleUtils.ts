@@ -83,7 +83,6 @@ export async function runScript(
     fileName: PathLike;
     lineOffset: number;
     context: Record<string, unknown>;
-    require?: Record<string, unknown>;
     deleteVariable?: (key: string) => void;
   }
 ): Promise<Record<string, unknown>> {
@@ -95,8 +94,9 @@ export async function runScript(
   const mod = createModule(filename);
 
   function extendedRequire(id: string) {
-    if (options.require && options.require[id]) {
-      return options.require[id];
+    const proivderRequire = io.javascriptProvider.require;
+    if (proivderRequire && proivderRequire[id]) {
+      return proivderRequire[id];
     }
     return mod.require(id);
   }

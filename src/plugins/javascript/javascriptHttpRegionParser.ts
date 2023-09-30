@@ -1,6 +1,5 @@
 import { HookInterceptor, HookTriggerContext } from 'hookpoint';
 
-import { javascriptProvider } from '../../io';
 import * as models from '../../models';
 import * as utils from '../../utils';
 import { HttpyacJsApi } from './httpyacJsApi';
@@ -178,7 +177,6 @@ async function executeScriptData(
       $context: context,
     },
     lineOffset: scriptData.lineOffset,
-    require: javascriptProvider.require,
     deleteVariable: (key: string) => utils.deleteVariableInContext(key, context),
   });
   if (result) {

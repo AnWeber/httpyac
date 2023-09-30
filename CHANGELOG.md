@@ -3,6 +3,8 @@
 ### Feature
 
 - allow change of active Environment in provided context (Anweber/vscode-httpyac#225)
+- allow setting channelCredentials in header using `string` (#553)
+- support using require in inline template
 
 ## [6.6.7]  (2023-09-18)
 
