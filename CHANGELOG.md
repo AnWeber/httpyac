@@ -6,6 +6,11 @@
 - allow setting channelCredentials in header using `string` (#553)
 - support using require in inline template
 
+### Fixes
+
+- improvements to completionItem API (AnWeber/vscode-httpyac#224)
+
+
 ## [6.6.7]  (2023-09-18)
 
 ### Fixes

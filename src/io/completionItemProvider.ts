@@ -7,9 +7,11 @@ export type CompletionItem = {
 };
 
 export const completionItemProvider: {
-  emptyLineProvider: Array<(text: string) => Array<CompletionItem>>;
+  emptyLineProvider: Array<() => Array<CompletionItem>>;
+  variableProvider: Array<() => Array<CompletionItem>>;
   requestHeaderProvider: Array<(request: models.Request) => Array<CompletionItem>>;
 } = {
   emptyLineProvider: [],
+  variableProvider: [],
   requestHeaderProvider: [],
 };
