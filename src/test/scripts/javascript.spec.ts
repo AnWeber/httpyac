@@ -60,7 +60,7 @@ describe('scripts.javascript', () => {
     GET  http://localhost:${localServer.port}/json?foo={{(new Date()).toString()}}
     `);
 
-    await sendHttpFile(httpFile);
+    await sendHttpFile({ httpFile });
 
     const requests = await mockedEndpoints.getSeenRequests();
     expect(requests.length).toBe(2);

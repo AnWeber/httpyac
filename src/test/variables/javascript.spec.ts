@@ -18,7 +18,7 @@ describe('variables.javascript', () => {
     GET  http://localhost:${localServer.port}/json?foo={{foo.version}}
     `);
 
-    await sendHttpFile(httpFile);
+    await sendHttpFile({ httpFile });
 
     const requests = await mockedEndpoints.getSeenRequests();
     expect(requests.length).toBe(1);
@@ -35,7 +35,7 @@ describe('variables.javascript', () => {
     GET  http://localhost:${localServer.port}/json?foo={{foo.version}}
     `);
 
-    await sendHttpFile(httpFile);
+    await sendHttpFile({ httpFile });
 
     const requests = await mockedEndpoints.getSeenRequests();
     expect(requests.length).toBe(1);

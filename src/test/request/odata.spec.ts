@@ -58,8 +58,11 @@ ${body}
     );
 
     expect(httpFile.httpRegions.length).toBe(1);
-    await sendHttpFile(httpFile, {
-      host: `http://localhost:${localServer.port}`,
+    await sendHttpFile({
+      httpFile,
+      variables: {
+        host: `http://localhost:${localServer.port}`,
+      },
     });
 
     const requests = await mockedEndpoints.getSeenRequests();
