@@ -17,8 +17,11 @@ describe('assert', () => {
     ?? response.parsedBody == {"foo": "bar"}
     `);
 
-    const responses = await sendHttpFile(httpFile, {
-      host: `http://localhost:${localServer.port}`,
+    const responses = await sendHttpFile({
+      httpFile,
+      variables: {
+        host: `http://localhost:${localServer.port}`,
+      },
     });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
@@ -37,8 +40,11 @@ describe('assert', () => {
     ?? notvalid response.parsedBody == {"foo": "bar"}
     `);
 
-    const responses = await sendHttpFile(httpFile, {
-      host: `http://localhost:${localServer.port}`,
+    const responses = await sendHttpFile({
+      httpFile,
+      variables: {
+        host: `http://localhost:${localServer.port}`,
+      },
     });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
@@ -57,8 +63,11 @@ describe('assert', () => {
     ?? js response.parsedBody =!= {"foo": "bar"}
     `);
 
-    const responses = await sendHttpFile(httpFile, {
-      host: `http://localhost:${localServer.port}`,
+    const responses = await sendHttpFile({
+      httpFile,
+      variables: {
+        host: `http://localhost:${localServer.port}`,
+      },
     });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);

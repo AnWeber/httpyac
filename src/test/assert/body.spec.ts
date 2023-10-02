@@ -20,8 +20,11 @@ describe('assert.body', () => {
     ?? body md5 m7WPJhkuS6APAeLnsTa72A==
     `);
 
-    const responses = await sendHttpFile(httpFile, {
-      host: `http://localhost:${localServer.port}`,
+    const responses = await sendHttpFile({
+      httpFile,
+      variables: {
+        host: `http://localhost:${localServer.port}`,
+      },
     });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
@@ -47,8 +50,11 @@ describe('assert.body', () => {
     ?? body foo == bar
     `);
 
-    const responses = await sendHttpFile(httpFile, {
-      host: `http://localhost:${localServer.port}`,
+    const responses = await sendHttpFile({
+      httpFile,
+      variables: {
+        host: `http://localhost:${localServer.port}`,
+      },
     });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
@@ -67,8 +73,11 @@ describe('assert.body', () => {
     ?? body foo == {{["bar"]}}
     `);
 
-    const responses = await sendHttpFile(httpFile, {
-      host: `http://localhost:${localServer.port}`,
+    const responses = await sendHttpFile({
+      httpFile,
+      variables: {
+        host: `http://localhost:${localServer.port}`,
+      },
     });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);

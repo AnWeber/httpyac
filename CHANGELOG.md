@@ -1,3 +1,9 @@
+## [6.7.1]
+
+### Fix
+
+- complete activeEnvironment refactor (Anweber/vscode-httpyac#230)
+
 ## [6.7.0]
 
 ### Feature

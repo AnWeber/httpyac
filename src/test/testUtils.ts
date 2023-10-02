@@ -29,16 +29,14 @@ export async function sendHttp(code: string, variables: models.Variables = {}) {
   return result;
 }
 
-export async function sendHttpFile(httpFile: models.HttpFile, variables: models.Variables = {}) {
+export async function sendHttpFile<T extends models.HttpFileSendContext>(context: T) {
   const result: Array<models.HttpResponse> = [];
-  httpFile.hooks.onResponse.addHook('testResponse', response => {
+  context.httpFile.hooks.onResponse.addHook('testResponse', response => {
     result.push(response);
   });
 
   await send({
-    activeEnvironment: httpFile.activeEnvironment,
-    httpFile,
-    variables,
+    ...context,
   });
   return result;
 }

@@ -18,8 +18,11 @@ describe('assert.xpath', () => {
     ?? xpath /bookstore/book/title == Everyday Italian
     `);
 
-    const responses = await sendHttpFile(httpFile, {
-      host: `http://localhost:${localServer.port}`,
+    const responses = await sendHttpFile({
+      httpFile,
+      variables: {
+        host: `http://localhost:${localServer.port}`,
+      },
     });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
@@ -39,8 +42,11 @@ describe('assert.xpath', () => {
     ?? xpath //bookml:title/text() == Harry Potter
     `);
 
-    const responses = await sendHttpFile(httpFile, {
-      host: `http://localhost:${localServer.port}`,
+    const responses = await sendHttpFile({
+      httpFile,
+      variables: {
+        host: `http://localhost:${localServer.port}`,
+      },
     });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
@@ -59,8 +65,11 @@ describe('assert.xpath', () => {
     ?? xpath /bookstore/book/title == Everyday Italian2
     `);
 
-    const responses = await sendHttpFile(httpFile, {
-      host: `http://localhost:${localServer.port}`,
+    const responses = await sendHttpFile({
+      httpFile,
+      variables: {
+        host: `http://localhost:${localServer.port}`,
+      },
     });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
@@ -77,8 +86,11 @@ describe('assert.xpath', () => {
     ?? xpath /bookstore/book/title == Everyday Italian2
     `);
 
-    const responses = await sendHttpFile(httpFile, {
-      host: `http://localhost:${localServer.port}`,
+    const responses = await sendHttpFile({
+      httpFile,
+      variables: {
+        host: `http://localhost:${localServer.port}`,
+      },
     });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);

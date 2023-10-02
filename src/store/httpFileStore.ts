@@ -74,7 +74,6 @@ export class HttpFileStore implements models.HttpFileStore {
                 Object.assign(httpRegion.variablesPerEnv, prevHttpRegion.variablesPerEnv);
               }
             }
-            httpFile.activeEnvironment = httpFileStoreEntry.httpFile.activeEnvironment;
           }
           httpFileStoreEntry.version = version;
           httpFileStoreEntry.httpFile = httpFile;

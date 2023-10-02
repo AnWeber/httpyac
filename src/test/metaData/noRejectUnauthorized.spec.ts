@@ -68,10 +68,13 @@ GET /metadata
 GET /intellijconfig
     `
     );
-    httpFile.activeEnvironment = ['Local'];
 
-    const respones = await sendHttpFile(httpFile, {
-      host: `https://localhost:${localServer.port}`,
+    const respones = await sendHttpFile({
+      httpFile,
+      activeEnvironment: ['Local'],
+      variables: {
+        host: `https://localhost:${localServer.port}`,
+      },
     });
     const requests = await mockedEndpoints.getSeenRequests();
     expect(requests.length).toBe(1);
