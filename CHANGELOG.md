@@ -1,11 +1,11 @@
-## [6.7.1]
+## [6.7.1] (2023-10-02)
 
 ### Fix
 
 - complete activeEnvironment refactor (Anweber/vscode-httpyac#230)
 - add filename to processedHttpRegion
 
-## [6.7.0]
+## [6.7.0] (2023-10-01)
 
 ### Feature
 
