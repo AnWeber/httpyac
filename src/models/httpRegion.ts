@@ -3,6 +3,7 @@ import { HttpFile } from './httpFile';
 import { Request } from './httpRequest';
 import { HttpResponse } from './httpResponse';
 import { HttpSymbol } from './httpSymbol';
+import { PathLike } from './pathLike';
 import { ProcessorContext } from './processorContext';
 import { TestResult } from './testResult';
 import { Variables } from './variables';
@@ -10,6 +11,7 @@ import { Variables } from './variables';
 export interface ProcessedHttpRegion {
   request?: Request;
   response?: HttpResponse;
+  filename: PathLike;
   symbol: HttpSymbol;
   metaData: Record<string, string | undefined | true>;
   testResults?: Array<TestResult>;

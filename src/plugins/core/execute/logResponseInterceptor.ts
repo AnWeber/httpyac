@@ -28,6 +28,7 @@ export class LogResponseInterceptor implements HookInterceptor<[models.Processor
       metaData: context.httpRegion.metaData && {
         ...context.httpRegion.metaData,
       },
+      filename: context.httpFile.fileName,
       symbol: context.httpRegion.symbol,
       testResults: context.httpRegion.testResults,
       request: context.httpRegion.request && {

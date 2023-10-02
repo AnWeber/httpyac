@@ -3,6 +3,7 @@
 ### Fix
 
 - complete activeEnvironment refactor (Anweber/vscode-httpyac#230)
+- add filename to processedHttpRegion
 
 ## [6.7.0]
 
