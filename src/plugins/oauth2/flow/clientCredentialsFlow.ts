@@ -29,7 +29,7 @@ class ClientCredentialsFlow implements OpenIdFlow {
           method: 'POST',
           body: utils.toQueryParams({
             grant_type: 'client_credentials',
-            scope: config.scope ?? 'openid',
+            scope: config.scope,
             audience: config.audience,
             resource: config.resource,
           }),
