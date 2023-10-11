@@ -4,10 +4,14 @@ import { stringifySafe } from './stringUtils';
 
 export async function repeat(
   load: () => Promise<models.HttpResponse | void | undefined>,
-  context: { repeat?: models.RepeatOptions }
+  context: { repeat?: models.RepeatOptions; isMainContext?: boolean }
 ) {
   const loader: Array<() => Promise<models.HttpResponse | void | undefined>> = [];
-  for (let index = 0; index < (context.repeat?.count || 1); index++) {
+  let repeatCount = 1;
+  if (context.repeat?.count && !!context.isMainContext) {
+    repeatCount = context.repeat.count;
+  }
+  for (let index = 0; index < repeatCount; index++) {
     loader.push(load);
   }
   const responses = [];
