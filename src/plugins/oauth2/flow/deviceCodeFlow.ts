@@ -121,7 +121,7 @@ class DeviceCodeFlow implements OpenIdFlow {
   ) {
     const response = await io.httpClientProvider.exchange?.(
       {
-        url: config.tokenEndpoint,
+        url: config.tokenEndpoint || '',
         method: 'POST',
         headers: {
           'content-type': 'application/x-www-form-urlencoded',
@@ -143,7 +143,7 @@ class DeviceCodeFlow implements OpenIdFlow {
   private async requestDeviceAuthorization(config: models.OpenIdConfiguration, context: models.OpenIdContext) {
     const response = await io.httpClientProvider.exchange?.(
       {
-        url: config.deviceCodeEndpoint,
+        url: config.deviceCodeEndpoint || '',
         method: 'POST',
         headers: {
           'content-type': 'application/x-www-form-urlencoded',
@@ -151,7 +151,7 @@ class DeviceCodeFlow implements OpenIdFlow {
         body: utils.toQueryParams({
           client_id: config.clientId,
           client_secret: config.useDeviceCodeClientSecret ? config.clientSecret : undefined,
-          scope: config.scope || 'openid',
+          scope: config.scope ?? 'openid',
           audience: config.audience,
           resource: config.resource,
         }),

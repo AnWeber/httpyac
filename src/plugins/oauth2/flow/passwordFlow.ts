@@ -25,7 +25,7 @@ class PasswordFlow implements OpenIdFlow {
       utils.report(context, 'execute OAuth2 password flow');
       return requestOpenIdInformation(
         {
-          url: config.tokenEndpoint,
+          url: config.tokenEndpoint || '',
           method: 'POST',
           body: utils.toQueryParams({
             grant_type: 'password',

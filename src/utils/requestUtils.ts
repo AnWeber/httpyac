@@ -156,7 +156,7 @@ export function decodeJWT(str: string): JWTToken | null {
   }
 }
 
-export function toQueryParams(params: Record<string, undefined | string | number | boolean>): string {
+export function toQueryParams(params: Record<string, undefined | string | number | boolean | null>): string {
   return Object.entries(params)
     .filter(([, value]) => !!value)
     .map(([key, value]) => `${key}=${encodeURIComponent(value || '')}`)

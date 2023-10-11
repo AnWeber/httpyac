@@ -32,10 +32,10 @@ class AuthorizationCodeFlow implements OpenIdFlow {
         try {
           utils.report(context, 'execute OAuth2 authorization_code flow');
           const authUrl = `${config.authorizationEndpoint}${
-            config.authorizationEndpoint.indexOf('?') > 0 ? '&' : '?'
+            config.authorizationEndpoint && config.authorizationEndpoint.indexOf('?') > 0 ? '&' : '?'
           }${utils.toQueryParams({
             client_id: config.clientId,
-            scope: config.scope || 'openid',
+            scope: config.scope ?? 'openid',
             response_type: 'code',
             state,
             audience: config.audience,
@@ -66,11 +66,11 @@ class AuthorizationCodeFlow implements OpenIdFlow {
                 }
                 const openIdInformation = requestOpenIdInformation(
                   {
-                    url: config.tokenEndpoint,
+                    url: config.tokenEndpoint || '',
                     method: 'POST',
                     body: utils.toQueryParams({
                       grant_type: 'authorization_code',
-                      scope: config.scope,
+                      scope: config.scope ?? 'opendid',
                       code: params.code,
                       redirect_uri: config.redirectUri.toString(),
                       ...(code_verifier ? { code_verifier } : {}),

@@ -25,7 +25,7 @@ class RefreshTokenFlow {
       const { tokenEndpoint, scope, resource, audience } = openIdInformation.config;
       return requestOpenIdInformation(
         {
-          url: tokenEndpoint,
+          url: tokenEndpoint || '',
           method: 'POST',
           body: utils.toQueryParams({
             grant_type: 'refresh_token',

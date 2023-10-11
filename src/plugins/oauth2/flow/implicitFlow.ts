@@ -31,11 +31,11 @@ class ImplicitFlow implements OpenIdFlow {
         const state = utils.stateGenerator();
         try {
           const authUrl = `${config.authorizationEndpoint}${
-            config.authorizationEndpoint.indexOf('?') > 0 ? '&' : '?'
+            config.authorizationEndpoint && config.authorizationEndpoint.indexOf('?') > 0 ? '&' : '?'
           }${utils.toQueryParams({
             client_id: config.clientId,
-            scope: config.scope || 'openid',
-            response_type: config.responseType || 'token',
+            scope: config.scope ?? 'openid',
+            response_type: config.responseType ?? 'token',
             nonce: utils.stateGenerator(),
             state,
             response_mode: config.responseMode,
@@ -62,7 +62,7 @@ class ImplicitFlow implements OpenIdFlow {
                 if (params.code) {
                   const openIdInformation = requestOpenIdInformation(
                     {
-                      url: config.tokenEndpoint,
+                      url: config.tokenEndpoint || '',
                       method: 'POST',
                       body: utils.toQueryParams({
                         grant_type: 'authorization_code',
@@ -99,7 +99,7 @@ class ImplicitFlow implements OpenIdFlow {
                     config,
                     id,
                     title: `implicit: ${config.clientId}`,
-                    description: config.tokenEndpoint,
+                    description: config.tokenEndpoint || '',
                     details: {
                       clientId: config.clientId,
                       tokenEndpoint: config.tokenEndpoint,

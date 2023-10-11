@@ -3,15 +3,14 @@ import { ensureString, toString } from './stringUtils';
 export function toBoolean(value: unknown, defaultValue = false): boolean {
   if (typeof value === 'boolean') return value;
   if (typeof value === 'number') return !!value;
-  const stringValue = ensureString(value);
-  const trimmedValue = stringValue.trim();
-  if (!trimmedValue) {
+  const stringValue = ensureString(value)?.trim();
+  if (!stringValue) {
     return defaultValue;
   }
-  if (/^true$/iu.test(trimmedValue)) {
+  if (/^true$/iu.test(stringValue)) {
     return true;
   }
-  if (/^false$/iu.test(trimmedValue)) {
+  if (/^false$/iu.test(stringValue)) {
     return false;
   }
   const numberValue = parseFloat(stringValue);

@@ -1,3 +1,8 @@
+## [unreleased]
+
+### Fix
+- only use default scope `opendid` if no scope is defined (#560)
+
 ## [6.7.1] (2023-10-02)
 
 ### Fix

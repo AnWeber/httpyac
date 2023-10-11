@@ -19,7 +19,7 @@ function getVariableRaw(variables: models.Variables, name: string, variablePrefi
   if (caseInsensitiveVariables.length === 1) {
     return caseInsensitiveVariables.pop();
   }
-  if (typeof varValue === 'undefined' || varValue === null) {
+  if (varValue === undefined) {
     varValue = get(variables, `${variablePrefix}.${name}`);
   }
   return varValue;
@@ -78,7 +78,7 @@ export function getOpenIdConfiguration(
     resource: getString('resource'),
     username: getString('username'),
     password: getString('password'),
-    subjectIssuer: getString('subjectIssuer'),
+    subjectIssuer: getString('subjectIssuer') || undefined,
     redirectUri: getUrl('redirectUri', DEFAULT_CALLBACK_URI),
     keepAlive: getBoolean('keepAlive', true),
     useAuthorizationHeader: getBoolean('useAuthorizationHeader', true),

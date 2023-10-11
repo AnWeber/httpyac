@@ -77,9 +77,9 @@ export function stringifySafe(obj: unknown, indent = 0) {
   }
 }
 
-export function ensureString(value: unknown): string {
+export function ensureString(value: unknown): string | null | undefined {
   if (typeof value === 'undefined' || value === null) {
-    return '';
+    return value;
   }
   if (isString(value)) {
     return value;

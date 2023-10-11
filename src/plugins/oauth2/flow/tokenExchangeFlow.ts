@@ -24,13 +24,13 @@ export class TokenExchangeFlow {
 
       return requestOpenIdInformation(
         {
-          url: config.tokenEndpoint,
+          url: config.tokenEndpoint || '',
           method: 'POST',
           body: utils.toQueryParams({
             grant_type: 'urn:ietf:params:oauth:grant-type:token-exchange',
             requested_token_type: 'urn:ietf:params:oauth:token-type:access_token',
             subject_token_type: 'urn:ietf:params:oauth:token-type:access_token',
-            scope: config.scope || 'openid',
+            scope: config.scope ?? 'openid',
             subject_issuer: config.subjectIssuer || jwtToken?.iss,
             subject_token: encodeUrl(openIdInformation.accessToken),
           }),

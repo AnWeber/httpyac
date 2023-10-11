@@ -25,11 +25,11 @@ class ClientCredentialsFlow implements OpenIdFlow {
       utils.report(context, 'execute OAuth2 client_credentials flow');
       return requestOpenIdInformation(
         {
-          url: config.tokenEndpoint,
+          url: config.tokenEndpoint || '',
           method: 'POST',
           body: utils.toQueryParams({
             grant_type: 'client_credentials',
-            scope: config.scope,
+            scope: config.scope ?? 'openid',
             audience: config.audience,
             resource: config.resource,
           }),
