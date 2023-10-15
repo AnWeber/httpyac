@@ -1,5 +1,6 @@
 import * as utils from '../../utils';
 import { MQTTRequestClient } from './mqttRequestClient';
+import { userSessionStore } from '../../store';
 
 export const parseMqttLine = utils.parseRequestLineFactory({
   protocol: 'MQTT',
@@ -11,4 +12,5 @@ export const parseMqttLine = utils.parseRequestLineFactory({
   modifyRequest(request) {
     request.supportsStreaming = true;
   },
+  sessionStore: userSessionStore,
 });

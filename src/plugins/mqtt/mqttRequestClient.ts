@@ -52,7 +52,7 @@ export class MQTTRequestClient extends models.AbstractRequestClient<MqttClient |
     return [];
   }
 
-  async connect(): Promise<void> {
+  async connect(): Promise<MqttClient | undefined> {
     if (isMQTTRequest(this.request)) {
       const request = this.request;
       const options: IClientOptions = {};
@@ -64,6 +64,7 @@ export class MQTTRequestClient extends models.AbstractRequestClient<MqttClient |
       this.registerEvents(this._nativeClient);
       this.subscribe(this._nativeClient, this.subscribeTopics, request);
     }
+    return this._nativeClient;
   }
 
   async send(body?: unknown): Promise<void> {

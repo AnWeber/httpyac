@@ -1,19 +1,12 @@
 import { AMQPChannel, AMQPClient } from '@cloudamqp/amqp-client';
 
 import * as models from '../../models';
-import * as store from '../../store';
 import * as utils from '../../utils';
 import * as amqpMethods from './amqpMethods';
 import * as constants from './amqpMethods/amqpConstants';
 import { AmqpRequest, isAmqpRequest } from './amqpRequest';
 
-interface AmqpSession {
-  client: AMQPClient;
-  channel: AMQPChannel;
-}
-
 export class AmqpRequestClient extends models.AbstractRequestClient<AMQPClient | undefined> {
-  private closeClientOnFinish = true;
   constructor(
     private readonly request: models.Request,
     private readonly context: models.ProcessorContext
@@ -28,6 +21,10 @@ export class AmqpRequestClient extends models.AbstractRequestClient<AMQPClient |
     return true;
   }
 
+  public getSessionId() {
+    return utils.replaceInvalidChars(this.request.url);
+  }
+
   private _channel: AMQPChannel | undefined;
   public get channel(): AMQPChannel | undefined {
     return this._channel;
@@ -38,51 +35,18 @@ export class AmqpRequestClient extends models.AbstractRequestClient<AMQPClient |
     return this._nativeClient;
   }
 
-  private async initAMQPClient(request: AmqpRequest): Promise<void> {
-    const channelId = utils.getHeaderNumber(request.headers, constants.AmqpChannelId);
-    if (channelId) {
-      const userSession: (models.UserSession & Partial<AmqpSession>) | undefined =
-        store.userSessionStore.getUserSession(this.getAmqpSessionId(request, channelId));
-      if (userSession && userSession.client && userSession.channel) {
-        this._nativeClient = userSession.client;
-        this._channel = userSession.channel;
-        this.closeClientOnFinish = false;
-        return;
-      }
-    }
-
-    this._nativeClient = new AMQPClient(request.url || '');
-    await this._nativeClient.connect();
-    this._channel = await this._nativeClient.channel(channelId);
-
-    this.setUserSession(request, this._nativeClient, this._channel);
-  }
-
-  private getAmqpSessionId(request: AmqpRequest, channelId: number) {
-    return `amqp_${request.url}_${channelId}`;
-  }
-  private setUserSession(request: AmqpRequest, client: AMQPClient, channel: AMQPChannel) {
-    const session: models.UserSession & AmqpSession = {
-      id: this.getAmqpSessionId(request, channel.id),
-      description: `${request.url} and channel ${channel.id}`,
-      details: {
-        url: request.url,
-      },
-      title: `AMQP Client for ${request.url}`,
-      type: 'AMQP',
-      client,
-      channel,
-      delete: async () => {
-        this.disconnect();
-      },
-    };
-    store.userSessionStore.setUserSession(session);
-  }
-
-  async connect(): Promise<void> {
+  async connect(obj: AMQPClient | undefined): Promise<AMQPClient | undefined> {
     if (isAmqpRequest(this.request)) {
-      await this.initAMQPClient(this.request);
+      if (obj) {
+        this._nativeClient = obj;
+      } else {
+        this._nativeClient = new AMQPClient(this.request.url || '');
+        await this._nativeClient.connect();
+      }
+      const channelId = utils.getHeaderNumber(this.request.headers, constants.AmqpChannelId);
+      this._channel = await this._nativeClient.channel(channelId);
       await this.executeAmqpMethod(this.request);
+      return this._nativeClient;
     }
     return undefined;
   }
@@ -115,19 +79,14 @@ export class AmqpRequestClient extends models.AbstractRequestClient<AMQPClient |
   }
 
   override disconnect(err?: Error): void {
-    if (this.closeClientOnFinish) {
-      if (isAmqpRequest(this.request) && this._channel?.id) {
-        store.userSessionStore.removeUserSession(this.getAmqpSessionId(this.request, this._channel.id));
-      }
-      if (err) {
-        this.channel?.close();
-        this._nativeClient?.close(err.message);
-      } else {
-        this._channel?.close();
-        this._nativeClient?.close();
-      }
-      this.onDisconnect();
+    if (err) {
+      this.channel?.close();
+      this._nativeClient?.close(err.message);
+    } else {
+      this._channel?.close();
+      this._nativeClient?.close();
     }
+    this.onDisconnect();
   }
 
   private getMethod(methodName = 'publish') {

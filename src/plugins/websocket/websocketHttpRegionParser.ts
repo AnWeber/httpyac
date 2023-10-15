@@ -1,5 +1,6 @@
 import * as utils from '../../utils';
 import { WebsocketRequestClient } from './websocketRequestClient';
+import { userSessionStore } from '../../store';
 
 export const parseWebsocketLine = utils.parseRequestLineFactory({
   protocol: 'WS',
@@ -11,4 +12,5 @@ export const parseWebsocketLine = utils.parseRequestLineFactory({
   modifyRequest(request) {
     request.supportsStreaming = true;
   },
+  sessionStore: userSessionStore,
 });

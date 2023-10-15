@@ -1,6 +1,7 @@
 import { httpClientProvider } from '../../../io';
 import * as models from '../../../models';
 import * as utils from '../../../utils';
+import { userSessionStore } from '../../../store';
 
 export const parseHttpRequestLine = utils.parseRequestLineFactory({
   protocol: 'HTTP',
@@ -21,6 +22,7 @@ export const parseHttpRequestLine = utils.parseRequestLineFactory({
       parseProtocol(request);
     }
   },
+  sessionStore: userSessionStore,
 });
 
 function parseProtocol(request: models.HttpRequest) {

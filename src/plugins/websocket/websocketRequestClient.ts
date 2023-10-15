@@ -5,19 +5,13 @@ import { SocksProxyAgent } from 'socks-proxy-agent';
 import WebSocket, { ClientOptions } from 'ws';
 
 import * as models from '../../models';
-import * as store from '../../store';
 import * as utils from '../../utils';
 import { isWebsocketRequest, WebsocketRequest } from './websocketRequest';
 
 const WEBSOCKET_CLOSE_NORMAL = 1000;
 const WEBSOCKET_CLOSE_GOING_AWAY = 1001;
 
-interface WebsocketSession extends models.UserSession {
-  client: WebSocket;
-}
-
 export class WebsocketRequestClient extends models.AbstractRequestClient<WebSocket | undefined> {
-  private closeOnFinish = true;
   private _nativeClient: WebSocket | undefined;
   private responseTemplate: Partial<models.HttpResponse> & { protocol: string } = {
     protocol: 'WS',
@@ -41,35 +35,29 @@ export class WebsocketRequestClient extends models.AbstractRequestClient<WebSock
     return this._nativeClient;
   }
 
-  async connect(): Promise<void> {
-    if (isWebsocketRequest(this.request)) {
-      this._nativeClient = this.initWebsocket(this.request);
-      if (this.closeOnFinish) {
-        this.registerEvents(this._nativeClient);
-        await new Promise<void>(resolve => {
-          const resolveListener = () => {
-            resolve();
-            this.nativeClient?.off('open', resolveListener);
-            this.nativeClient?.off('close', resolveListener);
-          };
-          this._nativeClient?.on('open', resolveListener);
-          this._nativeClient?.on('close', resolveListener);
-        });
-      }
-    }
+  public getSessionId() {
+    return utils.replaceInvalidChars(this.request.url);
   }
 
-  private initWebsocket(request: WebsocketRequest) {
-    const session: (models.UserSession & Partial<WebsocketSession>) | undefined = store.userSessionStore.getUserSession(
-      this.getWebsocketId(request)
-    );
-    if (session?.client) {
-      this.closeOnFinish = false;
-      return session.client;
+  async connect(obj: WebSocket | undefined): Promise<WebSocket | undefined> {
+    if (obj) {
+      this._nativeClient = obj;
+      return obj;
     }
-    const nativeClient = new WebSocket(this.request.url || '', this.getClientOptions(request));
-    this.setUserSession(request, nativeClient);
-    return nativeClient;
+    if (isWebsocketRequest(this.request)) {
+      this._nativeClient = new WebSocket(this.request.url || '', this.getClientOptions(this.request));
+      this.registerEvents(this._nativeClient);
+      await new Promise<void>(resolve => {
+        const resolveListener = () => {
+          resolve();
+          this.nativeClient?.off('open', resolveListener);
+          this.nativeClient?.off('close', resolveListener);
+        };
+        this._nativeClient?.on('open', resolveListener);
+        this._nativeClient?.on('close', resolveListener);
+      });
+    }
+    return this._nativeClient;
   }
 
   async send(body?: unknown): Promise<void> {
@@ -91,10 +79,7 @@ export class WebsocketRequestClient extends models.AbstractRequestClient<WebSock
   }
 
   override disconnect(err?: Error): void {
-    if (this.closeOnFinish) {
-      this.removeWebsocketSession();
-      this.closeWebsocket(err);
-    }
+    this.closeWebsocket(err);
   }
 
   private closeWebsocket(err?: Error) {
@@ -142,7 +127,6 @@ export class WebsocketRequestClient extends models.AbstractRequestClient<WebSock
         body: utils.toString(reason) || 'close',
         rawBody: Buffer.isBuffer(reason) ? reason : undefined,
       });
-      this.removeWebsocketSession();
     });
 
     const metaDataEvents = ['upgrade', 'unexpected-response', 'ping', 'pong', 'closing', 'close'];
@@ -194,31 +178,6 @@ export class WebsocketRequestClient extends models.AbstractRequestClient<WebSock
       this.initProxy(configOptions, request.proxy);
     }
     return Object.assign({}, config?.request, request.options, metaDataOptions);
-  }
-
-  private getWebsocketId(request: WebsocketRequest) {
-    return `ws_${request.url}`;
-  }
-  private setUserSession(request: WebsocketRequest, client: WebSocket) {
-    const session: models.UserSession & WebsocketSession = {
-      id: this.getWebsocketId(request),
-      description: `Client for ${request.url}`,
-      details: {
-        url: request.url,
-      },
-      title: `WS Client for ${request.url}`,
-      type: 'WS',
-      client,
-      delete: async () => {
-        this.closeWebsocket();
-      },
-    };
-    store.userSessionStore.setUserSession(session);
-  }
-  private removeWebsocketSession() {
-    if (isWebsocketRequest(this.request)) {
-      store.userSessionStore.removeUserSession(this.getWebsocketId(this.request));
-    }
   }
 
   private initProxy(options: ClientOptions, proxy: string | undefined) {

@@ -2,6 +2,7 @@ import * as utils from '../../utils';
 import { getKafkaMethod } from './kafkaMethods';
 import { isKafkaRequest } from './kafkaRequest';
 import { KafkaRequestClient } from './kafkaRequestClient';
+import { userSessionStore } from '../../store';
 
 export const parseKafkaLine = utils.parseRequestLineFactory({
   protocol: 'KAFKA',
@@ -16,4 +17,5 @@ export const parseKafkaLine = utils.parseRequestLineFactory({
       request.method = getKafkaMethod(request);
     }
   },
+  sessionStore: userSessionStore,
 });

@@ -1,4 +1,5 @@
 import * as utils from '../../utils';
+import { userSessionStore } from '../../store';
 import { EventSourceRequestClient } from './eventSourceRequestClient';
 
 export const parseEventSource = utils.parseRequestLineFactory({
@@ -10,4 +11,5 @@ export const parseEventSource = utils.parseRequestLineFactory({
   modifyRequest(request) {
     request.supportsStreaming = true;
   },
+  sessionStore: userSessionStore,
 });

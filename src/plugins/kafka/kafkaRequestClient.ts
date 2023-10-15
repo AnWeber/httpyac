@@ -18,7 +18,7 @@ export class KafkaRequestClient extends models.AbstractRequestClient<Kafka | und
     return this._nativeClient;
   }
 
-  async connect(): Promise<void> {
+  async connect(): Promise<Kafka | undefined> {
     if (isKafkaRequest(this.request)) {
       this._nativeClient = new Kafka({
         ...this.request.options,
@@ -27,6 +27,7 @@ export class KafkaRequestClient extends models.AbstractRequestClient<Kafka | und
       });
       await this.executeKafkaMethod(this.request);
     }
+    return this._nativeClient;
   }
   async send(body?: unknown): Promise<void> {
     if (isKafkaRequest(this.request) && this.nativeClient && body) {

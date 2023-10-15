@@ -7,9 +7,11 @@ import { report } from './logUtils';
 import { mergeResponses, repeat } from './repeatUtils';
 import { toString } from './stringUtils';
 import { deleteVariableInContext, setVariableInContext } from './variableUtils';
+import { v4 } from 'uuid';
 
 export function executeRequestClientFactory<T extends models.RequestClient>(
-  requestClientFactory: (request: models.Request, context: models.ProcessorContext) => T
+  requestClientFactory: (request: models.Request, context: models.ProcessorContext) => T,
+  sessionStore: models.SessionStore
 ) {
   return async function (context: models.ProcessorContext) {
     const { request } = context;
@@ -26,6 +28,10 @@ export function executeRequestClientFactory<T extends models.RequestClient>(
       );
       context.requestClient = requestClient;
       const dispose = registerCancellation(requestClient, context);
+      const connectionId = requestClient.getSessionId?.() || v4();
+      const connectionSession = getConnectionSession(sessionStore, connectionId, request, () => {
+        requestClient.disconnect(new Error('user cancellation'));
+      });
       try {
         const messagePromises: Array<Promise<models.HttpResponse | undefined>> = [];
         addProgressEvent(requestClient, context);
@@ -33,11 +39,18 @@ export function executeRequestClientFactory<T extends models.RequestClient>(
         addMetaDataEvent(requestClient, context, messagePromises);
 
         report(context, requestClient.reportMessage);
-        await requestClient.connect();
+
+        const newClient = await requestClient.connect(connectionSession?.connection);
+
+        connectionSession.connectionCount++;
+        if (newClient !== connectionSession?.connection) {
+          connectionSession.connection = newClient;
+        }
+
         await Promise.all([
           repeat(() => requestClient.send(), context),
           onStreaming(context).then(() => {
-            requestClient.disconnect();
+            requestClient.streamEnded?.();
           }),
         ]);
 
@@ -48,14 +61,21 @@ export function executeRequestClientFactory<T extends models.RequestClient>(
             return false;
           }
         }
-        requestClient.disconnect();
+        connectionSession.connectionCount--;
+        if (shouldDisconnectConnection(sessionStore, connectionSession)) {
+          requestClient.disconnect();
+        }
+
         return true;
       } catch (err) {
-        (context.scriptConsole || log).error(context.request);
-        if (isError(err)) {
-          requestClient.disconnect(err);
-        } else {
-          requestClient.disconnect(new Error(toString(err)));
+        connectionSession.connectionCount--;
+        if (shouldDisconnectConnection(sessionStore, connectionSession)) {
+          (context.scriptConsole || log).error(context.request);
+          if (isError(err)) {
+            requestClient.disconnect(err);
+          } else {
+            requestClient.disconnect(new Error(toString(err)));
+          }
         }
         throw err;
       } finally {
@@ -184,4 +204,44 @@ export function createResponseProxy(response: models.HttpResponse): models.HttpR
     },
   });
   return proxy;
+}
+
+interface ConnectionSession extends models.UserSession {
+  connection?: unknown;
+  connectionCount: number;
+}
+
+function getConnectionSession(
+  sessionStore: models.SessionStore,
+  id: string,
+  request: models.Request,
+  disconnect: () => void
+): ConnectionSession {
+  const result = sessionStore.getUserSession(id);
+  if ((result as ConnectionSession)?.connection) {
+    return result as ConnectionSession;
+  }
+  const newSession = {
+    id,
+    description: `Pending Connection`,
+    details: {
+      method: request.method,
+      url: request.url,
+    },
+    title: `${request.method} ${request.url}`,
+    type: 'Stream',
+    connectionCount: 0,
+    delete: disconnect,
+  };
+
+  sessionStore.setUserSession(newSession);
+  return newSession;
+}
+
+function shouldDisconnectConnection(sessionStore: models.SessionStore, connectionSession: ConnectionSession) {
+  if (connectionSession.connectionCount <= 0) {
+    delete connectionSession.delete;
+    sessionStore.removeUserSession(connectionSession.id);
+  }
+  return connectionSession.connectionCount === 0;
 }

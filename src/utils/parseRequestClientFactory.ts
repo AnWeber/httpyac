@@ -12,6 +12,7 @@ interface RequestParserContext {
   modifyRequest?: (request: models.Request) => void;
   methodRegex: RegExp;
   protocolRegex?: RegExp;
+  sessionStore: models.SessionStore;
 }
 
 export function parseRequestLineFactory(requestContext: RequestParserContext) {
@@ -82,7 +83,7 @@ export function parseRequestLineFactory(requestContext: RequestParserContext) {
 
       context.httpRegion.hooks.execute.addHook(
         requestContext.protocol.toLowerCase(),
-        executeRequestClientFactory(requestContext.requestClientFactory)
+        executeRequestClientFactory(requestContext.requestClientFactory, requestContext.sessionStore)
       );
 
       return result;

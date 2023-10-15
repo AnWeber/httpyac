@@ -2,6 +2,7 @@ import * as utils from '../../utils';
 import { getAmqpMethod } from './amqpMethods/amqpConstants';
 import { isAmqpRequest } from './amqpRequest';
 import { AmqpRequestClient } from './amqpRequestClient';
+import { userSessionStore } from '../../store';
 
 export const parseAmqpLine = utils.parseRequestLineFactory({
   protocol: 'AMQP',
@@ -16,4 +17,5 @@ export const parseAmqpLine = utils.parseRequestLineFactory({
       request.method = getAmqpMethod(request);
     }
   },
+  sessionStore: userSessionStore,
 });

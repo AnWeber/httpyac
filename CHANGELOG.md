@@ -3,6 +3,8 @@
 ### Fix
 - only use default scope `opendid` if no scope is defined (#560)
 - use repeat only in mainContext and not in forceRef calls (#562)
+- store all connections as session in userStorage to allow disconnect (#565)
+- new amqp client does not disconnect previous amqp client (#565)
 
 ## [6.7.1] (2023-10-02)
 

@@ -23,8 +23,8 @@ export class HttpRequestClient extends models.AbstractRequestClient<typeof got> 
     return got;
   }
 
-  async connect(): Promise<void> {
-    // nothing
+  async connect(): Promise<typeof got> {
+    return this.nativeClient;
   }
 
   private cancelableRequest: CancelableRequest<Response<unknown>> | undefined;

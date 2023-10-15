@@ -1,5 +1,6 @@
 import * as utils from '../../utils';
 import { GrpcRequestClient } from './grpcRequestClient';
+import { userSessionStore } from '../../store';
 
 export const parseGrpcLine = utils.parseRequestLineFactory({
   protocol: 'GRPC',
@@ -11,4 +12,5 @@ export const parseGrpcLine = utils.parseRequestLineFactory({
   modifyRequest(request) {
     request.supportsStreaming = true;
   },
+  sessionStore: userSessionStore,
 });

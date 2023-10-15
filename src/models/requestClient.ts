@@ -6,10 +6,15 @@ export type RequestClientResponse = undefined | void | HttpResponse;
 
 export interface RequestClient<T = unknown> {
   readonly supportsStreaming: boolean;
+  getSessionId?(): string;
   reportMessage: string;
   nativeClient: T;
-  connect(): Promise<void>;
+  connect(obj: T | undefined): Promise<T>;
   send(body?: unknown): Promise<void>;
+  /**
+   * called after onStreaming finished using this client
+   */
+  streamEnded?(): void;
   disconnect(err?: Error): void;
   on<K extends keyof RequestClientEventMap>(
     type: K,
@@ -35,7 +40,7 @@ export abstract class AbstractRequestClient<T> implements RequestClient<T> {
   abstract disconnect(err?: Error): void;
   abstract nativeClient: T;
   abstract reportMessage: string;
-  abstract connect(): Promise<void>;
+  abstract connect(obj: T | undefined): Promise<T>;
   abstract send(body?: unknown): Promise<void>;
   private eventEmitter = new EventEmitter();
 

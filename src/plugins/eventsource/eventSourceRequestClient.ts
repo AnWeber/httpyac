@@ -26,11 +26,12 @@ export class EventSourceRequestClient extends models.AbstractRequestClient<Event
     return this._nativeClient;
   }
 
-  async connect(): Promise<void> {
+  async connect(): Promise<EventSource | undefined> {
     if (isEventSourceRequest(this.request)) {
       this._nativeClient = new EventSource(this.request.url || '', this.getClientOptions(this.request));
       this.registerEvents(this._nativeClient, this.request);
     }
+    return this._nativeClient;
   }
 
   async send(): Promise<void> {
