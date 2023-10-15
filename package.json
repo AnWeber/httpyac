@@ -110,6 +110,7 @@
     "filesize": "^10.0.7",
     "globby": "^13.2.2",
     "got": "^11.8.6",
+    "grpc-reflection-js": "^0.3.0",
     "hookpoint": "3.2.1",
     "http-proxy-agent": "^7.0.0",
     "https-proxy-agent": "^7.0.1",

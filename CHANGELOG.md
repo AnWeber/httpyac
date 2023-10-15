@@ -1,5 +1,9 @@
 ## [unreleased]
 
+### Feature
+
+- add support for grpc-reflection (#566)
+
 ### Fix
 - only use default scope `opendid` if no scope is defined (#560)
 - use repeat only in mainContext and not in forceRef calls (#562)

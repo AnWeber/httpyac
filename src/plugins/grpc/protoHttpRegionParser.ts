@@ -19,6 +19,7 @@ export async function parseProtoImport(
 
     if (matchProto?.groups?.fileName) {
       const protoDefinition = new models.ProtoDefinition(matchProto.groups.fileName.trim());
+      protoDefinition.loaderOptions = {};
 
       const protoSymbol: models.HttpSymbol = {
         name: next.value.textLine,
@@ -42,8 +43,9 @@ export async function parseProtoImport(
           utils.parseComments,
           utils.parseRequestHeaderFactory(protoDefinition.loaderOptions),
           utils.parseDefaultHeadersFactory((headers, context: models.ProtoProcessorContext) => {
-            if (context.options.protoDefinitions) {
-              Object.assign(context.options.protoDefinitions[protoDefinition.fileName].loaderOptions, headers);
+            const loaderOptions = context.options.protoDefinitions?.[protoDefinition.fileName]?.loaderOptions;
+            if (loaderOptions) {
+              Object.assign(loaderOptions, headers);
             }
           }),
         ],
@@ -75,7 +77,7 @@ export class ProtoImportAction {
     utils.report(context, `import proto ${this.protoDefinition.fileName}`);
     const definition = context.options.protoDefinitions?.[this.protoDefinition.fileName];
     if (definition && io.userInteractionProvider.isTrusted('Proto-Loader')) {
-      const options = await this.convertLoaderOptions(definition.loaderOptions, context);
+      const options = await this.convertLoaderOptions(context, definition.loaderOptions);
       definition.packageDefinition = await utils.replaceFilePath(
         this.protoDefinition.fileName,
         context,
@@ -98,7 +100,7 @@ export class ProtoImportAction {
     return true;
   }
 
-  private async convertLoaderOptions(loaderOptions: Record<string, unknown>, context: models.ProcessorContext) {
+  private async convertLoaderOptions(context: models.ProcessorContext, loaderOptions?: Record<string, unknown>) {
     const options = { ...loaderOptions };
 
     const optionsScript = utils.toMultiLineString(

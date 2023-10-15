@@ -4,11 +4,9 @@ import { PackageDefinition } from '@grpc/proto-loader';
 import { ProcessorContext } from './processorContext';
 
 export class ProtoDefinition {
-  loaderOptions: Record<string, string>;
+  loaderOptions?: Record<string, string>;
 
-  constructor(readonly fileName: string) {
-    this.loaderOptions = {};
-  }
+  constructor(readonly fileName: string) {}
   packageDefinition?: PackageDefinition;
   grpcObject?: GrpcObject;
 }

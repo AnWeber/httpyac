@@ -1,22 +1,13 @@
-import './completionItemProvider';
-
-import * as grpc from '@grpc/grpc-js';
-
-import { javascriptProvider } from '../../io';
-import * as models from '../../models';
-import { callOptionsRequestHook } from './callOptionsRequestHook';
-import { channelCredentialsRequestHook } from './channelCredentialsRequestHook';
-import { channelOptionsRequestHook } from './channelOptionsRequestHook';
-import { parseGrpcLine } from './grpcHttpRegionParser';
-import { parseGrpcResponse } from './grpcResponseHttpRegionParser';
-import { parseProtoImport } from './protoHttpRegionParser';
-
-export function registerGrpcPlugin(api: models.HttpyacHooksApi) {
-  api.hooks.parse.addHook('proto', parseProtoImport, { before: ['request'] });
-  api.hooks.parse.addHook('grpc', parseGrpcLine, { before: ['request'] });
-  api.hooks.parse.addHook('grpcResponse', parseGrpcResponse, { before: ['requestBody'] });
-  api.hooks.onRequest.addHook('channelOptions', channelOptionsRequestHook);
-  api.hooks.onRequest.addHook('channelCredentials', channelCredentialsRequestHook);
-  api.hooks.onRequest.addHook('callOptions', callOptionsRequestHook);
-  javascriptProvider.require['@grpc/grpc-js'] = grpc;
-}
+export * from './callOptionsRequestHook';
+export * from './channelCredentialsRequestHook';
+export * from './channelOptionsRequestHook';
+export * from './completionItemProvider';
+export * from './createGrpcService';
+export * from './grpcHttpRegionParser';
+export * from './grpcRequest';
+export * from './grpcRequestClient';
+export * from './grpcResponseHttpRegionParser';
+export * from './pathAwareChannel';
+export * from './protoHttpRegionParser';
+export * from './grpcReflectionMetaDataHandler';
+export * from './registerGrpcPlugin';

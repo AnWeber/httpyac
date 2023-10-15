@@ -23,10 +23,10 @@ export interface ServiceData {
   methodDefinition: grpc.MethodDefinition<unknown, unknown>;
 }
 
-export function getSerivceData(url: string, protoDefinitions: Record<string, ProtoDefinition>): ServiceData {
-  const GrpcUrlRegex =
-    /^\s*((?<protocol>grpc|https?):\/\/)?(?<server>[^/]+?)(\/(?<path>.+))?\/(?<service>[^/]+?)\/(?<method>[^/]+?)$/iu;
+export const GrpcUrlRegex =
+  /^\s*((?<protocol>grpc|https?):\/\/)?(?<server>[^/]+?)(\/(?<path>.+))?\/(?<service>[^/]+?)\/(?<method>[^/]+?)$/iu;
 
+export function getSerivceData(url: string, protoDefinitions: Record<string, ProtoDefinition>): ServiceData {
   const urlMatch = GrpcUrlRegex.exec(url);
   if (urlMatch && urlMatch.groups?.service) {
     const { server, path, service, method, protocol } = urlMatch.groups;
