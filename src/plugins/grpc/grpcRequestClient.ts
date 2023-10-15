@@ -71,6 +71,9 @@ export class GrpcRequestClient extends models.AbstractRequestClient<ServiceData 
       const protoDefinitions = this.context.options.protoDefinitions;
       if (protoDefinitions) {
         this._nativeClient = getSerivceData(this.request.url || '', protoDefinitions);
+      } else {
+        log.error('no protodefinitions found in context');
+        throw new Error('Missing protodefinitions');
       }
     }
     return this._nativeClient;
