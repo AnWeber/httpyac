@@ -5,6 +5,7 @@ export type FileEncoding =
   | 'utf8'
   | 'utf-8'
   | 'utf16le'
+  | 'utf-16le'
   | 'ucs2'
   | 'ucs-2'
   | 'base64'
