@@ -4,7 +4,7 @@ import { Duplex, Readable, Writable } from 'stream';
 import { log } from '../../io';
 import * as models from '../../models';
 import * as utils from '../../utils';
-import { getSerivceData, ServiceData } from './createGrpcService';
+import { getSerivceData, GrpcClient, ServiceData } from './createGrpcService';
 import { GrpcRequest, isGrpcRequest } from './grpcRequest';
 import { PathAwareChannel } from './pathAwareChannel';
 
@@ -17,7 +17,7 @@ interface GrpcError {
   message?: string;
 }
 
-export class GrpcRequestClient extends models.AbstractRequestClient<ServiceData | undefined> {
+export class GrpcRequestClient extends models.AbstractRequestClient<GrpcClient | undefined> {
   private grpcStream: GrpcStream | undefined;
   private responseTemplate: Partial<models.HttpResponse> & { protocol: string } = {
     protocol: 'GRPC',
@@ -35,12 +35,15 @@ export class GrpcRequestClient extends models.AbstractRequestClient<ServiceData 
 
   get supportsStreaming() {
     return (
-      !!this.nativeClient?.methodDefinition?.requestStream || !!this.nativeClient?.methodDefinition?.responseStream
+      !!this._clientDefinition?.methodDefinition?.requestStream ||
+      !!this._clientDefinition?.methodDefinition?.responseStream
     );
   }
 
-  private _nativeClient: ServiceData | undefined;
-  get nativeClient(): ServiceData | undefined {
+  private _clientDefinition: ServiceData | undefined;
+
+  private _nativeClient: GrpcClient | undefined;
+  get nativeClient(): GrpcClient | undefined {
     return this._nativeClient;
   }
 
@@ -66,11 +69,25 @@ export class GrpcRequestClient extends models.AbstractRequestClient<ServiceData 
     return Object.assign(options, request.options);
   }
 
-  async connect(): Promise<ServiceData | undefined> {
+  public getSessionId() {
+    return utils.replaceInvalidChars(this.request.url);
+  }
+
+  async connect(prevClient: GrpcClient | undefined): Promise<GrpcClient | undefined> {
     if (isGrpcRequest(this.request)) {
       const protoDefinitions = this.context.options.protoDefinitions;
       if (protoDefinitions) {
-        this._nativeClient = getSerivceData(this.request.url || '', protoDefinitions);
+        this._clientDefinition = getSerivceData(this.request.url || '', protoDefinitions);
+
+        if (prevClient) {
+          this._nativeClient = prevClient;
+        } else {
+          this._nativeClient = new this._clientDefinition.ServiceClass(
+            this._clientDefinition.server,
+            this.request.channelCredentials || grpc.credentials.createInsecure(),
+            this.getChannelOptions(this.request, this._clientDefinition)
+          );
+        }
       } else {
         log.error('no protodefinitions found in context');
         throw new Error('Missing protodefinitions');
@@ -83,13 +100,13 @@ export class GrpcRequestClient extends models.AbstractRequestClient<ServiceData 
     return new Promise<void>(resolve => {
       const data = this.getData(body || this.request.body);
 
-      const initNewStream = !this.grpcStream || !this._nativeClient?.methodDefinition.requestStream;
+      const initNewStream = !this.grpcStream || !this._clientDefinition?.methodDefinition.requestStream;
 
       if (initNewStream) {
         this.grpcStream = this.callMethod(data, resolve);
 
         if (this.grpcStream instanceof Duplex || this.grpcStream instanceof Readable) {
-          this.grpcStream.once('end', () => resolve());
+          this.grpcStream.once('close', () => resolve());
         }
       }
       if (isGrpcRequest(this.request) && (this.grpcStream instanceof Writable || this.grpcStream instanceof Duplex)) {
@@ -102,11 +119,11 @@ export class GrpcRequestClient extends models.AbstractRequestClient<ServiceData 
   }
 
   private callMethod(body: unknown, resolve: () => void): GrpcStream | undefined {
-    if (this.nativeClient?.ServiceClass && isGrpcRequest(this.request)) {
-      const method = this.getServiceDataMethod(this.nativeClient, this.request);
-      const methodArgs = this.getMethodArgs(this.nativeClient, this.request, body, resolve);
+    if (this.nativeClient && this._clientDefinition && isGrpcRequest(this.request)) {
+      const methodName = this._clientDefinition.method;
+      const method = this.nativeClient[methodName].bind(this.nativeClient);
+      const methodArgs = this.getMethodArgs(this._clientDefinition, this.request, body, resolve);
       const result = method(...methodArgs);
-      const methodName = this.nativeClient.method;
       this.registerEvents(result, methodName);
       return result;
     }
@@ -140,16 +157,6 @@ export class GrpcRequestClient extends models.AbstractRequestClient<ServiceData 
     return body;
   }
 
-  private getServiceDataMethod(serviceData: ServiceData, request: GrpcRequest): (...args: unknown[]) => GrpcStream {
-    const client = new serviceData.ServiceClass(
-      serviceData.server,
-      request.channelCredentials || grpc.credentials.createInsecure(),
-      this.getChannelOptions(request, serviceData)
-    );
-    const method = client[serviceData.method]?.bind?.(client);
-    return method;
-  }
-
   public streamEnded(): void {
     if (this.grpcStream instanceof Writable || this.grpcStream instanceof Duplex) {
       this.grpcStream.end();
@@ -166,6 +173,9 @@ export class GrpcRequestClient extends models.AbstractRequestClient<ServiceData 
       }
     }
     delete this.grpcStream;
+
+    this._nativeClient?.close();
+    delete this._nativeClient;
     this.onDisconnect();
   }
 

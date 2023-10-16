@@ -41,6 +41,7 @@ export function executeRequestClientFactory<T extends models.RequestClient>(
         report(context, requestClient.reportMessage);
 
         const newClient = await requestClient.connect(connectionSession?.connection);
+        log.debug(`requestClient ${request.url} connect`);
 
         connectionSession.connectionCount++;
         if (newClient !== connectionSession?.connection) {
@@ -63,6 +64,7 @@ export function executeRequestClientFactory<T extends models.RequestClient>(
         }
         connectionSession.connectionCount--;
         if (shouldDisconnectConnection(sessionStore, connectionSession)) {
+          log.debug(`requestClient ${request.url} disconnect`);
           requestClient.disconnect();
         }
 
@@ -71,6 +73,7 @@ export function executeRequestClientFactory<T extends models.RequestClient>(
         connectionSession.connectionCount--;
         if (shouldDisconnectConnection(sessionStore, connectionSession)) {
           (context.scriptConsole || log).error(context.request);
+          log.debug(`requestClient ${request.url} disconnect`);
           if (isError(err)) {
             requestClient.disconnect(err);
           } else {

@@ -2,7 +2,6 @@ import * as grpc from '@grpc/grpc-js';
 
 import { log } from '../../io';
 import { ProtoDefinition } from '../../models';
-
 export interface ServiceData {
   server: string;
   path: string;
@@ -10,17 +9,15 @@ export interface ServiceData {
   method: string;
   protocol: string;
   ServiceClass: {
-    new (
-      address: string,
-      credentials: grpc.ChannelCredentials,
-      options?: Partial<grpc.ChannelOptions>
-    ): Record<
-      string,
-      // eslint-disable-next-line @typescript-eslint/ban-types
-      Function
-    >;
+    new (address: string, credentials: grpc.ChannelCredentials, options?: Partial<grpc.ChannelOptions>): GrpcClient;
   };
   methodDefinition: grpc.MethodDefinition<unknown, unknown>;
+}
+
+export interface GrpcClient extends grpc.Client {
+  close(): void;
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  [key: string]: Function;
 }
 
 export const GrpcUrlRegex =
