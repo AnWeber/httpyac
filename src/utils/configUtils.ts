@@ -21,8 +21,11 @@ export async function getHttpyacConfig(
 
 export const defaultConfigFiles = [
   '.httpyac.js',
+  '.httpyac.cjs',
   '.httpyac.config.js',
+  '.httpyac.config.cjs',
   'httpyac.config.js',
+  'httpyac.config.cjs',
   '.httpyac.json',
   'httpyac.config.json',
 ];

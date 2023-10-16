@@ -1,3 +1,9 @@
+## [6.8.1] (2023-10-16)
+
+### Fix
+
+- allow import of `.httpyac.cjs` or `.httpyac.config.cjs` file
+
 ## [6.8.0] (2023-10-15)
 
 ### Feature
