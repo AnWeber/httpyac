@@ -11,11 +11,13 @@ import { digestAuthVariableReplacer } from './digestAuthVariableReplacer';
 import { gotHttpClient } from './gotUtils';
 import { HttpRequestClient } from './httpRequestClient';
 import { logHttpRedirect } from './logHttpRedirect';
+import { postRedirectGetMetaDataHandler } from './postRedirectGetMetaDataHandler';
 
 httpClientProvider.exchange = gotHttpClient;
 httpClientProvider.createRequestClient = (request, context) => new HttpRequestClient(request, context);
 
 export function registerHttpPlugin(api: models.HttpyacHooksApi) {
+  api.hooks.parseMetaData.addHook('postRedirectGet', postRedirectGetMetaDataHandler);
   api.hooks.execute.addInterceptor(new CookieJarInterceptor());
   api.hooks.replaceVariable.addHook('aws', awsAuthVariableReplacer);
   api.hooks.replaceVariable.addHook('basicAuth', basicAuthVariableReplacer);

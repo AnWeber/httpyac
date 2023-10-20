@@ -1,9 +1,12 @@
 ## [unreleased]
 
+### Feature
+
+- add new meta data `# @post-redirect-get` to always use method `GET` for redirects (#563)
+
 ### Fix
 
 - use grpc Stream cancel method if available
-
 
 ## [6.8.1] (2023-10-16)
 
