@@ -1,3 +1,10 @@
+## [unreleased]
+
+### Fix
+
+- use grpc Stream cancel method if available
+
+
 ## [6.8.1] (2023-10-16)
 
 ### Fix

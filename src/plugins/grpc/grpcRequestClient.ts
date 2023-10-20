@@ -9,7 +9,7 @@ import { GrpcRequest, isGrpcRequest } from './grpcRequest';
 import { PathAwareChannel } from './pathAwareChannel';
 
 grpc.setLogger(log);
-type GrpcStream = Readable | Writable | Duplex;
+type GrpcStream = (Readable | Writable | Duplex) & { cancel?(): void };
 
 interface GrpcError {
   details?: string;
@@ -159,13 +159,19 @@ export class GrpcRequestClient extends models.AbstractRequestClient<GrpcClient |
 
   public streamEnded(): void {
     if (this.grpcStream instanceof Writable || this.grpcStream instanceof Duplex) {
-      this.grpcStream.end();
+      if (this.grpcStream.cancel) {
+        this.grpcStream.cancel();
+      } else {
+        this.grpcStream.destroy();
+      }
       delete this.grpcStream;
     }
   }
 
   override disconnect(err?: Error): void {
-    if (err) {
+    if (this.grpcStream?.cancel) {
+      this.grpcStream.cancel();
+    } else if (err) {
       this.grpcStream?.destroy(err);
     } else {
       if (this.grpcStream instanceof Writable || this.grpcStream instanceof Duplex) {
@@ -174,7 +180,11 @@ export class GrpcRequestClient extends models.AbstractRequestClient<GrpcClient |
     }
     delete this.grpcStream;
 
-    this._nativeClient?.close();
+    if (this._nativeClient) {
+      log.debug('client connection state:', this._nativeClient.getChannel().getConnectivityState(false));
+      this._nativeClient.close();
+      log.debug('client connection state after close:', this._nativeClient.getChannel().getConnectivityState(false));
+    }
     delete this._nativeClient;
     this.onDisconnect();
   }
