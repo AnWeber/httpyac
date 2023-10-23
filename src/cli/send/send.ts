@@ -25,6 +25,7 @@ export function sendCommand() {
     .option('--insecure', 'allow insecure server connections when using ssl')
     .option('-i --interactive', 'do not exit the program after request, go back to selection')
     .option('--json', 'use json output')
+    .option('--junit', 'use junit xml output')
     .option('-l, --line <line>', 'line of the http requests')
     .option('-n, --name <name>', 'name of the http requests')
     .option('--no-color', 'disable color support')
@@ -90,6 +91,8 @@ async function execute(fileNames: Array<string>, options: SendOptions): Promise<
           const cliJsonOutput = toSendJsonOutput(jsonOutput, options);
           if (options.json) {
             console.info(utils.stringifySafe(cliJsonOutput, 2));
+          } else if (options.junit) {
+            console.info(utils.toJunitXml(cliJsonOutput));
           } else if (context.scriptConsole) {
             context.scriptConsole.info('');
             context.scriptConsole.info(
