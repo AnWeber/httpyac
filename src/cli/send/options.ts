@@ -17,6 +17,7 @@ export interface SendOptions {
   interactive?: boolean;
   insecure?: boolean;
   json?: boolean;
+  junit?: boolean;
   output?: OutputType;
   outputFailed?: OutputType;
   raw?: boolean;
