@@ -35,6 +35,7 @@ export class LogResponseInterceptor implements HookInterceptor<[models.Processor
         ...context.httpRegion.request,
       },
       response: context.httpRegion.response && utils.cloneResponse(context.httpRegion.response),
+      duration: context.httpRegion.response?.durationMillis,
       isGlobal: context.httpRegion.isGlobal(),
     };
   }
