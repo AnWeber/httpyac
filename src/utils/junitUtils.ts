@@ -31,8 +31,16 @@ function prettyPrintXml(xml: string, tab = '\t', nl = '\n'): string {
   return formatted;
 }
 
+function toFloatSeconds(durationMillis: number): string {
+  return (durationMillis / 1000).toFixed(3);
+}
+
 export function toJunitXml(output: SendJsonOutput): string {
-  let resultXml = `<?xml version="1.0" encoding="UTF-8"?><testsuites errors="0" failures="${output.summary.failedTests}" tests="${output.summary.totalTests}">`;
+  let resultXml = `<?xml version="1.0" encoding="UTF-8"?><testsuites errors="0" failures="${
+    output.summary.failedTests
+  }" tests="${output.summary.totalTests}" time="${toFloatSeconds(
+    output.requests.reduce((n, r) => n + (r.duration ?? 0), 0)
+  )}">`;
   for (const req of output.requests) {
     resultXml += '<properties>';
     if (req.name) {
@@ -46,7 +54,7 @@ export function toJunitXml(output: SendJsonOutput): string {
     const regionRef = req.name ?? req.title ?? req.fileName;
     resultXml += `<testsuite name="${escapeXml(regionRef)}" tests="${req.summary.totalTests}" errors="0" failures="${
       req.summary.failedTests
-    }" package="${escapeXml(req.fileName)}">`;
+    }" package="${escapeXml(req.fileName)}" time="${toFloatSeconds(req.duration ?? 0)}">`;
     for (const testResult of req.testResults ?? []) {
       resultXml += `<testcase name="${escapeXml(testResult.message)}" classname="${escapeXml(regionRef)}"`;
       if (!testResult.result && testResult.error) {

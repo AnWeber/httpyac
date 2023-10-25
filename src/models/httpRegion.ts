@@ -15,6 +15,7 @@ export interface ProcessedHttpRegion {
   symbol: HttpSymbol;
   metaData: Record<string, string | undefined | true>;
   testResults?: Array<TestResult>;
+  duration?: number;
   isGlobal: boolean;
 }
 

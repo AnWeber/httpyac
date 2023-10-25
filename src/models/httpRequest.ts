@@ -11,6 +11,7 @@ export interface HeadersContainer {
 export type RequestBody = string | Array<HttpRequestBodyLine> | Buffer;
 
 export interface Request<TMethod extends string = string, TBody = RequestBody> {
+  start?: number;
   supportsStreaming?: boolean;
   protocol?: string;
   url: string;

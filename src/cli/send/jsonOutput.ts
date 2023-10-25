@@ -19,6 +19,7 @@ export interface SendOutputRequest {
   summary: SendTestSummary;
   response: HttpResponse | undefined;
   testResults?: Array<TestResult>;
+  duration?: number;
 }
 
 export interface SendRequestSummary {
@@ -57,6 +58,7 @@ export function toSendJsonOutput(
           description: utils.toString(httpRegion.metaData?.description),
           line: httpRegion.symbol.startLine,
           testResults: httpRegion.testResults,
+          duration: httpRegion.duration,
           summary: {
             totalTests: httpRegion.testResults?.length || 0,
             failedTests: httpRegion.testResults?.filter?.(obj => !obj.result).length || 0,
