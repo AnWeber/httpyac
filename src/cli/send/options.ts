@@ -31,7 +31,7 @@ export interface SendOptions {
 }
 
 export function getLogLevel(cliOptions: SendOptions): LogLevel | undefined {
-  if (cliOptions.json) {
+  if (cliOptions.json || cliOptions.junit) {
     return LogLevel.none;
   }
   if (cliOptions.silent) {

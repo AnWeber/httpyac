@@ -71,7 +71,7 @@ async function execute(fileNames: Array<string>, options: SendOptions): Promise<
           const sendFuncs = httpFiles.map(
             httpFile =>
               async function sendHttpFile() {
-                if (!options.json && context.scriptConsole && httpFiles.length > 1) {
+                if (!options.junit && !options.json && context.scriptConsole && httpFiles.length > 1) {
                   context.scriptConsole.info(`--------------------- ${httpFile.fileName}  --`);
                 }
                 await send(Object.assign({ processedHttpRegions }, context, { httpFile }));
@@ -85,6 +85,7 @@ async function execute(fileNames: Array<string>, options: SendOptions): Promise<
         }
         if (
           options.json ||
+          options.junit ||
           Object.keys(jsonOutput).length > 1 ||
           Object.entries(jsonOutput).some(([, httpRegions]) => httpRegions.length > 1)
         ) {
@@ -150,7 +151,7 @@ export function initRequestLogger(cliOptions: SendOptions, context: Omit<models.
   });
   scriptConsole.collectMessages();
   context.scriptConsole = scriptConsole;
-  if (!cliOptions.json) {
+  if (!cliOptions.json && !cliOptions.junit) {
     context.logStream = getStreamLogger(cliOptions);
     const logger = getRequestLogger(cliOptions, context.config, scriptConsole);
     context.logResponse = async (response, httpRegion) => {
