@@ -12,19 +12,7 @@ function escapeXml(unsafe: string): string {
   return unsafe.replace(/[<>&'"]/gu, c => `&${xmlSpecialCharReplacementMap[c]};`);
 }
 
-// function prettyPrintXml(xml: string): string {
-//   let formatted = '';
-//   let indent = '';
-//   const tab = '    ';
-//   xml.split(/>\s*</u).forEach(node => {
-//     if (node.match(/^\/\w/u)) indent = indent.slice(tab.length); // decrease indent by one 'tab'
-//     formatted += `${indent}<${node}>\r\n`;
-//     if (node.match(/^<?\w[^>]*[^/]$/u)) indent += tab; // increase indent
-//   });
-//   return formatted.slice(1, formatted.length - 3);
-// }
-
-function prettyPrintXmlFast(xml: string, tab = '\t', nl = '\n'): string {
+function prettyPrintXml(xml: string, tab = '\t', nl = '\n'): string {
   let formatted = '';
   let indent = '';
   const nodes = xml.slice(1, -1).split(/>\s*</u);
@@ -76,5 +64,5 @@ export function toJunitXml(output: SendJsonOutput): string {
     resultXml += `</testsuite>`;
   }
   resultXml += `</testsuites>`;
-  return prettyPrintXmlFast(resultXml);
+  return prettyPrintXml(resultXml);
 }
