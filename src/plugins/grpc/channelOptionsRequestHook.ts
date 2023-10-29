@@ -1,5 +1,3 @@
-import { HookCancel } from 'hookpoint';
-
 import * as models from '../../models';
 import * as utils from '../../utils';
 import { isGrpcRequest } from './grpcRequest';
@@ -7,7 +5,7 @@ import { isGrpcRequest } from './grpcRequest';
 export async function channelOptionsRequestHook(
   request: models.Request,
   context: models.ProcessorContext
-): Promise<void | typeof HookCancel> {
+): Promise<void> {
   if (isGrpcRequest(request) && request.headers) {
     utils.report(context, 'create channel options');
     if (!request.options) {

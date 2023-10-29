@@ -25,13 +25,12 @@ export class LazyVariableInterceptor implements HookInterceptor<[models.Processo
     return true;
   }
 
-  private async replaceAllVariables(context: models.ProcessorContext): Promise<boolean> {
+  private async replaceAllVariables(context: models.ProcessorContext): Promise<void> {
     for (const [key, value] of Object.entries(context.variables)) {
       const result = await utils.replaceVariables(value, models.VariableType.variable, context);
       if (result !== HookCancel) {
         context.variables[key] = result;
       }
     }
-    return true;
   }
 }
