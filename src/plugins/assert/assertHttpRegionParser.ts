@@ -51,18 +51,25 @@ export async function parseAssertLine(
       const predicate = predicates.find(obj => match.groups?.predicate && obj.id.indexOf(match.groups.predicate) >= 0);
       if (predicate) {
         httpRegion.hooks.onResponse.addHook(`test ${textLine}`, async (response, context) => {
-          const value = await context.httpFile.hooks.provideAssertValue.trigger(type, valueString, response, context);
-          const expected =
-            expectedString && (await utils.replaceVariables(expectedString, models.VariableType.variable, context));
-
-          const expectedConverted = predicate.noAutoConvert ? expected : convertToType(value, expected);
-          const test = utils.testFactory(context);
-          test(`${valueString || type} ${predicate.id[0]} ${utils.toString(expected) || ''}`.trim(), () => {
-            ok(
-              predicate.match(value, expectedConverted),
-              `${valueString || type} (${value}) ${predicate.id[0]} ${utils.toString(expectedConverted) || ''}`.trim()
-            );
-          });
+          const test = utils.testFactoryAsync(context);
+          await test(
+            `${valueString || type} ${predicate.id[0]} ${utils.toString(expectedString) || ''}`.trim(),
+            async () => {
+              const value = await context.httpFile.hooks.provideAssertValue.trigger(
+                type,
+                valueString,
+                response,
+                context
+              );
+              const expected =
+                expectedString && (await utils.replaceVariables(expectedString, models.VariableType.variable, context));
+              const expectedConverted = predicate.noAutoConvert ? expected : convertToType(value, expected);
+              ok(
+                predicate.match(value, expectedConverted),
+                `${valueString || type} (${value}) ${predicate.id[0]} ${utils.toString(expectedConverted) || ''}`.trim()
+              );
+            }
+          );
         });
       }
 

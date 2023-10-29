@@ -1,3 +1,9 @@
+## [unreleased]
+
+### Fix
+
+- do not fail on javascript assert (#572)
+
 ## [6.8.2] (2023-10-23)
 
 ### Feature
