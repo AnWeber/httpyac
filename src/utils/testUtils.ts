@@ -1,6 +1,14 @@
 import { default as chalk } from 'chalk';
 
-import { HttpRegion, HttpResponse, ProcessorContext, TestFunction, TestResult, testSymbols } from '../models';
+import {
+  ConsoleLogHandler,
+  HttpRegion,
+  HttpResponse,
+  ProcessorContext,
+  TestFunction,
+  TestResult,
+  testSymbols,
+} from '../models';
 import {
   assertHasNoResponseBody,
   assertHasResponseBody,
@@ -118,7 +126,7 @@ export function testFactory({ httpRegion, scriptConsole, variables }: ProcessorC
 function addTestResultToHttpRegion(
   httpRegion: HttpRegion,
   testResult: TestResult,
-  scriptConsole: import('/home/andreas/github/httpyac/httpyac/src/models/logHandler').ConsoleLogHandler | undefined
+  scriptConsole: ConsoleLogHandler | undefined
 ) {
   if (!httpRegion.testResults) {
     httpRegion.testResults = [];
