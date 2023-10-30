@@ -3,21 +3,9 @@ import { HttpFile } from './httpFile';
 import { Request } from './httpRequest';
 import { HttpResponse } from './httpResponse';
 import { HttpSymbol } from './httpSymbol';
-import { PathLike } from './pathLike';
 import { ProcessorContext } from './processorContext';
 import { TestResult } from './testResult';
 import { Variables } from './variables';
-
-export interface ProcessedHttpRegion {
-  request?: Request;
-  response?: HttpResponse;
-  filename: PathLike;
-  symbol: HttpSymbol;
-  metaData: Record<string, string | undefined | true>;
-  testResults?: Array<TestResult>;
-  duration?: number;
-  isGlobal: boolean;
-}
 
 export type PartialProperty<T, TProperty extends string, TProperty2 extends string> = Omit<
   Omit<T, TProperty>,
@@ -33,6 +21,7 @@ export interface RequestClientHooks {
 }
 
 export interface HttpRegion {
+  readonly id: string;
   request?: Request;
   response?: HttpResponse;
   symbol: HttpSymbol;

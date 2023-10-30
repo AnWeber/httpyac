@@ -19,7 +19,7 @@ export class HttpRegion implements models.HttpRegion {
   };
   readonly symbol: models.HttpSymbol;
 
-  constructor(
+  public constructor(
     private readonly httpFile: models.HttpFile,
     start = 0
   ) {
@@ -32,6 +32,10 @@ export class HttpRegion implements models.HttpRegion {
       endLine: start,
       endOffset: 0,
     };
+  }
+
+  public get id(): string {
+    return `${this.httpFile.fileName}_${this.symbol.startLine}`;
   }
 
   public isGlobal() {

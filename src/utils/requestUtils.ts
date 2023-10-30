@@ -321,6 +321,22 @@ function logTimings(response: models.HttpResponse) {
   return result;
 }
 
+export function cloneRequest(request: models.Request): models.Request {
+  const clone: models.Request = {
+    url: request.url,
+    method: request.method,
+    body: request.body,
+    contentType: request.contentType && {
+      ...request.contentType,
+    },
+    headers: request.headers && {
+      ...request.headers,
+    },
+    supportsStreaming: request.supportsStreaming,
+  };
+  return clone;
+}
+
 export function isHttpResponse(val: unknown): val is models.HttpResponse {
   const obj = val as models.HttpResponse;
   return !!obj?.statusCode;
@@ -348,15 +364,13 @@ export function cloneResponse(response: models.HttpResponse): models.HttpRespons
     parsedBody: response.parsedBody,
     prettyPrintBody: response.prettyPrintBody,
     contentType: response.contentType,
-    timings: response.timings,
+    timings: response.timings && {
+      ...response.timings,
+    },
     meta: response.meta,
     tags: response.tags,
+    request: response.request && cloneRequest(response.request),
   };
-  if (response.request) {
-    clone.request = {
-      ...response.request,
-    };
-  }
   return clone;
 }
 

@@ -1,9 +1,10 @@
 import { EnvironmentConfig } from './environmentConfig';
 import { OnRequestHook, OnResponseHook, OnStreaming, ResponseLoggingHook } from './hooks';
 import { HttpFile } from './httpFile';
-import { HttpRegion, ProcessedHttpRegion } from './httpRegion';
+import { HttpRegion } from './httpRegion';
 import { Request } from './httpRequest';
 import { ConsoleLogHandler, RequestLogger, StreamLogger } from './logHandler';
+import { ProcessedHttpRegion } from './processedHttpRegion';
 import { RepeatOptions } from './repeatOptions';
 import { RequestClient } from './requestClient';
 import { Variables } from './variables';
