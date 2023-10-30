@@ -1,4 +1,4 @@
-import { SendJsonOutput } from '@/cli/send/jsonOutput';
+import { SendJsonOutput } from './jsonOutput';
 
 const xmlSpecialCharReplacementMap: Record<string, string> = {
   '<': 'lt',

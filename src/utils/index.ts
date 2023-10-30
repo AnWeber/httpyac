@@ -23,4 +23,3 @@ export * from './requestUtils';
 export * from './stringUtils';
 export * from './testUtils';
 export * from './variableUtils';
-export * from './junitUtils';
