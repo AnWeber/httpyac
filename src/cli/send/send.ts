@@ -5,13 +5,14 @@ import type { Options } from 'globby';
 import { sep } from 'path';
 
 import { send } from '../../httpYacApi';
-import { fileProvider, Logger } from '../../io';
+import { Logger } from '../../io';
 import * as models from '../../models';
 import { HttpFileStore } from '../../store';
 import * as utils from '../../utils';
 import { toSendJsonOutput } from './jsonOutput';
 import { getLogLevel, OutputType, SendFilterOptions, SendOptions } from './options';
 import { createCliPluginRegister } from './plugin';
+import { toJunitXml } from './junitUtils';
 
 export function sendCommand() {
   const program = new Command('send')
@@ -55,18 +56,14 @@ async function execute(fileNames: Array<string>, options: SendOptions): Promise<
   try {
     if (httpFiles.length > 0) {
       let isFirstRequest = true;
-      const jsonOutput: Record<string, Array<models.ProcessedHttpRegion>> = {};
       while (options.interactive || isFirstRequest) {
         isFirstRequest = false;
         const selection = await selectAction(httpFiles, options);
 
-        const processedHttpRegions: Array<models.ProcessedHttpRegion> = [];
+        context.processedHttpRegions = [];
 
         if (selection) {
-          await send(Object.assign({ processedHttpRegions }, context, selection));
-          jsonOutput[fileProvider.toString(selection.httpFile.fileName)] = [
-            ...processedHttpRegions.filter(obj => !obj.isGlobal),
-          ];
+          await send(Object.assign({}, context, selection));
         } else {
           const sendFuncs = httpFiles.map(
             httpFile =>
@@ -74,39 +71,34 @@ async function execute(fileNames: Array<string>, options: SendOptions): Promise<
                 if (!options.junit && !options.json && context.scriptConsole && httpFiles.length > 1) {
                   context.scriptConsole.info(`--------------------- ${httpFile.fileName}  --`);
                 }
-                await send(Object.assign({ processedHttpRegions }, context, { httpFile }));
-                jsonOutput[fileProvider.toString(httpFile.fileName)] = [
-                  ...processedHttpRegions.filter(obj => !obj.isGlobal),
-                ];
-                processedHttpRegions.length = 0;
+                await send(Object.assign({}, context, { httpFile }));
               }
           );
           await utils.promiseQueue(options.parallel || 1, ...sendFuncs);
         }
-        if (
-          options.json ||
-          options.junit ||
-          Object.keys(jsonOutput).length > 1 ||
-          Object.entries(jsonOutput).some(([, httpRegions]) => httpRegions.length > 1)
-        ) {
-          const cliJsonOutput = toSendJsonOutput(jsonOutput, options);
-          if (options.json) {
-            console.info(utils.stringifySafe(cliJsonOutput, 2));
-          } else if (options.junit) {
-            console.info(utils.toJunitXml(cliJsonOutput));
-          } else if (context.scriptConsole) {
-            context.scriptConsole.info('');
-            context.scriptConsole.info(
-              chalk`{bold ${cliJsonOutput.summary.totalRequests}} requests processed ({green ${cliJsonOutput.summary.successRequests} succeeded}, {red ${cliJsonOutput.summary.failedRequests} failed})`
-            );
-          }
-        }
+        reportOutput(context, options);
       }
     } else {
       console.error(`httpYac cannot find the specified file ${fileNames.join(', ')}.`);
     }
   } finally {
     context.scriptConsole?.flush?.();
+  }
+}
+
+function reportOutput(context: Omit<models.HttpFileSendContext, 'httpFile'>, options: SendOptions) {
+  const processedHttpRegions = context.processedHttpRegions || [];
+
+  const cliJsonOutput = toSendJsonOutput(processedHttpRegions, options);
+  if (options.json) {
+    console.info(utils.stringifySafe(cliJsonOutput, 2));
+  } else if (options.junit) {
+    console.info(toJunitXml(cliJsonOutput));
+  } else if (context.scriptConsole) {
+    context.scriptConsole.info('');
+    context.scriptConsole.info(
+      chalk`{bold ${cliJsonOutput.summary.totalRequests}} requests processed ({green ${cliJsonOutput.summary.successRequests} succeeded}, {red ${cliJsonOutput.summary.failedRequests} failed})`
+    );
   }
 }
 

@@ -1,6 +1,7 @@
 import { HttpResponse, ProcessedHttpRegion, TestResult } from '../../models';
 import * as utils from '../../utils';
 import { SendFilterOptions, SendOptions } from './options';
+import { fileProvider } from '../../io';
 
 export interface SendJsonOutput {
   _meta: {
@@ -12,7 +13,7 @@ export interface SendJsonOutput {
 
 export interface SendOutputRequest {
   fileName: string;
-  name?: string;
+  name: string;
   title?: string;
   description?: string;
   line?: number;
@@ -20,6 +21,7 @@ export interface SendOutputRequest {
   response: HttpResponse | undefined;
   testResults?: Array<TestResult>;
   duration?: number;
+  disabled: boolean;
 }
 
 export interface SendRequestSummary {
@@ -39,35 +41,33 @@ function sum(x: number, y: number) {
 }
 
 export function toSendJsonOutput(
-  context: Record<string, Array<ProcessedHttpRegion>>,
+  processedHttpRegions: Array<ProcessedHttpRegion>,
   options: SendOptions
 ): SendJsonOutput {
   const requests: Array<SendOutputRequest> = [];
-  for (const [fileName, httpRegions] of Object.entries(context)) {
-    requests.push(
-      ...httpRegions.map(httpRegion => {
-        let output = options.output;
-        if (options.outputFailed && httpRegion.testResults?.some?.(test => !test.result)) {
-          output = options.outputFailed;
-        }
-        const result: SendOutputRequest = {
-          fileName,
-          response: convertResponse(httpRegion.response, output),
-          name: utils.toString(httpRegion.metaData?.name),
-          title: utils.toString(httpRegion.metaData?.title),
-          description: utils.toString(httpRegion.metaData?.description),
-          line: httpRegion.symbol.startLine,
-          testResults: httpRegion.testResults,
-          duration: httpRegion.duration,
-          summary: {
-            totalTests: httpRegion.testResults?.length || 0,
-            failedTests: httpRegion.testResults?.filter?.(obj => !obj.result).length || 0,
-            successTests: httpRegion.testResults?.filter?.(obj => !!obj.result).length || 0,
-          },
-        };
-        return result;
-      })
-    );
+
+  for (const httpRegion of processedHttpRegions) {
+    let output = options.output;
+    if (options.outputFailed && httpRegion.testResults?.some?.(test => !test.result)) {
+      output = options.outputFailed;
+    }
+    const result: SendOutputRequest = {
+      fileName: fileProvider.fsPath(httpRegion.filename) || fileProvider.toString(httpRegion.filename),
+      response: convertResponse(httpRegion.response, output),
+      name: utils.toString(httpRegion.metaData?.name) || httpRegion.symbol.name,
+      line: httpRegion.symbol.startLine,
+      title: utils.toString(httpRegion.metaData?.title),
+      description: utils.toString(httpRegion.metaData?.description),
+      testResults: httpRegion.testResults,
+      duration: httpRegion.duration,
+      disabled: !!httpRegion.disabled,
+      summary: {
+        totalTests: httpRegion.testResults?.length || 0,
+        failedTests: httpRegion.testResults?.filter?.(obj => !obj.result).length || 0,
+        successTests: httpRegion.testResults?.filter?.(obj => !!obj.result).length || 0,
+      },
+    };
+    requests.push(result);
   }
   let resultRequests = requests;
   if (options.filter === SendFilterOptions.onlyFailed) {
@@ -75,7 +75,7 @@ export function toSendJsonOutput(
   }
   return {
     _meta: {
-      version: '1.0.0',
+      version: '1.1.0',
     },
     requests: resultRequests,
     summary: {
