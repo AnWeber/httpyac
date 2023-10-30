@@ -12,7 +12,7 @@ import * as utils from '../../utils';
 import { toSendJsonOutput } from './jsonOutput';
 import { getLogLevel, OutputType, SendFilterOptions, SendOptions } from './options';
 import { createCliPluginRegister } from './plugin';
-import { toJunitXml } from './junitUtils';
+import { transformToJunit } from './junitUtils';
 
 export function sendCommand() {
   const program = new Command('send')
@@ -93,7 +93,7 @@ function reportOutput(context: Omit<models.HttpFileSendContext, 'httpFile'>, opt
   if (options.json) {
     console.info(utils.stringifySafe(cliJsonOutput, 2));
   } else if (options.junit) {
-    console.info(toJunitXml(cliJsonOutput));
+    console.info(transformToJunit(cliJsonOutput));
   } else if (context.scriptConsole) {
     context.scriptConsole.info('');
     context.scriptConsole.info(
