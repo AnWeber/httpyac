@@ -110,7 +110,7 @@
     "globby": "^13.2.2",
     "got": "^11.8.6",
     "grpc-reflection-js": "^0.3.0",
-    "hookpoint": "3.2.1",
+    "hookpoint": "4.0.0",
     "http-proxy-agent": "^7.0.0",
     "https-proxy-agent": "^7.0.1",
     "inquirer": "^9.2.8",
