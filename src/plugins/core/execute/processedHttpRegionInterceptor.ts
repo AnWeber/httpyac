@@ -33,7 +33,7 @@ export class ProcessedHttpRegionInterceptor implements HookInterceptor<[models.P
 
     const processedHttpRegion = context.processedHttpRegions?.find(obj => obj.id === context.httpRegion.id);
     if (processedHttpRegion) {
-      processedHttpRegion.end = performance.now();
+      processedHttpRegion.end = new Date().getTime();
       processedHttpRegion.duration = processedHttpRegion.end - processedHttpRegion.start;
       processedHttpRegion.disabled = !!hookContext.bail;
       processedHttpRegion.metaData = {
@@ -63,7 +63,7 @@ export class ProcessedHttpRegionInterceptor implements HookInterceptor<[models.P
       filename: context.httpFile.fileName,
       symbol: context.httpRegion.symbol,
       isGlobal: context.httpRegion.isGlobal(),
-      start: performance.now(),
+      start: new Date().getTime(),
     };
   }
 }

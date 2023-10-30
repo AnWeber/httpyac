@@ -18,14 +18,16 @@ export interface SendOutputRequest {
   description?: string;
   line?: number;
   summary: SendTestSummary;
-  response: HttpResponse | undefined;
+  response?: HttpResponse;
   testResults?: Array<TestResult>;
+  timestamp?: string;
   duration?: number;
   disabled: boolean;
 }
 
 export interface SendRequestSummary {
   totalRequests: number;
+  disabledRequests: number;
   failedRequests: number;
   successRequests: number;
 }
@@ -59,10 +61,11 @@ export function toSendJsonOutput(
       title: utils.toString(httpRegion.metaData?.title),
       description: utils.toString(httpRegion.metaData?.description),
       testResults: httpRegion.testResults,
+      timestamp: new Date(httpRegion.start).toISOString(),
       duration: httpRegion.duration,
       disabled: !!httpRegion.disabled,
       summary: {
-        totalTests: httpRegion.testResults?.length || 0,
+        totalTests: httpRegion.disabled ? 1 : httpRegion.testResults?.length || 0,
         failedTests: httpRegion.testResults?.filter?.(obj => !obj.result).length || 0,
         successTests: httpRegion.testResults?.filter?.(obj => !!obj.result).length || 0,
       },
@@ -78,14 +81,19 @@ export function toSendJsonOutput(
       version: '1.1.0',
     },
     requests: resultRequests,
-    summary: {
-      totalRequests: requests.length,
-      failedRequests: requests.filter(obj => obj.summary.failedTests > 0).length,
-      successRequests: requests.filter(obj => obj.summary.failedTests === 0).length,
-      totalTests: requests.map(obj => obj.summary.totalTests).reduce(sum, 0),
-      failedTests: requests.map(obj => obj.summary.failedTests).reduce(sum, 0),
-      successTests: requests.map(obj => obj.summary.successTests).reduce(sum, 0),
-    },
+    summary: createTestSummary(requests),
+  };
+}
+
+export function createTestSummary(requests: Array<SendOutputRequest>): SendRequestSummary & SendTestSummary {
+  return {
+    totalRequests: requests.length,
+    disabledRequests: requests.filter(obj => obj.disabled).length,
+    failedRequests: requests.filter(obj => obj.summary.failedTests > 0).length,
+    successRequests: requests.filter(obj => obj.summary.failedTests === 0).length,
+    totalTests: requests.map(obj => obj.summary.totalTests).reduce(sum, 0),
+    failedTests: requests.map(obj => obj.summary.failedTests).reduce(sum, 0),
+    successTests: requests.map(obj => obj.summary.successTests).reduce(sum, 0),
   };
 }
 
