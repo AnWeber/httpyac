@@ -18,7 +18,6 @@ export interface HttpResponse {
   request?: Request;
 
   timings?: HttpTimings;
-  durationMillis?: number;
   meta?: Record<string, unknown>;
   tags?: Array<string>;
 }
