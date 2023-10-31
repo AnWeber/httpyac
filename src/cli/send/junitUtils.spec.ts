@@ -34,9 +34,6 @@ describe('transformToJunit', () => {
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites errors="0" disabled="0" failues="0">
   <testsuite name="test.http" tests="1" failures="0" skipped="0" package="." time="1.001" file="test.http">
-    <properties>
-      <property name="name" value="test"/>
-    </properties>
     <testcase name="test" classname="test.http" assertions="1" time="1.001"/>
   </testsuite>
 </testsuites>
@@ -99,19 +96,10 @@ describe('transformToJunit', () => {
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites errors="0" disabled="0" failues="0">
   <testsuite name="test.http" tests="2" failures="0" skipped="0" package="." time="2.003" file="test.http">
-    <properties>
-      <property name="name" value="test"/>
-    </properties>
     <testcase name="test" classname="test.http" assertions="1" time="1.001"/>
-    <properties>
-      <property name="name" value="test2"/>
-    </properties>
     <testcase name="test2" classname="test.http" assertions="1" time="1.002"/>
   </testsuite>
   <testsuite name="test2.http" tests="1" failures="0" skipped="0" package="." time="1.002" file="test2.http">
-    <properties>
-      <property name="name" value="other"/>
-    </properties>
     <testcase name="other" classname="test2.http" assertions="1" time="1.002"/>
   </testsuite>
 </testsuites>
@@ -151,9 +139,6 @@ describe('transformToJunit', () => {
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites errors="0" disabled="1" failues="0">
   <testsuite name="test.http" tests="1" failures="0" skipped="1" package="." time="0.000" file="test.http">
-    <properties>
-      <property name="name" value="test"/>
-    </properties>
     <testcase name="test" classname="test.http" assertions="0" time="0.000">
       <skipped/>
     </testcase>
@@ -205,12 +190,54 @@ describe('transformToJunit', () => {
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites errors="0" disabled="0" failues="1">
   <testsuite name="test.http" tests="1" failures="1" skipped="0" package="." time="0.000" file="test.http">
-    <properties>
-      <property name="name" value="test"/>
-    </properties>
     <testcase name="test" classname="test.http" assertions="2" time="0.000">
       <failure message="Assertions fail" type="unknown">failed result</failure>
       <system-err>{"message":"test","name":"unknown","stack":""}</system-err>
+    </testcase>
+  </testsuite>
+</testsuites>
+    `.trim()
+    );
+  });
+
+  it('should output properties', () => {
+    const result = transformToJunit({
+      _meta: {
+        version: 'test',
+      },
+      requests: [
+        {
+          fileName: 'test.http',
+          disabled: false,
+          title: 'title',
+          name: 'test',
+          duration: 1001,
+          summary: {
+            totalTests: 1,
+            successTests: 1,
+            failedTests: 0,
+          },
+        },
+      ],
+      summary: {
+        totalRequests: 1,
+        successRequests: 1,
+        disabledRequests: 0,
+        failedRequests: 0,
+        totalTests: 1,
+        successTests: 1,
+        failedTests: 0,
+      },
+    });
+    expect(result).toBe(
+      `
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites errors="0" disabled="0" failues="0">
+  <testsuite name="test.http" tests="1" failures="0" skipped="0" package="." time="1.001" file="test.http">
+    <testcase name="test" classname="test.http" assertions="1" time="1.001">
+      <properties>
+        <property name="title" value="title"/>
+      </properties>
     </testcase>
   </testsuite>
 </testsuites>
