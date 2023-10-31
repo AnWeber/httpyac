@@ -5,10 +5,6 @@ import { EOL } from 'os';
 import { DOMImplementation } from '@xmldom/xmldom';
 import { formatXml } from 'xmldom-format';
 
-function toFloatSeconds(durationMillis: number): string {
-  return (durationMillis / 1000).toFixed(3);
-}
-
 /**
  * output in junit format
  * @param output json object with all test results
@@ -24,9 +20,11 @@ export function transformToJunit(output: SendJsonOutput): string {
   document.appendChild(xmlNode);
   const root = document.createElement('testsuites');
   document.appendChild(root);
+  root.setAttribute('tests', `${output.summary.totalRequests}`);
   root.setAttribute('errors', '0');
   root.setAttribute('disabled', `${output.summary.disabledRequests}`);
   root.setAttribute('failues', `${output.summary.failedTests}`);
+  root.setAttribute('time', `${toFloatSeconds(output.requests.reduce(sumDuration, 0))}`);
 
   for (const [filename, requests] of Object.entries(groupedRequests)) {
     root.appendChild(transformToTestSuite(document, filename, requests));
@@ -36,10 +34,6 @@ export function transformToJunit(output: SendJsonOutput): string {
     indentation: '  ',
     eol: EOL,
   });
-}
-
-function sum(x: number, y: SendOutputRequest) {
-  return x + (y.duration || 0);
 }
 
 // eslint-disable-next-line no-undef
@@ -52,7 +46,7 @@ function transformToTestSuite(document: XMLDocument, file: string, requests: Arr
   setAttribute(root, 'failures', summary.failedRequests);
   setAttribute(root, 'skipped', summary.disabledRequests);
   setAttribute(root, 'package', dirname(file).replace(process.cwd(), ''));
-  setAttribute(root, 'time', toFloatSeconds(requests.reduce(sum, 0) || 0));
+  setAttribute(root, 'time', `${toFloatSeconds(requests.reduce(sumDuration, 0))}`);
   setAttribute(root, 'file', file);
 
   for (const request of requests) {
@@ -132,6 +126,13 @@ function transformToProperties(document: XMLDocument, request: SendOutputRequest
     return root;
   }
   return undefined;
+}
+function sumDuration(x: number, y: SendOutputRequest) {
+  return x + (y.duration || 0);
+}
+
+function toFloatSeconds(durationMillis: number): string {
+  return (durationMillis / 1000).toFixed(3);
 }
 
 // eslint-disable-next-line no-undef

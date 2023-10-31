@@ -32,7 +32,7 @@ describe('transformToJunit', () => {
     expect(result).toBe(
       `
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites errors="0" disabled="0" failues="0">
+<testsuites tests="1" errors="0" disabled="0" failues="0" time="1.001">
   <testsuite name="test.http" tests="1" failures="0" skipped="0" package="." time="1.001" file="test.http">
     <testcase name="test" classname="test.http" assertions="1" time="1.001"/>
   </testsuite>
@@ -94,7 +94,7 @@ describe('transformToJunit', () => {
     expect(result).toBe(
       `
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites errors="0" disabled="0" failues="0">
+<testsuites tests="1" errors="0" disabled="0" failues="0" time="3.005">
   <testsuite name="test.http" tests="2" failures="0" skipped="0" package="." time="2.003" file="test.http">
     <testcase name="test" classname="test.http" assertions="1" time="1.001"/>
     <testcase name="test2" classname="test.http" assertions="1" time="1.002"/>
@@ -137,7 +137,7 @@ describe('transformToJunit', () => {
     expect(result).toBe(
       `
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites errors="0" disabled="1" failues="0">
+<testsuites tests="1" errors="0" disabled="1" failues="0" time="0.000">
   <testsuite name="test.http" tests="1" failures="0" skipped="1" package="." time="0.000" file="test.http">
     <testcase name="test" classname="test.http" assertions="0" time="0.000">
       <skipped/>
@@ -188,7 +188,7 @@ describe('transformToJunit', () => {
     expect(result).toBe(
       `
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites errors="0" disabled="0" failues="1">
+<testsuites tests="1" errors="0" disabled="0" failues="1" time="0.000">
   <testsuite name="test.http" tests="1" failures="1" skipped="0" package="." time="0.000" file="test.http">
     <testcase name="test" classname="test.http" assertions="2" time="0.000">
       <failure message="Assertions fail" type="unknown">failed result</failure>
@@ -232,7 +232,7 @@ describe('transformToJunit', () => {
     expect(result).toBe(
       `
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites errors="0" disabled="0" failues="0">
+<testsuites tests="1" errors="0" disabled="0" failues="0" time="1.001">
   <testsuite name="test.http" tests="1" failures="0" skipped="0" package="." time="1.001" file="test.http">
     <testcase name="test" classname="test.http" assertions="1" time="1.001">
       <properties>
