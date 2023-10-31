@@ -69,7 +69,10 @@ function transformToTestcase(document: XMLDocument, request: SendOutputRequest) 
   setAttribute(root, 'assertions', request.summary.totalTests);
   setAttribute(root, 'time', toFloatSeconds(request.duration || 0));
 
-  root.appendChild(transformToProperties(document, request));
+  const propertiesNode = transformToProperties(document, request);
+  if (propertiesNode) {
+    root.appendChild(propertiesNode);
+  }
 
   if (request.disabled) {
     root.appendChild(document.createElement('skipped'));
@@ -113,9 +116,11 @@ function transformToProperties(document: XMLDocument, request: SendOutputRequest
     line: request.line,
     timestamp: request.timestamp,
   };
+  let hasChild = false;
   const root = document.createElement('properties');
   for (const [key, value] of Object.entries(properties)) {
     if (value) {
+      hasChild = true;
       const propertyNode = document.createElement('property');
       propertyNode.setAttribute('name', key);
       propertyNode.setAttribute('value', utils.toString(value) || '');
@@ -123,7 +128,10 @@ function transformToProperties(document: XMLDocument, request: SendOutputRequest
     }
   }
 
-  return root;
+  if (hasChild) {
+    return root;
+  }
+  return undefined;
 }
 
 // eslint-disable-next-line no-undef
