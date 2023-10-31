@@ -61,7 +61,7 @@ export function toSendJsonOutput(
       title: utils.toString(httpRegion.metaData?.title),
       description: utils.toString(httpRegion.metaData?.description),
       testResults: httpRegion.testResults,
-      timestamp: new Date(httpRegion.start).toISOString(),
+      timestamp: new Date(performance.timeOrigin + httpRegion.start).toISOString(),
       duration: httpRegion.duration,
       disabled: !!httpRegion.disabled,
       summary: {
