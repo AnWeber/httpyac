@@ -31,6 +31,7 @@ describe('transformToJunit', () => {
     });
     expect(result).toBe(
       `
+<?xml version="1.0" encoding="UTF-8"?>
 <testsuites errors="0" disabled="0" failues="0">
   <testsuite name="test.http" tests="1" failures="0" skipped="0" package="." time="1.001" file="test.http">
     <properties>
@@ -95,6 +96,7 @@ describe('transformToJunit', () => {
     });
     expect(result).toBe(
       `
+<?xml version="1.0" encoding="UTF-8"?>
 <testsuites errors="0" disabled="0" failues="0">
   <testsuite name="test.http" tests="2" failures="0" skipped="0" package="." time="2.003" file="test.http">
     <properties>
@@ -146,6 +148,7 @@ describe('transformToJunit', () => {
     });
     expect(result).toBe(
       `
+<?xml version="1.0" encoding="UTF-8"?>
 <testsuites errors="0" disabled="1" failues="0">
   <testsuite name="test.http" tests="1" failures="0" skipped="1" package="." time="0.000" file="test.http">
     <properties>
@@ -199,6 +202,7 @@ describe('transformToJunit', () => {
     });
     expect(result).toBe(
       `
+<?xml version="1.0" encoding="UTF-8"?>
 <testsuites errors="0" disabled="0" failues="1">
   <testsuite name="test.http" tests="1" failures="1" skipped="0" package="." time="0.000" file="test.http">
     <properties>
