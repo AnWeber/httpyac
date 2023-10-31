@@ -20,7 +20,10 @@ export function transformToJunit(output: SendJsonOutput): string {
   const dom = new DOMImplementation();
   const document = dom.createDocument('', '');
 
+  const xmlNode = document.createProcessingInstruction('xml', 'version="1.0" encoding="UTF-8"');
+  document.appendChild(xmlNode);
   const root = document.createElement('testsuites');
+  document.appendChild(root);
   root.setAttribute('errors', '0');
   root.setAttribute('disabled', `${output.summary.disabledRequests}`);
   root.setAttribute('failues', `${output.summary.failedTests}`);
@@ -29,7 +32,7 @@ export function transformToJunit(output: SendJsonOutput): string {
     root.appendChild(transformToTestSuite(document, filename, requests));
   }
 
-  return formatXml(root, {
+  return formatXml(document, {
     indentation: '  ',
     eol: EOL,
   });
