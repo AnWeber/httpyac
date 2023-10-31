@@ -56,7 +56,6 @@ function transformToTestSuite(document: XMLDocument, file: string, requests: Arr
   setAttribute(root, 'file', file);
 
   for (const request of requests) {
-    root.appendChild(transformToProperties(document, request));
     root.appendChild(transformToTestcase(document, request));
   }
   return root;
@@ -69,6 +68,8 @@ function transformToTestcase(document: XMLDocument, request: SendOutputRequest) 
   setAttribute(root, 'classname', basename(request.fileName));
   setAttribute(root, 'assertions', request.summary.totalTests);
   setAttribute(root, 'time', toFloatSeconds(request.duration || 0));
+
+  root.appendChild(transformToProperties(document, request));
 
   if (request.disabled) {
     root.appendChild(document.createElement('skipped'));
@@ -107,11 +108,10 @@ function groupByFilename(requests: Array<SendOutputRequest>): Record<string, Arr
 // eslint-disable-next-line no-undef
 function transformToProperties(document: XMLDocument, request: SendOutputRequest) {
   const properties = {
-    name: request.name,
     title: request.title,
     description: request.description,
     line: request.line,
-    start: request.timestamp,
+    timestamp: request.timestamp,
   };
   const root = document.createElement('properties');
   for (const [key, value] of Object.entries(properties)) {
