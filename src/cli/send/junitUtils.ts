@@ -20,6 +20,7 @@ export function transformToJunit(output: SendJsonOutput): string {
   document.appendChild(xmlNode);
   const root = document.createElement('testsuites');
   document.appendChild(root);
+  root.setAttribute('name', `httpyac`);
   root.setAttribute('tests', `${output.summary.totalRequests}`);
   root.setAttribute('errors', '0');
   root.setAttribute('disabled', `${output.summary.disabledRequests}`);
