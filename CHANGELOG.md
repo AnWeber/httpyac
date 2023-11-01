@@ -1,4 +1,8 @@
-## [unreleased]
+## [6.9.0] (2023-11-01)
+
+### Feature
+
+- junit export using '--junit'  args
 
 ### Fix
 
