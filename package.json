@@ -39,7 +39,7 @@
     "httpyac": "./bin/httpyac.js"
   },
   "scripts": {
-    "compile": "npm run esbuild && npm run tsc",
+    "build": "npm run esbuild && npm run tsc",
     "docker_build": "npm run esbuild -- --no-external --no-minify",
     "esbuild": "node ./buildSrc/esbuild.js",
     "eslint": "eslint src --ext ts",
@@ -47,7 +47,7 @@
     "lint": "npm run format && npm run eslint && npm run tsc:check && npm run lockfile-lint && npm run packageJson-lint",
     "lockfile-lint": "lockfile-lint --path package-lock.json --validate-https --allowed-hosts npm --validate-checksum --validate-integrity",
     "packageJson-lint": "node ./buildSrc/lintPackageJson.js",
-    "prepack": "npm run compile",
+    "prepack": "npm run build",
     "prepare": "husky install",
     "start": "npm run watch",
     "test": "jest",

@@ -25,8 +25,8 @@ This project uses [NodeJS LTS](https://nodejs.org/en/download/) and npm v7 for d
 # install dependencies
 npm i
 
-# compile
-npm run compile
+# build
+npm run build
 
 # watch
 npm run watch
