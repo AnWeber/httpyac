@@ -39,10 +39,6 @@ describe('transformToJunit', () => {
       `
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites name="httpyac" tests="1" errors="0" disabled="0" failues="0" time="1.001">
-  <properties>
-    <property name="requests" value="1"/>
-    <property name="successRequests" value="1"/>
-  </properties>
   <testsuite name="test.http" tests="1" failures="0" skipped="0" package="." time="1.001" file="test.http">
     <testsuite name="test" tests="1" failures="0" skipped="0" package="test.http" time="1.001">
       <testcase name="status == 200" assertions="1"/>
@@ -125,10 +121,6 @@ describe('transformToJunit', () => {
       `
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites name="httpyac" tests="3" errors="0" disabled="0" failues="0" time="3.005">
-  <properties>
-    <property name="requests" value="3"/>
-    <property name="successRequests" value="3"/>
-  </properties>
   <testsuite name="test.http" tests="2" failures="0" skipped="0" package="." time="2.003" file="test.http">
     <testsuite name="test" tests="1" failures="0" skipped="0" package="test.http" time="1.001">
       <testcase name="status == 200" assertions="1"/>
@@ -178,10 +170,6 @@ describe('transformToJunit', () => {
       `
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites name="httpyac" tests="1" errors="0" disabled="1" failues="0" time="0.000">
-  <properties>
-    <property name="requests" value="1"/>
-    <property name="disabledRequests" value="1"/>
-  </properties>
   <testsuite name="test.http" tests="1" failures="0" skipped="1" package="." time="0.000" file="test.http">
     <testsuite name="test" tests="1" failures="0" skipped="1" package="test.http" time="0.000">
       <testcase name="skipped all tests">
@@ -239,10 +227,6 @@ describe('transformToJunit', () => {
       `
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites name="httpyac" tests="2" errors="0" disabled="0" failues="1" time="0.000">
-  <properties>
-    <property name="requests" value="1"/>
-    <property name="failedRequests" value="1"/>
-  </properties>
   <testsuite name="test.http" tests="2" failures="1" skipped="0" package="." time="0.000" file="test.http">
     <testsuite name="test" tests="2" failures="1" skipped="0" package="test.http" time="0.000">
       <testcase name="Assertions fail" assertions="1">
@@ -292,10 +276,6 @@ describe('transformToJunit', () => {
       `
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites name="httpyac" tests="1" errors="0" disabled="0" failues="0" time="1.001">
-  <properties>
-    <property name="requests" value="1"/>
-    <property name="successRequests" value="1"/>
-  </properties>
   <testsuite name="test.http" tests="1" failures="0" skipped="0" package="." time="1.001" file="test.http">
     <testsuite name="test" tests="1" failures="0" skipped="0" package="test.http" time="1.001">
       <properties>

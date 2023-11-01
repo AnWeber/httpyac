@@ -28,16 +28,6 @@ export function transformToJunit(output: SendJsonOutput): string {
   root.setAttribute('failues', `${output.summary.failedTests}`);
   root.setAttribute('time', `${toFloatSeconds(output.requests.reduce(sumDuration, 0))}`);
 
-  const propertiesNode = transformToProperties(document, {
-    requests: output.summary.totalRequests,
-    successRequests: output.summary.successRequests,
-    failedRequests: output.summary.failedRequests,
-    disabledRequests: output.summary.disabledRequests,
-  });
-  if (propertiesNode) {
-    root.appendChild(propertiesNode);
-  }
-
   for (const [filename, requests] of Object.entries(groupedRequests)) {
     root.appendChild(transformHttpFile(document, filename, requests));
   }
