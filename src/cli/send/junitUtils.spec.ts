@@ -17,6 +17,12 @@ describe('transformToJunit', () => {
             successTests: 1,
             failedTests: 0,
           },
+          testResults: [
+            {
+              result: true,
+              message: 'status == 200',
+            },
+          ],
         },
       ],
       summary: {
@@ -33,8 +39,14 @@ describe('transformToJunit', () => {
       `
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites name="httpyac" tests="1" errors="0" disabled="0" failues="0" time="1.001">
+  <properties>
+    <property name="requests" value="1"/>
+    <property name="successRequests" value="1"/>
+  </properties>
   <testsuite name="test.http" tests="1" failures="0" skipped="0" package="." time="1.001" file="test.http">
-    <testcase name="test" classname="test.http" assertions="1" time="1.001"/>
+    <testsuite name="test" tests="1" failures="0" skipped="0" package="test.http" time="1.001">
+      <testcase name="status == 200" assertions="1"/>
+    </testsuite>
   </testsuite>
 </testsuites>
     `.trim()
@@ -57,6 +69,12 @@ describe('transformToJunit', () => {
             successTests: 1,
             failedTests: 0,
           },
+          testResults: [
+            {
+              result: true,
+              message: 'status == 200',
+            },
+          ],
         },
         {
           fileName: 'test.http',
@@ -68,6 +86,12 @@ describe('transformToJunit', () => {
             successTests: 1,
             failedTests: 0,
           },
+          testResults: [
+            {
+              result: true,
+              message: 'status == 200',
+            },
+          ],
         },
         {
           fileName: 'test2.http',
@@ -79,28 +103,44 @@ describe('transformToJunit', () => {
             successTests: 1,
             failedTests: 0,
           },
+          testResults: [
+            {
+              result: true,
+              message: 'status == 200',
+            },
+          ],
         },
       ],
       summary: {
-        totalRequests: 1,
-        successRequests: 1,
+        totalRequests: 3,
+        successRequests: 3,
         disabledRequests: 0,
         failedRequests: 0,
-        totalTests: 1,
-        successTests: 1,
+        totalTests: 3,
+        successTests: 3,
         failedTests: 0,
       },
     });
     expect(result).toBe(
       `
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="httpyac" tests="1" errors="0" disabled="0" failues="0" time="3.005">
+<testsuites name="httpyac" tests="3" errors="0" disabled="0" failues="0" time="3.005">
+  <properties>
+    <property name="requests" value="3"/>
+    <property name="successRequests" value="3"/>
+  </properties>
   <testsuite name="test.http" tests="2" failures="0" skipped="0" package="." time="2.003" file="test.http">
-    <testcase name="test" classname="test.http" assertions="1" time="1.001"/>
-    <testcase name="test2" classname="test.http" assertions="1" time="1.002"/>
+    <testsuite name="test" tests="1" failures="0" skipped="0" package="test.http" time="1.001">
+      <testcase name="status == 200" assertions="1"/>
+    </testsuite>
+    <testsuite name="test2" tests="1" failures="0" skipped="0" package="test.http" time="1.002">
+      <testcase name="status == 200" assertions="1"/>
+    </testsuite>
   </testsuite>
   <testsuite name="test2.http" tests="1" failures="0" skipped="0" package="." time="1.002" file="test2.http">
-    <testcase name="other" classname="test2.http" assertions="1" time="1.002"/>
+    <testsuite name="other" tests="1" failures="0" skipped="0" package="test2.http" time="1.002">
+      <testcase name="status == 200" assertions="1"/>
+    </testsuite>
   </testsuite>
 </testsuites>
     `.trim()
@@ -118,7 +158,7 @@ describe('transformToJunit', () => {
           disabled: true,
           name: 'test',
           summary: {
-            totalTests: 0,
+            totalTests: 1,
             successTests: 0,
             failedTests: 0,
           },
@@ -130,7 +170,7 @@ describe('transformToJunit', () => {
         disabledRequests: 1,
         failedRequests: 0,
         totalTests: 1,
-        successTests: 1,
+        successTests: 0,
         failedTests: 0,
       },
     });
@@ -138,10 +178,16 @@ describe('transformToJunit', () => {
       `
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites name="httpyac" tests="1" errors="0" disabled="1" failues="0" time="0.000">
+  <properties>
+    <property name="requests" value="1"/>
+    <property name="disabledRequests" value="1"/>
+  </properties>
   <testsuite name="test.http" tests="1" failures="0" skipped="1" package="." time="0.000" file="test.http">
-    <testcase name="test" classname="test.http" assertions="0" time="0.000">
-      <skipped/>
-    </testcase>
+    <testsuite name="test" tests="1" failures="0" skipped="1" package="test.http" time="0.000">
+      <testcase name="skipped all tests">
+        <skipped/>
+      </testcase>
+    </testsuite>
   </testsuite>
 </testsuites>
     `.trim()
@@ -172,6 +218,10 @@ describe('transformToJunit', () => {
                 error: { message: 'test', name: 'unknown', stack: '' } as unknown as Error,
               },
             },
+            {
+              result: true,
+              message: 'status === 200',
+            },
           ],
         },
       ],
@@ -188,12 +238,21 @@ describe('transformToJunit', () => {
     expect(result).toBe(
       `
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="httpyac" tests="1" errors="0" disabled="0" failues="1" time="0.000">
-  <testsuite name="test.http" tests="1" failures="1" skipped="0" package="." time="0.000" file="test.http">
-    <testcase name="test" classname="test.http" assertions="2" time="0.000">
-      <failure message="Assertions fail" type="unknown">failed result</failure>
-      <system-err>{"message":"test","name":"unknown","stack":""}</system-err>
-    </testcase>
+<testsuites name="httpyac" tests="2" errors="0" disabled="0" failues="1" time="0.000">
+  <properties>
+    <property name="requests" value="1"/>
+    <property name="failedRequests" value="1"/>
+  </properties>
+  <testsuite name="test.http" tests="2" failures="1" skipped="0" package="." time="0.000" file="test.http">
+    <testsuite name="test" tests="2" failures="1" skipped="0" package="test.http" time="0.000">
+      <testcase name="Assertions fail" assertions="1">
+        <properties>
+          <property name="displayMessage" value="failed result"/>
+        </properties>
+        <failure message="Assertions fail" type="unknown">{"message":"test","name":"unknown","stack":""}</failure>
+      </testcase>
+      <testcase name="status === 200" assertions="1"/>
+    </testsuite>
   </testsuite>
 </testsuites>
     `.trim()
@@ -233,12 +292,16 @@ describe('transformToJunit', () => {
       `
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites name="httpyac" tests="1" errors="0" disabled="0" failues="0" time="1.001">
+  <properties>
+    <property name="requests" value="1"/>
+    <property name="successRequests" value="1"/>
+  </properties>
   <testsuite name="test.http" tests="1" failures="0" skipped="0" package="." time="1.001" file="test.http">
-    <testcase name="test" classname="test.http" assertions="1" time="1.001">
+    <testsuite name="test" tests="1" failures="0" skipped="0" package="test.http" time="1.001">
       <properties>
         <property name="title" value="title"/>
       </properties>
-    </testcase>
+    </testsuite>
   </testsuite>
 </testsuites>
     `.trim()

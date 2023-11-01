@@ -4,6 +4,7 @@ import { basename, dirname } from 'path';
 import { EOL } from 'os';
 import { DOMImplementation } from '@xmldom/xmldom';
 import { formatXml } from 'xmldom-format';
+import { TestResult } from '../../models';
 
 /**
  * output in junit format
@@ -21,14 +22,24 @@ export function transformToJunit(output: SendJsonOutput): string {
   const root = document.createElement('testsuites');
   document.appendChild(root);
   root.setAttribute('name', `httpyac`);
-  root.setAttribute('tests', `${output.summary.totalRequests}`);
+  root.setAttribute('tests', `${output.summary.totalTests}`);
   root.setAttribute('errors', '0');
   root.setAttribute('disabled', `${output.summary.disabledRequests}`);
   root.setAttribute('failues', `${output.summary.failedTests}`);
   root.setAttribute('time', `${toFloatSeconds(output.requests.reduce(sumDuration, 0))}`);
 
+  const propertiesNode = transformToProperties(document, {
+    requests: output.summary.totalRequests,
+    successRequests: output.summary.successRequests,
+    failedRequests: output.summary.failedRequests,
+    disabledRequests: output.summary.disabledRequests,
+  });
+  if (propertiesNode) {
+    root.appendChild(propertiesNode);
+  }
+
   for (const [filename, requests] of Object.entries(groupedRequests)) {
-    root.appendChild(transformToTestSuite(document, filename, requests));
+    root.appendChild(transformHttpFile(document, filename, requests));
   }
 
   return formatXml(document, {
@@ -38,55 +49,82 @@ export function transformToJunit(output: SendJsonOutput): string {
 }
 
 // eslint-disable-next-line no-undef
-function transformToTestSuite(document: XMLDocument, file: string, requests: Array<SendOutputRequest>) {
+function transformHttpFile(document: XMLDocument, file: string, requests: Array<SendOutputRequest>) {
   const summary = createTestSummary(requests);
 
   const root = document.createElement('testsuite');
   setAttribute(root, 'name', basename(file));
-  setAttribute(root, 'tests', summary.totalRequests);
-  setAttribute(root, 'failures', summary.failedRequests);
+  setAttribute(root, 'tests', summary.totalTests);
+  setAttribute(root, 'failures', summary.failedTests);
   setAttribute(root, 'skipped', summary.disabledRequests);
   setAttribute(root, 'package', dirname(file).replace(process.cwd(), ''));
   setAttribute(root, 'time', `${toFloatSeconds(requests.reduce(sumDuration, 0))}`);
   setAttribute(root, 'file', file);
 
   for (const request of requests) {
-    root.appendChild(transformToTestcase(document, request));
+    root.appendChild(transformRequest(document, request));
   }
   return root;
 }
 
 // eslint-disable-next-line no-undef
-function transformToTestcase(document: XMLDocument, request: SendOutputRequest) {
-  const root = document.createElement('testcase');
-  setAttribute(root, 'name', request.name);
-  setAttribute(root, 'classname', basename(request.fileName));
-  setAttribute(root, 'assertions', request.summary.totalTests);
-  setAttribute(root, 'time', toFloatSeconds(request.duration || 0));
+function transformRequest(document: XMLDocument, request: SendOutputRequest) {
+  const testSuiteNode = document.createElement('testsuite');
+  setAttribute(testSuiteNode, 'name', request.name);
+  setAttribute(testSuiteNode, 'tests', request.disabled ? 1 : request.summary?.totalTests || 0);
+  setAttribute(testSuiteNode, 'failures', request.summary?.failedTests || 0);
+  setAttribute(testSuiteNode, 'skipped', request.disabled ? 1 : 0);
+  setAttribute(testSuiteNode, 'package', basename(request.fileName));
+  setAttribute(testSuiteNode, 'time', toFloatSeconds(request.duration || 0));
 
-  const propertiesNode = transformToProperties(document, request);
+  const propertiesNode = transformToProperties(document, {
+    title: request.title,
+    description: request.description,
+    line: request.line,
+    timestamp: request.timestamp,
+  });
+  if (propertiesNode) {
+    testSuiteNode.appendChild(propertiesNode);
+  }
+
+  if (request.testResults) {
+    for (const testResult of request.testResults) {
+      const child = transformTestResultToTestcase(document, testResult);
+      testSuiteNode.appendChild(child);
+    }
+  } else if (request.disabled) {
+    const testcaseNode = document.createElement('testcase');
+    testcaseNode.setAttribute('name', 'skipped all tests');
+    testSuiteNode.appendChild(testcaseNode);
+    testcaseNode.appendChild(document.createElement('skipped'));
+  }
+
+  return testSuiteNode;
+}
+// eslint-disable-next-line no-undef
+function transformTestResultToTestcase(document: XMLDocument, testResult: TestResult) {
+  const root = document.createElement('testcase');
+  setAttribute(root, 'name', testResult.message);
+  setAttribute(root, 'assertions', 1);
+
+  const propertiesNode = transformToProperties(document, {
+    displayMessage: testResult.error?.displayMessage,
+    file: testResult.error?.file,
+    line: testResult.error?.line,
+    offset: testResult.error?.offset,
+    errorType: testResult.error?.errorType,
+    message: testResult.error?.message,
+  });
   if (propertiesNode) {
     root.appendChild(propertiesNode);
   }
 
-  if (request.disabled) {
-    root.appendChild(document.createElement('skipped'));
-  }
-  if (request.testResults) {
-    for (const testResult of request.testResults) {
-      if (!testResult.result) {
-        const failureNode = document.createElement('failure');
-        root.appendChild(failureNode);
-        setAttribute(failureNode, 'message', testResult.message);
-        setAttribute(failureNode, 'type', testResult.error?.errorType ?? 'unknown');
-        if (testResult.error) {
-          failureNode.textContent = testResult.error?.displayMessage;
-          const systemErrNode = document.createElement('system-err');
-          systemErrNode.textContent = utils.errorToString(testResult.error.error) || '';
-          root.appendChild(systemErrNode);
-        }
-      }
-    }
+  if (!testResult.result) {
+    const failureNode = document.createElement('failure');
+    root.appendChild(failureNode);
+    setAttribute(failureNode, 'message', testResult.message);
+    setAttribute(failureNode, 'type', testResult.error?.errorType ?? 'unknown');
+    failureNode.textContent = utils.errorToString(testResult.error?.error) || '';
   }
 
   return root;
@@ -104,13 +142,7 @@ function groupByFilename(requests: Array<SendOutputRequest>): Record<string, Arr
 }
 
 // eslint-disable-next-line no-undef
-function transformToProperties(document: XMLDocument, request: SendOutputRequest) {
-  const properties = {
-    title: request.title,
-    description: request.description,
-    line: request.line,
-    timestamp: request.timestamp,
-  };
+function transformToProperties(document: XMLDocument, properties: Record<string, string | number | undefined>) {
   let hasChild = false;
   const root = document.createElement('properties');
   for (const [key, value] of Object.entries(properties)) {
