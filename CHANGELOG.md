@@ -1,3 +1,9 @@
+## [6.9.1] (2023-11-01)
+
+### Fix
+
+- improve junit output using nested testsuite for httpFile and httpRegion
+
 ## [6.9.0] (2023-11-01)
 
 ### Feature
