@@ -89,13 +89,7 @@ function transformRequest(document: XMLDocument, request: SendOutputRequest) {
     const testCaseDurationMillis =
       requestDurationMillis / (request.testResults.length === 0 ? 1 : request.testResults.length);
     for (const testResult of request.testResults) {
-      const child = transformTestResultToTestcase(
-        document,
-        request.name,
-        fileRelativeToCwd,
-        testCaseDurationMillis,
-        testResult
-      );
+      const child = transformTestResultToTestcase(document, request.name, testCaseDurationMillis, testResult);
       testSuiteNode.appendChild(child);
     }
   } else if (request.disabled) {
@@ -103,25 +97,22 @@ function transformRequest(document: XMLDocument, request: SendOutputRequest) {
     testcaseNode.setAttribute('name', 'skipped all tests');
     testcaseNode.setAttribute('classname', request.name);
     testcaseNode.setAttribute('time', '0.000');
-    testcaseNode.setAttribute('file', fileRelativeToCwd);
     testSuiteNode.appendChild(testcaseNode);
     testcaseNode.appendChild(document.createElement('skipped'));
   }
 
   return testSuiteNode;
 }
-// eslint-disable-next-line no-undef
 function transformTestResultToTestcase(
+  // eslint-disable-next-line no-undef
   document: XMLDocument,
   testSuiteName: string,
-  file: string,
   testCaseDurationMillis: number,
   testResult: TestResult
 ) {
   const root = document.createElement('testcase');
   setAttribute(root, 'name', testResult.message);
   setAttribute(root, 'classname', testSuiteName);
-  setAttribute(root, 'file', file);
   setAttribute(root, 'time', toFloatSeconds(testCaseDurationMillis));
   setAttribute(root, 'assertions', 1);
 
