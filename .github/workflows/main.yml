@@ -54,10 +54,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Install Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node-version }}
+      - run: npm install
       - run: npm run docker_build
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
