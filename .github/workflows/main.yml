@@ -39,12 +39,13 @@ jobs:
       - run: npm run build -- --no-minify
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+      - run: npm run docker_build
   publish:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -59,8 +60,8 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ github.repository }}
           tags: type=edge,enable=true,priority=700,prefix=,suffix=,branch=main
+          images: ${{ env.REGISTRY }}/${{ github.repository }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
