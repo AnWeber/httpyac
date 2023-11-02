@@ -8,6 +8,10 @@ on:
       - main
   schedule:
     - cron: '0 0 * * 1'
+
+env:
+  REGISTRY: ghcr.io
+
 jobs:
   build:
     strategy:
