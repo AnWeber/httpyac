@@ -1,4 +1,4 @@
-FROM node:16
+FROM node:18
 ENV NODE_ENV=production
 COPY bin /httpyac/bin
 COPY dist /httpyac/dist
