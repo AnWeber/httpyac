@@ -15,7 +15,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         language: ['javascript']
-        node-version: [16.x, 18.x]
+        node-version: [18.x]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -35,3 +35,34 @@ jobs:
       - run: npm run build -- --no-minify
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}
+          tags: type=edge,enable=true,priority=700,prefix=,suffix=,branch=main
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
