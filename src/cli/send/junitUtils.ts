@@ -89,7 +89,11 @@ function transformRequest(document: XMLDocument, request: SendOutputRequest) {
     const testCaseDurationMillis =
       requestDurationMillis / (request.testResults.length === 0 ? 1 : request.testResults.length);
     for (const testResult of request.testResults) {
-      const child = transformTestResultToTestcase(document, request.name, testCaseDurationMillis, testResult);
+      const child = transformTestResultToTestcase(document, testResult, {
+        classname: request.name,
+        time: toFloatSeconds(testCaseDurationMillis),
+        file: fileRelativeToCwd,
+      });
       testSuiteNode.appendChild(child);
     }
   } else if (request.disabled) {
@@ -97,6 +101,7 @@ function transformRequest(document: XMLDocument, request: SendOutputRequest) {
     testcaseNode.setAttribute('name', 'skipped all tests');
     testcaseNode.setAttribute('classname', request.name);
     testcaseNode.setAttribute('time', '0.000');
+    testcaseNode.setAttribute('file', fileRelativeToCwd);
     testSuiteNode.appendChild(testcaseNode);
     testcaseNode.appendChild(document.createElement('skipped'));
   }
@@ -106,14 +111,14 @@ function transformRequest(document: XMLDocument, request: SendOutputRequest) {
 function transformTestResultToTestcase(
   // eslint-disable-next-line no-undef
   document: XMLDocument,
-  testSuiteName: string,
-  testCaseDurationMillis: number,
-  testResult: TestResult
+  testResult: TestResult,
+  attributes: Record<string, string | number>
 ) {
   const root = document.createElement('testcase');
   setAttribute(root, 'name', testResult.message);
-  setAttribute(root, 'classname', testSuiteName);
-  setAttribute(root, 'time', toFloatSeconds(testCaseDurationMillis));
+  for (const [key, value] of Object.entries(attributes)) {
+    setAttribute(root, key, value);
+  }
   setAttribute(root, 'assertions', 1);
 
   const propertiesNode = transformToProperties(document, {
