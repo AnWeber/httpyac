@@ -7,6 +7,7 @@ import { send } from '../httpYacApi';
 import * as io from '../io';
 import * as models from '../models';
 import * as store from '../store';
+import { TestRequestClient } from './testRequestClient';
 
 export async function parseHttp(code: string, filename = 'any.http') {
   return await new store.HttpFileStore().getOrCreate(filename, async () => Promise.resolve(code), 0, {
@@ -127,6 +128,15 @@ export function initNestedFileProvider(filesystem: Directory) {
     }
     return [];
   };
+}
+
+export function initHttpClientProvider(action?: (request: models.Request) => Promise<Partial<models.HttpResponse>>) {
+  const requests: Array<models.Request> = [];
+  io.httpClientProvider.createRequestClient = request => {
+    requests.push(request);
+    return new TestRequestClient(request, action);
+  };
+  return requests;
 }
 
 function isDirectory(file: Directory | string | undefined): file is Directory {

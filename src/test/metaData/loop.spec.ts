@@ -1,16 +1,10 @@
-import { getLocal } from 'mockttp';
-
 import { send } from '../../httpYacApi';
-import { initFileProvider, parseHttp, sendHttp } from '../testUtils';
+import { initFileProvider, initHttpClientProvider, parseHttp, sendHttp } from '../testUtils';
 
 describe('metadata.name', () => {
-  const localServer = getLocal();
-  beforeAll(async () => await localServer.start());
-  afterAll(async () => await localServer.stop());
-
   it('loop for of', async () => {
     initFileProvider();
-    const mockedEndpoints = await localServer.forGet('/json').thenReply(200);
+    const requests = initHttpClientProvider();
 
     await sendHttp(
       `
@@ -20,41 +14,33 @@ exports.data = ['a', 'b', 'c'];
 ###
 # @loop for item of data
 GET /json?index={{$index}}&test={{item}}
-    `,
-      {
-        host: `http://localhost:${localServer.port}`,
-      }
+    `
     );
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/json?index=0&test=a`);
-    expect(requests[1].url).toBe(`http://localhost:${localServer.port}/json?index=1&test=b`);
-    expect(requests[2].url).toBe(`http://localhost:${localServer.port}/json?index=2&test=c`);
+    expect(requests[0].url).toBe(`/json?index=0&test=a`);
+    expect(requests[1].url).toBe(`/json?index=1&test=b`);
+    expect(requests[2].url).toBe(`/json?index=2&test=c`);
   });
 
   it('loop for', async () => {
     initFileProvider();
-    const mockedEndpoints = await localServer.forGet('/json').thenReply(200);
+    const requests = initHttpClientProvider();
 
     await sendHttp(
       `
 # @loop for 3
 GET  /json?test={{$index}}
-    `,
-      {
-        host: `http://localhost:${localServer.port}`,
-      }
+    `
     );
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/json?test=0`);
-    expect(requests[1].url).toBe(`http://localhost:${localServer.port}/json?test=1`);
-    expect(requests[2].url).toBe(`http://localhost:${localServer.port}/json?test=2`);
+    expect(requests[0].url).toBe(`/json?test=0`);
+    expect(requests[1].url).toBe(`/json?test=1`);
+    expect(requests[2].url).toBe(`/json?test=2`);
   });
 
   it('loop while', async () => {
     initFileProvider();
-    const mockedEndpoints = await localServer.forGet('/json').thenReply(200);
+    const requests = initHttpClientProvider();
 
     await sendHttp(
       `
@@ -66,23 +52,20 @@ exports.expression = {
 ###
 # @loop while expression.index < 3
 GET  /json?test={{expression.index++}}
-    `,
-      {
-        host: `http://localhost:${localServer.port}`,
-      }
+    `
     );
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/json?test=0`);
-    expect(requests[1].url).toBe(`http://localhost:${localServer.port}/json?test=1`);
-    expect(requests[2].url).toBe(`http://localhost:${localServer.port}/json?test=2`);
+    expect(requests[0].url).toBe(`/json?test=0`);
+    expect(requests[1].url).toBe(`/json?test=1`);
+    expect(requests[2].url).toBe(`/json?test=2`);
   });
   it('loop for + ref', async () => {
     initFileProvider();
-    const mockedEndpoints = await localServer.forGet('/test').thenCallback(req => ({
-      status: 200,
-      body: `foo${req.url.slice(-1)}`,
-    }));
+    const requests = initHttpClientProvider(req =>
+      Promise.resolve({
+        body: `foo${req.url.slice(-1)}`,
+      })
+    );
 
     const httpFile = await parseHttp(
       `
@@ -100,15 +83,11 @@ GET /test?index={{$index}}&item={{item.body}}
     await send({
       httpFile,
       httpRegion: httpFile.httpRegions[1],
-      variables: {
-        host: `http://localhost:${localServer.port}`,
-      },
     });
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/test?index=0`);
-    expect(requests[1].url).toBe(`http://localhost:${localServer.port}/test?index=1`);
-    expect(requests[2].url).toBe(`http://localhost:${localServer.port}/test?index=0&item=foo0`);
-    expect(requests[3].url).toBe(`http://localhost:${localServer.port}/test?index=1&item=foo1`);
+    expect(requests[0].url).toBe(`/test?index=0`);
+    expect(requests[1].url).toBe(`/test?index=1`);
+    expect(requests[2].url).toBe(`/test?index=0&item=foo0`);
+    expect(requests[3].url).toBe(`/test?index=1&item=foo1`);
   });
 });

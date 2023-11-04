@@ -1,15 +1,10 @@
-import { getLocal } from 'mockttp';
-
-import { initFileProvider, parseHttp, sendHttpFile } from '../testUtils';
+import { initFileProvider, initHttpClientProvider, parseHttp, sendHttpFile } from '../testUtils';
 
 describe('request.odata', () => {
-  const localServer = getLocal();
-  beforeAll(async () => await localServer.start());
-  afterAll(async () => await localServer.stop());
-
   it('batch processing', async () => {
     initFileProvider();
-    const mockedEndpoints = await localServer.forPost('/$batch').thenReply(200);
+
+    const requests = initHttpClientProvider();
 
     const body = `--batch_36522ad7-fc75-4b56-8c71-56071383e77b
     Content-Type: application/http
@@ -60,12 +55,8 @@ ${body}
     expect(httpFile.httpRegions.length).toBe(1);
     await sendHttpFile({
       httpFile,
-      variables: {
-        host: `http://localhost:${localServer.port}`,
-      },
     });
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(await requests[0].body.getText()).toBe(body);
+    expect(requests[0].body).toBe(body);
   });
 });

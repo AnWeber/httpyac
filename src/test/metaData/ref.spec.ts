@@ -1,17 +1,15 @@
-import { getLocal } from 'mockttp';
-
 import { send } from '../../httpYacApi';
-import { initFileProvider, parseHttp } from '../testUtils';
+import { initFileProvider, initHttpClientProvider, parseHttp } from '../testUtils';
 
 describe('metadata.ref', () => {
-  const localServer = getLocal();
-  beforeAll(async () => await localServer.start());
-  afterAll(async () => await localServer.stop());
-
   it('name + ref', async () => {
     initFileProvider();
-    const refEndpoints = await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
-    const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
+    const requests = initHttpClientProvider(() =>
+      Promise.resolve({
+        parsedBody: { foo: 'bar', test: 1 },
+      })
+    );
+
     const httpFile = await parseHttp(`
 # @name foo
 GET  /json
@@ -32,16 +30,11 @@ foo={{foo.foo}}
     await send({
       httpFile,
       httpRegion: httpFile.httpRegions[1],
-      variables: {
-        host: `http://localhost:${localServer.port}`,
-      },
     });
 
-    const refRequests = await refEndpoints.getSeenRequests();
-    expect(refRequests[0].path).toBe('/json');
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].path).toBe('/post?test=1');
-    expect(await requests[0].body.getText()).toBe('foo=bar');
+    expect(requests[0].url).toBe('/json');
+    expect(requests[1].url).toBe('/post?test=1');
+    expect(requests[1].body).toBe('foo=bar');
   });
 
   it('not found ref', async () => {
@@ -61,17 +54,17 @@ foo={{foo.foo}}
         await send({
           httpFile,
           httpRegion: httpFile.httpRegions[1],
-          variables: {
-            host: `http://localhost:${localServer.port}`,
-          },
         })
     ).rejects.toThrow(`ref not_found not found`);
   });
 
   it('name + ref + falsy body', async () => {
     initFileProvider();
-    const refEndpoints = await localServer.forGet('/json').thenReply(200);
-    const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
+    const requests = initHttpClientProvider(() =>
+      Promise.resolve({
+        body: '',
+      })
+    );
     const httpFile = await parseHttp(`
 # @name child
 GET  /json
@@ -94,18 +87,13 @@ foo={{parent}}
     await send({
       httpFile,
       httpRegion: httpFile.httpRegions[2],
-      variables: {
-        host: `http://localhost:${localServer.port}`,
-      },
     });
 
-    const refRequests = await refEndpoints.getSeenRequests();
-    expect(refRequests[0].path).toBe('/json');
-    expect(refRequests.length).toBe(1);
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].path).toBe('/post?test=');
-    expect(await requests[0].body.getText()).toBe('foo=');
-    expect(await requests[1].body.getText()).toBe('foo=');
+    expect(requests.length).toBe(3);
+    expect(requests[0].url).toBe('/json');
+    expect(requests[1].url).toBe('/post?test=');
+    expect(requests[1].body).toBe('foo=');
+    expect(requests[2].body).toBe('foo=');
   });
 
   it('name + import + ref', async () => {
@@ -115,8 +103,11 @@ foo={{parent}}
 GET  /json
       `,
     });
-    await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
-    const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
+    const requests = initHttpClientProvider(() =>
+      Promise.resolve({
+        parsedBody: { foo: 'bar', test: 1 },
+      })
+    );
     const httpFile = await parseHttp(`
 # @import ./import.http
 ###
@@ -129,20 +120,20 @@ foo={{foo.foo}}
     await send({
       httpFile,
       httpRegion: httpFile.httpRegions[1],
-      variables: {
-        host: `http://localhost:${localServer.port}`,
-      },
     });
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].path).toBe('/post?test=1');
-    expect(await requests[0].body.getText()).toBe('foo=bar');
+    expect(requests.length).toBe(2);
+    expect(requests[1].url).toBe('/post?test=1');
+    expect(requests[1].body).toBe('foo=bar');
   });
 
   it('name + forceRef', async () => {
     initFileProvider();
-    const refEndpoints = await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
-    const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
+    const requests = initHttpClientProvider(() =>
+      Promise.resolve({
+        parsedBody: { foo: 'bar', test: 1 },
+      })
+    );
     const httpFile = await parseHttp(`
 # @name foo
 GET  /json
@@ -164,15 +155,10 @@ foo={{foo.foo}}
     await send({
       httpFile,
       httpRegions,
-      variables: {
-        host: `http://localhost:${localServer.port}`,
-      },
     });
 
-    const refRequests = await refEndpoints.getSeenRequests();
-    expect(refRequests.length).toBe(2);
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].path).toBe('/post?test=1');
-    expect(await requests[0].body.getText()).toBe('foo=bar');
+    expect(requests.length).toBe(4);
+    expect(requests[3].url).toBe('/post?test=1');
+    expect(requests[3].body).toBe('foo=bar');
   });
 });

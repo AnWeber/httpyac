@@ -1,15 +1,9 @@
-import { getLocal } from 'mockttp';
-
-import { initFileProvider, parseHttp, sendHttpFile } from '../testUtils';
+import { initFileProvider, initHttpClientProvider, parseHttp, sendHttpFile } from '../../../test/testUtils';
 
 describe('assert.status', () => {
-  const localServer = getLocal();
-  beforeAll(async () => await localServer.start());
-  afterAll(async () => await localServer.stop());
-
   it('should be equal 200', async () => {
     initFileProvider();
-    await localServer.forGet('/get').thenReply(200);
+    initHttpClientProvider();
     const httpFile = await parseHttp(`
     GET /get
 
@@ -18,9 +12,6 @@ describe('assert.status', () => {
 
     const responses = await sendHttpFile({
       httpFile,
-      variables: {
-        host: `http://localhost:${localServer.port}`,
-      },
     });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
@@ -30,7 +21,7 @@ describe('assert.status', () => {
   });
   it('should be equal to 200 with global assert', async () => {
     initFileProvider();
-    await localServer.forGet('/get').thenReply(200);
+    initHttpClientProvider();
     const httpFile = await parseHttp(`
     ?? status == 200
     ###
@@ -40,9 +31,6 @@ describe('assert.status', () => {
 
     const responses = await sendHttpFile({
       httpFile,
-      variables: {
-        host: `http://localhost:${localServer.port}`,
-      },
     });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
@@ -52,7 +40,7 @@ describe('assert.status', () => {
   });
   it('should not be equal 200', async () => {
     initFileProvider();
-    await localServer.forGet('/get').thenReply(201);
+    initHttpClientProvider(() => Promise.resolve({ statusCode: 201 }));
     const httpFile = await parseHttp(`
     GET /get
 
@@ -61,9 +49,6 @@ describe('assert.status', () => {
 
     const responses = await sendHttpFile({
       httpFile,
-      variables: {
-        host: `http://localhost:${localServer.port}`,
-      },
     });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(201);
@@ -73,7 +58,7 @@ describe('assert.status', () => {
   });
   it('should compare valid to 200', async () => {
     initFileProvider();
-    await localServer.forGet('/get').thenReply(200);
+    initHttpClientProvider();
     const httpFile = await parseHttp(`
     GET /get
 
@@ -91,9 +76,6 @@ describe('assert.status', () => {
 
     const responses = await sendHttpFile({
       httpFile,
-      variables: {
-        host: `http://localhost:${localServer.port}`,
-      },
     });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);

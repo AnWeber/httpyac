@@ -1,17 +1,16 @@
-import { getLocal } from 'mockttp';
-
-import { initFileProvider, parseHttp, sendHttpFile } from '../testUtils';
+import { initFileProvider, initHttpClientProvider, parseHttp, sendHttpFile } from '../../../test/testUtils';
 
 describe('assert.header', () => {
-  const localServer = getLocal();
-  beforeAll(async () => await localServer.start());
-  afterAll(async () => await localServer.stop());
-
   it('should equal header', async () => {
     initFileProvider();
-    await localServer.forGet('/get').thenReply(200, undefined, {
-      foo: 'bar',
-    });
+
+    initHttpClientProvider(() =>
+      Promise.resolve({
+        headers: {
+          foo: 'bar',
+        },
+      })
+    );
     const httpFile = await parseHttp(`
     GET /get
 
@@ -20,9 +19,6 @@ describe('assert.header', () => {
 
     const responses = await sendHttpFile({
       httpFile,
-      variables: {
-        host: `http://localhost:${localServer.port}`,
-      },
     });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);

@@ -1,16 +1,15 @@
-import { getLocal } from 'mockttp';
-
-import { initFileProvider, parseHttp, sendHttpFile } from '../testUtils';
+import { initFileProvider, initHttpClientProvider, parseHttp, sendHttpFile } from '../../../test/testUtils';
 
 describe('assert', () => {
-  const localServer = getLocal();
-  beforeAll(async () => await localServer.start());
-  afterAll(async () => await localServer.stop());
   it('should fail on empty type', async () => {
     initFileProvider();
-    await localServer.forGet('/get').thenJson(200, {
-      foo: 'bar',
-    });
+    initHttpClientProvider(() =>
+      Promise.resolve({
+        parsedBody: {
+          foo: 'bar',
+        },
+      })
+    );
     const httpFile = await parseHttp(`
     GET /get
 
@@ -19,9 +18,6 @@ describe('assert', () => {
 
     const responses = await sendHttpFile({
       httpFile,
-      variables: {
-        host: `http://localhost:${localServer.port}`,
-      },
     });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
@@ -31,9 +27,13 @@ describe('assert', () => {
   });
   it('should fail on invalid type', async () => {
     initFileProvider();
-    await localServer.forGet('/get').thenJson(200, {
-      foo: 'bar',
-    });
+    initHttpClientProvider(() =>
+      Promise.resolve({
+        parsedBody: {
+          foo: 'bar',
+        },
+      })
+    );
     const httpFile = await parseHttp(`
     GET /get
 
@@ -42,9 +42,6 @@ describe('assert', () => {
 
     const responses = await sendHttpFile({
       httpFile,
-      variables: {
-        host: `http://localhost:${localServer.port}`,
-      },
     });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
@@ -54,9 +51,13 @@ describe('assert', () => {
   });
   it('should ignore test on invalid predicate', async () => {
     initFileProvider();
-    await localServer.forGet('/get').thenJson(200, {
-      foo: 'bar',
-    });
+    initHttpClientProvider(() =>
+      Promise.resolve({
+        parsedBody: {
+          foo: 'bar',
+        },
+      })
+    );
     const httpFile = await parseHttp(`
     GET /get
 
@@ -65,9 +66,6 @@ describe('assert', () => {
 
     const responses = await sendHttpFile({
       httpFile,
-      variables: {
-        host: `http://localhost:${localServer.port}`,
-      },
     });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);

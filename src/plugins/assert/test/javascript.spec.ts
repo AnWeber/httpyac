@@ -1,16 +1,16 @@
-import { getLocal } from 'mockttp';
-
-import { initFileProvider, parseHttp, sendHttpFile } from '../testUtils';
+import { initFileProvider, initHttpClientProvider, parseHttp, sendHttpFile } from '../../../test/testUtils';
 
 describe('assert.javascript', () => {
-  const localServer = getLocal();
-  beforeAll(async () => await localServer.start());
-  afterAll(async () => await localServer.stop());
   it('should equal body', async () => {
     initFileProvider();
-    await localServer.forGet('/get').thenJson(200, {
-      foo: 'bar',
-    });
+
+    initHttpClientProvider(() =>
+      Promise.resolve({
+        parsedBody: {
+          foo: 'bar',
+        },
+      })
+    );
     const httpFile = await parseHttp(`
     GET /get
 
@@ -19,9 +19,6 @@ describe('assert.javascript', () => {
 
     const responses = await sendHttpFile({
       httpFile,
-      variables: {
-        host: `http://localhost:${localServer.port}`,
-      },
     });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
@@ -32,9 +29,14 @@ describe('assert.javascript', () => {
 
   it('should not fail on exception in javascript', async () => {
     initFileProvider();
-    await localServer.forGet('/get').thenJson(200, {
-      foo: 'bar',
-    });
+    initHttpClientProvider(() =>
+      Promise.resolve({
+        parsedBody: {
+          foo: 'bar',
+        },
+      })
+    );
+
     const httpFile = await parseHttp(`
     GET /get
 
@@ -43,9 +45,6 @@ describe('assert.javascript', () => {
 
     const responses = await sendHttpFile({
       httpFile,
-      variables: {
-        host: `http://localhost:${localServer.port}`,
-      },
     });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);

@@ -1,90 +1,79 @@
-import { getLocal } from 'mockttp';
-
-import { initFileProvider, sendHttp } from '../testUtils';
+import { initFileProvider, initHttpClientProvider, sendHttp } from '../testUtils';
 
 describe('request.http', () => {
-  const localServer = getLocal();
-  beforeAll(async () => await localServer.start());
-  afterAll(async () => await localServer.stop());
-
   it('get http', async () => {
     initFileProvider();
-    const mockedEndpoints = await localServer.forGet('/get').thenReply(200);
+    const requests = initHttpClientProvider();
 
-    await sendHttp(`GET /get`, { host: `http://localhost:${localServer.port}` });
+    await sendHttp(`GET /get`);
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/get`);
+    expect(requests[0].url).toBe(`/get`);
   });
 
   it('get http with protocol', async () => {
     initFileProvider();
-    const mockedEndpoints = await localServer.forGet('/get').thenReply(200);
+    const requests = initHttpClientProvider();
 
-    await sendHttp(`GET /get HTTP/1.1`, { host: `http://localhost:${localServer.port}` });
+    await sendHttp(`GET /get HTTP/1.1`);
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/get`);
+    expect(requests[0].url).toBe(`/get`);
   });
 
   it('get http with multiline', async () => {
     initFileProvider();
-    const mockedEndpoints = await localServer.forGet('/bar').thenReply(200);
+    const requests = initHttpClientProvider();
 
     await sendHttp(
       `
 GET /bar
   ?test=foo
       `,
-      { host: `http://localhost:${localServer.port}` }
+      { host: `` }
     );
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].path).toBe('/bar?test=foo');
+    expect(requests[0].url).toBe('/bar?test=foo');
   });
 
   it('get http with headers', async () => {
     initFileProvider();
-    const mockedEndpoints = await localServer.forGet('/get').thenReply(200);
+    const requests = initHttpClientProvider();
 
     await sendHttp(
       `
 GET /get
-Authorization: Bearer test
-Date: 2015-06-01
+authorization: Bearer test
+date: 2015-06-01
       `,
-      { host: `http://localhost:${localServer.port}` }
+      { host: `` }
     );
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].headers.authorization).toBe('Bearer test');
-    expect(requests[0].headers.date).toBe('2015-06-01');
+    expect(requests[0].headers?.authorization).toBe('Bearer test');
+    expect(requests[0].headers?.date).toBe('2015-06-01');
   });
 
   it('post http', async () => {
     initFileProvider();
     const body = JSON.stringify({ foo: 'foo', bar: 'bar' }, null, 2);
-    const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
+    const requests = initHttpClientProvider();
 
     await sendHttp(
       `
 POST /post
-Content-Type: application/json
+content-type: application/json
 
 ${body}
       `,
-      { host: `http://localhost:${localServer.port}` }
+      { host: `` }
     );
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].headers['content-type']).toBe('application/json');
-    expect(await requests[0].body.getText()).toBe(body);
+    expect(requests[0].headers?.['content-type']).toBe('application/json');
+    expect(requests[0].body).toBe(body);
   });
 
   it('post json variable', async () => {
     initFileProvider();
     const body = JSON.stringify({ foo: 'foo', bar: 'bar' });
-    const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
+    const requests = initHttpClientProvider();
 
     await sendHttp(
       `
@@ -92,21 +81,19 @@ ${body}
   exports.body = ${body}
 }}
 POST /post
-Content-Type: application/json
+content-type: application/json
 
 {{body}}
-      `,
-      { host: `http://localhost:${localServer.port}` }
+      `
     );
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].headers['content-type']).toBe('application/json');
-    expect(await requests[0].body.getText()).toBe(body);
+    expect(requests[0].headers?.['content-type']).toBe('application/json');
+    expect(requests[0].body).toBe(body);
   });
 
   it('x-www-form-urlencoded', async () => {
     initFileProvider();
-    const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
+    const requests = initHttpClientProvider();
 
     await sendHttp(
       `
@@ -114,16 +101,15 @@ Content-Type: application/json
 @clientSecret=xxxx-xxxxxxx-xxxxxx-xxxx
 
           POST /post
-Content-Type: application/x-www-form-urlencoded
+content-type: application/x-www-form-urlencoded
 
 grant_type=client_credentials&client_id={{clientId}}&client_secret={{clientSecret}}
       `,
-      { host: `http://localhost:${localServer.port}` }
+      { host: `` }
     );
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].headers['content-type']).toBe('application/x-www-form-urlencoded');
-    expect(await requests[0].body.getText()).toBe(
+    expect(requests[0].headers?.['content-type']).toBe('application/x-www-form-urlencoded');
+    expect(requests[0].body).toBe(
       `grant_type=client_credentials&client_id=test&client_secret=xxxx-xxxxxxx-xxxxxx-xxxx`
     );
   });

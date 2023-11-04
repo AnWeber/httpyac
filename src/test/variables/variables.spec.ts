@@ -1,34 +1,32 @@
-import { getLocal } from 'mockttp';
-
-import { initFileProvider, sendHttp } from '../testUtils';
+import { initFileProvider, initHttpClientProvider, sendHttp } from '../testUtils';
 
 describe('variables.set', () => {
-  const localServer = getLocal();
-  beforeAll(async () => await localServer.start());
-  afterAll(async () => await localServer.stop());
   it('file variables', async () => {
     initFileProvider();
-    const mockedEndpoints = await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
+    const requests = initHttpClientProvider(() =>
+      Promise.resolve({
+        parsedBody: { foo: 'bar', test: 1 },
+      })
+    );
 
     await sendHttp(
       `
 @foo=foo
 @bar={{foo}}bar
 GET /json?bar={{bar}}
-    `,
-      {
-        host: `http://localhost:${localServer.port}`,
-      }
+    `
     );
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/json?bar=foobar`);
+    expect(requests[0].url).toBe(`/json?bar=foobar`);
   });
 
   it('set string variable', async () => {
     initFileProvider();
-    const mockedEndpoints = await localServer.forGet('/test').thenJson(200, { slideshow: { author: 'httpyac' } });
-
+    const requests = initHttpClientProvider(() =>
+      Promise.resolve({
+        parsedBody: { slideshow: { author: 'httpyac' } },
+      })
+    );
     await sendHttp(
       `
 # @name fooString
@@ -38,21 +36,20 @@ GET  /test
 ###
 #@ref fooString
 GET  /test?author={{slideshow}}
-    `,
-      {
-        host: `http://localhost:${localServer.port}`,
-      }
+    `
     );
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/test`);
-    expect(requests[1].url).toBe(`http://localhost:${localServer.port}/test?author=httpyac`);
+    expect(requests[0].url).toBe(`/test`);
+    expect(requests[1].url).toBe(`/test?author=httpyac`);
   });
 
   it('set object variable', async () => {
     initFileProvider();
-    const mockedEndpoints = await localServer.forGet('/test').thenJson(200, { slideshow: { author: 'httpyac' } });
-
+    const requests = initHttpClientProvider(() =>
+      Promise.resolve({
+        parsedBody: { slideshow: { author: 'httpyac' } },
+      })
+    );
     await sendHttp(
       `
 # @name fooObject
@@ -61,21 +58,20 @@ GET  /test
 @slideshow={{fooObject.slideshow}}
 ###
 GET  /test?author={{slideshow.author}}
-    `,
-      {
-        host: `http://localhost:${localServer.port}`,
-      }
+    `
     );
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/test`);
-    expect(requests[1].url).toBe(`http://localhost:${localServer.port}/test?author=httpyac`);
+    expect(requests[0].url).toBe(`/test`);
+    expect(requests[1].url).toBe(`/test?author=httpyac`);
   });
 
   it('set object variable with number', async () => {
     initFileProvider();
-    const mockedEndpoints = await localServer.forGet('/get').thenJson(200, { foo: { test: 1 } });
-
+    const requests = initHttpClientProvider(() =>
+      Promise.resolve({
+        parsedBody: { foo: { test: 1 } },
+      })
+    );
     await sendHttp(
       `
 # @name objectNumber
@@ -84,21 +80,24 @@ GET /get
 @foo={{objectNumber.foo}}
 ###
 GET /get?test={{foo.test}}
-    `,
-      {
-        host: `http://localhost:${localServer.port}`,
-      }
+    `
     );
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/get`);
-    expect(requests[1].url).toBe(`http://localhost:${localServer.port}/get?test=1`);
+    expect(requests[0].url).toBe(`/get`);
+    expect(requests[1].url).toBe(`/get?test=1`);
   });
 
   it('direct replace variable', async () => {
     initFileProvider();
-    await localServer.forGet('/test').thenJson(200, { slideshow: { author: 'httpyac' } });
-    const mockedEndpoints = await localServer.forGet('/text').thenJson(200, { slideshow: { author: 'foo' } });
+    const requests = initHttpClientProvider(req =>
+      req.url.includes('text')
+        ? Promise.resolve({
+            parsedBody: { slideshow: { author: 'foo' } },
+          })
+        : Promise.resolve({
+            parsedBody: { slideshow: { author: 'httpyac' } },
+          })
+    );
 
     await sendHttp(
       `
@@ -109,21 +108,24 @@ GET  /test
 GET  /text?author={{slideshow.author}}
 ###
 GET  /text?another_author={{slideshow.author}}
-    `,
-      {
-        host: `http://localhost:${localServer.port}`,
-      }
+    `
     );
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/text?author=httpyac`);
-    expect(requests[1].url).toBe(`http://localhost:${localServer.port}/text?another_author=httpyac`);
+    expect(requests[1].url).toBe(`/text?author=httpyac`);
+    expect(requests[2].url).toBe(`/text?another_author=httpyac`);
   });
 
   it('lazy replace variable', async () => {
     initFileProvider();
-    await localServer.forGet('/test').thenJson(200, { slideshow: { author: 'httpyac' } });
-    const mockedEndpoints = await localServer.forGet('/text').thenJson(200, { slideshow: { author: 'foo' } });
+    const requests = initHttpClientProvider(req =>
+      req.url.includes('text')
+        ? Promise.resolve({
+            parsedBody: { slideshow: { author: 'foo' } },
+          })
+        : Promise.resolve({
+            parsedBody: { slideshow: { author: 'httpyac' } },
+          })
+    );
 
     await sendHttp(
       `
@@ -134,22 +136,24 @@ GET /test
 GET /text?author={{slideshow.author}}
 ###
 GET /text?another_author={{slideshow.author}}
-    `,
-      {
-        host: `http://localhost:${localServer.port}`,
-      }
+    `
     );
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/text?author=httpyac`);
-    expect(requests[1].url).toBe(`http://localhost:${localServer.port}/text?another_author=foo`);
+    expect(requests[1].url).toBe(`/text?author=httpyac`);
+    expect(requests[2].url).toBe(`/text?another_author=foo`);
   });
 
   it('string empty variable', async () => {
     initFileProvider();
-    await localServer.forGet('/test').thenJson(200, { slideshow: { author: 'httpyac' } });
-    const mockedEndpoints = await localServer.forGet('/text').thenJson(200, { slideshow: { author: 'foo' } });
-
+    const requests = initHttpClientProvider(req =>
+      req.url.includes('text')
+        ? Promise.resolve({
+            parsedBody: { slideshow: { author: 'foo' } },
+          })
+        : Promise.resolve({
+            parsedBody: { slideshow: { author: 'httpyac' } },
+          })
+    );
     await sendHttp(
       `
 {{
@@ -157,19 +161,22 @@ exports.foo = "";
 }}
 GET /text?foo={{foo}}
 
-    `,
-      {
-        host: `http://localhost:${localServer.port}`,
-      }
+    `
     );
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/text?foo=`);
+    expect(requests[0].url).toBe(`/text?foo=`);
   });
   it('nested replace variable', async () => {
     initFileProvider();
-    const mockedEndpoints = await localServer.forGet('/nested').thenJson(200, { slideshow: { author: 'httpyac' } });
-
+    const requests = initHttpClientProvider(req =>
+      req.url.includes('text')
+        ? Promise.resolve({
+            parsedBody: { slideshow: { author: 'foo' } },
+          })
+        : Promise.resolve({
+            parsedBody: { slideshow: { author: 'httpyac' } },
+          })
+    );
     await sendHttp(
       `
 @baz=works
@@ -177,19 +184,21 @@ GET /text?foo={{foo}}
   exports.testObj = { bar: '{{baz}}'};
 }}
 GET /nested?test={{JSON.stringify(testObj)}}
-    `,
-      {
-        host: `http://localhost:${localServer.port}`,
-      }
+    `
     );
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].path).toBe(`/nested?test={%22bar%22:%22works%22}`);
+    expect(requests[0].url).toBe(`/nested?test={"bar":"works"}`);
   });
 
   it('support await syntax in custom scripts', async () => {
     initFileProvider();
-    const mockedEndpoints = await localServer.forGet('/awaittest').thenJson(200, { slideshow: { author: 'httpyac' } });
+    const requests = initHttpClientProvider(() =>
+      Promise.resolve({
+        parsedBody: {
+          slideshow: { author: 'httpyac' },
+        },
+      })
+    );
     await sendHttp(
       `
 {{
@@ -197,13 +206,9 @@ const asyncFn = async () => ({ bar: 'works'});
 exports.testObj = await asyncFn();
 }}
 GET /awaittest?test={{JSON.stringify(testObj)}}
-    `,
-      {
-        host: `http://localhost:${localServer.port}`,
-      }
+    `
     );
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].path).toBe(`/awaittest?test={%22bar%22:%22works%22}`);
+    expect(requests[0].url).toBe(`/awaittest?test={"bar":"works"}`);
   });
 });

@@ -1,16 +1,15 @@
-import { getLocal } from 'mockttp';
-
-import { initFileProvider, parseHttp, sendHttpFile } from '../testUtils';
+import { initFileProvider, initHttpClientProvider, parseHttp, sendHttpFile } from '../../../test/testUtils';
 
 describe('assert.body', () => {
-  const localServer = getLocal();
-  beforeAll(async () => await localServer.start());
-  afterAll(async () => await localServer.stop());
   it('should equal body', async () => {
     initFileProvider();
-    await localServer.forGet('/get').thenJson(200, {
-      foo: 'bar',
-    });
+    initHttpClientProvider(() =>
+      Promise.resolve({
+        parsedBody: {
+          foo: 'bar',
+        },
+      })
+    );
     const httpFile = await parseHttp(`
     GET /get
 
@@ -22,9 +21,6 @@ describe('assert.body', () => {
 
     const responses = await sendHttpFile({
       httpFile,
-      variables: {
-        host: `http://localhost:${localServer.port}`,
-      },
     });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
@@ -41,9 +37,14 @@ describe('assert.body', () => {
   });
   it('should equal body property', async () => {
     initFileProvider();
-    await localServer.forGet('/get').thenJson(200, {
-      foo: 'bar',
-    });
+
+    initHttpClientProvider(() =>
+      Promise.resolve({
+        parsedBody: {
+          foo: 'bar',
+        },
+      })
+    );
     const httpFile = await parseHttp(`
     GET /get
 
@@ -52,9 +53,6 @@ describe('assert.body', () => {
 
     const responses = await sendHttpFile({
       httpFile,
-      variables: {
-        host: `http://localhost:${localServer.port}`,
-      },
     });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
@@ -64,9 +62,14 @@ describe('assert.body', () => {
   });
   it('should equal body array', async () => {
     initFileProvider();
-    await localServer.forGet('/get').thenJson(200, {
-      foo: ['bar'],
-    });
+
+    initHttpClientProvider(() =>
+      Promise.resolve({
+        parsedBody: {
+          foo: ['bar'],
+        },
+      })
+    );
     const httpFile = await parseHttp(`
     GET /get
 
@@ -75,9 +78,6 @@ describe('assert.body', () => {
 
     const responses = await sendHttpFile({
       httpFile,
-      variables: {
-        host: `http://localhost:${localServer.port}`,
-      },
     });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);

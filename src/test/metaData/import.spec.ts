@@ -1,28 +1,22 @@
-import { getLocal } from 'mockttp';
-
 import { send } from '../../httpYacApi';
-import { initFileProvider, parseHttp } from '../testUtils';
+import { initFileProvider, initHttpClientProvider, parseHttp } from '../testUtils';
 
-let desc = describe;
-if (/^v?20.*/u.test(process.version) && process.env.CI) {
-  desc = describe.skip;
-}
-
-desc('metadata.import', () => {
-  const localServer = getLocal();
-  beforeAll(async () => await localServer.start());
-  beforeEach(() => localServer.reset());
-  afterAll(async () => await localServer.stop());
-
+describe('metadata.import', () => {
   it('name + import + ref', async () => {
     initFileProvider({
       'import.http': `
 # @name foo
-GET http://localhost:${localServer.port}/nameimportjson
+GET /nameimportjson
       `,
     });
-    await localServer.forGet('/nameimportjson').thenJson(200, { foo: 'bar', test: 1 });
-    const mockedEndpoints = await localServer.forPost('/nameimport').thenJson(200, { foo: 'bar', test: 1 });
+    const requests = initHttpClientProvider(() =>
+      Promise.resolve({
+        parsedBody: {
+          foo: 'bar',
+          test: 1,
+        },
+      })
+    );
     const httpFile = await parseHttp(
       `
 # @import ./import.http
@@ -37,14 +31,11 @@ foo={{foo.foo}}
     await send({
       httpFile,
       httpRegion: httpFile.httpRegions[1],
-      variables: {
-        host: `http://localhost:${localServer.port}`,
-      },
     });
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].path).toBe(`/nameimport?test=1`);
-    expect(await requests[0].body.getText()).toBe('foo=bar');
+    expect(requests.length).toBe(2);
+    expect(requests[1].url).toBe(`/nameimport?test=1`);
+    expect(requests[1].body).toBe('foo=bar');
   });
   it('import global variable', async () => {
     initFileProvider({
@@ -53,7 +44,7 @@ foo={{foo.foo}}
 @bar=foo
       `,
     });
-    const mockedEndpoints = await localServer.forPost('/globalvarimport').thenReply(200);
+    const requests = initHttpClientProvider();
     const httpFile = await parseHttp(`
 # @import ./import.http
 POST /globalvarimport?foo={{foo}}
@@ -64,14 +55,11 @@ bar={{bar}}
     await send({
       httpFile,
       httpRegion: httpFile.httpRegions[1],
-      variables: {
-        host: `http://localhost:${localServer.port}`,
-      },
     });
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].path).toBe(`/globalvarimport?foo=bar`);
-    expect(await requests[0].body.getText()).toBe('bar=foo');
+    expect(requests.length).toBe(1);
+    expect(requests[0].url).toBe(`/globalvarimport?foo=bar`);
+    expect(requests[0].body).toBe('bar=foo');
   });
   it('import named variable', async () => {
     initFileProvider({
@@ -82,7 +70,7 @@ bar={{bar}}
 @bar=foo
       `,
     });
-    const mockedEndpoints = await localServer.forPost('/namedvar').thenReply(200);
+    const requests = initHttpClientProvider();
     const httpFile = await parseHttp(`
 # @import ./import.http
 # @ref test
@@ -94,24 +82,21 @@ bar={{bar}}
     await send({
       httpFile,
       httpRegion: httpFile.httpRegions[1],
-      variables: {
-        host: `http://localhost:${localServer.port}`,
-      },
     });
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].path).toBe(`/namedvar?foo=bar`);
-    expect(await requests[0].body.getText()).toBe('bar=foo');
+    expect(requests.length).toBe(1);
+    expect(requests[0].url).toBe(`/namedvar?foo=bar`);
+    expect(requests[0].body).toBe('bar=foo');
   });
   it('import request with using global host variable', async () => {
     initFileProvider({
       'import.http': `
-      @host=http://localhost:${localServer.port}
+      @host=http://localhost
 
       ### Apple
       # @name send_apple
       POST /globalhostimport
-      Content-Type: application/json
+      content-type: application/json
 
       {
               "id": "0001",
@@ -120,8 +105,14 @@ bar={{bar}}
       }
       `,
     });
-    await localServer.forGet('/globalhost').thenJson(200, { foo: 'bar', test: 1 });
-    const mockedEndpoints = await localServer.forPost('/globalhostimport').thenReply(200);
+    const requests = initHttpClientProvider(() =>
+      Promise.resolve({
+        parsedBody: {
+          foo: 'bar',
+          test: 1,
+        },
+      })
+    );
     const httpFile = await parseHttp(`
 # @import ./import.http
 
@@ -134,9 +125,9 @@ bar={{bar}}
       httpRegion: httpFile.httpRegions[1],
     });
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].path).toBe(`/globalhostimport`);
-    expect(requests[0].headers['content-type']).toBe('application/json');
+    expect(requests.length).toBe(2);
+    expect(requests[1].url).toBe(`http://localhost/globalhostimport`);
+    expect(requests[1].headers['content-type']).toBe('application/json');
   });
   it('should import httpFile in all files', async () => {
     initFileProvider({
@@ -151,9 +142,15 @@ GET /foo
       GET /bar?test={{foo.test}}
             `,
     });
-    await localServer.forGet('/foo').thenJson(200, { foo: 'bar', test: 1 });
-    await localServer.forGet('/bar').thenJson(200, { bar: 'foo', test: 1 });
-    const mockedEndpoints = await localServer.forPost('/test').thenJson(200, { foo: 'bar', test: 1 });
+    const requests = initHttpClientProvider(() =>
+      Promise.resolve({
+        parsedBody: {
+          foo: 'bar',
+          bar: 'foo',
+          test: 1,
+        },
+      })
+    );
     const httpFile = await parseHttp(
       `
 # @import ./foo.http
@@ -169,13 +166,10 @@ bar={{bar.bar}}`
     await send({
       httpFile,
       httpRegion: httpFile.httpRegions[1],
-      variables: {
-        host: `http://localhost:${localServer.port}`,
-      },
     });
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].path).toBe(`/test?test=barfoo`);
-    expect(await requests[0].body.getText()).toBe('foo=bar\nbar=foo');
+    expect(requests.length).toBe(3);
+    expect(requests[2].url).toBe(`/test?test=barfoo`);
+    expect(requests[2].body).toBe('foo=bar\nbar=foo');
   });
 });

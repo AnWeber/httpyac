@@ -1,23 +1,18 @@
-import { getLocal } from 'mockttp';
-
 import { getEnvironments, send } from '../../httpYacApi';
 import { VariableProviderContext } from '../../models';
-import { initNestedFileProvider, parseHttp, sendHttpFile } from '../testUtils';
+import { initHttpClientProvider, initNestedFileProvider, parseHttp, sendHttpFile } from '../testUtils';
 
 describe('environment.dotenv', () => {
-  const localServer = getLocal();
   let envContent = '';
   const httpContent = `
 GET  /json
 foo: {{foo}}
     `;
   beforeAll(async () => {
-    await localServer.start();
     envContent = `
-host=http://localhost:${localServer.port}
+host=http://localhost
 foo=bar`;
   });
-  afterAll(async () => await localServer.stop());
 
   describe('provideEnvironments', () => {
     it('parse .env in root dir', async () => {
@@ -125,13 +120,12 @@ foo=bar`;
           },
         },
       });
-      const mockedEndpoints = await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
+      const requests = initHttpClientProvider();
 
       const httpFile = await parseHttp(httpContent, '/src/test.http');
       await sendHttpFile({ httpFile });
 
-      const requests = await mockedEndpoints.getSeenRequests();
-      expect(requests[0].headers.foo).toBe('bar');
+      expect(requests[0].headers?.foo).toBe('bar');
     });
     it('parse .env in env folder', async () => {
       initNestedFileProvider({
@@ -148,13 +142,12 @@ foo=bar`;
           },
         },
       });
-      const mockedEndpoints = await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
+      const requests = initHttpClientProvider();
 
       const httpFile = await parseHttp(httpContent, '/src/test.http');
       await sendHttpFile({ httpFile });
 
-      const requests = await mockedEndpoints.getSeenRequests();
-      expect(requests[0].headers.foo).toBe('bar');
+      expect(requests[0].headers?.foo).toBe('bar');
     });
     it('parse .env in config env dir', async () => {
       initNestedFileProvider({
@@ -171,7 +164,7 @@ foo=bar`;
           },
         },
       });
-      const mockedEndpoints = await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
+      const requests = initHttpClientProvider();
 
       const httpFile = await parseHttp(httpContent, '/src/test.http');
       await send({
@@ -181,8 +174,7 @@ foo=bar`;
         },
       });
 
-      const requests = await mockedEndpoints.getSeenRequests();
-      expect(requests[0].headers.foo).toBe('bar');
+      expect(requests[0].headers?.foo).toBe('bar');
     });
     it('use activeenvironemt', async () => {
       initNestedFileProvider({
@@ -199,7 +191,7 @@ foo=bar`;
           },
         },
       });
-      const mockedEndpoints = await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
+      const requests = initHttpClientProvider();
 
       try {
         process.env.HTTPYAC_ENV = '/foo';
@@ -208,8 +200,7 @@ foo=bar`;
           httpFile,
         });
 
-        const requests = await mockedEndpoints.getSeenRequests();
-        expect(requests[0].headers.foo).toBe('bar');
+        expect(requests[0].headers?.foo).toBe('bar');
       } finally {
         delete process.env.HTTPYAC_ENV;
       }
@@ -229,14 +220,13 @@ foo=bar`;
           },
         },
       });
-      const mockedEndpoints = await localServer.forGet('/json').thenJson(200, { foo: 'bar', test: 1 });
+      const requests = initHttpClientProvider();
       const httpFile = await parseHttp(httpContent, '/src/test.http');
       await send({
         activeEnvironment: ['dev'],
         httpFile,
       });
-      const requests = await mockedEndpoints.getSeenRequests();
-      expect(requests[0].headers.foo).toBe('bar');
+      expect(requests[0].headers?.foo).toBe('bar');
     });
   });
 });

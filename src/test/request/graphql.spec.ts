@@ -1,15 +1,9 @@
-import { getLocal } from 'mockttp';
-
-import { initFileProvider, sendHttp } from '../testUtils';
+import { initFileProvider, initHttpClientProvider, sendHttp } from '../testUtils';
 
 describe('request.graphql', () => {
-  const localServer = getLocal();
-  beforeAll(async () => await localServer.start());
-  afterAll(async () => await localServer.stop());
-
   it('query + operation + variables', async () => {
     initFileProvider();
-    const mockedEndpoints = await localServer.forPost('/graphql').thenReply(200);
+    const requests = initHttpClientProvider();
 
     await sendHttp(
       `
@@ -37,22 +31,18 @@ query launchesQuery($limit: Int!){
 {
     "limit": 10
 }
-    `,
-      {
-        host: `http://localhost:${localServer.port}`,
-      }
+    `
     );
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/graphql`);
-    expect(await requests[0].body.getText()).toBe(
+    expect(requests[0].url).toBe(`/graphql`);
+    expect(requests[0].body).toBe(
       '{"query":"query launchesQuery($limit: Int!){\\n  launchesPast(limit: $limit) {\\n    mission_name\\n    launch_date_local\\n    launch_site {\\n      site_name_long\\n    }\\n    rocket {\\n      rocket_name\\n      rocket_type\\n    }\\n    ships {\\n      name\\n      home_port\\n      image\\n    }\\n  }\\n}","operationName":"launchesQuery","variables":{"limit":10}}'
     );
   });
 
   it('query + operation + variable replacement', async () => {
     initFileProvider();
-    const mockedEndpoints = await localServer.forPost('/graphql').thenReply(200);
+    const requests = initHttpClientProvider();
 
     await sendHttp(
       `
@@ -84,23 +74,18 @@ query launchesQuery($limit: Int!){
 }
 
 {{ variables }}
-    `,
-      {
-        host: `http://localhost:${localServer.port}`,
-      }
+    `
     );
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/graphql`);
-    expect(await requests[0].body.getText()).toBe(
+    expect(requests[0].url).toBe(`/graphql`);
+    expect(requests[0].body).toBe(
       '{"query":"query launchesQuery($limit: Int!){\\n  launchesPast(limit: $limit) {\\n    mission_name\\n    launch_date_local\\n    launch_site {\\n      site_name_long\\n    }\\n    rocket {\\n      rocket_name\\n      rocket_type\\n    }\\n    ships {\\n      name\\n      home_port\\n      image\\n    }\\n  }\\n}","operationName":"launchesQuery","variables":{"limit":10}}'
     );
   });
 
   it('query + operation + loop', async () => {
     initFileProvider();
-    const mockedEndpoints = await localServer.forPost('/graphql').thenReply(200);
-
+    const requests = initHttpClientProvider();
     await sendHttp(
       `
 {{
@@ -134,20 +119,19 @@ query launchesQuery($limit: Int!){
 {{ variables }}
     `,
       {
-        host: `http://localhost:${localServer.port}`,
+        host: ``,
       }
     );
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/graphql`);
-    expect(await requests[0].body.getText()).toBe(
+    expect(requests[0].url).toBe(`/graphql`);
+    expect(requests[0].body).toBe(
       '{"query":"query launchesQuery($limit: Int!){\\n  launchesPast(limit: $limit) {\\n    mission_name\\n    launch_date_local\\n    launch_site {\\n      site_name_long\\n    }\\n    rocket {\\n      rocket_name\\n      rocket_type\\n    }\\n    ships {\\n      name\\n      home_port\\n      image\\n    }\\n  }\\n}","operationName":"launchesQuery","variables":{"limit":10}}'
     );
   });
 
   it('query + operation + partial variable replacement', async () => {
     initFileProvider();
-    const mockedEndpoints = await localServer.forPost('/graphql').thenReply(200);
+    const requests = initHttpClientProvider();
 
     await sendHttp(
       `
@@ -184,20 +168,19 @@ query launchesQuery($limit: ComplexInput!){
 }
     `,
       {
-        host: `http://localhost:${localServer.port}`,
+        host: ``,
       }
     );
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/graphql`);
-    expect(await requests[0].body.getText()).toBe(
+    expect(requests[0].url).toBe(`/graphql`);
+    expect(requests[0].body).toBe(
       '{"query":"query launchesQuery($limit: ComplexInput!){\\n  launchesPast(limit: $limit) {\\n    mission_name\\n    launch_date_local\\n    launch_site {\\n      site_name_long\\n    }\\n    rocket {\\n      rocket_name\\n      rocket_type\\n    }\\n    ships {\\n      name\\n      home_port\\n      image\\n    }\\n  }\\n}","operationName":"launchesQuery","variables":{"limit":{"foo":10,"bar":20}}}'
     );
   });
 
   it('query with fragment', async () => {
     initFileProvider();
-    const mockedEndpoints = await localServer.forPost('/graphql').thenReply(200);
+    const requests = initHttpClientProvider();
 
     await sendHttp(
       `
@@ -236,20 +219,19 @@ query launchesQuery($limit: Int!){
 }
       `,
       {
-        host: `http://localhost:${localServer.port}`,
+        host: ``,
       }
     );
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/graphql`);
-    expect(await requests[0].body.getText()).toBe(
+    expect(requests[0].url).toBe(`/graphql`);
+    expect(requests[0].body).toBe(
       '{"query":"query launchesQuery($limit: Int!){\\n  launchesPast(limit: $limit) {\\n    mission_name\\n    launch_date_local\\n    launch_site {\\n      site_name_long\\n    }\\n    rocket {\\n      ...RocketParts\\n    }\\n  }\\n}\\nfragment RocketParts on LaunchRocket {\\n  rocket_name\\n  first_stage {\\n    cores {\\n      flight\\n      core {\\n        reuse_count\\n        status\\n      }\\n    }\\n  }\\n}","operationName":"launchesQuery","variables":{"limit":10}}'
     );
   });
 
   it('only query', async () => {
     initFileProvider();
-    const mockedEndpoints = await localServer.forPost('/graphql').thenReply(200);
+    const requests = initHttpClientProvider();
 
     await sendHttp(
       `
@@ -263,13 +245,12 @@ query company_query {
 }
       `,
       {
-        host: `http://localhost:${localServer.port}`,
+        host: ``,
       }
     );
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/graphql`);
-    expect(await requests[0].body.getText()).toBe(
+    expect(requests[0].url).toBe(`/graphql`);
+    expect(requests[0].body).toBe(
       '{"query":"query company_query {\\n  company {\\n    coo\\n  }\\n}","operationName":"company_query"}'
     );
   });
@@ -297,7 +278,7 @@ query launchesQuery($limit: Int!){
 }
         `,
     });
-    const mockedEndpoints = await localServer.forPost('/graphql').thenReply(200);
+    const requests = initHttpClientProvider();
 
     await sendHttp(
       `
@@ -311,19 +292,18 @@ gql launchesQuery < ./graphql.gql
 }
       `,
       {
-        host: `http://localhost:${localServer.port}`,
+        host: ``,
       }
     );
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/graphql`);
-    expect(await requests[0].body.getText()).toBe(
+    expect(requests[0].url).toBe(`/graphql`);
+    expect(requests[0].body).toBe(
       '{"query":"\\nquery launchesQuery($limit: Int!){\\n  launchesPast(limit: $limit) {\\n    mission_name\\n    launch_date_local\\n    launch_site {\\n      site_name_long\\n    }\\n    rocket {\\n      rocket_name\\n      rocket_type\\n    }\\n    ships {\\n      name\\n      home_port\\n      image\\n    }\\n  }\\n}\\n        ","operationName":"launchesQuery","variables":{"limit":10}}'
     );
   });
   it('use graphql method', async () => {
     initFileProvider();
-    const mockedEndpoints = await localServer.forPost('/graphql').thenReply(200);
+    const requests = initHttpClientProvider();
 
     await sendHttp(
       `
@@ -337,36 +317,34 @@ query company_query {
 }
       `,
       {
-        host: `http://localhost:${localServer.port}`,
+        host: ``,
       }
     );
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].url).toBe(`http://localhost:${localServer.port}/graphql`);
-    expect(await requests[0].body.getText()).toBe(
+    expect(requests[0].url).toBe(`/graphql`);
+    expect(requests[0].body).toBe(
       '{"query":"query company_query {\\n  company {\\n    coo\\n  }\\n}","operationName":"company_query"}'
     );
   });
   it('imported buffer body with replace', async () => {
     const body = JSON.stringify({ foo: 'foo', bar: '{{bar}}' }, null, 2);
     initFileProvider({ 'body.json': body });
-    const mockedEndpoints = await localServer.forPost('/post').thenReply(200);
+    const requests = initHttpClientProvider();
 
     await sendHttp(
       `
 @bar=bar2
 POST /post
-Content-Type: application/json
+content-type: application/json
 
 <@ ./body.json
       `,
       {
-        host: `http://localhost:${localServer.port}`,
+        host: ``,
       }
     );
 
-    const requests = await mockedEndpoints.getSeenRequests();
-    expect(requests[0].headers['content-type']).toBe('application/json');
-    expect(await requests[0].body.getText()).toBe(JSON.stringify({ foo: 'foo', bar: 'bar2' }, null, 2));
+    expect(requests[0].headers?.['content-type']).toBe('application/json');
+    expect(requests[0].body).toBe(JSON.stringify({ foo: 'foo', bar: 'bar2' }, null, 2));
   });
 });
