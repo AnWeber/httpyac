@@ -61,6 +61,7 @@ Options:
   --insecure                allow insecure server connections when using ssl
   -i --interactive          do not exit the program after request, go back to selection
   --json                    use json output
+  --junit                   use junit xml output
   -l, --line <line>         line of the http requests
   -n, --name <name>         name of the http requests
   --no-color                disable color support
@@ -70,6 +71,7 @@ Options:
   --quiet
   --repeat <count>          repeat count for requests
   --repeat-mode <mode>      repeat mode: sequential, parallel (default)
+  --parallel <count>        send parallel requests
   -s, --silent              log only request
   --timeout <timeout>       maximum time allowed for connections
   --var  <variables...>     list of variables
