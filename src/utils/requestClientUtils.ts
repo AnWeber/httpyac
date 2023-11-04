@@ -113,7 +113,8 @@ function registerCancellation<T extends models.RequestClient>(client: T, context
 function addProgressEvent<T extends models.RequestClient>(client: T, context: models.ProcessorContext) {
   if (context.isMainContext && context.progress?.report) {
     let prevPercent = 0;
-    client.on('progress', percent => {
+    client.addEventListener('progress', evt => {
+      const percent = evt.detail;
       const newData = percent - prevPercent;
       prevPercent = percent;
       if (context.progress?.report) {
@@ -133,7 +134,8 @@ function addMessageEvent<T extends models.RequestClient>(
   context: models.ProcessorContext,
   loadingPromises: Array<Promise<models.HttpResponse | void | undefined>>
 ) {
-  client.on('message', ([type, response]) => {
+  client.addEventListener('message', evt => {
+    const [type, response] = evt.detail;
     log.debug(type, response?.message || response?.body);
     loadingPromises.push(Promise.resolve(response));
     if (client.supportsStreaming && !context.httpRegion.metaData.noStreamingLog && context.logStream) {
@@ -146,7 +148,8 @@ function addMetaDataEvent<T extends models.RequestClient>(
   context: models.ProcessorContext,
   loadingPromises: Array<Promise<models.HttpResponse | void | undefined>>
 ) {
-  client.on('metaData', ([type, response]) => {
+  client.addEventListener('metaData', evt => {
+    const [type, response] = evt.detail;
     log.debug(type, response?.message || response?.body);
     if (context.httpRegion.metaData.metaDataLogging && context.logStream) {
       loadingPromises.push(context.logStream(type, response));

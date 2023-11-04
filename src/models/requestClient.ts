@@ -1,5 +1,3 @@
-import { EventEmitter } from 'events';
-
 import { HttpResponse, StreamResponse } from './httpResponse';
 
 export type RequestClientResponse = undefined | void | HttpResponse;
@@ -16,13 +14,13 @@ export interface RequestClient<T = unknown> {
    */
   streamEnded?(): void;
   disconnect(err?: Error): void;
-  on<K extends keyof RequestClientEventMap>(
+  addEventListener<K extends keyof RequestClientEventMap>(
     type: K,
-    listener: (this: RequestClient<T>, ev: RequestClientEventMap[K]) => void
+    listener: (ev: CustomEvent<RequestClientEventMap[K]>) => void
   ): void;
-  off<K extends keyof RequestClientEventMap>(
+  removeEventListener<K extends keyof RequestClientEventMap>(
     type: K,
-    listener: (this: RequestClient<T>, ev: RequestClientEventMap[K]) => void
+    listener: (ev: CustomEvent<RequestClientEventMap[K]>) => void
   ): void;
   triggerEnd(): void;
 }
@@ -35,6 +33,29 @@ interface RequestClientEventMap {
   end: void;
 }
 
+if (!global.CustomEvent) {
+  class CustomEvent<T = unknown> extends Event {
+    #detail?: T;
+    // eslint-disable-next-line no-undef
+    constructor(message: string, options?: CustomEventInit<T>) {
+      super(message, options);
+      this.#detail = options?.detail;
+    }
+
+    public get detail(): T | undefined {
+      return this.#detail;
+    }
+
+    public initCustomEvent(): void {
+      throw new Error('not implemented');
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  global.CustomEvent = CustomEvent;
+}
+
 export abstract class AbstractRequestClient<T> implements RequestClient<T> {
   abstract readonly supportsStreaming: boolean;
   abstract disconnect(err?: Error): void;
@@ -42,33 +63,53 @@ export abstract class AbstractRequestClient<T> implements RequestClient<T> {
   abstract reportMessage: string;
   abstract connect(obj: T | undefined): Promise<T>;
   abstract send(body?: unknown): Promise<void>;
-  private eventEmitter = new EventEmitter();
+  private eventEmitter = new EventTarget();
 
-  on<K extends keyof RequestClientEventMap>(
+  addEventListener<K extends keyof RequestClientEventMap>(
     type: K,
-    listener: (this: RequestClient, ev: RequestClientEventMap[K]) => void
+    listener: (evt: CustomEvent<RequestClientEventMap[K]>) => void
   ): void {
-    this.eventEmitter.on(type, listener);
+    this.eventEmitter.addEventListener(type, evt =>
+      this.isCustomEvent<RequestClientEventMap[K]>(evt) ? listener(evt) : undefined
+    );
   }
-  off<K extends keyof RequestClientEventMap>(
+  removeEventListener<K extends keyof RequestClientEventMap>(
     type: K,
-    listener: (this: RequestClient, ev: RequestClientEventMap[K]) => void
+    listener: (evt: CustomEvent<RequestClientEventMap[K]>) => void
   ) {
-    this.eventEmitter.off(type, listener);
+    this.eventEmitter.removeEventListener(type, evt =>
+      this.isCustomEvent<RequestClientEventMap[K]>(evt) ? listener(evt) : undefined
+    );
+  }
+
+  private isCustomEvent<T>(evt: Event): evt is CustomEvent<T> {
+    return evt instanceof CustomEvent;
   }
   protected onMessage(type: string, response: HttpResponse & StreamResponse) {
-    this.eventEmitter.emit('message', [type, response]);
+    this.eventEmitter.dispatchEvent(
+      new CustomEvent('message', {
+        detail: [type, response],
+      })
+    );
   }
   protected onProgress(percent: number) {
-    this.eventEmitter.emit('progress', percent);
+    this.eventEmitter.dispatchEvent(
+      new CustomEvent('progress', {
+        detail: percent,
+      })
+    );
   }
   protected onMetaData(type: string, response: HttpResponse & StreamResponse) {
-    this.eventEmitter.emit('metaData', [type, response]);
+    this.eventEmitter.dispatchEvent(
+      new CustomEvent('metaData', {
+        detail: [type, response],
+      })
+    );
   }
   protected onDisconnect() {
-    this.eventEmitter.emit('disconnect');
+    this.eventEmitter.dispatchEvent(new CustomEvent('disconnect'));
   }
   public triggerEnd() {
-    this.eventEmitter.emit('end');
+    this.eventEmitter.dispatchEvent(new CustomEvent('end'));
   }
 }

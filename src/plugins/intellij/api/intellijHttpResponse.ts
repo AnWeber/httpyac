@@ -82,8 +82,8 @@ export class IntellijTextStreamResponse implements HttpResponse {
     ) => void,
     onFinish?: (() => void) | undefined
   ): void {
-    const subscriberHandler = (evt: [string, models.HttpResponse]) => {
-      const [, response] = evt;
+    const subscriberHandler = (evt: CustomEvent<[string, models.HttpResponse]>) => {
+      const [, response] = evt.detail;
       this.status = response.statusCode;
       Object.assign(this.headers, response.headers);
       this.contentType = toContentType(response.contentType);
@@ -91,16 +91,16 @@ export class IntellijTextStreamResponse implements HttpResponse {
       const message = utils.toString(response.body);
       if (message) {
         const unsubscribe = () => {
-          this.requestClient.off('message', subscriberHandler);
+          this.requestClient.removeEventListener('message', subscriberHandler);
           this.resolve();
         };
         const output = (answer: string) => this.requestClient.send(answer);
         subscriber(message, unsubscribe, output);
       }
     };
-    this.requestClient.on('message', subscriberHandler);
+    this.requestClient.addEventListener('message', subscriberHandler);
     if (onFinish) {
-      this.requestClient.on('end', onFinish);
+      this.requestClient.addEventListener('end', onFinish);
     }
   }
 }

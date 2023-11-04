@@ -12,7 +12,7 @@ export function keepStreamingMetaDataHandler(type: string, _value: string | unde
         utils.report(context, 'stream until manual cancellation');
         await new Promise(resolve => {
           if (context.requestClient) {
-            context.requestClient.on('disconnect', () => resolve(true));
+            context.requestClient.addEventListener('disconnect', () => resolve(true));
           }
         });
       }

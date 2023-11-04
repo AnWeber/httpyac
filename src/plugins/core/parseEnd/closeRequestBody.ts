@@ -215,7 +215,7 @@ async function sendStreamingContents(
     } else {
       let count = 0;
       const messageCount = messageWaitCount;
-      context.requestClient?.on('message', async () => {
+      context.requestClient?.addEventListener('message', async () => {
         if (++count === messageCount) {
           await sendWithRequestClient(streamingContent, context);
           if (isLast) {
