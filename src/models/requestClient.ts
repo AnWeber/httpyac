@@ -81,9 +81,9 @@ export abstract class AbstractRequestClient<T> implements RequestClient<T> {
     this.eventEmitter.dispatchEvent(new RequestClientEvent('metaData', [type, response]));
   }
   protected onDisconnect() {
-    this.eventEmitter.dispatchEvent(new RequestClientEvent('disconnect'));
+    this.eventEmitter.dispatchEvent(new RequestClientEvent('disconnect', undefined));
   }
   public triggerEnd() {
-    this.eventEmitter.dispatchEvent(new RequestClientEvent('end'));
+    this.eventEmitter.dispatchEvent(new RequestClientEvent('end', undefined));
   }
 }
