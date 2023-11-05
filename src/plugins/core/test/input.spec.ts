@@ -1,5 +1,5 @@
-import { userInteractionProvider } from '../../io';
-import { initFileProvider, sendHttp } from '../testUtils';
+import { userInteractionProvider } from '../../../io';
+import { initFileProvider, sendHttp } from '../../../test/testUtils';
 
 describe('variables.input', () => {
   it('input', async () => {

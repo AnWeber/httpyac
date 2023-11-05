@@ -1,5 +1,5 @@
-import { send } from '../../httpYacApi';
-import { initFileProvider, initHttpClientProvider, parseHttp } from '../testUtils';
+import { send } from '../../../../httpYacApi';
+import { initFileProvider, initHttpClientProvider, parseHttp } from '../../../../test/testUtils';
 
 describe('metadata.ref', () => {
   it('name + ref', async () => {

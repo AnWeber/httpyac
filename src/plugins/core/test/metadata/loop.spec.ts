@@ -1,5 +1,5 @@
-import { send } from '../../httpYacApi';
-import { initFileProvider, initHttpClientProvider, parseHttp, sendHttp } from '../testUtils';
+import { send } from '../../../../httpYacApi';
+import { initFileProvider, initHttpClientProvider, parseHttp, sendHttp } from '../../../../test/testUtils';
 
 describe('metadata.name', () => {
   it('loop for of', async () => {

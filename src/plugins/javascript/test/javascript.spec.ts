@@ -1,6 +1,38 @@
-import { initFileProvider, initHttpClientProvider, parseHttp, sendHttp, sendHttpFile } from '../testUtils';
+import { initFileProvider, initHttpClientProvider, parseHttp, sendHttpFile, sendHttp } from '../../../test/testUtils';
 
-describe('scripts.javascript', () => {
+describe('variables.javascript', () => {
+  it('use variables from scripts in request', async () => {
+    initFileProvider();
+    const requests = initHttpClientProvider();
+
+    const httpFile = await parseHttp(`
+    {{
+      exports.foo = { version: 1};
+    }}
+    GET  /json?foo={{foo.version}}
+    `);
+
+    await sendHttpFile({ httpFile });
+
+    expect(requests.length).toBe(1);
+    expect(requests[0].url).toBe(`/json?foo=1`);
+  });
+  it('use null variable from scripts in request', async () => {
+    initFileProvider();
+    const requests = initHttpClientProvider();
+
+    const httpFile = await parseHttp(`
+    {{
+      exports.foo = { version: null};
+    }}
+    GET  /json?foo={{foo.version}}
+    `);
+
+    await sendHttpFile({ httpFile });
+
+    expect(requests.length).toBe(1);
+    expect(requests[0].url).toBe(`/json?foo=null`);
+  });
   it('basic auth', async () => {
     initFileProvider();
     const requests = initHttpClientProvider(() =>

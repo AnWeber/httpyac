@@ -1,6 +1,6 @@
-import { getEnvironments, send } from '../../httpYacApi';
-import { VariableProviderContext } from '../../models';
-import { initHttpClientProvider, initNestedFileProvider, parseHttp, sendHttpFile } from '../testUtils';
+import { getEnvironments, send } from '../../../httpYacApi';
+import { VariableProviderContext } from '../../../models';
+import { initHttpClientProvider, initNestedFileProvider, parseHttp, sendHttpFile } from '../../../test/testUtils';
 
 describe('environment.dotenv', () => {
   let envContent = '';

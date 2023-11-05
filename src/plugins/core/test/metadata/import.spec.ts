@@ -1,5 +1,5 @@
-import { send } from '../../httpYacApi';
-import { initFileProvider, initHttpClientProvider, parseHttp } from '../testUtils';
+import { send } from '../../../../httpYacApi';
+import { initFileProvider, initHttpClientProvider, parseHttp } from '../../../../test/testUtils';
 
 describe('metadata.import', () => {
   it('name + import + ref', async () => {
@@ -127,7 +127,7 @@ bar={{bar}}
 
     expect(requests.length).toBe(2);
     expect(requests[1].url).toBe(`http://localhost/globalhostimport`);
-    expect(requests[1].headers['content-type']).toBe('application/json');
+    expect(requests[1].headers?.['content-type']).toBe('application/json');
   });
   it('should import httpFile in all files', async () => {
     initFileProvider({

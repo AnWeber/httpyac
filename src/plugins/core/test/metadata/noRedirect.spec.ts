@@ -1,5 +1,4 @@
-import { initFileProvider, initHttpClientProvider, sendHttp } from '../testUtils';
-
+import { initFileProvider, initHttpClientProvider, sendHttp } from '../../../../test/testUtils';
 describe('metadata.noRedirect', () => {
   it('follow redirect', async () => {
     initFileProvider();

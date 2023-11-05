@@ -1,4 +1,4 @@
-import { initFileProvider, initHttpClientProvider, sendHttp } from '../testUtils';
+import { initFileProvider, initHttpClientProvider, sendHttp } from '../../../test/testUtils';
 
 describe('scripts.intellij', () => {
   it('pre request script', async () => {

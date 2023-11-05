@@ -1,4 +1,4 @@
-import { initFileProvider, initHttpClientProvider, sendHttp } from '../testUtils';
+import { initFileProvider, initHttpClientProvider, sendHttp } from '../../../test/testUtils';
 
 describe('request.graphql', () => {
   it('query + operation + variables', async () => {

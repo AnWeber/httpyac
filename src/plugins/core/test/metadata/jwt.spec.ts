@@ -1,7 +1,7 @@
-import { send } from '../../httpYacApi';
-import { HttpResponse } from '../../models';
-import { stringifySafe } from '../../utils';
-import { initFileProvider, initHttpClientProvider, parseHttp } from '../testUtils';
+import { send } from '../../../../httpYacApi';
+import { HttpResponse } from '../../../../models';
+import { stringifySafe } from '../../../../utils';
+import { initFileProvider, initHttpClientProvider, parseHttp } from '../../../../test/testUtils';
 
 describe('metadata.jwt', () => {
   it('jwt', async () => {

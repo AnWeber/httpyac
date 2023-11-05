@@ -1,4 +1,4 @@
-import { initFileProvider, initHttpClientProvider, parseHttp, sendHttpFile } from '../testUtils';
+import { initFileProvider, initHttpClientProvider, parseHttp, sendHttpFile } from '../../../test/testUtils';
 
 describe('request.odata', () => {
   it('batch processing', async () => {

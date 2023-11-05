@@ -1,6 +1,6 @@
 import { getLocal } from 'mockttp';
 
-import { initFileProvider, sendHttp } from '../testUtils';
+import { initFileProvider, sendHttp } from '../../../test/testUtils';
 
 describe('variables.digestAuth', () => {
   const localServer = getLocal();
