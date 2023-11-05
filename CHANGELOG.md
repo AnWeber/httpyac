@@ -1,3 +1,11 @@
+## [6.9.2] (2023-11-05)
+
+### Fix
+
+- improve junit output with updated testcase node
+- add [npm package provenance](https://github.blog/2023-04-19-introducing-npm-package-provenance/)
+
+
 ## [6.9.1] (2023-11-01)
 
 ### Fix
