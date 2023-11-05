@@ -16,11 +16,11 @@ export interface RequestClient<T = unknown> {
   disconnect(err?: Error): void;
   addEventListener<K extends keyof RequestClientEventMap>(
     type: K,
-    listener: (ev: CustomEvent<RequestClientEventMap[K]>) => void
+    listener: (ev: RequestClientEvent<RequestClientEventMap[K]>) => void
   ): void;
   removeEventListener<K extends keyof RequestClientEventMap>(
     type: K,
-    listener: (ev: CustomEvent<RequestClientEventMap[K]>) => void
+    listener: (ev: RequestClientEvent<RequestClientEventMap[K]>) => void
   ): void;
   triggerEnd(): void;
 }
@@ -33,27 +33,13 @@ interface RequestClientEventMap {
   end: void;
 }
 
-if (!global.CustomEvent) {
-  class CustomEvent<T = unknown> extends Event {
-    #detail?: T;
-    // eslint-disable-next-line no-undef
-    constructor(message: string, options?: CustomEventInit<T>) {
-      super(message, options);
-      this.#detail = options?.detail;
-    }
-
-    public get detail(): T | undefined {
-      return this.#detail;
-    }
-
-    public initCustomEvent(): void {
-      throw new Error('not implemented');
-    }
+export class RequestClientEvent<T = undefined> extends Event {
+  constructor(
+    message: string,
+    public readonly detail: T
+  ) {
+    super(message);
   }
-
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  global.CustomEvent = CustomEvent;
 }
 
 export abstract class AbstractRequestClient<T> implements RequestClient<T> {
@@ -67,49 +53,37 @@ export abstract class AbstractRequestClient<T> implements RequestClient<T> {
 
   addEventListener<K extends keyof RequestClientEventMap>(
     type: K,
-    listener: (evt: CustomEvent<RequestClientEventMap[K]>) => void
+    listener: (evt: RequestClientEvent<RequestClientEventMap[K]>) => void
   ): void {
     this.eventEmitter.addEventListener(type, evt =>
-      this.isCustomEvent<RequestClientEventMap[K]>(evt) ? listener(evt) : undefined
+      this.isRequestClientEvent<RequestClientEventMap[K]>(evt) ? listener(evt) : undefined
     );
   }
   removeEventListener<K extends keyof RequestClientEventMap>(
     type: K,
-    listener: (evt: CustomEvent<RequestClientEventMap[K]>) => void
+    listener: (evt: RequestClientEvent<RequestClientEventMap[K]>) => void
   ) {
     this.eventEmitter.removeEventListener(type, evt =>
-      this.isCustomEvent<RequestClientEventMap[K]>(evt) ? listener(evt) : undefined
+      this.isRequestClientEvent<RequestClientEventMap[K]>(evt) ? listener(evt) : undefined
     );
   }
 
-  private isCustomEvent<T>(evt: Event): evt is CustomEvent<T> {
-    return evt instanceof CustomEvent;
+  private isRequestClientEvent<T>(evt: Event): evt is RequestClientEvent<T> {
+    return evt instanceof RequestClientEvent;
   }
   protected onMessage(type: string, response: HttpResponse & StreamResponse) {
-    this.eventEmitter.dispatchEvent(
-      new CustomEvent('message', {
-        detail: [type, response],
-      })
-    );
+    this.eventEmitter.dispatchEvent(new RequestClientEvent('message', [type, response]));
   }
   protected onProgress(percent: number) {
-    this.eventEmitter.dispatchEvent(
-      new CustomEvent('progress', {
-        detail: percent,
-      })
-    );
+    this.eventEmitter.dispatchEvent(new RequestClientEvent('progress', percent));
   }
   protected onMetaData(type: string, response: HttpResponse & StreamResponse) {
-    this.eventEmitter.dispatchEvent(
-      new CustomEvent('metaData', {
-        detail: [type, response],
-      })
-    );
+    this.eventEmitter.dispatchEvent(new RequestClientEvent('metaData', [type, response]));
   }
   protected onDisconnect() {
-    this.eventEmitter.dispatchEvent(new CustomEvent('disconnect'));
+    this.eventEmitter.dispatchEvent(new RequestClientEvent('disconnect'));
   }
   public triggerEnd() {
-    this.eventEmitter.dispatchEvent(new CustomEvent('end'));
+    this.eventEmitter.dispatchEvent(new RequestClientEvent('end'));
   }
 }

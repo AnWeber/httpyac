@@ -24,9 +24,8 @@ export class RegionScopedVariablesInterceptor implements HookInterceptor<[models
       );
     } else {
       context.variables = Object.assign(
-        {},
-        ...context.httpFile.httpRegions.map(obj => obj.variablesPerEnv[env]),
-        context.variables
+        context.variables,
+        ...context.httpFile.httpRegions.map(obj => obj.variablesPerEnv[env])
       );
     }
 

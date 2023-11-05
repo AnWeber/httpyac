@@ -1,3 +1,10 @@
+## [6.9.3] (2023-11-05)
+
+### Fix
+
+- add [npm package provenance](https://github.blog/2023-04-19-introducing-npm-package-provenance/) (2nd try)
+
+
 ## [6.9.2] (2023-11-05)
 
 ### Fix

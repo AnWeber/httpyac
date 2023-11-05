@@ -82,7 +82,7 @@ export class IntellijTextStreamResponse implements HttpResponse {
     ) => void,
     onFinish?: (() => void) | undefined
   ): void {
-    const subscriberHandler = (evt: CustomEvent<[string, models.HttpResponse]>) => {
+    const subscriberHandler = (evt: models.RequestClientEvent<[string, models.HttpResponse]>) => {
       const [, response] = evt.detail;
       this.status = response.statusCode;
       Object.assign(this.headers, response.headers);
