@@ -1,3 +1,4 @@
+import { log } from '../io';
 import { ErrorDescription } from '../models';
 import { stringifySafe, toString } from './stringUtils';
 
@@ -43,4 +44,13 @@ export function errorToString(err: unknown): string | undefined {
     });
   }
   return toString(err);
+}
+
+export async function useDefaultOnError<T>(promise: Promise<T>, defaultVal: T): Promise<T> {
+  try {
+    return await promise;
+  } catch (err) {
+    log.warn(`promise has read error`, err);
+    return defaultVal;
+  }
 }

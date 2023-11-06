@@ -21,7 +21,7 @@ export async function provideDotenvEnvironments(context: VariableProviderContext
   if (dirOfFile) {
     await utils.iterateUntilRoot(dirOfFile, context.httpFile.rootDir, async (dir: PathLike) => {
       files.push(...(await readEnvDir(getEnvdirname(context) || 'env', dir)));
-      files.push(...(await fileProvider.readdir(dir)));
+      files.push(...(await utils.useDefaultOnError(fileProvider.readdir(dir), [])));
     });
   }
 
@@ -41,7 +41,7 @@ async function readEnvDir(dir: string | undefined, rootDir: PathLike | undefined
   if (dir && utils.isString(dir)) {
     const absoluteDir = await utils.toAbsoluteFilename(dir, rootDir);
     if (absoluteDir) {
-      files.push(...(await fileProvider.readdir(absoluteDir)));
+      files.push(...(await utils.useDefaultOnError(fileProvider.readdir(absoluteDir), [])));
     }
   }
   return files;
@@ -99,7 +99,7 @@ async function getEnvFolderVariables(
 }
 
 async function getEnvVariables(searchFiles: string[], dir: PathLike) {
-  const files = await fileProvider.readdir(dir);
+  const files = await utils.useDefaultOnError(fileProvider.readdir(dir), []);
   const foundFiles = searchFiles.filter(file => files.indexOf(file) >= 0);
   const vars = [];
 

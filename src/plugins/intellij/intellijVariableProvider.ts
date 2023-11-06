@@ -66,7 +66,7 @@ async function getAllEnvironmentVariables(context: VariableProviderContext) {
 }
 
 async function readAbsoluteDirs(dir: PathLike, filter: (file: string) => boolean) {
-  const files = await fileProvider.readdir(dir);
+  const files = await utils.useDefaultOnError(fileProvider.readdir(dir), []);
   return files.filter(filter).map(file => fileProvider.joinPath(dir, file));
 }
 
