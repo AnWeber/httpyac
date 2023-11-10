@@ -33,7 +33,7 @@ class RefMetaAction {
     if (reference) {
       const envKey = utils.toEnvironmentKey(context.activeEnvironment);
       utils.setVariableInContext(reference.variablesPerEnv[envKey], context);
-      log.trace('import variables', reference.variablesPerEnv[envKey]);
+      log.debug('import variables', reference.variablesPerEnv[envKey]);
       if (this.data.force || utils.isUndefined(context.variables[this.data.name])) {
         result = await reference.execute(context);
         if (result) {

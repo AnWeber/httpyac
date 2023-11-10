@@ -11,7 +11,7 @@ export function registerCancelExecutionInterceptor(parserContext: models.ParserC
     ) {
       const context = hookContext.args[0];
       if (context.progress?.isCanceled?.()) {
-        log.trace('process canceled by user');
+        log.debug('process canceled by user');
         return false;
       }
       return true;

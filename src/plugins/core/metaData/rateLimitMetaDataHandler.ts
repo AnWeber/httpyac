@@ -48,7 +48,7 @@ async function checkRateLimit(rateLimitSession: RateLimitSession, context: model
         utils.report(context, `rate limit max reached. wait for ${freeSlotTime}`);
         log.debug(`rate limit max reached. wait for ${freeSlotTime} (slot ${rateLimitSession.slot})`);
         await utils.sleep(freeSlotTime);
-        log.trace('rate limit max waited');
+        log.debug('rate limit max waited');
       }
       continue;
     }
@@ -60,7 +60,7 @@ async function checkRateLimit(rateLimitSession: RateLimitSession, context: model
           utils.report(context, `rate limit minIdleTime, wait for ${minIdleTime}`);
           log.debug(`rate limit minIdleTime, wait for ${minIdleTime} (slot ${rateLimitSession.slot})`);
           await utils.sleep(minIdleTime);
-          log.trace('rate limit minIdleTime waited');
+          log.debug('rate limit minIdleTime waited');
           continue;
         }
       }

@@ -45,7 +45,7 @@ export async function importHttpFileInContext(
     fileName,
     context,
     async (absoluteFileName: models.PathLike) => {
-      log.trace(`parse imported file ${absoluteFileName}`);
+      log.debug(`parse imported file ${absoluteFileName}`);
       if (!context.options.httpFiles) {
         context.options.httpFiles = [];
       }
@@ -79,7 +79,7 @@ export async function importHttpFileInContext(
     if (!context.options.globalScriptsExecuted) {
       context.options.globalScriptsExecuted = [];
     }
-    log.trace(`execute global scripts for import ${httpFile.fileName}`);
+    log.debug(`execute global scripts for import ${httpFile.fileName}`);
     context.options.globalScriptsExecuted.push(httpFile);
     const cloneContext: ImportProcessorContext = {
       ...context,

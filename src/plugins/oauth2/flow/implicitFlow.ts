@@ -130,7 +130,7 @@ class ImplicitFlow implements OpenIdFlow {
             },
             reject,
           });
-          log.trace(`open browser: ${authUrl}`);
+          log.debug(`open browser: ${authUrl}`);
           utils.report(context, `implicit browser authentication pending: ${authUrl}`);
           open(authUrl);
         } catch (err) {
