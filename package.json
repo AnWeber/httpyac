@@ -107,7 +107,7 @@
     "encodeurl": "^1.0.2",
     "eventsource": "^2.0.2",
     "filesize": "^10.0.7",
-    "globby": "^13.2.2",
+    "globby": "^14.0.0",
     "got": "^11.8.6",
     "grpc-reflection-js": "^0.3.0",
     "hookpoint": "4.0.0",
