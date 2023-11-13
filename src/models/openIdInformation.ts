@@ -30,7 +30,7 @@ export interface OpenIdInformation extends UserSession {
   time: number;
   config: OpenIdConfiguration;
   accessToken: string;
-  expiresIn: number;
+  expiresIn?: number;
   timeSkew: number;
   refreshToken?: string;
   refreshExpiresIn?: number;

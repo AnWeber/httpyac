@@ -99,6 +99,7 @@ function keepAlive(cacheKey: string, variables: models.Variables) {
   const openIdInformation = userSessionStore.userSessions.find(obj => obj.id === cacheKey);
   if (
     utils.isOpenIdInformation(openIdInformation) &&
+    openIdInformation.expiresIn &&
     openIdInformation.refreshToken &&
     openIdInformation.config.keepAlive
   ) {

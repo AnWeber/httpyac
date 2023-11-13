@@ -1,3 +1,16 @@
+## [6.10.0] (2023-11-13)
+
+### Feature
+
+- add support for dynamic `# @ref` (#585)
+
+### Fix
+
+- device code flow uses correct interval
+- `expires_in` is not required in OAuth2Response (AnWeber/vscode-httpyac#240
+
+
+
 ## [6.9.3] (2023-11-05)
 
 ### Fix

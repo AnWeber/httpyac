@@ -70,7 +70,7 @@ export function toOpenIdInformation(
       type: 'OAuth2',
       time,
       accessToken: jwtToken.access_token,
-      expiresIn: jwtToken.expires_in,
+      expiresIn: jwtToken.expires_in ?? parsedToken?.exp,
       refreshToken: jwtToken.refresh_token,
       refreshExpiresIn: jwtToken.refresh_expires_in,
       timeSkew: parsedToken?.iat ? Math.floor(time / 1000) - parsedToken.iat : 0,
@@ -81,12 +81,12 @@ export function toOpenIdInformation(
 
 export function isAuthToken(obj: unknown): obj is AuthToken {
   const guard = obj as AuthToken;
-  return guard && !!guard.access_token && !!guard.expires_in;
+  return guard && !!guard.access_token;
 }
 
 interface AuthToken {
   access_token: string;
-  expires_in: number;
+  expires_in?: number;
   refresh_token?: string;
   refresh_expires_in?: number;
 }
