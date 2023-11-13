@@ -37,12 +37,13 @@ class DeviceCodeFlow implements OpenIdFlow {
 
         const deviceCodeBody: DeviceCodeBody = JSON.parse(deviceCodeResponse.body);
 
-        let interval = utils.toNumber(deviceCodeBody.interval) || 5000;
+        const intervalInSeconds = utils.toNumber(deviceCodeBody.interval) || 5;
+        let intervalInMs = intervalInSeconds * 1000.0;
         this.showUserCode(deviceCodeBody);
 
         while (new Date().getTime() - deviceCodeTime < Number(deviceCodeBody.expires_in) * 1000) {
           try {
-            await utils.sleep(interval);
+            await utils.sleep(intervalInMs);
             if (context.progress?.isCanceled?.()) {
               io.log.trace('process canceled by user');
               return false;
@@ -71,8 +72,8 @@ class DeviceCodeFlow implements OpenIdFlow {
               if (['slow_down', 'authorization_pending'].indexOf(parsedBody.error) >= 0) {
                 if (parsedBody.error === 'slow_down' || response.statusCode === 408) {
                   // on Timeout slow down
-                  interval += 5000;
-                  io.log.debug(`DeviceCode Flow increase interval: ${interval}`);
+                  intervalInMs += 5000;
+                  io.log.debug(`DeviceCode Flow increase interval: ${intervalInMs / 1000.0}s`);
                 }
               } else {
                 if (
