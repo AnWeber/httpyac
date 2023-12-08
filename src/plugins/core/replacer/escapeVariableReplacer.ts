@@ -10,7 +10,7 @@ export const escapeVariableInterceptor = {
   ): Promise<boolean> {
     const [text] = hookContext.args;
     if (isString(text)) {
-      const escapeRegex = /(?:\\\{){2}([^}{2}]+)(?:\\\}){2}/gu;
+      const escapeRegex = /(?:\\\{){2}([^}]+?)(?:\\\}){2}/gu;
       let match: RegExpExecArray | null;
       let result = text;
       while (isString(result) && (match = escapeRegex.exec(text)) !== null) {

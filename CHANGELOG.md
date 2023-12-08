@@ -1,3 +1,9 @@
+## [unreleased]
+
+### Fix
+
+- escaping of `\{\{2\}\}` did not work (Anweber/vscode-httpyac#244)
+
 ## [6.10.0] (2023-11-13)
 
 ### Feature
