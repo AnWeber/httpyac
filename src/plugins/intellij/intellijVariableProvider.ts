@@ -9,7 +9,7 @@ export async function provideIntellijEnvironments(context: VariableProviderConte
 async function getAllEnvironmentVariables(context: VariableProviderContext) {
   const envJsonFiles: Array<PathLike> = [];
 
-  const envJsonFilter = (file: string) => file.endsWith('.env.json');
+  const envJsonFilter = (file: string) => ['http-client.env.json', 'http-client.private.env.json'].includes(file);
 
   const globalEnv = process.env.HTTPYAC_ENV;
   if (globalEnv && utils.isString(globalEnv)) {
