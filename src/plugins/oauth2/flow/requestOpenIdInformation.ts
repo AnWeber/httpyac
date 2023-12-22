@@ -2,7 +2,6 @@ import { log } from '../../../io';
 import * as io from '../../../io';
 import type * as models from '../../../models';
 import * as utils from '../../../utils';
-import { addClientCertificateForUrl } from '../../http';
 
 export async function requestOpenIdInformation(
   request: models.HttpClientRequest | false,
@@ -66,7 +65,6 @@ export async function addConfigRequestOptions(
     if (context.config?.request?.rejectUnauthorized !== undefined) {
       request.noRejectUnauthorized = !utils.toBoolean(context.config?.request?.rejectUnauthorized);
     }
-    await addClientCertificateForUrl(request.url, request, context);
 
     if (config.interceptRequest) {
       await config.interceptRequest(request, context);

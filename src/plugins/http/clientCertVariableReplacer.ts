@@ -36,7 +36,7 @@ export async function clientCertVariableReplacer(
   return text;
 }
 
-export async function addClientCertificateForUrl(
+async function addClientCertificateForUrl(
   urlString: string,
   request: models.HttpRequest,
   context: models.ProcessorContext
