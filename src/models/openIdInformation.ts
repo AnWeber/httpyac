@@ -1,5 +1,6 @@
+import { HttpRequest } from './httpRequest';
 import { RequestLogger } from './logHandler';
-import { Progress } from './processorContext';
+import { ProcessorContext, Progress } from './processorContext';
 import { UserSession } from './userSession';
 import { Variables } from './variables';
 
@@ -24,6 +25,7 @@ export interface OpenIdConfiguration {
   usePkce: boolean;
   redirectUri: URL;
   serverPort?: number;
+  interceptRequest?: (request: HttpRequest, context: ProcessorContext) => Promise<void>;
 }
 
 export interface OpenIdInformation extends UserSession {

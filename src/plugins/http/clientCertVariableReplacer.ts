@@ -12,13 +12,7 @@ export async function clientCertVariableReplacer(
   const { request, httpRegion, httpFile } = context;
   if (isString(text) && isHttpRequest(request) && !httpRegion.metaData.noClientCert) {
     if (type === models.VariableType.url && context.config?.clientCertificates) {
-      const url = createUrl(text);
-      if (url) {
-        const clientCertificateOptions = context.config?.clientCertificates[url.host];
-        if (clientCertificateOptions) {
-          await setClientCertificateOptions(request, clientCertificateOptions, httpFile);
-        }
-      }
+      await addClientCertificateForUrl(text, request, context);
     } else if (type.toLowerCase().endsWith('clientcert')) {
       const match =
         /^\s*(cert:\s*(?<cert>[^\s]*)\s*)?(key:\s*(?<key>[^\s]*)\s*)?(pfx:\s*(?<pfx>[^\s]*)\s*)?(passphrase:\s*(?<passphrase>[^\s]*)\s*)?\s*$/u.exec(
@@ -40,6 +34,20 @@ export async function clientCertVariableReplacer(
     }
   }
   return text;
+}
+
+export async function addClientCertificateForUrl(
+  urlString: string,
+  request: models.HttpRequest,
+  context: models.ProcessorContext
+) {
+  const url = createUrl(urlString);
+  if (url && context.config?.clientCertificates) {
+    const clientCertificateOptions = context.config?.clientCertificates[url.host];
+    if (clientCertificateOptions) {
+      await setClientCertificateOptions(request, clientCertificateOptions, context.httpFile);
+    }
+  }
 }
 
 function createUrl(url: string): URL | undefined {

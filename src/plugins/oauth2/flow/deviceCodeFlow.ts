@@ -5,7 +5,7 @@ import type * as models from '../../../models';
 import * as utils from '../../../utils';
 import { assertConfiguration } from '../openIdConfiguration';
 import { OpenIdFlow } from './openIdFlow';
-import { toOpenIdInformation } from './requestOpenIdInformation';
+import { addConfigRequestOptions, toOpenIdInformation } from './requestOpenIdInformation';
 
 class DeviceCodeFlow implements OpenIdFlow {
   supportsFlow(flow: string): boolean {
@@ -120,21 +120,20 @@ class DeviceCodeFlow implements OpenIdFlow {
     deviceCodeBody: DeviceCodeBody,
     context: models.OpenIdContext
   ) {
-    const response = await io.httpClientProvider.exchange?.(
-      {
-        url: config.tokenEndpoint || '',
-        method: 'POST',
-        headers: {
-          'content-type': 'application/x-www-form-urlencoded',
-        },
-        body: utils.toQueryParams({
-          client_id: config.clientId,
-          grant_type: 'urn:ietf:params:oauth:grant-type:device_code',
-          device_code: deviceCodeBody.device_code,
-        }),
+    const request: models.HttpRequest = {
+      url: config.tokenEndpoint || '',
+      method: 'POST',
+      headers: {
+        'content-type': 'application/x-www-form-urlencoded',
       },
-      { isMainContext: false }
-    );
+      body: utils.toQueryParams({
+        client_id: config.clientId,
+        grant_type: 'urn:ietf:params:oauth:grant-type:device_code',
+        device_code: deviceCodeBody.device_code,
+      }),
+    };
+    await addConfigRequestOptions(request, config, context);
+    const response = await io.httpClientProvider.exchange?.(request, { isMainContext: false });
     if (response && utils.isProcessorContext(context)) {
       await utils.logResponse(response, context);
     }
@@ -142,23 +141,22 @@ class DeviceCodeFlow implements OpenIdFlow {
   }
 
   private async requestDeviceAuthorization(config: models.OpenIdConfiguration, context: models.OpenIdContext) {
-    const response = await io.httpClientProvider.exchange?.(
-      {
-        url: config.deviceCodeEndpoint || '',
-        method: 'POST',
-        headers: {
-          'content-type': 'application/x-www-form-urlencoded',
-        },
-        body: utils.toQueryParams({
-          client_id: config.clientId,
-          client_secret: config.useDeviceCodeClientSecret ? config.clientSecret : undefined,
-          scope: config.scope ?? 'openid',
-          audience: config.audience,
-          resource: config.resource,
-        }),
+    const request: models.HttpRequest = {
+      url: config.deviceCodeEndpoint || '',
+      method: 'POST',
+      headers: {
+        'content-type': 'application/x-www-form-urlencoded',
       },
-      { isMainContext: false }
-    );
+      body: utils.toQueryParams({
+        client_id: config.clientId,
+        client_secret: config.useDeviceCodeClientSecret ? config.clientSecret : undefined,
+        scope: config.scope ?? 'openid',
+        audience: config.audience,
+        resource: config.resource,
+      }),
+    };
+    await addConfigRequestOptions(request, config, context);
+    const response = await io.httpClientProvider.exchange?.(request, { isMainContext: false });
 
     if (response && utils.isProcessorContext(context)) {
       response.tags = ['auth', 'oauth2', 'deviceCode', 'automatic'];

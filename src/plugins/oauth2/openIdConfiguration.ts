@@ -55,6 +55,15 @@ export function getOpenIdConfiguration(
       throw new Error(`Expected a valid URL, but received ${url}`);
     }
   };
+
+  const getFunction = (name: string) => {
+    const expandedValue = getVariableUnknown(variables, variablePrefix, name);
+    if (typeof expandedValue === 'function') {
+      return expandedValue;
+    }
+    return undefined;
+  };
+
   const getBoolean = (name: string, defaultValue = false) => {
     const expandedValue = getVariableUnknown(variables, variablePrefix, name);
     return utils.toBoolean(expandedValue, defaultValue);
@@ -85,6 +94,10 @@ export function getOpenIdConfiguration(
     useDeviceCodeClientSecret: getBoolean('useDeviceCodeClientSecret'),
     usePkce: getBoolean('usePkce'),
     serverPort: getNumber('serverPort'),
+    interceptRequest: getFunction('interceptRequest') as (
+      request: models.HttpRequest,
+      context: models.ProcessorContext
+    ) => Promise<void>,
   };
   return config;
 }

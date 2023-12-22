@@ -4,6 +4,8 @@
 
 - escaping of `\{\{2\}\}` did not work (Anweber/vscode-httpyac#244)
 - support only `http-client.env.json` and `http-client.private.env.json` files for intellij environments (Anweber/vscode-httpyac#245)
+- add support to set requestUnauthorized or client certificates to OAuth2 Requests (#605)
+- allow intercepting and modification of OAuth2 Request before sending using `oauht2_interceptRequest` (#605)
 
 ## [6.10.0] (2023-11-13)
 

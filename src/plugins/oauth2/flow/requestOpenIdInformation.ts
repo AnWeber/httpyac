@@ -2,6 +2,7 @@ import { log } from '../../../io';
 import * as io from '../../../io';
 import type * as models from '../../../models';
 import * as utils from '../../../utils';
+import { addClientCertificateForUrl } from '../../http';
 
 export async function requestOpenIdInformation(
   request: models.HttpClientRequest | false,
@@ -32,6 +33,7 @@ export async function requestOpenIdInformation(
         client_secret: options.config.clientSecret,
       })}`;
     }
+    await addConfigRequestOptions(request, options.config, context);
 
     const response = await io.httpClientProvider.exchange?.(
       {
@@ -53,6 +55,23 @@ export async function requestOpenIdInformation(
     }
   }
   return false;
+}
+
+export async function addConfigRequestOptions(
+  request: models.HttpClientRequest,
+  config: models.OpenIdConfiguration,
+  context: models.OpenIdContext
+) {
+  if (utils.isProcessorContext(context)) {
+    if (context.config?.request?.rejectUnauthorized !== undefined) {
+      request.noRejectUnauthorized = !utils.toBoolean(context.config?.request?.rejectUnauthorized);
+    }
+    await addClientCertificateForUrl(request.url, request, context);
+
+    if (config.interceptRequest) {
+      await config.interceptRequest(request, context);
+    }
+  }
 }
 
 export function toOpenIdInformation(
