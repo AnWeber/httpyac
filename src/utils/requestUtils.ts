@@ -156,10 +156,17 @@ export function decodeJWT(str: string): JWTToken | null {
   }
 }
 
-export function toQueryParams(params: Record<string, undefined | string | number | boolean | null>): string {
+export function toQueryParams(
+  params: Record<string, undefined | string | number | boolean | null | Array<string | number | boolean>>
+): string {
   return Object.entries(params)
     .filter(([, value]) => !!value)
-    .map(([key, value]) => `${key}=${encodeURIComponent(value || '')}`)
+    .map(([key, value]) => {
+      if (Array.isArray(value)) {
+        return value.map(val => `${key}=${encodeURIComponent(val || '')}`).join('&');
+      }
+      return `${key}=${encodeURIComponent(value || '')}`;
+    })
     .join('&');
 }
 
