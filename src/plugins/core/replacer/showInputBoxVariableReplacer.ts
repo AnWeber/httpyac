@@ -41,7 +41,7 @@ export async function showInputBoxVariableReplacer(
         session?.answer || matchInput.groups.value,
         inputType === 'password'
       );
-      if (answer) {
+      if (answer !== undefined) {
         userSessionStore.setUserSession({
           id,
           title: `${placeholder}=${answer}`,

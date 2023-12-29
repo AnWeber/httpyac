@@ -28,7 +28,7 @@ export async function showQuickpickVariableReplacer(
 
       const items = await getArray(matchInput.groups.value, context);
       const answer = await userInteractionProvider.showListPrompt(placeholder, items);
-      if (answer) {
+      if (answer !== undefined) {
         userSessionStore.setUserSession({
           id,
           title: `${placeholder}=${answer}`,
