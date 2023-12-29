@@ -1,11 +1,15 @@
-## [6.10.1] (2023-12-29)
+## [6.11.0] (2023-12-29)
+
+### Feature
+
+- add `audience` and `resource` to OAuth2 token exchange flow (AnWeber/vscode-httpyac#248)
+- allow intercepting and modification of OAuth2 Request before sending using `oauht2_interceptRequest` (#605)
 
 ### Fix
 
 - escaping of `\{\{2\}\}` did not work (Anweber/vscode-httpyac#244)
 - support only `http-client.env.json` and `http-client.private.env.json` files for intellij environments (Anweber/vscode-httpyac#245)
 - add support to set requestUnauthorized to OAuth2 Requests (#605)
-- allow intercepting and modification of OAuth2 Request before sending using `oauht2_interceptRequest` (#605)
 - allow empty string in input and list provider (AnWeber/vscode-httpyac#247)
 - parsing issue with multiline url parsing with only variable content (Anweber/vscode-httpyac#249)
 

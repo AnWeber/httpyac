@@ -33,6 +33,8 @@ export class TokenExchangeFlow {
             scope: config.scope ?? 'openid',
             subject_issuer: config.subjectIssuer || jwtToken?.iss,
             subject_token: encodeUrl(openIdInformation.accessToken),
+            audience: config.audience,
+            resource: config.resource,
           }),
         },
         {
