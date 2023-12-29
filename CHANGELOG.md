@@ -1,4 +1,4 @@
-## [unreleased]
+## [6.10.1] (2023-12-29)
 
 ### Fix
 
@@ -7,6 +7,7 @@
 - add support to set requestUnauthorized to OAuth2 Requests (#605)
 - allow intercepting and modification of OAuth2 Request before sending using `oauht2_interceptRequest` (#605)
 - allow empty string in input and list provider (AnWeber/vscode-httpyac#247)
+- parsing issue with multiline url parsing with only variable content (Anweber/vscode-httpyac#249)
 
 ## [6.10.0] (2023-11-13)
 
@@ -18,8 +19,6 @@
 
 - device code flow uses correct interval
 - `expires_in` is not required in OAuth2Response (AnWeber/vscode-httpyac#240
-
-
 
 ## [6.9.3] (2023-11-05)
 

@@ -202,7 +202,7 @@ export function parseUrlLineFactory(attachUrl: (url: string) => void): ParseLine
 
 export function parseQueryLineFactory(attachUrl: (url: string) => void): ParseLineMethod {
   return async function parseQueryLine(httpLine: models.HttpLine): Promise<models.SymbolParserResult | false> {
-    if (/^\s*(\?|&)([^=\s]+)=(.*)$/u.test(httpLine.textLine)) {
+    if (/^\s*(\?|&)((([^=]+)=(.*))|\{\{.*\}\})\s*$/u.test(httpLine.textLine)) {
       const val = httpLine.textLine.trim();
       attachUrl(val);
       return {
