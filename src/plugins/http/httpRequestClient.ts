@@ -44,6 +44,9 @@ export class HttpRequestClient extends models.AbstractRequestClient<typeof got> 
         if (err instanceof CancelError) {
           return;
         }
+        if (err instanceof TypeError && err.message === 'Invalid URL') {
+          err.message = `Invalid URL: ${(err as { input?: string }).input || this.request.url}`;
+        }
         throw err;
       } finally {
         delete this.cancelableRequest;
