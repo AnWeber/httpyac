@@ -8,19 +8,18 @@ type IntellijGlobalCacheSession = models.UserSession;
 export class IntellijVariables implements Variables {
   private userSession: IntellijGlobalCacheSession;
   constructor(private readonly context: models.ProcessorContext) {
-    this.userSession = this.getIntellijSession(context);
+    this.userSession = this.getIntellijSession();
   }
 
-  private getIntellijSession(context: models.ProcessorContext): IntellijGlobalCacheSession {
-    const envKey = utils.toEnvironmentKey(context.activeEnvironment);
-    const id = `intellij_global_cache_${envKey}`;
+  private getIntellijSession(): IntellijGlobalCacheSession {
+    const id = `intellij_global_cache`;
     const userSession = userSessionStore.getUserSession(id);
     if (this.isIntellijGlobalCacheSession(userSession)) {
       return userSession;
     }
     const intellijSession: IntellijGlobalCacheSession = {
       id,
-      title: `Intellij Cache for ${envKey}`,
+      title: `Intellij Cache`,
       description: `Global Cache for all Intellij Variables`,
       details: {},
       type: 'intellij_global_cache',
