@@ -2,6 +2,7 @@
 
 ### Fix
 - Intellij store variables independent from current env in global cache (#612)
+- always use GRPC Reflection to support same Behaviour as Intellij (Anweber/vscode-httpyac#254)
 
 ## [6.11.0] (2023-12-29)
 

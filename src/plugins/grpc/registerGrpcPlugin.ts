@@ -11,6 +11,7 @@ import { parseGrpcLine } from './grpcHttpRegionParser';
 import { parseGrpcResponse } from './grpcResponseHttpRegionParser';
 import { parseProtoImport } from './protoHttpRegionParser';
 import { grpcReflectionMetaDataHandler } from './grpcReflectionMetaDataHandler';
+import { grpcReflectionRequestHook } from './grpcReflectionRequestHook';
 
 export function registerGrpcPlugin(api: models.HttpyacHooksApi) {
   api.hooks.parseMetaData.addHook('grpcReflection', grpcReflectionMetaDataHandler);
@@ -20,5 +21,6 @@ export function registerGrpcPlugin(api: models.HttpyacHooksApi) {
   api.hooks.onRequest.addHook('channelOptions', channelOptionsRequestHook);
   api.hooks.onRequest.addHook('channelCredentials', channelCredentialsRequestHook);
   api.hooks.onRequest.addHook('callOptions', callOptionsRequestHook);
+  api.hooks.onRequest.addHook('grpcReflectionRequestHook', grpcReflectionRequestHook);
   javascriptProvider.require['@grpc/grpc-js'] = grpc;
 }

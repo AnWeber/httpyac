@@ -6,10 +6,9 @@ import { Client } from 'grpc-reflection-js';
 import { fromJSON } from '@grpc/proto-loader';
 import { loadPackageDefinition } from '@grpc/grpc-js';
 import { GrpcRequest, isGrpcRequest } from './grpcRequest';
-import { GrpcUrlRegex } from './createGrpcService';
 
 export function grpcReflectionMetaDataHandler(type: string, server: string | undefined, context: models.ParserContext) {
-  if (type === 'grpcReflection') {
+  if (type === 'grpcReflection' && server) {
     context.httpRegion.hooks.onRequest.addHook(
       'grpcReflection',
       async (request: models.Request, context: models.ProtoProcessorContext) => {
@@ -18,10 +17,15 @@ export function grpcReflectionMetaDataHandler(type: string, server: string | und
         }
         utils.report(context, 'grpc reflection');
 
-        const host = server || GrpcUrlRegex.exec(request.url)?.groups?.server;
-        if (host) {
+        if (server) {
           try {
-            await loadAllServices(host, request, context);
+            const protoDefinitions = await loadGrpcProtoDefinitionsWithReflection(server, request);
+
+            if (context.options.protoDefinitions) {
+              Object.assign(context.options.protoDefinitions, protoDefinitions);
+            } else {
+              context.options.protoDefinitions = protoDefinitions;
+            }
           } catch (err) {
             log.warn('error in grpc reflection', err);
           }
@@ -32,22 +36,23 @@ export function grpcReflectionMetaDataHandler(type: string, server: string | und
   }
   return false;
 }
-async function loadAllServices(host: string, request: GrpcRequest, context: models.ProtoProcessorContext) {
+export async function loadGrpcProtoDefinitionsWithReflection(
+  host: string,
+  request: GrpcRequest
+): Promise<Record<string, models.ProtoDefinition>> {
   const reflectionClient = new Client(host, request.channelCredentials || grpc.credentials.createInsecure());
 
   const serviceNames = await reflectionClient.listServices();
   log.debug('grpc reflection', serviceNames);
 
-  if (!context.options.protoDefinitions) {
-    context.options.protoDefinitions = {};
-  }
+  const protoDefinitions: Record<string, models.ProtoDefinition> = {};
   for (const serviceName of serviceNames) {
     if (!serviceName.startsWith('grpc.reflection')) {
       const symbol = await reflectionClient.fileContainingSymbol(serviceName);
       const packageDefinition = fromJSON(symbol);
       const grpcObject = loadPackageDefinition(packageDefinition);
 
-      context.options.protoDefinitions[serviceName] = {
+      protoDefinitions[serviceName] = {
         fileName: serviceName,
         loaderOptions: {},
         grpcObject,
@@ -55,4 +60,5 @@ async function loadAllServices(host: string, request: GrpcRequest, context: mode
       };
     }
   }
+  return protoDefinitions;
 }
