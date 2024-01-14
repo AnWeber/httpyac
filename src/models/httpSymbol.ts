@@ -34,6 +34,20 @@ export class HttpSymbol {
     this.source = options.source;
   }
 
+  public getSymbolsForLine(line: number): Array<HttpSymbol> {
+    const result: Array<HttpSymbol> = [];
+    if (this.startLine <= line || this.endLine >= line) {
+      result.push(this);
+      if (this.children) {
+        for (const child of this.children) {
+          result.push(...child.getSymbolsForLine(line));
+        }
+      }
+    }
+
+    return result;
+  }
+
   public filter(predicate: (symbol: HttpSymbol) => boolean): Array<HttpSymbol> {
     const result: Array<HttpSymbol> = [];
     if (this.children) {

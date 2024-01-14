@@ -8,6 +8,7 @@ export interface IntelliJParserResult {
   endOffset: number;
   data: models.ScriptData | IntellijScriptData;
   isBeforeRequest: boolean;
+  symbols?: Array<models.HttpSymbol>;
 }
 
 export async function parseIntellijScript(
@@ -38,6 +39,7 @@ export async function parseIntellijScript(
           startOffset: 0,
           endLine: intellijContent.endLine,
           endOffset: intellijContent.endOffset,
+          children: intellijContent.symbols,
         }),
       ],
     };
@@ -55,14 +57,26 @@ function getIntellijContent(lineReader: models.HttpLineGenerator, hasRequest: bo
       if (fileMatches.groups.event === '<' && hasRequest) {
         return false;
       }
+      const fileName = fileMatches.groups.fileName.trim();
       return {
         startLine,
         endLine: startLine,
         endOffset: next.value.textLine.length,
         data: {
-          fileName: fileMatches.groups.fileName.trim(),
+          fileName,
         },
         isBeforeRequest: fileMatches.groups.event === '<',
+        symbols: [
+          new models.HttpSymbol({
+            name: 'filename',
+            description: fileName,
+            kind: models.HttpSymbolKind.path,
+            startLine: next.value.line,
+            startOffset: next.value.textLine.indexOf(fileName),
+            endLine: next.value.line,
+            endOffset: next.value.textLine.indexOf(fileName) + fileName.length,
+          }),
+        ],
       };
     }
 

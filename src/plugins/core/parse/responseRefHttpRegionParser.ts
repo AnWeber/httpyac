@@ -22,7 +22,8 @@ export async function parseResponseRef(
         httpRegion.responseRefs = [];
       }
 
-      httpRegion.responseRefs.push(match.groups.fileName);
+      const filename = match.groups.fileName;
+      httpRegion.responseRefs.push(filename);
       return {
         nextParserLine: next.value.line,
         symbols: [
@@ -34,6 +35,17 @@ export async function parseResponseRef(
             startOffset: 0,
             endLine: next.value.line,
             endOffset: next.value.textLine.length,
+            children: [
+              new HttpSymbol({
+                name: 'filename',
+                description: filename,
+                kind: HttpSymbolKind.path,
+                startLine: next.value.line,
+                startOffset: textLine.indexOf(filename),
+                endLine: next.value.line,
+                endOffset: textLine.indexOf(filename) + filename.length,
+              }),
+            ],
           }),
         ],
       };

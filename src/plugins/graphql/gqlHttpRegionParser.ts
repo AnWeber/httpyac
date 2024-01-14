@@ -34,18 +34,8 @@ export async function parseGraphql(
       gqlData.fragments[gqlContent.name] = gqlContent.gql;
     }
     return {
-      nextParserLine: gqlContent.endLine,
-      symbols: [
-        new models.HttpSymbol({
-          name: 'gql',
-          description: 'gql',
-          kind: models.HttpSymbolKind.gql,
-          startLine: gqlContent.startLine,
-          startOffset: 0,
-          endLine: gqlContent.endLine,
-          endOffset: gqlContent.endOffset,
-        }),
-      ],
+      nextParserLine: gqlContent.symbol.endLine,
+      symbols: [gqlContent.symbol],
     };
   }
   return false;
@@ -80,9 +70,26 @@ async function getGQLContent(lineReader: models.HttpLineGenerator): Promise<GqlP
     if (fileMatches && fileMatches.groups?.fileName) {
       const parserPath = fileMatches.groups.fileName.trim();
       return {
-        startLine,
-        endLine: startLine,
-        endOffset: next.value.textLine.length,
+        symbol: new models.HttpSymbol({
+          name: 'gql',
+          description: 'gql',
+          kind: models.HttpSymbolKind.gql,
+          startLine,
+          startOffset: 0,
+          endLine: startLine,
+          endOffset: next.value.textLine.length,
+          children: [
+            new models.HttpSymbol({
+              name: 'filename',
+              description: parserPath,
+              kind: models.HttpSymbolKind.path,
+              startLine: next.value.line,
+              startOffset: next.value.textLine.indexOf(parserPath),
+              endLine: next.value.line,
+              endOffset: next.value.textLine.indexOf(parserPath) + parserPath.length,
+            }),
+          ],
+        }),
         name: fileMatches.groups.name || fileMatches.groups.fileName,
         gql: (context: models.ProcessorContext) =>
           utils.replaceFilePath(parserPath, context, (path: models.PathLike) => fileProvider.readFile(path, 'utf-8')),
@@ -119,8 +126,14 @@ function matchGqlContent(
     if (EmptyLine.test(next.value.textLine)) {
       return {
         name,
-        startLine: value.line,
-        ...prevReader,
+        symbol: new models.HttpSymbol({
+          name: 'gql',
+          description: 'gql',
+          kind: models.HttpSymbolKind.gql,
+          startLine: value.line,
+          startOffset: 0,
+          ...prevReader,
+        }),
         gql: utils.toMultiLineString(gqlLines),
       };
     }
@@ -130,16 +143,20 @@ function matchGqlContent(
   }
   return {
     name,
-    startLine: value.line,
-    ...prevReader,
+    symbol: new models.HttpSymbol({
+      name: 'gql',
+      description: 'gql',
+      kind: models.HttpSymbolKind.gql,
+      startLine: value.line,
+      startOffset: 0,
+      ...prevReader,
+    }),
     gql: utils.toMultiLineString(gqlLines),
   };
 }
 
 export interface GqlParserResult {
   name?: string;
-  startLine: number;
-  endLine: number;
-  endOffset: number;
+  symbol: models.HttpSymbol;
   gql: string | ((context: models.ProcessorContext) => Promise<string | undefined>);
 }

@@ -1,4 +1,4 @@
-## [unreleased]
+## [6.11.1] (2023-01-14)
 
 ### Fix
 - Intellij store variables independent from current env in global cache (#612)

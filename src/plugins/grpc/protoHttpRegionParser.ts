@@ -18,7 +18,8 @@ export async function parseProtoImport(
     const matchProto = ProtoImport.exec(next.value.textLine);
 
     if (matchProto?.groups?.fileName) {
-      const protoDefinition = new models.ProtoDefinition(matchProto.groups.fileName.trim());
+      const filename = matchProto?.groups?.fileName;
+      const protoDefinition = new models.ProtoDefinition(filename.trim());
       protoDefinition.loaderOptions = {};
 
       const protoSymbol: models.HttpSymbol = new models.HttpSymbol({
@@ -29,6 +30,17 @@ export async function parseProtoImport(
         startOffset: 0,
         endLine: next.value.line,
         endOffset: next.value.textLine.length,
+        children: [
+          new models.HttpSymbol({
+            name: 'filename',
+            description: filename,
+            kind: models.HttpSymbolKind.path,
+            startLine: next.value.line,
+            startOffset: next.value.textLine.indexOf(filename),
+            endLine: next.value.line,
+            endOffset: next.value.textLine.indexOf(filename) + filename.length,
+          }),
+        ],
       });
       const symbols = [protoSymbol];
 

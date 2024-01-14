@@ -50,6 +50,17 @@ export async function parseOutputRedirection(
             startOffset: 0,
             endLine: next.value.line,
             endOffset: next.value.textLine.length,
+            children: [
+              new models.HttpSymbol({
+                name: 'filename',
+                description: fileName,
+                kind: models.HttpSymbolKind.path,
+                startLine: next.value.line,
+                startOffset: next.value.textLine.indexOf(fileName),
+                endLine: next.value.line,
+                endOffset: next.value.textLine.indexOf(fileName) + fileName.length,
+              }),
+            ],
           }),
         ],
       };
