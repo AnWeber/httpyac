@@ -2,6 +2,7 @@ import {
   getHttpLineGenerator,
   HttpLineGenerator,
   HttpRegionParserResult,
+  HttpSymbol,
   HttpSymbolKind,
   ParserContext,
 } from '../../../models';
@@ -21,7 +22,7 @@ export async function parseComment(
     return {
       nextParserLine: comment.endLine,
       symbols: [
-        {
+        new HttpSymbol({
           name: 'comment',
           description: comment.comment,
           kind: HttpSymbolKind.comment,
@@ -29,7 +30,7 @@ export async function parseComment(
           startOffset: 0,
           endLine: comment.endLine,
           endOffset: comment.endOffset,
-        },
+        }),
       ],
     };
   }

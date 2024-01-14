@@ -16,7 +16,7 @@ export async function parseRequestBody(
         const symbols: Array<models.HttpSymbol> = [];
 
         if (!requestBody.symbol || requestBody.symbol.endLine !== next.value.line - 1) {
-          requestBody.symbol = {
+          requestBody.symbol = new models.HttpSymbol({
             name: 'request body',
             description: 'request body',
             kind: models.HttpSymbolKind.requestBody,
@@ -25,12 +25,12 @@ export async function parseRequestBody(
             endLine: next.value.line,
             endOffset: next.value.textLine.length,
             children: utils.parseHandlebarsSymbols(next.value.textLine, next.value.line),
-          };
+          });
           symbols.push(requestBody.symbol);
         } else {
           requestBody.symbol.endLine = next.value.line;
-          requestBody.symbol.children?.push?.(...utils.parseHandlebarsSymbols(next.value.textLine, next.value.line));
           requestBody.symbol.endOffset = next.value.textLine.length;
+          requestBody.symbol.children?.push?.(...utils.parseHandlebarsSymbols(next.value.textLine, next.value.line));
         }
 
         return {

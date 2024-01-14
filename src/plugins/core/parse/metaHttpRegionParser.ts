@@ -36,15 +36,17 @@ export async function parseMetaData(
       const delimiterMatch = utils.RegionSeparator.exec(textLine);
       if (delimiterMatch) {
         result.endRegionLine = next.value.line - 1;
-        result.symbols.push({
-          name: 'separator',
-          description: delimiterMatch.groups?.title || '-',
-          kind: models.HttpSymbolKind.metaData,
-          startLine: next.value.line,
-          startOffset: 0,
-          endLine: next.value.line,
-          endOffset: textLine.length,
-        });
+        result.symbols.push(
+          new models.HttpSymbol({
+            name: 'separator',
+            description: delimiterMatch.groups?.title || '-',
+            kind: models.HttpSymbolKind.metaData,
+            startLine: next.value.line,
+            startOffset: 0,
+            endLine: next.value.line,
+            endOffset: textLine.length,
+          })
+        );
         data.metaTitle = delimiterMatch.groups?.title;
       } else {
         const commentResult = await utils.parseComments(next.value, context, MetaDataRegex);

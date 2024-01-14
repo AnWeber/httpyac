@@ -15,6 +15,7 @@ export enum HttpSymbolKind {
   key = 'key',
   value = 'value',
   variable = 'variable',
+  path = 'path',
   variableDefinition = 'variableDefinition',
   text = 'text',
 }

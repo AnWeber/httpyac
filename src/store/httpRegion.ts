@@ -23,7 +23,7 @@ export class HttpRegion implements models.HttpRegion {
     private readonly httpFile: models.HttpFile,
     start = 0
   ) {
-    this.symbol = {
+    this.symbol = new models.HttpSymbol({
       name: '-',
       description: '-',
       kind: models.HttpSymbolKind.request,
@@ -31,7 +31,7 @@ export class HttpRegion implements models.HttpRegion {
       startOffset: 0,
       endLine: start,
       endOffset: 0,
-    };
+    });
   }
 
   public get id(): string {

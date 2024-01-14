@@ -63,7 +63,7 @@ export async function parseJavascript(
           return {
             nextParserLine: next.value.line,
             symbols: [
-              {
+              new models.HttpSymbol({
                 name: 'script',
                 description: 'nodejs script',
                 kind: models.HttpSymbolKind.script,
@@ -71,7 +71,7 @@ export async function parseJavascript(
                 startOffset: 0,
                 endLine: next.value.line,
                 endOffset: next.value.textLine.length,
-              },
+              }),
             ],
           };
         }

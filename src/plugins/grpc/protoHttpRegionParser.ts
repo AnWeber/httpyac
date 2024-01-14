@@ -21,7 +21,7 @@ export async function parseProtoImport(
       const protoDefinition = new models.ProtoDefinition(matchProto.groups.fileName.trim());
       protoDefinition.loaderOptions = {};
 
-      const protoSymbol: models.HttpSymbol = {
+      const protoSymbol: models.HttpSymbol = new models.HttpSymbol({
         name: next.value.textLine,
         description: 'proto import',
         kind: models.HttpSymbolKind.proto,
@@ -29,7 +29,7 @@ export async function parseProtoImport(
         startOffset: 0,
         endLine: next.value.line,
         endOffset: next.value.textLine.length,
-      };
+      });
       const symbols = [protoSymbol];
 
       const result: models.HttpRegionParserResult = {

@@ -36,7 +36,7 @@ export async function parseGraphql(
     return {
       nextParserLine: gqlContent.endLine,
       symbols: [
-        {
+        new models.HttpSymbol({
           name: 'gql',
           description: 'gql',
           kind: models.HttpSymbolKind.gql,
@@ -44,7 +44,7 @@ export async function parseGraphql(
           startOffset: 0,
           endLine: gqlContent.endLine,
           endOffset: gqlContent.endOffset,
-        },
+        }),
       ],
     };
   }

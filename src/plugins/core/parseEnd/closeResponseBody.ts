@@ -14,15 +14,17 @@ export async function closeResponseBody(context: models.ParserContext): Promise<
       const symbol = context.data.httpResponseSymbol.symbol;
       if (symbol.children) {
         const lastLine = context.data.httpResponseSymbol.body.at(-1);
-        symbol.children.push({
-          name: 'response body',
-          description: 'response body',
-          kind: models.HttpSymbolKind.response,
-          startLine: symbol.endLine - context.data.httpResponseSymbol.body.length + 1,
-          startOffset: 0,
-          endLine: symbol.endLine,
-          endOffset: lastLine?.length || 0,
-        });
+        symbol.children.push(
+          new models.HttpSymbol({
+            name: 'response body',
+            description: 'response body',
+            kind: models.HttpSymbolKind.response,
+            startLine: symbol.endLine - context.data.httpResponseSymbol.body.length + 1,
+            startOffset: 0,
+            endLine: symbol.endLine,
+            endOffset: lastLine?.length || 0,
+          })
+        );
       }
     }
 

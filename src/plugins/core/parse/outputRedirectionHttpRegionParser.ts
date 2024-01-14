@@ -42,7 +42,7 @@ export async function parseOutputRedirection(
       return {
         nextParserLine: next.value.line,
         symbols: [
-          {
+          new models.HttpSymbol({
             name: match.groups.key,
             description: match.groups.value,
             kind: models.HttpSymbolKind.response,
@@ -50,7 +50,7 @@ export async function parseOutputRedirection(
             startOffset: 0,
             endLine: next.value.line,
             endOffset: next.value.textLine.length,
-          },
+          }),
         ],
       };
     }

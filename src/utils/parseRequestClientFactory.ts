@@ -36,7 +36,7 @@ export function parseRequestLineFactory(requestContext: RequestParserContext) {
         return false;
       }
       context.httpRegion.request = requestLine.request;
-      const requestSymbol: models.HttpSymbol = {
+      const requestSymbol = new models.HttpSymbol({
         name: next.value.textLine,
         description: `${requestContext.protocol} request-line`,
         kind: models.HttpSymbolKind.requestLine,
@@ -45,7 +45,7 @@ export function parseRequestLineFactory(requestContext: RequestParserContext) {
         endLine: next.value.line,
         endOffset: next.value.textLine.length,
         children: [requestLine.symbol],
-      };
+      });
 
       const result: models.HttpRegionParserResult = {
         nextParserLine: next.value.line,
@@ -103,7 +103,7 @@ function getRequestParseLine(
         protocol: context.protocol.toUpperCase(),
         method: lineMatch.groups?.method || context.method || context.protocol,
       },
-      symbol: {
+      symbol: new models.HttpSymbol({
         name: lineMatch.groups.url,
         description: `${context.protocol} Url`,
         kind: models.HttpSymbolKind.url,
@@ -112,7 +112,7 @@ function getRequestParseLine(
         endLine: httpLine.line,
         endOffset: httpLine.textLine.length,
         children: parser.parseHandlebarsSymbols(httpLine.textLine, httpLine.line),
-      },
+      }),
     };
   }
   const protocolMatch = context.protocolRegex?.exec(httpLine.textLine);
@@ -123,7 +123,7 @@ function getRequestParseLine(
         protocol: context.protocol.toUpperCase(),
         method: protocolMatch.groups?.method || context.method || context.protocol,
       },
-      symbol: {
+      symbol: new models.HttpSymbol({
         name: protocolMatch.groups.url,
         description: `${context.protocol} Url`,
         kind: models.HttpSymbolKind.url,
@@ -132,7 +132,7 @@ function getRequestParseLine(
         endLine: httpLine.line,
         endOffset: httpLine.textLine.length,
         children: parser.parseHandlebarsSymbols(httpLine.textLine, httpLine.line),
-      },
+      }),
     };
   }
   return undefined;

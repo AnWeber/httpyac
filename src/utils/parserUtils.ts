@@ -70,7 +70,7 @@ export function parseRequestHeaderFactory(headers: Record<string, unknown>): Par
       const valueOffset = httpLine.textLine.indexOf(headerValue);
       return {
         symbols: [
-          {
+          new models.HttpSymbol({
             name: headerName,
             description: headerValue,
             kind: models.HttpSymbolKind.requestHeader,
@@ -79,7 +79,7 @@ export function parseRequestHeaderFactory(headers: Record<string, unknown>): Par
             endLine: httpLine.line,
             endOffset: httpLine.textLine.length,
             children: [
-              {
+              new models.HttpSymbol({
                 name: headerName,
                 description: 'request header key',
                 kind: models.HttpSymbolKind.key,
@@ -87,8 +87,8 @@ export function parseRequestHeaderFactory(headers: Record<string, unknown>): Par
                 startOffset: httpLine.textLine.indexOf(headerName),
                 endLine: httpLine.line,
                 endOffset: httpLine.textLine.indexOf(headerName) + headerName.length,
-              },
-              {
+              }),
+              new models.HttpSymbol({
                 name: headerValue,
                 description: 'request header value',
                 kind: models.HttpSymbolKind.value,
@@ -97,9 +97,9 @@ export function parseRequestHeaderFactory(headers: Record<string, unknown>): Par
                 endLine: httpLine.line,
                 endOffset: valueOffset + headerValue.length,
                 children: parseHandlebarsSymbols(headerValue, httpLine.line, valueOffset),
-              },
+              }),
             ],
-          },
+          }),
         ],
       };
     }
@@ -129,7 +129,7 @@ export function parseDefaultHeadersFactory(
       const val = httpLine.textLine.trim();
       return {
         symbols: [
-          {
+          new models.HttpSymbol({
             name: val,
             description: 'Header Variable',
             kind: models.HttpSymbolKind.requestHeader,
@@ -138,7 +138,7 @@ export function parseDefaultHeadersFactory(
             endOffset: httpLine.textLine.length,
             endLine: httpLine.line,
             children: [
-              {
+              new models.HttpSymbol({
                 name: fileHeaders.groups.variableName,
                 description: 'Header Variable',
                 kind: models.HttpSymbolKind.variable,
@@ -146,9 +146,9 @@ export function parseDefaultHeadersFactory(
                 startOffset: fileHeaders.index,
                 endOffset: fileHeaders.groups.variableName.length,
                 endLine: httpLine.line,
-              },
+              }),
             ],
-          },
+          }),
         ],
       };
     }
@@ -183,7 +183,7 @@ export function parseUrlLineFactory(attachUrl: (url: string) => void): ParseLine
       attachUrl(val);
       return {
         symbols: [
-          {
+          new models.HttpSymbol({
             name: val,
             description: 'URL Part',
             kind: models.HttpSymbolKind.url,
@@ -192,7 +192,7 @@ export function parseUrlLineFactory(attachUrl: (url: string) => void): ParseLine
             endOffset: httpLine.textLine.length,
             endLine: httpLine.line,
             children: parseHandlebarsSymbols(httpLine.textLine, httpLine.line),
-          },
+          }),
         ],
       };
     }
@@ -207,7 +207,7 @@ export function parseQueryLineFactory(attachUrl: (url: string) => void): ParseLi
       attachUrl(val);
       return {
         symbols: [
-          {
+          new models.HttpSymbol({
             name: val,
             description: 'Query',
             kind: models.HttpSymbolKind.url,
@@ -216,7 +216,7 @@ export function parseQueryLineFactory(attachUrl: (url: string) => void): ParseLi
             endOffset: httpLine.textLine.length,
             endLine: httpLine.line,
             children: parseHandlebarsSymbols(httpLine.textLine, httpLine.line, 0),
-          },
+          }),
         ],
       };
     }
@@ -232,7 +232,7 @@ export async function parseComments(
   if (metaRegex.test(httpLine.textLine)) {
     const result: models.SymbolParserResult = {
       symbols: [
-        {
+        new models.HttpSymbol({
           name: 'comment',
           description: httpLine.textLine,
           kind: models.HttpSymbolKind.metaData,
@@ -240,14 +240,14 @@ export async function parseComments(
           startOffset: 0,
           endLine: httpLine.line,
           endOffset: httpLine.textLine.length,
-        },
+        }),
       ],
     };
     const match = /^\s*(#+|\/{2,})\s+@(?<key>[^\s]*)(\s+)?"?(?<value>.*)?"?$/u.exec(httpLine.textLine);
     if (match && match.groups && match.groups.key) {
       const key = match.groups.key.replace(/-./gu, value => value[1].toUpperCase());
       result.symbols[0].children = [
-        {
+        new models.HttpSymbol({
           name: key,
           description: match.groups.value || '-',
           kind: models.HttpSymbolKind.metaData,
@@ -256,7 +256,7 @@ export async function parseComments(
           endLine: httpLine.line,
           endOffset: httpLine.textLine.length,
           children: [
-            {
+            new models.HttpSymbol({
               name: key,
               description: knownMetaData.find(obj => obj.name === key)?.description || 'key of meta data',
               kind: models.HttpSymbolKind.key,
@@ -264,22 +264,24 @@ export async function parseComments(
               startOffset: httpLine.textLine.indexOf(match.groups.key),
               endLine: httpLine.line,
               endOffset: httpLine.textLine.indexOf(match.groups.key) + match.groups.key.length,
-            },
+            }),
           ],
-        },
+        }),
       ];
       let val: string | undefined;
       if (match.groups.value) {
         val = match.groups.value.trim();
-        result.symbols[0].children.push({
-          name: match.groups.value,
-          description: 'value of meta data',
-          kind: models.HttpSymbolKind.value,
-          startLine: httpLine.line,
-          startOffset: httpLine.textLine.indexOf(match.groups.value),
-          endLine: httpLine.line,
-          endOffset: httpLine.textLine.indexOf(match.groups.value) + match.groups.value.length,
-        });
+        result.symbols[0].children.push(
+          new models.HttpSymbol({
+            name: match.groups.value,
+            description: 'value of meta data',
+            kind: models.HttpSymbolKind.value,
+            startLine: httpLine.line,
+            startOffset: httpLine.textLine.indexOf(match.groups.value),
+            endLine: httpLine.line,
+            endOffset: httpLine.textLine.indexOf(match.groups.value) + match.groups.value.length,
+          })
+        );
       }
       await context.httpFile.hooks.parseMetaData.trigger(key, val, context);
     }
@@ -452,16 +454,18 @@ export function parseHandlebarsSymbols(line: string | undefined, startLine: numb
     let match: RegExpExecArray | null;
     while ((match = HandlebarsSingleLine.exec(line)) !== null) {
       const [searchValue, variable] = match;
-      symbols.push({
-        name: variable,
-        description: variable,
-        startLine,
-        endLine: startLine,
-        kind: models.HttpSymbolKind.variable,
-        startOffset: offset + match.index,
-        endOffset: offset + match.index + searchValue.length,
-        source: variable,
-      });
+      symbols.push(
+        new models.HttpSymbol({
+          name: variable,
+          description: variable,
+          startLine,
+          endLine: startLine,
+          kind: models.HttpSymbolKind.variable,
+          startOffset: offset + match.index,
+          endOffset: offset + match.index + searchValue.length,
+          source: variable,
+        })
+      );
     }
   }
   return symbols;
@@ -478,7 +482,6 @@ export async function parseInlineResponse(
     if (context.data.httpResponseSymbol) {
       const responseSymbol = context.data.httpResponseSymbol;
       responseSymbol.body.push(next.value.textLine);
-
       responseSymbol.symbol.endLine = next.value.line;
       responseSymbol.symbol.endOffset = next.value.textLine.length;
       return {
@@ -497,7 +500,7 @@ export async function parseInlineResponse(
         headers,
       };
 
-      const responseSymbol: models.HttpSymbol & { children: Array<models.HttpSymbol> } = {
+      const responseSymbol = new models.HttpSymbol({
         name: 'response',
         description: 'response',
         kind: models.HttpSymbolKind.response,
@@ -506,7 +509,7 @@ export async function parseInlineResponse(
         endLine: next.value.line,
         endOffset: next.value.textLine.length,
         children: [],
-      };
+      });
 
       context.data.httpResponseSymbol = {
         symbol: responseSymbol,
@@ -525,7 +528,7 @@ export async function parseInlineResponse(
         result.nextParserLine = headersResult.nextLine || result.nextParserLine;
         for (const parseResult of headersResult.parseResults) {
           for (const child of parseResult.symbols) {
-            responseSymbol.children.push(child);
+            responseSymbol.children?.push(child);
             responseSymbol.endLine = child.endLine;
             responseSymbol.endOffset = child.endOffset;
           }

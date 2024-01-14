@@ -1,4 +1,10 @@
-import { getHttpLineGenerator, HttpRegionParserResult, HttpSymbolKind, ParserContext } from '../../../models';
+import {
+  getHttpLineGenerator,
+  HttpRegionParserResult,
+  HttpSymbol,
+  HttpSymbolKind,
+  ParserContext,
+} from '../../../models';
 
 export async function parseResponseRef(
   getLineReader: getHttpLineGenerator,
@@ -20,7 +26,7 @@ export async function parseResponseRef(
       return {
         nextParserLine: next.value.line,
         symbols: [
-          {
+          new HttpSymbol({
             name: match.groups.key,
             description: match.groups.value,
             kind: HttpSymbolKind.response,
@@ -28,7 +34,7 @@ export async function parseResponseRef(
             startOffset: 0,
             endLine: next.value.line,
             endOffset: next.value.textLine.length,
-          },
+          }),
         ],
       };
     }

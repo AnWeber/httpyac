@@ -76,7 +76,7 @@ export async function parseAssertLine(
       return {
         nextParserLine: next.value.line,
         symbols: [
-          {
+          new models.HttpSymbol({
             name: `assert ${match.groups.type}`,
             description: `${match.groups.predicate} ${match.groups.expected || ''}`.trim(),
             kind: models.HttpSymbolKind.script,
@@ -84,7 +84,7 @@ export async function parseAssertLine(
             startOffset: 0,
             endLine: next.value.line,
             endOffset: next.value.textLine.length,
-          },
+          }),
         ],
       };
     }

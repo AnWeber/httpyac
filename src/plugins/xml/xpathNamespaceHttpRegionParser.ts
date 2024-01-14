@@ -30,7 +30,7 @@ export async function parseXpathNamespace(
       return {
         nextParserLine: next.value.line,
         symbols: [
-          {
+          new models.HttpSymbol({
             name: match.groups.key,
             description: match.groups.value,
             kind: models.HttpSymbolKind.variableDefinition,
@@ -39,7 +39,7 @@ export async function parseXpathNamespace(
             endLine: next.value.line,
             endOffset: next.value.textLine.length,
             children: [
-              {
+              new models.HttpSymbol({
                 name: match.groups.key,
                 description: 'key',
                 kind: models.HttpSymbolKind.key,
@@ -47,8 +47,8 @@ export async function parseXpathNamespace(
                 startOffset: next.value.textLine.indexOf(match.groups.key),
                 endLine: next.value.line,
                 endOffset: next.value.textLine.indexOf(match.groups.key) + match.groups.key.length,
-              },
-              {
+              }),
+              new models.HttpSymbol({
                 name: match.groups.value,
                 description: 'value',
                 kind: models.HttpSymbolKind.value,
@@ -56,9 +56,9 @@ export async function parseXpathNamespace(
                 startOffset: next.value.textLine.indexOf(match.groups.value),
                 endLine: next.value.line,
                 endOffset: next.value.textLine.indexOf(match.groups.value) + match.groups.value.length,
-              },
+              }),
             ],
-          },
+          }),
         ],
       };
     }

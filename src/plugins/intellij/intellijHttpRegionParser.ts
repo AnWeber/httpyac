@@ -30,7 +30,7 @@ export async function parseIntellijScript(
     return {
       nextParserLine: intellijContent.endLine,
       symbols: [
-        {
+        new models.HttpSymbol({
           name: 'Intellij Script',
           description: 'Intellij Script',
           kind: models.HttpSymbolKind.script,
@@ -38,7 +38,7 @@ export async function parseIntellijScript(
           startOffset: 0,
           endLine: intellijContent.endLine,
           endOffset: intellijContent.endOffset,
-        },
+        }),
       ],
     };
   }
