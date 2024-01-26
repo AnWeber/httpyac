@@ -16,7 +16,7 @@ export async function showInputBoxVariableReplacer(
 ): Promise<unknown> {
   return utils.parseHandlebarsString(text, async (variable: string) => {
     const inputRegex =
-      /^\$(?<type>(prompt|input|password))(?<save>-askonce)?\s*(?<placeholder>[^$]*)(\$value:\s*(?<value>.*))?\s*$/u;
+      /^\$(?<type>(prompt|input|password))(?<askonce>-askonce)?\s*(?<placeholder>[^$]*)(\$value:\s*(?<value>.*))?\s*$/u;
     const matchInput = inputRegex.exec(variable);
 
     if (matchInput?.groups?.placeholder) {
@@ -27,7 +27,7 @@ export async function showInputBoxVariableReplacer(
 
       const session = userSessionStore.getUserSession<InputSession>(id);
 
-      if (matchInput.groups.save) {
+      if (matchInput.groups.askonce) {
         if (variables?.[placeholder] !== undefined) {
           return variables[placeholder];
         }
@@ -36,21 +36,22 @@ export async function showInputBoxVariableReplacer(
         }
       }
 
+      const isPassword = inputType === 'password';
       const answer = await userInteractionProvider.showInputPrompt(
         placeholder,
         session?.answer || matchInput.groups.value,
-        inputType === 'password'
+        isPassword
       );
       if (answer !== undefined) {
         userSessionStore.setUserSession({
           id,
-          title: `${placeholder}=${answer}`,
+          title: isPassword ? placeholder : `${placeholder}=${answer}`,
           description: `Cache for ${inputType}`,
           type: 'input',
           details: {
             placeholder,
             inputType,
-            answer: inputType !== 'password' ? answer : undefined,
+            answer: isPassword ? undefined : answer,
           },
           answer,
         });

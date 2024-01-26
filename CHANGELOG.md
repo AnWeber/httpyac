@@ -1,3 +1,8 @@
+## [unreleased]
+
+### Fix
+- hide password answer in sessionStore (AnWeber/httpbook#111)
+
 ## [6.11.1] (2023-01-14)
 
 ### Fix
