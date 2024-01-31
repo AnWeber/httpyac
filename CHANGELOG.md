@@ -1,7 +1,8 @@
-## [unreleased]
+## [6.11.2] (2023-01-31)
 
 ### Fix
 - hide password answer in sessionStore (AnWeber/httpbook#111)
+- add Content-Type if protocol `GRAPHQL` is used to support same API as Intellij HTTP Client (AnWeber/vscode-httpyac#257)
 
 ## [6.11.1] (2023-01-14)
 
