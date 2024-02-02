@@ -28,7 +28,10 @@ export interface HttpRequest extends Request<HttpMethod> {
   options?: OptionsOfUnknownResponseBody;
 }
 
-export type HttpRequestBodyLine = string | ((context: ProcessorContext) => Promise<Buffer | string | undefined>);
+export type HttpRequestBodyLine =
+  | string
+  | Buffer
+  | ((context: ProcessorContext) => Promise<Buffer | string | undefined>);
 
 export interface RequestBodyImport {
   fileName: string;

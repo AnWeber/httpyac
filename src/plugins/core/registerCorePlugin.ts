@@ -25,6 +25,7 @@ export function registerCorePlugins(api: models.HttpyacHooksApi) {
 function initOnRequestHook(api: models.HttpyacHooksApi) {
   api.hooks.onRequest.addHook('attachDefaultHeaders', request.attachDefaultHeaders);
   api.hooks.onRequest.addHook('setEnvRequestOptions', request.setEnvRequestOptions);
+  api.hooks.onRequest.addHook('resolveRequestBody', request.resolveRequestBody);
   api.hooks.onRequest.addHook('requestVariableReplacer', request.requestVariableReplacer);
   api.hooks.onRequest.addHook('transformRequestBody', request.transformRequestBodyToBuffer);
   api.hooks.onRequest.addHook('encodeRequestBody', request.encodeRequestBody);

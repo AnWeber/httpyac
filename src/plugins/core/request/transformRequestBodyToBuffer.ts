@@ -31,6 +31,8 @@ export async function normalizeBody(
   for (const obj of body) {
     if (utils.isString(obj)) {
       buffers.push(obj);
+    } else if (Buffer.isBuffer(obj)) {
+      buffers.push(obj);
     } else {
       const result = await obj(context);
       if (result) {

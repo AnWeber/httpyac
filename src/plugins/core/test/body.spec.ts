@@ -111,4 +111,33 @@ invoice_text: {{bar}}
       `--WebKitFormBoundary\r\nContent-Disposition: form-data; name="text"\r\n\r\ninvoice_text: bar2\r\n--WebKitFormBoundary--`
     );
   });
+  it('should send mulitpart form body with variables and file', async () => {
+    const requests = initHttpClientProvider();
+
+    initFileProvider({ 'body.json': 'test' });
+    await sendHttp(
+      `
+@bar=bar2
+POST /post
+content-type: multipart/form-data; boundary=WebKitFormBoundary
+
+--WebKitFormBoundary
+Content-Disposition: form-data; name="text"
+
+invoice_text: {{bar}}
+--WebKitFormBoundary
+Content-Disposition: form-data; name="invoice"; filename="invoice.pdf"
+Content-Type: application/pdf
+
+< ./body.json
+--WebKitFormBoundary--
+      `
+    );
+
+    expect(requests[0].headers?.['content-type']).toBe('multipart/form-data; boundary=WebKitFormBoundary');
+    expect(Buffer.isBuffer(requests[0].body)).toBe(true);
+    expect(requests[0].body?.toString()).toBe(
+      `--WebKitFormBoundary\r\nContent-Disposition: form-data; name="text"\r\n\r\ninvoice_text: bar2\r\n--WebKitFormBoundary\r\nContent-Disposition: form-data; name="invoice"; filename="invoice.pdf"\r\nContent-Type: application/pdf\r\n\r\ntest\r\n--WebKitFormBoundary--`
+    );
+  });
 });
