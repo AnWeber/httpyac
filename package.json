@@ -31,7 +31,7 @@
     "rest-client"
   ],
   "engines": {
-    "node": ">=14.16"
+    "node": ">=18"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -124,5 +124,8 @@
     "ws": "^8.14.2",
     "xmldom-format": "^1.1.1",
     "xpath": "^0.0.34"
+  },
+  "volta": {
+    "node": "20.11.1"
   }
 }
