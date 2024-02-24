@@ -1,3 +1,9 @@
+## [unreleased]
+
+### Fix
+- Assertsions for Zero are working (AnWeber/vscode-httpyac#260)
+
+
 ## [6.11.3] (2023-02-02)
 
 ### Fix

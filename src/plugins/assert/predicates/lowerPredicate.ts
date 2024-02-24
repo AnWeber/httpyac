@@ -6,7 +6,7 @@ export class LowerPredicate implements TestPredicate {
   match(value: unknown, expected: unknown): boolean {
     const valNumber = toNumber(value);
     const expectedNumber = toNumber(expected);
-    if (valNumber && expectedNumber) {
+    if (valNumber !== undefined && expectedNumber !== undefined) {
       return valNumber < expectedNumber;
     }
     return false;
