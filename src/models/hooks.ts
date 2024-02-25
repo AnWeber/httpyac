@@ -43,7 +43,7 @@ export class ProvideAssertValue extends LastOutHook<
   unknown
 > {
   constructor() {
-    super(obj => !!obj);
+    super(obj => obj !== false);
     this.id = 'ProvideAssertValue';
   }
 }
