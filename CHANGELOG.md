@@ -1,4 +1,4 @@
-## [unreleased]
+## [6.11.4] (2023-02-25)
 
 ### Fix
 - Assertsions for Zero are working (AnWeber/vscode-httpyac#260)
