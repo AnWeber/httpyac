@@ -2,7 +2,7 @@
 
 ### Fix
 - Assertsions for Zero are working (AnWeber/vscode-httpyac#260)
-
+- typo in junit report.xml generation (#642)
 
 ## [6.11.3] (2023-02-02)
 

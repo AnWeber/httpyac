@@ -25,7 +25,7 @@ export function transformToJunit(output: SendJsonOutput): string {
   root.setAttribute('tests', `${output.summary.totalTests}`);
   root.setAttribute('errors', '0');
   root.setAttribute('disabled', `${output.summary.disabledRequests}`);
-  root.setAttribute('failues', `${output.summary.failedTests}`);
+  root.setAttribute('failures', `${output.summary.failedTests}`);
   root.setAttribute('time', `${toFloatSeconds(output.requests.reduce(sumDuration, 0))}`);
 
   for (const [filename, requests] of Object.entries(groupedRequests)) {
