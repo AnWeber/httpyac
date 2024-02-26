@@ -1,3 +1,8 @@
+## [unreleased]
+
+### Fix
+- replace grpc-reflection-js with grpc-js-reflection-client
+
 ## [6.11.4] (2023-02-25)
 
 ### Fix
