@@ -1,7 +1,10 @@
 import { ConsoleLogHandler, LogHandler, LogLevel } from '../models';
 
+type LogCache = Array<() => void> | undefined;
+
 export class Logger implements ConsoleLogHandler {
-  private collectCache: Array<() => void> | undefined;
+  private collectCache: LogCache;
+  private priorityCache: LogCache;
   constructor(
     readonly options: {
       level?: LogLevel;
@@ -11,59 +14,69 @@ export class Logger implements ConsoleLogHandler {
     }
   ) {}
 
-  collectMessages(): void {
+  public collectMessages(): void {
     this.collectCache = [];
+    this.priorityCache = [];
   }
 
-  flush(): void {
-    if (this.collectCache) {
-      for (const action of this.collectCache) {
+  public flush(): void {
+    this.priorityCache = this.flushCache(this.priorityCache);
+    this.collectCache = this.flushCache(this.collectCache);
+  }
+
+  private flushCache(cache: LogCache) {
+    if (cache) {
+      for (const action of cache) {
         action();
       }
-      this.collectCache = [];
+      return [];
     }
+    return undefined;
   }
 
-  private writeLog(logLevel: LogLevel, action: (...params: unknown[]) => void, params: unknown[]) {
+  private writeLog(logLevel: LogLevel, cache: LogCache, action: (...params: unknown[]) => void, params: unknown[]) {
     if (!this.options?.level || logLevel >= this.options.level) {
       let log = () => action(...params);
       if (this.options?.logMethod) {
         log = () => this.options?.logMethod?.(logLevel, ...params);
       }
-      if (this.collectCache) {
-        this.collectCache.push(log);
+      if (cache) {
+        cache.push(log);
       } else {
         log();
       }
     }
   }
 
-  info(...params: unknown[]): void {
-    this.writeLog(LogLevel.info, console.info, params);
+  public info(...params: unknown[]): void {
+    this.writeLog(LogLevel.info, this.collectCache, console.info, params);
   }
-  log(...params: unknown[]): void {
-    this.writeLog(LogLevel.info, console.log, params);
+  public log(...params: unknown[]): void {
+    this.writeLog(LogLevel.info, this.collectCache, console.log, params);
   }
-  trace(...params: unknown[]): void {
-    this.writeLog(LogLevel.trace, this.options.noTrace ? console.debug : console.trace, params);
+  public trace(...params: unknown[]): void {
+    this.writeLog(LogLevel.trace, this.collectCache, this.options.noTrace ? console.debug : console.trace, params);
   }
-  debug(...params: unknown[]): void {
-    this.writeLog(LogLevel.debug, console.debug, params);
+  public debug(...params: unknown[]): void {
+    this.writeLog(LogLevel.debug, this.collectCache, console.debug, params);
   }
-  error(...params: unknown[]): void {
-    this.writeLog(LogLevel.error, console.error, params);
+  public error(...params: unknown[]): void {
+    this.writeLog(LogLevel.error, this.collectCache, console.error, params);
   }
-  warn(...params: unknown[]): void {
-    this.writeLog(LogLevel.warn, console.warn, params);
+  public warn(...params: unknown[]): void {
+    this.writeLog(LogLevel.warn, this.collectCache, console.warn, params);
   }
-  logTest(result: boolean, message: string): void {
+  public logTest(result: boolean, message: string): void {
     if (!this.options?.onlyFailedTests && result) {
-      this.writeLog(LogLevel.info, console.info, [message]);
+      this.writeLog(LogLevel.info, this.collectCache, console.info, [message]);
     } else if (!result) {
-      this.writeLog(LogLevel.info, console.error, [message]);
+      this.writeLog(LogLevel.info, this.collectCache, console.error, [message]);
     }
   }
-  clear(): void {
+  public logPriority(...msg: Array<string>) {
+    this.writeLog(LogLevel.info, this.priorityCache, console.info, msg);
+  }
+  public clear(): void {
     console.clear();
   }
 }

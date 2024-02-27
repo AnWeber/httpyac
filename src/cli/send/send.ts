@@ -286,7 +286,11 @@ function getRequestLogger(
   );
 
   if (requestLoggerOptions || requestFailedLoggerOptions) {
-    return utils.requestLoggerFactory(args => logger.info(args), requestLoggerOptions, requestFailedLoggerOptions);
+    return utils.requestLoggerFactory(
+      args => logger.logPriority(args),
+      requestLoggerOptions,
+      requestFailedLoggerOptions
+    );
   }
   return undefined;
 }

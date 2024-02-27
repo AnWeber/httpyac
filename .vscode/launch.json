@@ -14,7 +14,9 @@
       "args": [
         "send",
         "${file}",
-        "--all"
+        "--all",
+        "-o",
+        "short"
       ],
       "outFiles": [
         "${workspaceFolder}/dist/**/*.js"

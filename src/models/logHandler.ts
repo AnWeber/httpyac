@@ -25,6 +25,7 @@ export interface LogHandler {
 
 export interface ConsoleLogHandler extends LogHandler {
   logTest(result: boolean, message: string): void;
+  logPriority(message: string): void;
   collectMessages(): void;
   flush(): void;
 }
