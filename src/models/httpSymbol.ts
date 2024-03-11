@@ -50,6 +50,9 @@ export class HttpSymbol {
 
   public filter(predicate: (symbol: HttpSymbol) => boolean): Array<HttpSymbol> {
     const result: Array<HttpSymbol> = [];
+    if (predicate(this)) {
+      result.push(this);
+    }
     if (this.children) {
       for (const child of this.children) {
         if (predicate(child)) {
