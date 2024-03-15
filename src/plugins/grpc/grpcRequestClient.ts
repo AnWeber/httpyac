@@ -159,11 +159,7 @@ export class GrpcRequestClient extends models.AbstractRequestClient<GrpcClient |
 
   public streamEnded(): void {
     if (this.grpcStream instanceof Writable || this.grpcStream instanceof Duplex) {
-      if (this.grpcStream.cancel) {
-        this.grpcStream.cancel();
-      } else {
-        this.grpcStream.destroy();
-      }
+      this.grpcStream.end();
       delete this.grpcStream;
     }
   }

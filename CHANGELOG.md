@@ -1,6 +1,10 @@
 ## [unreleased]
+
 ### Features
 - add current symbol to filter result if symbol matches predicate (AnWeber/vscode-httpyac#265)
+
+### Fix
+- call `end()` instead of `cancel()`on successful GRPC Client Streaming (Anweber/vscode-httpyac#264)
 
 ## [6.11.5] (2023-02-27)
 
