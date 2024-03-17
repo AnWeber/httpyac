@@ -1,4 +1,4 @@
-## [unreleased]
+## [6.12.0] (2023-03-17)
 
 ### Features
 - add current symbol to filter result if symbol matches predicate (AnWeber/vscode-httpyac#265)
