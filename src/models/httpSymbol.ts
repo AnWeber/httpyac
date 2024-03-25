@@ -55,9 +55,6 @@ export class HttpSymbol {
     }
     if (this.children) {
       for (const child of this.children) {
-        if (predicate(child)) {
-          result.push(child);
-        }
         result.push(...child.filter(predicate));
       }
     }

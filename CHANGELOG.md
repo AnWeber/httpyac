@@ -1,3 +1,7 @@
+## [unreleasd]
+### Fix
+- provide no duplicate symbols on filter call (Anweber/vscode-httpyac#269)
+
 ## [6.12.0] (2023-03-17)
 
 ### Features
