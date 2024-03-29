@@ -104,7 +104,7 @@
     "dayjs": "^1.11.10",
     "dayjs-plugin-utc": "^0.1.2",
     "dotenv": "^16.4.5",
-    "encodeurl": "^1.0.2",
+    "encodeurl": "^2.0.0",
     "eventsource": "^2.0.2",
     "filesize": "^10.1.0",
     "globby": "^14.0.1",
