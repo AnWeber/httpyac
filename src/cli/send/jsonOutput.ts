@@ -48,7 +48,7 @@ export function toSendJsonOutput(
 ): SendJsonOutput {
   const requests: Array<SendOutputRequest> = [];
 
-  for (const httpRegion of processedHttpRegions) {
+  for (const httpRegion of processedHttpRegions.filter(o => !o.disabled)) {
     let output = options.output;
     if (options.outputFailed && httpRegion.testResults?.some?.(test => !test.result)) {
       output = options.outputFailed;
