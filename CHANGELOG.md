@@ -1,4 +1,4 @@
-## [unreleasd]
+## [6.12.1]
 ### Fix
 - provide no duplicate symbols on filter call (Anweber/vscode-httpyac#269)
 - request count ignores disabled region (#663)
