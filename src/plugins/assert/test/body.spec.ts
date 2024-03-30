@@ -83,6 +83,6 @@ describe('assert.body', () => {
     expect(responses[0].statusCode).toBe(200);
     expect(httpFile.httpRegions[0].testResults?.length).toBe(1);
     expect(httpFile.httpRegions[0].testResults?.[0].result).toBeTruthy();
-    expect(httpFile.httpRegions[0].testResults?.[0].message).toBe('foo == {{["bar"]}}');
+    expect(httpFile.httpRegions[0].testResults?.[0].message).toBe('foo == bar');
   });
 });

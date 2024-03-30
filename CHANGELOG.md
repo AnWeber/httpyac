@@ -1,6 +1,8 @@
 ## [unreleasd]
 ### Fix
 - provide no duplicate symbols on filter call (Anweber/vscode-httpyac#269)
+- request count ignores disabled region (#663)
+- show replaced expected value in test results to improve user experience (#663)
 
 ## [6.12.0] (2023-03-17)
 

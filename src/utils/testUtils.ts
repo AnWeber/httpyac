@@ -24,15 +24,18 @@ import { isHttpResponse } from './requestUtils';
 export function testFactoryAsync({
   httpRegion,
   scriptConsole,
-}: ProcessorContext): (message: string, testMethod: () => Promise<void>) => Promise<void> {
-  return async function test(message: string, testMethod: () => Promise<void> | void): Promise<void> {
+}: ProcessorContext): (message: string, testMethod: (testResult: TestResult) => Promise<void>) => Promise<void> {
+  return async function test(
+    message: string,
+    testMethod: (testResult: TestResult) => Promise<void> | void
+  ): Promise<void> {
     const testResult: TestResult = {
       message,
       result: true,
     };
     if (typeof testMethod === 'function') {
       try {
-        await testMethod();
+        await testMethod(testResult);
       } catch (err) {
         setErrorInTestResult(testResult, err);
       }
