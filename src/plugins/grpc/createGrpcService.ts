@@ -56,7 +56,7 @@ export function getSerivceData(url: string, protoDefinitions: Record<string, Pro
     }
 
     const flatServiceKeys = Object.keys(flatServices);
-    if (flatServiceKeys) {
+    if (flatServiceKeys.length > 0) {
       throw new Error(`Service ${service} does not exist. Available Services: ${flatServiceKeys.join(', ')}`);
     } else {
       throw new Error(`Service ${service} does not exist. No Service imported`);

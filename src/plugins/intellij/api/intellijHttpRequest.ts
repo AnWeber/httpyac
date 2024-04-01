@@ -46,7 +46,7 @@ class IntellijRequestHeaders implements RequestHeaders {
   constructor(private readonly context: models.ProcessorContext) {}
   all(): Array<RequestHeader> {
     if (this.context.request?.headers) {
-      return Object.keys(this.context.request?.headers).map(name => new IntellijRequestHeader(name, this.context));
+      return Object.keys(this.context.request.headers).map(name => new IntellijRequestHeader(name, this.context));
     }
     return [];
   }

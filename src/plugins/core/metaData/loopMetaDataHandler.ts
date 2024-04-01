@@ -121,13 +121,13 @@ class LoopMetaInterceptor implements HookInterceptor<[models.ProcessorContext], 
   private async *iterate(context: models.ProcessorContext) {
     switch (this.data.type) {
       case LoopMetaType.forOf:
-        await (yield* this.iterateForOfLoop(context));
+        yield* this.iterateForOfLoop(context);
         break;
       case LoopMetaType.for:
         yield* this.iterateForLoop();
         break;
       case LoopMetaType.while:
-        await (yield* this.iterateWhileLoop(context));
+        yield* this.iterateWhileLoop(context);
         break;
       default:
         break;

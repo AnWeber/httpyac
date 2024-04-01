@@ -46,7 +46,7 @@ export async function logResponse(
   if (regionResult === HookCancel) {
     return undefined;
   }
-  if (!context.httpRegion.metaData.noLog && clone && context.logResponse) {
+  if (!context.httpRegion.metaData.noLog && context.logResponse) {
     await context.logResponse(clone, context.httpRegion);
   }
   return clone;

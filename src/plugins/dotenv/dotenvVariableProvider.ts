@@ -20,7 +20,7 @@ export async function provideDotenvEnvironments(context: VariableProviderContext
   const dirOfFile = fileProvider.dirname(context.httpFile.fileName);
   if (dirOfFile) {
     await utils.iterateUntilRoot(dirOfFile, context.httpFile.rootDir, async (dir: PathLike) => {
-      files.push(...(await readEnvDir(getEnvdirname(context) || 'env', dir)));
+      files.push(...(await readEnvDir(getEnvdirname(context), dir)));
       files.push(...(await utils.useDefaultOnError(fileProvider.readdir(dir), [])));
     });
   }
@@ -38,7 +38,7 @@ export async function provideDotenvEnvironments(context: VariableProviderContext
 
 async function readEnvDir(dir: string | undefined, rootDir: PathLike | undefined): Promise<Array<string>> {
   const files = [];
-  if (dir && utils.isString(dir)) {
+  if (dir) {
     const absoluteDir = await utils.toAbsoluteFilename(dir, rootDir);
     if (absoluteDir) {
       files.push(...(await utils.useDefaultOnError(fileProvider.readdir(absoluteDir), [])));

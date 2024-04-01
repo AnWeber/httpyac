@@ -67,11 +67,9 @@ export function parseRequestLineFactory(requestContext: RequestParserContext) {
         context
       );
 
-      if (headersResult) {
-        result.nextParserLine = headersResult.nextLine || result.nextParserLine;
-        for (const parseResult of headersResult.parseResults) {
-          result.symbols?.push?.(...parseResult.symbols);
-        }
+      result.nextParserLine = headersResult.nextLine || result.nextParserLine;
+      for (const parseResult of headersResult.parseResults) {
+        result.symbols?.push?.(...parseResult.symbols);
       }
       requestContext.modifyRequest?.(requestLine.request);
       if (requestLine.request.headers) {
@@ -152,7 +150,7 @@ function isValidRequestLine(
   if (requestContext.methodRegex.exec(httpLine.textLine)?.groups?.url) {
     return true;
   }
-  if (!context?.httpRegion.request && requestContext.protocolRegex) {
+  if (!context.httpRegion.request && requestContext.protocolRegex) {
     return !!requestContext.protocolRegex.exec(httpLine.textLine)?.groups?.url;
   }
   return false;

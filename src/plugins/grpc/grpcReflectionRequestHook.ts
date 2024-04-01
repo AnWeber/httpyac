@@ -14,7 +14,7 @@ export async function grpcReflectionRequestHook(request: models.Request, context
       try {
         const protoDefinitions = await loadGrpcProtoDefinitionsWithReflection(host, request);
 
-        if (!Object.keys(protoDefinitions)) {
+        if (Object.keys(protoDefinitions).length === 0) {
           return;
         }
         if (context.options.protoDefinitions) {

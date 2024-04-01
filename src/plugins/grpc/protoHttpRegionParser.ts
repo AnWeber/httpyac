@@ -18,7 +18,7 @@ export async function parseProtoImport(
     const matchProto = ProtoImport.exec(next.value.textLine);
 
     if (matchProto?.groups?.fileName) {
-      const filename = matchProto?.groups?.fileName;
+      const filename = matchProto.groups.fileName;
       const protoDefinition = new models.ProtoDefinition(filename.trim());
       protoDefinition.loaderOptions = {};
 

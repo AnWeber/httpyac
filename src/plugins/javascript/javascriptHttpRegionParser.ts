@@ -33,7 +33,7 @@ export async function parseJavascript(
             script: utils.toMultiLineString(script),
             lineOffset,
           };
-          const isOnEveryRequest = match.groups?.modifier === '+';
+          const isOnEveryRequest = match.groups.modifier === '+';
 
           switch (match.groups.event) {
             case 'request':
@@ -179,8 +179,6 @@ async function executeScriptData(
     lineOffset: scriptData.lineOffset,
     deleteVariable: (key: string) => utils.deleteVariableInContext(key, context),
   });
-  if (result) {
-    utils.setVariableInContext(result, context);
-  }
+  utils.setVariableInContext(result, context);
   return !result.$cancel;
 }

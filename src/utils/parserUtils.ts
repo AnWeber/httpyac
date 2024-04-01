@@ -111,7 +111,7 @@ export function parseDefaultHeadersFactory(
   setHeaders: (headers: Record<string, unknown>, context: models.ProcessorContext) => void = (headers, context) => {
     if (context.request) {
       if (context.request.headers) {
-        Object.assign(context.request?.headers, headers);
+        Object.assign(context.request.headers, headers);
       } else {
         context.request.headers = headers;
       }
@@ -524,14 +524,12 @@ export async function parseInlineResponse(
 
       const headersResult = await parseSubsequentLines(lineReader, [parseRequestHeaderFactory(headers)], context);
 
-      if (headersResult) {
-        result.nextParserLine = headersResult.nextLine || result.nextParserLine;
-        for (const parseResult of headersResult.parseResults) {
-          for (const child of parseResult.symbols) {
-            responseSymbol.children?.push(child);
-            responseSymbol.endLine = child.endLine;
-            responseSymbol.endOffset = child.endOffset;
-          }
+      result.nextParserLine = headersResult.nextLine || result.nextParserLine;
+      for (const parseResult of headersResult.parseResults) {
+        for (const child of parseResult.symbols) {
+          responseSymbol.children?.push(child);
+          responseSymbol.endLine = child.endLine;
+          responseSymbol.endOffset = child.endOffset;
         }
       }
       return result;

@@ -50,7 +50,7 @@ export abstract class CodeBlockInterceptor
   }
 
   private getHttpBlockLines(lines: Array<string>, data: models.ParserContextData) {
-    if (data?.codeBlocks) {
+    if (data.codeBlocks) {
       return data.codeBlocks;
     }
     const result: Array<{

@@ -40,11 +40,11 @@ export function executeRequestClientFactory<T extends models.RequestClient>(
 
         report(context, requestClient.reportMessage);
 
-        const newClient = await requestClient.connect(connectionSession?.connection);
+        const newClient = await requestClient.connect(connectionSession.connection);
         log.debug(`requestClient ${request.url} connect`);
 
         connectionSession.connectionCount++;
-        if (newClient !== connectionSession?.connection) {
+        if (newClient !== connectionSession.connection) {
           connectionSession.connection = newClient;
         }
 
