@@ -31,7 +31,10 @@ export class ProcessedHttpRegionInterceptor implements HookInterceptor<[models.P
   ): Promise<boolean | undefined> {
     const [context] = hookContext.args;
 
-    const processedHttpRegion = context.processedHttpRegions?.find(obj => obj.id === context.httpRegion.id);
+    const processedHttpRegion = context.processedHttpRegions
+      ?.slice()
+      .reverse()
+      ?.find(obj => obj.id === context.httpRegion.id);
     if (processedHttpRegion) {
       processedHttpRegion.end = performance.now();
       processedHttpRegion.duration = processedHttpRegion.end - processedHttpRegion.start;
