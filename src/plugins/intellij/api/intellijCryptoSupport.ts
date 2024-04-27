@@ -1,7 +1,7 @@
 import { createHash, createHmac, Hash, Hmac } from 'crypto';
 
 import * as utils from '../../../utils';
-import { CryptoSupport, Digest, DigestBuilder, HmacInitializer, HmacSupport } from './http-client';
+import { CryptoSupport, Digest, DigestBuilder, HmacInitializer, HmacSupport } from './stubs';
 
 export class IntellijCryptoSupport implements CryptoSupport {
   constructor() {
@@ -12,6 +12,9 @@ export class IntellijCryptoSupport implements CryptoSupport {
   }
   sha256(): DigestBuilder {
     return new IntellijDigestBuilder(createHash('sha256'));
+  }
+  sha384(): DigestBuilder {
+    return new IntellijDigestBuilder(createHash('sha384'));
   }
   sha512(): DigestBuilder {
     return new IntellijDigestBuilder(createHash('sha512'));
@@ -76,6 +79,9 @@ export class IntellijHmacSupport implements HmacSupport {
   }
   sha256(): HmacInitializer {
     return new IntellijHmacInitializer('sha256');
+  }
+  sha384(): HmacInitializer {
+    return new IntellijHmacInitializer('sha384');
   }
   sha512(): HmacInitializer {
     return new IntellijHmacInitializer('sha512');

@@ -109,13 +109,17 @@ export class IntellijAction {
   }
 }
 
-function initIntellijVariables(context: models.ProcessorContext) {
-  const variables: Record<string, unknown> = {
+function initIntellijVariables(context: models.ProcessorContext): intellij.IntellijJavascriptGlobal {
+  const variables: intellij.IntellijJavascriptGlobal = {
     client: new intellij.IntellijHttpClient(context),
     crypto: new intellij.IntellijCryptoSupport(),
   };
   if (context.request) {
-    variables.request = new intellij.IntellijHttpClientRequest(context);
+    if (context.httpRegion.response) {
+      variables.request = new intellij.IntellijHttpClientRequest(context);
+    } else {
+      variables.request = new intellij.IntellijPreRequestHttpClientRequest(context);
+    }
   }
   return variables;
 }

@@ -5,7 +5,7 @@ import { provideIntellijGlobalVariables } from './intellijGlobalVariableProvider
 import { parseIntellijScript } from './intellijHttpRegionParser';
 import { replaceIntellijProjectContext } from './intellijProjectContextReplacer';
 import { provideIntellijEnvironments, provideIntellijVariables } from './intellijVariableProvider';
-import { replaceDynamicIntellijVariables } from './intellijVariableReplacer';
+import { replaceDynamicIntellijVariables } from './replacer';
 
 export function registerIntellijPlugin(api: models.HttpyacHooksApi) {
   api.hooks.parse.addHook('intellijScript', parseIntellijScript, { before: ['request'] });

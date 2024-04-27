@@ -2,7 +2,7 @@ import { ok } from 'assert';
 
 import * as models from '../../../models';
 import { testFactory } from '../../../utils';
-import { HttpClient, Variables } from './http-client';
+import { HttpClient, Variables } from './stubs';
 import { IntellijVariables } from './intellijVariables';
 
 export class IntellijHttpClient implements HttpClient {
@@ -22,6 +22,6 @@ export class IntellijHttpClient implements HttpClient {
     }
   }
   exit(): void {
-    this.context.scriptConsole?.warn('exit not supportd');
+    this.context.scriptConsole?.warn('exit not supported');
   }
 }

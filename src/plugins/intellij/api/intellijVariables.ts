@@ -1,7 +1,7 @@
 import * as models from '../../../models';
 import { userSessionStore } from '../../../store';
 import * as utils from '../../../utils';
-import { Variables } from './http-client';
+import { Variables } from './stubs';
 
 type IntellijGlobalCacheSession = models.UserSession;
 
@@ -41,8 +41,8 @@ export class IntellijVariables implements Variables {
       this.context
     );
   }
-  get(varName: string): unknown {
-    return this.context.variables[varName];
+  get(varName: string): string {
+    return this.context.variables[varName] as string;
   }
   isEmpty(): boolean {
     return Object.entries(this.userSession.details).length === 0;

@@ -1,12 +1,8 @@
 import { v4 } from 'uuid';
 
-import * as utils from '../../utils';
+import * as utils from '../../../utils';
 
-export async function replaceDynamicIntellijVariables(text: unknown): Promise<unknown> {
-  return utils.parseHandlebarsString(text, async (variable: string) => replaceIntellijVariable(variable));
-}
-
-export function replaceIntellijVariable(variable: string): string | undefined {
+export function replaceIntellijVariableRandom(variable: string): string | undefined {
   const trimmedVariable = variable.trim();
   if (['$uuid', '$random.uuid'].indexOf(trimmedVariable) >= 0) {
     return v4();
@@ -20,13 +16,8 @@ export function replaceIntellijVariable(variable: string): string | undefined {
   if (trimmedVariable === '$randomInt') {
     return `${Math.floor(Math.random() * 1000)}`;
   }
-  if (trimmedVariable.startsWith('$random.integer')) {
-    const float = randomFloat(trimmedVariable);
-    if (float) {
-      return `${Math.floor(float)}`;
-    }
-  }
-  if (trimmedVariable.startsWith('$random.float')) {
+
+  if (trimmedVariable.startsWith('$random.float') || trimmedVariable.startsWith('$random.integer')) {
     const float = randomFloat(trimmedVariable);
     if (float) {
       return `${float}`;

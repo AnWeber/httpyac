@@ -1,19 +1,45 @@
 import * as models from '../../../models';
 import * as utils from '../../../utils';
-import { replaceIntellijVariable } from '../intellijVariableReplacer';
 import {
   HttpClientRequest,
+  PreRequestHttpClientRequest,
   RequestBody,
   RequestEnvironment,
   RequestHeader,
   RequestHeaders,
   RequestUrl,
   Variables,
-} from './http-client';
+} from './stubs';
 import { IntellijVariables } from './intellijVariables';
+import { replaceIntellijVariableRandom } from '../replacer';
 
 export class IntellijHttpClientRequest implements HttpClientRequest {
+  private _url: string;
+  method: string;
+  private _body: string | undefined;
+  headers: RequestHeaders;
+  environment: RequestEnvironment;
+  variables: Variables;
+
+  public url() {
+    return this._url;
+  }
+  public body(): string {
+    return this._body || '';
+  }
+  constructor(context: models.ProcessorContext) {
+    this._url = context.request?.url || '';
+    this.method = context.request?.method || '';
+    this._body = context.request?.body && utils.toString(context.request?.body);
+    this.headers = new IntellijRequestHeaders(context);
+    this.environment = new IntellijRequestEnvironment(context.variables);
+    this.variables = new IntellijVariables(context);
+  }
+}
+
+export class IntellijPreRequestHttpClientRequest implements PreRequestHttpClientRequest {
   url: RequestUrl;
+  method: string;
   body: IntellijRequestBody;
   headers: RequestHeaders;
   environment: RequestEnvironment;
@@ -21,6 +47,7 @@ export class IntellijHttpClientRequest implements HttpClientRequest {
 
   constructor(context: models.ProcessorContext) {
     this.url = new IntellijRequestUrl(context);
+    this.method = context.request?.method || '';
     this.body = new IntellijRequestBody(context);
     this.headers = new IntellijRequestHeaders(context);
     this.environment = new IntellijRequestEnvironment(context.variables);
@@ -108,7 +135,7 @@ function tryGetSubstituted(value: string, variables: models.Variables) {
   let result = value;
 
   const replacers: Array<(variable: string) => string | undefined> = [
-    replaceIntellijVariable,
+    replaceIntellijVariableRandom,
     variable => {
       const obj = variables[variable];
       if (!utils.isUndefined(obj)) {

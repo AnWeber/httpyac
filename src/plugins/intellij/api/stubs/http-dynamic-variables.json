@@ -1,0 +1,136 @@
+{
+  "__about__": [
+    "This file provides stubs for dynamic variables used in HTTP Client",
+    "This file serves a documentation purpose and should not be modified manually",
+    "Values of this variables are generated at the runtime"
+  ],
+  "dynamicVariables": {
+    "uuid": {
+      "description": "This dynamic variable generates a new UUID-v4",
+      "sample-value": "e9e87c05-82eb-4522-bc47-f0fcfdde4cab"
+    },
+    "timestamp": {
+      "description": "This dynamic variable generates the current Unix timestamp",
+      "sample-value": "1563362218"
+    },
+    "isoTimestamp": {
+      "description": "This dynamic variable generates the current timestamp in ISO 8601 format for UTC timezone",
+      "sample-value": "2022-08-23T14:35:32.495636Z"
+    },
+    "randomInt": {
+      "description": "This dynamic variable generates a random integer between 0 and 1000",
+      "sample-value": "123"
+    },
+    "placeholder": {
+      "description": "This dynamic variable marks some segment, that should be replaced by user. Usually tooling adds this variable, when some URL path cannot be recognized.",
+      "sample-value": "undefined"
+    },
+    "exampleServer": {
+      "description": "This dynamic variable provides address for a local example server for playing with HTTP Client request",
+      "sample-value": "some-host:12345/some-url-path"
+    },
+    "random": {
+      "integer": {
+        "description": "This dynamic variable generates random integer",
+        "sample-value": "123",
+        "overloading": [
+          {
+            "parameters": {
+              "from": {
+                "type": "INTEGER",
+                "description": "Lower bound for a random integer (inclusive)"
+              },
+              "to": {
+                "type": "INTEGER",
+                "description": "Upper bound for a random integer (exclusive)"
+              }
+            },
+            "description": "This version generates integer between `from` and `to`"
+          },
+          {
+            "parameters": {
+              "to": {
+                "type": "INTEGER",
+                "description": "Upper bound for a random integer (exclusive)"
+              }
+            },
+            "description": "This version generates integer between 0 and `to`"
+          },
+          {
+            "description": "This version generates integer between 0 and 1000 (inclusive)"
+          }
+        ]
+      },
+      "float": {
+        "description": "This dynamic variable generates random float",
+        "sample-value": "123.12",
+        "overloading": [
+          {
+            "parameters": {
+              "from": {
+                "type": "FLOAT",
+                "description": "Lower bound for a random float (inclusive)"
+              },
+              "to": {
+                "type": "FLOAT",
+                "description": "Upper bound for a random float (exclusive)"
+              }
+            },
+            "description": "This version generates float between `from` and `to`"
+          },
+          {
+            "parameters": {
+              "to": {
+                "type": "FLOAT",
+                "description": "Upper bound for a random float (exclusive)"
+              }
+            },
+            "description": "This version generates float between 0 and `to`"
+          },
+          {
+            "description": "This version generates float between 0 and 1000 (inclusive)"
+          }
+        ]
+      },
+      "alphanumeric": {
+        "description": "This dynamic variable generates random sequence of letters, digits and `_` of length `length`",
+        "sample-value": "wEd1Ib5Jzi",
+        "parameters": {
+          "length": {
+            "type": "INTEGER",
+            "description": "Length of the generated string. Should be greater than 0"
+          }
+        }
+      },
+      "alphabetic": {
+        "description": "This dynamic variable generates random sequence of uppercase and lowercase letters of length `length`",
+        "sample-value": "aBsseEasgZ",
+        "parameters": {
+          "length": {
+            "type": "INTEGER",
+            "description": "Length of the generated string. Should be greater than 0"
+          }
+        }
+      },
+      "hexadecimal": {
+        "description": "This dynamic variable generates random hexadecimal string of length `length`",
+        "sample-value": "A012BCF",
+        "parameters": {
+          "length": {
+            "type": "INTEGER",
+            "description": "Length of generated hexadecimal string. Should be greater than 0"
+          }
+        }
+      },
+      "email": {
+        "description": "This dynamic variable generates random email address",
+        "sample-value": "asdaf@afad.com"
+      },
+      "uuid": {
+        "description": "This dynamic variable generates a new UUID-v4",
+        "sample-value": "e9e87c05-82eb-4522-bc47-f0fcfdde4cab"
+      },
+      "__section__": true
+    }
+  }
+}

@@ -1,6 +1,6 @@
 import * as models from '../../../models';
 import * as utils from '../../../utils';
-import { ContentType, HttpResponse, ResponseHeaders, TextStreamResponse } from './http-client';
+import { ContentType, HttpResponse, ResponseHeaders, TextStreamResponse } from './stubs';
 
 export class IntellijHttpResponse implements HttpResponse {
   body: string | TextStreamResponse | unknown;
