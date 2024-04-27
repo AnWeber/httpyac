@@ -14,7 +14,7 @@ export interface PreRequestHttpClientRequest extends CommonHttpClientRequest {
   url: RequestUrl;
 }
 
-export interface RequestVariables {
+export interface PreRequestRequestVariables {
   /**
    * Saves variable with name 'varName' and sets its value to 'varValue'.
    */

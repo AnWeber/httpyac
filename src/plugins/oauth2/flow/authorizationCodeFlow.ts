@@ -40,7 +40,7 @@ class AuthorizationCodeFlow implements OpenIdFlow {
             state,
             audience: config.audience,
             resource: config.resource,
-            redirect_uri: config.redirectUri.toString(),
+            redirect_uri: config.redirectUri?.toString(),
             ...(code_verifier
               ? { code_challenge: this.createSha256(code_verifier), code_challenge_method: 'S256' }
               : {}),
@@ -56,8 +56,8 @@ class AuthorizationCodeFlow implements OpenIdFlow {
 
           registerListener({
             id: state,
-            port: config.serverPort || Number(config.redirectUri.port),
-            path: config.redirectUri.pathname,
+            port: config.serverPort || Number(config.redirectUri?.port),
+            path: config.redirectUri?.pathname || '',
             name: `authorization for ${config.clientId}: ${config.authorizationEndpoint}`,
             resolve: params => {
               if (params.code && params.state === state) {
@@ -72,7 +72,7 @@ class AuthorizationCodeFlow implements OpenIdFlow {
                       grant_type: 'authorization_code',
                       scope: config.scope ?? 'opendid',
                       code: params.code,
-                      redirect_uri: config.redirectUri.toString(),
+                      redirect_uri: config.redirectUri?.toString(),
                       ...(code_verifier ? { code_verifier } : {}),
                     }),
                   },

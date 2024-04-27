@@ -91,6 +91,8 @@ export function toOpenIdInformation(
       refreshToken: jwtToken.refresh_token,
       refreshExpiresIn: jwtToken.refresh_expires_in,
       timeSkew: parsedToken?.iat ? Math.floor(time / 1000) - parsedToken.iat : 0,
+      idToken: jwtToken.id_token,
+      scope: jwtToken.scope,
     };
   }
   return false;
@@ -102,8 +104,10 @@ export function isAuthToken(obj: unknown): obj is AuthToken {
 }
 
 interface AuthToken {
+  id_token?: string;
   access_token: string;
   expires_in?: number;
   refresh_token?: string;
   refresh_expires_in?: number;
+  scope?: string;
 }

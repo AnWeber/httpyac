@@ -31,11 +31,13 @@ export interface OpenIdConfiguration {
 export interface OpenIdInformation extends UserSession {
   time: number;
   config: OpenIdConfiguration;
+  idToken?: string;
   accessToken: string;
   expiresIn?: number;
   timeSkew: number;
   refreshToken?: string;
   refreshExpiresIn?: number;
+  scope?: string;
 }
 
 export interface OpenIdContext {

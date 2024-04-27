@@ -18,25 +18,28 @@ export async function replaceIntellijVariableAuth(
 async function getOAuthToken(variable: string, context: ProcessorContext) {
   const match = /^\$auth.(?<type>token|idToken)\s*\(\s*"?(?<name>[^"]*)"?\s*\)$/u.exec(variable);
   if (match && match.groups?.type && match.groups?.name) {
-    const authConfig = createOAuth2DynamicVariable(match.groups.name, context.variables);
-
+    const authConfig = getOpenIdConfiguration(match.groups.name, context.variables);
     if (!authConfig?.flow) {
       return undefined;
     }
     setVariableInContext(
       {
-        __intellij_oauth2__: authConfig.config,
+        intellij_oauth2: authConfig.config,
       },
       context
     );
 
-    const openIdInformation = await getOAuth2Response(authConfig.flow, '__intellij_oauth2__', context);
+    const openIdInformation = await getOAuth2Response(authConfig.flow, 'intellij_oauth2', context);
+
+    if (authConfig.useIdToken || match.groups.type === 'idToken') {
+      return openIdInformation?.idToken;
+    }
     return openIdInformation?.accessToken;
   }
   return undefined;
 }
 
-function createOAuth2DynamicVariable(name: string, variables: Variables) {
+function getOpenIdConfiguration(name: string, variables: Variables) {
   if (!isIntellijAuth(variables.Security)) {
     return undefined;
   }
@@ -66,6 +69,7 @@ function createOAuth2DynamicVariable(name: string, variables: Variables) {
 
   return {
     flow: mapGrantType(auth['Grant Type']),
+    useIdToken: auth['Use ID Token'],
     config,
   };
 }

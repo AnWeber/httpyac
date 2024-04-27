@@ -41,7 +41,7 @@ class ImplicitFlow implements OpenIdFlow {
             response_mode: config.responseMode,
             audience: config.audience,
             resource: config.resource,
-            redirect_uri: config.redirectUri.toString(),
+            redirect_uri: config.redirectUri?.toString(),
           })}`;
 
           let unregisterProgress: (() => void) | undefined;
@@ -54,8 +54,8 @@ class ImplicitFlow implements OpenIdFlow {
 
           registerListener({
             id: state,
-            port: config.serverPort || Number(config.redirectUri.port),
-            path: config.redirectUri.pathname,
+            port: config.serverPort || Number(config.redirectUri?.port),
+            path: config.redirectUri?.pathname || '',
             name: `authorization for ${config.clientId}: ${config.authorizationEndpoint}`,
             resolve: params => {
               if (params.state === state) {
@@ -68,7 +68,7 @@ class ImplicitFlow implements OpenIdFlow {
                         grant_type: 'authorization_code',
                         scope: config.scope,
                         code: params.code,
-                        redirect_uri: config.redirectUri.toString(),
+                        redirect_uri: config.redirectUri?.toString(),
                       }),
                     },
                     {
