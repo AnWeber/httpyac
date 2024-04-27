@@ -47,6 +47,14 @@ export function getOpenIdConfiguration(
     return utils.ensureString(expandedValue);
   };
 
+  const getArrayOrString = (name: string): string | Array<string> | null | undefined => {
+    const expandedValue = getVariableUnknown(variables, variablePrefix, name);
+    if (Array.isArray(expandedValue)) {
+      return expandedValue.map(v => utils.ensureString(v)) as Array<string>;
+    }
+    return utils.ensureString(expandedValue);
+  };
+
   const getUrl = (name: string, defaultUrl: string) => {
     const url = utils.ensureString(getVariableUnknown(variables, variablePrefix, name));
     try {
@@ -82,9 +90,9 @@ export function getOpenIdConfiguration(
     clientSecret: getString('clientSecret'),
     responseType: getString('responseType'),
     responseMode: getString('responseMode'),
-    audience: getString('audience'),
+    audience: getArrayOrString('audience'),
     scope: getString('scope'),
-    resource: getString('resource'),
+    resource: getArrayOrString('resource'),
     username: getString('username'),
     password: getString('password'),
     subjectIssuer: getString('subjectIssuer') || undefined,

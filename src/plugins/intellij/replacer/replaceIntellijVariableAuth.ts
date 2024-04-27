@@ -58,8 +58,8 @@ function getOpenIdConfiguration(name: string, variables: Variables) {
     tokenEndpoint: auth['Token URL'],
     clientId: auth['Client ID'],
     clientSecret: auth['Client Secret'],
-    responseType: auth['Custom Request Parameters']?.resource,
-    audience: auth['Custom Request Parameters']?.audience,
+    resource: transformCustomRequestParamterToString(auth['Custom Request Parameters']?.resource),
+    audience: transformCustomRequestParamterToString(auth['Custom Request Parameters']?.audience),
     scope: auth.Scope,
     username: auth.Username,
     password: auth.Password,
@@ -72,6 +72,21 @@ function getOpenIdConfiguration(name: string, variables: Variables) {
     useIdToken: auth['Use ID Token'],
     config,
   };
+}
+
+function transformCustomRequestParamterToString(
+  val: undefined | string | Array<string> | CustomRequestParameter | Array<CustomRequestParameter>
+): string | Array<string> | undefined {
+  if (!val) {
+    return val;
+  }
+  if (typeof val === 'string') {
+    return val;
+  }
+  if (Array.isArray(val)) {
+    return val.map(v => (typeof v === 'string' ? v : v.Value));
+  }
+  return val.Value;
 }
 
 function mapGrantType(
@@ -116,14 +131,18 @@ interface IntellijSecurity {
       'Start Polling After Browser'?: boolean;
       'Use ID Token'?: boolean;
       'Custom Request Parameters': {
-        resource: string;
-        audience: string;
+        resource: string | Array<string> | CustomRequestParameter | Array<CustomRequestParameter>;
+        audience: string | Array<string>;
       };
       Token?: 'string';
       'ID Token'?: string;
     }
   >;
 }
+type CustomRequestParameter = {
+  Value: string;
+  Use: 'In Auth Request' | 'In Token Request' | 'Everywhere';
+};
 
 function isIntellijAuth(obj: unknown): obj is IntellijSecurity {
   const sec = obj as IntellijSecurity;

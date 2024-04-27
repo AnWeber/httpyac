@@ -13,8 +13,8 @@ export interface OpenIdConfiguration {
   clientSecret?: string | null;
   responseType?: string | null;
   responseMode?: string | null;
-  audience?: string | null;
-  resource?: string | null;
+  audience?: string | Array<string> | null;
+  resource?: string | Array<string> | null;
   scope?: string | null;
   keepAlive?: boolean;
   username?: string | null;
