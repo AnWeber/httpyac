@@ -16,14 +16,14 @@ export interface OpenIdConfiguration {
   audience?: string | null;
   resource?: string | null;
   scope?: string | null;
-  keepAlive: boolean;
+  keepAlive?: boolean;
   username?: string | null;
   password?: string | null;
   subjectIssuer?: string | null;
-  useAuthorizationHeader: boolean;
+  useAuthorizationHeader?: boolean;
   useDeviceCodeClientSecret?: boolean;
-  usePkce: boolean;
-  redirectUri: URL;
+  usePkce?: boolean;
+  redirectUri?: URL;
   serverPort?: number;
   interceptRequest?: (request: HttpRequest, context: ProcessorContext) => Promise<void>;
 }
