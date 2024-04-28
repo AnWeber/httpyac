@@ -1,8 +1,11 @@
 
-## [unreleased]
+## [6.13.0]
 ### Features
 - update to new API Changes of Intellij Http Client
 - add support for OAuth2 Intellij API (AnWeber/vscode-httpyac#275)
+
+### Fix
+- JUnit Test Output conforms to Junit 5 XSD (#673)
 
 ## [6.12.2]
 ### Fix

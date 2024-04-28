@@ -1,19 +1,16 @@
 import { DOMImplementation } from '@xmldom/xmldom';
 import { EOL } from 'os';
-import { basename, dirname } from 'path';
 import { formatXml } from 'xmldom-format';
 import { TestResult } from '../../models';
 import * as utils from '../../utils';
-import { SendJsonOutput, SendOutputRequest, createTestSummary } from './jsonOutput';
+import { SendJsonOutput, SendOutputRequest } from './jsonOutput';
 
 /**
  * output in junit format
  * @param output json object with all test results
- * @returns xml in junit format (https://llg.cubic.org/docs/junit/)
+ * @returns xml in junit format (https://github.com/junit-team/junit5/blob/main/platform-tests/src/test/resources/jenkins-junit.xsd)
  */
 export function transformToJunit(output: SendJsonOutput): string {
-  const groupedRequests = groupByFilename(output.requests);
-
   const dom = new DOMImplementation();
   const document = dom.createDocument('', '');
 
@@ -28,8 +25,8 @@ export function transformToJunit(output: SendJsonOutput): string {
   root.setAttribute('failures', `${output.summary.failedTests}`);
   root.setAttribute('time', `${toFloatSeconds(output.requests.reduce(sumDuration, 0))}`);
 
-  for (const [filename, requests] of Object.entries(groupedRequests)) {
-    root.appendChild(transformHttpFile(document, filename, requests));
+  for (const request of output.requests) {
+    root.appendChild(transformRequest(document, request));
   }
 
   return formatXml(document, {
@@ -39,39 +36,17 @@ export function transformToJunit(output: SendJsonOutput): string {
 }
 
 // eslint-disable-next-line no-undef
-function transformHttpFile(document: XMLDocument, file: string, requests: Array<SendOutputRequest>) {
-  const summary = createTestSummary(requests);
-
-  const root = document.createElement('testsuite');
-  setAttribute(root, 'name', basename(file));
-  setAttribute(root, 'tests', summary.totalTests);
-  setAttribute(root, 'failures', summary.failedTests);
-  setAttribute(root, 'skipped', summary.disabledRequests);
-  setAttribute(root, 'package', dirname(file).replace(process.cwd(), ''));
-  setAttribute(root, 'time', toFloatSeconds(requests.reduce(sumDuration, 0)));
-  let filePathRelativeToCwd = file.replace(process.cwd(), '');
-  filePathRelativeToCwd = filePathRelativeToCwd.startsWith('/')
-    ? filePathRelativeToCwd.slice(1)
-    : filePathRelativeToCwd;
-  setAttribute(root, 'file', filePathRelativeToCwd);
-
-  for (const request of requests) {
-    root.appendChild(transformRequest(document, request));
-  }
-  return root;
-}
-
-// eslint-disable-next-line no-undef
 function transformRequest(document: XMLDocument, request: SendOutputRequest) {
   const testSuiteNode = document.createElement('testsuite');
   setAttribute(testSuiteNode, 'name', request.name);
   setAttribute(testSuiteNode, 'tests', request.disabled ? 1 : request.summary?.totalTests || 0);
+  setAttribute(testSuiteNode, 'errors', 0);
   setAttribute(testSuiteNode, 'failures', request.summary?.failedTests || 0);
   setAttribute(testSuiteNode, 'skipped', request.disabled ? 1 : 0);
+
   let fileRelativeToCwd = request.fileName.replace(process.cwd(), '');
   fileRelativeToCwd = fileRelativeToCwd.startsWith('/') ? fileRelativeToCwd.slice(1) : fileRelativeToCwd;
-  setAttribute(testSuiteNode, 'file', fileRelativeToCwd);
-  setAttribute(testSuiteNode, 'package', basename(request.fileName));
+  setAttribute(testSuiteNode, 'package', fileRelativeToCwd);
   const requestDurationMillis = request.duration || 0;
   setAttribute(testSuiteNode, 'time', toFloatSeconds(requestDurationMillis));
 
@@ -80,6 +55,7 @@ function transformRequest(document: XMLDocument, request: SendOutputRequest) {
     description: request.description,
     line: request.line,
     timestamp: request.timestamp,
+    file: fileRelativeToCwd,
   });
   if (propertiesNode) {
     testSuiteNode.appendChild(propertiesNode);
@@ -92,7 +68,6 @@ function transformRequest(document: XMLDocument, request: SendOutputRequest) {
       const child = transformTestResultToTestcase(document, testResult, {
         classname: request.name,
         time: toFloatSeconds(testCaseDurationMillis),
-        file: fileRelativeToCwd,
       });
       testSuiteNode.appendChild(child);
     }
@@ -101,7 +76,6 @@ function transformRequest(document: XMLDocument, request: SendOutputRequest) {
     testcaseNode.setAttribute('name', 'skipped all tests');
     testcaseNode.setAttribute('classname', request.name);
     testcaseNode.setAttribute('time', '0.000');
-    testcaseNode.setAttribute('file', fileRelativeToCwd);
     testSuiteNode.appendChild(testcaseNode);
     testcaseNode.appendChild(document.createElement('skipped'));
   }
@@ -142,17 +116,6 @@ function transformTestResultToTestcase(
   }
 
   return root;
-}
-
-function groupByFilename(requests: Array<SendOutputRequest>): Record<string, Array<SendOutputRequest>> {
-  const result: Record<string, Array<SendOutputRequest>> = {};
-  for (const request of requests) {
-    if (!result[request.fileName]) {
-      result[request.fileName] = [];
-    }
-    result[request.fileName].push(request);
-  }
-  return result;
 }
 
 // eslint-disable-next-line no-undef
