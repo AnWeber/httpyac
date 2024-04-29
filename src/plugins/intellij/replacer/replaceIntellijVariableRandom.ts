@@ -16,8 +16,13 @@ export function replaceIntellijVariableRandom(variable: string): string | undefi
   if (trimmedVariable === '$randomInt') {
     return `${Math.floor(Math.random() * 1000)}`;
   }
-
-  if (trimmedVariable.startsWith('$random.float') || trimmedVariable.startsWith('$random.integer')) {
+  if (trimmedVariable.startsWith('$random.integer')) {
+    const float = randomFloat(trimmedVariable);
+    if (float) {
+      return `${Math.floor(float)}`;
+    }
+  }
+  if (trimmedVariable.startsWith('$random.float')) {
     const float = randomFloat(trimmedVariable);
     if (float) {
       return `${float}`;

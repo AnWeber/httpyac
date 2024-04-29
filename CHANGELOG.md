@@ -1,4 +1,9 @@
 
+## [6.13.1] ( 2024-04-29)
+
+### Fix
+- `$random.integer() returns valid integer (Anweber/vscode-httpyac#277)
+
 ## [6.13.0]
 ### Features
 - update to new API Changes of Intellij Http Client
