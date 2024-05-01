@@ -17,10 +17,10 @@ export async function requestVariableReplacer(
       request.url = result;
     }
   }
-  if ((await replaceVariablesInHeader(request, context)) === false) {
+  if ((await replaceVariablesInBody(request, context)) === false) {
     return HookCancel;
   }
-  if ((await replaceVariablesInBody(request, context)) === false) {
+  if ((await replaceVariablesInHeader(request, context)) === false) {
     return HookCancel;
   }
   return undefined;
