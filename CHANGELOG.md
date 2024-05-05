@@ -1,3 +1,7 @@
+## [unrelaased]
+### Fix
+- Aws Signing use query params in signing request (#684)
+
 ## [6.13.2] ( 2024-05-01)
 ### Fix
 - ensureUniqueId on merge (Anweber/vscode-httpyac#280)

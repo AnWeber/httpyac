@@ -28,7 +28,7 @@ export async function awsAuthVariableReplacer(
         method: request.method,
         headers: request.headers,
         host: url.host,
-        path: url.pathname,
+        path: `${url.pathname}${url.search}`,
         region: match.groups.region,
         service: match.groups.service,
         body: Buffer.isBuffer(request.body) || utils.isString(request.body) ? request.body : undefined,
