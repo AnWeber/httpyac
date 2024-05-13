@@ -25,7 +25,7 @@ export function toNumber(value: unknown): number | undefined {
   }
   const stringValue = ensureString(value);
   if (stringValue) {
-    const numberValue = Number.parseInt(stringValue.trim(), 10);
+    const numberValue = Number.parseFloat(stringValue.trim());
     if (!Number.isNaN(numberValue)) {
       return numberValue;
     }

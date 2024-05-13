@@ -1,6 +1,7 @@
-## [unrelaased]
+## [6.13.3]
 ### Fix
 - Aws Signing use query params in signing request (#684)
+- allow check for floats (Anweber/vscode-httpyac#283)
 
 ## [6.13.2] ( 2024-05-01)
 ### Fix
