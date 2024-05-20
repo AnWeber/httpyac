@@ -50,7 +50,7 @@
     "prepack": "npm run build",
     "prepare": "husky install",
     "start": "npm run watch",
-    "test": "jest",
+    "test": "node --experimental-vm-modules ./node_modules/.bin/jest",
     "tsc-watch": "tsc --watch --project tsconfig.build.json",
     "tsc:check": "tsc --noEmit --project tsconfig.json",
     "tsc": "tsc --declaration --emitDeclarationOnly --project tsconfig.build.json",

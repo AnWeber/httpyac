@@ -24,8 +24,9 @@ export interface SendOptions {
   repeatMode?: 'sequential' | 'parallel';
   repeat?: number;
   parallel?: number;
-  timeout?: number;
   silent?: boolean;
+  tag?: Array<string>;
+  timeout?: number;
   var?: Array<string>;
   verbose?: boolean;
 }

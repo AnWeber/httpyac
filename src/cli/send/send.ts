@@ -13,6 +13,7 @@ import { toSendJsonOutput } from './jsonOutput';
 import { getLogLevel, OutputType, SendFilterOptions, SendOptions } from './options';
 import { createCliPluginRegister } from './plugin';
 import { transformToJunit } from './junitUtils';
+import { selectHttpFiles } from './selectHttpFiles';
 
 export function sendCommand() {
   const program = new Command('send')
@@ -41,6 +42,7 @@ export function sendCommand() {
     .option('--repeat-mode <mode>', 'repeat mode: sequential, parallel (default)')
     .option('--parallel <count>', 'send parallel requests', utils.toNumber)
     .option('-s, --silent', 'log only request')
+    .option('-t, --tag  <tag...>', 'list of tags to execute')
     .option('--timeout <timeout>', 'maximum time allowed for connections', utils.toNumber)
     .option('--var  <variables...>', 'list of variables')
     .option('-v, --verbose', 'make the operation more talkative')
@@ -58,24 +60,21 @@ async function execute(fileNames: Array<string>, options: SendOptions): Promise<
       let isFirstRequest = true;
       while (options.interactive || isFirstRequest) {
         isFirstRequest = false;
-        const selection = await selectAction(httpFiles, options);
+        const selection = await selectHttpFiles(httpFiles, options);
 
         context.processedHttpRegions = [];
 
-        if (selection) {
-          await send(Object.assign({}, context, selection));
-        } else {
-          const sendFuncs = httpFiles.map(
-            httpFile =>
-              async function sendHttpFile() {
-                if (!options.junit && !options.json && context.scriptConsole && httpFiles.length > 1) {
-                  context.scriptConsole.info(`--------------------- ${httpFile.fileName}  --`);
-                }
-                await send(Object.assign({}, context, { httpFile }));
+        const sendFuncs = selection.map(
+          ({ httpFile, httpRegions }) =>
+            async function sendHttpFile() {
+              if (!options.junit && !options.json && context.scriptConsole && selection.length > 1) {
+                context.scriptConsole.info(`--------------------- ${httpFile.fileName}  --`);
               }
-          );
-          await utils.promiseQueue(options.parallel || 1, ...sendFuncs);
-        }
+              await send(Object.assign({}, context, { httpFile, httpRegions }));
+            }
+        );
+        await utils.promiseQueue(options.parallel || 1, ...sendFuncs);
+
         reportOutput(context, options);
       }
     } else {
@@ -196,66 +195,6 @@ async function queryGlobbyPattern(fileName: string) {
     return paths;
   }
   return await globby(fileName.replace(/\\/gu, '/'), globOptions);
-}
-
-type SelectActionResult = { httpRegion?: models.HttpRegion | undefined; httpFile: models.HttpFile } | false;
-
-async function selectAction(httpFiles: models.HttpFile[], cliOptions: SendOptions): Promise<SelectActionResult> {
-  if (httpFiles.length === 1) {
-    const httpFile = httpFiles[0];
-    const httpRegion = getHttpRegion(httpFile, cliOptions);
-    if (httpRegion) {
-      return {
-        httpFile,
-        httpRegion,
-      };
-    }
-  }
-
-  if (!cliOptions.all) {
-    const httpRegionMap: Record<string, { httpRegion?: models.HttpRegion | undefined; httpFile: models.HttpFile }> = {};
-    const hasManyFiles = httpFiles.length > 1;
-    for (const httpFile of httpFiles) {
-      httpRegionMap[hasManyFiles ? `${httpFile.fileName}: all` : 'all'] = { httpFile };
-
-      for (const httpRegion of httpFile.httpRegions) {
-        if (httpRegion.request) {
-          const name = httpRegion.symbol.name;
-          httpRegionMap[hasManyFiles ? `${httpFile.fileName}: ${name}` : name] = {
-            httpRegion,
-            httpFile,
-          };
-        }
-      }
-    }
-    const answer = await (
-      await import('inquirer')
-    ).default.prompt([
-      {
-        type: 'list',
-        name: 'region',
-        message: 'please choose which region to use',
-        choices: Object.entries(httpRegionMap).map(([key]) => key),
-      },
-    ]);
-    if (answer.region && httpRegionMap[answer.region]) {
-      return httpRegionMap[answer.region];
-    }
-  }
-  return false;
-}
-
-function getHttpRegion(httpFile: models.HttpFile, cliOptions: SendOptions): models.HttpRegion | false {
-  let httpRegion: models.HttpRegion | false = false;
-  if (cliOptions.name) {
-    httpRegion = httpFile.httpRegions.find(obj => obj.metaData.name === cliOptions.name) || false;
-  } else {
-    httpRegion =
-      httpFile.httpRegions.find(
-        obj => cliOptions.line && obj.symbol.startLine <= cliOptions.line && obj.symbol.endLine >= cliOptions.line
-      ) || false;
-  }
-  return httpRegion;
 }
 
 function getStreamLogger(options: SendOptions): models.StreamLogger | undefined {
