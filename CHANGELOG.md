@@ -2,6 +2,9 @@
 ### Features
 - add `--tag` support to cli to only execute httpRegion with defined tag (#693)
 
+### Fix
+- prevent readFile Error log output on package.json search (Anweber/vscode-httpyac#293)
+
 ## [6.13.3]
 ### Fix
 - Aws Signing use query params in signing request (#684)

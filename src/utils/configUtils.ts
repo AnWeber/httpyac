@@ -73,8 +73,10 @@ async function loadPackageJsonConig(filename: PathLike, rootDir: PathLike) {
 
 export async function parseJson<T>(fileName: PathLike): Promise<T | undefined> {
   try {
-    const text = await io.fileProvider.readFile(fileName, 'utf-8');
-    return JSON.parse(text);
+    if (await io.fileProvider.exists(fileName)) {
+      const text = await io.fileProvider.readFile(fileName, 'utf-8');
+      return JSON.parse(text);
+    }
   } catch (err) {
     io.log.debug(`json parse of ${fileName} failed`);
   }

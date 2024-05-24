@@ -111,7 +111,7 @@ async function getEnvVariables(searchFiles: string[], dir: PathLike) {
       const variables = parse(content);
       vars.push(variables);
     } catch (err) {
-      log.trace(`${fileProvider.toString(dir)}/${fileName} not found`);
+      log.trace(`${fileProvider.toString(envFileName)} not found`);
     }
   }
   return vars;
