@@ -62,7 +62,8 @@ function isLine(httpRegion: models.HttpRegion, line: number | undefined) {
 
 function hasTag(httpRegion: models.HttpRegion, tags: Array<string> | undefined) {
   if (tags && utils.isString(httpRegion.metaData?.tag)) {
-    return tags.includes(httpRegion.metaData.tag);
+    const metaDataTag = httpRegion.metaData.tag?.split(',').map(t => t.trim());
+    return tags.some(t => metaDataTag.includes(t));
   }
   return false;
 }
