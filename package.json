@@ -50,11 +50,11 @@
     "prepack": "npm run build",
     "prepare": "husky install",
     "start": "npm run watch",
-    "test": "node --experimental-vm-modules ./node_modules/.bin/jest",
+    "test": "node --experimental-vm-modules ./node_modules/.bin/jest  --coverage --coverageProvider=v8",
     "tsc-watch": "tsc --watch --project tsconfig.build.json",
     "tsc:check": "tsc --noEmit --project tsconfig.json",
     "tsc": "tsc --declaration --emitDeclarationOnly --project tsconfig.build.json",
-    "watch": "concurrently \"npm run esbuild -- --no-minify --watch\" \"npm run tsc -- --watch\" \"npm test -- --coverage --watch --coverageProvider=v8\""
+    "watch": "concurrently \"npm run esbuild -- --no-minify --watch\" \"npm run tsc -- --watch\" \"npm test -- --watch\""
   },
   "lint-staged": {
     "*.js": [

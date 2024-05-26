@@ -68,6 +68,7 @@ function initReplaceVariableHook(api: models.HttpyacHooksApi) {
   api.hooks.replaceVariable.addInterceptor(replacer.escapeVariableInterceptor);
 }
 function initParseMetData(api: models.HttpyacHooksApi) {
+  api.hooks.parseMetaData.addHook('disabled', metaData.disabledMetaDataHandler);
   api.hooks.parseMetaData.addHook('import', metaData.importMetaDataHandler);
   api.hooks.parseMetaData.addHook('jwt', metaData.jwtMetaDataHandler);
   api.hooks.parseMetaData.addHook('keepStreaming', metaData.keepStreamingMetaDataHandler);
@@ -82,13 +83,10 @@ function initParseMetData(api: models.HttpyacHooksApi) {
   api.hooks.parseMetaData.addHook('sleep', metaData.sleepMetaDataHandler);
   api.hooks.parseMetaData.addHook('verbose', metaData.verboseMetaDataHandler);
   api.hooks.parseMetaData.addHook('forceRegionDelimiter', metaData.forceRegionDelimiterMetaDataHandler);
-
-  api.hooks.parseMetaData.addInterceptor(new metaData.DefaultMetaDataHandler());
 }
 
 function initExecuteInterceptor(api: models.HttpyacHooksApi) {
   const processedHttpRegionInterceptor = new execute.ProcessedHttpRegionInterceptor();
-  api.hooks.execute.addInterceptor(new execute.DisabledInterceptor());
   api.hooks.execute.addInterceptor(new execute.RegionScopedVariablesInterceptor());
   api.hooks.execute.addInterceptor(processedHttpRegionInterceptor);
   api.hooks.responseLogging.addInterceptor(processedHttpRegionInterceptor.getResponseLoggingInterceptor());

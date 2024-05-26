@@ -283,6 +283,9 @@ export async function parseComments(
           })
         );
       }
+      context.httpRegion.metaData = Object.assign(context.httpRegion.metaData || {}, {
+        [key]: val || true,
+      });
       await context.httpFile.hooks.parseMetaData.trigger(key, val, context);
     }
     return result;

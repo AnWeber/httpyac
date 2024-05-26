@@ -26,35 +26,19 @@ GET /json
       })
     );
 
+    const variables: Record<string, string> = {};
     await sendHttp(
       `
-# @disabled !this.token
 {{
-exports.token = 'test'
+  exports.foo="bar"
 }}
+# @disabled foo==="bar"
 GET /json
-    `
+    `,
+      variables
     );
 
-    expect(requests.length).toBe(0);
-  });
-  it('disabled with expression', async () => {
-    initFileProvider();
-    const requests = initHttpClientProvider(() =>
-      Promise.resolve({
-        parsedBody: { foo: 'bar', test: 1 },
-      })
-    );
-
-    await sendHttp(
-      `
-{{
-httpRegion.metaData.disabled = true;
-}}
-GET h/json
-    `
-    );
-
+    expect(variables.foo).toBe('bar');
     expect(requests.length).toBe(0);
   });
 });

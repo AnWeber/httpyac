@@ -1,4 +1,4 @@
-export * from './defaultMetaDataHandler';
+export * from './disabeldMetaDataHandler';
 export * from './forceRegionDelimiterMetaDataHandler';
 export * from './importMetaDataHandler';
 export * from './jwtMetaDataHandler';

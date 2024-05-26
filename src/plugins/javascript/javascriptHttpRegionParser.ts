@@ -89,7 +89,8 @@ function addStreamingHook(
   httpFileStore: models.HttpFileStore
 ) {
   hooks.onStreaming.addHook('js', async context => {
-    await executeScriptData(scriptData, context, httpFileStore, 'streaming');
+    const result = await executeScriptData(scriptData, context, httpFileStore, 'streaming');
+    return result ? undefined : models.HookCancel;
   });
 }
 
@@ -106,7 +107,8 @@ function addRequestHook(
   httpFileStore: models.HttpFileStore
 ) {
   hooks.onRequest.addHook('js', async (_request, context) => {
-    await executeScriptData(scriptData, context, httpFileStore, 'request');
+    const result = await executeScriptData(scriptData, context, httpFileStore, 'request');
+    return result ? undefined : models.HookCancel;
   });
 }
 
@@ -117,7 +119,8 @@ function addResponseHook(
 ) {
   hooks.onResponse.addHook('js', async (response, context) => {
     context.variables.response = response;
-    await executeScriptData(scriptData, context, httpFileStore, 'response');
+    const result = await executeScriptData(scriptData, context, httpFileStore, 'response');
+    return result ? undefined : models.HookCancel;
   });
 }
 function addResponseLoggingHook(
