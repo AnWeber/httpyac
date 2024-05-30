@@ -4,7 +4,7 @@ import { fileProvider, log } from '../../io';
 import { PathLike, VariableProviderContext, Variables } from '../../models';
 import * as utils from '../../utils';
 
-const defaultFiles: Array<string> = ['.env'];
+const envFileName = '.env';
 
 export async function provideDotenvEnvironments(context: VariableProviderContext): Promise<string[]> {
   const files: Array<string> = [];
@@ -25,15 +25,18 @@ export async function provideDotenvEnvironments(context: VariableProviderContext
     });
   }
 
-  const envs = files
-    .filter(file => file.startsWith('.env') || file.endsWith('.env'))
-    .filter(fileName => defaultFiles.indexOf(fileName) < 0)
-    .map(fileName => {
-      if (fileName.startsWith('.env')) {
-        return fileName.slice(5);
-      }
-      return fileName.slice(0, fileName.length - 4);
-    });
+  const envs = [];
+  for (const file of files) {
+    let val: string | undefined;
+    if (file.startsWith(`${envFileName}.`)) {
+      val = file.slice(5);
+    } else if (file.endsWith(envFileName)) {
+      val = file.slice(0, file.length - 4);
+    }
+    if (val) {
+      envs.push(val);
+    }
+  }
   log.info('dotenv Env Provider found environments', envs);
   return envs;
 }
@@ -76,7 +79,7 @@ function getEnvdirname(context: VariableProviderContext) {
 }
 
 function getSearchFiles(env: string[] | undefined) {
-  const searchFiles = [...defaultFiles];
+  const searchFiles = [envFileName];
   if (env) {
     for (const environment of env) {
       searchFiles.push(`${environment}.env`, `.env.${environment}`);

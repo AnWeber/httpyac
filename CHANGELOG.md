@@ -6,6 +6,7 @@
 - prevent readFile Error log output on package.json search (Anweber/vscode-httpyac#293)
 - disabled MetaData Handler checks disabled State on occurence of line in execution order (AnWeber/vscode-httpyac#292)
 - support Intellij Multiline FormUrlEncoded Syntax (#699)
+- better match .env files to ignore false positive like `.envrc` (#700)
 
 ## [6.13.3]
 ### Fix
