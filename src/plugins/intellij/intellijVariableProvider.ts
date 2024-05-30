@@ -3,7 +3,10 @@ import { PathLike, VariableProviderContext, Variables } from '../../models';
 import * as utils from '../../utils';
 
 export async function provideIntellijEnvironments(context: VariableProviderContext): Promise<string[]> {
-  return Object.keys(await getAllEnvironmentVariables(context));
+  const envs = Object.keys(await getAllEnvironmentVariables(context));
+
+  log.info('Intellij Env Provider found environments', envs);
+  return envs;
 }
 
 async function getAllEnvironmentVariables(context: VariableProviderContext) {

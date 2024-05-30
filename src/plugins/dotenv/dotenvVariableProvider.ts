@@ -25,7 +25,7 @@ export async function provideDotenvEnvironments(context: VariableProviderContext
     });
   }
 
-  return files
+  const envs = files
     .filter(file => file.startsWith('.env') || file.endsWith('.env'))
     .filter(fileName => defaultFiles.indexOf(fileName) < 0)
     .map(fileName => {
@@ -34,6 +34,8 @@ export async function provideDotenvEnvironments(context: VariableProviderContext
       }
       return fileName.slice(0, fileName.length - 4);
     });
+  log.info('dotenv Env Provider found environments', envs);
+  return envs;
 }
 
 async function readEnvDir(dir: string | undefined, rootDir: PathLike | undefined): Promise<Array<string>> {

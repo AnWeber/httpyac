@@ -1,3 +1,4 @@
+import { log } from '../../../io';
 import { VariableProviderContext, Variables } from '../../../models';
 
 const DEFAULT_ENV = '$default';
@@ -5,7 +6,10 @@ const SHARED_ENV = '$shared';
 
 export async function provideConfigEnvironments(context: VariableProviderContext): Promise<string[]> {
   if (context.config?.environments) {
-    return Object.keys(context.config.environments).filter(obj => [DEFAULT_ENV, SHARED_ENV].indexOf(obj) < 0);
+    const envs = Object.keys(context.config.environments).filter(obj => [DEFAULT_ENV, SHARED_ENV].indexOf(obj) < 0);
+
+    log.info('Config Env Provider found environments', envs);
+    return envs;
   }
   return [];
 }
