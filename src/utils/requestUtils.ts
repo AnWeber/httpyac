@@ -263,7 +263,7 @@ export function getPartOfBody(body: string, length: number | undefined) {
   if (length > 0) {
     result = body.slice(0, Math.min(body.length, length));
     if (body.length >= length) {
-      result += `... (${body.length - length} characters  more)`;
+      result += `... (${body.length - length} characters more)`;
     }
   }
   return result;
