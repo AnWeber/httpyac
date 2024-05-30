@@ -6,3 +6,4 @@ export * from './requestVariableReplacer';
 export * from './resolveRequestBody';
 export * from './setEnvRequestOptions';
 export * from './transformRequestBodyToBuffer';
+export * from './transfromMultilineFormUrlEncoded';
