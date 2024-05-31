@@ -184,7 +184,6 @@ export class HttpFileStore implements models.HttpFileStore {
       };
       for (const [plugin, hook] of Object.entries(hooks)) {
         try {
-          log.debug(`load ${plugin}`);
           const result = hook(api);
           if (utils.isPromise(result)) {
             await result;
