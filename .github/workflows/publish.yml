@@ -55,3 +55,11 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+      - name: Github Releases To Discord
+        uses: SethCohen/github-releases-to-discord@v1.13.1
+        with:
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK }}
+          username: 'Release Changelog'
+          content: '||@everyone||'
+          footer_title: 'Changelog'
+          footer_timestamp: true
