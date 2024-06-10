@@ -121,7 +121,7 @@
     "open": "^8.4.2",
     "socks-proxy-agent": "^8.0.3",
     "tough-cookie": "^4.1.4",
-    "uuid": "^9.0.1",
+    "uuid": "^10.0.0",
     "ws": "^8.17.0",
     "xmldom-format": "^1.1.1",
     "xpath": "^0.0.34"
