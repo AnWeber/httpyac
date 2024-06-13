@@ -18,9 +18,6 @@ export function disabledMetaDataHandler(type: string, value: string | undefined,
     } else if (typeof value === 'string') {
       context.httpRegion.hooks.execute.addHook('disabled', async context => {
         const result = await io.javascriptProvider.evalExpression(value, context);
-        if (result) {
-          context.variables.$cancel = true;
-        }
         return !result;
       });
     }

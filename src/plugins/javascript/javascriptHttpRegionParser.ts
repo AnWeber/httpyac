@@ -182,6 +182,8 @@ async function executeScriptData(
     lineOffset: scriptData.lineOffset,
     deleteVariable: (key: string) => utils.deleteVariableInContext(key, context),
   });
+  const cancel = !result.$cancel;
+  delete result.$cancel;
   utils.setVariableInContext(result, context);
-  return !result.$cancel;
+  return cancel;
 }
