@@ -1,5 +1,5 @@
 import { log, userInteractionProvider } from '../../io';
-import { ProcessorContext, Request } from '../../models';
+import { ProcessorContext, Request, VariableType } from '../../models';
 import * as utils from '../../utils';
 
 export type GqlLoadData = string | ((context: ProcessorContext) => Promise<string | undefined>);
@@ -60,8 +60,9 @@ export class GqlAction {
             }
           }
         }
+        const replacedQuery = await utils.replaceVariables(query, VariableType.body, context);
         const gqlRequestBody: GqlPostRequest = {
-          query,
+          query: utils.isString(replacedQuery) ? replacedQuery : query,
         };
         if (this.gqlData.operationName) {
           gqlRequestBody.operationName = this.gqlData.operationName;

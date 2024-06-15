@@ -40,6 +40,30 @@ query launchesQuery($limit: Int!){
     );
   });
 
+  it('should replace variables in query', async () => {
+    initFileProvider();
+    const requests = initHttpClientProvider();
+
+    await sendHttp(
+      `
+@sku=1
+POST /graphql
+
+query getit {
+  product( id: "gid://shopify/Product/{{sku}}" ) {
+    id
+    status
+  }
+}
+    `
+    );
+
+    expect(requests[0].url).toBe(`/graphql`);
+    expect(requests[0].body).toBe(
+      '{"query":"query getit {\\n  product( id: \\"gid://shopify/Product/1\\" ) {\\n    id\\n    status\\n  }\\n}","operationName":"getit"}'
+    );
+  });
+
   it('query + operation + variable replacement', async () => {
     initFileProvider();
     const requests = initHttpClientProvider();

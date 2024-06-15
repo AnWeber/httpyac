@@ -1,3 +1,7 @@
+## [unreleased]
+### Fix
+- variables in gql Query body are replaced (AnWeber/vscode-httpyac#303)
+
 ## [6.14.0] ( 2024-06-01)
 ### Features
 - add `--tag` support to cli to only execute httpRegion with defined tag (#693)
