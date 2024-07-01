@@ -50,7 +50,6 @@ function initParseHook(api: models.HttpyacHooksApi) {
   api.hooks.parse.addHook('responseRef', parse.parseResponseRef);
   api.hooks.parse.addHook('response', parse.parseResponse);
   api.hooks.parse.addHook('requestBody', parse.parseRequestBody);
-
   api.hooks.parse.addInterceptor(new parse.MultipartMixedInterceptor());
 }
 function initParseEndHook(api: models.HttpyacHooksApi) {
