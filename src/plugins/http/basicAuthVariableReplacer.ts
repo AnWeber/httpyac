@@ -6,7 +6,7 @@ export async function basicAuthVariableReplacer(text: unknown | undefined, type:
   if (type.toLowerCase() === 'authorization' && isString(text)) {
     const match = BasicAuthColon.exec(text) || BasicAuth.exec(text);
 
-    if (match && match.groups && match.groups.user && match.groups.password) {
+    if (match && match.groups && match.groups.user) {
       return `Basic ${Buffer.from(`${match.groups.user}:${match.groups.password}`).toString('base64')}`;
     }
   }
