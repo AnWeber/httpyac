@@ -118,10 +118,6 @@ export function convertCliOptionsToContext(cliOptions: SendOptions) {
         timeout: cliOptions.timeout,
         https: cliOptions.insecure ? { rejectUnauthorized: false } : undefined,
       },
-      defaultHeaders: {
-        Accept: '*/*',
-        'User-Agent': 'httpyac',
-      },
     },
     variables: cliOptions.var
       ? Object.fromEntries(
