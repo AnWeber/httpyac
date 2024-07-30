@@ -8,6 +8,7 @@ export async function setEnvRequestOptions(
   await setEnvRejectUnauthorized(request, variables);
   await setEnvNoRedirect(request, variables);
   await setEnvProxy(request, variables);
+  await setEnvRequestTimeout(request, variables);
 }
 
 async function setEnvRejectUnauthorized(request: models.Request, variables: models.Variables): Promise<void> {
@@ -29,5 +30,12 @@ async function setEnvNoRedirect(request: models.Request, variables: models.Varia
 async function setEnvProxy(request: models.Request, variables: models.Variables): Promise<void> {
   if (utils.isString(variables?.request_proxy)) {
     request.proxy = variables.request_proxy;
+  }
+}
+
+async function setEnvRequestTimeout(request: models.Request, variables: models.Variables): Promise<void> {
+  const timeout = utils.toNumber(variables?.request_timeout);
+  if (timeout !== undefined) {
+    request.timeout = timeout;
   }
 }

@@ -156,7 +156,8 @@ export class WebsocketRequestClient extends models.AbstractRequestClient<WebSock
 
     const configOptions: ClientOptions = {};
     if (config?.request) {
-      configOptions.handshakeTimeout = utils.toNumber(config.request.timeout);
+      configOptions.handshakeTimeout = request.timeout || utils.toNumber(config.request.timeout);
+      configOptions.sessionTimeout = configOptions.handshakeTimeout;
       if (!utils.isUndefined(config.request.rejectUnauthorized)) {
         configOptions.rejectUnauthorized = utils.toBoolean(config.request.rejectUnauthorized, true);
       }

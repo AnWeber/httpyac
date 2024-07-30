@@ -151,8 +151,9 @@ export class MQTTRequestClient extends models.AbstractRequestClient<MqttClient |
 
     const configOptions: IClientOptions = {};
     if (config?.request) {
-      if (config.request.timeout !== undefined) {
-        configOptions.connectTimeout = utils.toNumber(config.request.timeout);
+      const timeout = request.timeout || utils.toNumber(config.request.timeout);
+      if (timeout !== undefined) {
+        configOptions.connectTimeout = timeout;
       }
       if (!utils.isUndefined(config.request.rejectUnauthorized)) {
         configOptions.rejectUnauthorized = utils.toBoolean(config.request.rejectUnauthorized, true);

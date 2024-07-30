@@ -1,4 +1,7 @@
 ## [unreleased]
+### Features
+- add support to define timeout per request using `request.timeout` or setting variable `request_timeout`
+
 ### Fix
 - variables in gql Query body are replaced (AnWeber/vscode-httpyac#303)
 - allow defaultHeaders to overwrite accept or user-agent header

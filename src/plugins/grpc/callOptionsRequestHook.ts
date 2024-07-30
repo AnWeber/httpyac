@@ -6,7 +6,7 @@ export async function callOptionsRequestHook(request: models.Request, context: m
   if (isGrpcRequest(request) && request.headers) {
     utils.report(context, 'create call options');
     if (context.config?.request?.timeout) {
-      const timeout = utils.toNumber(context.config?.request?.timeout) || 0;
+      const timeout = request.timeout || utils.toNumber(context.config?.request?.timeout) || 0;
       request.callOptions = Object.assign({}, request.options, {
         deadline: new Date(new Date().getTime() + timeout),
       });

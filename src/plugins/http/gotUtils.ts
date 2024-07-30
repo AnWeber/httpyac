@@ -45,6 +45,7 @@ export function getClientOptions(
       method: request.method,
       headers: request.headers,
       body: request.body,
+      timeout: request.timeout,
     },
     request.options
   );

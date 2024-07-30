@@ -21,6 +21,7 @@ export interface Request<TMethod extends string = string, TBody = RequestBody> {
   noRejectUnauthorized?: boolean;
   noRedirect?: boolean;
   proxy?: string;
+  timeout?: number;
 }
 
 export interface HttpRequest extends Request<HttpMethod> {
