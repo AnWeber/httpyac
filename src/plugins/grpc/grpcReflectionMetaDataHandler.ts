@@ -26,7 +26,7 @@ export function grpcReflectionMetaDataHandler(type: string, server: string | und
               context.options.protoDefinitions = protoDefinitions;
             }
           } catch (err) {
-            log.warn('error in grpc reflection', err);
+            log.debug('error in grpc reflection', err);
           }
         }
       }
