@@ -1,3 +1,4 @@
+import { TestResultStatus } from '../../../models';
 import { initFileProvider, initHttpClientProvider, parseHttp, sendHttpFile } from '../../../test/testUtils';
 
 describe('assert.xpath', () => {
@@ -21,7 +22,7 @@ describe('assert.xpath', () => {
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
     expect(httpFile.httpRegions[0].testResults?.length).toBe(1);
-    expect(httpFile.httpRegions[0].testResults?.[0].result).toBeTruthy();
+    expect(httpFile.httpRegions[0].testResults?.[0].status).toBe(TestResultStatus.SUCCESS);
     expect(httpFile.httpRegions[0].testResults?.[0].message).toBe('/bookstore/book/title == Everyday Italian');
   });
   it('should equal xpath with namespaces', async () => {
@@ -45,7 +46,7 @@ describe('assert.xpath', () => {
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
     expect(httpFile.httpRegions[0].testResults?.length).toBe(1);
-    expect(httpFile.httpRegions[0].testResults?.[0].result).toBeTruthy();
+    expect(httpFile.httpRegions[0].testResults?.[0].status).toBe(TestResultStatus.SUCCESS);
     expect(httpFile.httpRegions[0].testResults?.[0].message).toBe('//bookml:title/text() == Harry Potter');
   });
   it('should fail xpath', async () => {
@@ -67,7 +68,7 @@ describe('assert.xpath', () => {
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
     expect(httpFile.httpRegions[0].testResults?.length).toBe(1);
-    expect(httpFile.httpRegions[0].testResults?.[0].result).toBeFalsy();
+    expect(httpFile.httpRegions[0].testResults?.[0].status).toBe(TestResultStatus.FAILED);
     expect(httpFile.httpRegions[0].testResults?.[0].message).toBe('/bookstore/book/title == Everyday Italian2');
   });
   it('should fail on empty body', async () => {
@@ -86,7 +87,7 @@ describe('assert.xpath', () => {
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
     expect(httpFile.httpRegions[0].testResults?.length).toBe(1);
-    expect(httpFile.httpRegions[0].testResults?.[0].result).toBeFalsy();
+    expect(httpFile.httpRegions[0].testResults?.[0].status).toBe(TestResultStatus.FAILED);
     expect(httpFile.httpRegions[0].testResults?.[0].message).toBe('/bookstore/book/title == Everyday Italian2');
   });
 });

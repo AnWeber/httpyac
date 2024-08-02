@@ -1,3 +1,4 @@
+import { TestResultStatus } from '../../models';
 import { transformToJunit } from './junitUtils';
 
 describe('transformToJunit', () => {
@@ -9,17 +10,18 @@ describe('transformToJunit', () => {
       requests: [
         {
           fileName: 'test.http',
-          disabled: false,
           name: 'test',
           duration: 1001,
           summary: {
             totalTests: 1,
             successTests: 1,
             failedTests: 0,
+            erroredTests: 0,
+            skippedTests: 0,
           },
           testResults: [
             {
-              result: true,
+              status: TestResultStatus.SUCCESS,
               message: 'status == 200',
             },
           ],
@@ -28,11 +30,14 @@ describe('transformToJunit', () => {
       summary: {
         totalRequests: 1,
         successRequests: 1,
-        disabledRequests: 0,
+        skippedRequests: 0,
+        erroredRequests: 0,
         failedRequests: 0,
         totalTests: 1,
         successTests: 1,
         failedTests: 0,
+        erroredTests: 0,
+        skippedTests: 0,
       },
     });
     expect(result).toBe(
@@ -58,51 +63,54 @@ describe('transformToJunit', () => {
       requests: [
         {
           fileName: 'test.http',
-          disabled: false,
           name: 'test',
           duration: 1001,
           summary: {
             totalTests: 1,
             successTests: 1,
             failedTests: 0,
+            erroredTests: 0,
+            skippedTests: 0,
           },
           testResults: [
             {
-              result: true,
+              status: TestResultStatus.SUCCESS,
               message: 'status == 200',
             },
           ],
         },
         {
           fileName: 'test.http',
-          disabled: false,
           name: 'test2',
           duration: 1002,
           summary: {
             totalTests: 1,
             successTests: 1,
             failedTests: 0,
+            erroredTests: 0,
+            skippedTests: 0,
           },
           testResults: [
             {
-              result: true,
+              status: TestResultStatus.SUCCESS,
               message: 'status == 200',
             },
           ],
         },
         {
           fileName: 'test2.http',
-          disabled: false,
           name: 'other',
           duration: 1002,
           summary: {
             totalTests: 1,
             successTests: 1,
             failedTests: 0,
+            erroredTests: 0,
+            skippedTests: 0,
           },
           testResults: [
             {
-              result: true,
+              status: TestResultStatus.SUCCESS,
               message: 'status == 200',
             },
           ],
@@ -111,11 +119,14 @@ describe('transformToJunit', () => {
       summary: {
         totalRequests: 3,
         successRequests: 3,
-        disabledRequests: 0,
+        skippedRequests: 0,
+        erroredRequests: 0,
         failedRequests: 0,
         totalTests: 3,
         successTests: 3,
         failedTests: 0,
+        erroredTests: 0,
+        skippedTests: 0,
       },
     });
     expect(result).toBe(
@@ -153,23 +164,33 @@ describe('transformToJunit', () => {
       requests: [
         {
           fileName: 'test.http',
-          disabled: true,
           name: 'test',
           summary: {
             totalTests: 1,
             successTests: 0,
             failedTests: 0,
+            erroredTests: 0,
+            skippedTests: 1,
           },
+          testResults: [
+            {
+              status: TestResultStatus.SKIPPED,
+              message: 'skipped all tests',
+            },
+          ],
         },
       ],
       summary: {
         totalRequests: 1,
         successRequests: 0,
-        disabledRequests: 1,
+        skippedRequests: 1,
+        erroredRequests: 0,
         failedRequests: 0,
         totalTests: 1,
         successTests: 0,
         failedTests: 0,
+        erroredTests: 0,
+        skippedTests: 1,
       },
     });
     expect(result).toBe(
@@ -180,7 +201,7 @@ describe('transformToJunit', () => {
     <properties>
       <property name="file" value="test.http"/>
     </properties>
-    <testcase name="skipped all tests" classname="test" time="0.000">
+    <testcase name="skipped all tests" classname="test" time="0.000" assertions="1">
       <skipped/>
     </testcase>
   </testsuite>
@@ -197,16 +218,17 @@ describe('transformToJunit', () => {
       requests: [
         {
           fileName: 'test.http',
-          disabled: false,
           name: 'test',
           summary: {
             totalTests: 2,
             successTests: 1,
             failedTests: 1,
+            erroredTests: 0,
+            skippedTests: 0,
           },
           testResults: [
             {
-              result: false,
+              status: TestResultStatus.FAILED,
               message: 'Assertions fail',
               error: {
                 displayMessage: 'failed result',
@@ -214,7 +236,7 @@ describe('transformToJunit', () => {
               },
             },
             {
-              result: true,
+              status: TestResultStatus.SUCCESS,
               message: 'status === 200',
             },
           ],
@@ -223,11 +245,14 @@ describe('transformToJunit', () => {
       summary: {
         totalRequests: 1,
         successRequests: 0,
-        disabledRequests: 0,
+        skippedRequests: 0,
+        erroredRequests: 0,
         failedRequests: 1,
         totalTests: 2,
         successTests: 1,
         failedTests: 1,
+        erroredTests: 0,
+        skippedTests: 0,
       },
     });
     expect(result).toBe(
@@ -259,7 +284,6 @@ describe('transformToJunit', () => {
       requests: [
         {
           fileName: 'test.http',
-          disabled: false,
           title: 'title',
           name: 'test',
           duration: 1001,
@@ -267,17 +291,22 @@ describe('transformToJunit', () => {
             totalTests: 1,
             successTests: 1,
             failedTests: 0,
+            erroredTests: 0,
+            skippedTests: 0,
           },
         },
       ],
       summary: {
         totalRequests: 1,
         successRequests: 1,
-        disabledRequests: 0,
+        skippedRequests: 0,
+        erroredRequests: 0,
         failedRequests: 0,
         totalTests: 1,
         successTests: 1,
         failedTests: 0,
+        erroredTests: 0,
+        skippedTests: 0,
       },
     });
     expect(result).toBe(

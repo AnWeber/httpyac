@@ -1,3 +1,4 @@
+import { TestResultStatus } from '../../../models';
 import { initFileProvider, initHttpClientProvider, parseHttp, sendHttpFile } from '../../../test/testUtils';
 
 describe('assert', () => {
@@ -22,7 +23,7 @@ describe('assert', () => {
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
     expect(httpFile.httpRegions[0].testResults?.length).toBe(1);
-    expect(httpFile.httpRegions[0].testResults?.[0].result).toBeFalsy();
+    expect(httpFile.httpRegions[0].testResults?.[0].status).toBe(TestResultStatus.FAILED);
     expect(httpFile.httpRegions[0].testResults?.[0].message).toBe('response.parsedBody == {"foo": "bar"}');
   });
   it('should fail on invalid type', async () => {
@@ -46,7 +47,7 @@ describe('assert', () => {
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
     expect(httpFile.httpRegions[0].testResults?.length).toBe(1);
-    expect(httpFile.httpRegions[0].testResults?.[0].result).toBeFalsy();
+    expect(httpFile.httpRegions[0].testResults?.[0].status).toBe(TestResultStatus.FAILED);
     expect(httpFile.httpRegions[0].testResults?.[0].message).toBe('response.parsedBody == {"foo": "bar"}');
   });
   it('should ignore test on invalid predicate', async () => {

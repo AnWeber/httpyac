@@ -1,3 +1,4 @@
+import { TestResultStatus } from '../../../models';
 import { initFileProvider, initHttpClientProvider, parseHttp, sendHttpFile } from '../../../test/testUtils';
 
 describe('assert.body', () => {
@@ -25,7 +26,7 @@ describe('assert.body', () => {
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
     expect(httpFile.httpRegions[0].testResults?.length).toBe(4);
-    expect(httpFile.httpRegions[0].testResults?.every(obj => obj.result)).toBeTruthy();
+    expect(httpFile.httpRegions[0].testResults?.every(obj => obj.status === TestResultStatus.SUCCESS)).toBeTruthy();
     expect(httpFile.httpRegions[0].testResults?.[0].message).toBe('body == {"foo":"bar"}');
     expect(httpFile.httpRegions[0].testResults?.[1].message).toBe(
       'body sha256 eji/gfOD9pQzrW6QDTWz4jhVk/dqe3q11DVbi6Qe4ks='
@@ -57,7 +58,7 @@ describe('assert.body', () => {
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
     expect(httpFile.httpRegions[0].testResults?.length).toBe(1);
-    expect(httpFile.httpRegions[0].testResults?.[0].result).toBeTruthy();
+    expect(httpFile.httpRegions[0].testResults?.[0].status).toBe(TestResultStatus.SUCCESS);
     expect(httpFile.httpRegions[0].testResults?.[0].message).toBe('foo == bar');
   });
   it('should equal body array', async () => {
@@ -82,7 +83,7 @@ describe('assert.body', () => {
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
     expect(httpFile.httpRegions[0].testResults?.length).toBe(1);
-    expect(httpFile.httpRegions[0].testResults?.[0].result).toBeTruthy();
+    expect(httpFile.httpRegions[0].testResults?.[0].status).toBe(TestResultStatus.SUCCESS);
     expect(httpFile.httpRegions[0].testResults?.[0].message).toBe('foo == bar');
   });
 });
