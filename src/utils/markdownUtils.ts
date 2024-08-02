@@ -123,9 +123,14 @@ export function toMarkdownTestResults(testResults: Array<models.TestResult>): Ar
   result.push('`TestResults`');
   result.push('');
   for (const testResult of testResults) {
-    let message = `${testResult.result ? models.testSymbols.ok : models.testSymbols.error}: ${testResult.message}`;
-    if (testResult.error) {
-      message += ` (${testResult.error.displayMessage})`;
+    let message = `${models.testSymbols.ok}: ${testResult.message}`;
+    if (testResult.status === models.TestResultStatus.SKIPPED) {
+      message = `${models.testSymbols.skipped}: ${testResult.message}`;
+    } else if ([models.TestResultStatus.FAILED, models.TestResultStatus.ERROR].includes(testResult.status)) {
+      message = `${models.testSymbols.error}: ${testResult.message}`;
+      if (testResult.error) {
+        message += ` (${testResult.error.displayMessage})`;
+      }
     }
     result.push(message);
   }

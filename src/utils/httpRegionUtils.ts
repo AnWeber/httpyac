@@ -38,18 +38,20 @@ export function getRegionDescription(httpRegion: models.HttpRegion, defaultName 
 }
 
 export async function logResponse(
-  response: models.HttpResponse,
+  response: models.HttpResponse | undefined,
   context: models.ProcessorContext
-): Promise<models.HttpResponse | undefined> {
-  const clone = cloneResponse(response);
-  const regionResult = await context.hooks.responseLogging.trigger(createResponseProxy(clone), context);
-  if (regionResult === HookCancel) {
-    return undefined;
+): Promise<void> {
+  let clone: models.HttpResponse | undefined;
+  if (response) {
+    clone = cloneResponse(response);
+    const regionResult = await context.hooks.responseLogging.trigger(createResponseProxy(clone), context);
+    if (regionResult === HookCancel) {
+      return;
+    }
   }
   if (!context.httpRegion.metaData.noLog && context.logResponse) {
     await context.logResponse(clone, context.httpRegion);
   }
-  return clone;
 }
 
 export async function executeGlobalScripts(context: {

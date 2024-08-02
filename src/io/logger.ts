@@ -66,13 +66,6 @@ export class Logger implements ConsoleLogHandler {
   public warn(...params: unknown[]): void {
     this.writeLog(LogLevel.warn, this.collectCache, console.warn, params);
   }
-  public logTest(result: boolean, message: string): void {
-    if (!this.options?.onlyFailedTests && result) {
-      this.writeLog(LogLevel.info, this.collectCache, console.info, [message]);
-    } else if (!result) {
-      this.writeLog(LogLevel.info, this.collectCache, console.error, [message]);
-    }
-  }
   public logPriority(...msg: Array<string>) {
     this.writeLog(LogLevel.info, this.priorityCache, console.info, msg);
   }

@@ -1,7 +1,7 @@
 import { DOMImplementation } from '@xmldom/xmldom';
 import { EOL } from 'os';
 import { formatXml } from 'xmldom-format';
-import { TestResult } from '../../models';
+import { TestResult, TestResultStatus } from '../../models';
 import * as utils from '../../utils';
 import { SendJsonOutput, SendOutputRequest } from './jsonOutput';
 
@@ -20,8 +20,8 @@ export function transformToJunit(output: SendJsonOutput): string {
   document.appendChild(root);
   root.setAttribute('name', `httpyac`);
   root.setAttribute('tests', `${output.summary.totalTests}`);
-  root.setAttribute('errors', '0');
-  root.setAttribute('disabled', `${output.summary.disabledRequests}`);
+  root.setAttribute('errors', `${output.summary.erroredTests}`);
+  root.setAttribute('disabled', `${output.summary.skippedTests}`);
   root.setAttribute('failures', `${output.summary.failedTests}`);
   root.setAttribute('time', `${toFloatSeconds(output.requests.reduce(sumDuration, 0))}`);
 
@@ -39,10 +39,10 @@ export function transformToJunit(output: SendJsonOutput): string {
 function transformRequest(document: XMLDocument, request: SendOutputRequest) {
   const testSuiteNode = document.createElement('testsuite');
   setAttribute(testSuiteNode, 'name', request.name);
-  setAttribute(testSuiteNode, 'tests', request.disabled ? 1 : request.summary?.totalTests || 0);
-  setAttribute(testSuiteNode, 'errors', 0);
+  setAttribute(testSuiteNode, 'tests', request.summary?.totalTests || 0);
+  setAttribute(testSuiteNode, 'errors', request.summary?.erroredTests || 0);
   setAttribute(testSuiteNode, 'failures', request.summary?.failedTests || 0);
-  setAttribute(testSuiteNode, 'skipped', request.disabled ? 1 : 0);
+  setAttribute(testSuiteNode, 'skipped', request.summary?.skippedTests || 0);
 
   let fileRelativeToCwd = request.fileName.replace(process.cwd(), '');
   fileRelativeToCwd = fileRelativeToCwd.startsWith('/') ? fileRelativeToCwd.slice(1) : fileRelativeToCwd;
@@ -71,13 +71,6 @@ function transformRequest(document: XMLDocument, request: SendOutputRequest) {
       });
       testSuiteNode.appendChild(child);
     }
-  } else if (request.disabled) {
-    const testcaseNode = document.createElement('testcase');
-    testcaseNode.setAttribute('name', 'skipped all tests');
-    testcaseNode.setAttribute('classname', request.name);
-    testcaseNode.setAttribute('time', '0.000');
-    testSuiteNode.appendChild(testcaseNode);
-    testcaseNode.appendChild(document.createElement('skipped'));
   }
 
   return testSuiteNode;
@@ -95,24 +88,28 @@ function transformTestResultToTestcase(
   }
   setAttribute(root, 'assertions', 1);
 
-  const propertiesNode = transformToProperties(document, {
-    displayMessage: testResult.error?.displayMessage,
-    file: testResult.error?.file,
-    line: testResult.error?.line,
-    offset: testResult.error?.offset,
-    errorType: testResult.error?.errorType,
-    message: testResult.error?.message,
-  });
-  if (propertiesNode) {
-    root.appendChild(propertiesNode);
+  if (testResult.error) {
+    const propertiesNode = transformToProperties(document, {
+      displayMessage: testResult.error?.displayMessage,
+      file: testResult.error?.file,
+      line: testResult.error?.line,
+      offset: testResult.error?.offset,
+      errorType: testResult.error?.errorType,
+      message: testResult.error?.message,
+    });
+    if (propertiesNode) {
+      root.appendChild(propertiesNode);
+    }
   }
 
-  if (!testResult.result) {
+  if ([TestResultStatus.ERROR, TestResultStatus.FAILED].includes(testResult.status)) {
     const failureNode = document.createElement('failure');
     root.appendChild(failureNode);
     setAttribute(failureNode, 'message', testResult.message);
     setAttribute(failureNode, 'type', testResult.error?.errorType ?? 'unknown');
     failureNode.textContent = utils.errorToString(testResult.error?.error) || '';
+  } else if (testResult.status === TestResultStatus.SKIPPED) {
+    root.appendChild(document.createElement('skipped'));
   }
 
   return root;

@@ -1,7 +1,7 @@
 import { HookCancel } from 'hookpoint';
 
 import { log } from '../../io';
-import type * as models from '../../models';
+import * as models from '../../models';
 import { userSessionStore } from '../../store';
 import * as utils from '../../utils';
 import * as flows from './flow';
@@ -28,6 +28,10 @@ export async function oauth2VariableReplacer(
       if (openIdInformation) {
         return `Bearer ${openIdInformation.accessToken}`;
       }
+      utils.addTestResultToHttpRegion(context.httpRegion, {
+        message: 'OAuth2 did not retrieve AccessToken',
+        status: models.TestResultStatus.ERROR,
+      });
       return HookCancel;
     }
   }

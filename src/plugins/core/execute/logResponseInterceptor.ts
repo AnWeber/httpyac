@@ -9,15 +9,16 @@ export class LogResponseInterceptor implements HookInterceptor<[models.Processor
     hookContext: HookTriggerContext<[models.ProcessorContext], boolean | undefined>
   ): Promise<boolean | undefined> {
     const context = hookContext.args[0];
+    let clone: models.HttpResponse | undefined;
     if (context.httpRegion.response) {
-      const cloneResponse = utils.cloneResponse(context.httpRegion.response);
-      if (!cloneResponse.tags) {
-        cloneResponse.tags = [];
+      clone = utils.cloneResponse(context.httpRegion.response);
+      if (!clone.tags) {
+        clone.tags = [];
       }
-      cloneResponse.tags.push('httpRegion', context.isMainContext ? 'mainResponse' : 'refResponse');
-      await utils.logResponse(cloneResponse, context);
+      clone.tags.push('httpRegion', context.isMainContext ? 'mainResponse' : 'refResponse');
       delete context.httpRegion.response;
     }
+    await utils.logResponse(clone, context);
     return true;
   }
 }

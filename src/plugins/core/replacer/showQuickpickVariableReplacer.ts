@@ -58,7 +58,7 @@ async function getArray(value: string, context: ProcessorContext): Promise<Array
         return jsResult;
       }
     } catch (err) {
-      log.trace(err);
+      log.trace('error in quickpick', err);
     }
   }
 

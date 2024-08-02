@@ -180,7 +180,13 @@ export function requestLoggerFactory(
     httpRegion?: models.HttpRegion
   ): Promise<void> {
     let opt = options;
-    if (optionsFailed && httpRegion?.testResults && httpRegion.testResults.some(obj => !obj.result)) {
+    if (
+      optionsFailed &&
+      httpRegion?.testResults &&
+      httpRegion.testResults.some(obj =>
+        [models.TestResultStatus.FAILED, models.TestResultStatus.ERROR].includes(obj.status)
+      )
+    ) {
       opt = optionsFailed;
     }
 
@@ -188,7 +194,10 @@ export function requestLoggerFactory(
       return;
     }
 
-    if (opt.onlyFailed && (!httpRegion?.testResults || httpRegion.testResults.every(obj => obj.result))) {
+    if (
+      opt.onlyFailed &&
+      (!httpRegion?.testResults || httpRegion.testResults.every(obj => obj.status === models.TestResultStatus.SUCCESS))
+    ) {
       return;
     }
 
@@ -205,9 +214,20 @@ export function requestLoggerFactory(
       log('');
     }
 
+    const request = response?.request || httpRegion?.request;
+    if (request) {
+      if (opt.useShort) {
+        log(chalk`{yellow ${request?.method || 'GET'}} {gray ${request?.url || '?'}}`);
+      } else if (opt.requestOutput) {
+        logRequest(request, {
+          headers: opt.requestHeaders,
+          bodyLength: opt.requestBodyLength,
+        }).forEach(m => log(m));
+      }
+    }
+
     if (response) {
       if (opt.useShort) {
-        log(chalk`{yellow ${response?.request?.method || 'GET'}} {gray ${response.request?.url || '?'}}`);
         log(
           chalk`{gray =>} {cyan.bold ${response.statusCode}} ({yellow ${response.timings?.total || '?'} ms}, {yellow ${
             response.meta?.size || '?'
@@ -215,14 +235,6 @@ export function requestLoggerFactory(
         );
       } else {
         const result: Array<string> = [];
-        if (response.request && opt.requestOutput) {
-          result.push(
-            ...logRequest(response.request, {
-              headers: opt.requestHeaders,
-              bodyLength: opt.requestBodyLength,
-            })
-          );
-        }
 
         if (opt.responseHeaders) {
           if (result.length > 0) {
@@ -250,6 +262,20 @@ export function requestLoggerFactory(
           }
         }
         log(toMultiLineString(result));
+      }
+    }
+
+    if (httpRegion?.testResults) {
+      for (const testResult of httpRegion.testResults) {
+        let message = chalk`{green ${models.testSymbols.ok} ${testResult.message || 'Test passed'}}`;
+        if (testResult.status === models.TestResultStatus.SKIPPED) {
+          message = chalk`{yellow ${models.testSymbols.skipped} Test skipped}`;
+        } else if (testResult.status === models.TestResultStatus.FAILED) {
+          message = chalk`{red ${models.testSymbols.error} ${testResult.message || 'Test failed'} (${testResult.error?.displayMessage})}`;
+        } else if (testResult.status === models.TestResultStatus.ERROR) {
+          message = chalk`{red ${models.testSymbols.error} ${testResult.message || 'Test failed'}}`;
+        }
+        log(message);
       }
     }
   };

@@ -100,7 +100,7 @@ class DeviceCodeFlow implements OpenIdFlow {
               return false;
             }
           } catch (err) {
-            io.log.debug(err);
+            io.log.debug('error in deviceCodeFlow', err);
             return false;
           }
         }

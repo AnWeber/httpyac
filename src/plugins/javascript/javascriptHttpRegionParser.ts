@@ -182,8 +182,12 @@ async function executeScriptData(
     lineOffset: scriptData.lineOffset,
     deleteVariable: (key: string) => utils.deleteVariableInContext(key, context),
   });
-  const cancel = !result.$cancel;
-  delete result.$cancel;
+  const cancel = result.$cancel;
+
+  if (cancel) {
+    delete result.$cancel;
+    utils.addSkippedTestResult(context.httpRegion);
+  }
   utils.setVariableInContext(result, context);
-  return cancel;
+  return !cancel;
 }

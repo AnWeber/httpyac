@@ -1,7 +1,13 @@
 import { Hook, HookCancel } from 'hookpoint';
 
 import * as models from '../models';
-import { addHttpFileRequestClientHooks, isError, toEnvironmentKey } from '../utils';
+import {
+  addHttpFileRequestClientHooks,
+  isError,
+  toEnvironmentKey,
+  addTestResultToHttpRegion,
+  parseError,
+} from '../utils';
 
 export class HttpRegion implements models.HttpRegion {
   request?: models.Request<string, models.RequestBody> | undefined;
@@ -92,6 +98,11 @@ export class HttpRegion implements models.HttpRegion {
       return result !== HookCancel && result.every(obj => !!obj);
     } catch (err) {
       if (isError(err)) {
+        addTestResultToHttpRegion(this, {
+          message: err.message,
+          error: parseError(err),
+          status: models.TestResultStatus.ERROR,
+        });
         if (!err.handled) {
           await context.logResponse?.(this.response, this);
           err.handled = true;

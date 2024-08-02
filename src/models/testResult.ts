@@ -8,8 +8,15 @@ export interface ErrorDescription {
   offset?: string;
 }
 
+export enum TestResultStatus {
+  SUCCESS = 'SUCCESS',
+  FAILED = 'FAILED',
+  SKIPPED = 'SKIPPED',
+  ERROR = 'ERROR',
+}
+
 export interface TestResult {
   message: string;
-  result: boolean;
+  status: TestResultStatus;
   error?: ErrorDescription;
 }

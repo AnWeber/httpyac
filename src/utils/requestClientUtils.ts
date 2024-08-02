@@ -118,7 +118,7 @@ function addProgressEvent<T extends models.RequestClient>(client: T, context: mo
       const newData = percent - prevPercent;
       prevPercent = percent;
       if (context.progress?.report) {
-        log.debug(`progress to ${percent}`);
+        log.trace(`progress to ${percent}`);
         const divider = context.progress.divider || 1;
         context.progress.report({
           message: 'request progress',
@@ -150,7 +150,7 @@ function addMetaDataEvent<T extends models.RequestClient>(
 ) {
   client.addEventListener('metaData', evt => {
     const [type, response] = evt.detail;
-    log.debug(type, response?.message || response?.body);
+    log.debug(`event ${type} for ${response.protocol}`, response?.message || response?.body);
     if (context.httpRegion.metaData.metaDataLogging && context.logStream) {
       loadingPromises.push(context.logStream(type, response));
     }

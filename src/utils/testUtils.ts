@@ -1,14 +1,4 @@
-import { default as chalk } from 'chalk';
-
-import {
-  ConsoleLogHandler,
-  HttpRegion,
-  HttpResponse,
-  ProcessorContext,
-  TestFunction,
-  TestResult,
-  testSymbols,
-} from '../models';
+import { HttpRegion, HttpResponse, ProcessorContext, TestFunction, TestResult, TestResultStatus } from '../models';
 import {
   assertHasNoResponseBody,
   assertHasResponseBody,
@@ -23,7 +13,6 @@ import { isHttpResponse } from './requestUtils';
 
 export function testFactoryAsync({
   httpRegion,
-  scriptConsole,
 }: ProcessorContext): (message: string, testMethod: (testResult: TestResult) => Promise<void>) => Promise<void> {
   return async function test(
     message: string,
@@ -31,7 +20,7 @@ export function testFactoryAsync({
   ): Promise<void> {
     const testResult: TestResult = {
       message,
-      result: true,
+      status: TestResultStatus.SUCCESS,
     };
     if (typeof testMethod === 'function') {
       try {
@@ -40,12 +29,12 @@ export function testFactoryAsync({
         setErrorInTestResult(testResult, err);
       }
     }
-    addTestResultToHttpRegion(httpRegion, testResult, scriptConsole);
+    addTestResultToHttpRegion(httpRegion, testResult);
   };
 }
 
 function setErrorInTestResult(testResult: TestResult, err: unknown) {
-  testResult.result = false;
+  testResult.status = TestResultStatus.FAILED;
   if (isError(err)) {
     testResult.error = parseError(err);
   } else {
@@ -56,11 +45,11 @@ function setErrorInTestResult(testResult: TestResult, err: unknown) {
   }
 }
 
-export function testFactory({ httpRegion, scriptConsole, variables }: ProcessorContext): TestFunction {
+export function testFactory({ httpRegion, variables }: ProcessorContext): TestFunction {
   const testFunction = function test(message: string, testMethod: () => void): void {
     const testResult: TestResult = {
       message,
-      result: true,
+      status: TestResultStatus.SUCCESS,
     };
     if (typeof testMethod === 'function') {
       try {
@@ -69,7 +58,7 @@ export function testFactory({ httpRegion, scriptConsole, variables }: ProcessorC
         setErrorInTestResult(testResult, err);
       }
     }
-    addTestResultToHttpRegion(httpRegion, testResult, scriptConsole);
+    addTestResultToHttpRegion(httpRegion, testResult);
   };
 
   function getHttpResponse(): HttpResponse | undefined {
@@ -126,20 +115,16 @@ export function testFactory({ httpRegion, scriptConsole, variables }: ProcessorC
   };
   return testFunction;
 }
-function addTestResultToHttpRegion(
-  httpRegion: HttpRegion,
-  testResult: TestResult,
-  scriptConsole: ConsoleLogHandler | undefined
-) {
+export function addTestResultToHttpRegion(httpRegion: HttpRegion, testResult: TestResult) {
   if (!httpRegion.testResults) {
     httpRegion.testResults = [];
   }
   httpRegion.testResults.push(testResult);
+}
 
-  scriptConsole?.logTest?.(
-    testResult.result,
-    testResult.result
-      ? chalk`{green ${testSymbols.ok} ${testResult.message || 'Test passed'}}`
-      : chalk`{red ${testSymbols.error} ${testResult.message || 'Test failed'} (${testResult.error?.displayMessage})}`
-  );
+export function addSkippedTestResult(httpRegion: HttpRegion) {
+  addTestResultToHttpRegion(httpRegion, {
+    message: 'request is skipped',
+    status: TestResultStatus.SKIPPED,
+  });
 }

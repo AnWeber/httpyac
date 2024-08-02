@@ -72,7 +72,7 @@ export class HttpRequestClient extends models.AbstractRequestClient<typeof got> 
         this.onMetaData(event, {
           protocol: 'HTTP',
           statusCode: 0,
-          message: args.length > 0 ? `${event}: ${utils.toString(args[0])}` : event,
+          message: args.length > 0 ? `${utils.toString(args[0])}` : undefined,
           body: {
             ...args,
           },

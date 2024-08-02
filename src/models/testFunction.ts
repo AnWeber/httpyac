@@ -1,6 +1,7 @@
 export const testSymbols = {
   ok: '✓',
   error: '✖',
+  skipped: '○',
 };
 
 export interface TestFunction {

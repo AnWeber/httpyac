@@ -1,4 +1,4 @@
-import { HttpResponse, ProcessedHttpRegion, TestResult } from '../../models';
+import { HttpResponse, ProcessedHttpRegion, TestResult, TestResultStatus } from '../../models';
 import * as utils from '../../utils';
 import { SendFilterOptions, SendOptions } from './options';
 import { fileProvider } from '../../io';
@@ -22,19 +22,21 @@ export interface SendOutputRequest {
   testResults?: Array<TestResult>;
   timestamp?: string;
   duration?: number;
-  disabled: boolean;
 }
 
 export interface SendRequestSummary {
   totalRequests: number;
-  disabledRequests: number;
+  skippedRequests: number;
   failedRequests: number;
+  erroredRequests: number;
   successRequests: number;
 }
 
 export interface SendTestSummary {
   totalTests: number;
   failedTests: number;
+  skippedTests: number;
+  erroredTests: number;
   successTests: number;
 }
 
@@ -48,9 +50,9 @@ export function toSendJsonOutput(
 ): SendJsonOutput {
   const requests: Array<SendOutputRequest> = [];
 
-  for (const httpRegion of processedHttpRegions.filter(o => !o.disabled)) {
+  for (const httpRegion of processedHttpRegions) {
     let output = options.output;
-    if (options.outputFailed && httpRegion.testResults?.some?.(test => !test.result)) {
+    if (options.outputFailed && httpRegion.testResults?.some?.(test => !test.status)) {
       output = options.outputFailed;
     }
     const result: SendOutputRequest = {
@@ -63,11 +65,12 @@ export function toSendJsonOutput(
       testResults: httpRegion.testResults,
       timestamp: new Date(performance.timeOrigin + httpRegion.start).toISOString(),
       duration: httpRegion.duration,
-      disabled: !!httpRegion.disabled,
       summary: {
-        totalTests: httpRegion.disabled ? 1 : httpRegion.testResults?.length || 0,
-        failedTests: httpRegion.testResults?.filter?.(obj => !obj.result).length || 0,
-        successTests: httpRegion.testResults?.filter?.(obj => !!obj.result).length || 0,
+        totalTests: httpRegion.testResults?.length || 0,
+        failedTests: httpRegion.testResults?.filter?.(t => t.status === TestResultStatus.FAILED).length || 0,
+        successTests: httpRegion.testResults?.filter?.(t => t.status === TestResultStatus.SUCCESS).length || 0,
+        erroredTests: httpRegion.testResults?.filter?.(t => t.status === TestResultStatus.ERROR).length || 0,
+        skippedTests: httpRegion.testResults?.filter?.(t => t.status === TestResultStatus.SKIPPED).length || 0,
       },
     };
     requests.push(result);
@@ -88,12 +91,15 @@ export function toSendJsonOutput(
 export function createTestSummary(requests: Array<SendOutputRequest>): SendRequestSummary & SendTestSummary {
   return {
     totalRequests: requests.length,
-    disabledRequests: requests.filter(obj => obj.disabled).length,
+    skippedRequests: requests.filter(obj => obj.summary.skippedTests > 0).length,
     failedRequests: requests.filter(obj => obj.summary.failedTests > 0).length,
     successRequests: requests.filter(obj => obj.summary.failedTests === 0).length,
+    erroredRequests: requests.filter(obj => obj.summary.erroredTests === 0).length,
     totalTests: requests.map(obj => obj.summary.totalTests).reduce(sum, 0),
     failedTests: requests.map(obj => obj.summary.failedTests).reduce(sum, 0),
     successTests: requests.map(obj => obj.summary.successTests).reduce(sum, 0),
+    erroredTests: requests.map(obj => obj.summary.erroredTests).reduce(sum, 0),
+    skippedTests: requests.map(obj => obj.summary.skippedTests).reduce(sum, 0),
   };
 }
 

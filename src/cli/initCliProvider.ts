@@ -16,6 +16,7 @@ function initFixTestSymbols() {
     // https://github.com/nodejs/node-v0.x-archive/issues/7940
     models.testSymbols.ok = '[x]';
     models.testSymbols.error = '[-]';
+    models.testSymbols.skipped = '[*]';
   }
 }
 

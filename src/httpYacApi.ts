@@ -38,9 +38,7 @@ async function sendHttpRegions(context: models.HttpRegionsSendContext): Promise<
       context.progress.divider = context.httpRegions.length;
     }
     for (const httpRegion of context.httpRegions) {
-      if (!(await httpRegion.execute(processorContext, true))) {
-        return false;
-      }
+      await httpRegion.execute(processorContext, true);
     }
     return true;
   }
@@ -85,7 +83,7 @@ export async function getVariables(context: models.VariableProviderContext): Pro
     ...vars.map(variables => utils.cleanVariables(variables)),
     context.variables
   );
-  log.debug(variables);
+  log.debug('current environement variables', variables);
   return variables;
 }
 
