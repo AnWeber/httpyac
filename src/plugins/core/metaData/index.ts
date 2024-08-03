@@ -12,4 +12,5 @@ export * from './rateLimitMetaDataHandler';
 export * from './refMetaDataHandler';
 export * from './responseRefMetaDataHandler';
 export * from './sleepMetaDataHandler';
+export * from './timeoutMetaDataHandler';
 export * from './verboseMetaDataHandler';

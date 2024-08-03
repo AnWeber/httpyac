@@ -417,6 +417,11 @@ export const knownMetaData: Array<{
     completions: ['${1}'],
   },
   {
+    name: 'timeout',
+    description: 'set timeout for request',
+    completions: ['${1}'],
+  },
+  {
     name: 'verbose',
     description: 'enable trace log level',
   },

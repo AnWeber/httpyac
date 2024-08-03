@@ -77,6 +77,7 @@ function initParseMetData(api: models.HttpyacHooksApi) {
   api.hooks.parseMetaData.addHook('loop', metaData.loopMetaDataHandler);
   api.hooks.parseMetaData.addHook('noRedirect', metaData.noRedirectMetaDataHandler);
   api.hooks.parseMetaData.addHook('noRejectUnauthorized', metaData.noRejectUnauthorizedMetaDataHandler);
+  api.hooks.parseMetaData.addHook('timeout', metaData.timeoutMetaDataHandler);
   api.hooks.parseMetaData.addHook('note', metaData.noteMetaDataHandler);
   api.hooks.parseMetaData.addHook('proxy', metaData.proxyMetaDataHandler);
   api.hooks.parseMetaData.addHook('rateLimit', metaData.rateLimitMetaDataHandler);
