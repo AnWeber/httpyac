@@ -26,11 +26,22 @@ export class ProcessedHttpRegionInterceptor implements HookInterceptor<[models.P
     return true;
   }
 
+  public async onError(
+    _err: unknown,
+    hookContext: HookTriggerContext<[models.ProcessorContext], boolean | undefined>
+  ): Promise<boolean | undefined> {
+    this.updateProcessedHttpRegionAfterLoop(hookContext.args[0]);
+    return true;
+  }
+
   public async afterLoop(
     hookContext: HookTriggerContext<[models.ProcessorContext], boolean | undefined>
   ): Promise<boolean | undefined> {
-    const [context] = hookContext.args;
+    this.updateProcessedHttpRegionAfterLoop(hookContext.args[0]);
+    return true;
+  }
 
+  private updateProcessedHttpRegionAfterLoop(context: models.ProcessorContext) {
     const processedHttpRegion = context.processedHttpRegions
       ?.slice()
       .reverse()
@@ -38,13 +49,11 @@ export class ProcessedHttpRegionInterceptor implements HookInterceptor<[models.P
     if (processedHttpRegion) {
       processedHttpRegion.end = performance.now();
       processedHttpRegion.duration = processedHttpRegion.end - processedHttpRegion.start;
-      processedHttpRegion.disabled = !!hookContext.bail;
       processedHttpRegion.metaData = {
         ...context.httpRegion.metaData,
       };
       processedHttpRegion.testResults = context.httpRegion.testResults;
     }
-    return true;
   }
 
   private async afterResponseLoggingLoop(
@@ -66,6 +75,7 @@ export class ProcessedHttpRegionInterceptor implements HookInterceptor<[models.P
       filename: context.httpFile.fileName,
       symbol: context.httpRegion.symbol,
       isGlobal: context.httpRegion.isGlobal(),
+      testResults: context.httpRegion.testResults,
       start: performance.now(),
     };
   }

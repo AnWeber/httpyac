@@ -142,7 +142,7 @@ function deleteVariables(contextKeys: string[], context: vm.Context, deleteVaria
           deleteVariable(key);
         }
       } catch (err) {
-        log.info(err);
+        log.info(`error on delete of ${key}`, err);
       }
     }
   }

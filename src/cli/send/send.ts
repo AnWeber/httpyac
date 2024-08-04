@@ -95,8 +95,22 @@ function reportOutput(context: Omit<models.HttpFileSendContext, 'httpFile'>, opt
     console.info(transformToJunit(cliJsonOutput));
   } else if (context.scriptConsole) {
     context.scriptConsole.info('');
+
+    const requestCounts: Array<string> = [];
+    if (cliJsonOutput.summary.successRequests > 0) {
+      requestCounts.push(chalk`{green ${cliJsonOutput.summary.successRequests} succeeded}`);
+    }
+    if (cliJsonOutput.summary.failedRequests > 0) {
+      requestCounts.push(chalk`{red ${cliJsonOutput.summary.failedRequests} failed}`);
+    }
+    if (cliJsonOutput.summary.erroredRequests > 0) {
+      requestCounts.push(chalk`{red ${cliJsonOutput.summary.erroredRequests} errored}`);
+    }
+    if (cliJsonOutput.summary.skippedRequests > 0) {
+      requestCounts.push(chalk`{yellow ${cliJsonOutput.summary.skippedRequests} skipped}`);
+    }
     context.scriptConsole.info(
-      chalk`{bold ${cliJsonOutput.summary.totalRequests}} requests processed ({green ${cliJsonOutput.summary.successRequests} succeeded}, {red ${cliJsonOutput.summary.failedRequests} failed})`
+      chalk`{bold ${cliJsonOutput.summary.totalRequests}} requests processed (${requestCounts.join(', ')}))`
     );
   }
 }

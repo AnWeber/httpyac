@@ -122,9 +122,9 @@ export function addTestResultToHttpRegion(httpRegion: HttpRegion, testResult: Te
   httpRegion.testResults.push(testResult);
 }
 
-export function addSkippedTestResult(httpRegion: HttpRegion) {
+export function addSkippedTestResult(httpRegion: HttpRegion, message: string = 'request is skipped') {
   addTestResultToHttpRegion(httpRegion, {
-    message: 'request is skipped',
+    message,
     status: TestResultStatus.SKIPPED,
   });
 }

@@ -111,7 +111,7 @@
     "google-protobuf": "^3.21.2",
     "got": "^11.8.6",
     "grpc-js-reflection-client": "^1.2.14",
-    "hookpoint": "4.0.1",
+    "hookpoint": "4.1.0",
     "http-proxy-agent": "^7.0.2",
     "https-proxy-agent": "^7.0.4",
     "inquirer": "^9.2.20",

@@ -2,7 +2,7 @@ import { isEqualWith } from 'lodash';
 import get from 'lodash/get';
 import { URL } from 'url';
 
-import { log, userInteractionProvider } from '../../io';
+import { log } from '../../io';
 import type * as models from '../../models';
 import * as utils from '../../utils';
 
@@ -123,7 +123,7 @@ export function isOpenIdConfigurationEqual(
   });
 }
 
-export function assertConfiguration(config: models.OpenIdConfiguration, keys: string[]): boolean {
+export function assertConfiguration(config: models.OpenIdConfiguration, keys: string[]): void {
   const missingKeys = [];
   for (const key of keys) {
     if (!Object.entries(config).some(([obj, value]) => obj === key && !!value)) {
@@ -133,8 +133,6 @@ export function assertConfiguration(config: models.OpenIdConfiguration, keys: st
   if (missingKeys.length > 0) {
     const message = `missing configuration: ${missingKeys.map(obj => `${config.variablePrefix}_${obj}`).join(', ')}`;
     log.error(message);
-    userInteractionProvider.showErrorMessage?.(message);
-    return false;
+    throw new Error(message);
   }
-  return true;
 }

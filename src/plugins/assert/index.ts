@@ -6,3 +6,4 @@ export * from './provideAssertValueHeader';
 export * from './provideAssertValueJavascript';
 export * from './provideAssertValueStatus';
 export * from './registerAssertPlugin';
+export * from './testFailedInterceptor';

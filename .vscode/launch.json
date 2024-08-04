@@ -15,6 +15,7 @@
         "send",
         "${file}",
         "--all",
+        "--bail",
         "-o",
         "short"
       ],

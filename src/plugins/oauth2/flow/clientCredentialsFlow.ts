@@ -10,10 +10,8 @@ class ClientCredentialsFlow implements OpenIdFlow {
   }
 
   getCacheKey(config: models.OpenIdConfiguration) {
-    if (assertConfiguration(config, ['tokenEndpoint', 'clientId', 'clientSecret'])) {
-      return `client_credentials_${config.variablePrefix}_${config.clientId}_${config.tokenEndpoint}`;
-    }
-    return false;
+    assertConfiguration(config, ['tokenEndpoint', 'clientId', 'clientSecret']);
+    return `client_credentials_${config.variablePrefix}_${config.clientId}_${config.tokenEndpoint}`;
   }
 
   async perform(

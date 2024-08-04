@@ -14,10 +14,8 @@ class AuthorizationCodeFlow implements OpenIdFlow {
   }
 
   getCacheKey(config: models.OpenIdConfiguration) {
-    if (assertConfiguration(config, ['tokenEndpoint', 'authorizationEndpoint', 'clientId'])) {
-      return `authorization_code_${config.variablePrefix}_${config.clientId}_${config.tokenEndpoint}`;
-    }
-    return false;
+    assertConfiguration(config, ['tokenEndpoint', 'authorizationEndpoint', 'clientId']);
+    return `authorization_code_${config.variablePrefix}_${config.clientId}_${config.tokenEndpoint}`;
   }
 
   async perform(

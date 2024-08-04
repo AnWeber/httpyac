@@ -1,6 +1,7 @@
 import { generateCACertificate, getLocal, Mockttp } from 'mockttp';
 
 import { initFileProvider, parseHttp, sendHttp, sendHttpFile } from '../../../../test/testUtils';
+import { TestResultStatus } from '../../../../models';
 
 describe('metadata.noRejectUnauthorized', () => {
   let localServer: Mockttp;
@@ -14,24 +15,20 @@ describe('metadata.noRejectUnauthorized', () => {
   });
   afterAll(async () => await localServer.stop());
   it('should throw self signed certificate error', async () => {
-    try {
-      initFileProvider();
-      await localServer.forGet('/selfsignederror').thenReply(200);
+    initFileProvider();
 
-      await sendHttp(
-        `
+    const httpFile = await parseHttp(`
 GET /selfsignederror
-    `,
-        {
-          host: `https://localhost:${localServer.port}`,
-        }
-      );
+    `);
+    await localServer.forGet('/selfsignederror').thenReply(200);
 
-      throw new Error('no error while sendhttp');
-    } catch (err) {
-      expect(err instanceof Error && err.name).toBe('RequestError');
-      expect(err.toString()).toContain('signed certificate in certificate chain');
-    }
+    await sendHttpFile({
+      httpFile,
+      variables: {
+        host: `https://localhost:${localServer.port}`,
+      },
+    });
+    expect(httpFile.httpRegions[0].testResults?.some(t => t.status === TestResultStatus.ERROR)).toBeTruthy();
   });
   it('should use metadata tag', async () => {
     initFileProvider();

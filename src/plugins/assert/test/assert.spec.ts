@@ -70,6 +70,6 @@ describe('assert', () => {
     });
     expect(responses.length).toBe(1);
     expect(responses[0].statusCode).toBe(200);
-    expect(httpFile.httpRegions[0].testResults?.length).toBeUndefined();
+    expect(httpFile.httpRegions[0].testResults?.length).toBe(0);
   });
 });

@@ -28,7 +28,7 @@ export class IntellijAction {
   async processOnRequest(_request: models.Request, context: models.ProcessorContext): Promise<void> {
     utils.report(context, 'execute Intellij Javascript');
     const scriptData = await this.loadScript(context);
-    if (!scriptData || this.isStreamingScript(scriptData)) {
+    if (this.isStreamingScript(scriptData)) {
       return;
     }
 
@@ -38,9 +38,6 @@ export class IntellijAction {
 
   async processOnStreaming(context: models.ProcessorContext): Promise<void> {
     const scriptData = await this.loadScript(context);
-    if (!scriptData) {
-      return;
-    }
     this.scriptData = scriptData;
     if (this.isStreamingScript(scriptData) && context.requestClient) {
       const requestClient = context.requestClient;
@@ -55,7 +52,7 @@ export class IntellijAction {
   async processOnResponse(response: models.HttpResponse, context: models.ProcessorContext): Promise<void> {
     utils.report(context, 'execute Intellij Javascript');
     const scriptData = await this.loadScript(context);
-    if (!scriptData || this.isStreamingScript(scriptData)) {
+    if (this.isStreamingScript(scriptData)) {
       return;
     }
 
@@ -83,7 +80,7 @@ export class IntellijAction {
     return false;
   }
 
-  private async loadScript(context: models.ProcessorContext): Promise<models.ScriptData | undefined> {
+  private async loadScript(context: models.ProcessorContext): Promise<models.ScriptData> {
     if (this.isIntellijScriptData(this.scriptData)) {
       try {
         return {
@@ -94,9 +91,8 @@ export class IntellijAction {
           lineOffset: 0,
         };
       } catch (err) {
-        io.userInteractionProvider.showErrorMessage?.(`error loading script ${this.scriptData.fileName}`);
         (context.scriptConsole || io.log).error(this.scriptData.fileName, err);
-        return undefined;
+        throw new Error(`error loading script ${this.scriptData.fileName}`);
       }
     } else {
       return this.scriptData;

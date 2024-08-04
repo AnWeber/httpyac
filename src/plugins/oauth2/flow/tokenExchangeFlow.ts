@@ -7,10 +7,8 @@ import { requestOpenIdInformation } from './requestOpenIdInformation';
 
 export class TokenExchangeFlow {
   static getCacheKey(config: models.OpenIdConfiguration): string | false {
-    if (assertConfiguration(config, ['tokenEndpoint', 'clientId', 'clientSecret'])) {
-      return `${config.tokenEndpoint}_${config.clientId}`;
-    }
-    return false;
+    assertConfiguration(config, ['tokenEndpoint', 'clientId', 'clientSecret']);
+    return `${config.tokenEndpoint}_${config.clientId}`;
   }
 
   static async perform(

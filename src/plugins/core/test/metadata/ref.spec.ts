@@ -41,7 +41,6 @@ foo={{foo.foo}}
     initFileProvider();
     const httpFile = await parseHttp(`
 
-###
 # @ref not_found
 POST /post?test={{foo.test}}
 
@@ -49,13 +48,11 @@ foo={{foo.foo}}
 
     `);
 
-    await expect(
-      async () =>
-        await send({
-          httpFile,
-          httpRegion: httpFile.httpRegions[1],
-        })
-    ).rejects.toThrow(`ref not_found not found`);
+    await send({
+      httpFile,
+      httpRegion: httpFile.httpRegions[1],
+    });
+    expect(httpFile.httpRegions?.[0]?.testResults?.[0].message).toBe(`ref not_found not found`);
   });
 
   it('name + ref + falsy body', async () => {

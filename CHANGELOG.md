@@ -8,6 +8,7 @@
 - only try loading grpc reflection if no other protodefinition file is imported or it is explicitly triggerd using grpcReflection (#757)
 - add better handling for disabled and error tests (Anweber/vscode-httpyac#297, #760)
 - support empty passwords for Basic auth  (#751)
+- error do not bail test runs and instead just set error for this httpRegion (#708)
 
 ## [6.14.0] ( 2024-06-01)
 ### Features

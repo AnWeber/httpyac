@@ -4,12 +4,18 @@ import * as models from '../../../models';
 
 export const testExitCodeInterceptor = {
   id: 'testExitCode',
+
+  onError: async function onError(): Promise<boolean | undefined> {
+    process.exitCode = 10;
+    return true;
+  },
+
   afterTrigger: async function bail(hookContext: HookTriggerContext<[models.ProcessorContext], boolean>) {
     const context = hookContext.args[0];
-    const failedTest = context.httpRegion.testResults?.some?.(obj =>
-      [models.TestResultStatus.FAILED, models.TestResultStatus.ERROR].includes(obj.status)
+    const hasFailedTestResult = context.httpRegion.testResults?.some?.(
+      obj => obj.status === models.TestResultStatus.FAILED
     );
-    if (failedTest) {
+    if (hasFailedTestResult) {
       process.exitCode = 20;
     }
     return true;

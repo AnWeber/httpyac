@@ -93,8 +93,10 @@ export function createTestSummary(requests: Array<SendOutputRequest>): SendReque
     totalRequests: requests.length,
     skippedRequests: requests.filter(obj => obj.summary.skippedTests > 0).length,
     failedRequests: requests.filter(obj => obj.summary.failedTests > 0).length,
-    successRequests: requests.filter(obj => obj.summary.failedTests === 0).length,
-    erroredRequests: requests.filter(obj => obj.summary.erroredTests === 0).length,
+    successRequests: requests.filter(
+      obj => obj.summary.failedTests + obj.summary.erroredTests + obj.summary.skippedTests === 0
+    ).length,
+    erroredRequests: requests.filter(obj => obj.summary.erroredTests > 0).length,
     totalTests: requests.map(obj => obj.summary.totalTests).reduce(sum, 0),
     failedTests: requests.map(obj => obj.summary.failedTests).reduce(sum, 0),
     successTests: requests.map(obj => obj.summary.successTests).reduce(sum, 0),

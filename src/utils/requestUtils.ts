@@ -270,10 +270,13 @@ export function requestLoggerFactory(
         let message = chalk`{green ${models.testSymbols.ok} ${testResult.message || 'Test passed'}}`;
         if (testResult.status === models.TestResultStatus.SKIPPED) {
           message = chalk`{yellow ${models.testSymbols.skipped} Test skipped}`;
-        } else if (testResult.status === models.TestResultStatus.FAILED) {
-          message = chalk`{red ${models.testSymbols.error} ${testResult.message || 'Test failed'} (${testResult.error?.displayMessage})}`;
-        } else if (testResult.status === models.TestResultStatus.ERROR) {
-          message = chalk`{red ${models.testSymbols.error} ${testResult.message || 'Test failed'}}`;
+        } else if ([models.TestResultStatus.ERROR, models.TestResultStatus.FAILED].includes(testResult.status)) {
+          const errorMessage = testResult.error ? ` (${testResult.error?.displayMessage})` : '';
+          message = chalk`{red ${models.testSymbols.error} ${testResult.message || 'Test failed'}${errorMessage}}`;
+
+          if (!options?.useShort && testResult.error?.error.stack) {
+            message = [message, testResult.error?.error.stack].join('\r\n');
+          }
         }
         log(message);
       }
