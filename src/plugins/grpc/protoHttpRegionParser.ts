@@ -23,7 +23,7 @@ export async function parseProtoImport(
       protoDefinition.loaderOptions = {};
 
       const protoSymbol: models.HttpSymbol = new models.HttpSymbol({
-        name: next.value.textLine,
+        name: next.value.textLine || 'proto import',
         description: 'proto import',
         kind: models.HttpSymbolKind.proto,
         startLine: next.value.line,

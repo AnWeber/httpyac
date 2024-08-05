@@ -37,7 +37,7 @@ export function parseRequestLineFactory(requestContext: RequestParserContext) {
       }
       context.httpRegion.request = requestLine.request;
       const requestSymbol = new models.HttpSymbol({
-        name: next.value.textLine,
+        name: next.value.textLine || 'request line',
         description: `${requestContext.protocol} request-line`,
         kind: models.HttpSymbolKind.requestLine,
         startLine: next.value.line,
@@ -102,7 +102,7 @@ function getRequestParseLine(
         method: lineMatch.groups?.method || context.method || context.protocol,
       },
       symbol: new models.HttpSymbol({
-        name: lineMatch.groups.url,
+        name: lineMatch.groups.url || 'request',
         description: `${context.protocol} Url`,
         kind: models.HttpSymbolKind.url,
         startLine: httpLine.line,
@@ -122,7 +122,7 @@ function getRequestParseLine(
         method: protocolMatch.groups?.method || context.method || context.protocol,
       },
       symbol: new models.HttpSymbol({
-        name: protocolMatch.groups.url,
+        name: protocolMatch.groups.url || 'request',
         description: `${context.protocol} Url`,
         kind: models.HttpSymbolKind.url,
         startLine: httpLine.line,

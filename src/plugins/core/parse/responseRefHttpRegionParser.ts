@@ -28,8 +28,8 @@ export async function parseResponseRef(
         nextParserLine: next.value.line,
         symbols: [
           new HttpSymbol({
-            name: match.groups.key,
-            description: match.groups.value,
+            name: 'responseRef',
+            description: match.groups.filename,
             kind: HttpSymbolKind.response,
             startLine: next.value.line,
             startOffset: 0,

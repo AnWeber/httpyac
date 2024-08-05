@@ -1,3 +1,9 @@
+## [unreleased]
+
+### Fix
+
+- ensure valid names of parsed symbols (AnWeber/vscode-httpyac#297)
+
 ## [6.15.0] ( 2024-08-04)
 ### Features
 - add support to define timeout per request using `request.timeout` or setting variable `request_timeout`

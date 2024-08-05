@@ -43,8 +43,8 @@ export async function parseOutputRedirection(
         nextParserLine: next.value.line,
         symbols: [
           new models.HttpSymbol({
-            name: match.groups.key,
-            description: match.groups.value,
+            name: `outputredirection`,
+            description: match.groups.filename,
             kind: models.HttpSymbolKind.response,
             startLine: next.value.line,
             startOffset: 0,

@@ -23,7 +23,7 @@ export class HttpSymbol {
     endOffset: number;
     children?: Array<HttpSymbol>;
   }) {
-    this.name = options.name;
+    this.name = options.name || 'symbol';
     this.description = options.description;
     this.kind = options.kind;
     this.startLine = options.startLine;

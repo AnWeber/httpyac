@@ -88,17 +88,19 @@ export function parseRequestHeaderFactory(headers: Record<string, unknown>): Par
                 endLine: httpLine.line,
                 endOffset: httpLine.textLine.indexOf(headerName) + headerName.length,
               }),
-              new models.HttpSymbol({
-                name: headerValue,
-                description: 'request header value',
-                kind: models.HttpSymbolKind.value,
-                startLine: httpLine.line,
-                startOffset: valueOffset,
-                endLine: httpLine.line,
-                endOffset: valueOffset + headerValue.length,
-                children: parseHandlebarsSymbols(headerValue, httpLine.line, valueOffset),
-              }),
-            ],
+              headerValue
+                ? new models.HttpSymbol({
+                    name: headerValue,
+                    description: 'request header value',
+                    kind: models.HttpSymbolKind.value,
+                    startLine: httpLine.line,
+                    startOffset: valueOffset,
+                    endLine: httpLine.line,
+                    endOffset: valueOffset + headerValue.length,
+                    children: parseHandlebarsSymbols(headerValue, httpLine.line, valueOffset),
+                  })
+                : undefined,
+            ].filter(s => !!s),
           }),
         ],
       };
@@ -130,7 +132,7 @@ export function parseDefaultHeadersFactory(
       return {
         symbols: [
           new models.HttpSymbol({
-            name: val,
+            name: val || 'hader variable',
             description: 'Header Variable',
             kind: models.HttpSymbolKind.requestHeader,
             startLine: httpLine.line,
@@ -184,7 +186,7 @@ export function parseUrlLineFactory(attachUrl: (url: string) => void): ParseLine
       return {
         symbols: [
           new models.HttpSymbol({
-            name: val,
+            name: val || 'URL Part',
             description: 'URL Part',
             kind: models.HttpSymbolKind.url,
             startLine: httpLine.line,
@@ -208,7 +210,7 @@ export function parseQueryLineFactory(attachUrl: (url: string) => void): ParseLi
       return {
         symbols: [
           new models.HttpSymbol({
-            name: val,
+            name: val || 'Query',
             description: 'Query',
             kind: models.HttpSymbolKind.url,
             startLine: httpLine.line,
@@ -248,7 +250,7 @@ export async function parseComments(
       const key = match.groups.key.replace(/-./gu, value => value[1].toUpperCase());
       result.symbols[0].children = [
         new models.HttpSymbol({
-          name: key,
+          name: key || 'metadata',
           description: match.groups.value || '-',
           kind: models.HttpSymbolKind.metaData,
           startLine: httpLine.line,
@@ -257,7 +259,7 @@ export async function parseComments(
           endOffset: httpLine.textLine.length,
           children: [
             new models.HttpSymbol({
-              name: key,
+              name: key || 'metadata key',
               description: knownMetaData.find(obj => obj.name === key)?.description || 'key of meta data',
               kind: models.HttpSymbolKind.key,
               startLine: httpLine.line,
@@ -273,7 +275,7 @@ export async function parseComments(
         val = match.groups.value.trim();
         result.symbols[0].children.push(
           new models.HttpSymbol({
-            name: match.groups.value,
+            name: match.groups.value || 'metadata value',
             description: 'value of meta data',
             kind: models.HttpSymbolKind.value,
             startLine: httpLine.line,
@@ -464,7 +466,7 @@ export function parseHandlebarsSymbols(line: string | undefined, startLine: numb
       const [searchValue, variable] = match;
       symbols.push(
         new models.HttpSymbol({
-          name: variable,
+          name: variable || 'variable',
           description: variable,
           startLine,
           endLine: startLine,
