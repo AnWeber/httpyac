@@ -90,7 +90,7 @@
     "lockfile-lint": "^4.13.2",
     "mockttp": "^3.11.0",
     "prettier": "^3.2.5",
-    "typescript": "^5.4.5"
+    "typescript": "^5.5.4"
   },
   "dependencies": {
     "@cloudamqp/amqp-client": "^2.1.1",
