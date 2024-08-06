@@ -114,7 +114,7 @@
     "hookpoint": "4.1.0",
     "http-proxy-agent": "^7.0.2",
     "https-proxy-agent": "^7.0.4",
-    "inquirer": "^9.2.20",
+    "inquirer": "^10.1.8",
     "kafkajs": "^2.2.4",
     "lodash": "^4.17.21",
     "mqtt": "^5.5.5",
