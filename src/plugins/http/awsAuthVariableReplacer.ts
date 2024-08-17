@@ -24,6 +24,9 @@ export async function awsAuthVariableReplacer(
         sessionToken: match.groups.token,
       };
       const url = new URL(request.url);
+      if (!request.headers) {
+        request.headers = {};
+      }
       const requestOptions: aws4.Request = {
         method: request.method,
         headers: request.headers,
@@ -36,6 +39,7 @@ export async function awsAuthVariableReplacer(
       const result = await aws4.sign(requestOptions, credentials);
 
       Object.assign(request, { http2: false });
+      Object.assign(request.headers, result.headers);
       return result.headers?.Authorization;
     }
   }

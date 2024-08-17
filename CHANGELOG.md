@@ -3,6 +3,7 @@
 ### Fix
 
 - ensure valid names of parsed symbols (AnWeber/vscode-httpyac#297)
+- copy header for aws signing (#769)
 
 ## [6.15.0] ( 2024-08-04)
 ### Features
