@@ -204,9 +204,10 @@ export function requestLoggerFactory(
     log('');
     log('---------------------');
     log('');
-    if (httpRegion?.metaData?.title || httpRegion?.metaData?.description) {
-      if (httpRegion?.metaData?.title) {
-        log(chalk`{gray === ${httpRegion.metaData.title} ===}`);
+    if (httpRegion?.metaData?.title || httpRegion?.metaData?.name || httpRegion?.metaData?.description) {
+      const title = httpRegion?.metaData?.title || httpRegion?.metaData?.name;
+      if (title) {
+        log(chalk`{gray === ${title} ===}`);
       }
       if (httpRegion?.metaData?.description) {
         log(chalk`{gray ${httpRegion.metaData.description}}`);

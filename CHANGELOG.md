@@ -1,4 +1,6 @@
 ## [unreleased]
+### Features
+- prefix output with name as fallback for title (AnWeber/vscode-httpyac#318)
 
 ### Fix
 
