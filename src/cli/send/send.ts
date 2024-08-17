@@ -110,7 +110,7 @@ function reportOutput(context: Omit<models.HttpFileSendContext, 'httpFile'>, opt
       requestCounts.push(chalk`{yellow ${cliJsonOutput.summary.skippedRequests} skipped}`);
     }
     context.scriptConsole.info(
-      chalk`{bold ${cliJsonOutput.summary.totalRequests}} requests processed (${requestCounts.join(', ')}))`
+      chalk`{bold ${cliJsonOutput.summary.totalRequests}} requests processed (${requestCounts.join(', ')})`
     );
   }
 }
