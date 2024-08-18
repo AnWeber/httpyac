@@ -15,7 +15,7 @@ export function oauth2Command() {
       'output format of response (access_token, refresh_token, response)',
       'access_token'
     )
-    .option('--var  <variables...>', 'list of variables')
+    .option('--var  <variables...>', 'list of variables (e.g foo="bar")')
     .action(execute);
   return program;
 }

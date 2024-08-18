@@ -44,7 +44,7 @@ export function sendCommand() {
     .option('-s, --silent', 'log only request')
     .option('-t, --tag  <tag...>', 'list of tags to execute')
     .option('--timeout <timeout>', 'maximum time allowed for connections', utils.toNumber)
-    .option('--var  <variables...>', 'list of variables')
+    .option('--var  <variables...>', 'list of variables (e.g foo="bar")')
     .option('-v, --verbose', 'make the operation more talkative')
     .action(execute);
   return program;
