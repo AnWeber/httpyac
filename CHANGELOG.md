@@ -6,6 +6,7 @@
 
 - ensure valid names of parsed symbols (AnWeber/vscode-httpyac#297)
 - copy header for aws signing (#769)
+- add skip test result if `@ref` is skipped (AnWeber/vscode-httpyac#297)
 
 ## [6.15.0] ( 2024-08-04)
 ### Features

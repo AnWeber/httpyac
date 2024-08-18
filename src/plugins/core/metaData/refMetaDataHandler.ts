@@ -44,6 +44,8 @@ class RefMetaAction {
         if (result) {
           // ref to ref variable export
           utils.setVariableInContext(reference.variablesPerEnv[envKey], context);
+        } else if (reference.testResults?.some(t => t.status === models.TestResultStatus.SKIPPED)) {
+          utils.addSkippedTestResult(context.httpRegion, 'ref is skipped');
         }
       }
     } else {
