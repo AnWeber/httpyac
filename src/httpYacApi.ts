@@ -83,7 +83,7 @@ export async function getVariables(context: models.VariableProviderContext): Pro
     ...vars.map(variables => utils.cleanVariables(variables)),
     context.variables
   );
-  log.debug('current environement variables', variables);
+  log.debug('current environment variables', variables);
   return variables;
 }
 
