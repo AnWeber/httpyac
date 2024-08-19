@@ -17,7 +17,7 @@ describe('awsAuthVariableReplacer', () => {
       } as models.ProcessorContext
     );
     expect(result).toContain(
-      'AWS4-HMAC-SHA256 Credential=doe/20240817/eu-central-1/cognito-idp/aws4_request, SignedHeaders=host;x-amz-date;x-amz-security-token, Signature='
+      'AWS4-HMAC-SHA256 Credential=doe/20240817/eu-central-1/cognito-idp/aws4_request, SignedHeaders=host;x-amz-date;x-amz-security-token'
     );
     expect(Object.keys(request.headers)).toEqual(['Host', 'X-Amz-Security-Token', 'X-Amz-Date', 'Authorization']);
   });
