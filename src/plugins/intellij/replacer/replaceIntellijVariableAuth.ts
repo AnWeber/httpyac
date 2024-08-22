@@ -1,6 +1,7 @@
 import { OpenIdConfiguration, ProcessorContext, Variables } from '../../../models';
 import { getOAuth2Response } from '../../oauth2';
 import { setVariableInContext } from '../../../utils';
+import { log } from '../../../io';
 export async function replaceIntellijVariableAuth(
   variable: string,
   context: ProcessorContext
@@ -41,13 +42,12 @@ async function getOAuthToken(variable: string, context: ProcessorContext) {
 
 function getOpenIdConfiguration(name: string, variables: Variables) {
   if (!isIntellijAuth(variables.Security)) {
-    return undefined;
-  }
-  if (!variables.Security?.Auth) {
+    log.warn('no intellij auth security found');
     return undefined;
   }
   const auth = variables.Security?.Auth?.[name];
   if (!auth) {
+    log.warn(`no auth security found with name ${name}`);
     return undefined;
   }
 
@@ -109,7 +109,7 @@ function mapGrantType(
 }
 
 interface IntellijSecurity {
-  Auth?: Record<
+  Auth: Record<
     string,
     {
       Type: 'OAuth2' | 'Mock';
