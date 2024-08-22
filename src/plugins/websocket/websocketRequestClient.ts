@@ -79,10 +79,6 @@ export class WebsocketRequestClient extends models.AbstractRequestClient<WebSock
   }
 
   override disconnect(err?: Error): void {
-    this.closeWebsocket(err);
-  }
-
-  private closeWebsocket(err?: Error) {
     if (err) {
       this._nativeClient?.close(WEBSOCKET_CLOSE_GOING_AWAY, err.message);
     } else {

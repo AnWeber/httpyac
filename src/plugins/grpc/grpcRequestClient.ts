@@ -7,6 +7,7 @@ import * as utils from '../../utils';
 import { getSerivceData, GrpcClient, ServiceData } from './createGrpcService';
 import { GrpcRequest, isGrpcRequest } from './grpcRequest';
 import { PathAwareChannel } from './pathAwareChannel';
+import { ConnectivityState } from '@grpc/grpc-js/build/src/connectivity-state';
 
 grpc.setLogger(log);
 type GrpcStream = (Readable | Writable | Duplex) & { cancel?(): void };
@@ -56,12 +57,13 @@ export class GrpcRequestClient extends models.AbstractRequestClient<GrpcClient |
         options: grpc.ChannelOptions
       ) => {
         try {
+          log.trace('grpc new channel for address is created', address);
           const nextOptions = Object.assign({}, options);
           delete nextOptions.channelFactoryOverride;
           nextOptions['grpc.default_authority'] = serviceData.server;
           return new PathAwareChannel(address, credentials, nextOptions, serviceData.path);
         } catch (err) {
-          log.debug(err);
+          log.debug('error on PathAwareChannel creation', err);
         }
         return new grpc.Channel(address, credentials, options);
       };
@@ -75,22 +77,31 @@ export class GrpcRequestClient extends models.AbstractRequestClient<GrpcClient |
 
   async connect(prevClient: GrpcClient | undefined): Promise<GrpcClient | undefined> {
     if (isGrpcRequest(this.request)) {
+      if (prevClient) {
+        const connectivityState = this.getClientConnectivityState(prevClient);
+        log.trace('grpc connect with prev client and state', connectivityState, prevClient);
+        if (connectivityState === ConnectivityState.TRANSIENT_FAILURE) {
+          prevClient.close();
+          log.debug('grpc prev client connection state after close:', this.getClientConnectivityState(prevClient));
+        } else if (connectivityState !== ConnectivityState.SHUTDOWN) {
+          this._nativeClient = prevClient;
+          log.trace('grpc prev client is used', connectivityState, prevClient);
+          return this._nativeClient;
+        }
+      }
+
       const protoDefinitions = this.context.options.protoDefinitions;
       if (protoDefinitions) {
+        log.trace('grpc new client is used');
         this._clientDefinition = getSerivceData(this.request.url || '', protoDefinitions);
-
-        if (prevClient) {
-          this._nativeClient = prevClient;
-        } else {
-          this._nativeClient = new this._clientDefinition.ServiceClass(
-            this._clientDefinition.server,
-            this.request.channelCredentials || grpc.credentials.createInsecure(),
-            this.getChannelOptions(this.request, this._clientDefinition)
-          );
-        }
+        this._nativeClient = new this._clientDefinition.ServiceClass(
+          this._clientDefinition.server,
+          this.request.channelCredentials || grpc.credentials.createInsecure(),
+          this.getChannelOptions(this.request, this._clientDefinition)
+        );
       } else {
         log.error('no protodefinitions found in context');
-        throw new Error('Missing protodefinitions');
+        throw new Error('Missing Protodefinitions');
       }
     }
     return this._nativeClient;
@@ -164,7 +175,7 @@ export class GrpcRequestClient extends models.AbstractRequestClient<GrpcClient |
     }
   }
 
-  override disconnect(err?: Error): void {
+  public override disconnect(err?: Error): void {
     if (this.grpcStream?.cancel) {
       this.grpcStream.cancel();
     } else if (err) {
@@ -177,12 +188,16 @@ export class GrpcRequestClient extends models.AbstractRequestClient<GrpcClient |
     delete this.grpcStream;
 
     if (this._nativeClient) {
-      log.debug('client connection state:', this._nativeClient.getChannel().getConnectivityState(false));
+      log.debug('client connection state:', this.getClientConnectivityState(this._nativeClient));
       this._nativeClient.close();
-      log.debug('client connection state after close:', this._nativeClient.getChannel().getConnectivityState(false));
+      log.debug('client connection state after close:', this.getClientConnectivityState(this._nativeClient));
     }
     delete this._nativeClient;
     this.onDisconnect();
+  }
+
+  private getClientConnectivityState(client: GrpcClient) {
+    return client.getChannel().getConnectivityState(false);
   }
 
   private registerEvents(stream: GrpcStream, methodName: string): void {

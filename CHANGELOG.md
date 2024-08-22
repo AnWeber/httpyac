@@ -1,4 +1,4 @@
-## [unreleased]
+## [6.15.1] ( 2024-08-22)
 ### Features
 - prefix output with name as fallback for title (AnWeber/vscode-httpyac#318)
 
