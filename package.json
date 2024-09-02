@@ -96,7 +96,7 @@
     "@cloudamqp/amqp-client": "^2.1.1",
     "@grpc/grpc-js": "^1.11.1",
     "@grpc/proto-loader": "^0.7.13",
-    "@xmldom/xmldom": "^0.8.10",
+    "@xmldom/xmldom": "^0.9.0",
     "aws4": "^1.13.1",
     "chalk": "^4.1.2",
     "clipboardy": "^4.0.0",
