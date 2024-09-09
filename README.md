@@ -73,6 +73,7 @@ Options:
   --repeat-mode <mode>      repeat mode: sequential, parallel (default)
   --parallel <count>        send parallel requests
   -s, --silent              log only request
+  -t, --tag  <tag...>       list of tags to execute
   --timeout <timeout>       maximum time allowed for connections
   --var  <variables...>     list of variables
   -v, --verbose             make the operation more talkative
