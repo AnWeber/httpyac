@@ -1,3 +1,7 @@
+## [unreleased]
+### Features
+- support client certificates on OAuth2 Requests (#802)
+
 ## [6.15.1] ( 2024-08-22)
 ### Features
 - prefix output with name as fallback for title (AnWeber/vscode-httpyac#318)
