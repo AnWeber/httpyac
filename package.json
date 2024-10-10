@@ -120,7 +120,7 @@
     "mqtt": "^5.10.0",
     "open": "^8.4.2",
     "socks-proxy-agent": "^8.0.4",
-    "tough-cookie": "^4.1.4",
+    "tough-cookie": "^5.0.0",
     "uuid": "^10.0.0",
     "ws": "^8.18.0",
     "xmldom-format": "^1.1.1",
