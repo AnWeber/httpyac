@@ -148,7 +148,7 @@ export class HttpFileStore implements models.HttpFileStore {
     const envPluginLocation = process.env.HTTPYAC_PLUGIN;
     if (envPluginLocation) {
       try {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const envHook = require(envPluginLocation);
         if (envHook.configureHooks) {
           hooks.HTTPYAC_PLUGIN = envHook.configureHooks;

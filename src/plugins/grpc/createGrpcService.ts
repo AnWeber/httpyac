@@ -16,7 +16,7 @@ export interface ServiceData {
 
 export interface GrpcClient extends grpc.Client {
   close(): void;
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   [key: string]: Function;
 }
 

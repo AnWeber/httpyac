@@ -37,7 +37,7 @@ export function initFileProvider(): void {
   fileProvider.exists = async (path: models.PathLike): Promise<boolean> => {
     try {
       return !!(await fs.stat(fileProvider.toString(path)));
-    } catch (err) {
+    } catch {
       return false;
     }
   };

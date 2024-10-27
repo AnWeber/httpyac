@@ -56,7 +56,7 @@ export class CookieJarInterceptor implements HookInterceptor<[models.ProcessorCo
     if (memoryStore && memoryStore instanceof MemoryCookieStore) {
       memoryStore.getAllCookies((err, cookies) => {
         if (!err) {
-          for (const cookie of cookies) {
+          for (const cookie of cookies || []) {
             const cookieSession: CookieSession = {
               id: `${this.getCookieStorePrefix(hookContext.args[0])}_${cookie.toString()}`,
               title: `${cookie.domain} ${cookie.path} ${cookie.key}`,

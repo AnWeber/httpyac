@@ -14,7 +14,7 @@ function resolveModule(request: string, context: string): string | undefined {
   try {
     try {
       resolvedPath = Module.createRequire(path.resolve(context, 'package.json')).resolve(request);
-    } catch (e) {
+    } catch {
       resolvedPath = require.resolve(request, { paths: [context] });
     }
   } catch (e) {
@@ -30,12 +30,13 @@ export function loadModule<T>(request: string, context: string, force = false): 
         clearModule(request, context);
       }
       return Module.createRequire(path.resolve(context, 'package.json'))(request);
-    } catch (e) {
+    } catch {
       const resolvedPath = resolveModule(request, context);
       if (resolvedPath) {
         if (force) {
           clearRequireCache(resolvedPath);
         }
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         return require(resolvedPath);
       }
     }

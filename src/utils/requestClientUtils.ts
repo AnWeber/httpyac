@@ -105,7 +105,9 @@ function toResponses(...responses: Array<models.HttpResponse | void | undefined>
 
 function registerCancellation<T extends models.RequestClient>(client: T, context: models.ProcessorContext) {
   if (context.progress?.register) {
-    return context.progress?.register(() => client.disconnect(new Error('user cancellation')));
+    return context.progress?.register(() => {
+      client.disconnect(new Error('user cancellation'));
+    });
   }
   return undefined;
 }

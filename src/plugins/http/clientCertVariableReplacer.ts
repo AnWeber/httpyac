@@ -53,7 +53,7 @@ export async function addClientCertificateForUrl(
 function createUrl(url: string): URL | undefined {
   try {
     return new URL(url);
-  } catch (err) {
+  } catch {
     return undefined;
   }
 }

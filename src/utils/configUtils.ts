@@ -78,7 +78,7 @@ export async function parseJson<T>(fileName: PathLike): Promise<T | undefined> {
       return JSON.parse(text);
     }
   } catch (err) {
-    io.log.debug(`json parse of ${fileName} failed`);
+    io.log.debug(`json parse of ${fileName} failed`, err);
   }
   return undefined;
 }

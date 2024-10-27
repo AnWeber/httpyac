@@ -1,6 +1,7 @@
 ## [unreleased]
 ### Features
 - support client certificates on OAuth2 Requests (#802)
+- update tough-cookie to remove punycode deprecation warning (#813)
 
 ## [6.15.1] ( 2024-08-22)
 ### Features
