@@ -2,6 +2,7 @@
 ### Features
 - support client certificates on OAuth2 Requests (#802)
 - update tough-cookie to remove punycode deprecation warning (#813)
+- support $env intellij environment variables access (#811)
 
 ## [6.15.1] ( 2024-08-22)
 ### Features

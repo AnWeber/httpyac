@@ -109,6 +109,8 @@ function initIntellijVariables(context: models.ProcessorContext): intellij.Intel
   const variables: intellij.IntellijJavascriptGlobal = {
     client: new intellij.IntellijHttpClient(context),
     crypto: new intellij.IntellijCryptoSupport(),
+    $random: new intellij.IntellijRandom(),
+    $env: process.env,
   };
   if (context.request) {
     if (context.httpRegion.response) {
