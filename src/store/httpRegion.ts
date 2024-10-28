@@ -91,7 +91,7 @@ export class HttpRegion implements models.HttpRegion {
       }
       const isNotCanceled = result !== HookCancel && result.every(obj => !!obj);
       const hasOnlySucessTestResults =
-        this.testResults && this.testResults?.some(t => t.status === models.TestResultStatus.SUCCESS);
+        !this.testResults.length || this.testResults.every(t => t.status === models.TestResultStatus.SUCCESS);
       return isNotCanceled && hasOnlySucessTestResults;
     } catch (err) {
       if (isError(err)) {

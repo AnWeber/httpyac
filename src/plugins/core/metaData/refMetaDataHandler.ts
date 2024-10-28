@@ -46,7 +46,7 @@ class RefMetaAction {
           utils.setVariableInContext(reference.variablesPerEnv[envKey], context);
         } else if (
           reference.testResults &&
-          reference.testResults?.some(t => t.status !== models.TestResultStatus.SUCCESS)
+          reference.testResults.some(t => t.status !== models.TestResultStatus.SUCCESS)
         ) {
           utils.addSkippedTestResult(context.httpRegion);
         }
