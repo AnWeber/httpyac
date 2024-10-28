@@ -30,6 +30,8 @@ async function setEnvNoRedirect(request: models.Request, variables: models.Varia
 async function setEnvProxy(request: models.Request, variables: models.Variables): Promise<void> {
   if (utils.isString(variables?.request_proxy)) {
     request.proxy = variables.request_proxy;
+  } else if (utils.isString(process.env.http_proxy)) {
+    request.proxy = process.env.http_proxy;
   }
 }
 
