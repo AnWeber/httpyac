@@ -1,4 +1,4 @@
-import { DOMParser, Document } from '@xmldom/xmldom';
+import { DOMParser, Document, Node } from '@xmldom/xmldom';
 
 import { log } from '../../io';
 import { Variables } from '../../models';
