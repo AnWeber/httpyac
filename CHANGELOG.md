@@ -5,6 +5,7 @@
 - support $env intellij environment variables access (#811)
 - failed tests in reference skips request (AnWeber/vscode-httpyac#335)
 - support `http_proxy` environment variable
+- remove `unexpected-response` listener to support abortHandshake in ws (#816)
 
 ## [6.15.1] ( 2024-08-22)
 ### Features

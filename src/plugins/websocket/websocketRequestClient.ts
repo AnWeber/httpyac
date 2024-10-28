@@ -125,7 +125,7 @@ export class WebsocketRequestClient extends models.AbstractRequestClient<WebSock
       });
     });
 
-    const metaDataEvents = ['upgrade', 'unexpected-response', 'ping', 'pong', 'closing', 'close'];
+    const metaDataEvents = ['upgrade', 'ping', 'pong', 'closing', 'close'];
     for (const event of metaDataEvents) {
       if (utils.isString(event)) {
         client.on(event, (message: IncomingMessage) => {
