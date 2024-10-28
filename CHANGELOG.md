@@ -1,4 +1,4 @@
-## [unreleased]
+## [6.16.0] ( 2024-10-28)
 ### Features
 - support client certificates on OAuth2 Requests (#802)
 - update tough-cookie to remove punycode deprecation warning (#813)
