@@ -3,6 +3,7 @@
 - support client certificates on OAuth2 Requests (#802)
 - update tough-cookie to remove punycode deprecation warning (#813)
 - support $env intellij environment variables access (#811)
+- failed tests in reference skips request (AnWeber/vscode-httpyac#335)
 
 ## [6.15.1] ( 2024-08-22)
 ### Features
