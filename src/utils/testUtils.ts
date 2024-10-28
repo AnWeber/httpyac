@@ -11,9 +11,14 @@ import {
 import { isError, parseError } from './errorUtils';
 import { isHttpResponse } from './requestUtils';
 
-export function testFactoryAsync({
-  httpRegion,
-}: ProcessorContext): (message: string, testMethod: (testResult: TestResult) => Promise<void>) => Promise<void> {
+export type TestFactoryOptions = {
+  ignoreErrorFile: true;
+};
+
+export function testFactoryAsync(
+  { httpRegion }: ProcessorContext,
+  options: TestFactoryOptions
+): (message: string, testMethod: (testResult: TestResult) => Promise<void>) => Promise<void> {
   return async function test(
     message: string,
     testMethod: (testResult: TestResult) => Promise<void> | void
@@ -27,6 +32,9 @@ export function testFactoryAsync({
         await testMethod(testResult);
       } catch (err) {
         setErrorInTestResult(testResult, err);
+        if (options.ignoreErrorFile && testResult.error?.errorType) {
+          testResult.error.displayMessage = `${testResult.error.errorType}: ${testResult.error.message}`;
+        }
       }
     }
     addTestResultToHttpRegion(httpRegion, testResult);

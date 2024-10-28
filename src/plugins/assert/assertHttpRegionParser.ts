@@ -51,7 +51,9 @@ export async function parseAssertLine(
       const predicate = predicates.find(obj => match.groups?.predicate && obj.id.indexOf(match.groups.predicate) >= 0);
       if (predicate) {
         httpRegion.hooks.onResponse.addHook(`test ${textLine}`, async (response, context) => {
-          const test = utils.testFactoryAsync(context);
+          const test = utils.testFactoryAsync(context, {
+            ignoreErrorFile: true,
+          });
           await test(`${valueString || type} ${predicate.id[0]} ${expectedString || ''}`.trim(), async testResult => {
             const value = await context.httpFile.hooks.provideAssertValue.trigger(type, valueString, response, context);
             const expected =
