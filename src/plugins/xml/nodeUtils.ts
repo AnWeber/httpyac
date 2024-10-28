@@ -1,5 +1,4 @@
-/* eslint-disable no-undef */
-import { DOMParser } from '@xmldom/xmldom';
+import { DOMParser, Document } from '@xmldom/xmldom';
 
 import { log } from '../../io';
 import { Variables } from '../../models';
@@ -40,5 +39,5 @@ export function parseFromString(xml: string, mimeType?: string | undefined): Doc
     errorHandler(level: string, message: unknown) {
       log.debug(level, message);
     },
-  }).parseFromString(xml, mimeType);
+  }).parseFromString(xml, mimeType || 'text/xml');
 }

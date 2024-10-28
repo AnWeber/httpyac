@@ -25,6 +25,7 @@ export async function provideAssertValueXPath(
         evaluate = useNamespaces(context.options.xpath_namespaces);
       }
 
+      // @ts-expect-error 2345
       const results = evaluate(value, node);
       return getSelectReturnType(results);
     } catch (err) {

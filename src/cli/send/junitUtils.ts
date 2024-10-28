@@ -1,4 +1,4 @@
-import { DOMImplementation } from '@xmldom/xmldom';
+import { DOMImplementation, Document, Element } from '@xmldom/xmldom';
 import { EOL } from 'os';
 import { formatXml } from 'xmldom-format';
 import { TestResult, TestResultStatus } from '../../models';
@@ -35,8 +35,7 @@ export function transformToJunit(output: SendJsonOutput): string {
   });
 }
 
-// eslint-disable-next-line no-undef
-function transformRequest(document: XMLDocument, request: SendOutputRequest) {
+function transformRequest(document: Document, request: SendOutputRequest) {
   const testSuiteNode = document.createElement('testsuite');
   setAttribute(testSuiteNode, 'name', request.name);
   setAttribute(testSuiteNode, 'tests', request.summary?.totalTests || 0);
@@ -76,8 +75,7 @@ function transformRequest(document: XMLDocument, request: SendOutputRequest) {
   return testSuiteNode;
 }
 function transformTestResultToTestcase(
-  // eslint-disable-next-line no-undef
-  document: XMLDocument,
+  document: Document,
   testResult: TestResult,
   attributes: Record<string, string | number>
 ) {
@@ -115,8 +113,7 @@ function transformTestResultToTestcase(
   return root;
 }
 
-// eslint-disable-next-line no-undef
-function transformToProperties(document: XMLDocument, properties: Record<string, string | number | undefined>) {
+function transformToProperties(document: Document, properties: Record<string, string | number | undefined>) {
   let hasChild = false;
   const root = document.createElement('properties');
   for (const [key, value] of Object.entries(properties)) {
@@ -142,8 +139,7 @@ function toFloatSeconds(durationMillis: number): string {
   return (durationMillis / 1000).toFixed(3);
 }
 
-// eslint-disable-next-line no-undef
-function setAttribute(node: HTMLElement, key: string, value: string | number | undefined) {
+function setAttribute(node: Element, key: string, value: string | number | undefined) {
   if (value || value === 0) {
     node.setAttribute(key, `${value}`);
   }

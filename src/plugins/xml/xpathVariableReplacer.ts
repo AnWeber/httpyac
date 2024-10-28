@@ -22,6 +22,7 @@ export async function xpathVariableReplacer(
           if (options.xpath_namespaces) {
             evaluate = useNamespaces(options.xpath_namespaces);
           }
+          // @ts-expect-error 2345
           const results = evaluate(match.groups.xpath, node);
           return getSelectReturnType(results);
         }

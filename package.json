@@ -96,8 +96,8 @@
     "@cloudamqp/amqp-client": "^2.1.1",
     "@grpc/grpc-js": "^1.11.1",
     "@grpc/proto-loader": "^0.7.13",
-    "@xmldom/xmldom": "^0.8.10",
-    "aws4": "^1.13.1",
+    "@xmldom/xmldom": "^0.9.5",
+    "aws4": "^1.13.2",
     "chalk": "^4.1.2",
     "clipboardy": "^4.0.0",
     "commander": "^12.1.0",
@@ -123,7 +123,7 @@
     "tough-cookie": "^5.0.0",
     "uuid": "^10.0.0",
     "ws": "^8.18.0",
-    "xmldom-format": "^1.1.1",
+    "xmldom-format": "^2.0.0",
     "xpath": "^0.0.34"
   },
   "volta": {
