@@ -1,4 +1,4 @@
-import { QuestionCollection } from 'inquirer';
+import { QuestionMap } from 'inquirer';
 import { HttpFile, HttpRegion } from '../../store';
 import { selectHttpFiles } from './selectHttpFiles';
 
@@ -83,7 +83,7 @@ describe('selectHttpFiles', () => {
   it('should return values by manual input', async () => {
     const inquirer = await import('inquirer');
     Object.assign(inquirer.default, {
-      prompt(questions: QuestionCollection) {
+      prompt(questions: QuestionMap) {
         const q = questions[0];
         return {
           region: q.choices[1],
