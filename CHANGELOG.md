@@ -1,9 +1,13 @@
+## [6.16.2] (2024-10-29)
+
+### Fix
+- named response is only set, if all testResults are valid
+
 ## [6.16.1] ( 2024-10-29)
 
 ### Fix
-- support `http_proxy` environment variable
+- support `https_proxy` environment variable
 - support html mimetype for dom parser and use only valid mimetype in parseFromString
-
 
 ## [6.16.0] ( 2024-10-28)
 ### Features
