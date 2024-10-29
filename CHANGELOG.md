@@ -1,3 +1,8 @@
+## [6.16.1] ( 2024-10-28)
+### Features
+- support `http_proxy` environment variable
+
+
 ## [6.16.0] ( 2024-10-28)
 ### Features
 - support client certificates on OAuth2 Requests (#802)

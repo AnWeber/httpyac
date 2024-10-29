@@ -5,13 +5,14 @@ export async function setEnvRequestOptions(
   request: models.Request,
   { variables }: models.ProcessorContext
 ): Promise<void> {
-  await setEnvRejectUnauthorized(request, variables);
-  await setEnvNoRedirect(request, variables);
-  await setEnvProxy(request, variables);
-  await setEnvRequestTimeout(request, variables);
+  setRequestRejectUnauthorized(request, variables);
+  setRequestNoRedirect(request, variables);
+  setRequestProxy(request, variables);
+  setRequestTimeout(request, variables);
+  setEnvironmentProxy(request);
 }
 
-async function setEnvRejectUnauthorized(request: models.Request, variables: models.Variables): Promise<void> {
+function setRequestRejectUnauthorized(request: models.Request, variables: models.Variables): void {
   if (request && variables) {
     if (typeof variables.request_rejectUnauthorized !== 'undefined') {
       request.noRejectUnauthorized = !utils.toBoolean(variables.request_rejectUnauthorized);
@@ -19,7 +20,7 @@ async function setEnvRejectUnauthorized(request: models.Request, variables: mode
   }
 }
 
-async function setEnvNoRedirect(request: models.Request, variables: models.Variables): Promise<void> {
+function setRequestNoRedirect(request: models.Request, variables: models.Variables): void {
   if (request && variables) {
     if (typeof variables.request_noRedirect !== 'undefined') {
       request.noRedirect = utils.toBoolean(variables.request_noRedirect);
@@ -27,15 +28,26 @@ async function setEnvNoRedirect(request: models.Request, variables: models.Varia
   }
 }
 
-async function setEnvProxy(request: models.Request, variables: models.Variables): Promise<void> {
+function setRequestProxy(request: models.Request, variables: models.Variables): void {
   if (utils.isString(variables?.request_proxy)) {
     request.proxy = variables.request_proxy;
-  } else if (utils.isString(process.env.http_proxy)) {
-    request.proxy = process.env.http_proxy;
   }
 }
 
-async function setEnvRequestTimeout(request: models.Request, variables: models.Variables): Promise<void> {
+function setEnvironmentProxy(request: models.Request) {
+  if (request.proxy || !utils.isHttpRequest(request)) {
+    return;
+  }
+  const httpsProxy = process.env.https_proxy || process.env.HTTPS_PROXY;
+  const httpProxy = process.env.http_proxy || process.env.HTTP_PROXY;
+  if (request.url.toLowerCase().startsWith('https') && utils.isString(httpsProxy)) {
+    request.proxy = httpsProxy;
+  } else if (utils.isString(httpProxy)) {
+    request.proxy = process.env.httpProxy;
+  }
+}
+
+function setRequestTimeout(request: models.Request, variables: models.Variables): void {
   const timeout = utils.toNumber(variables?.request_timeout);
   if (timeout !== undefined) {
     request.timeout = timeout;
