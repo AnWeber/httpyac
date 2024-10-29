@@ -15,12 +15,15 @@ export const xmlResponseInterceptor = {
     const [response] = hookContext.args;
     if (response) {
       if (
-        utils.isMimeTypeXml(response.contentType) &&
+        (utils.isMimeTypeXml(response.contentType) || utils.isMimeTypeHtml(response.contentType)) &&
         !response.prettyPrintBody &&
         utils.isString(response.body) &&
         response.body.length > 0
       ) {
-        const document = parseFromString(response.body, response.contentType?.mimeType);
+        const document = parseFromString(
+          response.body,
+          utils.isMimeTypeHtml(response.contentType) ? 'text/html' : 'text/xml'
+        );
         response.parsedBody = document;
         try {
           response.prettyPrintBody = formatXml(document, {
