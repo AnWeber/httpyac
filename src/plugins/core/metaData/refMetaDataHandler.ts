@@ -39,16 +39,14 @@ class RefMetaAction {
       const envKey = utils.toEnvironmentKey(context.activeEnvironment);
       utils.setVariableInContext(reference.variablesPerEnv[envKey], context);
       log.trace('import variables', reference.variablesPerEnv[envKey]);
-      if (this.data.force || utils.isUndefined(context.variables[name])) {
+
+      const isNotExecuted =
+        utils.isUndefined(context.variables[name]) && !context.processedHttpRegions?.some(p => p.id === reference.id);
+      if (this.data.force || isNotExecuted) {
         result = await reference.execute(context);
         if (result) {
           // ref to ref variable export
           utils.setVariableInContext(reference.variablesPerEnv[envKey], context);
-        } else if (
-          reference.testResults &&
-          reference.testResults.some(t => t.status !== models.TestResultStatus.SUCCESS)
-        ) {
-          utils.addSkippedTestResult(context.httpRegion);
         }
       }
     } else {

@@ -89,10 +89,7 @@ export class HttpRegion implements models.HttpRegion {
       if (!this.isGlobal()) {
         this.resetDependentRegionsWithVisitor(toEnvironmentKey(context.activeEnvironment), this, []);
       }
-      const isNotCanceled = result !== HookCancel && result.every(obj => !!obj);
-      const hasOnlySucessTestResults =
-        !this.testResults.length || this.testResults.every(t => t.status === models.TestResultStatus.SUCCESS);
-      return isNotCanceled && hasOnlySucessTestResults;
+      return result !== HookCancel && result.every(obj => !!obj);
     } catch (err) {
       if (isError(err)) {
         if (!err.handled) {

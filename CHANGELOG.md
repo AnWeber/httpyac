@@ -1,3 +1,18 @@
+## [6.16.3] (2024-10-30)
+
+### Fix
+- revert: named response is only set, if all testResults are valid
+- changed behaviour from `@ref` (AnWeber/vscode-httpyac#336)
+  - negative test results from reference does not stop dependent request
+  - errored reference is not executed multiple times if it is referenced multiple times
+
+
+## [6.16.2] (2024-10-29)
+
+### Fix
+- named response is only set, if all testResults are valid
+
+
 ## [6.16.1] ( 2024-10-29)
 
 ### Fix
