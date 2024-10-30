@@ -37,6 +37,7 @@ function initOnRequestHook(api: models.HttpyacHooksApi) {
 }
 
 function initOnResponseHook(api: models.HttpyacHooksApi) {
+  api.hooks.onResponse.addHook('handleMetaDataName', response.handleNameMetaData);
   api.hooks.onResponse.addHook('setLastResponseInVariables', response.setLastResponseInVariables);
   api.hooks.onResponse.addInterceptor(response.jsonResponseInterceptor);
 }
@@ -94,7 +95,6 @@ function initExecuteInterceptor(api: models.HttpyacHooksApi) {
   api.hooks.responseLogging.addInterceptor(processedHttpRegionInterceptor.getResponseLoggingInterceptor());
   api.hooks.execute.addInterceptor(new execute.CreateRequestInterceptor());
   api.hooks.execute.addInterceptor(new execute.LazyVariableInterceptor());
-  api.hooks.execute.addInterceptor(new execute.MetaDataNameInterceptor());
   api.hooks.execute.addInterceptor(new execute.LogResponseInterceptor());
 }
 function initProvideEnvironmentsHook(api: models.HttpyacHooksApi) {
