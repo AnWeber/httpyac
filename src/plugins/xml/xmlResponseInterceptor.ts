@@ -20,12 +20,12 @@ export const xmlResponseInterceptor = {
         utils.isString(response.body) &&
         response.body.length > 0
       ) {
-        const document = parseFromString(
-          response.body,
-          utils.isMimeTypeHtml(response.contentType) ? 'text/html' : 'text/xml'
-        );
-        response.parsedBody = document;
         try {
+          const document = parseFromString(
+            response.body,
+            utils.isMimeTypeHtml(response.contentType) ? 'text/html' : 'text/xml'
+          );
+          response.parsedBody = document;
           response.prettyPrintBody = formatXml(document, {
             eol: EOL,
             indentation: '  ',
