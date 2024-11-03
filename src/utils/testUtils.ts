@@ -31,7 +31,7 @@ export function testFactoryAsync(
       try {
         await testMethod(testResult);
       } catch (err) {
-        setErrorInTestResult(testResult, err);
+        setErrorInTestResult(testResult, err, TestResultStatus.ERROR);
         if (options.ignoreErrorFile && testResult.error?.errorType) {
           testResult.error.displayMessage = `${testResult.error.errorType}: ${testResult.error.message}`;
         }
@@ -41,8 +41,8 @@ export function testFactoryAsync(
   };
 }
 
-function setErrorInTestResult(testResult: TestResult, err: unknown) {
-  testResult.status = TestResultStatus.FAILED;
+function setErrorInTestResult(testResult: TestResult, err: unknown, status = TestResultStatus.FAILED) {
+  testResult.status = status;
   if (isError(err)) {
     testResult.error = parseError(err);
   } else {

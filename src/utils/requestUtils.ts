@@ -5,7 +5,7 @@ import { log } from '../io';
 import * as models from '../models';
 import { toBoolean, toNumber } from './convertUtils';
 import { parseMimeType } from './mimeTypeUtils';
-import { isString, toMultiLineString } from './stringUtils';
+import { isString, toMultiLineArray, toMultiLineString } from './stringUtils';
 
 export function isHttpRequestMethod(method: string | undefined): method is models.HttpMethod {
   if (method) {
@@ -274,6 +274,15 @@ export function requestLoggerFactory(
         } else if ([models.TestResultStatus.ERROR, models.TestResultStatus.FAILED].includes(testResult.status)) {
           const errorMessage = testResult.error ? ` (${testResult.error?.displayMessage})` : '';
           message = chalk`{red ${models.testSymbols.error} ${testResult.message || 'Test failed'}${errorMessage}}`;
+
+          if (
+            !options?.useShort &&
+            testResult.status === models.TestResultStatus.ERROR &&
+            testResult.error?.error.stack
+          ) {
+            const linesOfStack = toMultiLineArray(testResult.error.error.stack).slice(0, 3);
+            message = toMultiLineString([message, ...linesOfStack]);
+          }
         }
         log(message);
       }
