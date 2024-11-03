@@ -58,7 +58,16 @@ export function toString(value: unknown): string | undefined {
 
 export function stringifySafe(obj: unknown, indent = 0) {
   try {
-    return JSON.stringify(obj, null, indent);
+    return JSON.stringify(
+      obj,
+      (_, value) => {
+        if (isJsonBuffer(value)) {
+          return Buffer.from(value.data).toString('base64');
+        }
+        return value;
+      },
+      indent
+    );
   } catch (err) {
     log.debug(`JSON.stringify error`, err);
     const getCircularReplacer = () => {
@@ -85,4 +94,9 @@ export function ensureString(value: unknown): string | null | undefined {
     return value;
   }
   return `${value}`;
+}
+
+function isJsonBuffer(value: unknown): value is { type: string; data: Array<number> } {
+  const val = value as { type: string; data: Array<number> };
+  return val?.type === 'Buffer' && Array.isArray(val.data) && !!val.data.length;
 }
