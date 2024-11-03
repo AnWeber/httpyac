@@ -2,6 +2,7 @@
 
 ### Fix
 - handle dom parser exception for invalid xml (#821)
+- do not log stack on assertions error (AnWeber/vscode-httpyac#338)
 
 
 ## [6.16.3] (2024-10-30)

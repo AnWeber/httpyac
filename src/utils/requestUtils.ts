@@ -274,10 +274,6 @@ export function requestLoggerFactory(
         } else if ([models.TestResultStatus.ERROR, models.TestResultStatus.FAILED].includes(testResult.status)) {
           const errorMessage = testResult.error ? ` (${testResult.error?.displayMessage})` : '';
           message = chalk`{red ${models.testSymbols.error} ${testResult.message || 'Test failed'}${errorMessage}}`;
-
-          if (!options?.useShort && testResult.error?.error.stack) {
-            message = [message, testResult.error?.error.stack].join('\r\n');
-          }
         }
         log(message);
       }
