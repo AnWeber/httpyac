@@ -3,7 +3,8 @@
 ### Fix
 - handle dom parser exception for invalid xml (#821)
 - do not log stack on assertions error (AnWeber/vscode-httpyac#338)
-
+- only clear output channel for test runs (AnWeber/vscode-httpyac#337)
+- add skipped test result on user cancellation (AnWeber/vscode-httpyac#323)
 
 ## [6.16.3] (2024-10-30)
 

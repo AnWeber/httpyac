@@ -8,6 +8,7 @@ import { mergeResponses, repeat } from './repeatUtils';
 import { toString } from './stringUtils';
 import { deleteVariableInContext, setVariableInContext } from './variableUtils';
 import { v4 } from 'uuid';
+import { addSkippedTestResult } from './testUtils';
 
 export function executeRequestClientFactory<T extends models.RequestClient>(
   requestClientFactory: (request: models.Request, context: models.ProcessorContext) => T,
@@ -106,6 +107,7 @@ function toResponses(...responses: Array<models.HttpResponse | void | undefined>
 function registerCancellation<T extends models.RequestClient>(client: T, context: models.ProcessorContext) {
   if (context.progress?.register) {
     return context.progress?.register(() => {
+      addSkippedTestResult(context.httpRegion, 'user cancellation');
       client.disconnect(new Error('user cancellation'));
     });
   }
