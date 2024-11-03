@@ -1,4 +1,4 @@
-## [unreleased]
+## [6.16.4] (2024-11-03)
 
 ### Features
 - add support for better Buffer JSON stringify (#796)
