@@ -103,7 +103,7 @@
     "dayjs-plugin-utc": "^0.1.2",
     "dotenv": "^16.4.5",
     "encodeurl": "^2.0.0",
-    "eventsource": "^2.0.2",
+    "eventsource": "^3.0.1",
     "filesize": "^10.1.6",
     "globby": "^14.0.2",
     "google-protobuf": "^3.21.4",
