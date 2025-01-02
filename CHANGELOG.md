@@ -1,3 +1,9 @@
+## [unreleased]
+
+### Fix
+- ensure correct order if cli args are used (#773)
+
+
 ## [6.16.4] (2024-11-03)
 
 ### Features
