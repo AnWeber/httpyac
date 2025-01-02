@@ -1,5 +1,8 @@
 ## [unreleased]
 
+### Features
+- logger supports call to parent logger (AnWeber/vscode-httpyac#347)
+
 ### Fix
 - ensure correct order if cli args are used (#773)
 - errored or skipped referenced httpregion also skips current http region (#842, AnWeber/vscode-httpyac#339)

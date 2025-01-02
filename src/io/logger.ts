@@ -11,15 +11,18 @@ export class Logger implements ConsoleLogHandler {
       logMethod?: (level: LogLevel, ...params: unknown[]) => void;
       onlyFailedTests?: boolean;
       noTrace?: boolean;
-    }
+    },
+    private readonly parentLogger?: ConsoleLogHandler
   ) {}
 
   public collectMessages(): void {
+    this.parentLogger?.collectMessages();
     this.collectCache = [];
     this.priorityCache = [];
   }
 
   public flush(): void {
+    this.parentLogger?.flush();
     this.priorityCache = this.flushCache(this.priorityCache);
     this.collectCache = this.flushCache(this.collectCache);
   }
@@ -49,21 +52,27 @@ export class Logger implements ConsoleLogHandler {
   }
 
   public info(...params: unknown[]): void {
+    this.parentLogger?.info(...params);
     this.writeLog(LogLevel.info, this.collectCache, console.info, params);
   }
   public log(...params: unknown[]): void {
+    this.parentLogger?.log(...params);
     this.writeLog(LogLevel.info, this.collectCache, console.log, params);
   }
   public trace(...params: unknown[]): void {
+    this.parentLogger?.trace(...params);
     this.writeLog(LogLevel.trace, this.collectCache, this.options.noTrace ? console.debug : console.trace, params);
   }
   public debug(...params: unknown[]): void {
+    this.parentLogger?.debug(...params);
     this.writeLog(LogLevel.debug, this.collectCache, console.debug, params);
   }
   public error(...params: unknown[]): void {
+    this.parentLogger?.error(...params);
     this.writeLog(LogLevel.error, this.collectCache, console.error, params);
   }
   public warn(...params: unknown[]): void {
+    this.parentLogger?.warn(...params);
     this.writeLog(LogLevel.warn, this.collectCache, console.warn, params);
   }
   public logPriority(...msg: Array<string>) {
