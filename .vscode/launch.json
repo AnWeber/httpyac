@@ -15,27 +15,6 @@
         "send",
         "${file}",
         "--all",
-        "--bail",
-        "-o",
-        "short"
-      ],
-      "outFiles": [
-        "${workspaceFolder}/dist/**/*.js"
-      ]
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "debug files",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
-      "cwd": "${workspaceFolder:httpyac.github.io}/examples/",
-      "console": "integratedTerminal",
-      "program": "${workspaceFolder}/bin/httpyac.js",
-      "args": [
-        "send",
-        "**/*.http",
         "-o",
         "short"
       ],

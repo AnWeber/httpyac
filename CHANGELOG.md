@@ -2,6 +2,7 @@
 
 ### Fix
 - ensure correct order if cli args are used (#773)
+- errored or skipped referenced httpregion also skips current http region (#842, AnWeber/vscode-httpyac#339)
 
 
 ## [6.16.4] (2024-11-03)

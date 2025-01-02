@@ -37,10 +37,12 @@ async function sendHttpRegions(context: models.HttpRegionsSendContext): Promise<
     if (context.progress) {
       context.progress.divider = context.httpRegions.length;
     }
+    let status = true;
     for (const httpRegion of context.httpRegions) {
-      await httpRegion.execute(processorContext, true);
+      const result = await httpRegion.execute(processorContext, true);
+      status = status && result;
     }
-    return true;
+    return status;
   }
   return false;
 }
