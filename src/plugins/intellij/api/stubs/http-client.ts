@@ -63,7 +63,7 @@ export interface HttpResponse {
   /**
    * Response content, it is a string or JSON object if response content-type is json.
    */
-  body: string | TextStreamResponse | Document | object;
+  body: string | TextStreamResponse | Document | unknown;
 
   /**
    * Response headers storage.

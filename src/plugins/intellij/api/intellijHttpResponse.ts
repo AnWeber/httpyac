@@ -1,9 +1,10 @@
 import * as models from '../../../models';
 import * as utils from '../../../utils';
 import { ContentType, HttpResponse, ResponseHeaders, TextStreamResponse } from './stubs';
+import { Document } from '@xmldom/xmldom';
 
 export class IntellijHttpResponse implements HttpResponse {
-  body: string | TextStreamResponse | unknown;
+  body: string | TextStreamResponse | Document | unknown;
   status: number;
   contentType: ContentType;
   headers: ResponseHeaders;
