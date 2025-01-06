@@ -1,4 +1,5 @@
-## [unreleased]
+
+## [6.16.5] (2025-01-06)
 
 ### Features
 - logger supports call to parent logger (AnWeber/vscode-httpyac#347)
