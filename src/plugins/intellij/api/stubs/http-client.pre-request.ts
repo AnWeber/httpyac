@@ -18,12 +18,12 @@ export interface PreRequestRequestVariables {
   /**
    * Saves variable with name 'varName' and sets its value to 'varValue'.
    */
-  set(varName: string, varValue: string): void;
+  set(varName: string, varValue: unknown): void;
 
   /**
    * Returns value of variable 'varName'.
    */
-  get(varName: string): string | undefined;
+  get(varName: string): unknown;
 
   /**
    * Checks no variables are defined.

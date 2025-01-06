@@ -36,12 +36,12 @@ export interface Variables {
   /**
    * Saves variable with name 'varName' and sets its value to 'varValue'.
    */
-  set(varName: string, varValue: string): void;
+  set(varName: string, varValue: unknown): void;
 
   /**
    * Returns value of variable 'varName'.
    */
-  get(varName: string): string;
+  get(varName: string): unknown;
 
   /**
    * Checks no variables are defined.
@@ -84,6 +84,11 @@ export interface CommonHttpClientRequest {
    * Method of the current request
    */
   method: string;
+
+  // currently not supported
+  // iteration(): number;
+  // currently not supported
+  // templateValue(expressionNumber: number): string | boolean | number;
 }
 
 /**
@@ -117,12 +122,12 @@ export interface RequestEnvironment {
 /**
  * Variables for constructing current request. Can be updated in Pre-request handler script.
  */
-export interface RequestVariables {
+interface RequestVariables {
   /**
    * Retrieves request variable value by its name. Returns null if there is no such variable
    * @param name request variable name
    */
-  get(name: string): string | null;
+  get(name: string): unknown;
 }
 
 /**
@@ -134,6 +139,7 @@ export interface CommonRequestHeader {
    */
   name: string;
 }
+
 /**
  * Retrieves a value from a JSON object using a JSONPath expression.
  *
@@ -142,3 +148,19 @@ export interface CommonRequestHeader {
  * @return {any} - The value found in the JSON object using the JSONPath expression.
  */
 export type jsonPath = (obj: unknown, expression: string) => unknown;
+
+/**
+ * Retrieves a value from a XML object using a XPath expression.
+ *
+ * @param {any} obj - The obj to search in with XPath expression:
+ *                    - if obj is Node, Element or  Document returns result of search with expression.
+ *                    - null in all other cases.
+ * @param {string} expression - The XPath expression to use for searching.
+ * @return {any} - The value found in the XML object using the XPath expression.
+ */
+export type xpath = (obj: unknown, expression: string) => unknown;
+
+export interface CommonWindow {
+  atob(str: string): string;
+  btoa(bytes: string): string;
+}

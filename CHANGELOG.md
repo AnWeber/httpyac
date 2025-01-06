@@ -2,6 +2,7 @@
 
 ### Features
 - logger supports call to parent logger (AnWeber/vscode-httpyac#347)
+- update Intellij d.ts Stubs and add Window.btoa/atob (#839)
 
 ### Fix
 - ensure correct order if cli args are used (#773)

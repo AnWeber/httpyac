@@ -111,6 +111,8 @@ function initIntellijVariables(context: models.ProcessorContext): intellij.Intel
     crypto: new intellij.IntellijCryptoSupport(),
     $random: new intellij.IntellijRandom(),
     $env: process.env,
+    Window: new intellij.IntellijWindow(),
+    xpath:
   };
   if (context.request) {
     if (context.httpRegion.response) {
