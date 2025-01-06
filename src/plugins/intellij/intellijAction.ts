@@ -112,7 +112,6 @@ function initIntellijVariables(context: models.ProcessorContext): intellij.Intel
     $random: new intellij.IntellijRandom(),
     $env: process.env,
     Window: new intellij.IntellijWindow(),
-    xpath:
   };
   if (context.request) {
     if (context.httpRegion.response) {
