@@ -19,6 +19,9 @@ export async function provideAssertValueXPath(
     }
     try {
       const node = parseFromString(body);
+      if (!node) {
+        return value;
+      }
 
       let evaluate = select;
       if (context.options.xpath_namespaces) {

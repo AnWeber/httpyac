@@ -34,10 +34,15 @@ export function isNode(obj: unknown): obj is Node {
   );
 }
 
-export function parseFromString(xml: string, mimeType?: string | undefined): Document {
-  return new DOMParser({
-    errorHandler(level: string, message: unknown) {
-      log.debug(level, message);
-    },
-  }).parseFromString(xml, mimeType || 'text/xml');
+export function parseFromString(xml: string, mimeType?: string | undefined): Document | undefined {
+  try {
+    return new DOMParser({
+      errorHandler(level: string, message: unknown) {
+        log.debug(level, message);
+      },
+    }).parseFromString(xml, mimeType || 'text/xml');
+  } catch (err) {
+    log.warn('xml format error', xml, err);
+    return undefined;
+  }
 }

@@ -2,7 +2,6 @@ import { HookTriggerContext } from 'hookpoint';
 import { EOL } from 'os';
 import { formatXml } from 'xmldom-format';
 
-import * as io from '../../io';
 import * as models from '../../models';
 import * as utils from '../../utils';
 import { parseFromString } from './nodeUtils';
@@ -20,19 +19,17 @@ export const xmlResponseInterceptor = {
         utils.isString(response.body) &&
         response.body.length > 0
       ) {
-        try {
-          const document = parseFromString(
-            response.body,
-            utils.isMimeTypeHtml(response.contentType) ? 'text/html' : 'text/xml'
-          );
+        const document = parseFromString(
+          response.body,
+          utils.isMimeTypeHtml(response.contentType) ? 'text/html' : 'text/xml'
+        );
+        if (document) {
           response.parsedBody = document;
           response.prettyPrintBody = formatXml(document, {
             eol: EOL,
             indentation: '  ',
             useWhitespaceInAutoClosingNode: true,
           });
-        } catch (err) {
-          io.log.warn('xml format error', response.body, err);
         }
       }
     }
