@@ -63,6 +63,7 @@ export async function addConfigRequestOptions(
   context: models.OpenIdContext
 ) {
   if (utils.isProcessorContext(context)) {
+    request.proxy = config.proxy || undefined;
     if (context.config?.request?.rejectUnauthorized !== undefined) {
       request.noRejectUnauthorized = !utils.toBoolean(context.config?.request?.rejectUnauthorized);
     }

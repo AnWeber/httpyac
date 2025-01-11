@@ -95,6 +95,7 @@ export function getOpenIdConfiguration(
     resource: getArrayOrString('resource'),
     username: getString('username'),
     password: getString('password'),
+    proxy: getString('proxy'),
     subjectIssuer: getString('subjectIssuer') || undefined,
     redirectUri: getUrl('redirectUri', DEFAULT_CALLBACK_URI),
     keepAlive: getBoolean('keepAlive', true),

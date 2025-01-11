@@ -19,6 +19,7 @@ export interface OpenIdConfiguration {
   keepAlive?: boolean;
   username?: string | null;
   password?: string | null;
+  proxy?: string | null;
   subjectIssuer?: string | null;
   useAuthorizationHeader?: boolean;
   useDeviceCodeClientSecret?: boolean;
