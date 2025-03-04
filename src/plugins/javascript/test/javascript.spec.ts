@@ -48,10 +48,10 @@ describe('variables.javascript', () => {
       const date = new Date();
       const signatureBase64 = crypto.createHmac('sha256', 'secret')
       .update(\`\${request.method}_\${request.headers.key}\`).digest("base64");
-      exports.authentcation = \`Basic \${signatureBase64}\`;
+      exports.authentication = \`Basic \${signatureBase64}\`;
     }}
     GET /json
-    authorization: {{authentcation}}
+    authorization: {{authentication}}
     key: test
 
     `);
@@ -68,11 +68,11 @@ describe('variables.javascript', () => {
     await sendHttp(`
     {{
       //pre request script
-      exports.authentcation = \`Basic test\`;
+      exports.authentication = \`Basic test\`;
       // after comment
     }}
     GET  /json
-    authorization: {{authentcation}}
+    authorization: {{authentication}}
     key: test
 
     `);
