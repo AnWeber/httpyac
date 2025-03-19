@@ -199,11 +199,11 @@ function checkVariableNames(context: Record<string, unknown>) {
 
 export function isAllowedKeyword(key: string) {
   if (JAVASCRIPT_KEYWORDS.indexOf(key) >= 0) {
-    log.debug(`Keyword ${key} prevented, because Javascript Keyword`);
+    log.warn(`Keyword ${key} prevented, because Javascript Keyword`);
     return false;
   }
   if (HTTPYAC_KEYWORDS.indexOf(key) >= 0) {
-    log.debug(`Keyword ${key} prevented, because used by httpYac`);
+    log.warn(`Keyword ${key} prevented, because used by httpYac`);
     return false;
   }
   return true;
