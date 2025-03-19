@@ -1,4 +1,9 @@
 
+## [unreleased]
+
+### Fix
+- ignore whitespace before & in formurlencoded (#699)
+
 ## [6.16.6] (2025-01-11)
 
 ### Fix

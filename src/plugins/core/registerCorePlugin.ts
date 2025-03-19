@@ -29,7 +29,7 @@ function initOnRequestHook(api: models.HttpyacHooksApi) {
   api.hooks.onRequest.addHook('setDefaultHttpyacHeaders', request.setDefaultHttpyacHeaders);
   api.hooks.onRequest.addHook('requestVariableReplacer', request.requestVariableReplacer);
   api.hooks.onRequest.addHook('transformRequestBody', request.transformRequestBodyToBuffer);
-  api.hooks.onRequest.addHook('transfromMultilineFormUrlEncoded', request.transfromMultilineFormUrlEncoded);
+  api.hooks.onRequest.addHook('transformMultilineFormUrlEncoded', request.transformMultilineFormUrlEncoded);
   api.hooks.onRequest.addHook('encodeRequestBody', request.encodeRequestBody);
 
   api.hooks.onRequest.addInterceptor(request.isTrustedInterceptor);

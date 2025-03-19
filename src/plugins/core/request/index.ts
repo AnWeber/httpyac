@@ -7,4 +7,4 @@ export * from './resolveRequestBody';
 export * from './setDefaultHttpyacHeaders';
 export * from './setEnvRequestOptions';
 export * from './transformRequestBodyToBuffer';
-export * from './transfromMultilineFormUrlEncoded';
+export * from './transformMultilineFormUrlEncoded';
