@@ -144,17 +144,10 @@ function initServer(port: number, callbackPath: string) {
 }
 
 function parseQueryParams(url: string) {
-  return url
-    .slice(url.indexOf('?') + 1)
-    .split('&')
-    .reduce(
-      (prev, current) => {
-        const [key, value] = current.split('=');
-        prev[key] = value;
-        return prev;
-      },
-      {} as Record<string, string>
-    );
+  const queryStringParameters = url.slice(url.indexOf('?') + 1);
+  const urlSearchParams = new URLSearchParams(queryStringParameters);
+  const result: Record<string, string> = Object.fromEntries(urlSearchParams);
+  return result;
 }
 
 function getMessageHtml(message: string, valid: boolean) {
