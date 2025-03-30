@@ -91,7 +91,7 @@
     "typescript": "^5.6.3"
   },
   "dependencies": {
-    "@cloudamqp/amqp-client": "^2.1.1",
+    "@cloudamqp/amqp-client": "^3.2.0",
     "@grpc/grpc-js": "^1.12.2",
     "@grpc/proto-loader": "^0.7.13",
     "@xmldom/xmldom": "^0.9.5",
