@@ -1,8 +1,9 @@
 
-## [unreleased]
+## [6.16.7] (2025-03-30)
 
 ### Fix
 - ignore whitespace before & in formurlencoded (#699)
+- Invalid state error with authorization code flow when the state parameter is percent-encoded (#871)
 
 ## [6.16.6] (2025-01-11)
 
