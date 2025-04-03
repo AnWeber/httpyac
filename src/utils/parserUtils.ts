@@ -549,8 +549,11 @@ export async function parseInlineResponse(
 }
 
 export function parseFileImport(text: string) {
-  const fileImport = /^<(?:(?<injectVariables>@)(?<encoding>\w+)?)?\s+(?<fileName>.+?)\s*$/u.exec(text);
-  if (fileImport && fileImport.length === 4 && fileImport.groups) {
+  const fileImport =
+    /^<(?:(?<injectVariables>@)(?<encoding>\w+)?)?\s+(?<fileName>.+?)\s+>>(?<force>!)?\s+(?<outputFile>.+?)\s*$/u.exec(
+      text
+    );
+  if (fileImport && fileImport.length === 6 && fileImport.groups) {
     return {
       fileName: fileImport.groups.fileName.trim(),
       injectVariables: !!fileImport.groups.injectVariables,

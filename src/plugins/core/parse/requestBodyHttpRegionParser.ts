@@ -1,5 +1,7 @@
 import * as models from '../../../models';
 import * as utils from '../../../utils';
+import { fileProvider, log } from '../../../io';
+import { transformToBufferOrString } from '../request';
 
 export async function parseRequestBody(
   getLineReader: models.getHttpLineGenerator,
@@ -10,8 +12,16 @@ export async function parseRequestBody(
   if (context.httpRegion.request) {
     const requestBody = getRequestBody(context);
     const next = lineReader.next();
+
     if (!next.done) {
-      if (requestBody.rawBody.length > 0 || !utils.isStringEmpty(next.value.textLine)) {
+      const textLine = next.value.textLine;
+
+      const match =
+        /^<(?:(?<injectVariables>@)(?<encoding>\w+)?)?\s+(?<fileName>.+?)\s+>>(?<force>!)?\s+(?<outputFile>.+?)\s*$/u.exec(
+          textLine
+        );
+
+      if (requestBody.rawBody.length > 0 || !utils.isStringEmpty(textLine)) {
         const symbols: Array<models.HttpSymbol> = [];
 
         if (!requestBody.symbol || requestBody.symbol.endLine !== next.value.line - 1) {
@@ -23,13 +33,51 @@ export async function parseRequestBody(
             startOffset: 0,
             endLine: next.value.line,
             endOffset: next.value.textLine.length,
-            children: utils.parseHandlebarsSymbols(next.value.textLine, next.value.line),
+            children: utils.parseHandlebarsSymbols(textLine, next.value.line),
           });
           symbols.push(requestBody.symbol);
         } else {
           requestBody.symbol.endLine = next.value.line;
           requestBody.symbol.endOffset = next.value.textLine.length;
           requestBody.symbol.children?.push?.(...utils.parseHandlebarsSymbols(next.value.textLine, next.value.line));
+        }
+
+        if (match && match.groups?.outputFile) {
+          console.log(match.groups.outputFile.trim());
+          const fileName = match.groups.outputFile.trim();
+          const force: boolean = !!match.groups.force;
+
+          context.httpRegion.hooks.onRequest.addHook('inputRedirection', async (request, context) => {
+            try {
+              console.log(`request body is ${request.body}`);
+              if (request.body) {
+                console.log('Request body is present');
+                const body = await transformToBufferOrString(request.body, context);
+                const fileNameReplaced = utils.toString(
+                  await utils.replaceVariables(fileName, models.VariableType.variable, context)
+                );
+                console.log(`File name replaced is ${fileNameReplaced}`);
+
+                if (fileNameReplaced) {
+                  const file = await getInputRedirectionFileName(fileNameReplaced, force, context.httpFile.fileName);
+                  console.log(`File name is ${file}`);
+                  if (file) {
+                    if (typeof body === 'string') {
+                      await fileProvider.writeBuffer(file, Buffer.from(body));
+                    } else {
+                      await fileProvider.writeBuffer(file, body);
+                    }
+                  } else {
+                    log.debug(`file ${fileName} not found`);
+                  }
+                } else {
+                  log.debug(`file ${fileName} not found`);
+                }
+              }
+            } catch (err) {
+              log.error(`input redirection failed for ${fileName}`, err);
+            }
+          });
         }
 
         const fileImport = utils.parseFileImport(next.value.textLine);
@@ -69,4 +117,34 @@ export function getRequestBody(context: models.ParserContext) {
     context.data.request_body = result;
   }
   return result;
+}
+
+async function getInputRedirectionFileName(fileName: string, force: boolean, baseName: models.PathLike) {
+  let file = await toAbsoluteFileName(fileName, baseName);
+
+  if (!force) {
+    if (await fileProvider.exists(file)) {
+      const dotIndex = fileName.lastIndexOf('.');
+      if (dotIndex > 0 && dotIndex < fileName.length - 2) {
+        const path = fileName.slice(0, dotIndex);
+        const extension = fileName.slice(dotIndex + 1);
+        let index = 1;
+
+        file = await toAbsoluteFileName(`${path}-${index}.${extension}`, baseName);
+        while (await fileProvider.exists(file)) {
+          file = await toAbsoluteFileName(`${path}-${index++}.${extension}`, baseName);
+        }
+      }
+    }
+  }
+  return file;
+}
+async function toAbsoluteFileName(fileName: string, baseName: models.PathLike) {
+  if (!(await fileProvider.isAbsolute(fileName))) {
+    const dirName = fileProvider.dirname(baseName);
+    if (dirName) {
+      return fileProvider.joinPath(dirName, fileName);
+    }
+  }
+  return fileName;
 }

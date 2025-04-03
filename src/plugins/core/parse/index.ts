@@ -2,6 +2,7 @@ export * from './commentHttpRegionParser';
 export * from './metaHttpRegionParser';
 export * from './multipartMixedInterceptor';
 export * from './outputRedirectionHttpRegionParser';
+export * from './inputRedirectionHttpRegionParser';
 export * from './requestBodyHttpRegionParser';
 export * from './requestHttpRegionParser';
 export * from './responseHttpRegionParser';
