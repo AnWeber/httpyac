@@ -12,10 +12,10 @@ export const testExitCodeInterceptor = {
 
   afterTrigger: async function bail(hookContext: HookTriggerContext<[models.ProcessorContext], boolean>) {
     const context = hookContext.args[0];
-    const hasFailedTestResult = context.httpRegion.testResults?.some?.(
-      obj => obj.status === models.TestResultStatus.FAILED
+    const hasFailedOrErroredTestResult = context.httpRegion.testResults?.some?.(
+      obj => obj.status === models.TestResultStatus.FAILED || obj.status === models.TestResultStatus.ERROR
     );
-    if (hasFailedTestResult) {
+    if (hasFailedOrErroredTestResult) {
       process.exitCode = 20;
     }
     return true;
