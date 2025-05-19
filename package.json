@@ -98,7 +98,7 @@
     "aws4": "^1.13.2",
     "chalk": "^4.1.2",
     "clipboardy": "^4.0.0",
-    "commander": "^12.1.0",
+    "commander": "^14.0.0",
     "dayjs": "^1.11.13",
     "dayjs-plugin-utc": "^0.1.2",
     "dotenv": "^16.4.5",
