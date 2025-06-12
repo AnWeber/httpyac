@@ -231,7 +231,8 @@ describe('transformToJunit', () => {
               status: TestResultStatus.FAILED,
               message: 'Assertions fail',
               error: {
-                displayMessage: 'failed result',
+                displayMessage: 'failed result display',
+                message: 'failed result',
                 error: { message: 'test', name: 'unknown', stack: '' } as unknown as Error,
               },
             },
@@ -265,9 +266,10 @@ describe('transformToJunit', () => {
     </properties>
     <testcase name="Assertions fail" classname="test" time="0.000" assertions="1">
       <properties>
-        <property name="displayMessage" value="failed result"/>
+        <property name="displayMessage" value="failed result display"/>
+        <property name="message" value="failed result"/>
       </properties>
-      <failure message="Assertions fail" type="unknown">{"message":"test","name":"unknown","stack":""}</failure>
+      <failure message="failed result" type="unknown">{"message":"test","name":"unknown","stack":""}</failure>
     </testcase>
     <testcase name="status === 200" classname="test" time="0.000" assertions="1"/>
   </testsuite>
