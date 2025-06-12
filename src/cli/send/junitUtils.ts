@@ -103,7 +103,7 @@ function transformTestResultToTestcase(
   if ([TestResultStatus.ERROR, TestResultStatus.FAILED].includes(testResult.status)) {
     const failureNode = document.createElement('failure');
     root.appendChild(failureNode);
-    setAttribute(failureNode, 'message', testResult.message);
+    setAttribute(failureNode, 'message', testResult.error?.message ?? testResult.message);
     setAttribute(failureNode, 'type', testResult.error?.errorType ?? 'unknown');
     failureNode.textContent = utils.errorToString(testResult.error?.error) || '';
   } else if (testResult.status === TestResultStatus.SKIPPED) {
