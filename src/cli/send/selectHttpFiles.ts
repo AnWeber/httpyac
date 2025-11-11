@@ -1,12 +1,21 @@
 import * as models from '../../models';
 import * as utils from '../../utils';
 import { SendOptions } from './options';
+import type { search } from '@inquirer/prompts';
+import type Fuzzysort from 'fuzzysort';
 
 type SelectActionResult = Array<{ httpRegions?: Array<models.HttpRegion>; httpFile: models.HttpFile }>;
 
+// Dependencies that can be injected for testing
+type Dependencies = {
+  search?: typeof search;
+  fuzzysort?: typeof Fuzzysort;
+};
+
 export async function selectHttpFiles(
   httpFiles: Array<models.HttpFile>,
-  cliOptions: SendOptions
+  cliOptions: SendOptions,
+  deps?: Dependencies
 ): Promise<SelectActionResult> {
   if (cliOptions.all) {
     return httpFiles.map(httpFile => ({
@@ -17,7 +26,7 @@ export async function selectHttpFiles(
   if (resultWithArgs.length > 0) {
     return resultWithArgs;
   }
-  return await selectManualHttpFiles(httpFiles);
+  return await selectManualHttpFiles(httpFiles, deps);
 }
 
 function selectHttpFilesWithArgs(httpFiles: Array<models.HttpFile>, cliOptions: SendOptions) {
@@ -68,7 +77,10 @@ function hasTag(httpRegion: models.HttpRegion, tags: Array<string> | undefined) 
   return false;
 }
 
-async function selectManualHttpFiles(httpFiles: Array<models.HttpFile>): Promise<SelectActionResult> {
+async function selectManualHttpFiles(
+  httpFiles: Array<models.HttpFile>,
+  deps?: Dependencies
+): Promise<SelectActionResult> {
   const httpRegionMap: Record<string, SelectActionResult> = {};
   const hasManyFiles = httpFiles.length > 1;
   const cwd = `${process.cwd()}`;
@@ -88,12 +100,12 @@ async function selectManualHttpFiles(httpFiles: Array<models.HttpFile>): Promise
       }
     }
   }
-  const { search } = await import('@inquirer/prompts');
-  const fuzzysort = await import('fuzzysort');
+  const search = deps?.search || (await import('@inquirer/prompts')).search;
+  const fuzzysort = deps?.fuzzysort || (await import('fuzzysort')).default;
   const answer = await search<keyof typeof httpRegionMap>({
     message: 'please choose which region to use',
     source: async (input = '') =>
-      fuzzysort.default.go(input, Object.keys(httpRegionMap), { all: true }).map(({ target }) => target),
+      fuzzysort.go(input, Object.keys(httpRegionMap), { all: true }).map(({ target }) => target),
   });
   return httpRegionMap[answer];
 }
