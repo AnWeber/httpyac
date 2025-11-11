@@ -88,17 +88,12 @@ async function selectManualHttpFiles(httpFiles: Array<models.HttpFile>): Promise
       }
     }
   }
-  const inquirer = await import('inquirer');
-  const answer = await inquirer.default.prompt([
-    {
-      type: 'list',
-      name: 'region',
-      message: 'please choose which region to use',
-      choices: Object.entries(httpRegionMap).map(([key]) => key),
-    },
-  ]);
-  if (answer.region && httpRegionMap[answer.region]) {
-    return httpRegionMap[answer.region];
-  }
-  return [];
+  const { search } = await import('@inquirer/prompts');
+  const fuzzysort = await import('fuzzysort');
+  const answer = await search<keyof typeof httpRegionMap>({
+    message: 'please choose which region to use',
+    source: async (input = '') =>
+      fuzzysort.default.go(input, Object.keys(httpRegionMap), { all: true }).map(({ target }) => target),
+  });
+  return httpRegionMap[answer];
 }

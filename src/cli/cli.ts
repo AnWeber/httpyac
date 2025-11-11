@@ -23,6 +23,10 @@ export async function execute(rawArgs: string[]): Promise<void> {
     const program = await createProgram();
     await program.parseAsync(rawArgs);
   } catch (err) {
+    if (err instanceof Error && err.name === 'ExitPromptError') {
+      return;
+    }
+
     console.error(err);
     if (!process.exitCode) {
       process.exitCode = 1;
