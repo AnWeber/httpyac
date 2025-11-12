@@ -1,15 +1,18 @@
 import * as models from '../../models';
 import * as utils from '../../utils';
 import { SendOptions } from './options';
-import type { search } from '@inquirer/prompts';
-import type Fuzzysort from 'fuzzysort';
+// Use type-only imports here that will be removed during build.
+// We dynamically import the actual modules at runtime when needed.
+import type { search as searchPrompt } from '@inquirer/prompts';
 
 type SelectActionResult = Array<{ httpRegions?: Array<models.HttpRegion>; httpFile: models.HttpFile }>;
 
 // Dependencies that can be injected for testing
 type Dependencies = {
-  search?: typeof search;
-  fuzzysort?: typeof Fuzzysort;
+  search?: typeof searchPrompt;
+  fuzzysort?: {
+    go<T>(needle: string, haystack: readonly T[], options?: { all?: boolean }): Array<{ target: T }>;
+  };
 };
 
 export async function selectHttpFiles(
