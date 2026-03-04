@@ -1,4 +1,3 @@
-import { QuestionMap } from 'inquirer';
 import { HttpFile, HttpRegion } from '../../store';
 import { selectHttpFiles } from './selectHttpFiles';
 
@@ -48,6 +47,7 @@ describe('selectHttpFiles', () => {
       },
     ]),
   ];
+
   it('should export', () => {
     expect(selectHttpFiles).toBeDefined();
   });
@@ -59,6 +59,7 @@ describe('selectHttpFiles', () => {
     expect(result.map(h => h.httpFile.fileName)).toEqual(['test1', 'test2']);
     expect(result.map(h => h.httpRegions)).toEqual([undefined, undefined]);
   });
+
   it('should return values by name', async () => {
     const result = await selectHttpFiles(defaultHttpFiles, { name: 'foo1' });
 
@@ -66,6 +67,7 @@ describe('selectHttpFiles', () => {
     expect(result.map(h => h.httpFile.fileName)).toEqual(['test1']);
     expect(result.map(h => h.httpRegions?.map(hr => hr.metaData.name))).toEqual([['foo1']]);
   });
+
   it('should return values by tag', async () => {
     const result = await selectHttpFiles(defaultHttpFiles, { tag: ['foo', 'fuu'] });
 
@@ -73,6 +75,7 @@ describe('selectHttpFiles', () => {
     expect(result.map(h => h.httpFile.fileName)).toEqual(['test1']);
     expect(result.map(h => h.httpRegions?.map(hr => hr.metaData.name))).toEqual([['foo1', 'foo2', 'foo5']]);
   });
+
   it('should return values by line', async () => {
     const result = await selectHttpFiles(defaultHttpFiles, { line: 1 });
 
@@ -80,33 +83,63 @@ describe('selectHttpFiles', () => {
     expect(result.map(h => h.httpFile.fileName)).toEqual(['test1', 'test2']);
     expect(result.map(h => h.httpRegions?.map(hr => hr.metaData.name))).toEqual([['foo2'], ['test2']]);
   });
-  it('should return values by manual input', async () => {
-    const inquirer = await import('inquirer');
-    Object.assign(inquirer.default, {
-      prompt(questions: QuestionMap) {
-        const q = questions[0];
-        return {
-          region: q.choices[1],
-        };
-      },
-    });
-    const result = await selectHttpFiles(defaultHttpFiles, {});
 
+  it('should return values by manual input', async () => {
+    const mockSearch = jest.fn().mockResolvedValue('test1: foo1');
+    const mockFuzzysort = {
+      go: jest
+        .fn()
+        .mockReturnValue([
+          { target: 'test1: foo1' },
+          { target: 'test1: foo2' },
+          { target: 'test1: foo3' },
+          { target: 'test1: foo4' },
+          { target: 'test1: foo5' },
+          { target: 'test2: test1' },
+          { target: 'test2: test2' },
+        ]),
+    };
+
+    const result = await selectHttpFiles(
+      defaultHttpFiles,
+      {},
+      {
+        search: mockSearch,
+        fuzzysort: mockFuzzysort,
+      }
+    );
+
+    expect(result).toBeDefined();
     expect(result.length).toBe(1);
     expect(result.map(h => h.httpFile.fileName)).toEqual(['test1']);
     expect(result.map(h => h.httpRegions?.map(hr => hr.metaData.name))).toEqual([['foo1']]);
   });
-  it('should return empty on invalid manual input', async () => {
-    const inquirer = await import('inquirer');
-    Object.assign(inquirer.default, {
-      prompt() {
-        return {
-          region: 'fii',
-        };
-      },
-    });
-    const result = await selectHttpFiles(defaultHttpFiles, {});
 
-    expect(result.length).toBe(0);
+  it('should return empty on invalid manual input', async () => {
+    const mockSearch = jest.fn().mockResolvedValue('invalid-key');
+    const mockFuzzysort = {
+      go: jest
+        .fn()
+        .mockReturnValue([
+          { target: 'test1: foo1' },
+          { target: 'test1: foo2' },
+          { target: 'test1: foo3' },
+          { target: 'test1: foo4' },
+          { target: 'test1: foo5' },
+          { target: 'test2: test1' },
+          { target: 'test2: test2' },
+        ]),
+    };
+
+    const result = await selectHttpFiles(
+      defaultHttpFiles,
+      {},
+      {
+        search: mockSearch,
+        fuzzysort: mockFuzzysort,
+      }
+    );
+
+    expect(result).toBeUndefined();
   });
 });

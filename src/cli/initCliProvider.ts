@@ -79,56 +79,19 @@ function toBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
 }
 
 async function initUserInteractionProvider() {
-  const inquirer = (await import('inquirer')).default;
-  userInteractionProvider.showNote = async function showNote(note: string) {
-    const answer = await inquirer.prompt([
-      {
-        type: 'confirm',
-        name: 'note',
-        message: note,
-      },
-    ]);
-    return answer.note;
-  };
-  userInteractionProvider.showInputPrompt = async function showInputPrompt(
-    message: string,
-    defaultValue?: string,
-    maskedInput?: boolean
-  ) {
-    if (maskedInput) {
-      const answer = await inquirer.prompt([
-        {
-          type: 'password',
-          name: 'placeholder',
+  const { confirm, password, input, select } = await import('@inquirer/prompts');
+  userInteractionProvider.showNote = async (note: string) =>
+    confirm({
+      message: note,
+    });
+  userInteractionProvider.showInputPrompt = async (message: string, defaultValue?: string, maskedInput?: boolean) =>
+    maskedInput
+      ? password({
           message,
-          mask: '*',
-          default: defaultValue,
-        },
-      ]);
-      return answer.placeholder;
-    }
-
-    const answer = await inquirer.prompt([
-      {
-        type: 'input',
-        name: 'placeholder',
-        message,
-        default: defaultValue,
-      },
-    ]);
-    return answer.placeholder;
-  };
-  userInteractionProvider.showListPrompt = async function showListPrompt(message: string, values: string[]) {
-    const answer = await inquirer.prompt([
-      {
-        type: 'list',
-        name: 'placeholder',
-        message,
-        choices: values,
-      },
-    ]);
-    return answer.placeholder;
-  };
+        })
+      : input({ message, default: defaultValue });
+  userInteractionProvider.showListPrompt = async (message: string, values: string[]) =>
+    select({ message, choices: values });
   userInteractionProvider.getClipboard = async function getClipboard() {
     try {
       const clipboard = await import('clipboardy');
