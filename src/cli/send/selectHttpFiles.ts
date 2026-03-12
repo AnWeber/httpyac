@@ -1,12 +1,24 @@
 import * as models from '../../models';
 import * as utils from '../../utils';
 import { SendOptions } from './options';
+// Use type-only imports here that will be removed during build.
+// We dynamically import the actual modules at runtime when needed.
+import type { search as searchPrompt } from '@inquirer/prompts';
 
 type SelectActionResult = Array<{ httpRegions?: Array<models.HttpRegion>; httpFile: models.HttpFile }>;
 
+// Dependencies that can be injected for testing
+type Dependencies = {
+  search?: typeof searchPrompt;
+  fuzzysort?: {
+    go<T>(needle: string, haystack: readonly T[], options?: { all?: boolean }): Array<{ target: T }>;
+  };
+};
+
 export async function selectHttpFiles(
   httpFiles: Array<models.HttpFile>,
-  cliOptions: SendOptions
+  cliOptions: SendOptions,
+  deps?: Dependencies
 ): Promise<SelectActionResult> {
   if (cliOptions.all) {
     return httpFiles.map(httpFile => ({
@@ -17,7 +29,7 @@ export async function selectHttpFiles(
   if (resultWithArgs.length > 0) {
     return resultWithArgs;
   }
-  return await selectManualHttpFiles(httpFiles);
+  return await selectManualHttpFiles(httpFiles, deps);
 }
 
 function selectHttpFilesWithArgs(httpFiles: Array<models.HttpFile>, cliOptions: SendOptions) {
@@ -68,7 +80,10 @@ function hasTag(httpRegion: models.HttpRegion, tags: Array<string> | undefined) 
   return false;
 }
 
-async function selectManualHttpFiles(httpFiles: Array<models.HttpFile>): Promise<SelectActionResult> {
+async function selectManualHttpFiles(
+  httpFiles: Array<models.HttpFile>,
+  deps?: Dependencies
+): Promise<SelectActionResult> {
   const httpRegionMap: Record<string, SelectActionResult> = {};
   const hasManyFiles = httpFiles.length > 1;
   const cwd = `${process.cwd()}`;
@@ -88,17 +103,12 @@ async function selectManualHttpFiles(httpFiles: Array<models.HttpFile>): Promise
       }
     }
   }
-  const inquirer = await import('inquirer');
-  const answer = await inquirer.default.prompt([
-    {
-      type: 'list',
-      name: 'region',
-      message: 'please choose which region to use',
-      choices: Object.entries(httpRegionMap).map(([key]) => key),
-    },
-  ]);
-  if (answer.region && httpRegionMap[answer.region]) {
-    return httpRegionMap[answer.region];
-  }
-  return [];
+  const search = deps?.search || (await import('@inquirer/prompts')).search;
+  const fuzzysort = deps?.fuzzysort || (await import('fuzzysort')).default;
+  const answer = await search<keyof typeof httpRegionMap>({
+    message: 'please choose which region to use',
+    source: async (input = '') =>
+      fuzzysort.go(input, Object.keys(httpRegionMap), { all: true }).map(({ target }) => target),
+  });
+  return httpRegionMap[answer];
 }
