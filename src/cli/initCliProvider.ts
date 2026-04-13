@@ -131,8 +131,8 @@ async function initUserInteractionProvider() {
   };
   userInteractionProvider.getClipboard = async function getClipboard() {
     try {
-      const clipboard = await import('clipboardy');
-      return await clipboard.default.read();
+      const clipboard = await import('tinyclip');
+      return await clipboard.readText();
     } catch (err) {
       log.warn(err);
       return '';
@@ -140,8 +140,8 @@ async function initUserInteractionProvider() {
   };
   userInteractionProvider.setClipboard = async function setClipboard(message: string) {
     try {
-      const clipboard = await import('clipboardy');
-      await clipboard.default.write(message);
+      const clipboard = await import('tinyclip');
+      await clipboard.writeText(message);
     } catch (err) {
       log.warn(err);
     }
