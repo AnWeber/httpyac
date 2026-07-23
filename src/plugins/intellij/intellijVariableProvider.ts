@@ -88,14 +88,16 @@ export async function provideIntellijVariables(
 }
 
 async function getEnvironmentVariables(fileName: PathLike): Promise<Record<string, Variables> | undefined> {
-  try {
-    if (await fileProvider.exists(fileName)) {
-      const content = await fileProvider.readFile(fileName, 'utf-8');
-      return JSON.parse(content);
-    }
-  } catch (err) {
-    log.trace(`${fileName} not found`);
-    log.trace(err);
+  if (!(await fileProvider.exists(fileName))) {
+    return undefined;
   }
-  return undefined;
+
+  const content = await fileProvider.readFile(fileName, 'utf-8');
+  try {
+    return JSON.parse(content);
+  } catch (err) {
+    throw new SyntaxError(
+      `Failed to parse environment file ${fileProvider.toString(fileName)}: ${utils.toString(err)}`
+    );
+  }
 }

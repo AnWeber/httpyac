@@ -73,5 +73,22 @@ describe('intellijVariableProvider', () => {
         foo: 'bar',
       });
     });
+    it.each(['http-client.env.json', 'http-client.private.env.json'])(
+      'should report invalid JSON in %s',
+      async fileName => {
+        initFileProvider({
+          [fileName]: '{"test":',
+        });
+
+        await expect(
+          provideIntellijVariables(['test'], {
+            httpFile: {
+              fileName: 'test.http',
+            },
+            variables: {},
+          } as VariableProviderContext)
+        ).rejects.toThrow(`Failed to parse environment file ${fileName}`);
+      }
+    );
   });
 });
