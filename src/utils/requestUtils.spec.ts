@@ -1,4 +1,14 @@
-import { mergeRawHttpHeaders } from './requestUtils';
+import { isHttpRequestMethod, mergeRawHttpHeaders } from './requestUtils';
+
+describe('HTTP request method utils', () => {
+  it.each(['QUERY', 'query'])('recognizes QUERY method %s', method => {
+    expect(isHttpRequestMethod(method)).toBe(true);
+  });
+
+  it('rejects unsupported methods', () => {
+    expect(isHttpRequestMethod('INVALID')).toBe(false);
+  });
+});
 
 describe('Raw HTTP Header merge utils', () => {
   it('merges example raw headers to expected record value', () => {

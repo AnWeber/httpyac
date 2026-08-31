@@ -33,6 +33,7 @@ export function isHttpRequestMethod(method: string | undefined): method is model
       'PROPFIND',
       'PROPPATCH',
       'PUT',
+      'QUERY',
       'REPORT',
       'SEARCH',
       'TRACE',

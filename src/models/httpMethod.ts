@@ -22,6 +22,7 @@ export type HttpMethod =
   | 'PROPFIND'
   | 'PROPPATCH'
   | 'PUT'
+  | 'QUERY'
   | 'REPORT'
   | 'SEARCH'
   | 'TRACE'

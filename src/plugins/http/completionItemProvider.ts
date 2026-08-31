@@ -41,6 +41,10 @@ completionItemProvider.emptyLineProvider.push(() => [
     name: 'PATCH',
     description: 'The PATCH method is used to apply partial modifications to a resource.',
   },
+  {
+    name: 'QUERY',
+    description: 'The QUERY method performs a safe, idempotent server-side query described by request content.',
+  },
 ]);
 
 completionItemProvider.requestHeaderProvider.push(request => {

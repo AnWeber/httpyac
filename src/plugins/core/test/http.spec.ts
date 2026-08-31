@@ -70,6 +70,27 @@ ${body}
     expect(requests[0].body).toBe(body);
   });
 
+  it('query http with body', async () => {
+    initFileProvider();
+    const body = JSON.stringify({ query: 'active users' });
+    const requests = initHttpClientProvider();
+
+    await sendHttp(
+      `
+QUERY /contacts HTTP/1.1
+content-type: application/json
+
+${body}
+      `,
+      { host: `` }
+    );
+
+    expect(requests[0].method).toBe('QUERY');
+    expect(requests[0].url).toBe('/contacts');
+    expect(requests[0].headers?.['content-type']).toBe('application/json');
+    expect(requests[0].body).toBe(body);
+  });
+
   it('post json variable', async () => {
     initFileProvider();
     const body = JSON.stringify({ foo: 'foo', bar: 'bar' });
