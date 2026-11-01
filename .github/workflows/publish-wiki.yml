@@ -1,0 +1,49 @@
+name: Publish Wiki
+on:
+  push:
+    branches: [main]
+    paths:
+      - docs/wiki/**
+  release:
+    types: [created]
+  workflow_dispatch:
+
+concurrency:
+  group: publish-wiki
+  cancel-in-progress: false
+
+jobs:
+  publish-wiki:
+    name: Publish Wiki
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.release.tag_name || github.ref }}
+
+      - name: Checkout wiki
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ github.repository }}.wiki
+          path: wiki
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Sync docs/wiki to wiki
+        run: rsync -a --delete --exclude='.git' docs/wiki/ wiki/
+
+      - name: Commit and push
+        working-directory: wiki
+        env:
+          WIKI_REVISION: ${{ github.event.release.tag_name || github.ref_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No wiki changes to publish."
+            exit 0
+          fi
+          git commit -m "Publish wiki for ${WIKI_REVISION}"
+          git push
