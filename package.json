@@ -126,7 +126,7 @@
     "uuid": "^14.0.2",
     "ws": "^8.21.3",
     "xmldom-format": "^2.0.0",
-    "xpath": "^0.0.35"
+    "xpath": "^0.0.36"
   },
   "optionalDependencies": {
     "@platformatic/kafka": "^2.13.0"
