@@ -37,7 +37,7 @@ jobs:
           languages: ${{ matrix.language }}
           config-file: ./.github/codeql-config.yml
       - name: Install Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node-version }}
       - name: Install dependencies
