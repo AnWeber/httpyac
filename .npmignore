@@ -16,3 +16,4 @@ jest.config.js
 Dockerfile
 coverage
 docs
+end-to-end

@@ -1,0 +1,7 @@
+{
+  "environments": {
+    "$shared": {
+      "baseUrl": "http://localhost:8089"
+    }
+  }
+}

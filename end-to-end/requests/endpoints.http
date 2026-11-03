@@ -1,0 +1,51 @@
+### Health check
+GET {{baseUrl}}/health
+
+?? status == 200
+?? header content-type includes application/json
+?? body status == ok
+
+### Query parameters and JSON arrays
+GET {{baseUrl}}/api/users?role=reader
+Accept: application/json
+
+?? status == 200
+?? body users isArray
+?? js response.parsedBody.users.length == 2
+?? body users[0].name == Ada
+?? body users[0].role == reader
+?? body users[1].role == reader
+
+### Create a user with a JSON request body
+POST {{baseUrl}}/api/users
+Content-Type: application/json
+
+{
+  "name": "Grace",
+  "role": "reader"
+}
+
+?? status == 201
+?? header location == /api/users/43
+?? body id == 43
+?? body name == Grace
+?? body role == reader
+
+### Delete with an empty response
+DELETE {{baseUrl}}/api/users/43
+
+?? status == 204
+?? js response.body.length == 0
+
+### Plain text response
+GET {{baseUrl}}/api/greeting
+
+?? status == 200
+?? header content-type includes text/plain
+?? body == Hello from WireMock!
+
+### An expected not-found response is a passing test
+GET {{baseUrl}}/api/users/999
+
+?? status == 404
+?? body error == user_not_found

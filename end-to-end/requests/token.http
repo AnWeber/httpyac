@@ -1,0 +1,53 @@
+### Obtain a JWT using OAuth2 client credentials
+POST {{baseUrl}}/oauth/token
+Authorization: Basic httpyac-e2e-client httpyac-e2e-secret
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials&scope=api.read
+
+?? status == 200
+?? header content-type includes application/json
+?? header cache-control == no-store
+?? body token_type == Bearer
+?? body expires_in == 3600
+?? body scope == api.read
+?? body access_token matches ^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$
+
+{{
+  const [header, payload, signature] = response.parsedBody.access_token.split('.');
+  test('token is a signed HS256 JWT fixture', () => {
+    const crypto = require('node:crypto');
+    const expected = crypto.createHmac('sha256', 'your-256-bit-secret')
+      .update(`${header}.${payload}`).digest('base64url');
+    if (JSON.parse(Buffer.from(header, 'base64url')).alg !== 'HS256' || signature !== expected) {
+      throw new Error('Expected the signed, test-only JWT fixture');
+    }
+  });
+  test('JWT contains the fixture subject', () => {
+    if (JSON.parse(Buffer.from(payload, 'base64url')).sub !== '1234567890') {
+      throw new Error('Unexpected JWT subject');
+    }
+  });
+}}
+
+### Invalid client credentials must not issue a token
+POST {{baseUrl}}/oauth/token
+Authorization: Basic httpyac-e2e-client incorrect-secret
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials&scope=api.read
+
+?? status == 401
+?? header www-authenticate includes Basic
+?? body error == invalid_client
+?? body access_token isFalse
+
+### Missing client authentication must not issue a token
+POST {{baseUrl}}/oauth/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials&scope=api.read
+
+?? status == 401
+?? body error == invalid_client
+?? body access_token isFalse

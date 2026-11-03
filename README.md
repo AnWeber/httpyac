@@ -141,6 +141,10 @@ GET https://httpbin.org/json
 
 Use `matchesFile` for exact text comparison. See the [file-matching guide](docs/file-matching.md) for options and examples.
 
+## End-to-end tests
+
+The [end-to-end suite](end-to-end/README.md) runs assertion-bearing `.http` files against Docker Compose-hosted WireMock, including JWT token responses and OAuth2 client credentials.
+
 ## License
 
 [MIT License](LICENSE)

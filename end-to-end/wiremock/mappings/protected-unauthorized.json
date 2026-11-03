@@ -1,0 +1,17 @@
+{
+  "priority": 10,
+  "request": {
+    "method": "GET",
+    "urlPath": "/api/protected"
+  },
+  "response": {
+    "status": 401,
+    "headers": {
+      "Content-Type": "application/json",
+      "WWW-Authenticate": "Bearer realm=\"httpyac-e2e\", error=\"invalid_token\""
+    },
+    "jsonBody": {
+      "error": "invalid_token"
+    }
+  }
+}

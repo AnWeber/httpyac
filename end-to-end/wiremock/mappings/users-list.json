@@ -1,0 +1,23 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/api/users",
+    "queryParameters": {
+      "role": {
+        "equalTo": "reader"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "users": [
+        { "id": 41, "name": "Ada", "role": "reader" },
+        { "id": 42, "name": "Linus", "role": "reader" }
+      ]
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "priority": 10,
+  "request": {
+    "method": "POST",
+    "urlPath": "/oauth/token"
+  },
+  "response": {
+    "status": 401,
+    "headers": {
+      "Content-Type": "application/json",
+      "Cache-Control": "no-store",
+      "WWW-Authenticate": "Basic realm=\"httpyac-e2e\""
+    },
+    "jsonBody": {
+      "error": "invalid_client"
+    }
+  }
+}

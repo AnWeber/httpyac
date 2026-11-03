@@ -1,0 +1,38 @@
+@oauth2_tokenEndpoint = {{baseUrl}}/oauth/token
+@oauth2_clientId = httpyac-e2e-client
+@oauth2_clientSecret = httpyac-e2e-secret
+@oauth2_scope = api.read
+@oauth2_keepAlive = false
+
+### Protected endpoint rejects missing authorization
+GET {{baseUrl}}/api/protected
+
+?? status == 401
+?? header www-authenticate includes Bearer
+?? body error == invalid_token
+
+### Protected endpoint rejects an arbitrary bearer token
+GET {{baseUrl}}/api/protected
+Authorization: Bearer not-a-valid-token
+
+?? status == 401
+?? header www-authenticate includes Bearer
+?? body error == invalid_token
+
+### httpyac obtains a JWT and sends it as a bearer token automatically
+GET {{baseUrl}}/api/protected
+Authorization: oauth2 client_credentials
+
+?? status == 200
+?? header content-type includes application/json
+?? body message == OAuth2 access granted
+?? body subject == 1234567890
+?? body scope == api.read
+
+### Repeated OAuth2 requests remain authorized
+GET {{baseUrl}}/api/protected
+Authorization: oauth2 client_credentials
+
+?? status == 200
+?? body message == OAuth2 access granted
+?? body subject == 1234567890

@@ -48,6 +48,16 @@ jobs:
         run: npm test -- --coverage
       - name: Build
         run: npm run build -- --no-minify
+      - name: Start end-to-end WireMock
+        run: docker compose -f end-to-end/compose.yaml up --detach --wait --wait-timeout 120
+      - name: End-to-end tests (built httpyac)
+        run: npm run test:e2e
+      - name: WireMock logs
+        if: failure()
+        run: docker compose -f end-to-end/compose.yaml logs --no-color
+      - name: Stop end-to-end WireMock
+        if: always()
+        run: docker compose -f end-to-end/compose.yaml down --volumes
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
       - run: npm run docker_build
