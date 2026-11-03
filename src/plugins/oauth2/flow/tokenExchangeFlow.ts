@@ -1,4 +1,4 @@
-import encodeUrl from 'encodeurl';
+import { encodeUrl } from 'encodeurl';
 
 import type * as models from '../../../models';
 import * as utils from '../../../utils';
