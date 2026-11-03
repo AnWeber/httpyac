@@ -1,5 +1,5 @@
 import { createHash } from 'crypto';
-import type { CancelableRequest, OptionsOfUnknownResponseBody, Response } from 'got';
+import type { AfterResponseHook } from 'got';
 import { URL } from 'url';
 import { v4 as uuid } from 'uuid';
 
@@ -34,14 +34,11 @@ export async function digestAuthVariableReplacer(
   return text;
 }
 
-function digestFactory(username: string, password: string, context: ProcessorContext) {
-  return async function digestAfterResponse(
-    response: Response,
-    retryWithMergedOptions: (options: OptionsOfUnknownResponseBody) => CancelableRequest<Response>
-  ) {
+function digestFactory(username: string, password: string, context: ProcessorContext): AfterResponseHook {
+  return async function digestAfterResponse(response, retryWithMergedOptions) {
     const wwwAuthenticate = response.headers['www-authenticate'];
     if (response.statusCode === 401 && wwwAuthenticate && wwwAuthenticate.toLowerCase().startsWith('digest')) {
-      const httpResponse = toHttpResponse(response, { url: response.request.requestUrl });
+      const httpResponse = toHttpResponse(response, { url: response.url });
       await logResponse(httpResponse, context);
 
       const url = new URL(response.url);

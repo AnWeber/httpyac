@@ -1,4 +1,4 @@
-import type { OptionsOfUnknownResponseBody } from 'got';
+import type { StrictOptions } from 'got';
 
 import { ContentType } from './contentType';
 import { HttpMethod } from './httpMethod';
@@ -26,7 +26,7 @@ export interface Request<TMethod extends string = string, TBody = RequestBody> {
 
 export interface HttpRequest extends Request<HttpMethod> {
   headers?: Record<string, string | string[] | undefined>;
-  options?: OptionsOfUnknownResponseBody;
+  options?: StrictOptions;
 }
 
 export type HttpRequestBodyLine =

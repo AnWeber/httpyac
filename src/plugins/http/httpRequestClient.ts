@@ -1,4 +1,4 @@
-import { CancelableRequest, CancelError, default as got, Response } from 'got';
+import got, { AbortError, type RequestPromise, type Response } from 'got';
 
 import * as models from '../../models';
 import * as utils from '../../utils';
@@ -27,7 +27,7 @@ export class HttpRequestClient extends models.AbstractRequestClient<typeof got> 
     return this.nativeClient;
   }
 
-  private cancelableRequest: CancelableRequest<Response<unknown>> | undefined;
+  private abortController: AbortController | undefined;
 
   async send(body?: unknown): Promise<void> {
     if (utils.isHttpRequest(this.request) && this.request.url) {
@@ -36,12 +36,16 @@ export class HttpRequestClient extends models.AbstractRequestClient<typeof got> 
         if (body) {
           options.body = utils.toBufferLike(body);
         }
-        this.cancelableRequest = got(this.request.url, options);
-        this.registerEvents(this.cancelableRequest);
-        const response = await this.cancelableRequest;
+        this.abortController = new AbortController();
+        options.signal = options.signal
+          ? AbortSignal.any([options.signal, this.abortController.signal])
+          : this.abortController.signal;
+        const request = got(this.request.url, options);
+        this.registerEvents(request);
+        const response = await request;
         this.onMessage('message', toHttpResponse(response, this.request));
       } catch (err) {
-        if (err instanceof CancelError) {
+        if (err instanceof AbortError) {
           return;
         }
         if (err instanceof TypeError && err.message === 'Invalid URL') {
@@ -49,20 +53,20 @@ export class HttpRequestClient extends models.AbstractRequestClient<typeof got> 
         }
         throw err;
       } finally {
-        delete this.cancelableRequest;
+        delete this.abortController;
       }
     }
   }
 
   override disconnect(err?: Error): void {
     if (err) {
-      this.cancelableRequest?.cancel();
+      this.abortController?.abort();
       this.onDisconnect();
     }
   }
 
-  private registerEvents(cancelableRequest: CancelableRequest<Response<unknown>>) {
-    cancelableRequest.on('downloadProgress', data => {
+  private registerEvents(request: RequestPromise<Response<string>>) {
+    request.on('downloadProgress', data => {
       this.onProgress(data.percent);
     });
 
@@ -78,9 +82,9 @@ export class HttpRequestClient extends models.AbstractRequestClient<typeof got> 
           },
         });
       };
-    cancelableRequest.on('redirect', metaDataFactory('redirect'));
-    cancelableRequest.on('retry', metaDataFactory('retry'));
-    cancelableRequest.on('downloadProgress', metaDataFactory('downloadProgress'));
-    cancelableRequest.on('uploadProgress', metaDataFactory('uploadProgress'));
+    request.on('redirect', metaDataFactory('redirect'));
+    request.on('retry', metaDataFactory('retry'));
+    request.on('downloadProgress', metaDataFactory('downloadProgress'));
+    request.on('uploadProgress', metaDataFactory('uploadProgress'));
   }
 }

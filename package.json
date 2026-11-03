@@ -113,7 +113,7 @@
     "filesize": "^11.0.23",
     "globby": "^16.2.4",
     "google-protobuf": "^4.0.2",
-    "got": "^11.8.6",
+    "got": "^16.2.0",
     "grpc-js-reflection-client": "^1.4.2",
     "hookpoint": "4.1.0",
     "http-proxy-agent": "^9.1.0",

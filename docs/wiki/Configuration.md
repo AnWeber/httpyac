@@ -135,12 +135,14 @@ Common request defaults:
 
 | Key | Type | Applies to | Notes |
 | --- | --- | --- | --- |
-| `request.timeout` | `number` | HTTP, gRPC, WebSocket, MQTT; Kafka in ZW edition | Milliseconds. Request metadata or `request_timeout` variables override it. For HTTP it is passed to Got as `timeout`; for gRPC it becomes a deadline; for WebSocket it sets handshake/session timeout; for MQTT it sets connect timeout. |
+| `request.timeout` | `number` | HTTP, gRPC, WebSocket, MQTT; Kafka in ZW edition | Milliseconds. Request metadata or `request_timeout` variables override it. For HTTP it is converted to Got's `timeout.request` (the entire request); for gRPC it becomes a deadline; for WebSocket it sets handshake/session timeout; for MQTT it sets connect timeout. |
 | `request.https.rejectUnauthorized` | `boolean` | HTTP/Got | Use `false` to allow invalid TLS certificates for HTTP requests. CLI `--insecure` sets this value. |
 | `request.rejectUnauthorized` | `boolean` | WebSocket, MQTT, OAuth2 token requests | Use `false` to allow invalid TLS certificates for these clients. `# @noRejectUnauthorized` and `request_rejectUnauthorized=false` also disable verification for a request. |
 | `request.followRedirect` | `boolean` | HTTP/Got | Got uses the singular option name. Set `false` for a global HTTP no-redirect policy. |
 | `request.followRedirects` | `boolean` | WebSocket | The WebSocket client reads the plural option. `# @noRedirect` and `request_noRedirect=true` override it for a request. |
 | any other Got option | `unknown` | HTTP/Got | The HTTP client passes additional keys through to Got. No file loading or variable replacement is performed inside this object. |
+
+Numeric HTTP timeouts from CLI `--timeout`, `# @timeout`, and `request_timeout` use the same conversion. A value of `0` disables the total request timeout. Phase-specific Got timeout options are preserved when the total timeout is overridden.
 
 > [!NOTE]
 > **ZW edition:** [Kafka](Guide-Kafka) uses the global `request.timeout` value as its connection timeout, and `defaultHeaders` are sent as Kafka message headers. See [ZW edition differences](ZW-Edition-Differences).
