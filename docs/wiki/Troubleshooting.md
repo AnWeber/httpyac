@@ -108,9 +108,9 @@ Fixes:
 > [!NOTE]
 > **ZW edition:** Kafka protocol support is a fork feature and depends on `@confluentinc/kafka-javascript`. See [ZW edition differences](ZW-Edition-Differences).
 
-## VS Code does not recognize QUERY, Kafka, matchesFile, or matchesJsonFile
+## The upstream VS Code extension does not recognize QUERY, Kafka, matchesFile, or matchesJsonFile
 
-The public VS Code extension and httpbook builds bundle the upstream httpyac core. They may not parse or execute ZW-only features such as:
+The upstream VS Code extension may not parse or execute ZW-only features such as:
 
 - `QUERY` requests
 - `KAFKA` requests

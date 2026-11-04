@@ -77,4 +77,4 @@ Content-Type: application/json
 { "ok": true }
 ```
 
-Injected languages are especially useful for examples in [httpbook](Installation-Httpbook), README files and API design notes.
+Injected languages are especially useful for README files and API design notes.

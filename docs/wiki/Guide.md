@@ -113,4 +113,4 @@ Assertions can check status, headers, cookies, body values, JSONPath and more. T
 - [Variables](Guide-Variables) and [Environments](Guide-Environments)
 - [Scripting](Guide-Scripting), [Assert](Guide-Assert), and [Hooks](Guide-Hooks)
 - [Comment](Guide-Comment), [Response](Guide-Response), [Injected languages](Guide-Injected-Languages), and [Badges](Guide-Badges)
-- [Installation](Installation): CLI, VS Code, httpbook and Docker
+- [Installation](Installation): CLI, VS Code and Docker

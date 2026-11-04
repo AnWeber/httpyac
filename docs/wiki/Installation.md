@@ -3,8 +3,7 @@ HttpYac (ZW edition) can be used as a global command line tool, from editor exte
 ## Options
 
 - [CLI](Installation-CLI): install `@zerowiggliness/httpyac` with npm and run requests from a terminal or CI job.
-- [VS Code](Installation-VSCode): use the upstream `anweber.vscode-httpyac` extension for editor actions and inline responses.
-- [httpbook](Installation-Httpbook): use the upstream notebook extension when you want request files as VS Code notebooks.
+- [VS Code](Installation-VSCode): use the ZW edition extension for editor actions and inline responses.
 - [Docker](Installation-Docker): run the packaged ZW edition CLI from `ghcr.io/zerowiggliness/httpyac`.
 
 ## Choosing an install
@@ -13,7 +12,7 @@ Use the [CLI](Installation-CLI) for the most direct ZW edition experience. It is
 
 Use [Docker](Installation-Docker) when you do not want to install Node.js or global npm packages on the host.
 
-Use [VS Code](Installation-VSCode) or [httpbook](Installation-Httpbook) when editor integration is more important than using the forked runtime.
+Use [VS Code](Installation-VSCode) when editor integration is more important than using the forked runtime.
 
 > [!NOTE]
-> **ZW edition:** the VS Code and httpbook extensions are upstream extensions and bundle the upstream httpyac core, so fork-only features work there only if the extension is built against this fork. See [ZW edition differences](ZW-Edition-Differences).
+> **ZW edition:** the VS Code extension is maintained separately from the CLI. Check the [extension repository](https://github.com/ZeroWiggliness/vscode-httpyac) for extension-specific feature support. See [ZW edition differences](ZW-Edition-Differences).

@@ -1,4 +1,4 @@
-Responses can be written directly in a `.http` file. They are mainly documentation: they let editors and httpbook show an expected or example response before a request has been executed.
+Responses can be written directly in a `.http` file. They are mainly documentation: they let editors show an expected or example response before a request has been executed.
 
 ## Inline response blocks
 

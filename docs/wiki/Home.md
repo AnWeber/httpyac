@@ -33,7 +33,7 @@ httpyac send example.http
 ## Contents
 
 ### Getting started
-- [Installation](Installation): [CLI](Installation-CLI), [VS Code](Installation-VSCode), [VS Code Notebook (httpbook)](Installation-Httpbook), [Docker](Installation-Docker)
+- [Installation](Installation): [CLI](Installation-CLI), [VS Code](Installation-VSCode), [Docker](Installation-Docker)
 - [Guide](Guide): an overview of the `.http` file format
 
 ### Language

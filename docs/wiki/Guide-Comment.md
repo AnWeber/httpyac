@@ -1,4 +1,4 @@
-Comments make `.http` files easier to read and, in several places, also provide metadata for tools such as symbols, request lists and httpbook documentation.
+Comments make `.http` files easier to read and, in several places, also provide metadata for tools such as symbols and request lists.
 
 ## Syntax
 
@@ -67,9 +67,3 @@ Content-Type: application/json
 ```
 
 If a body line itself starts with `#`, `//` or a `/* ... */` block, HttpYac treats it as a comment or metadata line instead of body content.
-
-## httpbook documentation
-
-[httpbook](Installation-Httpbook) can render comments around HTTP examples as Markdown documentation, so the same file can describe and run the request.
-
-![httpbook example](https://httpyac.github.io/httpbook.gif)

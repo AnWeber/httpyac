@@ -17,40 +17,20 @@ Use these badges in README files, wiki pages or project dashboards when you want
 ```
 
 > [!NOTE]
-> **ZW edition:** the npm and Docker badges point at `@zerowiggliness/httpyac` and `ghcr.io/zerowiggliness/httpyac`; the VS Code extension and httpbook badges remain upstream because those projects are still published by AnWeber. See [ZW edition differences](ZW-Edition-Differences).
+> **ZW edition:** the npm and Docker badges point at `@zerowiggliness/httpyac` and `ghcr.io/zerowiggliness/httpyac`; the VS Code extension badges point at the ZW edition extension. See [ZW edition differences](ZW-Edition-Differences).
 
-## VS Code httpYac
+## VS Code httpYac (ZW edition)
 
-[![GitHub stars](https://img.shields.io/github/stars/Anweber/vscode-httpyac.svg?style=social&label=Star&maxAge=2592000)](https://github.com/Anweber/vscode-httpyac/stargazers/)
-[![Marketplace Version](https://vsmarketplacebadge.apphb.com/version-short/anweber.vscode-httpyac.svg)](https://marketplace.visualstudio.com/items?itemName=anweber.vscode-httpyac)
-[![Downloads](https://vsmarketplacebadge.apphb.com/downloads/anweber.vscode-httpyac.svg)](https://marketplace.visualstudio.com/items?itemName=anweber.vscode-httpyac)
-[![Installs](https://vsmarketplacebadge.apphb.com/installs/anweber.vscode-httpyac.svg)](https://marketplace.visualstudio.com/items?itemName=anweber.vscode-httpyac)
-[![Rating](https://vsmarketplacebadge.apphb.com/rating/anweber.vscode-httpyac.svg)](https://marketplace.visualstudio.com/items?itemName=anweber.vscode-httpyac)
-[![Build](https://img.shields.io/github/actions/workflow/status/anweber/vscode-httpyac/main.yml?label=build)](https://github.com/AnWeber/vscode-httpyac/actions/workflows/main.yml)
-
-```markdown
-[![GitHub stars](https://img.shields.io/github/stars/Anweber/vscode-httpyac.svg?style=social&label=Star&maxAge=2592000)](https://github.com/Anweber/vscode-httpyac/stargazers/)
-[![Marketplace Version](https://vsmarketplacebadge.apphb.com/version-short/anweber.vscode-httpyac.svg)](https://marketplace.visualstudio.com/items?itemName=anweber.vscode-httpyac)
-[![Downloads](https://vsmarketplacebadge.apphb.com/downloads/anweber.vscode-httpyac.svg)](https://marketplace.visualstudio.com/items?itemName=anweber.vscode-httpyac)
-[![Installs](https://vsmarketplacebadge.apphb.com/installs/anweber.vscode-httpyac.svg)](https://marketplace.visualstudio.com/items?itemName=anweber.vscode-httpyac)
-[![Rating](https://vsmarketplacebadge.apphb.com/rating/anweber.vscode-httpyac.svg)](https://marketplace.visualstudio.com/items?itemName=anweber.vscode-httpyac)
-[![Build](https://img.shields.io/github/actions/workflow/status/anweber/vscode-httpyac/main.yml?label=build)](https://github.com/AnWeber/vscode-httpyac/actions/workflows/main.yml)
-```
-
-## httpBook
-
-[![GitHub stars](https://img.shields.io/github/stars/Anweber/httpbook.svg?style=social&label=Star&maxAge=2592000)](https://github.com/Anweber/httpbook/stargazers/)
-[![Marketplace Version](https://vsmarketplacebadge.apphb.com/version-short/anweber.httpbook.svg)](https://marketplace.visualstudio.com/items?itemName=anweber.httpbook)
-[![Downloads](https://vsmarketplacebadge.apphb.com/downloads/anweber.httpbook.svg)](https://marketplace.visualstudio.com/items?itemName=anweber.httpbook)
-[![Installs](https://vsmarketplacebadge.apphb.com/installs/anweber.httpbook.svg)](https://marketplace.visualstudio.com/items?itemName=anweber.httpbook)
-[![Rating](https://vsmarketplacebadge.apphb.com/rating/anweber.httpbook.svg)](https://marketplace.visualstudio.com/items?itemName=anweber.httpbook)
-[![Build](https://img.shields.io/github/actions/workflow/status/anweber/httpbook/main.yml?label=build)](https://github.com/AnWeber/httpbook/actions/workflows/main.yml)
+[![GitHub stars](https://img.shields.io/github/stars/ZeroWiggliness/vscode-httpyac.svg?style=social&label=Star&maxAge=2592000)](https://github.com/ZeroWiggliness/vscode-httpyac/stargazers/)
+[![Open VSX Version](https://img.shields.io/open-vsx/v/zerowiggliness/vscode-httpyac-zw)](https://open-vsx.org/extension/zerowiggliness/vscode-httpyac-zw)
+[![Open VSX Downloads](https://img.shields.io/open-vsx/dt/zerowiggliness/vscode-httpyac-zw)](https://open-vsx.org/extension/zerowiggliness/vscode-httpyac-zw)
+[![Open VSX Rating](https://img.shields.io/open-vsx/r/zerowiggliness/vscode-httpyac-zw)](https://open-vsx.org/extension/zerowiggliness/vscode-httpyac-zw)
+[![Build](https://img.shields.io/github/actions/workflow/status/ZeroWiggliness/vscode-httpyac/main.yml?label=build)](https://github.com/ZeroWiggliness/vscode-httpyac/actions/workflows/main.yml)
 
 ```markdown
-[![GitHub stars](https://img.shields.io/github/stars/Anweber/httpbook.svg?style=social&label=Star&maxAge=2592000)](https://github.com/Anweber/httpbook/stargazers/)
-[![Marketplace Version](https://vsmarketplacebadge.apphb.com/version-short/anweber.httpbook.svg)](https://marketplace.visualstudio.com/items?itemName=anweber.httpbook)
-[![Downloads](https://vsmarketplacebadge.apphb.com/downloads/anweber.httpbook.svg)](https://marketplace.visualstudio.com/items?itemName=anweber.httpbook)
-[![Installs](https://vsmarketplacebadge.apphb.com/installs/anweber.httpbook.svg)](https://marketplace.visualstudio.com/items?itemName=anweber.httpbook)
-[![Rating](https://vsmarketplacebadge.apphb.com/rating/anweber.httpbook.svg)](https://marketplace.visualstudio.com/items?itemName=anweber.httpbook)
-[![Build](https://img.shields.io/github/actions/workflow/status/anweber/httpbook/main.yml?label=build)](https://github.com/AnWeber/httpbook/actions/workflows/main.yml)
+[![GitHub stars](https://img.shields.io/github/stars/ZeroWiggliness/vscode-httpyac.svg?style=social&label=Star&maxAge=2592000)](https://github.com/ZeroWiggliness/vscode-httpyac/stargazers/)
+[![Open VSX Version](https://img.shields.io/open-vsx/v/zerowiggliness/vscode-httpyac-zw)](https://open-vsx.org/extension/zerowiggliness/vscode-httpyac-zw)
+[![Open VSX Downloads](https://img.shields.io/open-vsx/dt/zerowiggliness/vscode-httpyac-zw)](https://open-vsx.org/extension/zerowiggliness/vscode-httpyac-zw)
+[![Open VSX Rating](https://img.shields.io/open-vsx/r/zerowiggliness/vscode-httpyac-zw)](https://open-vsx.org/extension/zerowiggliness/vscode-httpyac-zw)
+[![Build](https://img.shields.io/github/actions/workflow/status/ZeroWiggliness/vscode-httpyac/main.yml?label=build)](https://github.com/ZeroWiggliness/vscode-httpyac/actions/workflows/main.yml)
 ```

@@ -111,9 +111,9 @@ These fixes are on upstream `main` but are not in any upstream npm release. The 
 - Dependencies are kept up to date (for example TypeScript 6, eventsource v5, dotenv 18 and amqp-client v4).
 - If an IntelliJ-style script fails to load, the error keeps the original exception as `cause`, which makes it easier to debug.
 
-## VS Code extension and httpbook
+## VS Code extension
 
-The [VS Code extension](Installation-VSCode) and [httpbook](Installation-Httpbook) are upstream projects, and they bundle the **upstream** httpyac core. Fork-only features such as `QUERY`, Kafka and the file comparison asserts work in the ZW edition CLI, Docker image and Node.js library. They only work in the editor if the extension is built against `@zerowiggliness/httpyac`.
+The [ZW edition VS Code extension](Installation-VSCode) is maintained in [ZeroWiggliness/vscode-httpyac](https://github.com/ZeroWiggliness/vscode-httpyac), with patches and updates based on Andreas Weber's original work. Fork-only features such as `QUERY`, Kafka and the file comparison asserts are available in the ZW edition CLI, Docker image and Node.js library.
 
 ## Reporting issues
 

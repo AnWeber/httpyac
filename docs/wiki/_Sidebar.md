@@ -2,10 +2,9 @@
 
 **Getting started**
 - [Installation](Installation)
-  - [CLI](Installation-CLI)
-  - [VS Code](Installation-VSCode)
-  - [VS Code Notebook](Installation-Httpbook)
-  - [Docker](Installation-Docker)
+- [CLI](Installation-CLI)
+- [VS Code](Installation-VSCode)
+- [Docker](Installation-Docker)
 - [Guide](Guide)
 
 **Language**
