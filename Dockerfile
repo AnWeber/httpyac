@@ -8,6 +8,7 @@ RUN cd /httpyac && npm ci --omit=dev --include=optional
 
 FROM node:24
 COPY --from=build /httpyac /httpyac
+RUN ln -s /httpyac/bin/httpyac.js /usr/local/bin/httpyac
 WORKDIR data
 USER node
 ENTRYPOINT [ "node", "/httpyac/bin/httpyac.js" ]

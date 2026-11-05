@@ -22,6 +22,14 @@ docker run -it -v ${PWD}:/data ghcr.io/zerowiggliness/httpyac:latest send "**/*.
 
 Add Docker options such as `--rm`, `--env`, `--network` or extra volume mounts before the image name when your requests need them.
 
+### Runners that override the entrypoint
+
+The `httpyac` command is also available on `PATH`, so runners such as Maven can invoke it even when they override the image entrypoint. For example:
+
+```shell
+docker run --rm --entrypoint /bin/sh ghcr.io/zerowiggliness/httpyac:latest -c 'httpyac --version'
+```
+
 ## Upgrade
 
 Pull the latest published image:

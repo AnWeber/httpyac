@@ -61,3 +61,8 @@ jobs:
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
       - run: npm run docker_build
+      - name: Smoke test Docker CLI
+        run: |
+          docker build -t httpyac:smoke-test .
+          docker run --rm httpyac:smoke-test --version
+          docker run --rm --entrypoint /bin/sh httpyac:smoke-test -c 'httpyac --version'
