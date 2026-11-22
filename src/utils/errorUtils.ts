@@ -15,7 +15,7 @@ export function isError(val: unknown): val is Error & { handled?: boolean } {
 
 export function parseError(err: Error): ErrorDescription {
   if (err.stack) {
-    const match = /^(?<error>.*):\s*(?<message>.*)\r?\n\s*at (?<file>.*):(?<line>\d*):(?<offset>\d*)/mu.exec(err.stack);
+    const match = /^(?<error>.*?):\s*(?<message>.*)\r?\n\s*at (?<file>.*):(?<line>\d*):(?<offset>\d*)/mu.exec(err.stack);
 
     if (match && match.groups?.error) {
       return {
@@ -33,6 +33,51 @@ export function parseError(err: Error): ErrorDescription {
     error: err,
     displayMessage: err.message,
   };
+}
+
+/**
+ * returns a descriptive message of an error. Falls back to the messages of inner errors (e.g. AggregateError of net.connect
+ * with autoSelectFamily, which has an empty message) and to the error code
+ */
+export function getErrorMessage(err: unknown): string | undefined {
+  if (!err || typeof err !== 'object') {
+    return undefined;
+  }
+  const error = err as { message?: unknown; errors?: unknown; code?: unknown };
+  if (typeof error.message === 'string' && error.message) {
+    return error.message;
+  }
+  if (Array.isArray(error.errors)) {
+    const message = error.errors
+      .map(getErrorMessage)
+      .filter(obj => !!obj)
+      .join(', ');
+    if (message) {
+      return message;
+    }
+  }
+  if (typeof error.code === 'string' && error.code) {
+    return error.code;
+  }
+  return undefined;
+}
+
+/**
+ * sets message of error, if message is empty, and updates stack accordingly
+ */
+export function ensureErrorMessage(err: Error, innerError?: unknown) {
+  if (err.message) {
+    return;
+  }
+  const message = getErrorMessage(innerError) || getErrorMessage(err);
+  if (message) {
+    err.message = message;
+    if (err.stack) {
+      const lines = err.stack.split('\n');
+      lines[0] = `${err.name}: ${message}`;
+      err.stack = lines.join('\n');
+    }
+  }
 }
 
 export function errorToString(err: unknown): string | undefined {
