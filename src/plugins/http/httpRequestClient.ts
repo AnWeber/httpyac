@@ -31,6 +31,7 @@ export class HttpRequestClient extends models.AbstractRequestClient<typeof got> 
 
   async send(body?: unknown): Promise<void> {
     if (utils.isHttpRequest(this.request) && this.request.url) {
+      let requestError: Error | undefined;
       try {
         const options = getClientOptions(this.request, this.context);
         if (body) {
@@ -38,6 +39,12 @@ export class HttpRequestClient extends models.AbstractRequestClient<typeof got> 
         }
         this.cancelableRequest = got(this.request.url, options);
         this.registerEvents(this.cancelableRequest);
+        // got RequestError does not keep the original error (e.g. AggregateError with empty message)
+        this.cancelableRequest.on('request', req => {
+          req.on('error', (err: Error) => {
+            requestError = err;
+          });
+        });
         const response = await this.cancelableRequest;
         this.onMessage('message', toHttpResponse(response, this.request));
       } catch (err) {
@@ -46,6 +53,9 @@ export class HttpRequestClient extends models.AbstractRequestClient<typeof got> 
         }
         if (err instanceof TypeError && err.message === 'Invalid URL') {
           err.message = `Invalid URL: ${(err as { input?: string }).input || this.request.url}`;
+        }
+        if (err instanceof Error) {
+          utils.ensureErrorMessage(err, requestError);
         }
         throw err;
       } finally {
